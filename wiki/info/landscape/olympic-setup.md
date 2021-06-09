@@ -162,11 +162,11 @@ The tunnel configurations are established and configured using a set of scripts,
 On sap-p1-1 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is the local master:
 
 * tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 443:security-service.sapsailing.com:443; 8888<--8888; 9443<--9443
-* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
+* sap-p1-2: 10202-->10202; 10201<--10201
 
 On sap-p1-2, the following SSH connections are maintained, assuming sap-p1-2 is the local replica:
 
-- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 15674<--15672; 9444<--9443
+- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 9444<--9443
 
 A useful set of entries in your personal ``~/.ssh/config`` file for "off-site" use may look like this:
 
@@ -221,12 +221,12 @@ Host sap-p1-2
 On sap-p1-1, if the operating system still runs and the failure affects only the Java process running the SAP Sailing Analytics, two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is not running an SAP Sailing Analytics process currently:
 
 * tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 443:security-service.sapsailing.com:443
-* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
+* sap-p1-2: 10202-->10202; 10201<--10201
 
 On sap-p1-2 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-2 is the local master:
 
 * tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 18222<--22; 443:security-service.sapsailing.com:443; 8888<--8888
-* sap-p1-1 (if the operating system on sap-p1-1 still runs): 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
+* sap-p1-1 (if the operating system on sap-p1-1 still runs): 10202-->10202; 10201<--10201
 
 So the essential change is that the reverse forward from ``tokyo-ssh.sapsailing.com:8888`` now targets ``sap-p1-2:8888`` where we now assume the failover master to be running.
 
@@ -238,7 +238,7 @@ There is little we can do against the lack of Internet connection regarding prov
 
 On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the following port forwards:
 
-* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672; 5763-->localhost:5672
+* sap-p1-2: 10202-->10202; 10201<--10201; 5763-->localhost:5672
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-ap-northeast-1.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
