@@ -19,4 +19,11 @@
          version="2.8.4"
          unpack="false"/>
 
+   <plugin
+         id="com.rabbitmq.client.source"
+         download-size="0"
+         install-size="0"
+         version="2.8.4"
+         unpack="false"/>
+
 </feature>

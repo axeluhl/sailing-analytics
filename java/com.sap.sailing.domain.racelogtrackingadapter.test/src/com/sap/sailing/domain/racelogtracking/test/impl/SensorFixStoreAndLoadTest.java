@@ -169,6 +169,7 @@ public class SensorFixStoreAndLoadTest {
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* startDate */ null, /* endDate */null, null, null, "a", null,
                 /* registrationLinkSecret */ UUID.randomUUID().toString()));
+        regatta.getRegatta().setControlTrackingFromStartAndFinishTimes(true);
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);

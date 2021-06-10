@@ -178,6 +178,7 @@
 <setEntry value="com.sap.sailing.domain.igtimiadapter.gateway@5:true"/>
 <setEntry value="com.sap.sailing.domain.igtimiadapter.persistence@default:default"/>
 <setEntry value="com.sap.sailing.domain.igtimiadapter@4:true"/>
+<setEntry value="com.sap.sailing.domain.oceanraceadapter@5:true"/>
 <setEntry value="com.sap.sailing.domain.persistence@default:default"/>
 <setEntry value="com.sap.sailing.domain.racelogtrackingadapter@4:true"/>
 <setEntry value="com.sap.sailing.domain.shared.android@default:default"/>

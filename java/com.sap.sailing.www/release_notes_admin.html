@@ -23,6 +23,13 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">June 2021</h2>
+                    <ul class="bulletList">
+                        <li>Infer a tracking start/end time from race start/end time only if the regatta is marked accordingly.</li>
+                        <li>Bugfix in landscape management: when upgrading a replica set whose SERVER_NAME property does
+			                not equal the hostname used to address it, the temporary replica was trying to replicate
+			                from {SERVER_NAME}.sapsailing.com instead of {hostname}.sapsailing.com.</li>
+                    </ul>
                     <h2 class="articleSubheadline">May 2021</h2>
                     <ul class="bulletList">
                         <li>Added the RS21 boat class including logo, hull length and visualization type as a pre-defined boat class.</li>
@@ -36,6 +43,8 @@
 			    failed. This problem has now been fixed, and such missing allowances will be represented as 0.0s values.</li>
 			<li>Bugfix: ORC leg parameters editor reported tracked TWA flipped by 180°.</li>
 			<li>Added "sanfrancisco" as a new WindFinder spot collection, covering several stations around the San Francisco Bay</li>
+			<li>Bugfix for a regression: Updating the TracTrac live delay stopped working when no "official result reconciliation"
+			    was selected.</li>
                     </ul>
                     <h2 class="articleSubheadline">April 2021</h2>
                     <ul class="bulletList">

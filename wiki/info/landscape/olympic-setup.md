@@ -8,9 +8,59 @@ For the Olympic Summer Games 2020/2021 Tokyo we use a dedicated hardware set-up 
 
 The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
-Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongod.conf``. RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
+Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this.
+
+RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
 
 Both machines have been configured to use 2GB of swap space at ``/swapfile``.
+
+### Mongo Configuration
+
+On both laptops, the ``/etc/mongod.conf`` configuration configures ``/var/lib/mongodb`` to be the storage directory, and the in-memory cache size to be 2GB:
+
+```
+storage:
+  dbPath: /var/lib/mongodb
+  journal:
+    enabled: true
+  wiredTiger:
+    engineConfig:
+      cacheSizeGB: 2
+```
+
+The port is set to ``10201`` on ``sap-p1-1``:
+
+```
+# network interfaces
+net:
+  port: 10201
+  bindIp: 0.0.0.0
+```
+
+and to ``10202`` on ``sap-p1-2``:
+
+```
+# network interfaces
+net:
+  port: 10202
+  bindIp: 0.0.0.0
+```
+
+Furthermore, the replica set is configured to be ``tokyo2020`` on both:
+
+```
+replication:
+  oplogSizeMB: 10000
+  replSetName: tokyo2020
+```
+
+On both laptops we have a second MongoDB configuration ``/etc/mongod-security-service.conf`` which is used by the ``/lib/systemd/system/mongod-security-service.service`` unit which we created as a copy of ``/lib/systemd/system/mongod.service`` and adjusted the line
+
+```
+ExecStart=/usr/bin/mongod --config /etc/mongod-security-service.conf
+```
+
+This second database runs as a replica set ``security_service`` on the default port 27017 and is used as the target for a backup script for the ``security_service`` database. See below. We increased the priority of the ``sap-p1-1`` node from 1 to 2.
 
 ### User Accounts
 
@@ -42,6 +92,55 @@ TracTrac Dev Jorge (Linux)		10.1.3.228	10.8.0.135
 TracTrac Dev Chris (Linux)		10.1.3.233	10.8.0.136	
 ```
 
+The OpenVPN connection is set up with the GUI of the Linux Desktop. Therefore the management is done through Network Manager. Network Manager has a CLI, ``nmcli``. With that more properties of connections can be modified. The ``connection.secondaries`` property defines the UUID of a connection that will be established as soon as the initial connection is working. With ``nmcli connection show`` you will get the list of connections with the corresponding UUIDs. For the Medemblik Event the OpenVPN connection to the A server is bound to the wired interface that is used with 
+
+```
+sudo nmcli connection modify <Wired Connection 2> +connection.secondaries <UUID-of-OpenVPN-A>
+```
+
+For the OpenVPN connections we have received two alternative configuration files together with keys and certificates for our server and work laptops, as well as the certificates for the OpenVPN server (``ca.crt``, ``dh.pem``, ``pfs.key``). The "A" configuration, e.g., provided in a file named ``st-soft-aws_A.ovpn``, looks like this:
+
+```
+client
+dev tun
+proto udp
+remote 3.122.96.235 1195
+ca ca.crt
+cert {name-of-the-certificate}.crt
+key {name-of-the-key}.key
+tls-version-min 1.2
+tls-cipher TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256
+cipher AES-256-CBC
+auth SHA512
+resolv-retry infinite
+auth-retry none
+nobind
+persist-key
+persist-tun
+ns-cert-type server
+comp-lzo
+verb 3
+tls-client
+tls-auth pfs.key
+```
+
+Here, ``{name-of-the-certificate}.crt`` and ``{name-of-the-key}.key`` need to be replaced by the names of the files corresponding with the host to connect to the OpenVPN. The "B" configuration only differs in the ``remote`` specification, using a different IP address for the OpenVPN server, namely ``52.59.130.167``. It is useful to copy the ``.ovpn`` file and the other ``.key`` and ``.crt`` files into one directory.
+
+Under Windows download the latest OpenVPN client from [https://openvpn.net/client-connect-vpn-for-windows/](https://openvpn.net/client-connect-vpn-for-windows/). After installation, use the ``.ovpn`` file, adjusted with your personalized key/certificate, to establish the connection.
+
+On Linux, go to the global settings through Gnome, node "Network" and press the "+" button next to VPN. Import the ``.ovpn`` file, then enable the OpenVPN connection by flicking the switch. The connection will show in the output of
+
+```
+	nmcli connection show
+```
+
+The connection IDs will be shown, e.g., ``st-soft-aws_A``. Such a connection can be stopped and restarted from the command line using the following commands:
+
+```
+	nmcli connection down st-soft-aws_A
+	nmcli connection up st-soft-aws_A
+```
+
 ### Tunnels
 
 On both laptops there is a script ``/usr/local/bin/tunnels`` which establishes SSH tunnels using the ``autossh`` tool. The ``autossh`` processes are forked into the background using the ``-f`` option. It seems important to then pass the port to use for sending heartbeats using the ``-M`` option. If this is omitted, according to my experience only one of several ``autossh`` processes survives.
@@ -52,6 +151,8 @@ On both laptops, we maintain SSH connections to ``localhost`` with port forwards
 
 Furthermore, for administrative SSH access from outside, we establish reverse port forwards from our jump host ``tokyo-ssh.sapsailing.com`` to the SSH ports on ``sap-p1-1`` (on port 18122) and ``sap-p1-2`` (on port 18222).
 
+Both laptops have a forward from localhost:22222 to sapsailing.com:22 through tokyo-ssh, in order to be able to have a git remote ``ssh`` with the url ``ssh://trac@localhost:22222/home/trac/git``.
+
 The port forwards vary for exceptional situations, such as when the Internet connection is not available, or when ``sap-p1-1`` that regularly runs the master process fails and we need to make ``sap-p1-2`` the new master. See below for the details of the configurations for those scenarios.
 
 The tunnel configurations are established and configured using a set of scripts, each to be found under ``/usr/local/bin`` on each of the two laptops.
@@ -61,11 +162,11 @@ The tunnel configurations are established and configured using a set of scripts,
 On sap-p1-1 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is the local master:
 
 * tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 443:security-service.sapsailing.com:443; 8888<--8888; 9443<--9443
-* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
+* sap-p1-2: 10202-->10202; 10201<--10201
 
 On sap-p1-2, the following SSH connections are maintained, assuming sap-p1-2 is the local replica:
 
-- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 15674<--15672; 9444<--9443
+- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 9444<--9443
 
 A useful set of entries in your personal ``~/.ssh/config`` file for "off-site" use may look like this:
 
@@ -120,12 +221,12 @@ Host sap-p1-2
 On sap-p1-1, if the operating system still runs and the failure affects only the Java process running the SAP Sailing Analytics, two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is not running an SAP Sailing Analytics process currently:
 
 * tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 443:security-service.sapsailing.com:443
-* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
+* sap-p1-2: 10202-->10202; 10201<--10201
 
 On sap-p1-2 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-2 is the local master:
 
 * tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 18222<--22; 443:security-service.sapsailing.com:443; 8888<--8888
-* sap-p1-1 (if the operating system on sap-p1-1 still runs): 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
+* sap-p1-1 (if the operating system on sap-p1-1 still runs): 10202-->10202; 10201<--10201
 
 So the essential change is that the reverse forward from ``tokyo-ssh.sapsailing.com:8888`` now targets ``sap-p1-2:8888`` where we now assume the failover master to be running.
 
@@ -137,11 +238,11 @@ There is little we can do against the lack of Internet connection regarding prov
 
 On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the following port forwards:
 
-* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672; 5763-->localhost:5672
+* sap-p1-2: 10202-->10202; 10201<--10201; 5763-->localhost:5672
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-ap-northeast-1.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
-### Letsencrypt Certificate for tokyo2020.sapsailing.com and security-service.sapsailing.com
+### Letsencrypt Certificate for tokyo2020.sapsailing.com, security-service.sapsailing.com and tokyo2020-master.sapsailing.com
 
 In order to allow us to access ``tokyo2020.sapsailing.com`` and ``security-service.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
 
@@ -175,6 +276,58 @@ The "Let's Encrypt"-provided certificate is used for SSL termination. With tokyo
 
 Likewise, ``/etc/nginx/sites-enabled/security-service`` forwards to 127.0.0.1:8889 where a local copy of the security service may be deployed in case the Internet fails. In this case, the local port 443 must be forwarded to the NGINX port 9443 instead of security-service.sapsailing.com:443 through tokyo-ssh.sapsailing.com.
 
+On sap-p1-1 is currently a nginx listening to tokyo2020-master.sapsailing.com with the following configuration:
+
+```
+server {
+    listen              9443 ssl;
+    server_name         tokyo2020-master.sapsailing.com;
+    ssl_certificate     /etc/ssl/private/tokyo2020-master.sapsailing.com.fullchain.pem;
+    ssl_certificate_key /etc/ssl/private/tokyo2020-master.sapsailing.com.privkey.pem;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://127.0.0.1:8888;
+    }
+}
+```
+
+
+
+### Backup
+
+borgbackup is used to backup the ``/`` folder of both laptops towards the other machine. Folder where the borg repository is located is: ``/backup``.
+
+The backup from sap-p1-1 to sap-p1-2 runs at 01:00 each day, and the backup from sap-p1-2 to sap-p1-1 runs at 02:00 each day. Details about the configuration can be found in ``/root/borg-backup.sh`` on either machine. Log files for the backup run are in ``/var/log/backup.log``. Crontab file is in ``/root``.
+
+### Monitoring and e-Mail Alerting
+
+To be able to use ``sendmail`` to send notifications via email it needs to be installed and configured to use the AWS SES as smtp relay:
+```
+sudo apt install sendmail
+```
+
+Follow the instructions on [https://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-email-sendmail.html](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-email-sendmail.html) with one exception, the content that needs to be added to ``sendmail.mc`` looks like:
+```
+define(`SMART_HOST', `email-smtp.eu-west-1.amazonaws.com')dnl
+define(`RELAY_MAILER_ARGS', `TCP $h 587')dnl
+define(`confAUTH_MECHANISMS', `LOGIN PLAIN')dnl
+FEATURE(`authinfo', `hash -o /etc/mail/authinfo.db')dnl
+MASQUERADE_AS(`sapsailing.com')dnl
+FEATURE(masquerade_envelope)dnl
+FEATURE(masquerade_entire_domain)dnl
+```
+The authentication details can be fetched from the content of ``/root/mail.properties`` of any running sailing EC2 instance.
+
+Both laptops, ``sap-p1-1`` and ``sap-p1-2`` have monitoring scripts from the git folder ``configuration/on-site-scripts`` linked to ``/usr/local/bin``. These in particular include ``monitor-autossh-tunnels`` and ``monitor-mongo-replica-set-delay`` as well as a ``notify-operators`` script which contains the list of e-mail addresses to notify in case an alert occurs.
+
+The ``monitor-autossh-tunnels`` script checks all running ``autossh`` processes and looks for their corresponding ``ssh`` child processes. If any of them is missing, an alert is sent using ``notify-operators``.
+
+The ``monitor-mongo-replica-set-delay`` looks as the result of calling ``rs.printSecondaryReplicationInfo()`` and logs it to ``/tmp/mongo-replica-set-delay``. The average of the last ten values is compared to a threshold (currently 3s), and an alert is sent using ``notify-operators`` if the threshold is exceeded.
+
+The ``monitor-disk-usage`` script checks the partition holding ``/var/lib/mongodb/``. Should it fill up to more than 90%, an alert will be sent using ``notify-operators``.
+
 ## AWS Setup
 
 Our primary AWS region for the event will be Tokyo (ap-northeast-1). There, we have reserved the elastic IP ``52.194.91.94`` to which we've mapped the Route53 hostname ``tokyo-ssh.sapsailing.com`` with a simple A-record. The host assigned to the IP/hostname is to be used as a "jump host" for SSH tunnels. It runs Amazon Linux with a login-user named ``ec2-user``. The ``ec2-user`` has ``sudo`` permission. In the root user's crontab we have the same set of scripts hooked up that in our eu-west-1 production landscape is responsible for obtaining and installing the landscape manager's SSH public keys to the login user's account, aligning the set of ``authorized_keys`` with those of the registered landscape managers (users with permission ``LANDSCAPE:MANAGE:AWS``). The ``authorized_keys.org`` file also contains the two public SSH keys of the ``sailing`` accounts on the two laptops, so each time the script produces a new ``authorized_keys`` file for the ``ec2-user``, the ``sailing`` keys for the laptop tunnels don't get lost.
@@ -195,11 +348,15 @@ For RabbitMQ we run a separate host, based on AWS Ubuntu 20. It brings the ``rab
     loopback_users = none
 ```
 
-which allows clients from other hosts to connect. The security groups for the RabbitMQ server are configured such that only ``172.0.0.0/8`` addresses from our VPCs can connect.
+which allows clients from other hosts to connect (note how this works differently on different version of RabbitMQ; the local laptops have to use a different syntax in their ``rabbitmq.config`` file). The security groups for the RabbitMQ server are configured such that only ``172.0.0.0/8`` addresses from our VPCs can connect.
 
 The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbitmq_management`` for access from localhost. This will require again an SSH tunnel to the host. The host's default user is ``ubuntu``. The RabbitMQ management plugin is active on port 15672 and accessible only from localhost or an SSH tunnel with port forward ending at this host. RabbitMQ itself listens on the default port 5672. With this set-up, RabbitMQ traffic for this event remains independent and undisturbed from any other RabbitMQ traffic from other servers in our default ``eu-west-1`` landscape, such as ``my.sapsailing.com``. The hostname pointing to the internal IP address of the RabbitMQ host is ``rabbit-ap-northeast-1.sapsailing.com`` and has a timeout of 60s.
 
 An autossh tunnel is established from ``tokyo-ssh.sapsailing.com`` to ``rabbit-ap-northeast-1.sapsailing.com`` which forwards port 15673 to port 15672, thus exposing the RabbitMQ web interface which otherwise only responds to localhost. This autossh tunnel is established by a systemctl service that is described in ``/etc/systemd/system/autossh-port-forwards.service`` in ``tokyo-ssh.sapsailing.com``.
+
+### Local setup of rabbitmq
+
+The above configuration needs also to be set on the rabbitmq installations of the P1s. The rabbitmq-server package has version 3.6.10. In that version the config file is located in ``/etc/rabbitmq/rabbitmq.config``, the entry is ``[{rabbit, [{loopback_users, []}]}].`` Further documentation for this version can be found here: [http://previous.rabbitmq.com/v3_6_x/configure.html](http://previous.rabbitmq.com/v3_6_x/configure.html)
 
 ### Cross-Region VPC Peering
 
@@ -219,11 +376,11 @@ The Route53 entry ``tokyo2020.sapsailing.com`` now is an alias A record pointing
 
 ### Application Load Balancers (ALBs) and Target Groups
 
-In each region supported, two target groups with the usual settings (port 8888, health check on ``/gwt/status``, etc.) must exist: ``S-ded-tokyo2020`` (public) and ``S-ded-tokyo2020-m`` (master). An application load balancer then must be created or identified that will then have the five rules distributing traffic for ``tokyo2020.sapsailing.com`` to either the public or the master target group, furthermore a general rule in the HTTP listener for port 80 that will redirect all HTTP traffic to HTTPS permanently.
+In each region supported, a dedicated load balancer for the Global Accelerator-based event setup has been set up (``Tokyo2020ALB`` or simply ``ALB``). A single target group with the usual settings (port 8888, health check on ``/gwt/status``, etc.) must exist: ``S-ded-tokyo2020`` (public).
 
-The master target group in all regions must contain an instance that forwards traffic on port 8888 to the master running on site, usually transitively through ``tokyo-ssh.sapsailing.com:8888``. Only in ap-northeast-1 the ``tokyo-ssh.sapsailing.com`` instance itself can be used as target in the ``S-ded-tokyo2020-m`` master target group. In ``eu-west-1`` the Webserver instance plays that role; it has a tmux running with the ``root`` user where an ``autossh`` connection is established to ``tokyo-ssh.sapsailing.com``, forwarding port 8888 accordingly.
+Note that no dedicated ``-m`` master target group is established. The reason is that the AWS Global Accelerator judges an ALB's health by looking at _all_ its target groups; should only a single target group not have a healthy target, the Global Accelerator considers the entire ALB unhealthy. With this, as soon as the on-site master server is unreachable, e.g., during an upgrade, all those ALBs would enter the "unhealthy" state from the Global Accelerator's perspective, and all public replicas which are still healthy would no longer receive traffic; the site would go "black." Therefore, we must ensure that the ALBs targeted by the Global Accelerator only have a single target group which only has the public replicas in that region as its targets.
 
-Similar set-ups with a region-local "jump host" can be established; the jump host doesn't need much bandwidth as it is mainly used for admin requests that are to be routed straight to the master instance running on site.
+Each ALB has an HTTP and an HTTPS listener. The HTTP listener has only a single rule redirecting all traffic permanently (301) to the corresponding HTTPS request. The HTTPS listener has three rules: the ``/`` path for ``tokyo2020.sapsailing.com`` is re-directed to the Olympic event with ID ``25c65ff1-68b8-4734-a35f-75c9641e52f8``. All other traffic for ``tokyo2020.sapsailing.com`` goes to the public target group holding the regional replica(s). A default rule returns a 404 status with a static ``Not found`` text.
 
 ## Landscape Architecture
 
@@ -239,9 +396,28 @@ Three MongoDB nodes are intended to run during regular operations: sap-p1-1:1020
 	mongodb://localhost:10201,localhost:10202,localhost:10203/tokyo2020?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest
 ```
 
+The cloud replica is not supposed to become primary, except for maybe in the unlikely event where operations would move entirely to the cloud. To achieve this, the cloud replica has priority 0 which can be configured like this:
+
+```
+    tokyo2020:PRIMARY> cfg = rs.conf()
+    # Then search for the member localhost:10203; let's assume, it's in cfg.members[0] :
+    cfg.members[0].priority=0
+    rs.reconfig(cfg)
+```
+
 All cloud replicas shall use a MongoDB database name ``tokyo2020-replica``. In those regions where we don't have dedicated MongoDB support established (basically all but eu-west-1 currently), an image should be used that has a MongoDB server configured to use ``/home/sailing/mongo`` as its data directory and ``replica`` as its replica set name. See AMI SAP Sailing Analytics App HVM with MongoDB 1.137 (ami-05b6c7b1244f49d54) in ap-northeast-1 (already copied to the other peered regions except eu-west-1).
 
-In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``ec2-user`` on ``tokyo-ssh.sapsailing.com`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/ec2-user/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``tokyo-ssh.sapsailing.com`` and then restores it on the local ``tokyo2020`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
+One way to monitor the health and replication status of the replica set is running the following command:
+
+```
+  watch 'echo "rs.printSecondaryReplicationInfo()" | \
+  mongo "mongodb://localhost:10201/?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest" | \
+  grep "\(^source:\)\|\(syncedTo:\)\|\(behind the primary\)"'
+```
+
+It shows the replication state and in particular the delay of the replicas. A cronjob exists for ``sailing@sap-p1-1`` which triggers ``/usr/local/bin/monitor-mongo-replica-set-delay`` every minute which will use ``/usr/local/bin/notify-operators`` in case the average replication delay for the last ten read-outs exceeds a threshold (currently 3s). We have a cron job monitoring this (see above) and sending out alerts if things start slowing down.
+
+In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@tokyo-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017,sap-p1-2/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
 
 ```
     db.copyDatabase("security_service_bak", "security_service")
@@ -255,9 +431,12 @@ The master configuration is described in ``/home/sailing/servers/master/master.c
       rm env.sh; cat master.conf | ./refreshInstance.sh auto-install-from-stdin
 ```
 
+If the laptops cannot reach ``https://releases.sapsailing.com`` due to connectivity constraints, releases and environments can be downloaded through other channels to ``sap-p1-1:/home/trac/releases``, and the variable ``INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT`` can be set to ``sailing@sap-p1-1`` to fetch the release file and environment file from there by SCP. Alternatively, ``sap-p1-2:/home/trac/releases`` may be used for the same.
+
 This way, a clean new ``env.sh`` file will be produced from the config file, including the download and installation of a release. The ``master.conf`` file looks approximately like this:
 
 ```
+INSTALL_FROM_RELEASE=build-202106012325
 SERVER_NAME=tokyo2020
 MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest"
 # RabbitMQ in eu-west-1 (rabbit.internal.sapsailing.com) is expected to be found through SSH tunnel on localhost:5675
@@ -287,6 +466,7 @@ The file looks like this:
 ```
 # Regular operations; sap-p1-2 replicates sap-p1-1 using the rabbit-ap-northeast-1.sapsailing.com RabbitMQ in the cloud through SSH tunnel.
 # Outbound replication, though not expected to become active, goes to a local RabbitMQ
+INSTALL_FROM_RELEASE=build-202106012325
 SERVER_NAME=tokyo2020
 MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}-replica?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest"
 # RabbitMQ in ap-northeast-1 is expected to be found locally on port 5673
@@ -306,7 +486,7 @@ ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 Replicas in region ``eu-west-1`` can be launched using the following user data, making use of the established MongoDB live replica set in the region:
 
 ```
-INSTALL_FROM_RELEASE=build-202105211058
+INSTALL_FROM_RELEASE=build-202106012325
 SERVER_NAME=tokyo2020
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com,dbserver.internal.sapsailing.com:10203/tokyo2020-replica?replicaSet=live&retryWrites=true&readPreference=nearest"
 USE_ENVIRONMENT=live-replica-server
@@ -325,7 +505,7 @@ ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
 
 ```
-INSTALL_FROM_RELEASE=build-202105211058
+INSTALL_FROM_RELEASE=build-202106012325
 SERVER_NAME=tokyo2020
 MONGODB_URI="mongodb://localhost/tokyo2020-replica?replicaSet=replica&retryWrites=true&readPreference=nearest"
 USE_ENVIRONMENT=live-replica-server
@@ -358,3 +538,31 @@ Moderators who need to comment on the races shall be given more elaborate permis
 To achieve this effect, the ``tokyo2020-server`` group has the ``sailing_viewer`` role assigned for all users, and all objects, except for the top-level ``Event`` object are owned by that group. This way, everything but the event are publicly visible.
 
 The ``Event`` object is owned by ``tokyo2020-moderators``, and that group grants the ``sailing_viewer`` role only to its members, meaning only the members of that group are allowed to see the ``Event`` object.
+
+## Landscape Upgrade Procedure
+
+update git on all replicas
+stop replication on all cloud replicas:
+```
+$ for i in `./get-replica-ips`; do ssh -o StrictHostKeyChecking=no sailing@$i "cd /home/sailing/servers/tokyo2020; /home/sailing/code/java/target/stopReplicating.sh 4qUrxMVQanLghETmM95XX3fshkHK0wNAQycuPAVNW0E="; done
+```
+
+stop replication on-site
+
+put release in /home/trac/
+
+refresh instance stop start on sap-p1-1 / on-site master
+
+after on-site master is healthy / available register cloud master forwarder to target groups, pay attention in eu-west-1 webserver instance works as cloud master forwarder
+
+./stop /start on on-site replica
+
+launch more like this with new user data, append (manual) to name of instance, make sure master target group has a healthy target.
+
+check :8888/gwt/status , if initial load is not starting most probably registration to master has failed (check log for Exception), if so login and do stop & start
+
+edit target group, deregister and register in the same window, save changes
+
+terminate old auto-replica
+
+wait for autoscaling group to create a new autoscaling instance, after healthy terminate manually launched instance/replica

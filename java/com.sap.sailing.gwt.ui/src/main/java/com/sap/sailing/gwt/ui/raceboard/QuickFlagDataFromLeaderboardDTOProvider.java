@@ -129,7 +129,12 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                                     .get(raceColumnName);
                             List<LegEntryDTO> legDetailsList = raceEntryForCompetitor.legDetails;
                             if (raceEntryForCompetitor != null && legDetailsList != null) {
-                                oneBasedLegNumber = raceEntryForCompetitor.getOneBasedCurrentLegNumber();
+                                final int oneBasedLegNumberCandidate = raceEntryForCompetitor.getOneBasedCurrentLegNumber();
+                                if (oneBasedLegNumberCandidate == legDetailsList.size() && legDetailsList.get(oneBasedLegNumberCandidate-1).finished) {
+                                    oneBasedLegNumber = 0;
+                                } else {
+                                    oneBasedLegNumber = oneBasedLegNumberCandidate;
+                                }
                                 lastLeaderboardProvidedLegNumbers = true;
                                 speedInKnots = sogProvider.get(row);
                             } else {
