@@ -400,7 +400,7 @@ The cloud replica is not supposed to become primary, except for maybe in the unl
 
 ```
     tokyo2020:PRIMARY> cfg = rs.conf()
-    # Then search for the member localhost:10203; let's assume, it's in cfg.members[0]:
+    # Then search for the member localhost:10203; let's assume, it's in cfg.members[0] :
     cfg.members[0].priority=0
     rs.reconfig(cfg)
 ```
