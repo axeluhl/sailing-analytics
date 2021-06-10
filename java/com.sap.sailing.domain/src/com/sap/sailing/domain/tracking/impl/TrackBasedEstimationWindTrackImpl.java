@@ -84,7 +84,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
 
     private static final SpeedWithBearing defaultSpeedWithBearing = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
     
-    private static Duration RESOLUTION = Duration.ONE_SECOND;
+    private final static Duration RESOLUTION = Duration.ONE_SECOND;
 
     private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
 

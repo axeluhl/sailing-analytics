@@ -68,6 +68,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -92,6 +93,36 @@ public class WindTest {
         track.add(wind1);
         track.add(wind2);
         Wind average = track.getAveragedWind(pos, middle);
+        PositionAssert.assertBearingEquals(new DegreeBearingImpl(0), average.getBearing().getDifferenceTo(new DegreeBearingImpl(0)), 0.01);
+    }
+    
+    /**
+     * When a wind track has a gap, e.g., because a sensor temporarily did not transmit data, averaging should still try to
+     * obtain fixes "left and right" of the time point requested up to the averaging interval set on the track, ideally
+     * symmetrically, and taking at least one fix before and one fix after the time point requested, if possible, rather than
+     * considering a long gap on one side an exceeding of the averaging interval although only one fix is consumed from that
+     * side.<p>
+     * 
+     * See also bug 5576.
+     */
+    @Test
+    public void testAveragingWindWithGapInTrack() throws InterruptedException {
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
+        TimePoint t = MillisecondsTimePoint.now();
+        TimePoint t1_left = t.minus(Duration.ONE_SECOND);
+        TimePoint t2_left = t1_left.minus(Duration.ONE_MINUTE);
+        TimePoint t1_right = t.plus(Duration.ONE_SECOND);
+        TimePoint t2_right = t1_right.plus(Duration.ONE_MINUTE);
+        DegreePosition pos = new DegreePosition(0, 0);
+        Wind wind1 = new WindImpl(pos, t2_left, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(340)));
+        Wind wind2 = new WindImpl(pos, t1_left, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(350)));
+        Wind wind3 = new WindImpl(pos, t1_right, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(10)));
+        Wind wind4 = new WindImpl(pos, t2_right, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(20)));
+        track.add(wind1);
+        track.add(wind2);
+        track.add(wind3);
+        track.add(wind4);
+        Wind average = track.getAveragedWind(pos, t);
         PositionAssert.assertBearingEquals(new DegreeBearingImpl(0), average.getBearing().getDifferenceTo(new DegreeBearingImpl(0)), 0.01);
     }
     
