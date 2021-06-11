@@ -225,13 +225,30 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     /**
      * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface method.
-     * It does so by collecting (smoothened, outliers removed) wind fixes around the <code>at</code> time point up to
-     * an interval length as specified by {@link #getMillisecondsOverWhichToAverageWind()}. At least one fix that is
-     * closest to <code>at</code> will be picked up. If the track is empty, <code>null</code> is returned. Otherwise,
-     * the wind fixes in the interval constructed are averaged using a {@link ConfidenceBasedWindAverager}.
-     * 
+     * It does so by collecting (smoothened, outliers removed) wind fixes around the <code>at</code> time point up to an
+     * interval length as specified by {@link #getMillisecondsOverWhichToAverageWind()}. If available, at least the fix
+     * time-wise closest before and the fix time-wise closest after {@code at} will be picked up, which may lead to an
+     * overall interval length that exceeds {@link #getMillisecondsOverWhichToAverageWind()}.
      * <p>
-     * However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses may use this
+     * 
+     * Collecting the fixes around {@code at} tries to work symmetrically. The interval is counted from the earliest fix
+     * used to the latest fix used, and always including {@code at}. After adding the latest fix before and the earliest
+     * fix after {@code at} (if they exist) to the result, while the interval that has to include {@code at} does not
+     * yet exceed {@link #getMillisecondsOverWhichToAverageWind()}, the next fix that is closest to {@code at} and that
+     * is not yet part of the result is added unless it would extend the interval beyond
+     * {@link #getMillisecondsOverWhichToAverageWind()} in which case the iteration ends.
+     * <p>
+     * 
+     * While this procedure does not guarantee an equal number of fixes on both sides of {@code at}, it works well for
+     * producing fixes that are aligned closely around {@code at} while also guaranteeing that fixes from both sides of
+     * {@code at} are considered when available.
+     * <p>
+     * 
+     * If the track is empty, {@code null} is returned. Otherwise, the wind fixes in the interval constructed are
+     * averaged using a {@link ConfidenceBasedWindAverager}.
+     * <p>
+     * 
+     * Not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses may use this
      * carefully if they can guarantee there are no concurrency issues with the internal fixes while iterating over the
      * result of {@link #getInternalFixes()}.
      * 
