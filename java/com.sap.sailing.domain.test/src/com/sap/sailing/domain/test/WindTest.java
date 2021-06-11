@@ -177,8 +177,8 @@ public class WindTest {
 
     /**
      * If the wind track has areas with no data, and wind information is requested for such an interval,
-     * it is essential to still average over the {@link #AVERAGING_INTERVAL_MILLIS} interval, even if the
-     * interval is further away than {@link #AVERAGING_INTERVAL_MILLIS}.
+     * it is essential to still average over at least one fix left and one fix right, even if the
+     * resulting interval is longer than {@link #AVERAGING_INTERVAL_MILLIS}.
      */
     @Test
     public void testAveragingOfSparseWindTrack() {
@@ -198,19 +198,24 @@ public class WindTest {
         track.add(wind5);
         track.add(wind6);
         track.add(wind7);
-        
-        // interval does bearely reach 20's burst because 0 has 0 length and 1000..30000 has 29000 length
+        // expecting to pick up 0, 1000, 2000, 10000 and 30000, all with 20deg
         PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1)), 0.02);
-        // interval uses the two fixes to the left (0, 1000)=1000 and three to the right (2000, 10000, 30000)=28000
+        // interval uses the two fixes to the left (0, 1000) and three to the right (2000, 10000, 30000), total length 30000
         PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1001)), 0.02);
-        // in the middle of the "hole", fetches (0, 1000, 2000, 10000)=10000 and (30000, 40000)=10000, so 20000ms worth of wind
+        // in the middle of the "hole", fetches 10000 and 30000; then adding 2000 because it's closer to 20000 than 40000; then
+        // adding 1000 because it's still closer to 20000 than 40000 and still within the 30s range, and the same for 0; but not
+        // adding 40000 then because 2000..40000=38000 > 30000; still all 20deg values
         final double averageFor20000 = track.getAveragedWind(pos, new MillisecondsTimePoint(20000)).getKnots();
         // value is hard to predict exactly because time difference-based confidences rate fixes closer to 20000ms higher than those further away
-        assertEquals(35, averageFor20000, 5);
-        // right of the middle of the "hole", fetches (0, 1000, 2000, 10000)=10000 and (30000, 40000, 50000)=20000
-        final double averageFor20500 = track.getAveragedWind(pos, new MillisecondsTimePoint(20500)).getKnots();
-        assertEquals(37, averageFor20500, 5);
-        assertTrue(averageFor20500 > averageFor20000);
+        assertEquals(20, averageFor20000, 0.02);
+        // right of the middle of the "hole", fetches 10000 and 30000 initially; then 40000 (distance 16000 is less than distance 22000 to 2000),
+        // ending up with 10000..40000=30000, so no more fix is picked up; weighted average of two 20deg fixes and one 130deg fix
+        final double averageFor24000 = track.getAveragedWind(pos, new MillisecondsTimePoint(24000)).getKnots();
+        assertEquals(46, averageFor24000, 5);
+        assertTrue(averageFor24000 > averageFor20000);
+        // at least one fix will be picked up even when asking later than 30s after the last:
+        final double averageFor100000 = track.getAveragedWind(pos, new MillisecondsTimePoint(100000)).getKnots();
+        assertEquals(170, averageFor100000, 0.02);
     }
     
     @Test

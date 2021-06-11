@@ -32,6 +32,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
@@ -273,52 +274,64 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             Iterator<Wind> afterIter = afterSet.iterator();
             long beforeDistanceToAt = 0;
             long afterDistanceToAt = 0;
-            TimePoint beforeIntervalEnd = null;
-            TimePoint afterIntervalStart = null;
-            long beforeIntervalLength = 0;
-            long afterIntervalLength = 0;
             Wind beforeWind = null;
+            Wind afterWind = null;
+            // pick one left if possible
             if (beforeIter.hasNext()) {
                 beforeWind = beforeIter.next();
                 beforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
+                windFixesToAverage.add(createWindWithConfidence(beforeWind));
             }
-            Wind afterWind = null;
+            // pick one right if possible
             if (afterIter.hasNext()) {
                 afterWind = afterIter.next();
                 afterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
+                windFixesToAverage.add(createWindWithConfidence(afterWind));
             }
-            do {
-                if (beforeWind != null && (beforeDistanceToAt <= afterDistanceToAt || afterWind == null)) {
-                    windFixesToAverage.add(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(beforeWind,
-                            getConfidenceOfInternalWindFixUnsynchronized(beforeWind), new Util.Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind
-                                    .getTimePoint()), useSpeed));
-                    if (beforeIntervalEnd == null) {
-                        beforeIntervalEnd = beforeWind.getTimePoint();
-                    }
+            long newBeforeDistanceToAt;
+            long newAfterDistanceToAt;
+            if (beforeIter.hasNext()) {
+                beforeWind = beforeIter.next();
+                newBeforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
+            } else {
+                beforeWind = null;
+                newBeforeDistanceToAt = beforeDistanceToAt;
+            }
+            if (afterIter.hasNext()) {
+                afterWind = afterIter.next();
+                newAfterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
+            } else {
+                afterWind = null;
+                newAfterDistanceToAt = afterDistanceToAt;
+            }
+            boolean pickBefore;
+            // Invariant: beforeWind and afterWind each represent the next element in the respective direction that has not yet been consumed,
+            //            beforeDistanceToAt and afterDistanceToAt refer to the fixes consumed to far, newBeforeDistanceToAt and newAfterDistanceToAt
+            //            refer to the yet unconsumed next fix in the corresponding direction.
+            while ((pickBefore=(beforeWind != null && (afterWind == null || newBeforeDistanceToAt <= newAfterDistanceToAt) && newBeforeDistanceToAt + afterDistanceToAt <= getMillisecondsOverWhichToAverageWind()))
+                || (afterWind != null && beforeDistanceToAt + newAfterDistanceToAt <= getMillisecondsOverWhichToAverageWind())) {
+                if (pickBefore) {
+                    windFixesToAverage.add(createWindWithConfidence(beforeWind));
+                    beforeDistanceToAt = newBeforeDistanceToAt;
                     if (beforeIter.hasNext()) {
                         beforeWind = beforeIter.next();
-                        beforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
-                        beforeIntervalLength = beforeIntervalEnd.asMillis() - beforeWind.getTimePoint().asMillis();
+                        newBeforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
                     } else {
                         beforeWind = null;
+                        newBeforeDistanceToAt = beforeDistanceToAt;
                     }
-                } else if (afterWind != null) {
-                    windFixesToAverage.add(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(afterWind,
-                            getConfidenceOfInternalWindFixUnsynchronized(afterWind), new Util.Pair<Position, TimePoint>(afterWind.getPosition(), afterWind
-                                    .getTimePoint()), useSpeed));
-                    if (afterIntervalStart == null) {
-                        afterIntervalStart = afterWind.getTimePoint();
-                    }
+                } else {
+                    windFixesToAverage.add(createWindWithConfidence(afterWind));
+                    afterDistanceToAt = newAfterDistanceToAt;
                     if (afterIter.hasNext()) {
                         afterWind = afterIter.next();
-                        afterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
-                        afterIntervalLength = afterWind.getTimePoint().asMillis() - afterIntervalStart.asMillis();
+                        newAfterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
                     } else {
                         afterWind = null;
+                        newAfterDistanceToAt = afterDistanceToAt;
                     }
                 }
-            } while (beforeIntervalLength + afterIntervalLength < getMillisecondsOverWhichToAverageWind()
-                    && (beforeWind != null || afterWind != null));
+            }
             if (windFixesToAverage.isEmpty()) {
                 return null;
             } else {
@@ -328,6 +341,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         } finally {
             unlockAfterRead();
         }
+    }
+
+    private WindWithConfidenceImpl<Pair<Position, TimePoint>> createWindWithConfidence(Wind wind) {
+        return new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(wind,
+                getConfidenceOfInternalWindFixUnsynchronized(wind), new Util.Pair<Position, TimePoint>(wind.getPosition(), wind
+                        .getTimePoint()), useSpeed);
     }
 
     /**
