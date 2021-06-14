@@ -155,6 +155,7 @@
         <module>com.sap.sailing.shared.server.gateway</module>
         <module>com.sap.sailing.www</module>
         <module>com.sap.sailing.xmlexport</module>
+        <module>com.sap.sailing.hanaexport</module>
         <module>com.google.gwt.user</module>
         <module>com.google.gwt.dev</module>
         <module>com.google.gwt.servlet</module>
