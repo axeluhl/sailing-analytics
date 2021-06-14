@@ -18,9 +18,9 @@ import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
-import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationTopLevelView<?>>
         extends SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {

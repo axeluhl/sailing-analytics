@@ -185,7 +185,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterPermission();
     String permission();
     String nullUserGroup();
-
+    String failGeneratingHostedPageObject();
+    String errorOpenCheckout(String errMessage);
+    String errorSaveSubscription(String errMessage);
     String editRolesAndPermissionsForUser(String username);
     String permissionType();
     String couldNotLoadMarkTemplates();

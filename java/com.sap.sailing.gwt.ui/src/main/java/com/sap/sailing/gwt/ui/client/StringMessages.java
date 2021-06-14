@@ -2340,11 +2340,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String paymentStatusNoSuccess();
     String refunded();
     String errorLoadingUserSubscription(String errMessage);
-    String failGeneratingHostedPageObject();
-    String errorOpenCheckout(String errMessage);
     String failedCancelSubscription();
     String errorCancelSubscription(String errMessage);
-    String errorSaveSubscription(String errMessage);
     String errorInvalidSubscritionProvider(String errMessage);
     String unableToLoadCourseAreas(String message);
     String zoomCheckBoxLabel();

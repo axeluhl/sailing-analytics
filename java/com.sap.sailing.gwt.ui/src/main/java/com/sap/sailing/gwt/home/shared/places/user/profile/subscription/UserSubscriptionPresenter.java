@@ -8,15 +8,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceAsync;
-import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceAsync;
+import com.sap.sse.security.ui.client.subscription.WithSubscriptionService;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * Implementation presenter of {@link UserSubscriptionView.Presenter}

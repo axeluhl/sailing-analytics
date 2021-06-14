@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.ui.client.subscription.BaseUserSubscriptionView;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
+import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * View for displaying user subscription information like plan, subscription status...In this view user is able to
