@@ -114,13 +114,11 @@ public class LanguageSelector extends Composite {
     }
 
     private static class LanguageRenderer extends AbstractRenderer<String> {
-
         @Override
         public String render(String object) {
             final String displayName = LocaleInfo.getLocaleNativeDisplayName(object);
             return displayName == null ? "" : displayName;
         }
-
     }
 
 }

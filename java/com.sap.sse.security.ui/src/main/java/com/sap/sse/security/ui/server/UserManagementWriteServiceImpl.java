@@ -475,7 +475,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
 
     @Override
     public SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
-            String tenantQualifierName) throws UserManagementException, UnauthorizedException {
+            String tenantQualifierName, Boolean isTransitive) throws UserManagementException, UnauthorizedException {
         SuccessInfo successInfo;
         try {
             // get user for which to remove role
@@ -484,9 +484,8 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             getOrThrowQualifiedUser(userQualifierName);
             // get the group tenant the role is qualified for if one exists
             UserGroup tenant = getOrThrowTenant(tenantQualifierName);
-            //TODO: Not 
             Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
-                    userQualifierName, true);
+                    userQualifierName, isTransitive);
             final String message = "removed role " + role.getName() + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
             final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION

@@ -619,7 +619,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
         this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
+                /* securityServiceTracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
                 /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
     }
 
@@ -3290,21 +3291,18 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
-
         logger.info("Serializing regattas...");
         oos.writeObject(regattasByName);
         logoutput.append("Serialized " + regattasByName.size() + " regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
         }
-
         logger.info("Serializing events...");
         oos.writeObject(eventsById);
         logoutput.append("\nSerialized " + eventsById.size() + " events\n");
         for (Event event : eventsById.values()) {
             logoutput.append(String.format("%3s\n", event.toString()));
         }
-
         logger.info("Serializing regattas observed...");
         oos.writeObject(regattasObservedWithRaceAdditionListener);
         logger.info("Serializing regatta tracking cache...");
@@ -3329,37 +3327,31 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         logger.info("Serializing persisted competitors...");
         oos.writeObject(competitorAndBoatStore);
         logoutput.append("Serialized " + competitorAndBoatStore.getCompetitorsCount() + " persisted competitors\n");
-
         logger.info("Serializing configuration map...");
         oos.writeObject(raceManagerDeviceConfigurationsById);
         logoutput.append("Serialized " + raceManagerDeviceConfigurationsById.size() + " device configuration entries\n");
         for (DeviceConfiguration config : raceManagerDeviceConfigurationsById.values()) {
             logoutput.append(String.format("%3s\n", config.getName()));
         }
-
         logger.info("Serializing anniversary races...");
         final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = anniversaryRaceDeterminator
                 .getKnownAnniversaries();
         oos.writeObject(knownAnniversaries);
         logoutput.append("Serialized " + knownAnniversaries.size() + " anniversary races\n");
-
         logger.info("Serializing next anniversary...");
         final Pair<Integer, AnniversaryType> nextAnniversary = anniversaryRaceDeterminator
                 .getNextAnniversary();
         oos.writeObject(nextAnniversary);
         logoutput.append("Serialized next anniversary " + nextAnniversary + "\n");
-
         logger.info("Serializing race count for anniversaries...");
         final int currentRaceCount = anniversaryRaceDeterminator.getCurrentRaceCount();
         oos.writeInt(currentRaceCount);
         logoutput.append("Serialized race count for anniversaries " + currentRaceCount + "\n");
-
         logger.info("Serializing remote sailing server references...");
         final ArrayList<RemoteSailingServerReference> remoteServerReferences = new ArrayList<>(remoteSailingServerSet
                 .getCachedEventsForRemoteSailingServers().keySet());
         oos.writeObject(remoteServerReferences);
         logoutput.append("Serialized " + remoteServerReferences.size() + " remote sailing server references\n");
-
         logger.info(logoutput.toString());
     }
 
@@ -3458,7 +3450,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             }
         }
         logoutput.append("Received " + competitorAndBoatStore.getCompetitorsCount() + " NEW competitors\n");
-
         logger.info("Reading device configurations...");
         raceManagerDeviceConfigurationsById.putAll((Map<UUID, DeviceConfiguration>) ois.readObject());
         logoutput.append("Received " + raceManagerDeviceConfigurationsById.size() + " NEW configuration entries\n");
@@ -3466,42 +3457,38 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             raceManagerDeviceConfigurationsByName.put(config.getName(), config);
             logoutput.append(String.format("%3s\n", config.getName()));
         }
-
         logger.info("Reading anniversary races...");
         final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = (Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>>) ois
                 .readObject();
         anniversaryRaceDeterminator.setKnownAnniversaries(knownAnniversaries);
         logoutput.append("Received " + knownAnniversaries.size() + " anniversary races\n");
-
         logger.info("Reading next anniversary...");
         final Pair<Integer, AnniversaryType> nextAnniversary = (Pair<Integer, AnniversaryType>) ois.readObject();
         anniversaryRaceDeterminator.setNextAnniversary(nextAnniversary);
         logoutput.append("Received next anniversary " + nextAnniversary + "\n");
-
         logger.info("Reading race count for anniversaries...");
         final int currentRaceCount = ois.readInt();
         anniversaryRaceDeterminator.setRaceCount(currentRaceCount);
         logoutput.append("Received race count for anniversaries " + currentRaceCount + "\n");
-
         logger.info("Reading remote sailing server references...");
         for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois
                 .readObject()) {
             remoteSailingServerSet.add(remoteSailingServerReference);
             logoutput.append("Received remote sailing server reference " + remoteSailingServerReference);
         }
-
         // make sure to initialize listeners correctly
         for (Regatta regatta : regattasByName.values()) {
             RegattaImpl regattaImpl = (RegattaImpl) regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
             regattaImpl.addRaceColumnListener(raceLogReplicator);
         }
-        // re-establish RaceLogResolver references to this RacingEventService in all TrackedRace instances
+        // re-establish RaceLogResolver references to this RacingEventService and regatta listeners in all TrackedRace instances
         for (DynamicTrackedRegatta trackedRegatta : regattaTrackingCache.values()) {
             trackedRegatta.lockTrackedRacesForRead();
             try {
                 for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
                     ((TrackedRaceImpl) trackedRace).setRaceLogResolver(this);
+                    ((TrackedRaceImpl) trackedRace).registerRegattaListener();
                 }
             } finally {
                 trackedRegatta.unlockTrackedRacesAfterRead();

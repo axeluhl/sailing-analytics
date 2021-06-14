@@ -125,6 +125,7 @@
         <module>com.sap.sailing.datamining.shared</module>
         <module>com.sap.sailing.domain.persistence</module>
         <module>com.sap.sailing.domain.deckmanadapter</module>
+        <module>com.sap.sailing.domain.oceanraceadapter</module>
         <module>com.sap.sailing.domain.bravoadapter</module>
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>

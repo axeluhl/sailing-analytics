@@ -12,6 +12,7 @@ import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -38,6 +39,7 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SharedLandscapeConstants;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -100,6 +102,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final ErrorReporter errorReporter;
     private final AwsMfaLoginWidget mfaLoginWidget;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
+    private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -534,34 +537,47 @@ public class LandscapeManagementPanel extends SimplePanel {
                             @Override
                             public void ok(UpgradeApplicationReplicaSetInstructions upgradeInstructions) {
                                 applicationReplicaSetsBusy.setBusy(true);
+                                final int[] howManyMoreToGo = new int[] { Util.size(replicaSets) };
+                                Duration timeToWaitUntilUpgradingNextReplicaSet = Duration.NULL;
                                 for (final SailingApplicationReplicaSetDTO<String> replicaSet : replicaSets) {
-                                    landscapeManagementService.upgradeApplicationReplicaSet(regionId, replicaSet,
-                                            upgradeInstructions.getReleaseNameOrNullForLatestMaster(),
-                                            sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
-                                                    sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
-                                                    ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                            upgradeInstructions.getReplicationBearerToken(),
-                                            new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
-                                                @Override
-                                                public void onFailure(Throwable caught) {
-                                                    applicationReplicaSetsBusy.setBusy(false);
-                                                    errorReporter.reportError(caught.getMessage());
-                                                }
-    
-                                                @Override
-                                                public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
-                                                    applicationReplicaSetsBusy.setBusy(false);
-                                                    if (result != null) {
-                                                        Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
-                                                                        result.getName(), result.getVersion()), NotificationType.SUCCESS);
-                                                        applicationReplicaSetsTable.getFilterPanel().remove(replicaSet);
-                                                        applicationReplicaSetsTable.getFilterPanel().add(result);
-                                                    } else {
-                                                        Notification.notify(stringMessages.upgradingApplicationReplicaSetFailed(replicaSet.getName()),
-                                                                NotificationType.ERROR);
-                                                    }
-                                                }
-                                            });
+                                    new Timer() {
+                                        @Override
+                                        public void run() {
+                                            landscapeManagementService.upgradeApplicationReplicaSet(regionId, replicaSet,
+                                                    upgradeInstructions.getReleaseNameOrNullForLatestMaster(),
+                                                    sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                                            sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                                    upgradeInstructions.getReplicationBearerToken(),
+                                                    new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                                        @Override
+                                                        public void onFailure(Throwable caught) {
+                                                            if (--howManyMoreToGo[0] == 0) {
+                                                                applicationReplicaSetsBusy.setBusy(false);
+                                                            }
+                                                            errorReporter.reportError(caught.getMessage());
+                                                        }
+            
+                                                        @Override
+                                                        public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                                            if (--howManyMoreToGo[0] == 0) {
+                                                                applicationReplicaSetsBusy.setBusy(false);
+                                                            }
+                                                            if (result != null) {
+                                                                Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
+                                                                                result.getName(), result.getVersion()), NotificationType.SUCCESS);
+                                                                applicationReplicaSetsTable.getFilterPanel().remove(replicaSet);
+                                                                applicationReplicaSetsTable.getFilterPanel().add(result);
+                                                            } else {
+                                                                Notification.notify(stringMessages.upgradingApplicationReplicaSetFailed(replicaSet.getName()),
+                                                                        NotificationType.ERROR);
+                                                            }
+                                                        }
+                                                    });
+                                        }
+                                    }.schedule((int) timeToWaitUntilUpgradingNextReplicaSet.asMillis());
+                                    timeToWaitUntilUpgradingNextReplicaSet = timeToWaitUntilUpgradingNextReplicaSet.plus(
+                                            DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS);
                                 }
                             }
 

@@ -70,7 +70,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
@@ -152,7 +151,6 @@ import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
@@ -413,7 +411,6 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.ORCCertificat
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
-import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sailing.simulator.Path;
@@ -478,7 +475,6 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
-import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -1290,16 +1286,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
             if (windSources != null) {
                 windSourcesToDeliver.addAll(windSources);
             } else {
-                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.EXPEDITION));
                 windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.WEB));
             }
             for (WindSource windSource : windSourcesToDeliver) {
-                if(windSource.getType() == WindSourceType.WEB) {
+                if (windSource.getType() == WindSourceType.WEB) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
@@ -1310,7 +1304,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         Iterator<Wind> windIter = windTrack.getRawFixes().iterator();
                         while (windIter.hasNext()) {
                             Wind wind = windIter.next();
-                            if(wind != null) {
+                            if (wind != null) {
                                 WindDTO windDTO = createWindDTO(wind, windTrack);
                                 windTrackInfoDTO.windFixes.add(windDTO);
                             }
@@ -1318,7 +1312,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     } finally {
                         windTrack.unlockAfterRead();
                     }
-
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                 }
             }
@@ -2283,8 +2276,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(actualTimePoint);
             for (Competitor competitor : competitorsFromBestToWorst) {
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
-                if (trackedLeg != null) {
-                    int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
+                if (trackedLeg != null || !trackedRace.getMarkPassings(competitor).isEmpty()) {
+                    int legNumberOneBased = trackedLeg==null ? 0 : race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
                     Boat boatOfCompetitor = trackedRace.getBoatOfCompetitor(competitor);
                     QuickRankDTO quickRankDTO = new QuickRankDTO(
                             baseDomainFactory.convertToCompetitorAndBoatDTO(competitor, boatOfCompetitor).getCompetitor(),
@@ -3984,52 +3977,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     //??
-    public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
-        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
-        getService().apply(new UpdateServerConfiguration(
-                new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
-        if (serverConfiguration.isSelfService() != null) {
-            final boolean isCurrentlySelfService = isSelfServiceServer();
-            final boolean shouldBeSelfService = serverConfiguration.isSelfService();
-            if (isCurrentlySelfService != shouldBeSelfService) {
-                SecurityUtils.getSubject().checkPermission(getServerInfo().getIdentifier().getStringPermission(DefaultActions.CHANGE_ACL));
-                if (shouldBeSelfService) {
-                    getSecurityService().addToAccessControlList(getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
-                } else {
-                    getSecurityService().removeFromAccessControlList(getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
-                }
-            }
-        }
-        if (serverConfiguration.isPublic() != null) {
-            final RoleDefinition viewerRole = getSecurityService()
-                    .getRoleDefinition(SailingViewerRole.getInstance().getId());
-            final UserGroup serverGroup = getSecurityService().getServerGroup();
-            if (viewerRole != null && serverGroup != null) {
-                final boolean isCurrentlyPublic = Boolean.TRUE.equals(serverGroup.getRoleAssociation(viewerRole));
-                final boolean shouldBePublic = serverConfiguration.isPublic();
-                if (isCurrentlyPublic != shouldBePublic) {
-                    // value changed
-                    if (getSecurityService().hasCurrentUserUpdatePermission(serverGroup)
-                            && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
-                                    viewerRole, new Ownership(null, serverGroup))) {
-                        if (serverConfiguration.isPublic()) {
-                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, true);
-                        } else {
-                            getSecurityService().removeRoleDefintionFromUserGroup(serverGroup, viewerRole);
-                        }
-                    } else {
-                        throw new AuthorizationException("No permission to make the server public");
-                    }
-                }
-            } else {
-                throw new IllegalArgumentException(
-                        SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
-            }
-        }
-    }
-
-    @Override
-    //??
     public List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() {
         List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
         for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> remoteSailingServerRefAndItsCachedEvent :
@@ -4400,7 +4347,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         RaceLogDTO result = null;
         final RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
-        if(raceLog != null) {
+        if (raceLog != null) {
             List<RaceLogEventDTO> entries = new ArrayList<RaceLogEventDTO>();
             result = new RaceLogDTO(leaderboardName, raceColumnDTO.getName(), fleet.getName(), raceLog.getCurrentPassId(), entries);
             raceLog.lockForRead();
@@ -5832,7 +5779,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
 
-    private Boolean isSelfServiceServer() {
+    protected Boolean isSelfServiceServer() {
         final AccessControlListAnnotation serverAclOrNull = getSecurityService().getAccessControlList(getServerInfo().getIdentifier());
         final Boolean result;
         if (serverAclOrNull == null) {
@@ -6318,6 +6265,5 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             logger.log(Level.WARNING, "Unable to determine admin change log size", e);
             return 0;
         }
-
     }
 }

@@ -379,13 +379,17 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
             @Override
             public void updateRace(IRace race) {
-                if (reconciler != null && Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
+                if (Util.equalsWithNull(race.getId(), TracTracRaceTrackerImpl.this.tractracRace.getId())) {
                     int delayToLiveInMillis = race.getLiveDelay()*1000;
                     if (getRace() != null) {
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
                         if (trackedRace != null) {
-                            // in case a race status change was the reason for this update, reconcile with the race log(s)
-                            reconciler.reconcileRaceStatus(race, trackedRace);
+                            if (reconciler != null) {
+                                logger.info("Handling a race status update for race "+race.getName()+" with status "+race.getStatus()+
+                                        " and status time "+race.getStatusTime());
+                                // in case a race status change was the reason for this update, reconcile with the race log(s)
+                                reconciler.reconcileRaceStatus(race, trackedRace);
+                            }
                             logger.info("Setting delay to live for race "+trackedRace.getRace().getName()+" to "+delayToLiveInMillis+"ms");
                             trackedRace.setDelayToLiveInMillis(delayToLiveInMillis);
                         }

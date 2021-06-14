@@ -518,9 +518,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Instance getInstanceByPublicIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress) {
-        return getEc2Client(getRegion(region))
-                .describeInstances(b->b.filters(Filter.builder().name("ip-address").values(publicIpAddress).build())).reservations()
-                .iterator().next().instances().iterator().next();
+        try {
+            final InetAddress inetAddress = InetAddress.getByName(publicIpAddress);
+            return getEc2Client(getRegion(region))
+                    .describeInstances(b->b.filters(Filter.builder().name("ip-address").values(inetAddress.getHostAddress()).build())).reservations()
+                    .iterator().next().instances().iterator().next();
+        } catch (UnknownHostException e) {
+            logger.warning("IP address for "+publicIpAddress+" not found");
+            return null;
+        }
     }
     
     @Override
@@ -530,9 +536,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Instance getInstanceByPrivateIpAddress(com.sap.sse.landscape.Region region, String privateIpAddress) {
-        return getEc2Client(getRegion(region))
-                .describeInstances(b->b.filters(Filter.builder().name("private-ip-address").values(privateIpAddress).build())).reservations()
-                .iterator().next().instances().iterator().next();
+        InetAddress inetAddress;
+        try {
+            inetAddress = InetAddress.getByName(privateIpAddress);
+            return getEc2Client(getRegion(region))
+                    .describeInstances(b->b.filters(Filter.builder().name("private-ip-address").values(inetAddress.getHostAddress()).build())).reservations()
+                    .iterator().next().instances().iterator().next();
+        } catch (UnknownHostException e) {
+            logger.warning("IP address for "+privateIpAddress+" not found");
+            return null;
+        }
     }
 
     @Override
@@ -1252,7 +1265,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
                 @Override
                 public String getNodeName() {
-                    return anyRabbitMQHost.getPublicAddress().getCanonicalHostName();
+                    return anyRabbitMQHost.getPrivateAddress().getCanonicalHostName();
                 }
             };
         } else {
@@ -1503,7 +1516,24 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                         } else {
                             result = loadBalancingClient.describeRules(
                                 b->b.listenerArn(listener.listenerArn())).handle(
-                                    (describeRulesResponse, e)->new Pair<Listener, Iterable<Rule>>(listener, describeRulesResponse.rules()));
+                                    (describeRulesResponse, e)->{
+                                        final Pair<Listener, Iterable<Rule>> rulesResult;
+                                        if (e != null) {
+                                            logger.log(Level.WARNING, "Problem trying to get load balancer listener rules for "
+                                                    + loadBalancer.getName() + ". Trying synchronously...", e);
+                                            try {
+                                                Thread.sleep(3000);
+                                            } catch (InterruptedException e1) {
+                                                logger.log(Level.WARNING, "Strange; sleeping was interrupted", e1);
+                                            } // wait a bit; could have been a rate limit exceeding issue 
+                                            rulesResult = new Pair<Listener, Iterable<Rule>>(listener,
+                                                    getLoadBalancingClient(getRegion(region)).describeRules(b->b
+                                                            .listenerArn(listener.listenerArn())).rules());
+                                        } else {
+                                            rulesResult = new Pair<Listener, Iterable<Rule>>(listener, describeRulesResponse.rules());
+                                        }
+                                        return rulesResult;
+                                    });
                         }
                         return result;
                     });
@@ -1529,16 +1559,28 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      * so we'll throttle our requests a bit here; usually, 100 requests per seconds and region with a "bucket refill" of 20/s applies
      * as a limit, so if we throttle down to 20/s we should be fine for most cases.
      */
+    private final static Object sequencer = new Object();
     @Override
     public CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(com.sap.sse.landscape.Region region, TargetGroup<ShardingKey> targetGroup) {
-        try {
-            Thread.sleep(1000/20);
-        } catch (InterruptedException e1) {
-            logger.log(Level.WARNING, "Interrupted", e1);
+        synchronized (sequencer) { // ensure across instances to throttle access accordingly
+            try {
+                Thread.sleep(1000/20);
+            } catch (InterruptedException e1) {
+                logger.log(Level.WARNING, "Interrupted", e1);
+            }
+            final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
+                    getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
+            return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->{
+                final Iterable<TargetHealthDescription> result;
+                if (e != null) {
+                    logger.log(Level.WARNING, "Exception trying to obtain health status of target group "+targetGroup, e);
+                    result = Collections.emptySet();
+                } else {
+                    result = targetHealthResponse.targetHealthDescriptions();
+                }
+                return result;
+            });
         }
-        final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
-                getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
-        return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->targetHealthResponse.targetHealthDescriptions());
     }
     
     @Override

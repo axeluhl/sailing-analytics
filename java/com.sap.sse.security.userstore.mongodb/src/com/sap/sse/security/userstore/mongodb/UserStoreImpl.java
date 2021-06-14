@@ -749,8 +749,11 @@ public class UserStoreImpl implements UserStore {
      */
     private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
         assert userGroupsLock.isWriteLockedByCurrentThread() || userGroupsLock.getReadHoldCount() > 0;
-        if (userGroupsByName.containsKey(name) || userGroups.containsKey(groupId)) {
-            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
+        if (userGroupsByName.containsKey(name)) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS+": "+name);
+        }
+        if (userGroups.containsKey(groupId)) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS+": "+groupId);
         }
     }
 

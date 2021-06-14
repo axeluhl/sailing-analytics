@@ -84,7 +84,7 @@ public class PreciseCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingI
         }
     }
     
-    private class PreciseCompactEstimatedSpeed extends AbstractSpeedWithAbstractBearingImpl {
+    public class PreciseCompactEstimatedSpeed extends AbstractSpeedWithAbstractBearingImpl {
         private static final long serialVersionUID = -5871855443391817248L;
 
         @Override

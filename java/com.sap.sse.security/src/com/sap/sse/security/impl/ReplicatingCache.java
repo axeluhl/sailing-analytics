@@ -72,8 +72,11 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         }
         V result = cache.put(key, value);
         if (store && value instanceof Session) {
-            securityService.replicate(new PutToReplicatingCacheOperation<K, V>(getName(), key, value));
-            securityService.storeSession(getName(), (Session) value);
+            final Session session = (Session) value;
+            if (!session.getAttributeKeys().isEmpty()) {
+                securityService.replicate(new PutToReplicatingCacheOperation<K, V>(getName(), key, value));
+                securityService.storeSession(getName(), (Session) value);
+            }
         }
         return result;
     }

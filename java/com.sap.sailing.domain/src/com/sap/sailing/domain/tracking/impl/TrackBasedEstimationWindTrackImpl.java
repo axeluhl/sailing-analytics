@@ -759,9 +759,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
      * As opposed to the superclass implementation, this variant checks if the {@link EstimatedWindFixesAsNavigableSet#floor(Wind)}
      * or {@link EstimatedWindFixesAsNavigableSet#ceiling(Wind)} is closer to <code>at</code> and returns the wind fix with confidence
      * from {@link #virtualInternalRawFixes} for the resolution-compliant time point closer to <code>at</code>.<p>
-     * 
-     * The current implementation doesn't consider the position <code>p</code> for the result's confidence, even though the
-     * result type suggests it.
      */
     @Override
     protected WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
