@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.subscription;
 
+import java.util.List;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 import com.sap.sse.security.shared.dto.NamedDTO;
@@ -11,6 +13,8 @@ public class SubscriptionPlanDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = -1990028347487353679L;
     String id;
 
+    List<String> features;
+
     private String error;
 
     /**
@@ -20,9 +24,10 @@ public class SubscriptionPlanDTO extends NamedDTO implements IsSerializable {
     public SubscriptionPlanDTO() {
     }
 
-    public SubscriptionPlanDTO(String id, String name, String error) {
+    public SubscriptionPlanDTO(String id, String name, List<String> features, String error) {
         super(name);
         this.id = id;
+        this.features = features;
         this.error = error;
     }
     

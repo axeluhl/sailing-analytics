@@ -3,6 +3,7 @@ package com.sap.sse.security.shared.subscription;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sse.security.shared.PredefinedRoles;
@@ -26,21 +27,27 @@ public class SSESubscriptionPlan extends SubscriptionPlan {
                     SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER),
             new SubscriptionPlanRole(PredefinedRoles.mediaeditor.getId(),
                     SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
-                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) });
+                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) },
+            convertPermissionsIterable(PredefinedRoles.spectator.getPermissions(), PredefinedRoles.mediaeditor.getPermissions())
+            );
     public static final SSESubscriptionPlan PREMIUM = new SSESubscriptionPlan("premium", "Premium", new SubscriptionPlanRole[] {
             new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
                     SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
                     SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER),
             new SubscriptionPlanRole(PredefinedRoles.moderator.getId(),
                     SubscriptionPlanRole.GroupQualificationMode.SUBSCRIBING_USER_DEFAULT_TENANT,
-                    SubscriptionPlanRole.UserQualificationMode.NONE) });
+                    SubscriptionPlanRole.UserQualificationMode.NONE) 
+            }, 
+            convertPermissionsIterable(PredefinedRoles.spectator.getPermissions(), PredefinedRoles.moderator.getPermissions())
+            );
 
-    private SSESubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles) {
-        super(id, name, roles);
+    private SSESubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features) {
+        super(id, name, roles, features);
         plansById.put(id, this);
     }
     
     public static Map<Serializable, SubscriptionPlan> getAllInstances(){
         return Collections.unmodifiableMap(plansById);
     }
+
 }
