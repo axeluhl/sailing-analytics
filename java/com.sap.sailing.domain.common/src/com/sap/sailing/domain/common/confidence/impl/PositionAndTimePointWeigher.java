@@ -4,9 +4,9 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * A weigher that uses a {@link Position} and a {@link TimePoint} to compute a confidence based on
@@ -26,9 +26,9 @@ public class PositionAndTimePointWeigher implements Weigher<Util.Pair<Position, 
     private final Weigher<Position> distanceWeigher;
     private final boolean usePosition;
 
-    public PositionAndTimePointWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance) {
+    public PositionAndTimePointWeigher(Duration halfConfidenceAfter, Distance halfConfidenceDistance) {
         timeWeigher = ConfidenceFactory.INSTANCE.createStandardDistributionTimeDifferenceWeigher(
-                /* use as standard deviation */ new MillisecondsDurationImpl(halfConfidenceAfterMilliseconds));
+                /* use as standard deviation */ halfConfidenceAfter);
         distanceWeigher = ConfidenceFactory.INSTANCE.createHyperbolicDistanceWeigher(halfConfidenceDistance);
         this.usePosition = Boolean.valueOf(System.getProperty(USE_POSITION_SYSTEM_PROPERTY_NAME, "true"));
     }

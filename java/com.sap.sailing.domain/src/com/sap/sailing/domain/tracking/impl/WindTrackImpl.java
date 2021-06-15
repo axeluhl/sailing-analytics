@@ -112,7 +112,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         listeners = new HashSet<WindListener>();
         this.useSpeed = useSpeed;
         this.losslessCompaction = losslessCompaction;
-        this.weigher = createPositionAndTimePointWeigher(millisecondsOverWhichToAverage);
+        this.weigher = createPositionAndTimePointWeigher();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -231,10 +231,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     /**
      * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface method.
-     * It does so by collecting (smoothened, outliers removed) wind fixes around the <code>at</code> time point up to
-     * half interval length specified by {@link #getMillisecondsOverWhichToAverageWind()} in each direction. If
-     * available, at least the fix time-wise closest before and the fix time-wise closest after {@code at} will be
-     * picked up, which may lead to an overall interval length that exceeds
+     * It does so by collecting wind fixes around the <code>at</code> time point up to half interval length specified by
+     * {@link #getMillisecondsOverWhichToAverageWind()} in each direction, starting to count at the first fix found in
+     * each direction. If available, at least the fix time-wise closest before and the fix time-wise closest after
+     * {@code at} will be picked up, which may lead to an overall interval length that exceeds
      * {@link #getMillisecondsOverWhichToAverageWind()}.
      * <p>
      * 
@@ -261,11 +261,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             // pick one left if possible and extend to half averaging interval length
             NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
             final Iterator<Wind> beforeIter = beforeSet.descendingIterator();
-            collectFixesInOneDirection(at, beforeIter, windFixesToAverage);
+            collectFixesInOneDirection(beforeIter, windFixesToAverage);
             // pick one right if possible and extend to half averaging interval length
             NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */true);
             final Iterator<Wind> afterIter = afterSet.iterator();
-            collectFixesInOneDirection(at, afterIter, windFixesToAverage);
+            collectFixesInOneDirection(afterIter, windFixesToAverage);
             if (windFixesToAverage.isEmpty()) {
                 return null;
             } else {
@@ -277,41 +277,43 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
     }
 
-    private void collectFixesInOneDirection(final TimePoint at, final Iterator<Wind> fixIter, Collection<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage) {
-        long distanceToAt = 0;
+    private void collectFixesInOneDirection(final Iterator<Wind> fixIter, Collection<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage) {
+        long distanceToFirst = 0;
         Wind nextWindFix = null;
+        final TimePoint firstTimePointInDirection;
         if (fixIter.hasNext()) {
             nextWindFix = fixIter.next();
-            distanceToAt = Math.abs(at.asMillis() - nextWindFix.getTimePoint().asMillis());
+            firstTimePointInDirection = nextWindFix.getTimePoint();
+            distanceToFirst = Math.abs(firstTimePointInDirection.asMillis() - nextWindFix.getTimePoint().asMillis());
             windFixesToAverage.add(createWindWithConfidence(nextWindFix));
+        } else {
+            firstTimePointInDirection = null;
         }
         // and extend to at most half the averaging interval
-        long newDistanceToAt;
+        long newDistanceToFirst;
         if (fixIter.hasNext()) {
             nextWindFix = fixIter.next();
-            newDistanceToAt = Math.abs(at.asMillis() - nextWindFix.getTimePoint().asMillis());
+            newDistanceToFirst = Math.abs(firstTimePointInDirection.asMillis() - nextWindFix.getTimePoint().asMillis());
         } else {
             nextWindFix = null;
-            newDistanceToAt = distanceToAt;
+            newDistanceToFirst = distanceToFirst;
         }
         // go up to half the interval:
-        while (nextWindFix != null && newDistanceToAt <= getMillisecondsOverWhichToAverageWind()/2) {
+        while (nextWindFix != null && newDistanceToFirst <= getMillisecondsOverWhichToAverageWind()/2) {
             windFixesToAverage.add(createWindWithConfidence(nextWindFix));
-            distanceToAt = newDistanceToAt;
+            distanceToFirst = newDistanceToFirst;
             if (fixIter.hasNext()) {
                 nextWindFix = fixIter.next();
-                newDistanceToAt = Math.abs(at.asMillis() - nextWindFix.getTimePoint().asMillis());
+                newDistanceToFirst = Math.abs(firstTimePointInDirection.asMillis() - nextWindFix.getTimePoint().asMillis());
             } else {
                 nextWindFix = null;
-                newDistanceToAt = distanceToAt;
+                newDistanceToFirst = distanceToFirst;
             }
         }
     }
     
-    private PositionAndTimePointWeigher createPositionAndTimePointWeigher(long millisecondsOverWhichToAverage) {
-        return new PositionAndTimePointWeigher(
-                /* halfConfidenceAfterMilliseconds */ millisecondsOverWhichToAverage / 2,
-                WIND_HALF_CONFIDENCE_DISTANCE);
+    private PositionAndTimePointWeigher createPositionAndTimePointWeigher() {
+        return new PositionAndTimePointWeigher(WIND_HALF_CONFIDENCE_DURATION, WIND_HALF_CONFIDENCE_DISTANCE);
     }
 
     private WindWithConfidenceImpl<Pair<Position, TimePoint>> createWindWithConfidence(Wind wind) {

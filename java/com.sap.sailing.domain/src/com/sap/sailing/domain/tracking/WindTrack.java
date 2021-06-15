@@ -12,7 +12,7 @@ public interface WindTrack extends DynamicTrack<Wind> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;
     
     public static final Distance WIND_HALF_CONFIDENCE_DISTANCE = new MeterDistance(100);
-    public static final long WIND_HALF_CONFIDENCE_TIME_MILLIS = 10000l;
+    public static final Duration WIND_HALF_CONFIDENCE_DURATION = Duration.ONE_MINUTE;
 
     /**
      * Estimates a wind force and direction based on tracked wind data.<p>
