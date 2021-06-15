@@ -3,12 +3,10 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -23,15 +21,11 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.confidence.Weigher;
-import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
-import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -42,8 +36,6 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractTimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -108,8 +100,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
      * cache update is scheduled or already running.
      */
     private final NamedReentrantReadWriteLock scheduledRefreshIntervalLock;
-    
-    private final Weigher<Pair<Position, TimePoint>> weigher;
     
     /**
      * A copy of the {@link #timePointsWithCachedNullResult} contents offering fast contains checks.
@@ -268,8 +258,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
                 TrackBasedEstimationWindTrackImpl.class.getSimpleName() + " scheduledRefreshIntervalLock for race "
                         + trackedRace.getRace().getName(), /* fair */false);
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
-        weigher = new PositionAndTimePointWeigher(
-                /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
         listener = new CacheInvalidationRaceChangeListener();
         trackedRace.addListener(listener); // in particular, race status changes will be notified, unblocking waiting computations after LOADING phase
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(
@@ -303,17 +291,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
             double baseConfidence) {
         this(trackedRace, millisecondsOverWhichToAverage, baseConfidence, /* delayForCacheInvalidationInMilliseconds */
                 trackedRace.getMillisecondsOverWhichToAverageWind() / 2);
-    }
-    
-    /**
-     * The track-based estimation already averages the boats' bearings over time before averaging those across legs and
-     * tacks. There is no use in again averaging over a longer period of time. Therefore, we set the averaging interval
-     * to two times the resolution of the {@link EstimatedWindFixesAsNavigableSet virtual fixes collection} plus two
-     * milliseconds, so that at most one fix before and one fix after the time point requested will be used.
-     */
-    @Override
-    public long getMillisecondsOverWhichToAverageWind() {
-        return 2*getInternalRawFixes().getResolutionInMilliseconds()+2;
     }
     
     @Override
@@ -757,110 +734,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         public void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
             // no action required
         }
-    }
-
-    /**
-     * As opposed to the superclass implementation, this variant checks if the {@link EstimatedWindFixesAsNavigableSet#floor(Wind)}
-     * or {@link EstimatedWindFixesAsNavigableSet#ceiling(Wind)} is closer to <code>at</code> and obtains the wind fix with confidence
-     * from {@link #virtualInternalRawFixes} for the resolution-compliant time point closer to <code>at</code>. If no estimated
-     * wind fix can be obtained for that time point, the track is scanned left and right of the {@code at} time point, trying
-     * to obtain at least one, better two adjacent fixes. The search is performed based on this virtual track's {@link #RESOLUTION}
-     * up to {@link #getMillisecondsOverWhichToAverageWind}/2 left and right of {@code at}. If no estimation can be produced then
-     * the next available estimation outside of that interval is fetched from the cache for each direction, and the weighted
-     * average of those is returned.<p>
-     */
-    @Override
-    protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
-        final WindWithConfidence<Pair<Position, TimePoint>> result;
-        final Pair<Position, TimePoint> relativeTo = new Pair<Position, TimePoint>(p, at);
-        lockForRead();
-        try {
-            TimePoint floorTimePoint = virtualInternalRawFixes.floorToResolution(at);
-            TimePoint timePoint;
-            if (floorTimePoint.equals(at)
-                    || Math.abs(floorTimePoint.asMillis() - at.asMillis()) < Math.abs(virtualInternalRawFixes
-                            .ceilingToResolution(at).asMillis() - at.asMillis())) {
-                timePoint = floorTimePoint;
-            } else {
-                timePoint = virtualInternalRawFixes.ceilingToResolution(at);
-            }
-            final WindWithConfidence<TimePoint> fixAtTimePoint = virtualInternalRawFixes.getWindWithConfidence(timePoint);
-            ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE.createWindAverager(weigher);
-            List<WindWithConfidence<Util.Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
-            if (fixAtTimePoint == null) {
-                final WindWithConfidence<TimePoint> beforeAt = getWindWithConfidenceBefore(timePoint);
-                final WindWithConfidence<TimePoint> afterAt = getWindWithConfidenceAfter(timePoint);
-                if (beforeAt != null) {
-                    windFixesToAverage.add(createWindWithConfidenceForPositionAndTime(beforeAt));
-                }
-                if (afterAt != null) {
-                    windFixesToAverage.add(createWindWithConfidenceForPositionAndTime(afterAt));
-                }
-            } else {
-                windFixesToAverage.add(createWindWithConfidenceForPositionAndTime(fixAtTimePoint));
-            }
-            result = windAverager.getAverage(windFixesToAverage, relativeTo);
-            return result;
-        } finally {
-            unlockAfterRead();
-        }
-    }
-
-    private WindWithConfidenceImpl<Pair<Position, TimePoint>> createWindWithConfidenceForPositionAndTime(
-            final WindWithConfidence<TimePoint> preResult) {
-        return new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(preResult.getObject(),
-                    preResult.getConfidence(), new Pair<>(preResult.getObject().getPosition(), preResult.getObject().getTimePoint()),
-                    preResult.useSpeed());
-    }
-    
-    private WindWithConfidence<TimePoint> getWindWithConfidenceBefore(TimePoint timePoint) {
-        final TimePoint leftBump = getTrackedRace().getTimePointOfOldestEvent();
-        final WindWithConfidence<TimePoint> result;
-        if (leftBump == null) {
-            result = null;
-        } else {
-            final TimePoint cutoffForRecalculation = timePoint.minus(getMillisecondsOverWhichToAverageWind()/2);
-            TimePoint t = virtualInternalRawFixes.lowerToResolution(timePoint);
-            WindWithConfidence<TimePoint> candidate = null;
-            while (candidate == null && !t.before(leftBump)) {
-                if (t.before(cutoffForRecalculation)) {
-                    // pick the next best candidate from the cache
-                    candidate = cache.floor(new WindWithConfidenceImpl<TimePoint>(virtualInternalRawFixes.createDummyWindFix(t),
-                            0.0, /* relativeTo */ null, /* useSpeed */ false));
-                    break;
-                } else {
-                    candidate = virtualInternalRawFixes.getWindWithConfidence(t);
-                    t = virtualInternalRawFixes.lowerToResolution(t);
-                }
-            }
-            result = candidate;
-        }
-        return result;
-    }
-    
-    private WindWithConfidence<TimePoint> getWindWithConfidenceAfter(TimePoint timePoint) {
-        final TimePoint rightBump = getTrackedRace().getTimePointOfNewestEvent();
-        final WindWithConfidence<TimePoint> result;
-        if (rightBump == null) {
-            result = null;
-        } else {
-            final TimePoint cutoffForRecalculation = timePoint.plus(getMillisecondsOverWhichToAverageWind()/2);
-            TimePoint t = virtualInternalRawFixes.higherToResolution(timePoint);
-            WindWithConfidence<TimePoint> candidate = null;
-            while (candidate == null && !t.after(rightBump)) {
-                if (t.after(cutoffForRecalculation)) {
-                    // pick the next best candidate from the cache
-                    candidate = cache.ceiling(new WindWithConfidenceImpl<TimePoint>(virtualInternalRawFixes.createDummyWindFix(t),
-                            0.0, /* relativeTo */ null, /* useSpeed */ false));
-                    break;
-                } else {
-                    candidate = virtualInternalRawFixes.getWindWithConfidence(t);
-                    t = virtualInternalRawFixes.higherToResolution(t);
-                }
-            }
-            result = candidate;
-        }
-        return result;
     }
 
     @Override

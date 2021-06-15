@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
 import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
@@ -54,6 +55,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private long millisecondsOverWhichToAverage;
     
     private final boolean useSpeed;
+    
+    protected final Weigher<Pair<Position, TimePoint>> weigher;
     
     /**
      * Listeners won't be serialized.
@@ -108,6 +111,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         listeners = new HashSet<WindListener>();
         this.useSpeed = useSpeed;
         this.losslessCompaction = losslessCompaction;
+        this.weigher = createPositionAndTimePointWeigher(millisecondsOverWhichToAverage);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -262,10 +266,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         try {
             List<WindWithConfidence<Util.Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Util.Pair<Position, TimePoint>>>();
             // don't measure speed with separate confidence; return confidence obtained from averaging bearings
-            ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE
-                    .createWindAverager(new PositionAndTimePointWeigher(
-                    /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10,
-                    WIND_HALF_CONFIDENCE_DISTANCE));
+            ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE.createWindAverager(weigher);
             DummyWind atTimed = new DummyWind(at);
             Util.Pair<Position, TimePoint> relativeTo = new Util.Pair<Position, TimePoint>(p, at);
             NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
@@ -341,6 +342,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         } finally {
             unlockAfterRead();
         }
+    }
+
+    private PositionAndTimePointWeigher createPositionAndTimePointWeigher(long millisecondsOverWhichToAverage) {
+        return new PositionAndTimePointWeigher(
+                /* halfConfidenceAfterMilliseconds */ millisecondsOverWhichToAverage / 2,
+                WIND_HALF_CONFIDENCE_DISTANCE);
     }
 
     private WindWithConfidenceImpl<Pair<Position, TimePoint>> createWindWithConfidence(Wind wind) {

@@ -183,17 +183,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
-    /**
-     * The resolution at which {@link #getWind(Position, TimePoint)} and {@link #getWind(Position, TimePoint, Set)} and
-     * {@link #getWindWithConfidence(Position, TimePoint)} and {@link #getWindWithConfidence(Position, TimePoint, Set)}
-     * traverse an interval of length {@link #getMillisecondsOverWhichToAverageWind()}ms around a given time point
-     * in order to compute a smoothened average for a wind vector. This is then also the basis for the so-called
-     * "combined" wind and the "leg middle" wind (a specialization of the "combined" wind computed for a different
-     * position).
-     */
-    private static final Duration WIND_TRACK_RESOLUTION_FOR_SMOOTHENING = Duration.ONE_SECOND;
-    
-    // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
 
     public static final Duration TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = Duration.ONE_MINUTE.times(4); // let wind start four minutes before race
@@ -2026,21 +2015,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at, Set<WindSource> windSourcesToExclude) {
-        final Weigher<Pair<Position, TimePoint>> timeWeigher = (pair1, pair2)->
-            ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS).getConfidence(pair1.getB(), pair2.getB());
-        // at a 1s interval (or whatever WIND_TRACK_RESOLUTION_FOR_SMOOTHENING says) go to earlier and later time points starting
-        // from "at" and collect the wind fixes averaged over the wind sources to use, then average them based on time point only
-        ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE.createWindAverager(timeWeigher);
-        final Set<WindWithConfidence<Pair<Position, TimePoint>>> fixes = new HashSet<>();
-        final TimePoint end = at.plus(getMillisecondsOverWhichToAverageWind()/2);
-        for (TimePoint t=at.minus(getMillisecondsOverWhichToAverageWind()/2); !t.after(end); t=t.plus(WIND_TRACK_RESOLUTION_FOR_SMOOTHENING)) {
-            final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = shortTimeWindCache.getWindWithConfidence(p, t, windSourcesToExclude);
-            if (windWithConfidence != null) {
-                fixes.add(windWithConfidence);
-            }
-        }
-        return averager.getAverage(fixes, new Pair<>(p, at));
+    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position position, TimePoint at,
+            Set<WindSource> windSourcesToExclude) {
+        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = shortTimeWindCache
+                .getWindWithConfidence(position, roundToDuration(at, Duration.ONE_SECOND), windSourcesToExclude);
+        return windWithConfidence;
+    }
+    
+    private TimePoint roundToDuration(TimePoint t, Duration roundTo) {
+        final long roundToMillis = roundTo.asMillis();
+        final long half = roundToMillis/2;
+        return new MillisecondsTimePoint((t.asMillis()+half) / roundToMillis * roundToMillis);
     }
     
     public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidenceUncached(Position p, TimePoint at,
