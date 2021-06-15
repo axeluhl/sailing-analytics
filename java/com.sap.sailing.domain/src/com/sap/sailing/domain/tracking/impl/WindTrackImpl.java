@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -257,66 +258,14 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE.createWindAverager(weigher);
             DummyWind atTimed = new DummyWind(at);
             Util.Pair<Position, TimePoint> relativeTo = new Util.Pair<Position, TimePoint>(p, at);
+            // pick one left if possible and extend to half averaging interval length
             NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
+            final Iterator<Wind> beforeIter = beforeSet.descendingIterator();
+            collectFixesInOneDirection(at, beforeIter, windFixesToAverage);
+            // pick one right if possible and extend to half averaging interval length
             NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */true);
-            Iterator<Wind> beforeIter = beforeSet.descendingIterator();
-            Iterator<Wind> afterIter = afterSet.iterator();
-            long beforeDistanceToAt = 0;
-            long afterDistanceToAt = 0;
-            Wind beforeWind = null;
-            Wind afterWind = null;
-            // pick one left if possible
-            if (beforeIter.hasNext()) {
-                beforeWind = beforeIter.next();
-                beforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
-                windFixesToAverage.add(createWindWithConfidence(beforeWind));
-            }
-            // pick one right if possible
-            if (afterIter.hasNext()) {
-                afterWind = afterIter.next();
-                afterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
-                windFixesToAverage.add(createWindWithConfidence(afterWind));
-            }
-            long newBeforeDistanceToAt;
-            long newAfterDistanceToAt;
-            if (beforeIter.hasNext()) {
-                beforeWind = beforeIter.next();
-                newBeforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
-            } else {
-                beforeWind = null;
-                newBeforeDistanceToAt = beforeDistanceToAt;
-            }
-            if (afterIter.hasNext()) {
-                afterWind = afterIter.next();
-                newAfterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
-            } else {
-                afterWind = null;
-                newAfterDistanceToAt = afterDistanceToAt;
-            }
-            // go up to half the interval backward in time:
-            while (beforeWind != null && newBeforeDistanceToAt <= getMillisecondsOverWhichToAverageWind()/2) {
-                windFixesToAverage.add(createWindWithConfidence(beforeWind));
-                beforeDistanceToAt = newBeforeDistanceToAt;
-                if (beforeIter.hasNext()) {
-                    beforeWind = beforeIter.next();
-                    newBeforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
-                } else {
-                    beforeWind = null;
-                    newBeforeDistanceToAt = beforeDistanceToAt;
-                }
-            }
-            // go up to half the interval forward in time:
-            while (afterWind != null && newAfterDistanceToAt <= getMillisecondsOverWhichToAverageWind()/2) {
-                windFixesToAverage.add(createWindWithConfidence(afterWind));
-                afterDistanceToAt = newAfterDistanceToAt;
-                if (afterIter.hasNext()) {
-                    afterWind = afterIter.next();
-                    newAfterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
-                } else {
-                    afterWind = null;
-                    newAfterDistanceToAt = afterDistanceToAt;
-                }
-            }
+            final Iterator<Wind> afterIter = afterSet.iterator();
+            collectFixesInOneDirection(at, afterIter, windFixesToAverage);
             if (windFixesToAverage.isEmpty()) {
                 return null;
             } else {
@@ -328,6 +277,37 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
     }
 
+    private void collectFixesInOneDirection(final TimePoint at, final Iterator<Wind> fixIter, Collection<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage) {
+        long distanceToAt = 0;
+        Wind nextWindFix = null;
+        if (fixIter.hasNext()) {
+            nextWindFix = fixIter.next();
+            distanceToAt = Math.abs(at.asMillis() - nextWindFix.getTimePoint().asMillis());
+            windFixesToAverage.add(createWindWithConfidence(nextWindFix));
+        }
+        // and extend to at most half the averaging interval
+        long newDistanceToAt;
+        if (fixIter.hasNext()) {
+            nextWindFix = fixIter.next();
+            newDistanceToAt = Math.abs(at.asMillis() - nextWindFix.getTimePoint().asMillis());
+        } else {
+            nextWindFix = null;
+            newDistanceToAt = distanceToAt;
+        }
+        // go up to half the interval:
+        while (nextWindFix != null && newDistanceToAt <= getMillisecondsOverWhichToAverageWind()/2) {
+            windFixesToAverage.add(createWindWithConfidence(nextWindFix));
+            distanceToAt = newDistanceToAt;
+            if (fixIter.hasNext()) {
+                nextWindFix = fixIter.next();
+                newDistanceToAt = Math.abs(at.asMillis() - nextWindFix.getTimePoint().asMillis());
+            } else {
+                nextWindFix = null;
+                newDistanceToAt = distanceToAt;
+            }
+        }
+    }
+    
     private PositionAndTimePointWeigher createPositionAndTimePointWeigher(long millisecondsOverWhichToAverage) {
         return new PositionAndTimePointWeigher(
                 /* halfConfidenceAfterMilliseconds */ millisecondsOverWhichToAverage / 2,
