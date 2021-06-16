@@ -233,12 +233,21 @@ public class TimeSlider extends SliderBar {
             this.minValue = minValue;
         }  
     }
-    
+
     @Override
     public boolean setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
         final boolean result;
         if (!isZoomed) {
-            result = super.setMinAndMaxValue(minValue, maxValue, fireEvent);
+            // Inhibit shrinking of the slider ends if not zoomed in
+            Double minLimited = minValue;
+            if (minValue != null && this.minValue != null) {
+                minLimited = Double.min(minValue, this.minValue);
+            }
+            Double maxLimited = maxValue;
+            if (maxValue != null && this.maxValue != null) {
+                maxLimited = Double.max(maxValue, this.maxValue);
+            }
+            result = super.setMinAndMaxValue(minLimited, maxLimited, fireEvent);
         } else {
             boolean minChanged = !Util.equalsWithNull(this.minValue, minValue);
             this.minValue = minValue;
@@ -248,7 +257,7 @@ public class TimeSlider extends SliderBar {
         }
         return result;
     }
-    
+
     @Override
     protected void onMinMaxValueChanged(boolean fireEvent) {
         calculateTicks();
