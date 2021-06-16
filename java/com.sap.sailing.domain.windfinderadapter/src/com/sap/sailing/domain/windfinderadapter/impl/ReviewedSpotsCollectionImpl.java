@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -20,6 +21,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.windfinder.ReviewedSpotsCollection;
 import com.sap.sailing.domain.windfinder.Spot;
+import com.sap.sse.common.util.BackoffTracker;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -42,18 +44,17 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
      * map initialized with the result of calling {@link #loadSpots()}.
      */
     private Future<ConcurrentMap<String, Spot>> spotsByIdCache;
+
+    private BackoffTracker backoffTracker;
     
     public ReviewedSpotsCollectionImpl(String id) {
         this.id = id;
         this.parser = new WindFinderReportParser();
-        this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(()->{
+        this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(() -> {
+            backoffTracker = new BackoffTracker(TimeUnit.SECONDS.toMillis(5), 2);
             final ConcurrentMap<String, Spot> result = new ConcurrentHashMap<>();
-            try {
-                for (final Spot spot : loadSpots()) {
-                    result.put(spot.getId(), spot);
-                }
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Problem loading spots for spot collection "+id, e);
+            for (final Spot spot : loadSpots()) {
+                result.put(spot.getId(), spot);
             }
             return result;
         }, /* delay */ 0, TimeUnit.MILLISECONDS);
@@ -103,19 +104,22 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
         return result;
     }
     
-    private Iterable<Spot> loadSpots() throws IOException, ParseException, MalformedURLException {
-        final Iterable<Spot> result;
-        final InputStreamReader in = new InputStreamReader(
-                            (InputStream) HttpUrlConnectionHelper.redirectConnection(
-                                    new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS+"/"+getId()+SPOT_LIST_DOCUMENT_SUFFIX))
-                            .getContent());
-        try {
-            JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
-            result = parser.parseSpots(spotsAsJson, this);
-            return result;
-        } finally {
-            in.close();
+    private Iterable<Spot> loadSpots() {
+        Iterable<Spot> result = Collections.emptySet();
+        if (!backoffTracker.backOff()) {
+            try (InputStreamReader in = new InputStreamReader((InputStream) HttpUrlConnectionHelper
+                    .redirectConnection(
+                            new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS + "/" + getId() + SPOT_LIST_DOCUMENT_SUFFIX))
+                    .getContent())) {
+                JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
+                result = parser.parseSpots(spotsAsJson, this);
+                backoffTracker.clear();
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Problem loading spots for spot collection " + id, e);
+                backoffTracker.logFailure();
+            }
         }
+        return result;
     }
 
     @Override
