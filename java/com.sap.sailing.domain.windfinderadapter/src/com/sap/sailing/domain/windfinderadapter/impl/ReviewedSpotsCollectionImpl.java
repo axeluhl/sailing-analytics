@@ -21,6 +21,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.windfinder.ReviewedSpotsCollection;
 import com.sap.sailing.domain.windfinder.Spot;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.util.BackoffTracker;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -51,7 +52,7 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
         this.id = id;
         this.parser = new WindFinderReportParser();
         this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(() -> {
-            backoffTracker = new BackoffTracker(TimeUnit.SECONDS.toMillis(5), 2);
+            backoffTracker = new BackoffTracker(Duration.ONE_SECOND.times(5), /* multiplier for each additional failure */ 2);
             final ConcurrentMap<String, Spot> result = new ConcurrentHashMap<>();
             for (final Spot spot : loadSpots()) {
                 result.put(spot.getId(), spot);
