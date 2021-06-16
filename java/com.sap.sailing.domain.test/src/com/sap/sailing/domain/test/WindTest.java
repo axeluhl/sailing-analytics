@@ -370,7 +370,7 @@ public class WindTest {
     @Test
     public void testWindAveragingBasedOnPosition() {
         Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
-        /* halfConfidenceAfterMilliseconds */10000l, new MeterDistance(1000));
+        /* standard deviation */ Duration.ONE_SECOND.times(10), new MeterDistance(1000));
         ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
                 .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         TimePoint now = MillisecondsTimePoint.now();
