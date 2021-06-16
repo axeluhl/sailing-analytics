@@ -92,7 +92,7 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
     @Override
     public Iterable<Spot> getSpots(boolean cached) throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
         final Iterable<Spot> result;
-        if (cached) {
+        if (cached && !spotsByIdCache.get().isEmpty()) {
             result = new HashSet<>(spotsByIdCache.get().values());
         } else {
             result = loadSpots();
