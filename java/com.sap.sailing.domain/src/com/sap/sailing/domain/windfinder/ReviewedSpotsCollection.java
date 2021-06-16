@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.util.BackoffTracker;
 
 /**
  * A set of {@link Spot}s that WindFinder has reviewed and selected for a dedicated request for
@@ -25,9 +26,11 @@ public interface ReviewedSpotsCollection extends WithID {
     
     /**
      * @param cached
-     *            if {@code true}, only those spots collections are returned that this factory has previously obtained;
-     *            this is useful for a very fast lookup but does not guarantee that all spots collections added recently
-     *            will be considered
+     *            if {@code true}, only those spots collections are returned that this factory has previously obtained,
+     *            unless all previous calls terminated abnormally with an exception in which case another attempt to
+     *            obtain the spots will be made if not within the grace period (see also {@link BackoffTracker}); this
+     *            is useful for a very fast lookup but does not guarantee that all spots collections added recently will
+     *            be considered.
      */
     Iterable<Spot> getSpots(boolean cached) throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException;
 }
