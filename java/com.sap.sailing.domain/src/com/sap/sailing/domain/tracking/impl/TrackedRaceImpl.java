@@ -2551,7 +2551,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // if bearings was set to null this indicates there was an exception; no need for further calculations,
                 // return null
                 if (bearings != null && leg != null) {
-                    TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
+                    TrackedLeg trackedLeg = leg.getTrackedLeg();
                     LegType legType;
                     try {
                         legType = legTypesCache.get(trackedLeg);
