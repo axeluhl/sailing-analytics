@@ -170,6 +170,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
@@ -500,6 +501,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private int zoomingAnimationsInProgress = 0;
     private final FloatingSharingButtonsResources floatingSharingButtonsResources;
+    private final UserService userService;
+    private final SubscriptionService<?, ?> subscriptionService;
 
     static class MultiHashSet<T> {
         private HashMap<T, List<T>> map = new HashMap<>();
@@ -567,28 +570,31 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
-            RaceMapSettings raceMapSettings,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter,
-            Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
+            RaceMapSettings raceMapSettings, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
+            RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
-            boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider, UserService userService) {
+            boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider, UserService userService,
+            SubscriptionService<?, ?> subscriptionService) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
                 showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "",
-                /* leaderboardGroupId */ null, userService);
+                /* leaderboardGroupId */ null, userService, subscriptionService);
     }
-    
+
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
             RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
             boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider, String leaderboardName,
-            String leaderboardGroupName, UUID leaderboardGroupId, UserService userService) {
+            String leaderboardGroupName, UUID leaderboardGroupId, UserService userService,
+            SubscriptionService<?, ?> subscriptionService) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
                 showHeaderPanel, quickRanksDTOProvider, visible -> {
-                }, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null, userService);
+                }, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null, userService,
+                subscriptionService);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -598,9 +604,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
             boolean showHeaderPanel, QuickFlagDataProvider quickFlagDataProvider,
             Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName,
-            UUID leaderboardGroupId, Runnable shareLinkAction, UserService userService) {
+            UUID leaderboardGroupId, Runnable shareLinkAction, UserService userService, SubscriptionService<?,?> subscriptionService) {
         super(parent, context);
         this.shareLinkAction = shareLinkAction;
+        this.userService = userService;
+        this.subscriptionService = subscriptionService;
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
         this.quickFlagDataProvider = quickFlagDataProvider;
@@ -2895,7 +2903,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent(RaceMapSettings settings) {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar,
+                userService, subscriptionService);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class CombinedWindPanel extends FlowPanel {
                         .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build();
                 boolean hasPermission = userService.hasPermission(viewStreamletsPermission, null);
                 RaceMapSettings oldRaceMapSettings = map.getSettings();
-                // when off, turn on; when on and no color, turn on color; when on with color, turn off
+                // when off, turn on; when on and no color, turn on color; when on with color, turn off; Only clickable, if permissions granted
                 final boolean newShowStreamletsOverlaySetting = (oldRaceMapSettings.isShowWindStreamletOverlay() ?
                         oldRaceMapSettings.isShowWindStreamletColors() ? false : true : true) && hasPermission;
                 final boolean newShowWindStreamletColors = (oldRaceMapSettings.isShowWindStreamletOverlay() ? !oldRaceMapSettings.isShowWindStreamletColors() :

@@ -19,6 +19,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.home.shared.partials.premium.SailingPremiumCheckBox;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
@@ -30,6 +32,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 
 /**
  * The view responsible for manipulating an instance of RaceMapSettings, is handled by the RaceMapLifecycle
@@ -44,8 +51,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox zoomOnlyToSelectedCompetitorsCheckBox;
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
-    private CheckBox showWindStreamletOverlayCheckbox;
-    private CheckBox showWindStreamletColorsCheckbox;
+    private PremiumCheckBox showWindStreamletOverlayCheckbox;
+    private PremiumCheckBox showWindStreamletColorsCheckbox;
     private CheckBox showSatelliteLayerCheckbox;
     private CheckBox windUpCheckbox;
     private CheckBox showSimulationOverlayCheckbox;
@@ -56,19 +63,23 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private IntegerBox hoverlineStrokeWeight;
     private DoubleBox startCountDownFontSizeScalingBox;
     private CheckBox maneuverLossVisualizationCheckBox;
-    
     private boolean isSimulationEnabled;
-    
     private final StringMessages stringMessages;
     private final RaceMapSettings initialSettings;
-
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
     private CheckBox showEstimatedDuration;
+    private final OwnershipDTO raceOwnership;
+    private final AccessControlListDTO raceACL;
+    private final UserService userService;
     
-    public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean isSimulationEnabled) {
+    public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages,
+            boolean isSimulationEnabled, OwnershipDTO raceOwnership, AccessControlListDTO raceACL, UserService userService) {
         this.isSimulationEnabled = isSimulationEnabled;
         this.stringMessages = stringMessages;
         initialSettings = settings;
+        this.raceOwnership = raceOwnership;
+        this.raceACL = raceACL;
+        this.userService = userService;
     }
 
     @Override
@@ -90,21 +101,24 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         windUpCheckbox.ensureDebugId("windUpCheckBox");
         vp.add(windUpCheckbox);
 
-        showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
+        final WildcardPermission viewStreamletsPermission = WildcardPermission.builder()
+                .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build();
+        showWindStreamletOverlayCheckbox = new SailingPremiumCheckBox(stringMessages.showWindStreamletOverlay(),
+                userService, viewStreamletsPermission, raceOwnership, raceACL);
+        dialog.ensureHasValueIsValidated(showWindStreamletOverlayCheckbox.getCheckBox());
+        dialog.ensureFocusWidgetIsLinkedToKeyStrokes(showWindStreamletOverlayCheckbox.getFocusWidget());
         showWindStreamletOverlayCheckbox.ensureDebugId("showWindStreamletOverlayCheckBox");
-        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
+        showWindStreamletOverlayCheckbox.setValueifUserHasPermission(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
-        
-        showWindStreamletColorsCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletColors());
-        showWindStreamletColorsCheckbox.setEnabled(initialSettings.isShowWindStreamletOverlay());
-        showWindStreamletColorsCheckbox.setValue(initialSettings.isShowWindStreamletColors());
+        showWindStreamletColorsCheckbox = new SailingPremiumCheckBox(stringMessages.showWindStreamletOverlay(),
+                userService, viewStreamletsPermission, raceOwnership, raceACL);
+        showWindStreamletColorsCheckbox.setValueifUserHasPermission(initialSettings.isShowWindStreamletColors());
         showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckBoxIntended");
         vp.add(showWindStreamletColorsCheckbox);
-
-        showWindStreamletOverlayCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        showWindStreamletOverlayCheckbox.getCheckBox().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                showWindStreamletColorsCheckbox.setEnabled(showWindStreamletOverlayCheckbox.getValue());
+                showWindStreamletColorsCheckbox.setEnabledIfUserHasPermission(showWindStreamletOverlayCheckbox.getValue());
             }
         });
         
@@ -367,6 +381,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
 
     @Override
     public FocusWidget getFocusWidget() {
-        return showWindStreamletOverlayCheckbox;
+        return showWindStreamletOverlayCheckbox.getCheckBox();
     }
 }
