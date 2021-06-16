@@ -259,11 +259,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             DummyWind atTimed = new DummyWind(at);
             Util.Pair<Position, TimePoint> relativeTo = new Util.Pair<Position, TimePoint>(p, at);
             // pick one left if possible and extend to half averaging interval length
-            NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
+            NavigableSet<Wind> beforeSet = getInternalFixesLimitedHeadSet(atTimed);
             final Iterator<Wind> beforeIter = beforeSet.descendingIterator();
             collectFixesInOneDirection(beforeIter, windFixesToAverage);
             // pick one right if possible and extend to half averaging interval length
-            NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */true);
+            NavigableSet<Wind> afterSet = getInternalFixesLimitedTailSet(atTimed);
             final Iterator<Wind> afterIter = afterSet.iterator();
             collectFixesInOneDirection(afterIter, windFixesToAverage);
             if (windFixesToAverage.isEmpty()) {
@@ -275,6 +275,14 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         } finally {
             unlockAfterRead();
         }
+    }
+
+    protected NavigableSet<Wind> getInternalFixesLimitedHeadSet(Wind endingAt) {
+        return getInternalFixes().headSet(endingAt, /* inclusive */false);
+    }
+
+    protected NavigableSet<Wind> getInternalFixesLimitedTailSet(Wind startingAt) {
+        return getInternalFixes().tailSet(startingAt, /* inclusive */true);
     }
 
     private void collectFixesInOneDirection(final Iterator<Wind> fixIter, Collection<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage) {

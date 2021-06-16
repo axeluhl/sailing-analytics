@@ -796,6 +796,24 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
 
     }
+    
+    /**
+     * Limits the head set to a length of 2*{@link #getMillisecondsOverWhichToAverageWind()} to avoid
+     * an expensive search for valid estimation fixes in a huge or maybe even open-ended time range.
+     */
+    protected NavigableSet<Wind> getInternalFixesLimitedHeadSet(Wind endingAt) {
+        final Wind startingAt = new DummyWind(endingAt.getTimePoint().minus(2*getMillisecondsOverWhichToAverageWind()));
+        return getInternalFixes().subSet(startingAt, /* inclusive */ true, endingAt, /* inclusive */ false);
+    }
+
+    /**
+     * Limits the tail set to a length of 2*{@link #getMillisecondsOverWhichToAverageWind()} to avoid
+     * an expensive search for valid estimation fixes in a huge or maybe even open-ended time range.
+     */
+    protected NavigableSet<Wind> getInternalFixesLimitedTailSet(Wind startingAt) {
+        final Wind endingAt = new DummyWind(startingAt.getTimePoint().plus(2*getMillisecondsOverWhichToAverageWind()));
+        return getInternalFixes().subSet(startingAt, /* inclusive */ true, endingAt, /* inclusive */ true);
+    }
 
     /**
      * Forwards the information about the wind fix received to the {@link #listener} which will then adjust this
