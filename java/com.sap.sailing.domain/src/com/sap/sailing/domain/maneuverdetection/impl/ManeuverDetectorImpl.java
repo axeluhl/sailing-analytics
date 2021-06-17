@@ -363,12 +363,12 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                                 douglasPeuckerFixesGroup.get(douglasPeuckerFixesGroup.size() - 1).getTimePoint()
                                         .asMillis() + durationForDouglasPeuckerExtensionForMainCurveAnalysisInMillis),
                         latestManeuverEnd));
-
         ManeuverMainCurveDetailsWithBearingSteps maneuverMainCurveDetails = computeManeuverMainCurveDetails(
                 earliestTimePointBeforeManeuver, latestTimePointAfterManeuver, maneuverDirection);
         if (maneuverMainCurveDetails == null) {
             return null;
         }
+        // TODO wouldn't this have to be called maneuverStableCourseAndSpeedBoundaries, also the method? The variable is passed to the parameter maneuverCurveWithStableSpeedAndCourseBoundaries of the CompleteManeuverCurveImpl constructor...
         ManeuverCurveBoundaries maneuverUnstableCourseAndSpeedBoundaries = computeManeuverUnstableCourseAndSpeedBoundaries(
                 maneuverMainCurveDetails, earliestManeuverStart, latestManeuverEnd);
         MarkPassing markPassing = getMarkPassingIfPresent(maneuverMainCurveDetails);
@@ -1066,7 +1066,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         ManeuverCurveBoundaryExtension stableBearingExtension = findStableBearingWithMaxAbsCourseChangeSpeed(
                 stepsToAnalyze, false, MAX_TURNING_RATE_IN_DEG_PER_SECOND_FOR_STABLE_COURSE_ANALYSIS);
         ManeuverCurveBoundaryExtension mergedExtension = extendManeuverCurveBoundaryExtension(maneuverEnd, stableBearingExtension);
-        if(!isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, mergedExtension)) {
+        if (!isCourseChangeLimitExceededForCurveExtension(maneuverMainCurveDetails, mergedExtension)) {
             maneuverEnd = mergedExtension;
         }
         return maneuverEnd != null
@@ -1336,8 +1336,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             highestSpeed = bestBoundariesBeforeReset.getHighestSpeed();
         }
         if (refinedTimePointBeforeManeuver == null) {
-            // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() ==
-            // 0
+            // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() == 0
             return null;
         }
         if (refinedSpeedWithBearingAfterManeuver == null) {
