@@ -51,8 +51,8 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
     public ReviewedSpotsCollectionImpl(String id) {
         this.id = id;
         this.parser = new WindFinderReportParser();
+        this.backoffTracker = new BackoffTracker(Duration.ONE_SECOND.times(5), /* multiplier for each additional failure */ 2);
         this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(() -> {
-            backoffTracker = new BackoffTracker(Duration.ONE_SECOND.times(5), /* multiplier for each additional failure */ 2);
             final ConcurrentMap<String, Spot> result = new ConcurrentHashMap<>();
             for (final Spot spot : loadSpots()) {
                 result.put(spot.getId(), spot);
