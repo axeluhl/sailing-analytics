@@ -368,7 +368,6 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         if (maneuverMainCurveDetails == null) {
             return null;
         }
-        // TODO wouldn't this have to be called maneuverStableCourseAndSpeedBoundaries, also the method? The variable is passed to the parameter maneuverCurveWithStableSpeedAndCourseBoundaries of the CompleteManeuverCurveImpl constructor...
         ManeuverCurveBoundaries maneuverUnstableCourseAndSpeedBoundaries = computeManeuverUnstableCourseAndSpeedBoundaries(
                 maneuverMainCurveDetails, earliestManeuverStart, latestManeuverEnd);
         MarkPassing markPassing = getMarkPassingIfPresent(maneuverMainCurveDetails);
