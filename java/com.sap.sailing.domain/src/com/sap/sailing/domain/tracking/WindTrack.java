@@ -17,7 +17,7 @@ public interface WindTrack extends DynamicTrack<Wind> {
      * The following is used as a "standard deviation" in a Gaussian normal distribution; in order
      * to still get positive confidences, a rather large duration of 30min is chosen here.
      */
-    public static final Duration WIND_HALF_CONFIDENCE_DURATION = Duration.ONE_MINUTE.times(30);
+    public static final Duration WIND_HALF_CONFIDENCE_DURATION = Duration.ONE_SECOND.times(5);
 
     /**
      * Estimates a wind force and direction based on tracked wind data.<p>

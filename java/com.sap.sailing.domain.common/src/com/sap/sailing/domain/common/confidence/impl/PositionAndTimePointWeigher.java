@@ -27,8 +27,8 @@ public class PositionAndTimePointWeigher implements Weigher<Util.Pair<Position, 
     private final boolean usePosition;
 
     public PositionAndTimePointWeigher(Duration halfConfidenceAfter, Distance halfConfidenceDistance) {
-        timeWeigher = ConfidenceFactory.INSTANCE.createStandardDistributionTimeDifferenceWeigher(
-                /* use as standard deviation */ halfConfidenceAfter);
+        timeWeigher = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(
+                /* use as standard deviation */ halfConfidenceAfter.asMillis());
         distanceWeigher = ConfidenceFactory.INSTANCE.createHyperbolicDistanceWeigher(halfConfidenceDistance);
         this.usePosition = Boolean.valueOf(System.getProperty(USE_POSITION_SYSTEM_PROPERTY_NAME, "true"));
     }
