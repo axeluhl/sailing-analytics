@@ -138,11 +138,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
             seriesDialog.deleteRace("D3");
             seriesDialog.pressOk(true, false);
-            try {
-                Thread.sleep(2); // wait for the regatta details to have been updated with the new series information
-            } catch (InterruptedException e) {
-                logger.log(Level.SEVERE, "Interrupted!", e);
-            }
             final List<String> expectedRaces = Arrays.asList("D1", "D2", "D4", "D5");
             regattaDetails.waitForRacesOfSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME, expectedRaces);
             // Now we can check the result with our expectation
