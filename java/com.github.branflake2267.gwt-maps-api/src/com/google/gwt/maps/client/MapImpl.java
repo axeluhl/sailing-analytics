@@ -201,6 +201,21 @@ public class MapImpl extends MVCObject<MapImpl> {
   }-*/;
 
   /**
+   * get FullscreenControl
+   */
+  public final native void enterFullscreen() /*-{
+    console.log("requestFullscreen: " + this);
+    console.log("requestFullscreen: " + this.panControl);
+    if (this.document.requestFullscreen) {
+        this.document.requestFullscreen();
+      } else if (document.getElementById("hhgghh").webkitRequestFullscreen) { 
+        document.getElementById("hhgghh").webkitRequestFullscreen();
+      } else if (document.getElementById("hhgghh").msRequestFullscreen) { 
+        document.getElementById("hhgghh").msRequestFullscreen();
+      }
+  }-*/;
+
+  /**
    * Changes the center of the map by the given distance in pixels. If the distance is less than both the width and
    * height of the map, the transition will be smoothly animated. Note that the map coordinate system increases from
    * west to east (for x values) and north to south (for y values).

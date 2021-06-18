@@ -37,6 +37,10 @@ public interface RaceMapResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/uploadVideoButton.png")
     @MimeType("image/png")
     DataResource uploadVideoIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/compass.png")
+    @MimeType("image/png")
+    DataResource compass();
 
     @Source("com/sap/sailing/gwt/ui/client/images/minus.svg")
     @MimeType("image/svg+xml")
@@ -49,6 +53,10 @@ public interface RaceMapResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/more.svg")
     @MimeType("image/svg+xml")
     DataResource moreIcon();
+
+    @Source("com/sap/sailing/gwt/home/shared/fullscreen.svg")
+    @MimeType("image/svg+xml")
+    DataResource fullScreen();
     
     @Source("RaceMap.css")
     RaceMapStyle raceMapStyle();

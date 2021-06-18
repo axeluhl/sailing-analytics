@@ -339,6 +339,10 @@ public class MapWidget extends MVCObjectWidget<MapImpl> {
   public void setZoom(int zoom) {
     impl.setZoom(zoom);
   };
+  
+  public void enterFullscreen() {
+    impl.enterFullscreen();
+  }
 
   /**
    * TODO sets Additional controls to attach to the map. To add a control to the map, add the control's

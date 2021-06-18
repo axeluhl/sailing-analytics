@@ -22,6 +22,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     
     private final RaceMapImageManager raceMapResources;
     private final Label textLabel;
+    private final RaceMap map;
 
     private Canvas canvas;
     
@@ -34,6 +35,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
         this.raceMapStyle = raceMapStyle;
+        this.map = map;
         addStyleName(raceMapStyle.raceMapIndicatorPanel());
         addStyleName(raceMapStyle.trueNorthIndicatorPanel());
         transformer = raceMapResources.getTrueNorthIndicatorIconTransformer();
@@ -43,25 +45,29 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         canvas.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                RaceMapSettings oldRaceMapSettings = map.getSettings();
-                boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
-                
-                final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
-                        oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
-                        oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,
-                        oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
-                        oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
-                        oldRaceMapSettings.isShowWindStreamletOverlay(), oldRaceMapSettings.isShowSimulationOverlay(),
-                        oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
-                        oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
-                        oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
-                        oldRaceMapSettings.isShowSatelliteLayer());
-                map.updateSettings(newRaceMapSettings);
+                toggle();
             }
         });
         textLabel = new Label("");
         textLabel.addStyleName(this.raceMapStyle.raceMapIndicatorPanelTextLabel());
         add(textLabel);
+    }
+    
+    public void toggle() {
+        RaceMapSettings oldRaceMapSettings = map.getSettings();
+        boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
+        
+        final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
+                oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
+                oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,
+                oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
+                oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
+                oldRaceMapSettings.isShowWindStreamletOverlay(), oldRaceMapSettings.isShowSimulationOverlay(),
+                oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
+                oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
+                oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
+                oldRaceMapSettings.isShowSatelliteLayer());
+        map.updateSettings(newRaceMapSettings);
     }
 
     protected void redraw() {

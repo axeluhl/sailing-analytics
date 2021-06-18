@@ -127,14 +127,14 @@ body {
     margin-bottom: 5px;
 }
 
-.moreOptionsButton {
+.fullScreenButton {
     display: inline-block;
     background-position: center center;
     background-repeat: no-repeat;
     border-radius: 100%;
     border-width: thin;
     border-style: solid;
-    background-color: #efaa00;
+    background-color: rgb(0, 143, 204);
     margin-right: 10px;
     margin-bottom: 10px;
     z-index: 1;
@@ -142,12 +142,87 @@ body {
     width: 28px;
     height: 28px;
     cursor: pointer;
+    background-image: resourceUrl("fullScreen");
+    background-size: 74%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.trueNorthIndicatorButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204);
+    margin-right: 10px;
+    margin-bottom: 10px;
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("trueNorthIndicatorIcon");
+    background-size: 24%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.tagsButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204);
+    margin-right: 10px;
+    margin-bottom: 10px;
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("compass");
+    background-size: 74%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.moreOptionsButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 4px;
+    border: 0px;
+    background-color: rgba(255,255,255,0.2);
+    margin-right: 10px;
+    margin-bottom: 10px;
+    z-index: 1;
+    border-color: white;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
     background-image: resourceUrl("moreIcon");
     background-size: 74%;
     margin-right: 5px;
     margin-left: 5px;
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+.advancedFunctionsPopup {
+    background: rgba(255,255,255,0.75);
+    border-radius: 4px;
+    border: 1px solid #c9caca;
+    margin-top: 5px;
 }
 
 .combinedWindPanel {}
