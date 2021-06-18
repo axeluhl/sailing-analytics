@@ -2416,31 +2416,50 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return estimatedWindWithConfidence == null ? null : estimatedWindWithConfidence.getObject();
     }
 
+    /**
+     * A function that starts with 0.1 as confidence if the number of boats in the smallest cluster is 1; growing
+     * steadily and converging towards 1.0 as the number grows towards positive infinity (or {@link Integer#MAX_VALUE}
+     * to be more precise). The derivative at {@code numberOfBoatsInSmallestCluster==1} is 0.1 (so as if it was doubling
+     * on its way from one to two boats). Modeling this as the function {@code f(n) := 1 + b/(n+c)} we get a solution
+     * for b and c such that {@code c=8} and {@code b = -0.9-0.9*c = -0.9-7.2 = -8.1} and hence
+     * 
+     * <pre>
+     *     f(n) := 1 - 8.1/(n+8)
+     * </pre>
+     * 
+     * @param numberOfBoatsInSmallestCluster
+     *            must not be less than 1
+     */
+    private double getConfidenceMultiplierForClusterSize(int numberOfBoatsInSmallestCluster) {
+        return 1.0 - 8.1/(8.0 + numberOfBoatsInSmallestCluster);
+    }
+
     @Override
     public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint) {
-        DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow = new DummyMarkPassingWithTimePointOnly(timePoint);
-        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+        final DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow = new DummyMarkPassingWithTimePointOnly(timePoint);
+        final Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
         // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 getMillisecondsOverWhichToAverageSpeed(), /* minimum confidence */0.0000000001);
-        Map<LegType, Pair<BearingWithConfidenceCluster<TimePoint>, ScalablePosition>> bearings = clusterBearingsByLegType(
+        final Map<LegType, Pair<BearingWithConfidenceCluster<TimePoint>, ScalablePosition>> bearings = clusterBearingsByLegType(
                 timePoint, dummyMarkPassingForNow, weigher);
         // use the minimum confidence of the four "quadrants" as the result's confidence
         BearingWithConfidenceImpl<TimePoint> reversedUpwindAverage = null;
-        int upwindNumberOfRelevantBoats = 0;
         double confidence = 0;
         BearingWithConfidence<TimePoint> resultBearing = null;
         ScalablePosition scaledPosition = null;
         int numberOfFixesConsideredForScaledPosition = 0;
-        Set<WindSource> estimationExcluded = new HashSet<>();
+        final Set<WindSource> estimationExcluded = new HashSet<>();
         estimationExcluded.addAll(getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         estimationExcluded.addAll(getWindSources(WindSourceType.COURSE_BASED));
         if (bearings != null) {
+            // TODO factor out the commonalities between UPWIND and DOWNWIND to reduce code duplication
+            int upwindNumberOfRelevantBoats = 0;
             int numberOfFixesUpwind = bearings.get(LegType.UPWIND).getA().size();
             if (numberOfFixesUpwind > 0) {
-                ScalablePosition upwindPosition = bearings.get(LegType.UPWIND).getB();
-                Pair<Double, Double> minimumAngleBetweenDifferentTacksUpwindWithConfidence = getMinimumAngleBetweenDifferentTacksUpwind(getWind(
+                final ScalablePosition upwindPosition = bearings.get(LegType.UPWIND).getB();
+                final Pair<Double, Double> minimumAngleBetweenDifferentTacksUpwindWithConfidence = getMinimumAngleBetweenDifferentTacksUpwind(getWind(
                         upwindPosition.divide(numberOfFixesUpwind), timePoint, estimationExcluded));
-                BearingWithConfidenceCluster<TimePoint>[] bearingClustersUpwind = bearings
+                final BearingWithConfidenceCluster<TimePoint>[] bearingClustersUpwind = bearings
                         .get(LegType.UPWIND)
                         .getA()
                         .splitInTwo(
@@ -2452,7 +2471,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     upwindNumberOfRelevantBoats = Math.min(bearingClustersUpwind[0].size(),
                             bearingClustersUpwind[1].size());
                     confidence = Math.min(average0.getConfidence(), average1.getConfidence())
-                            * getRace().getBoatClass().getUpwindWindEstimationConfidence(upwindNumberOfRelevantBoats)
+                            * getRace().getBoatClass().getUpwindWindEstimationConfidence()
+                            * getConfidenceMultiplierForClusterSize(upwindNumberOfRelevantBoats)
                             * minimumAngleBetweenDifferentTacksUpwindWithConfidence.getB();
                     reversedUpwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject()
                             .middle(average1.getObject()).reverse(), confidence, timePoint);
@@ -2479,8 +2499,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     downwindNumberOfRelevantBoats = Math.min(bearingClustersDownwind[0].size(),
                             bearingClustersDownwind[1].size());
                     confidence = Math.min(average0.getConfidence(), average1.getConfidence())
-                            * getRace().getBoatClass().getDownwindWindEstimationConfidence(
-                                    downwindNumberOfRelevantBoats)
+                            * getRace().getBoatClass().getDownwindWindEstimationConfidence()
+                            * getConfidenceMultiplierForClusterSize(downwindNumberOfRelevantBoats)
                             * minimumAngleBetweenDifferentTacksDownwindWithConfidence.getB();
                     downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(
                             average1.getObject()), confidence, timePoint);

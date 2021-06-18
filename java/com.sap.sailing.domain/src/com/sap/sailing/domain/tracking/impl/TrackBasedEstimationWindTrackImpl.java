@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +37,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractTimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -294,7 +296,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
     }
     
     @Override
-    protected VirtualWindFixesAsNavigableSet getInternalRawFixes() {
+    protected EstimatedWindFixesAsNavigableSet getInternalRawFixes() {
         return virtualInternalRawFixes;
     }
 
@@ -797,22 +799,91 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
 
     }
     
+    private abstract class EstimationIterator implements Iterator<WindWithConfidence<Pair<Position, TimePoint>>> {
+        protected TimePoint t;
+        private WindWithConfidence<TimePoint> nextEstimatedWindWithTimeBasedConfidence;
+        
+        EstimationIterator(TimePoint t) {
+            this.t = t;
+            nextEstimatedWindWithTimeBasedConfidence = advance();
+        }
+        
+        protected abstract WindWithConfidence<TimePoint> advance();
+
+        @Override
+        public boolean hasNext() {
+            return nextEstimatedWindWithTimeBasedConfidence != null;
+        }
+        
+        protected WindWithConfidence<TimePoint> tryToGetNext() {
+            return getEstimatedWindDirection(t);
+        }
+        
+        @Override
+        public WindWithConfidence<Pair<Position, TimePoint>> next() {
+            if (nextEstimatedWindWithTimeBasedConfidence == null) {
+                throw new NoSuchElementException();
+            }
+            final WindWithConfidence<Pair<Position, TimePoint>> result = createWindWithTimeAndPositionBasedConfidence(nextEstimatedWindWithTimeBasedConfidence);
+            nextEstimatedWindWithTimeBasedConfidence = advance();
+            return result;
+        }
+    }
+    
     /**
      * Limits the head set to a length of 2*{@link #getMillisecondsOverWhichToAverageWind()} to avoid
      * an expensive search for valid estimation fixes in a huge or maybe even open-ended time range.
      */
-    protected NavigableSet<Wind> getInternalFixesLimitedHeadSet(Wind endingAt) {
-        final Wind startingAt = new DummyWind(endingAt.getTimePoint().minus(2*getMillisecondsOverWhichToAverageWind()));
-        return getInternalFixes().subSet(startingAt, /* inclusive */ true, endingAt, /* inclusive */ false);
+    @Override
+    protected Iterator<WindWithConfidence<Pair<Position, TimePoint>>> getInternalFixesLimitedHeadSetDescendingIterator(TimePoint endingAt) {
+        final TimePoint startingAt = endingAt.minus(2*getMillisecondsOverWhichToAverageWind());
+        return new EstimationIterator(getInternalRawFixes().floorToResolution(endingAt)) {
+            @Override
+            protected WindWithConfidence<TimePoint> advance() {
+                WindWithConfidence<TimePoint> next;
+                if (t.before(startingAt)) {
+                    next = null;
+                } else {
+                    do {
+                        next = tryToGetNext();
+                        t = getInternalRawFixes().lowerToResolution(t);
+                    } while (next == null && !t.before(startingAt));
+                }
+                return next;
+            }
+        };
     }
 
     /**
      * Limits the tail set to a length of 2*{@link #getMillisecondsOverWhichToAverageWind()} to avoid
      * an expensive search for valid estimation fixes in a huge or maybe even open-ended time range.
      */
-    protected NavigableSet<Wind> getInternalFixesLimitedTailSet(Wind startingAt) {
-        final Wind endingAt = new DummyWind(startingAt.getTimePoint().plus(2*getMillisecondsOverWhichToAverageWind()));
-        return getInternalFixes().subSet(startingAt, /* inclusive */ true, endingAt, /* inclusive */ true);
+    @Override
+    protected Iterator<WindWithConfidence<Pair<Position, TimePoint>>> getInternalFixesLimitedTailSetIterator(TimePoint startingAt) {
+        final TimePoint endingAt = startingAt.plus(2*getMillisecondsOverWhichToAverageWind());
+        return new EstimationIterator(getInternalRawFixes().ceilingToResolution(startingAt)) {
+            @Override
+            protected WindWithConfidence<TimePoint> advance() {
+                WindWithConfidence<TimePoint> next;
+                if (t.after(endingAt)) {
+                    next = null;
+                } else {
+                    do {
+                        next = tryToGetNext();
+                        t = getInternalRawFixes().higherToResolution(t);
+                    } while (next == null && !t.after(endingAt));
+                }
+                return next;
+            }
+        };
+    }
+
+    protected WindWithConfidenceImpl<Pair<Position, TimePoint>> createWindWithTimeAndPositionBasedConfidence(
+            final WindWithConfidence<TimePoint> estimatedWindWithTimeBasedConfidence) {
+        return new WindWithConfidenceImpl<Pair<Position, TimePoint>>(
+                estimatedWindWithTimeBasedConfidence.getObject(), estimatedWindWithTimeBasedConfidence.getConfidence(),
+                new Pair<>(estimatedWindWithTimeBasedConfidence.getObject().getPosition(), estimatedWindWithTimeBasedConfidence.getObject().getTimePoint()),
+                isUseSpeed());
     }
 
     /**
