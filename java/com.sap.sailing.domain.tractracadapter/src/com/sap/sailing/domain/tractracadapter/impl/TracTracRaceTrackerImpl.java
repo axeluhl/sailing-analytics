@@ -357,7 +357,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             reconciler = null;
         }
         racesListener = new IRacesListener() {
-            @Override public void abandonRace(UUID raceId) {
+            @Override public void abandonRace(long timestamp, UUID raceId) {
                 if (raceId.equals(tractracRace.getId())) {
                     try {
                         onStop(/* stopReceiversPreemtively */ false, /* willBeRemoved */ false);
@@ -367,24 +367,25 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                     }
                 }
             }
-            @Override public void addRace(IRace race) {}
-            @Override public void deleteRace(UUID raceId) {}
-            @Override public void reloadRace(UUID raceId) {
+            @Override public void addRace(long timestamp, IRace race) {}
+            @Override public void deleteRace(long timestamp, UUID raceId) {}
+            @Override public void reloadRace(long timestamp, UUID raceId) {
                 if (raceId.equals(tractracRace.getId())) {
                     logger.warning("reloadRace("+raceId+") for race "+tractracRace+
                             " in event "+tractracEvent+" not supported yet. Consider re-loading the race manually");
                 }
             }
-            @Override public void startTracking(UUID raceId) {}
-            @Override public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
+            @Override public void startTracking(long timestamp, UUID raceId) {}
+            @Override public void dataSourceChanged(long timestamp, IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
             @Override
-            public void updateRace(IRace race) {
+            public void updateRace(long timestamp, IRace race) {
                 if (Util.equalsWithNull(race.getId(), TracTracRaceTrackerImpl.this.tractracRace.getId())) {
                     int delayToLiveInMillis = race.getLiveDelay()*1000;
                     if (getRace() != null) {
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
                         if (trackedRace != null) {
                             if (reconciler != null) {
+                                final TimePoint raceUpdateTimestamp = TimePoint.of(timestamp); // TODO bug5581 how to use this consistently, e.g., when reading a race initially or after server re-start?
                                 logger.info("Handling a race status update for race "+race.getName()+" with status "+race.getStatus()+
                                         " and status time "+race.getStatusTime());
                                 // in case a race status change was the reason for this update, reconcile with the race log(s)
@@ -435,7 +436,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         }
         competitorsListener = new IRaceCompetitorListener() {
             @Override
-            public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
+            public void addRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
                 try {
                     trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
                 } catch (Exception e) {
@@ -444,14 +445,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             }
 
             @Override
-            public void updateRaceCompetitor(IRaceCompetitor raceCompetitor) {
+            public void updateRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
                 if (!raceCompetitor.getCompetitor().isNonCompeting()) {
                     TracTracRaceTrackerImpl.this.domainFactory.updateCompetitor(raceCompetitor.getCompetitor(), raceTrackingHandler);
                 }
             }
 
             @Override
-            public void deleteRaceCompetitor(UUID competitorId) {
+            public void deleteRaceCompetitor(long timestamp, UUID competitorId) {
                 try {
                     trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
                 } catch (Exception e) {
@@ -460,7 +461,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             }
 
             @Override
-            public void removeOffsetPositions(UUID competitorId, int offset) {
+            public void removeOffsetPositions(long timestamp, UUID competitorId, int offset) {
             }
         };
         raceSubscriber.subscribeRaceCompetitor(competitorsListener);

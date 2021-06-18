@@ -11,6 +11,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
@@ -22,17 +23,20 @@ import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
 
 /**
  * Subscribes for changes in an {@link IRaceCompetitor} object, such as the {@link IRaceCompetitor#getStatus() status}
- * or {@link IRaceCompetitor#getOfficialFinishTime() the official finishing time} and compares that with what we
- * have in the {@link RaceLog} {@link TrackedRace#getAttachedRaceLogs() attached} to the {@link TrackedRace} to
- * which this receiver belongs. If a valid {@link CompetitorResult} is found for the respective competitor already
- * in the race log that matches the new state of the {@link IRaceCompetitor}, no action is needed. Otherwise,
- * a {@link CompetitorResult} object will be constructed and added in a {@link RaceLogFinishPositioningConfirmedEvent}
- * to the race log from where it will go into the leaderboard.<p>
+ * or {@link IRaceCompetitor#getOfficialFinishTime() the official finishing time} and compares that with what we have in
+ * the {@link RaceLog} {@link TrackedRace#getAttachedRaceLogs() attached} to the {@link TrackedRace} to which this
+ * receiver belongs. If a valid {@link CompetitorResult} is found for the respective competitor already in the race log
+ * that matches the new state of the {@link IRaceCompetitor}, a time stamp comparison is performed. The second component
+ * of the triple enqueued by this receiver represents the time stamp in milliseconds since the epoch (Unix time) telling
+ * when the event was originally created. If older than what we have in the race log already, we'll ignore the event.
+ * Otherwise, a {@link CompetitorResult} object will be constructed and added in a
+ * {@link RaceLogFinishPositioningConfirmedEvent} to the race log from where it will go into the leaderboard.
+ * <p>
  * 
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, Void, Void>
+public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, Long, Void>
 implements OfficialCompetitorUpdateProvider {
     private static final Logger logger = Logger.getLogger(CompetitorChangeReceiver.class.getName());
     private final IRaceCompetitorListener listener;
@@ -47,26 +51,26 @@ implements OfficialCompetitorUpdateProvider {
         reconciler.setOfficialCompetitorUpdateProvider(this);
         listener = new IRaceCompetitorListener() {
             @Override
-            public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
+            public void addRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
                 // can't handle competitor list changes once the RaceDefinition exists
                 logger.warning("The competitor "+raceCompetitor+" was added to the race "+getTrackedRace(raceCompetitor.getRace())+
                         " but we don't know how to handle this. Ignoring.");
             }
 
             @Override
-            public void updateRaceCompetitor(IRaceCompetitor raceCompetitor) {
-                enqueue(new Triple<>(raceCompetitor, null, null));
+            public void updateRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
+                enqueue(new Triple<>(raceCompetitor, timestamp, null));
             }
 
             @Override
-            public void deleteRaceCompetitor(UUID competitorId) {
+            public void deleteRaceCompetitor(long timestamp, UUID competitorId) {
                 // can't handle competitor list changes once the RaceDefinition exists
                 logger.warning("The competitor with ID "+competitorId+" was removed from a race "+
                         " but we don't know how to handle this. Ignoring.");
             }
 
             @Override
-            public void removeOffsetPositions(UUID competitorId, int offset) {
+            public void removeOffsetPositions(long timestamp, UUID competitorId, int offset) {
                 // not sure what this means
             }
         };
@@ -89,12 +93,14 @@ implements OfficialCompetitorUpdateProvider {
      * inserted into the competitor's bravo fix track.
      */
     @Override
-    protected void handleEvent(Triple<IRaceCompetitor, Void, Void> event) {
+    protected void handleEvent(Triple<IRaceCompetitor, Long, Void> event) {
         final IRace race = event.getA().getRace();
         final DynamicTrackedRace trackedRace = getTrackedRace(race);
         if (trackedRace != null) {
             final IRaceCompetitor raceCompetitor = event.getA();
             if (reconciler != null && raceCompetitor != null) {
+                final TimePoint eventTimestamp = TimePoint.of(event.getB());
+                // TODO bug5581: we can pass the time stamp along here; but what when we read a race for the first time? Which time stamp to apply then?
                 reconciler.reconcileCompetitorStatus(raceCompetitor, trackedRace);
             }
         } else {
