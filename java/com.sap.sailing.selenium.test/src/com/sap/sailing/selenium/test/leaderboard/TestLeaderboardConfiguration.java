@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -31,6 +33,7 @@ import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO.Leaderboard
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
+    private static final Logger logger = Logger.getLogger(TestLeaderboardConfiguration.class.getName());
     private static final String IDM_5O5_2013_JSON_URL =
             "http://traclive.dk/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
     
@@ -135,6 +138,11 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
             seriesDialog.deleteRace("D3");
             seriesDialog.pressOk(true, false);
+            try {
+                Thread.sleep(2); // wait for the regatta details to have been updated with the new series information
+            } catch (InterruptedException e) {
+                logger.log(Level.SEVERE, "Interrupted!", e);
+            }
             final List<String> expectedRaces = Arrays.asList("D1", "D2", "D4", "D5");
             regattaDetails.waitForRacesOfSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME, expectedRaces);
             // Now we can check the result with our expectation
