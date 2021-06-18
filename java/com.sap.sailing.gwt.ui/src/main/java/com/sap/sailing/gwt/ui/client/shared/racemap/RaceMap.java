@@ -1121,11 +1121,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             switch (windSource.getType()) {
             case EXPEDITION:
             case WINDFINDER:
-                // we filter out measured wind sources with very low confidence
-                if (windTrackInfoDTO.minWindConfidence > 0.0001) {
-                    windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource,
-                            windTrackInfoDTO));
-                }
+                windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                 break;
             case COMBINED:
                 showCombinedWindOnMap(windSource, windTrackInfoDTO);
