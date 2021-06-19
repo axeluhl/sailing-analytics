@@ -6,8 +6,6 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -33,7 +31,6 @@ import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO.Leaderboard
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
-    private static final Logger logger = Logger.getLogger(TestLeaderboardConfiguration.class.getName());
     private static final String IDM_5O5_2013_JSON_URL =
             "http://traclive.dk/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
     
