@@ -1519,8 +1519,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (trackedRace != null) {
             TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() == null ? trackedRace
                     .getStartOfRace() : trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
-            TimePoint toTimePoint = to == null ? trackedRace.getEndOfRace() == null ?
-                    MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace() : new MillisecondsTimePoint(to);
+            TimePoint toTimePoint = to == null ?
+                    trackedRace.getEndOfRace() == null ?
+                            trackedRace.getEndOfTracking() == null ?
+                                    MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) :
+                                    trackedRace.getEndOfTracking() :
+                            trackedRace.getEndOfRace() :
+                    new MillisecondsTimePoint(to);
             if (fromTimePoint != null && toTimePoint != null) {
                 int numberOfFixes = Math.min(SailingServiceConstants.MAX_NUMBER_OF_WIND_FIXES_TO_DELIVER_IN_ONE_CALL,
                         (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds));
