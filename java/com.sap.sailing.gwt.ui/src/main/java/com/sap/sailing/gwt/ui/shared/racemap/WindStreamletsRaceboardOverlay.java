@@ -292,26 +292,29 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
 
                     @Override
                     public void onSuccess(WindInfoForRaceDTO result) {
-                        updateAverageLatitudeDeg(result);
-                        // merge the new wind fixes into the existing WindInfoForRaceDTO structure, updating min/max
-                        // confidences
-                        for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
-                            WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource
-                                    .get(e.getKey());
-                            if (windTrackForSource != null) {
-                                final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource
+                        if (result != null) {
+                            updateAverageLatitudeDeg(result);
+                            // merge the new wind fixes into the existing WindInfoForRaceDTO structure, updating min/max
+                            // confidences
+                            for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
+                                WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource
                                         .get(e.getKey());
-                                windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
-                                if (windTrackForSource.windFixes == null) {
-                                    windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
-                                } else {
-                                    windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
-                                }
-                                if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
-                                    windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
-                                }
-                                if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
-                                    windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
+                                if (windTrackForSource != null) {
+                                    final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource
+                                            .get(e.getKey());
+                                    windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
+                                    if (windTrackForSource.windFixes == null) {
+                                        // TODO bug5584: this takes over the List implementation provided in the GWT RPC response; yet, WindInfoForRaceVectorField depends on this being efficiently binarySearch'able and hence it must be at least a RandomAccess
+                                        windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
+                                    } else {
+                                        windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
+                                    }
+                                    if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
+                                        windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
+                                    }
+                                    if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
+                                        windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
+                                    }
                                 }
                             }
                         }
