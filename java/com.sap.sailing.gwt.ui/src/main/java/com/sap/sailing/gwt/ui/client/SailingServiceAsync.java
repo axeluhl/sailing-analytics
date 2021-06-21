@@ -263,8 +263,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getServerConfiguration(AsyncCallback<ServerConfigurationDTO> callback);
 
-    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration, AsyncCallback<Void> callback);
-
     void getRemoteSailingServerReferences(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);

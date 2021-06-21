@@ -793,12 +793,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 map = new MapWidget(mapOptions);
                 map.getElement().setId("googleMapsArea");
                 rootPanel.add(map, 0, 0);
-                if (showHeaderPanel) {
-                    final Image sapLogo = createSAPLogo();
-                    if (ClientConfiguration.getInstance().isBrandingActive()) {
-                        rootPanel.add(sapLogo);
-                    }
-                }
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
                 adjustLeftControlsIndent();
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
@@ -939,6 +933,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 metricOverlay.addToMap();
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
+                    if (ClientConfiguration.getInstance().isBrandingActive()) {
+                        getLeftHeaderPanel().insert(createSAPLogo(), 0);
+                    }
                 }
                 createAdvancedFunctionsButtonGroup(showMapControls);
                 
@@ -1319,11 +1316,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             switch (windSource.getType()) {
             case EXPEDITION:
             case WINDFINDER:
-                // we filter out measured wind sources with very low confidence
-                if (windTrackInfoDTO.minWindConfidence > 0.0001) {
-                    windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource,
-                            windTrackInfoDTO));
-                }
+                windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                 break;
             case COMBINED:
                 showCombinedWindOnMap(windSource, windTrackInfoDTO);
@@ -3457,12 +3450,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Image createSAPLogo() {
         ImageResource sapLogoResource = resources.sapLogoOverlay();
         Image sapLogo = new Image(sapLogoResource);
-        sapLogo.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.open(stringMessages.sapAnalyticsURL(), "_blank", null);
-            }
-        });
+        sapLogo.addClickHandler(event -> Window.open(stringMessages.sapAnalyticsURL(), "_blank", null));
         sapLogo.setStyleName("raceBoard-Logo");
         sapLogo.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "raceBoardSapLogo");
         return sapLogo;

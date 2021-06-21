@@ -12,7 +12,6 @@ import com.sap.sse.common.impl.NamedImpl;
 public class BoatClassImpl extends NamedImpl implements BoatClass {
     private static final long serialVersionUID = 7194912853476256420L;
 
-
     private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND = 60.;
     
     private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND = 15.;
@@ -35,10 +34,9 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     /**
      * Downwind estimations are less confident than upwind because jibing angles vary more.
      */
-    private static final double DOWNWIND_WIND_ESTIMATION_CONFIDENCE = .5;
+    private static final double DOWNWIND_WIND_ESTIMATION_CONFIDENCE = .2;
     
     private final boolean typicallyStartsUpwind;
-    
 
     private final Distance hullLength;
     
@@ -107,25 +105,13 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     }
 
     @Override
-    public double getDownwindWindEstimationConfidence(int numberOfBoatsInSmallestCluster) {
-        // Even for up to a million boats in the smallest cluster, the multiplier is still less than one.
-        // The multiplier is 1/1000000 in case there is only one boat and approaches 1.0 for many boats.
-        return DOWNWIND_WIND_ESTIMATION_CONFIDENCE * getConfidenceMultiplierForClusterSize(numberOfBoatsInSmallestCluster);
+    public double getDownwindWindEstimationConfidence() {
+        return DOWNWIND_WIND_ESTIMATION_CONFIDENCE;
     }
 
     @Override
-    public double getUpwindWindEstimationConfidence(int numberOfBoatsInSmallestCluster) {
-        // Even for up to a million boats in the smallest cluster, the multiplier is still less than one.
-        // The multiplier is 1/1000000 in case there is only one boat and approaches 1.0 for many boats.
-        return UPWIND_WIND_ESTIMATION_CONFIDENCE * getConfidenceMultiplierForClusterSize(numberOfBoatsInSmallestCluster);
-    }
-
-    /**
-     * Even for up to a million boats in the smallest cluster, the multiplier is still less than one.
-     * The multiplier is 1/1000000 in case there is only one boat and approaches 1.0 for many boats.
-     */
-    private double getConfidenceMultiplierForClusterSize(int numberOfBoatsInSmallestCluster) {
-        return 1.0 + 1.0/1000000.0 - 1.0/(double) numberOfBoatsInSmallestCluster;
+    public double getUpwindWindEstimationConfidence() {
+        return UPWIND_WIND_ESTIMATION_CONFIDENCE;
     }
 
     @Override

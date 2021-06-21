@@ -518,9 +518,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Instance getInstanceByPublicIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress) {
-        return getEc2Client(getRegion(region))
-                .describeInstances(b->b.filters(Filter.builder().name("ip-address").values(publicIpAddress).build())).reservations()
-                .iterator().next().instances().iterator().next();
+        try {
+            final InetAddress inetAddress = InetAddress.getByName(publicIpAddress);
+            return getEc2Client(getRegion(region))
+                    .describeInstances(b->b.filters(Filter.builder().name("ip-address").values(inetAddress.getHostAddress()).build())).reservations()
+                    .iterator().next().instances().iterator().next();
+        } catch (UnknownHostException e) {
+            logger.warning("IP address for "+publicIpAddress+" not found");
+            return null;
+        }
     }
     
     @Override
@@ -530,9 +536,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Instance getInstanceByPrivateIpAddress(com.sap.sse.landscape.Region region, String privateIpAddress) {
-        return getEc2Client(getRegion(region))
-                .describeInstances(b->b.filters(Filter.builder().name("private-ip-address").values(privateIpAddress).build())).reservations()
-                .iterator().next().instances().iterator().next();
+        InetAddress inetAddress;
+        try {
+            inetAddress = InetAddress.getByName(privateIpAddress);
+            return getEc2Client(getRegion(region))
+                    .describeInstances(b->b.filters(Filter.builder().name("private-ip-address").values(inetAddress.getHostAddress()).build())).reservations()
+                    .iterator().next().instances().iterator().next();
+        } catch (UnknownHostException e) {
+            logger.warning("IP address for "+privateIpAddress+" not found");
+            return null;
+        }
     }
 
     @Override

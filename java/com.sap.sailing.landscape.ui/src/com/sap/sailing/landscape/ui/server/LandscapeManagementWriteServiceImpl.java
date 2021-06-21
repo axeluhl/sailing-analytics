@@ -930,7 +930,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setPort(replicaSet.getMaster().getPort())
             .setServerName(replicaSet.getServerName())
             .setRelease(release)
-            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(replicationBearerToken)).build());
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
+                    .setMasterHostname(replicaSet.getHostname()) // see bug5571: don't rely on hostname being {server-name}.sapsailing.com but take from load balancer config
+                    .setCredentials(new BearerTokenReplicationCredentials(replicationBearerToken)).build());
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
         replicaHostBuilder
             .setInstanceType(masterInstanceType)

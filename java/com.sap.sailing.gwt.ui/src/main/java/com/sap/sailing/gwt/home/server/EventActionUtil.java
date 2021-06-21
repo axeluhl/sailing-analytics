@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
@@ -35,6 +36,8 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  */
 @GwtIncompatible
 public final class EventActionUtil {
+    private static final Logger logger = Logger.getLogger(EventActionUtil.LeaderboardCallback.class.getName());
+    
     private EventActionUtil() {
     }
     
@@ -125,6 +128,10 @@ public final class EventActionUtil {
     public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultScheduleWithReadPermissions(SailingDispatchContext context,
             UUID eventId, CalculationWithEvent<T> callback, T defaultResult) {
         Event event = context.getRacingEventService().getEvent(eventId);
+        if (event == null) {
+            logger.warning("Event with ID "+eventId+" not found.");
+            return new ResultWithTTL<T>(Duration.FOREVER, defaultResult);
+        }
         context.getSecurityService().checkCurrentUserReadPermission(event);
         EventState eventState = HomeServiceUtil.calculateEventState(event);
         if (eventState == EventState.FINISHED) {

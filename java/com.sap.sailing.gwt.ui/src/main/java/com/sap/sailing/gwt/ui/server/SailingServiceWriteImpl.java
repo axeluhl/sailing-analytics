@@ -153,6 +153,7 @@ import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -274,6 +275,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -342,7 +344,9 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCo
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
+import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.Duration;
@@ -374,7 +378,10 @@ import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -3798,5 +3805,50 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(leaderboardName));
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         return getDeviceMappings(regattaLog);
+    }
+    
+    @Override
+    public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
+        getService().apply(new UpdateServerConfiguration(
+                new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
+        if (serverConfiguration.isSelfService() != null) {
+            final boolean isCurrentlySelfService = isSelfServiceServer();
+            final boolean shouldBeSelfService = serverConfiguration.isSelfService();
+            if (isCurrentlySelfService != shouldBeSelfService) {
+                SecurityUtils.getSubject().checkPermission(getServerInfo().getIdentifier().getStringPermission(DefaultActions.CHANGE_ACL));
+                if (shouldBeSelfService) {
+                    getSecurityService().addToAccessControlList(getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
+                } else {
+                    getSecurityService().removeFromAccessControlList(getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
+                }
+            }
+        }
+        if (serverConfiguration.isPublic() != null) {
+            final RoleDefinition viewerRole = getSecurityService()
+                    .getRoleDefinition(SailingViewerRole.getInstance().getId());
+            final UserGroup serverGroup = getSecurityService().getServerGroup();
+            if (viewerRole != null && serverGroup != null) {
+                final boolean isCurrentlyPublic = Boolean.TRUE.equals(serverGroup.getRoleAssociation(viewerRole));
+                final boolean shouldBePublic = serverConfiguration.isPublic();
+                if (isCurrentlyPublic != shouldBePublic) {
+                    // value changed
+                    if (getSecurityService().hasCurrentUserUpdatePermission(serverGroup)
+                            && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                                    viewerRole, new Ownership(null, serverGroup))) {
+                        if (serverConfiguration.isPublic()) {
+                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, /* forAll */ true);
+                        } else {
+                            getSecurityService().removeRoleDefintionFromUserGroup(serverGroup, viewerRole);
+                        }
+                    } else {
+                        throw new AuthorizationException("No permission to make the server public");
+                    }
+                }
+            } else {
+                throw new IllegalArgumentException(
+                        SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
+            }
+        }
     }
 }

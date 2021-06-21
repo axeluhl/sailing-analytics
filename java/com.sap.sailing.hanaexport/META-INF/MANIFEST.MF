@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hanaexport
+Bundle-SymbolicName: com.sap.sailing.hanaexport
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sailing.hanaexport
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.sap.db.jdbc;bundle-version="2.6.30",
+ com.sap.sailing.domain,
+ com.sap.sailing.server
