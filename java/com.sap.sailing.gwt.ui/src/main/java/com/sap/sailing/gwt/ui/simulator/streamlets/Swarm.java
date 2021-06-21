@@ -346,8 +346,7 @@ public class Swarm implements TimeListener {
                     particle.v = null;
                 }
             } else {
-                // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new
-                // one
+                // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new one
                 particles[idx] = this.recycleOrCreateParticle(particles[idx]);
             }
             if (particles[idx] != null && particles[idx].v != null) {

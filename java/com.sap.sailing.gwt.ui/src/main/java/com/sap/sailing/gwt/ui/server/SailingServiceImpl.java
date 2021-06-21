@@ -1387,7 +1387,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
-                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent FIXME why not pass through onlyUpToNewestEvent here??? */ true, includeCombinedWindForAllLegMiddles);
+                windSourceTypeNames, trackedRace, onlyUpToNewestEvent, includeCombinedWindForAllLegMiddles);
         return result;
     }
 
