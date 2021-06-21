@@ -279,6 +279,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                 }
             }
         }
+        // TODO asking with endOfTime==null may produce a whole lot of fixes!
         GetWindInfoAction getWind = new GetWindInfoAction(sailingService, raceIdentifier, timeOfLastFixOfSource,
                 /* endOfTime */ null, RESOLUTION_IN_MILLIS, windSourceTypeNames, /* onlyUpToNewestEvent */ true);
         asyncActionsExecutor.execute(getWind, LOAD_WIND_STREAMLET_DATA_CATEGORY,

@@ -55,8 +55,8 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends AbstractMane
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(60))), new WindSourceImpl(WindSourceType.WEB));
+        getTrackedRace().recordWind(new WindImpl(/* position */ null, getTrackedRace().getStartOfRace(),
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
         logger.info("Waiting for things to settle in, such as wind updates...");
         Thread.sleep(2000);
         logger.info("...hopefully all is settled now.");

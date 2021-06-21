@@ -233,12 +233,21 @@ public class TimeSlider extends SliderBar {
             this.minValue = minValue;
         }  
     }
-    
+
     @Override
     public boolean setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
         final boolean result;
         if (!isZoomed) {
-            result = super.setMinAndMaxValue(minValue, maxValue, fireEvent);
+            // Inhibit shrinking of the slider ends if not zoomed in
+            Double minLimited = minValue;
+            if (minValue != null && this.minValue != null) {
+                minLimited = Double.min(minValue, this.minValue);
+            }
+            Double maxLimited = maxValue;
+            if (maxValue != null && this.maxValue != null) {
+                maxLimited = Double.max(maxValue, this.maxValue);
+            }
+            result = super.setMinAndMaxValue(minLimited, maxLimited, fireEvent);
         } else {
             boolean minChanged = !Util.equalsWithNull(this.minValue, minValue);
             this.minValue = minValue;
@@ -247,40 +256,6 @@ public class TimeSlider extends SliderBar {
             result = minChanged || maxChanged;
         }
         return result;
-    }
-
-    /**
-     * Updates the minimum and maximum value. Either value will only be updated if it does not shrink the the time
-     * interval on its respective end.
-     * @param minValue {@link Double} new value for minimum
-     * @param maxValue {@link Double} new value for maximum
-     * @param fireEvent fires the onValue change event if {@code true} and at least one value has changed
-     * @return {@code true} if min or max have changed
-     * @see {@link #setMinAndMaxValue(Double, Double, boolean)}
-     */
-    public boolean updateMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
-        boolean changed = false;
-        Double minLimited = minValue;
-        if (minValue != null && this.minValue != null) {
-            minLimited = Double.min(minValue, this.minValue);
-        }
-        if (!Util.equalsWithNull(minLimited, this.minValue)) {
-            this.minValue = minLimited;
-            changed = true;
-        }
-
-        Double maxLimited = maxValue;
-        if (maxValue != null && this.maxValue != null) {
-            maxLimited = Double.max(maxValue, this.maxValue);
-        }
-        if (!Util.equalsWithNull(maxLimited, this.maxValue)) {
-            this.maxValue = maxLimited;
-            changed = true;
-        }
-        if (changed && !isZoomed) { // !isZoomed to replicate behavior of setMinAndMaxValue
-            onMinMaxValueChanged(fireEvent);
-        }
-        return changed;
     }
 
     @Override
