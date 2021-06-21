@@ -77,7 +77,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
                 stringMessages.clickToToggleWindUp();
         canvas.setTitle(title);
         NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-        textLabel.setText(mappedTrueNorthDeg == 0 ? "N" : numberFormat.format(mappedTrueNorthDeg));
+        textLabel.setText(mappedTrueNorthDeg == 0 ? "N" : numberFormat.format(360 - mappedTrueNorthDeg) + "°");
         if (!isVisible()) {
             setVisible(true);
         }

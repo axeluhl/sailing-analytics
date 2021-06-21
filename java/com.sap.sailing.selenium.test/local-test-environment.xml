@@ -40,7 +40,8 @@
      -->
      <system-property>
         <name>webdriver.chrome.driver</name>
-        <value>/Users/sap/Documents/DEV/chromedriver/chromedriver</value>
+        <value>C:\apps\ChromeSeleniumDriver\chromedriver.exe</value>
+        <!-- value>~/Documents/chromedriver/chromedriver</value-->
      </system-property>
      <!--
         You need geckodriver to be able to run Selenium tests on Firefox.

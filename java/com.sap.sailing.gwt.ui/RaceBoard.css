@@ -673,7 +673,8 @@ img.openColumn {
 	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	position: relative;
 	left: 140px;
-	top: 11px;
+	height: 60px;
+	padding-top: 11px;
 }
 
 .RegattaRaceInformation-Header .RaceName-Label {
