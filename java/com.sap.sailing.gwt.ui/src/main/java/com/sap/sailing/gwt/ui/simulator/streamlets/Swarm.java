@@ -170,7 +170,7 @@ public class Swarm implements TimeListener {
         // animationIntervalMillis if possible
         double timeDelta = time1 - time0;
         // log("fps: "+(1000.0/timeDelta));
-        loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
+        loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta)); // TODO consider using AnimationScheduler instead!
     }
 
     private void removeBoundsChangeHandler() {
