@@ -110,13 +110,31 @@ public class MasterDataImporter {
         }
     }
 
+    /**
+     * Replicates a stripped-down version of the {@code topLevelMasterData} to any replica attached. We assume here that
+     * the {@link #racingEventService} provided to this imported is the "master" instance of this service. This must be
+     * guaranteed by any service invoking this method, be it a REST API or a GWT RPC; they all need to ensure that their
+     * request has previously been routed to the master node for the {@link RacingEventService}. The reason for this is
+     * that the {@link TopLevelMasterData} object used for replication will have all tracking data stripped off which
+     * helps reducing the object size to make it very likely for the operation to fit into a RabbitMQ replication
+     * message, and because transmitting the tracking data to a replica this way would be redundant because it will get
+     * replicated as soon as the master node starts loading those races.
+     * 
+     * @param topLevelMasterData
+     *            the full master data with all tracking data attached; for replication, a stripped-down
+     *            {@link TopLevelMasterData#copyAndStripOffDataNotNeededOnReplicas() copy} will be created. The
+     *            full version will be applied to the {@link #racingEventService} locally.
+     */
     private MasterDataImportObjectCreationCount applyMasterDataImportOperation(TopLevelMasterData topLevelMasterData,
             UUID importOperationId, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
+        ImportMasterDataOperation strippedOpForReplicas = new ImportMasterDataOperation(
+                topLevelMasterData.copyAndStripOffDataNotNeededOnReplicas(), importOperationId, override, creationCount,
+                user, tenant);
+        // replicate explicitly first and let isRequiresExplicitTransitiveReplication return false; see also bug5574
+        racingEventService.replicate(strippedOpForReplicas);
         ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
                 creationCount, user, tenant);
-        // replicate explicitly first and let isRequiresExplicitTransitiveReplication return false; see also bug5574
-        racingEventService.replicate(op);
         creationCount = racingEventService.apply(op);
         return creationCount;
     }
