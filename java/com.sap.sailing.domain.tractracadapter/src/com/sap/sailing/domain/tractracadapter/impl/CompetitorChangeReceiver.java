@@ -11,7 +11,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
@@ -36,7 +35,7 @@ import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, Long, Void>
+public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, Void, Void>
 implements OfficialCompetitorUpdateProvider {
     private static final Logger logger = Logger.getLogger(CompetitorChangeReceiver.class.getName());
     private final IRaceCompetitorListener listener;
@@ -59,7 +58,7 @@ implements OfficialCompetitorUpdateProvider {
 
             @Override
             public void updateRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
-                enqueue(new Triple<>(raceCompetitor, timestamp, null));
+                enqueue(new Triple<>(raceCompetitor, null, null));
             }
 
             @Override
@@ -93,14 +92,12 @@ implements OfficialCompetitorUpdateProvider {
      * inserted into the competitor's bravo fix track.
      */
     @Override
-    protected void handleEvent(Triple<IRaceCompetitor, Long, Void> event) {
+    protected void handleEvent(Triple<IRaceCompetitor, Void, Void> event) {
         final IRace race = event.getA().getRace();
         final DynamicTrackedRace trackedRace = getTrackedRace(race);
         if (trackedRace != null) {
             final IRaceCompetitor raceCompetitor = event.getA();
             if (reconciler != null && raceCompetitor != null) {
-                final TimePoint eventTimestamp = TimePoint.of(event.getB());
-                // TODO bug5581: we can pass the time stamp along here; but what when we read a race for the first time? Which time stamp to apply then?
                 reconciler.reconcileCompetitorStatus(raceCompetitor, trackedRace);
             }
         } else {

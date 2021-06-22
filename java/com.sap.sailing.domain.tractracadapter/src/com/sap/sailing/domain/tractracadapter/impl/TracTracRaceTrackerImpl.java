@@ -385,9 +385,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
                         if (trackedRace != null) {
                             if (reconciler != null) {
-                                final TimePoint raceUpdateTimestamp = TimePoint.of(timestamp); // TODO bug5581 how to use this consistently, e.g., when reading a race initially or after server re-start?
                                 logger.info("Handling a race status update for race "+race.getName()+" with status "+race.getStatus()+
-                                        " and status time "+race.getStatusTime());
+                                        " and status time "+race.getStatusLastChangedTime());
                                 // in case a race status change was the reason for this update, reconcile with the race log(s)
                                 reconciler.reconcileRaceStatus(race, trackedRace);
                             }
