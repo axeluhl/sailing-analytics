@@ -1,4 +1,5 @@
 @require 'theme';
+@external gwt-MapSettingsButton;
 
 .raceMapIndicatorPanel {
 	margin-top: DASHBOARD_SPACE_VERY_SMALL;
@@ -82,4 +83,228 @@
     cursor: pointer;
     background-image: resourceUrl("uploadVideoIcon");
     background-size: 74%;
+}
+
+.advancedFunctionsPopup {
+    background: rgba(255,255,255,0.75);
+    border-radius: 4px;
+    border: 1px solid #c9caca;
+    margin-top: 5px;
+}
+
+.exitFullScreenButton {
+    display: none;
+    background-position: center center;
+    background-repeat: no-repeat;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    -ms-border-radius: 4px;
+    border: 0px;
+    background-color: rgba(255,255,255,0.2);
+    z-index: 1;
+    border-color: white;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    background-image: resourceUrl("exitFullScreen");
+    background-size: 74%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+:fullscreen .exitFullScreenButton {
+    display: inline-block;
+}
+
+.fullScreenButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204);
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("fullScreen");
+    background-size: 74%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.moreOptions .raceMapVideoUploadButton {
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.moreOptions .raceMapShareLinkButton {
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.moreOptionsButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    -ms-border-radius: 4px;
+    border-radius: 4px;
+    border: 0px;
+    background-color: rgba(255,255,255,0.2);
+    z-index: 1;
+    border-color: white;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    background-image: resourceUrl("moreIcon");
+    background-size: 74%;
+    margin: 10px;
+}
+
+:fullscreen .moreOptionsButton {
+    display: none;
+}
+
+.settingsButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204);
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-size: 74%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.settingsButton::after {
+    outline: none;
+    background-image: resourceUrl("settingsIcon");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 66.6666%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    filter: brightness(0) invert(1);
+}
+
+.tagsButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204);
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("compass");
+    background-size: 74%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.topLeftControlsWrapperPanel {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.trueNorthIndicatorButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204);
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("trueNorthIndicatorIcon");
+    background-size: 24%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.underHeaderPosition {
+    top: 0;
+    padding-top: 60px; 
+}
+ 
+.zoomInButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204);
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("plusIcon");
+    background-size: 74%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.zoomOutButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204);
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("minusIcon");
+    background-size: 74%;
+    margin-right: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
