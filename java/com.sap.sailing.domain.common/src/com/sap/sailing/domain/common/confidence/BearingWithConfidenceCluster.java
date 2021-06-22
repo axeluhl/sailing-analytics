@@ -141,6 +141,8 @@ public class BearingWithConfidenceCluster<RelativeTo> {
      * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio. If the
      * combined confidence of the bearings in the cluster is 0.0, the result will contain <code>null</code> as
      * {@link BearingWithConfidence#getObject() object}.
+     * 
+     * TODO bug5576 comment 40: we could analyze the cluster's variance and let greater variances reduce the confidence
      */
     public BearingWithConfidence<RelativeTo> getAverage(RelativeTo relativeTo) {
         HasConfidence<DoublePair, Bearing, RelativeTo> average = averager.getAverage(getBearings(), relativeTo);
