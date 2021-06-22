@@ -174,7 +174,6 @@ public class ImportMasterDataOperation extends
             if (masterData.getDeviceConfigurations() != null) {
                 importDeviceConfigurations(toState);
             }
-            
             Collection<MediaTrack> allMediaTracksToImport = masterData.getFilteredMediaTracks();
             for (MediaTrack trackToImport : allMediaTracksToImport) {
                 ensureOwnership(trackToImport.getIdentifier(), securityService);
