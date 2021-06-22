@@ -115,6 +115,8 @@ public class MasterDataImporter {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
                 creationCount, user, tenant);
+        // replicate explicitly first and let isRequiresExplicitTransitiveReplication return false; see also bug5574
+        racingEventService.replicate(op);
         creationCount = racingEventService.apply(op);
         return creationCount;
     }

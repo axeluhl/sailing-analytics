@@ -112,6 +112,26 @@ public class ImportMasterDataOperation extends
         this.connectivityParametersToRestore = masterData.getConnectivityParametersToRestore();
     }
 
+    
+    /**
+     * Operations of this type are expected to be explicitly sent out <em>before</em> the operation is applied locally on
+     * the master server. This is important because otherwise tracking-related operations may be sent out before the
+     * structures for regattas, events, etc. have been replicated. This also holds for the "reverse" replication direction
+     * from a replica to a master. See also bug5574.
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        // TODO Implement ImportMasterDataOperation.clone(...)
+        return super.clone();
+    }
+
+
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
         final DataImportLockWithProgress dataImportLock = toState.getDataImportLock();
@@ -421,7 +441,7 @@ public class ImportMasterDataOperation extends
                             && Util.equalsWithNull(fix.getPosition(), existingFix.getPosition()))) {
                         windTrackToWriteTo.add(fix);
                     } else {
-                        logger.info("Didn't add wind fix in import, because equal fix was already there.");
+                        logger.fine("Didn't add wind fix in import, because equal fix was already there.");
                     }
                 }
             } finally {
