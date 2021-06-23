@@ -44,6 +44,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -950,6 +951,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogExcludeWindSourceEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogExcludeWindSourceEvent(event));
+        return result;
+    }
+
     public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogDenoteForTrackingEvent event) {
         Document result = new Document();
         storeRaceLogIdentifier(raceLogIdentifier, result);
@@ -1158,6 +1166,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogResultsAreOfficialEvent.class.getSimpleName());
         // currently there are no further properties; the event speaks for itself
+        return result;
+    }
+
+    private Object storeRaceLogExcludeWindSourceEvent(RaceLogExcludeWindSourceEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogExcludeWindSourceEvent.class.getSimpleName());
+        final WindSource windSourceToExclude = event.getWindSourceToExclude();
+        result.put(FieldNames.WIND_SOURCE_NAME.name(), windSourceToExclude.name());
+        if (windSourceToExclude.getId() != null) {
+            result.put(FieldNames.WIND_SOURCE_ID.name(), windSourceToExclude.getId());
+        }
         return result;
     }
 
