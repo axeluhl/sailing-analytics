@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
@@ -9,6 +10,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
@@ -357,10 +359,11 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             }
             if (revokedEvent instanceof RaceLogSuppressedMarkPassingsEvent) {
                 markPassingUpdateListener.removeSuppressedPassing(revokedEvent.getInvolvedCompetitors().get(0));
-            }
-            if (revokedEvent instanceof RaceLogFixedMarkPassingEvent) {
+            } else if (revokedEvent instanceof RaceLogFixedMarkPassingEvent) {
                 markPassingUpdateListener.removeFixedPassing(revokedEvent.getInvolvedCompetitors().get(0),
                         ((RaceLogFixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
+            } else if (revokedEvent instanceof RaceLogExcludeWindSourceEvent) {
+                int TODO_bug_2918; // TODO bug2918: figure out which wind sources are to be excluded now that this one event was revoked...
             }
         }
     }
@@ -385,5 +388,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
             trackedRace.invalidateEndTime();
         }
+    }
+
+    @Override
+    public void visit(RaceLogExcludeWindSourceEvent event) {
+        // TODO bug2918 set wind sources to exclude
+        trackedRace.setWindSourcesToExclude(Collections.singleton(event.getWindSourceToExclude()));
+        int TODO_bug_2918;
     }
 }
