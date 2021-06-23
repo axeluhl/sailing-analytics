@@ -4941,7 +4941,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     /**
-     * This should only be used for replicable Operations that need access to the SecurityService, all other should
+     * This should only be used for replicable Operations that need access to the SecurityService, all others should
      * obtain the SecurityService in another way.
      */
     @Override
