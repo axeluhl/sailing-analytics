@@ -218,6 +218,8 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         trackedRace.setFinishedTime(getFinishedTime());
         analyzeCourseDesign(null);
         initializeWindTrack(raceLog);
+        int TODO_bug_2918;
+        // TODO bug2918: look for valid, non-revoked RaceLogExcludeWindSourceEvent objects in log and exclude those wind sources
         if (markPassingUpdateListener != null) {
             markPassingDataFinder = new MarkPassingDataFinder(raceLog);
             analyzeMarkPassings();
