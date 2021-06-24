@@ -1,14 +1,17 @@
 package com.sap.sailing.server.gateway.deserialization.racelog.impl;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourceEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.WindSource;
@@ -34,17 +37,21 @@ public class RaceLogExcludeWindSourceEventDeserializer extends BaseRaceLogEventD
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        final WindSourceType windSourceType = WindSourceType.valueOf((String) object.get(RaceLogExcludeWindSourceEventSerializer.WIND_SOURCE_NAME));
-        final String windSourceId = (String) object.get(RaceLogExcludeWindSourceEventSerializer.WIND_SOURCE_ID);
-        final RaceLogEvent result;
-        final WindSource windSourceToExclude;
-        if (windSourceId == null) {
-            windSourceToExclude = new WindSourceImpl(windSourceType);
-        } else {
-            windSourceToExclude = new WindSourceWithAdditionalID(windSourceType, windSourceId);
+        final JSONArray windSourcesToExcludeJson = (JSONArray) object.get(RaceLogExcludeWindSourceEventSerializer.WIND_SOURCES_TO_EXCLUDE);
+        final Set<WindSource> windSourcesToExclude = new HashSet<>();
+        for (final Object o : windSourcesToExcludeJson) {
+            final JSONObject windSourceToExcludeJson = (JSONObject) o;
+            final WindSourceType windSourceType = WindSourceType.valueOf((String) windSourceToExcludeJson.get(RaceLogExcludeWindSourceEventSerializer.WIND_SOURCE_NAME));
+            final String windSourceId = (String) windSourceToExcludeJson.get(RaceLogExcludeWindSourceEventSerializer.WIND_SOURCE_ID);
+            final WindSource windSourceToExclude;
+            if (windSourceId == null) {
+                windSourceToExclude = new WindSourceImpl(windSourceType);
+            } else {
+                windSourceToExclude = new WindSourceWithAdditionalID(windSourceType, windSourceId);
+            }
+            windSourcesToExclude.add(windSourceToExclude);
         }
-        result = new RaceLogExcludeWindSourceEventImpl(createdAt, timePoint, author, id, passId, windSourceToExclude);
-        return result;
+        return new RaceLogExcludeWindSourcesEventImpl(createdAt, timePoint, author, id, passId, windSourcesToExclude);
     }
 
 }

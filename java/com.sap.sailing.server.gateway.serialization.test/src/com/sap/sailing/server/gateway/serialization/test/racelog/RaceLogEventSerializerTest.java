@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.serialization.test.racelog;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -13,7 +14,7 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCImpliedWindSourceEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourceEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
@@ -138,7 +139,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testExcludeWindSourceEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogExcludeWindSourceEventImpl(null, author, 0, new WindSourceWithAdditionalID(WindSourceType.WEB, "123"));
+        RaceLogEvent event = new RaceLogExcludeWindSourcesEventImpl(null, author, 0, Collections.singleton(new WindSourceWithAdditionalID(WindSourceType.WEB, "123")));
         serializer.serialize(event);
         verify(excludeWindSourceEventSerializer).serialize(event);
     }

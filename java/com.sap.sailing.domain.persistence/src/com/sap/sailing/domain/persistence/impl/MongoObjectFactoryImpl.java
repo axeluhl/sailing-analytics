@@ -44,7 +44,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -951,7 +951,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogExcludeWindSourceEvent event) {
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogExcludeWindSourcesEvent event) {
         Document result = new Document();
         storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogExcludeWindSourceEvent(event));
@@ -1169,15 +1169,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private Object storeRaceLogExcludeWindSourceEvent(RaceLogExcludeWindSourceEvent event) {
+    private Object storeRaceLogExcludeWindSourceEvent(RaceLogExcludeWindSourcesEvent event) {
         Document result = new Document();
         storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogExcludeWindSourceEvent.class.getSimpleName());
-        final WindSource windSourceToExclude = event.getWindSourceToExclude();
-        result.put(FieldNames.WIND_SOURCE_NAME.name(), windSourceToExclude.name());
-        if (windSourceToExclude.getId() != null) {
-            result.put(FieldNames.WIND_SOURCE_ID.name(), windSourceToExclude.getId());
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogExcludeWindSourcesEvent.class.getSimpleName());
+        final BasicDBList dbWindSourcesToExclude = new BasicDBList();
+        for (final WindSource windSourceToExclude : event.getWindSourcesToExclude()) {
+            final Document dbWindSourceToExclude = new Document();
+            dbWindSourceToExclude.put(FieldNames.WIND_SOURCE_NAME.name(), windSourceToExclude.name());
+            if (windSourceToExclude.getId() != null) {
+                dbWindSourceToExclude.put(FieldNames.WIND_SOURCE_ID.name(), windSourceToExclude.getId());
+            }
+            dbWindSourcesToExclude.add(dbWindSourceToExclude);
         }
+        result.put(FieldNames.WIND_SOURCES_TO_EXCLUDE.name(), dbWindSourcesToExclude);
         return result;
     }
 

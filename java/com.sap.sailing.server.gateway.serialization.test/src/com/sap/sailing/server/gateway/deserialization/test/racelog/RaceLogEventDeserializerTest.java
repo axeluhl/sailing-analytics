@@ -1,10 +1,13 @@
 package com.sap.sailing.server.gateway.deserialization.test.racelog;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -17,9 +20,9 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCCertificateAssignmentEventImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourceEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
@@ -29,6 +32,7 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -50,6 +54,7 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogUseCom
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.shared.json.JsonDeserializer;
 
@@ -208,29 +213,33 @@ public class RaceLogEventDeserializerTest {
     
     @Test
     public void testSeralizationAndDeserializationForExcludeWindSourceEventWithId() throws Exception {
-        RaceLogExcludeWindSourceEventImpl originalEvent = new RaceLogExcludeWindSourceEventImpl(timePoint, timePoint2,
-                author, UUID.randomUUID(), 3, new WindSourceWithAdditionalID(WindSourceType.WEB, "123"));
+        RaceLogExcludeWindSourcesEventImpl originalEvent = new RaceLogExcludeWindSourcesEventImpl(timePoint, timePoint2,
+                author, UUID.randomUUID(), 3, Collections.singleton(new WindSourceWithAdditionalID(WindSourceType.WEB, "123")));
         RaceLogEventSerializer serializer = (RaceLogEventSerializer) RaceLogEventSerializer.create(CompetitorJsonSerializer.create());
         JSONObject object = serializer.serialize(originalEvent);
         RaceLogEvent raceLogEvent = deserializer.deserialize(object);
-        RaceLogExcludeWindSourceEvent newEvent = (RaceLogExcludeWindSourceEvent) raceLogEvent;
+        RaceLogExcludeWindSourcesEvent newEvent = (RaceLogExcludeWindSourcesEvent) raceLogEvent;
         // assert raceLogEvent has correct value
         assertEquals(originalEvent.getTimePoint().toString(), newEvent.getTimePoint().toString());
-        assertEquals(originalEvent.getWindSourceToExclude().getType(), newEvent.getWindSourceToExclude().getType());
-        assertEquals(originalEvent.getWindSourceToExclude().getId(), newEvent.getWindSourceToExclude().getId());
+        assertEquals(1, Util.size(originalEvent.getWindSourcesToExclude()));
+        assertEquals(originalEvent.getWindSourcesToExclude().iterator().next().getType(), newEvent.getWindSourcesToExclude().iterator().next().getType());
+        assertEquals(originalEvent.getWindSourcesToExclude().iterator().next().getId(), newEvent.getWindSourcesToExclude().iterator().next().getId());
     }
     
     @Test
     public void testSeralizationAndDeserializationForExcludeWindSourceEventWithoutId() throws Exception {
-        RaceLogExcludeWindSourceEventImpl originalEvent = new RaceLogExcludeWindSourceEventImpl(timePoint, timePoint2,
-                author, UUID.randomUUID(), 3, new WindSourceImpl(WindSourceType.EXPEDITION));
+        final Set<WindSource> originalWindSourcesToExclude = new HashSet<>(Arrays.asList(new WindSourceImpl(WindSourceType.EXPEDITION), new WindSourceWithAdditionalID(WindSourceType.WEB, "123")));
+        RaceLogExcludeWindSourcesEventImpl originalEvent = new RaceLogExcludeWindSourcesEventImpl(timePoint, timePoint2,
+                author, UUID.randomUUID(), 3, originalWindSourcesToExclude);
         RaceLogEventSerializer serializer = (RaceLogEventSerializer) RaceLogEventSerializer.create(CompetitorJsonSerializer.create());
         JSONObject object = serializer.serialize(originalEvent);
         RaceLogEvent raceLogEvent = deserializer.deserialize(object);
-        RaceLogExcludeWindSourceEvent newEvent = (RaceLogExcludeWindSourceEvent) raceLogEvent;
+        RaceLogExcludeWindSourcesEvent newEvent = (RaceLogExcludeWindSourcesEvent) raceLogEvent;
+        final Set<WindSource> deserializedWindSourcesToExclude = new HashSet<>();
+        Util.addAll(newEvent.getWindSourcesToExclude(), deserializedWindSourcesToExclude);
         // assert raceLogEvent has correct value
         assertEquals(originalEvent.getTimePoint().toString(), newEvent.getTimePoint().toString());
-        assertEquals(originalEvent.getWindSourceToExclude().getType(), newEvent.getWindSourceToExclude().getType());
-        assertNull(newEvent.getWindSourceToExclude().getId());
+        assertEquals(2, Util.size(originalEvent.getWindSourcesToExclude()));
+        assertEquals(originalWindSourcesToExclude, deserializedWindSourcesToExclude);
     }
 }

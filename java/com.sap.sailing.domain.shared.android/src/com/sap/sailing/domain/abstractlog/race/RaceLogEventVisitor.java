@@ -69,5 +69,5 @@ public interface RaceLogEventVisitor {
     
     void visit(RaceLogResultsAreOfficialEvent event);
     
-    void visit(RaceLogExcludeWindSourceEvent event);
+    void visit(RaceLogExcludeWindSourcesEvent event);
 }

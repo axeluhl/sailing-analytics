@@ -63,7 +63,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -87,7 +87,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourceEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
@@ -1667,7 +1667,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             resultEvent = loadRaceLogORCSetImpliedWindEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogResultsAreOfficialEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogResultsAreOfficialEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(RaceLogExcludeWindSourceEvent.class.getSimpleName())) {
+        } else if (eventClass.equals(RaceLogExcludeWindSourcesEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogExcludeWindSourceEvent(createdAt, author, logicalTimePoint, passId, passId, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
@@ -2141,18 +2141,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, passId, certificate, boatId);
     }
 
-    private RaceLogExcludeWindSourceEvent loadRaceLogExcludeWindSourceEvent(TimePoint createdAt,
+    private RaceLogExcludeWindSourcesEvent loadRaceLogExcludeWindSourceEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, int passId, Document dbObject)
             throws JsonDeserializationException, ParseException {
-        final WindSource windSourceToExclude;
-        WindSourceType windSourceType = WindSourceType.valueOf((String) dbObject.get(FieldNames.WIND_SOURCE_NAME.name()));
-        if (dbObject.containsKey(FieldNames.WIND_SOURCE_ID.name())) {
-            windSourceToExclude = new WindSourceWithAdditionalID(windSourceType,
-                    (String) dbObject.get(FieldNames.WIND_SOURCE_ID.name()));
-        } else {
-            windSourceToExclude = new WindSourceImpl(windSourceType);
+        final Set<WindSource> windSourcesToExclude = new HashSet<>();
+        final Iterable<?> dbWindSourcesToExclude = (Iterable<?>) dbObject.get(FieldNames.WIND_SOURCES_TO_EXCLUDE.name());
+        for (final Object dbWindSourceToExcludeObject : dbWindSourcesToExclude) {
+            final Document dbWindSourceToExclude = (Document) dbWindSourceToExcludeObject;
+            WindSourceType windSourceType = WindSourceType.valueOf((String) dbWindSourceToExclude.get(FieldNames.WIND_SOURCE_NAME.name()));
+            final WindSource windSourceToExclude;
+            if (dbObject.containsKey(FieldNames.WIND_SOURCE_ID.name())) {
+                windSourceToExclude = new WindSourceWithAdditionalID(windSourceType,
+                        (String) dbWindSourceToExclude.get(FieldNames.WIND_SOURCE_ID.name()));
+            } else {
+                windSourceToExclude = new WindSourceImpl(windSourceType);
+            }
+            windSourcesToExclude.add(windSourceToExclude);
         }
-        return new RaceLogExcludeWindSourceEventImpl(createdAt, logicalTimePoint, author, id, passId, windSourceToExclude);
+        return new RaceLogExcludeWindSourcesEventImpl(createdAt, logicalTimePoint, author, id, passId, windSourcesToExclude);
     }
 
     @Override
