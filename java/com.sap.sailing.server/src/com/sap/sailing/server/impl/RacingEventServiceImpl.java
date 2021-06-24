@@ -299,7 +299,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartOfTracking;
 import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
-import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
@@ -2321,7 +2320,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
         @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-            replicate(new UpdateWindSourcesToExclude(getRaceIdentifier(), windSourcesToExclude));
+            // nothing to replicate; wind sources to exclude are managed by RaceLogEvents which are already being replicated
         }
 
         @Override
