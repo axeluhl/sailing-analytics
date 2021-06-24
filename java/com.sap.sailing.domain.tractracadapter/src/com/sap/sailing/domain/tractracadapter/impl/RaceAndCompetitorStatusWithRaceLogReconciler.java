@@ -237,7 +237,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      */
     public void reconcileRaceStatus(IRace tractracRace, TrackedRace trackedRace) {
         final RaceStatusType raceStatus = tractracRace.getStatus();
-        final TimePoint raceStatusUpdateTime = TimePoint.of(tractracRace.getStatusTime());
+        final TimePoint raceStatusUpdateTime = TimePoint.of(tractracRace.getStatusLastChangedTime());
         RaceLogFlagEvent abortingFlagEvent = null;
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             if (abortingFlagEvent == null) {
@@ -396,7 +396,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     public void reconcileCompetitorStatus(IRaceCompetitor raceCompetitor, TrackedRace trackedRace) {
         final int officialRank = raceCompetitor.getOfficialRank();
         final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
-        final long timePointForStatusEvent = raceCompetitor.getStatusTime();
+        final long timePointForStatusEvent = raceCompetitor.getStatusLastChangedTime();
         logger.info("Received a status change for competitor " + raceCompetitor + " in race "+trackedRace.getRaceIdentifier()+
                 ": officialRank: " + officialRank+
                 ", officialFinishingTime: "+officialFinishingTime+
