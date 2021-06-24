@@ -96,7 +96,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                     }
                 };
                 final MongoDBService replicaMongoDBService = new MongoDBConfiguration(replicaMongoDbUri).getService();
-                return new RacingEventServiceImpl(
+                final RacingEventServiceImpl result = new RacingEventServiceImpl(
                         (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
                             return new RacingEventServiceImpl.ConstructorParameters() {
                                 private final DomainObjectFactory domainObjectFactory =
@@ -116,6 +116,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                         /* restoreTrackedRaces */ false, /* security service tracker */ securityServiceTrackerMock,
                         /* sharedSailingData */ null, /* replicationServiceTracker */ null,
                         /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                result.addMasterDataClassLoader(this.getClass().getClassLoader());
+                return result;
             }
         });
         this.securityServiceTrackerMock = securityServiceTrackerMock;
