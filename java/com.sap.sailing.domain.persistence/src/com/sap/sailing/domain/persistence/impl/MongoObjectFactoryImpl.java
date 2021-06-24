@@ -25,6 +25,7 @@ import com.mongodb.BasicDBList;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoCommandException;
 import com.mongodb.ReadConcern;
+import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -524,7 +525,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Document dbOverallLeaderboard = leaderboardCollection.find(overallLeaderboardQuery).first();
             if (dbOverallLeaderboard == null) {
                 storeLeaderboard(overallLeaderboard);
-                dbOverallLeaderboard = leaderboardCollection.find(overallLeaderboardQuery).first();
+                dbOverallLeaderboard = leaderboardCollection.withReadPreference(ReadPreference.primary()).find(overallLeaderboardQuery).first();
             }
             ObjectId dbOverallLeaderboardId = (ObjectId) dbOverallLeaderboard.get("_id");
             dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), dbOverallLeaderboardId);
