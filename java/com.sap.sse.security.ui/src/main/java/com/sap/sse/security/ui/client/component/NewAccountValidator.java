@@ -46,11 +46,11 @@ public class NewAccountValidator {
         return result;
     }
 
-    protected String validateUsername(String username, boolean reallyUseLeadingOrTrailingSpacesInUsername) {
+    protected String validateUsername(String username, boolean tolerateLeadingOrTrailingSpacesInUsername) {
         final String result;
         if (username == null || username.length() < MINIMUM_USERNAME_LENGTH) {
             result = stringMessages.usernameMustHaveAtLeastNCharacters(MINIMUM_USERNAME_LENGTH);
-        } else if ((username.startsWith(" ") || username.endsWith(" ")) && !reallyUseLeadingOrTrailingSpacesInUsername) {
+        } else if ((username.startsWith(" ") || username.endsWith(" ")) && !tolerateLeadingOrTrailingSpacesInUsername) {
             result = stringMessages.usernameShouldNotStartOrEndWithSpaceCharactersUnlessYouExplicitlyWantTo();
         } else {
             result = null;

@@ -58,17 +58,9 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     @Override
     public void onChangeUsername(String newValue) {
         values.username = newValue;
-        final boolean startsOrEndsWithSpace = newValue.startsWith(" ") || newValue.endsWith(" ");
-        view.setReallyUseLeadingOrTrailingSpacesInUsernameUiVisibility(startsOrEndsWithSpace);
         values.validate();
     }
     
-    @Override
-    public void onReallyUseLeadingOrTrailingSpacesInUsernameUi(Boolean newValue) {
-        values.reallyUseLeadingOrTrailingSpacesInUsername = newValue;
-        values.validate();
-    }
-
     @Override
     public void onChangeFullName(String newValue) {
         values.fullName = newValue;
@@ -104,10 +96,10 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     private class CreateAccountFormValues {
         private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
         private String username, fullName, locale, company, email, password, passwordConfirmation;
-        private boolean reallyUseLeadingOrTrailingSpacesInUsername;
         
         private boolean validate() {
-            String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation, reallyUseLeadingOrTrailingSpacesInUsername);
+            String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation,
+                    /* tolerateLeadingOrTrailingSpacesInUsername */ false);
             boolean isValid = errorMessage == null || errorMessage.isEmpty();
             view.setErrorMessage(isValid ? null : errorMessage);
             view.getCreateAccountControl().setEnabled(isValid);
