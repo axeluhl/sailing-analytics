@@ -219,7 +219,6 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         analyzeCourseDesign(null);
         initializeWindTrack(raceLog);
         updateWindSourcesToExclude();
-        // TODO bug2918: look for valid, non-revoked RaceLogExcludeWindSourceEvent objects in log and exclude those wind sources
         if (markPassingUpdateListener != null) {
             markPassingDataFinder = new MarkPassingDataFinder(raceLog);
             analyzeMarkPassings();
@@ -357,15 +356,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                 } finally {
                     log.unlockAfterRead();
                 }
-
             }
             if (revokedEvent instanceof RaceLogSuppressedMarkPassingsEvent) {
                 markPassingUpdateListener.removeSuppressedPassing(revokedEvent.getInvolvedCompetitors().get(0));
             } else if (revokedEvent instanceof RaceLogFixedMarkPassingEvent) {
                 markPassingUpdateListener.removeFixedPassing(revokedEvent.getInvolvedCompetitors().get(0),
                         ((RaceLogFixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
-            } else if (revokedEvent instanceof RaceLogExcludeWindSourcesEvent) {
-                updateWindSourcesToExclude();
             }
         }
     }
