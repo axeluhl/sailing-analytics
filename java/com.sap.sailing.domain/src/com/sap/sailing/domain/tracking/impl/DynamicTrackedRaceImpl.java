@@ -521,7 +521,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     @Override
     public void setWindSourcesToExclude(final Iterable<? extends WindSource> windSourcesToExclude) {
-        final Set<WindSource> effectiveWindSourcesToExclude = new HashSet<>(getWindSourcesToExclude());
+        final Set<WindSource> effectiveWindSourcesToExclude = new HashSet<>();
+        Util.addAll(windSourcesToExclude, effectiveWindSourcesToExclude);
         if (!raceIsKnownToStartUpwind) {
             effectiveWindSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
         }
