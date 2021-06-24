@@ -505,7 +505,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name()).withReadConcern(ReadConcern.MAJORITY);
-
         try {
             leaderboardGroupCollection.createIndex(new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), 1));
         } catch (NullPointerException npe) {
