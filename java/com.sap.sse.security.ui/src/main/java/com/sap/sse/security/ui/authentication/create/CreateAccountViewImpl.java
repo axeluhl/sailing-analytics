@@ -8,12 +8,15 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.PasswordTextBox;
@@ -34,6 +37,7 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     
     @UiField TextBox emailUi;
     @UiField TextBox usernameUi;
+    @UiField CheckBox reallyUseLeadingOrTrailingSpacesInUsernameUi;
     @UiField TextBox nameUi;
     @UiField(provided = true)
     public ValueListBox<String> localeListBox = new ValueListBox<String>(new Renderer<String>() {
@@ -85,6 +89,12 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
                 presenter.onChangeFullName(nameUi.getValue());
             }
         });
+        reallyUseLeadingOrTrailingSpacesInUsernameUi.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                presenter.onReallyUseLeadingOrTrailingSpacesInUsernameUi(reallyUseLeadingOrTrailingSpacesInUsernameUi.getValue());
+            }
+        });
         localeListBox.setAcceptableValues(GWTLocaleUtil.getAvailableLocalesAndDefault());
         localeListBox.addValueChangeHandler(event -> presenter.onChangeLocale(localeListBox.getValue()));
         companyUi.addKeyUpHandler(new FieldKeyUpHandler() {
@@ -107,6 +117,11 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         });
     }
     
+    @Override
+    public void setReallyUseLeadingOrTrailingSpacesInUsernameUiVisibility(boolean visible) {
+        reallyUseLeadingOrTrailingSpacesInUsernameUi.setVisible(visible);
+    }
+
     @Override
     public HasEnabled getCreateAccountControl() {
         return createAccountUi;

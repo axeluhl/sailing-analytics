@@ -10,6 +10,8 @@ public interface CreateAccountView extends ErrorMessageView, IsWidget {
     
     HasEnabled getCreateAccountControl();
     
+    void setReallyUseLeadingOrTrailingSpacesInUsernameUiVisibility(boolean visible);
+    
     public interface Presenter {
         
         void onChangeEmail(String newValue);
@@ -29,6 +31,7 @@ public interface CreateAccountView extends ErrorMessageView, IsWidget {
         void createAccount();
         
         void signIn();
-        
+
+        void onReallyUseLeadingOrTrailingSpacesInUsernameUi(Boolean value);
     }
 }

@@ -148,7 +148,8 @@ public class EditProfileEntryPoint implements EntryPoint {
         KeyUpHandler keyUpHandler = new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                String errorMessage = validator.validateUsernameAndPassword(nameText.getText(), pwText.getText(), pw2Text.getText());
+                String errorMessage = validator.validateUsernameAndPassword(nameText.getText(), pwText.getText(),
+                        pw2Text.getText(), /* reallyUseLeadingOrTrailingSpacesInUsername */ true);
                 if (errorMessage == null) {
                     errorLabel.setText("");
                     submit.setEnabled(true);
