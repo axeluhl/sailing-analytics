@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientURI;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
@@ -70,8 +72,54 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock;
+    
     @SuppressWarnings("unchecked")
-    private FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock = mock(FullyInitializedReplicableTracker.class);
+    public MediaReplicationTest() {
+        this(mock(FullyInitializedReplicableTracker.class));
+    }
+    
+    private MediaReplicationTest(FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock) {
+        super(new ServerReplicationTestSetUp() {
+            @Override
+            public RacingEventServiceImpl createNewReplica() {
+                final MongoDBConfiguration masterMongoDBConfig = mongoDBService.getConfiguration();
+                final MongoClientURI masterMongoDbUri = masterMongoDBConfig.getMongoClientURI();
+                final MongoClientOptions masterMongoDbOptions = masterMongoDbUri.getOptions();
+                final MongoDBConfiguration proxyReplicaMongoDBConfig = new MongoDBConfiguration(
+                        masterMongoDBConfig.getHostname(), masterMongoDBConfig.getPort(),
+                        masterMongoDBConfig.getDatabaseName() + "-replica"); // use to construct basic MongoDB URI for replica DB name
+                final MongoClientURI replicaMongoDbUri = new MongoClientURI(proxyReplicaMongoDBConfig.getMongoClientURI().toString()) {
+                    @Override
+                    public MongoClientOptions getOptions() {
+                        return masterMongoDbOptions;
+                    }
+                };
+                final MongoDBService replicaMongoDBService = new MongoDBConfiguration(replicaMongoDbUri).getService();
+                return new RacingEventServiceImpl(
+                        (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
+                            return new RacingEventServiceImpl.ConstructorParameters() {
+                                private final DomainObjectFactory domainObjectFactory =
+                                        PersistenceFactory.INSTANCE.getDomainObjectFactory(replicaMongoDBService,
+                                                // replica gets its own base DomainFactory:
+                                                new DomainFactoryImpl(raceLogResolver));
+                                private final MongoObjectFactory replicaMongoObjectFactory = PersistenceFactory.INSTANCE
+                                        .getMongoObjectFactory(replicaMongoDBService);
+                                @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
+                                @Override public MongoObjectFactory getMongoObjectFactory() { return replicaMongoObjectFactory; }
+                                @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
+                                @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
+                            };
+                        }, MediaDBFactory.INSTANCE.getMediaDB(replicaMongoDBService), EmptyWindStore.INSTANCE,
+                        EmptySensorFixStore.INSTANCE, /* serviceFinderFactory */ null, null,
+                        /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
+                        /* restoreTrackedRaces */ false, /* security service tracker */ securityServiceTrackerMock,
+                        /* sharedSailingData */ null, /* replicationServiceTracker */ null,
+                        /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+            }
+        });
+        this.securityServiceTrackerMock = securityServiceTrackerMock;
+    }
     
     private void waitSomeTime() throws InterruptedException {
         Thread.sleep(1000); // wait for JMS to deliver the message and the message to be applied
@@ -90,28 +138,6 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         return mediaTrack;
     }
     
-    @Override
-    public RacingEventServiceImpl createNewReplica() {
-        return new RacingEventServiceImpl(
-                (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
-                    return new RacingEventServiceImpl.ConstructorParameters() {
-                        private final DomainObjectFactory domainObjectFactory =
-                                PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService,
-                                        // replica gets its own base DomainFactory:
-                                        new DomainFactoryImpl(raceLogResolver));
-                        @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
-                        @Override public MongoObjectFactory getMongoObjectFactory() { return testSetUp.mongoObjectFactory; }
-                        @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
-                        @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
-                    };
-                }, MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE,
-                EmptySensorFixStore.INSTANCE, /* serviceFinderFactory */ null, null,
-                /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
-                /* restoreTrackedRaces */ false, /* security service tracker */ securityServiceTrackerMock,
-                /* sharedSailingData */ null, /* replicationServiceTracker */ null,
-                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
-    }
-
     /* util */
     private MediaTrack cloneMediaTrack(MediaTrack mediaTrack) {
         MediaTrack clonedMediaTrack = new MediaTrack(mediaTrack.dbId, mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.duration, mediaTrack.mimeType, mediaTrack.assignedRaces);
