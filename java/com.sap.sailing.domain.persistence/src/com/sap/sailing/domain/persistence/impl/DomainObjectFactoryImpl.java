@@ -2150,7 +2150,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Document dbWindSourceToExclude = (Document) dbWindSourceToExcludeObject;
             WindSourceType windSourceType = WindSourceType.valueOf((String) dbWindSourceToExclude.get(FieldNames.WIND_SOURCE_NAME.name()));
             final WindSource windSourceToExclude;
-            if (dbObject.containsKey(FieldNames.WIND_SOURCE_ID.name())) {
+            if (dbWindSourceToExclude.containsKey(FieldNames.WIND_SOURCE_ID.name())) {
                 windSourceToExclude = new WindSourceWithAdditionalID(windSourceType,
                         (String) dbWindSourceToExclude.get(FieldNames.WIND_SOURCE_ID.name()));
             } else {
