@@ -25,6 +25,7 @@ import com.mongodb.BasicDBList;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoCommandException;
 import com.mongodb.ReadConcern;
+import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -506,7 +507,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name()).withReadConcern(ReadConcern.MAJORITY);
-
         try {
             leaderboardGroupCollection.createIndex(new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), 1));
         } catch (NullPointerException npe) {
@@ -526,7 +526,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Document dbOverallLeaderboard = leaderboardCollection.find(overallLeaderboardQuery).first();
             if (dbOverallLeaderboard == null) {
                 storeLeaderboard(overallLeaderboard);
-                dbOverallLeaderboard = leaderboardCollection.find(overallLeaderboardQuery).first();
+                dbOverallLeaderboard = leaderboardCollection.withReadPreference(ReadPreference.primary()).find(overallLeaderboardQuery).first();
             }
             ObjectId dbOverallLeaderboardId = (ObjectId) dbOverallLeaderboard.get("_id");
             dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), dbOverallLeaderboardId);
