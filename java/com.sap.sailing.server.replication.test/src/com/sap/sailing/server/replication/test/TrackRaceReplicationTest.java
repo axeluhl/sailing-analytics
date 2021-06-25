@@ -209,11 +209,11 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         try {
             logger.info("Running testWindSourcesToExcludeReplication()");
             startTracking();
-            final FlexibleLeaderboard lb = master.addFlexibleLeaderboard("LB", "LB Display Name", new int[0], new LowPoint(), Collections.emptySet());
-            final FlexibleRaceColumn r1 = (FlexibleRaceColumn) master.addColumnToLeaderboard("R1", lb.getName(), /* medal race */ false);
+            final FlexibleLeaderboard lb = master.apply(new CreateFlexibleLeaderboard("LB", "LB Display Name", new int[0], new LowPoint(), Collections.emptySet()));
+            final FlexibleRaceColumn r1 = (FlexibleRaceColumn) master.apply(new AddColumnToLeaderboard("R1", lb.getName(), /* medal race */ false));
+            master.apply(new ConnectTrackedRaceToLeaderboardColumn(lb.getName(), r1.getName(), "Default", raceIdentifier));
             Thread.sleep(1000);
             final TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-            r1.setTrackedRace(r1.getFleets().iterator().next(), replicaTrackedRace);
             assertTrue(Util.isEmpty(masterTrackedRace.getWindSourcesToExclude()));
             assertTrue(Util.isEmpty(replicaTrackedRace.getWindSourcesToExclude()));
             if (Wait.wait(()->masterTrackedRace.getAttachedRaceLogs().iterator().hasNext(),
