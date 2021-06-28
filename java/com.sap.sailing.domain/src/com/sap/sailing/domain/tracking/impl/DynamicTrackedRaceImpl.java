@@ -136,12 +136,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         gpsFixReceived = new AtomicBoolean(false);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
-            Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
-            for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
-                windSourcesToExclude.add(windSourceToExclude);
-            }
-            windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
-            setWindSourcesToExclude(windSourcesToExclude);
+            setWindSourcesToExclude(getWindSourcesToExclude()); // implicitly adds COURSE_BASED to the wind sources to exclude
         }
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
@@ -520,10 +515,19 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    /**
+     * Adds the {@link WindSourceType#COURSE_BASED} wind source to those to exclude if the race is not
+     * {@link #raceIsKnownToStartUpwind known to start with an upwind leg}.
+     */
     @Override
-    public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        super.setWindSourcesToExclude(windSourcesToExclude);
-        notifyListenersWindSourcesToExcludeChanged(windSourcesToExclude);
+    public void setWindSourcesToExclude(final Iterable<? extends WindSource> windSourcesToExclude) {
+        final Set<WindSource> effectiveWindSourcesToExclude = new HashSet<>();
+        Util.addAll(windSourcesToExclude, effectiveWindSourcesToExclude);
+        if (!raceIsKnownToStartUpwind) {
+            effectiveWindSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
+        }
+        super.setWindSourcesToExclude(effectiveWindSourcesToExclude);
+        notifyListenersWindSourcesToExcludeChanged(effectiveWindSourcesToExclude);
     }
 
     @Override
