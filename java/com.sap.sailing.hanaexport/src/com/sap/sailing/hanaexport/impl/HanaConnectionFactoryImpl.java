@@ -14,6 +14,8 @@ public class HanaConnectionFactoryImpl {
     private static final String HANADB_PASSWORD_SYSTEM_PROPERTY_NAME = "sap.hana.password";
     
     public void test() throws SQLException {
+        System.out.println("Java version: " + com.sap.db.jdbc.Driver.getJavaVersion());
+        System.out.println("Minimum supported Java version and SAP driver version number: " + com.sap.db.jdbc.Driver.getVersionInfo());
         final Connection connection = DriverManager.getConnection(
                 "jdbc:sap://"+System.getProperty(HANADB_ENDPOINT_PROPERTY_NAME)+"/?encrypt=true&validateCertificate=false",
                 System.getProperty(HANADB_USERNAME_SYSTEM_PROPERTY_NAME),
@@ -23,6 +25,7 @@ public class HanaConnectionFactoryImpl {
         } else {
             final Statement stmt = connection.createStatement();
             final ResultSet resultSet = stmt.executeQuery("SELECT * FROM SAILING.BOAT_CLASS");
+            logger.info("Fetch size: "+resultSet.getFetchSize());
             while (resultSet.next()) {
                 logger.info(resultSet.getString("id") + " " + resultSet.getString("description"));
             }
