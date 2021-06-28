@@ -197,6 +197,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private final Runnable shareLinkAction;
     private Collection<Runnable> mapInitializedListener;
     private Button addVideoToRaceButton;
+    private final Button trueNorthIndicatorButtonButtonGroup;
     private final PopupPanel advancedFunctionsPopup;
     private final Button advancedFunctionsButton;
     
@@ -651,7 +652,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
+        panelForLeftHeaderLabels.setHeight("60px");
         panelForRightHeaderLabels = new AbsolutePanel();
+        panelForRightHeaderLabels.setHeight("60px");
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
@@ -665,6 +668,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
         addVideoToRaceButton = createAddVideoToRaceButton();
+        this.trueNorthIndicatorButtonButtonGroup = createTrueNorthIndicatorButton();
         // TODO bug 494: reset zoom settings to user preferences
         initWidget(rootPanel);
         initializeData(settings.isShowMapControls(), showHeaderPanel);
@@ -756,6 +760,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         map.setOptions(mapOptions);
                         // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
                         mapFirstZoomDone = false;
+                        boolean visible = coordinateSystem.mapDegreeBearing(0) != 0;
+                        trueNorthIndicatorPanel.setVisible(visible);
+                        trueNorthIndicatorButtonButtonGroup.getElement().getStyle().setProperty("transform", "rotate(" + coordinateSystem.mapDegreeBearing(0) + "deg)");
                         if (trueNorthIndicatorPanel.isVisible()) {
                             trueNorthIndicatorPanel.redraw();
                         }
@@ -967,7 +974,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         popupContent.add(createZoomOutButton());
         popupContent.add(createZoomInButton());
         popupContent.add(createFullScreenButton());
-        popupContent.add(createTrueNorthIndicatorButton());
+        popupContent.add(trueNorthIndicatorButtonButtonGroup);
         //popupContent.add(createTagsButton());
         // add-video button
         if (shareLinkAction != null) {
@@ -1000,7 +1007,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         
         advancedFunctionsPopup.addStyleName(raceMapStyle.advancedFunctionsPopup());
         advancedFunctionsPopup.setAnimationEnabled(true);
-        advancedFunctionsPopup.setAnimationType(AnimationType.ONE_WAY_CORNER);
+        advancedFunctionsPopup.setAnimationType(AnimationType.ROLL_DOWN);
         advancedFunctionsPopup.setGlassEnabled(false);
         advancedFunctionsPopup.setModal(false);
         advancedFunctionsPopup.setAutoHideEnabled(true);
@@ -1034,7 +1041,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 int left = advancedFunctionsButton.getAbsoluteLeft();
                 int top = advancedFunctionsButton.getAbsoluteTop();
                 left += advancedFunctionsButton.getOffsetWidth();
-                top += addVideoToRaceButton.getOffsetHeight();
+                top += advancedFunctionsButton.getOffsetHeight();
                 left -= offsetWidth;
                 if (left < 0) {
                     left = advancedFunctionsButton.getAbsoluteLeft();
@@ -1093,6 +1100,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // that controls get positioned right
         headerPanel.getElement().getStyle().setHeight(60, Unit.PX);
         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+        headerPanel.ensureDebugId("headerPanel");
         // some sort of hack: not positioning TOP_LEFT because then the
         // controls at RIGHT would not get the correct top setting
         map.setControls(ControlPosition.TOP_RIGHT, headerPanel);
@@ -1159,29 +1167,31 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         fullScreenButton.setStylePrimaryName(raceMapStyle.fullScreenButton());
         fullScreenButton.setTitle(stringMessages.openFullscreenView());
         fullScreenButton.ensureDebugId("fullScreenButton");
+        fullScreenButton.setVisible(FullscreenUtil.isFullscreenSupported());
         fullScreenButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                FullscreenUtil.requestFullScreenToggle("googleMapsArea");
+                GWT.log("Click fullscreen");
                 hideAdvancedFunctionsPopup();
+                FullscreenUtil.requestFullScreenToggle("googleMapsArea");
             }
         });
         return fullScreenButton;
     }
     
     private Button createExitFullScreenButton() {
-        Button fullScreenButton = new Button();
-        fullScreenButton.setStylePrimaryName(raceMapStyle.exitFullScreenButton());
-        fullScreenButton.setTitle(stringMessages.closeFullscreenView());
-        fullScreenButton.ensureDebugId("exitFullScreenButton");
-        fullScreenButton.addClickHandler(new ClickHandler() {
+        Button exitFullScreenButton = new Button();
+        exitFullScreenButton.setStylePrimaryName(raceMapStyle.exitFullScreenButton());
+        exitFullScreenButton.setTitle(stringMessages.closeFullscreenView());
+        exitFullScreenButton.ensureDebugId("exitFullScreenButton");
+        exitFullScreenButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                FullscreenUtil.requestFullScreenToggle("googleMapsArea");
                 hideAdvancedFunctionsPopup();
+                FullscreenUtil.exitFullscreen();
             }
         });
-        return fullScreenButton;
+        return exitFullScreenButton;
     }
     
     private Button createTrueNorthIndicatorButton() {
@@ -1194,21 +1204,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             @Override
             public void onClick(ClickEvent event) {
                 trueNorthIndicatorPanel.toggle();
-                trueNorthIndicatorPanel.setVisible(coordinateSystem.mapDegreeBearing(0) != 0);
-                trueNorthIndicatorButton.getElement().getStyle().setProperty("transform", "rotate(" + coordinateSystem.mapDegreeBearing(0) + "deg)");
                 hideAdvancedFunctionsPopup();
             }
         });
         return trueNorthIndicatorButton;
     }
-    
-//    private Button createTagsButton() {
-//        Button tagsButton = new Button();
-//        tagsButton.setStylePrimaryName(raceMapStyle.tagsButton());
-//        tagsButton.setTitle(stringMessages.tags());
-//        tagsButton.ensureDebugId("tagsButton");
-//        return tagsButton;
-//    }
     
     private Button createZoomOutButton() {
         Button zoomOutButton = new Button();

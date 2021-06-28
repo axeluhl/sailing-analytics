@@ -184,10 +184,9 @@ body {
     -webkit-border-radius: 4px;
     -o-border-radius: 4px;
     -ms-border-radius: 4px;
-    border: 0px;
-    background-color: rgba(255,255,255,0.2);
+    border: 1px solid #c9caca;
+    background-color: rgba(0, 143, 204, 0.75);
     z-index: 1;
-    border-color: white;
     width: 30px;
     height: 30px;
     cursor: pointer;
@@ -200,6 +199,11 @@ body {
 }
 
 :fullscreen .exitFullScreenButton {
+    display: inline-block;
+    border: 1px solid #c9caca;
+}
+
+:-webkit-full-screen .exitFullScreenButton {
     display: inline-block;
 }
 
@@ -254,19 +258,22 @@ body {
     -o-border-radius: 4px;
     -ms-border-radius: 4px;
     border-radius: 4px;
-    border: 0px;
-    background-color: rgba(255,255,255,0.2);
+    border: 1px solid #c9caca;
+    background-color: rgba(255,255,255,0.75);
     z-index: 1;
-    border-color: white;
     width: 30px;
     height: 30px;
     cursor: pointer;
     background-image: resourceUrl("moreIcon");
-    background-size: 74%;
+    background-size: 75%;
     margin: 10px;
 }
-
 :fullscreen .moreOptionsButton {
+    display: none;
+    border: 1px solid #c9caca;
+}
+
+:-webkit-full-screen .moreOptionsButton {
     display: none;
 }
 
@@ -275,6 +282,7 @@ body {
     border-radius: 4px;
     border: 1px solid #c9caca;
     margin-top: 5px;
+    height: 38px;
 }
 
 .combinedWindPanel {}
