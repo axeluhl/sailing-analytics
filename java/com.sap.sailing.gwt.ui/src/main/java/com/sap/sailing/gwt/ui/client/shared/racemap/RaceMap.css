@@ -60,7 +60,7 @@ body {
     height: 28px;
     cursor: pointer;
     background-image: resourceUrl("uploadVideoIcon");
-    background-size: 74%;
+    background-size: 75%;
 }
 
 .moreOptions .raceMapVideoUploadButton {
@@ -90,7 +90,7 @@ body {
     width: 28px;
     height: 28px;
     cursor: pointer;
-    background-size: 74%;
+    background-size: 75%;
     margin-right: 5px;
     margin-left: 5px;
     margin-top: 5px;
@@ -127,7 +127,7 @@ body {
     height: 28px;
     cursor: pointer;
     background-image: resourceUrl("plusIcon");
-    background-size: 74%;
+    background-size: 75%;
     margin-right: 5px;
     margin-left: 5px;
     margin-top: 5px;
@@ -148,7 +148,7 @@ body {
     height: 28px;
     cursor: pointer;
     background-image: resourceUrl("minusIcon");
-    background-size: 74%;
+    background-size: 75%;
     margin-right: 5px;
     margin-left: 5px;
     margin-top: 5px;
@@ -169,7 +169,7 @@ body {
     height: 28px;
     cursor: pointer;
     background-image: resourceUrl("fullScreen");
-    background-size: 74%;
+    background-size: 75%;
     margin-right: 5px;
     margin-left: 5px;
     margin-top: 5px;
@@ -191,7 +191,7 @@ body {
     height: 30px;
     cursor: pointer;
     background-image: resourceUrl("exitFullScreen");
-    background-size: 74%;
+    background-size: 75%;
     margin-right: 5px;
     margin-left: 5px;
     margin-top: 5px;
@@ -242,7 +242,7 @@ body {
     height: 28px;
     cursor: pointer;
     background-image: resourceUrl("compass");
-    background-size: 74%;
+    background-size: 75%;
     margin-right: 5px;
     margin-left: 5px;
     margin-top: 5px;
