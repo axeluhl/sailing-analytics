@@ -13,8 +13,8 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
+import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceAsync;
-import com.sap.sse.security.ui.client.subscription.WithSubscriptionService;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
@@ -23,7 +23,7 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
  * 
  * @author Tu Tran
  */
-public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSubscriptionService>
+public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSecurity>
         implements UserSubscriptionView.Presenter {
 
     private final C clientFactory;
@@ -36,7 +36,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
     @Override
     public void init() {
-        clientFactory.getSubscriptionService().initializeProviders();
+        clientFactory.getSubscriptionServiceFactory().initializeProviders();
     }
     
     @Override
@@ -53,7 +53,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     @Override
     public void openCheckout(String planId) {
         try {
-            clientFactory.getSubscriptionService().getDefaultProvider().getSubscriptionViewPresenter()
+            clientFactory.getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
                     .startCheckout(planId, view);
         } catch (InvalidSubscriptionProviderException e) {
             onInvalidSubscriptionProviderError(e);
@@ -63,7 +63,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     @Override
     public void cancelSubscription(String planId, String providerName) {
         try {
-            clientFactory.getSubscriptionService().getWriteAsyncServiceByProvider(providerName)
+            clientFactory.getSubscriptionServiceFactory().getWriteAsyncServiceByProvider(providerName)
                     .cancelSubscription(planId, new AsyncCallback<Boolean>() {
                         @Override
                         public void onSuccess(Boolean result) {
@@ -86,7 +86,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
     private void fetchSubscription() {
         try {
-            clientFactory.getSubscriptionService().getDefaultAsyncService()
+            clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
                     .getSubscription(new AsyncCallback<SubscriptionDTO>() {
                         @Override
                         public void onSuccess(SubscriptionDTO result) {
@@ -109,7 +109,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     
     private void updateView(SubscriptionDTO subscription) {
         try {
-            final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionService()
+            final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionServiceFactory()
                     .getDefaultAsyncService();
             
             defaultAsyncService.getAllSubscriptionPlansMappedById(new AsyncCallback<Map<Serializable, SubscriptionPlanDTO>>() {

@@ -6,6 +6,7 @@ import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_RE
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 /**
  * The default implementation for the WithSecurity interface
@@ -18,6 +19,7 @@ public class DefaultWithSecurityImpl implements WithSecurity {
     private UserService userService;
     private UserManagementServiceAsync userManagementService;
     private UserManagementWriteServiceAsync userManagementWriteService;
+    private final SubscriptionServiceFactory subscriptionServiceFactory;
 
     public DefaultWithSecurityImpl() {
         userManagementService = GWT.create(UserManagementService.class);
@@ -29,23 +31,29 @@ public class DefaultWithSecurityImpl implements WithSecurity {
                 com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         userService = new UserService(userManagementService, userManagementWriteService);
+        subscriptionServiceFactory = SubscriptionServiceFactory.getInstance();
+        subscriptionServiceFactory.registerAsyncServices(
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.subscriptionServiceRemotePath);
     }
 
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return subscriptionServiceFactory;
+    }
+
+    @Override
     public UserManagementServiceAsync getUserManagementService() {
         return userManagementService;
     }
 
+    @Override
     public UserManagementWriteServiceAsync getUserManagementWriteService() {
         return userManagementWriteService;
     }
 
+    @Override
     public UserService getUserService() {
         return userService;
     }
-    
-    public static final String sailingServiceRemotePath = "service/sailing";
-    
-    public static final String sailingServiceWriteRemotePath = "service/sailingmaster";
-    
-    
+
 }

@@ -24,6 +24,7 @@ import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClientFactory {
 
@@ -123,6 +124,11 @@ public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClie
                         });
             }
         });
+    }
+
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return securityProvider.getSubscriptionServiceFactory();
     }
 
 }
