@@ -585,7 +585,6 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) throws URISyntaxException {
-        
         Course oldCourse = this.course;
         if (trackedRace == null) {
             if (oldCourse == null && startList != null) {

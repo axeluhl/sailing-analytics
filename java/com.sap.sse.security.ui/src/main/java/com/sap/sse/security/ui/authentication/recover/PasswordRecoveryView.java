@@ -8,8 +8,6 @@ public interface PasswordRecoveryView extends ErrorMessageView, IsWidget {
     void setPresenter(Presenter presenter);
     
     public interface Presenter {
-        
         void resetPassword(String email, String username);
-        
     }
 }
