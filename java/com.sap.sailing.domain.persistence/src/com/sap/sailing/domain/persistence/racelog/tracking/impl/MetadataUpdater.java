@@ -108,7 +108,7 @@ public class MetadataUpdater {
                             success = true;
                         } catch (Exception e) {
                             logger.severe("Unable to write update "+theNextUpdate+" to the metadata collection for device "+forDevice+
-                                    "; retrying "+retryCount+" more times.");
+                                    ": "+e.getMessage()+"; retrying "+retryCount+" more times.");
                             Thread.sleep(3000);
                         }
                     } while (!success && retryCount-- > 0);
