@@ -6,6 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Automatic-Module-Name: com.sap.sailing.hanaexport
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: com.sap.db.jdbc;bundle-version="2.6.30",
+Require-Bundle: com.sap.db.jdbc;bundle-version="2.8.14",
  com.sap.sailing.domain,
- com.sap.sailing.server
+ com.sap.sailing.server,
+ com.sap.sailing.domain.common,
+ com.sap.sse.common

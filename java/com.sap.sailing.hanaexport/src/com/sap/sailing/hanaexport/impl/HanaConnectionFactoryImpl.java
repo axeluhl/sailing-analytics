@@ -2,10 +2,13 @@ package com.sap.sailing.hanaexport.impl;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Logger;
+
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 
 public class HanaConnectionFactoryImpl {
     private static final Logger logger = Logger.getLogger(HanaConnectionFactoryImpl.class.getName());
@@ -23,6 +26,14 @@ public class HanaConnectionFactoryImpl {
         if (connection == null) {
             logger.warning("Couldn't get database connection for end point "+System.getProperty(HANADB_ENDPOINT_PROPERTY_NAME));
         } else {
+            connection.createStatement().execute("DELETE FROM SAILING.BOAT_CLASS");
+            final PreparedStatement insertBoatClasses = connection.prepareStatement("INSERT INTO SAILING.BOAT_CLASS (\"id\", \"description\") VALUES (?, ?);");
+            for (final BoatClassMasterdata boatClassMasterdata : BoatClassMasterdata.values()) {
+                insertBoatClasses.setString(1, boatClassMasterdata.getDisplayName());
+                insertBoatClasses.setString(2, "Type "+boatClassMasterdata.getHullType().name()+", length "+
+                        boatClassMasterdata.getHullLength().getMeters()+"m, beam "+boatClassMasterdata.getHullBeam().getMeters()+"m");
+                insertBoatClasses.execute();
+            }
             final Statement stmt = connection.createStatement();
             final ResultSet resultSet = stmt.executeQuery("SELECT * FROM SAILING.BOAT_CLASS");
             logger.info("Fetch size: "+resultSet.getFetchSize());
