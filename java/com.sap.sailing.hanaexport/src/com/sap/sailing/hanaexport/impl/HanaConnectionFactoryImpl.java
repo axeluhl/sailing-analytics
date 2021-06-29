@@ -9,8 +9,9 @@ import java.sql.Statement;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.hanaexport.HanaConnectionFactory;
 
-public class HanaConnectionFactoryImpl {
+public class HanaConnectionFactoryImpl implements HanaConnectionFactory {
     private static final Logger logger = Logger.getLogger(HanaConnectionFactoryImpl.class.getName());
     private static final String HANADB_ENDPOINT_PROPERTY_NAME = "sap.hana.endpoint"; 
     private static final String HANADB_USERNAME_SYSTEM_PROPERTY_NAME = "sap.hana.username";
@@ -19,10 +20,7 @@ public class HanaConnectionFactoryImpl {
     public void test() throws SQLException {
         System.out.println("Java version: " + com.sap.db.jdbc.Driver.getJavaVersion());
         System.out.println("Minimum supported Java version and SAP driver version number: " + com.sap.db.jdbc.Driver.getVersionInfo());
-        final Connection connection = DriverManager.getConnection(
-                "jdbc:sap://"+System.getProperty(HANADB_ENDPOINT_PROPERTY_NAME)+"/?encrypt=true&validateCertificate=false",
-                System.getProperty(HANADB_USERNAME_SYSTEM_PROPERTY_NAME),
-                System.getProperty(HANADB_PASSWORD_SYSTEM_PROPERTY_NAME));
+        final Connection connection = getConnection();
         if (connection == null) {
             logger.warning("Couldn't get database connection for end point "+System.getProperty(HANADB_ENDPOINT_PROPERTY_NAME));
         } else {
@@ -41,6 +39,14 @@ public class HanaConnectionFactoryImpl {
                 logger.info(resultSet.getString("id") + " " + resultSet.getString("description"));
             }
         }
+    }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(
+                "jdbc:sap://"+System.getProperty(HANADB_ENDPOINT_PROPERTY_NAME)+"/?encrypt=true&validateCertificate=false",
+                System.getProperty(HANADB_USERNAME_SYSTEM_PROPERTY_NAME),
+                System.getProperty(HANADB_PASSWORD_SYSTEM_PROPERTY_NAME));
     }
     
     public static void main(String[] args) throws SQLException {
