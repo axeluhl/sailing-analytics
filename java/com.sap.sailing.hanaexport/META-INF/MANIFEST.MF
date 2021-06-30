@@ -28,3 +28,4 @@ Require-Bundle: com.sap.db.jdbc;bundle-version="2.8.14",
  com.sap.sailing.server.interface,
  com.sap.sse.datamining
 Web-ContextPath: /hanaexport
+Bundle-Activator: com.sap.sailing.hanaexport.impl.Activator
