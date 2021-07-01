@@ -18,6 +18,8 @@ import org.apache.shiro.SecurityUtils;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.hanaexport.HanaConnectionFactory;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
@@ -55,6 +57,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
         exportBoatClasses(racingEventService, connection);
         exportIrms(racingEventService, connection);
+        exportScoringSchemes(racingEventService, connection);
         logger.info("Done exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         return Response.ok().build();
     }
@@ -67,6 +70,17 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             insertBoatClasses.setBoolean(2, irm.isDiscardable());
             insertBoatClasses.setBoolean(3, irm.isAdvanceCompetitorsTrackedWorse());
             insertBoatClasses.setBoolean(4, irm.isAppliesAtStartOfRace());
+            insertBoatClasses.execute();
+        }
+    }
+
+    private void exportScoringSchemes(RacingEventService racingEventService, Connection connection) throws SQLException {
+        final PreparedStatement insertBoatClasses = connection.prepareStatement(
+                "INSERT INTO SAILING.SCORING_SCHEME (\"ID\", \"HIGHERISBETTER\") VALUES (?, ?);");
+        for (final ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
+            final ScoringScheme scoringScheme = racingEventService.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
+            insertBoatClasses.setString(1, scoringScheme.getType().name());
+            insertBoatClasses.setBoolean(2, scoringScheme.isHigherBetter());
             insertBoatClasses.execute();
         }
     }
