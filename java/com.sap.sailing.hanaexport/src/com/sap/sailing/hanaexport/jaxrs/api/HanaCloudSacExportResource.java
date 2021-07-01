@@ -17,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.hanaexport.HanaConnectionFactory;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
@@ -52,15 +53,37 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         logger.info("Exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         final RacingEventService racingEventService = getService();
         final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
-        final PreparedStatement insertBoatClasses = connection.prepareStatement("INSERT INTO SAILING.BOAT_CLASS (\"ID\", \"DESCRIPTION\") VALUES (?, ?);");
+        exportBoatClasses(racingEventService, connection);
+        exportIrms(racingEventService, connection);
+        logger.info("Done exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
+        return Response.ok().build();
+    }
+
+    private void exportIrms(RacingEventService racingEventService, Connection connection) throws SQLException {
+        final PreparedStatement insertBoatClasses = connection.prepareStatement(
+                "INSERT INTO SAILING.IRM (\"NAME\", \"DISCARDABLE\", \"ADVANCECOMPETITORSTRACKEDWORSE\", \"APPLIESATSTARTOFRACE\") VALUES (?, ?, ?, ?);");
+        for (final MaxPointsReason irm : MaxPointsReason.values()) {
+            insertBoatClasses.setString(1, irm.name());
+            insertBoatClasses.setBoolean(2, irm.isDiscardable());
+            insertBoatClasses.setBoolean(3, irm.isAdvanceCompetitorsTrackedWorse());
+            insertBoatClasses.setBoolean(4, irm.isAppliesAtStartOfRace());
+            insertBoatClasses.execute();
+        }
+    }
+
+    private void exportBoatClasses(final RacingEventService racingEventService, final Connection connection)
+            throws SQLException {
+        final PreparedStatement insertBoatClasses = connection.prepareStatement(
+                "INSERT INTO SAILING.BOAT_CLASS (\"ID\", \"DESCRIPTION\", \"HULLLENGTHINMETERS\", \"HULLBEAMINMETERS\", \"HULLTYPE\") VALUES (?, ?, ?, ?, ?);");
         for (final BoatClass boatClass : racingEventService.getBaseDomainFactory().getBoatClasses()) {
             insertBoatClasses.setString(1, boatClass.getName().substring(0, Math.min(boatClass.getName().length(), 20)));
             insertBoatClasses.setString(2, "Type "+boatClass.getHullType().name()+", length "+
                     boatClass.getHullLength().getMeters()+"m, beam "+boatClass.getHullBeam().getMeters()+"m");
+            insertBoatClasses.setDouble(3, boatClass.getHullLength().getMeters());
+            insertBoatClasses.setDouble(4, boatClass.getHullBeam().getMeters());
+            insertBoatClasses.setString(5, boatClass.getHullType().name());
             insertBoatClasses.execute();
         }
-        logger.info("Done exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
-        return Response.ok().build();
     }
 
     @POST
@@ -83,7 +106,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     }
 
     private void tryExecutingQueriesFromSqlResource(String resourceWithSemicolonSeparatedStatements, Connection connection) throws IOException {
-        for (final String statementAsString : getStatementsFromResource("/droptables.sql")) {
+        for (final String statementAsString : getStatementsFromResource(resourceWithSemicolonSeparatedStatements)) {
             try {
                 logger.fine("...executing "+statementAsString);
                 connection.createStatement().execute(statementAsString);
