@@ -37,7 +37,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                 new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         logger.info("Clearing HANA Cloud SAILING DB on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
-        executeQueriesFromSqlResource("/cleartables.sql", connection);
+        tryExecutingQueriesFromSqlResource("/cleartables.sql", connection);
         logger.info("Done learing HANA Cloud SAILING DB on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         return Response.ok().build();
     }
@@ -52,7 +52,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         logger.info("Exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         final RacingEventService racingEventService = getService();
         final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
-        final PreparedStatement insertBoatClasses = connection.prepareStatement("INSERT INTO SAILING.BOAT_CLASS (\"id\", \"description\") VALUES (?, ?);");
+        final PreparedStatement insertBoatClasses = connection.prepareStatement("INSERT INTO SAILING.BOAT_CLASS (\"ID\", \"DESCRIPTION\") VALUES (?, ?);");
         for (final BoatClass boatClass : racingEventService.getBaseDomainFactory().getBoatClasses()) {
             insertBoatClasses.setString(1, boatClass.getName().substring(0, Math.min(boatClass.getName().length(), 20)));
             insertBoatClasses.setString(2, "Type "+boatClass.getHullType().name()+", length "+
@@ -73,20 +73,24 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
         if (drop) {
             logger.info("Dropping HANA Cloud SAILING DB tables on behalf of user "+SecurityUtils.getSubject().getPrincipal());
-            for (final String statementAsString : getStatementsFromResource("/droptables.sql")) {
-                try {
-                    logger.info("...dropping with "+statementAsString);
-                    connection.createStatement().execute(statementAsString);
-                } catch (Exception e) {
-                    logger.info("Problem trying to drop with "+statementAsString+"; continuing...");
-                }
-            }
+            tryExecutingQueriesFromSqlResource("/droptables.sql", connection);
             logger.info("Done dropping HANA Cloud SAILING DB tables on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         }
         logger.info("Creating HANA Cloud SAILING DB tables on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         executeQueriesFromSqlResource("/createtables.sql", connection);
         logger.info("Done creating HANA Cloud SAILING DB tables on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         return Response.ok().build();
+    }
+
+    private void tryExecutingQueriesFromSqlResource(String resourceWithSemicolonSeparatedStatements, Connection connection) throws IOException {
+        for (final String statementAsString : getStatementsFromResource("/droptables.sql")) {
+            try {
+                logger.fine("...executing "+statementAsString);
+                connection.createStatement().execute(statementAsString);
+            } catch (Exception e) {
+                logger.info("Problem trying to execute "+statementAsString+"; continuing...");
+            }
+        }
     }
 
     private String[] getStatementsFromResource(String resourceWithSemicolonSeparatedStatements) throws IOException {
