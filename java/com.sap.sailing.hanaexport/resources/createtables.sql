@@ -1,8 +1,8 @@
 CREATE COLUMN TABLE "Event" (
         "id"                    NVARCHAR(36) PRIMARY KEY,
         "name"                  NVARCHAR(255) NOT NULL,
-        "startDate"             DATE NOT NULL,
-        "endDate"               DATE NOT NULL,
+        "startDate"             TIMESTAMP NOT NULL,
+        "endDate"               TIMESTAMP NOT NULL,
         "venue"                 NVARCHAR(255),
         "isListed"              BOOLEAN,
         "description"           NVARCHAR(5000)
@@ -37,15 +37,13 @@ CREATE COLUMN TABLE "Race" (
 	"regatta" NVARCHAR(255) NOT NULL,
 	"raceColumn" NVARCHAR(255) NOT NULL,
 	"fleet" NVARCHAR(255) NOT NULL,
-	"boatClass" NVARCHAR(20) NOT NULL,
-	"startOfTracking" DATE NOT NULL,
-	"startOfRace" DATE NOT NULL,
-	"endOfTracking" DATE NOT NULL,
-	"endOfRace" DATE NOT NULL,
+	"startOfTracking" TIMESTAMP NOT NULL,
+	"startOfRace" TIMESTAMP NOT NULL,
+	"endOfTracking" TIMESTAMP NOT NULL,
+	"endOfRace" TIMESTAMP NOT NULL,
 	"avgWindSpeedInKnots" DECIMAL(5, 3),
 	PRIMARY KEY ("name", "regatta"),
-	FOREIGN KEY ("regatta") REFERENCES "Regatta" ("name"),
-	FOREIGN KEY ("boatClass") REFERENCES "BoatClass" ("id")
+	FOREIGN KEY ("regatta") REFERENCES "Regatta" ("name")
 );
 CREATE TABLE "Competitor" (
         "id"            NVARCHAR(36)    PRIMARY KEY,
@@ -63,12 +61,20 @@ CREATE TABLE "CompetitorRace" (
         FOREIGN KEY ("race", "regatta") REFERENCES "Race" ("name", "regatta")
 );
 CREATE TABLE "RaceResult" (
+        "regatta"       NVARCHAR(255)    NOT NULL,
+        "raceColumn"	NVARCHAR(255)    NOT NULL,
+        "competitorId"  NVARCHAR(36)     NOT NULL,
+        "points"        DECIMAL(10, 2),
+        "discarded"	BOOLEAN,
+        "irm"           NVARCHAR(4),
+        PRIMARY KEY ("regatta", "raceColumn", "competitorId"),
+        FOREIGN KEY ("competitorId")            REFERENCES "Competitor" ("id")
+);
+CREATE TABLE "RaceStats" (
         "race"          NVARCHAR(255)    NOT NULL,
         "regatta"       NVARCHAR(255)    NOT NULL,
-        "competitorId"  NVARCHAR(20)     NOT NULL,
+        "competitorId"  NVARCHAR(36)     NOT NULL,
         "rankOneBased"  INTEGER,
-        "points"        DECIMAL(10, 2),
-        "irm"           NVARCHAR(4),
         "distanceSailedInMeters"                DECIMAL(10, 2),
         "elapsedTimeInSeconds"                  DECIMAL(10, 2),
         "avgCrossTrackErrorInMeters"            DECIMAL(10, 2),

@@ -954,13 +954,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final Distance windwardDistanceToCompetitorFarthestAhead = trackedRace == null ? null : trackedRace
                     .getWindwardDistanceToCompetitorFarthestAhead(competitor, timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
             Distance averageAbsoluteCrossTrackError;
-            try {
-                averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(
-                    competitor, timePoint, waitForLatestAnalyses, cache);
-            } catch (NoWindException nwe) {
-                // without wind information, use null meaning "unknown"
-                averageAbsoluteCrossTrackError = null;
-            }
+            averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(
+                competitor, timePoint, waitForLatestAnalyses, cache);
             Distance averageSignedCrossTrackError;
             averageSignedCrossTrackError = trackedRace == null ? null : trackedRace.getAverageSignedCrossTrackError(
                 competitor, timePoint, waitForLatestAnalyses, cache);
