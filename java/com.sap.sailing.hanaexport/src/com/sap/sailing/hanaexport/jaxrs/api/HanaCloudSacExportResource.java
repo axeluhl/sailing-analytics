@@ -3,6 +3,7 @@ package com.sap.sailing.hanaexport.jaxrs.api;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -58,13 +60,14 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         exportBoatClasses(racingEventService, connection);
         exportIrms(racingEventService, connection);
         exportScoringSchemes(racingEventService, connection);
+        exportEvents(racingEventService, connection);
         logger.info("Done exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         return Response.ok().build();
     }
 
     private void exportIrms(RacingEventService racingEventService, Connection connection) throws SQLException {
         final PreparedStatement insertBoatClasses = connection.prepareStatement(
-                "INSERT INTO SAILING.IRM (\"NAME\", \"DISCARDABLE\", \"ADVANCECOMPETITORSTRACKEDWORSE\", \"APPLIESATSTARTOFRACE\") VALUES (?, ?, ?, ?);");
+                "INSERT INTO \"IRM\" (\"name\", \"discardable\", \"advanceCompetitorsTrackedWorse\", \"appliesAtStartOfRace\") VALUES (?, ?, ?, ?);");
         for (final MaxPointsReason irm : MaxPointsReason.values()) {
             insertBoatClasses.setString(1, irm.name());
             insertBoatClasses.setBoolean(2, irm.isDiscardable());
@@ -76,7 +79,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
 
     private void exportScoringSchemes(RacingEventService racingEventService, Connection connection) throws SQLException {
         final PreparedStatement insertBoatClasses = connection.prepareStatement(
-                "INSERT INTO SAILING.SCORING_SCHEME (\"ID\", \"HIGHERISBETTER\") VALUES (?, ?);");
+                "INSERT INTO \"ScoringScheme\" (\"id\", \"higherIsBetter\") VALUES (?, ?);");
         for (final ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
             final ScoringScheme scoringScheme = racingEventService.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
             insertBoatClasses.setString(1, scoringScheme.getType().name());
@@ -88,7 +91,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     private void exportBoatClasses(final RacingEventService racingEventService, final Connection connection)
             throws SQLException {
         final PreparedStatement insertBoatClasses = connection.prepareStatement(
-                "INSERT INTO SAILING.BOAT_CLASS (\"ID\", \"DESCRIPTION\", \"HULLLENGTHINMETERS\", \"HULLBEAMINMETERS\", \"HULLTYPE\") VALUES (?, ?, ?, ?, ?);");
+                "INSERT INTO \"BoatClass\" (\"id\", \"description\", \"hullLengthInMeters\", \"hullBeamInMeters\", \"hullType\") VALUES (?, ?, ?, ?, ?);");
         for (final BoatClass boatClass : racingEventService.getBaseDomainFactory().getBoatClasses()) {
             insertBoatClasses.setString(1, boatClass.getName().substring(0, Math.min(boatClass.getName().length(), 20)));
             insertBoatClasses.setString(2, "Type "+boatClass.getHullType().name()+", length "+
@@ -97,6 +100,21 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             insertBoatClasses.setDouble(4, boatClass.getHullBeam().getMeters());
             insertBoatClasses.setString(5, boatClass.getHullType().name());
             insertBoatClasses.execute();
+        }
+    }
+
+    private void exportEvents(RacingEventService racingEventService, Connection connection) throws SQLException {
+        final PreparedStatement insertEvents = connection.prepareStatement(
+                "INSERT INTO \"Event\" (\"id\", \"name\", \"startDate\", \"endDate\", \"venue\", \"isListed\", \"description\") VALUES (?, ?, ?, ?, ?, ?, ?);");
+        for (final Event event : racingEventService.getAllEvents()) {
+            insertEvents.setString(1, event.getId().toString());
+            insertEvents.setString(2, event.getName());
+            insertEvents.setDate(3, new Date(event.getStartDate().asMillis()));
+            insertEvents.setDate(4, new Date(event.getEndDate().asMillis()));
+            insertEvents.setString(5, event.getVenue().getName());
+            insertEvents.setBoolean(6, event.isPublic());
+            insertEvents.setString(7, event.getDescription());
+            insertEvents.execute();
         }
     }
 

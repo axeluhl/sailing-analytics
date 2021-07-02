@@ -1,50 +1,84 @@
-CREATE COLUMN TABLE SAILING.EVENTS (
-	id INTEGER PRIMARY KEY,
-	name NVARCHAR(250) NOT NULL,
-	startDate DATE NOT NULL,
-	endDate DATE NOT NULL,
-	venue NVARCHAR(250),
-	listed BOOLEAN,
-	description NVARCHAR(250)
+CREATE COLUMN TABLE "Event" (
+        "id"                    NVARCHAR(36) PRIMARY KEY,
+        "name"                  NVARCHAR(255) NOT NULL,
+        "startDate"             DATE NOT NULL,
+        "endDate"               DATE NOT NULL,
+        "venue"                 NVARCHAR(255),
+        "isListed"              BOOLEAN,
+        "description"           NVARCHAR(5000)
 );
-CREATE ROW TABLE SAILING.SCORING_SCHEME (
-	id NVARCHAR(255) PRIMARY KEY,
-	higherIsBetter BOOLEAN
+CREATE ROW TABLE "ScoringScheme" (
+	"id" NVARCHAR(255) PRIMARY KEY,
+	"higherIsBetter" BOOLEAN
 );
-CREATE ROW TABLE SAILING.BOAT_CLASS (
-	id NVARCHAR(20) PRIMARY KEY,
-	description NVARCHAR(250),
-	hullLengthInMeters DECIMAL(5, 2),
-	hullBeamInMeters DECIMAL(4, 2),
-	hullType NVARCHAR(20)
+CREATE ROW TABLE "BoatClass" (
+	"id" NVARCHAR(20) PRIMARY KEY,
+	"description" NVARCHAR(255),
+	"hullLengthInMeters" DECIMAL(10, 2),
+	"hullBeamInMeters" DECIMAL(10, 2),
+	"hullType" NVARCHAR(20)
 );
-CREATE ROW TABLE SAILING.IRM (
-        name NVARCHAR(4) PRIMARY KEY,
-        discardable BOOLEAN,
-        advanceCompetitorsTrackedWorse BOOLEAN,
-        appliesAtStartOfRace BOOLEAN
+CREATE ROW TABLE "IRM" (
+        "name" NVARCHAR(4) PRIMARY KEY,
+        "discardable" BOOLEAN,
+        "advanceCompetitorsTrackedWorse" BOOLEAN,
+        "appliesAtStartOfRace" BOOLEAN
 );
-CREATE COLUMN TABLE SAILING.REGATTAS (
-	name NVARCHAR(255) PRIMARY KEY,
-	boatClass NVARCHAR(20) NOT NULL,
-	scoringScheme NVARCHAR(255) NOT NULL,
-	rankingMetric NVARCHAR(255) NOT NULL,
-	FOREIGN KEY (boatClass) REFERENCES SAILING.BOAT_CLASS (id),
-	FOREIGN KEY (scoringScheme) REFERENCES SAILING.SCORING_SCHEME (id)
+CREATE COLUMN TABLE "Regatta" (
+	"name" NVARCHAR(255) PRIMARY KEY,
+	"boatClass" NVARCHAR(20) NOT NULL,
+	"scoringScheme" NVARCHAR(255) NOT NULL,
+	"rankingMetric" NVARCHAR(255) NOT NULL,
+	FOREIGN KEY ("boatClass") REFERENCES "BoatClass" ("id"),
+	FOREIGN KEY ("scoringScheme") REFERENCES "ScoringScheme" ("id")
 );
-CREATE COLUMN TABLE SAILING.RACES (
-	id NVARCHAR(20) PRIMARY KEY,
-	name NVARCHAR(250) NOT NULL,
-	regatta NVARCHAR(20) NOT NULL,
-	raceColumn NVARCHAR(5) NOT NULL,
-	fleet NVARCHAR(20) NOT NULL,
-	boatClass NVARCHAR(20) NOT NULL,
-	startOfTracking DATE NOT NULL,
-	startOfRace DATE NOT NULL,
-	endOfTracking DATE NOT NULL,
-	endOfTrace DATE NOT NULL,
-	avgWindSpeed DECIMAL(17, 3),
-	WindSpeedUnit NVARCHAR(5) DEFAULT 'KTS',
-	FOREIGN KEY (regatta) REFERENCES SAILING.REGATTAS (name),
-	FOREIGN KEY (boatClass) REFERENCES SAILING.BOAT_CLASS (id)
+CREATE COLUMN TABLE "Race" (
+	"name" NVARCHAR(255) NOT NULL,
+	"regatta" NVARCHAR(255) NOT NULL,
+	"raceColumn" NVARCHAR(255) NOT NULL,
+	"fleet" NVARCHAR(255) NOT NULL,
+	"boatClass" NVARCHAR(20) NOT NULL,
+	"startOfTracking" DATE NOT NULL,
+	"startOfRace" DATE NOT NULL,
+	"endOfTracking" DATE NOT NULL,
+	"endOfRace" DATE NOT NULL,
+	"avgWindSpeedInKnots" DECIMAL(5, 3),
+	PRIMARY KEY ("name", "regatta"),
+	FOREIGN KEY ("regatta") REFERENCES "Regatta" ("name"),
+	FOREIGN KEY ("boatClass") REFERENCES "BoatClass" ("id")
+);
+CREATE TABLE "Competitor" (
+        "id"            NVARCHAR(36)    PRIMARY KEY,
+        "name"          NVARCHAR(255)   NOT NULL,
+        "shortName"     NVARCHAR(20),
+        "nationality"   NVARCHAR(3)     NOT NULL,
+        "sailNumber"    NVARCHAR(255)
+);
+CREATE TABLE "CompetitorRace" (
+        "competitorId"  NVARCHAR(36),
+        "race"          NVARCHAR(255),
+        "regatta"	NVARCHAR(255),
+        PRIMARY KEY ("competitorId", "race"),
+        FOREIGN KEY ("competitorId")    REFERENCES "Competitor" ("id"),
+        FOREIGN KEY ("race", "regatta") REFERENCES "Race" ("name", "regatta")
+);
+CREATE TABLE "RaceResult" (
+        "race"          NVARCHAR(255)    NOT NULL,
+        "regatta"       NVARCHAR(255)    NOT NULL,
+        "competitorId"  NVARCHAR(20)     NOT NULL,
+        "rankOneBased"  INTEGER,
+        "points"        DECIMAL(10, 2),
+        "irm"           NVARCHAR(4),
+        "distanceSailedInMeters"                DECIMAL(10, 2),
+        "elapsedTimeInSeconds"                  DECIMAL(10, 2),
+        "avgCrossTrackErrorInMeters"            DECIMAL(10, 2),
+        "absoluteAvGCrossTrackErrorInMeters"    DECIMAL(10, 2),
+        "numberOfTacks"                         INTEGER,
+        "numberOfGybes"                         INTEGER,
+        "numberOfPenaltyCircles"                INTEGER,
+        "startDelayInSeconds"                   DECIMAL(10, 2),
+        "distanceFromStartLineInMetersAtStart"  DECIMAL(10, 2),
+        PRIMARY KEY ("race", "regatta", "competitorId"),
+        FOREIGN KEY ("competitorId")            REFERENCES "Competitor" ("id"),
+        FOREIGN KEY ("race", "regatta")         REFERENCES "Race" ("name", "regatta")
 );
