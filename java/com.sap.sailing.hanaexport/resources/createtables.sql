@@ -1,4 +1,4 @@
-CREATE COLUMN TABLE "Event" (
+CREATE COLUMN TABLE SAILING."Event" (
         "id"                    NVARCHAR(36) PRIMARY KEY,
         "name"                  NVARCHAR(255) NOT NULL,
         "startDate"             TIMESTAMP NOT NULL,
@@ -7,24 +7,24 @@ CREATE COLUMN TABLE "Event" (
         "isListed"              BOOLEAN,
         "description"           NVARCHAR(5000)
 );
-CREATE ROW TABLE "ScoringScheme" (
+CREATE ROW TABLE SAILING."ScoringScheme" (
 	"id" NVARCHAR(255) PRIMARY KEY,
 	"higherIsBetter" BOOLEAN
 );
-CREATE ROW TABLE "BoatClass" (
+CREATE ROW TABLE SAILING."BoatClass" (
 	"id" NVARCHAR(20) PRIMARY KEY,
 	"description" NVARCHAR(255),
 	"hullLengthInMeters" DECIMAL(10, 2),
 	"hullBeamInMeters" DECIMAL(10, 2),
 	"hullType" NVARCHAR(20)
 );
-CREATE ROW TABLE "IRM" (
+CREATE ROW TABLE SAILING."IRM" (
         "name" NVARCHAR(4) PRIMARY KEY,
         "discardable" BOOLEAN,
         "advanceCompetitorsTrackedWorse" BOOLEAN,
         "appliesAtStartOfRace" BOOLEAN
 );
-CREATE COLUMN TABLE "Regatta" (
+CREATE COLUMN TABLE SAILING."Regatta" (
 	"name" NVARCHAR(255) PRIMARY KEY,
 	"boatClass" NVARCHAR(20) NOT NULL,
 	"scoringScheme" NVARCHAR(255) NOT NULL,
@@ -32,7 +32,7 @@ CREATE COLUMN TABLE "Regatta" (
 	FOREIGN KEY ("boatClass") REFERENCES "BoatClass" ("id"),
 	FOREIGN KEY ("scoringScheme") REFERENCES "ScoringScheme" ("id")
 );
-CREATE COLUMN TABLE "Race" (
+CREATE COLUMN TABLE SAILING."Race" (
 	"name" NVARCHAR(255) NOT NULL,
 	"regatta" NVARCHAR(255) NOT NULL,
 	"raceColumn" NVARCHAR(255) NOT NULL,
@@ -45,14 +45,14 @@ CREATE COLUMN TABLE "Race" (
 	PRIMARY KEY ("name", "regatta"),
 	FOREIGN KEY ("regatta") REFERENCES "Regatta" ("name")
 );
-CREATE TABLE "Competitor" (
+CREATE TABLE SAILING."Competitor" (
         "id"            NVARCHAR(36)    PRIMARY KEY,
         "name"          NVARCHAR(255)   NOT NULL,
         "shortName"     NVARCHAR(20),
         "nationality"   NVARCHAR(3)     NOT NULL,
         "sailNumber"    NVARCHAR(255)
 );
-CREATE TABLE "CompetitorRace" (
+CREATE TABLE SAILING."CompetitorRace" (
         "competitorId"  NVARCHAR(36),
         "race"          NVARCHAR(255),
         "regatta"	NVARCHAR(255),
@@ -60,7 +60,7 @@ CREATE TABLE "CompetitorRace" (
         FOREIGN KEY ("competitorId")    REFERENCES "Competitor" ("id"),
         FOREIGN KEY ("race", "regatta") REFERENCES "Race" ("name", "regatta")
 );
-CREATE TABLE "RaceResult" (
+CREATE TABLE SAILING."RaceResult" (
         "regatta"       NVARCHAR(255)    NOT NULL,
         "raceColumn"	NVARCHAR(255)    NOT NULL,
         "competitorId"  NVARCHAR(36)     NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE "RaceResult" (
         PRIMARY KEY ("regatta", "raceColumn", "competitorId"),
         FOREIGN KEY ("competitorId")            REFERENCES "Competitor" ("id")
 );
-CREATE TABLE "RaceStats" (
+CREATE TABLE SAILING."RaceStats" (
         "race"          NVARCHAR(255)    NOT NULL,
         "regatta"       NVARCHAR(255)    NOT NULL,
         "competitorId"  NVARCHAR(36)     NOT NULL,

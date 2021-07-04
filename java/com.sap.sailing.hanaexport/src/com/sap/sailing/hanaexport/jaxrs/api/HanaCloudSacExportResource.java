@@ -86,7 +86,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
 
     private void exportCompetitors(RacingEventService racingEventService, Connection connection) throws SQLException {
         final PreparedStatement insertCompetitors = connection.prepareStatement(
-                "INSERT INTO \"Competitor\" (\"id\", \"name\", \"shortName\", \"nationality\", \"sailNumber\") VALUES (?, ?, ?, ?, ?);");
+                "INSERT INTO SAILING.\"Competitor\" (\"id\", \"name\", \"shortName\", \"nationality\", \"sailNumber\") VALUES (?, ?, ?, ?, ?);");
         for (final Competitor competitor : racingEventService.getCompetitorAndBoatStore().getAllCompetitors()) {
             insertCompetitors.setString(1, competitor.getId().toString());
             insertCompetitors.setString(2, competitor.getName());
@@ -99,7 +99,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
 
     private void exportIrms(RacingEventService racingEventService, Connection connection) throws SQLException {
         final PreparedStatement insertBoatClasses = connection.prepareStatement(
-                "INSERT INTO \"IRM\" (\"name\", \"discardable\", \"advanceCompetitorsTrackedWorse\", \"appliesAtStartOfRace\") VALUES (?, ?, ?, ?);");
+                "INSERT INTO SAILING.\"IRM\" (\"name\", \"discardable\", \"advanceCompetitorsTrackedWorse\", \"appliesAtStartOfRace\") VALUES (?, ?, ?, ?);");
         for (final MaxPointsReason irm : MaxPointsReason.values()) {
             insertBoatClasses.setString(1, irm.name());
             insertBoatClasses.setBoolean(2, irm.isDiscardable());
@@ -111,7 +111,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
 
     private void exportScoringSchemes(RacingEventService racingEventService, Connection connection) throws SQLException {
         final PreparedStatement insertBoatClasses = connection.prepareStatement(
-                "INSERT INTO \"ScoringScheme\" (\"id\", \"higherIsBetter\") VALUES (?, ?);");
+                "INSERT INTO SAILING.\"ScoringScheme\" (\"id\", \"higherIsBetter\") VALUES (?, ?);");
         for (final ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
             final ScoringScheme scoringScheme = racingEventService.getBaseDomainFactory().createScoringScheme(scoringSchemeType);
             insertBoatClasses.setString(1, scoringScheme.getType().name());
@@ -123,7 +123,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     private void exportBoatClasses(final RacingEventService racingEventService, final Connection connection)
             throws SQLException {
         final PreparedStatement insertBoatClasses = connection.prepareStatement(
-                "INSERT INTO \"BoatClass\" (\"id\", \"description\", \"hullLengthInMeters\", \"hullBeamInMeters\", \"hullType\") VALUES (?, ?, ?, ?, ?);");
+                "INSERT INTO SAILING.\"BoatClass\" (\"id\", \"description\", \"hullLengthInMeters\", \"hullBeamInMeters\", \"hullType\") VALUES (?, ?, ?, ?, ?);");
         for (final BoatClass boatClass : racingEventService.getBaseDomainFactory().getBoatClasses()) {
             insertBoatClasses.setString(1, boatClass.getName().substring(0, Math.min(boatClass.getName().length(), 20)));
             insertBoatClasses.setString(2, "Type "+boatClass.getHullType().name()+", length "+
@@ -137,7 +137,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
 
     private void exportEvents(RacingEventService racingEventService, Connection connection) throws SQLException {
         final PreparedStatement insertEvents = connection.prepareStatement(
-                "INSERT INTO \"Event\" (\"id\", \"name\", \"startDate\", \"endDate\", \"venue\", \"isListed\", \"description\") VALUES (?, ?, ?, ?, ?, ?, ?);");
+                "INSERT INTO SAILING.\"Event\" (\"id\", \"name\", \"startDate\", \"endDate\", \"venue\", \"isListed\", \"description\") VALUES (?, ?, ?, ?, ?, ?, ?);");
         for (final Event event : racingEventService.getAllEvents()) {
             insertEvents.setString(1, event.getId().toString());
             insertEvents.setString(2, event.getName());
@@ -153,18 +153,18 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     private void exportRaces(RacingEventService racingEventService, Connection connection) throws SQLException {
         final TimePoint now = TimePoint.now();
         final PreparedStatement insertRegattas = connection.prepareStatement(
-                "INSERT INTO \"Regatta\" (\"name\", \"boatClass\", \"scoringScheme\", \"rankingMetric\") "+
+                "INSERT INTO SAILING.\"Regatta\" (\"name\", \"boatClass\", \"scoringScheme\", \"rankingMetric\") "+
                                        "VALUES (?, ?, ?, ?);");
         final PreparedStatement insertRaces = connection.prepareStatement(
-                "INSERT INTO \"Race\" (\"name\", \"regatta\", \"raceColumn\", \"fleet\", \"startOfTracking\", "+
+                "INSERT INTO SAILING.\"Race\" (\"name\", \"regatta\", \"raceColumn\", \"fleet\", \"startOfTracking\", "+
                                        "\"startOfRace\", \"endOfTracking\", \"endOfRace\", \"avgWindSpeedInKnots\") "+
                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
         final PreparedStatement insertRaceResults = connection.prepareStatement(
-                "INSERT INTO \"RaceResult\" (\"regatta\", \"raceColumn\", \"competitorId\", \"points\", "+
+                "INSERT INTO SAILING.\"RaceResult\" (\"regatta\", \"raceColumn\", \"competitorId\", \"points\", "+
                                        "\"discarded\", \"irm\") "+
                                        "VALUES (?, ?, ?, ?, ?, ?);");
         final PreparedStatement insertRaceStats = connection.prepareStatement(
-                "INSERT INTO \"RaceStats\" (\"race\", \"regatta\", \"competitorId\", \"rankOneBased\", \"distanceSailedInMeters\", \"elapsedTimeInSeconds\", "+
+                "INSERT INTO SAILING.\"RaceStats\" (\"race\", \"regatta\", \"competitorId\", \"rankOneBased\", \"distanceSailedInMeters\", \"elapsedTimeInSeconds\", "+
                                        "\"avgCrossTrackErrorInMeters\", \"absoluteAvGCrossTrackErrorInMeters\", \"numberOfTacks\", "+
                                        "\"numberOfGybes\", \"numberOfPenaltyCircles\", \"startDelayInSeconds\", \"distanceFromStartLineInMetersAtStart\") "+
                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
