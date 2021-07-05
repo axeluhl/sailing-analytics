@@ -318,8 +318,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTracked
         Placemark startBest = null;
         Placemark finishBest = null;
         Position startPosition = null;
-
-        // Get start postition
+        // Get start position
         final Waypoint firstWaypoint = race.getRace().getCourse().getFirstWaypoint();
         if (firstWaypoint != null) {
             Iterator<Mark> startMarks = firstWaypoint.getMarks().iterator();

@@ -5,7 +5,8 @@ CREATE COLUMN TABLE SAILING."Event" (
         "endDate"               TIMESTAMP NOT NULL,
         "venue"                 NVARCHAR(255),
         "isListed"              BOOLEAN,
-        "description"           NVARCHAR(5000)
+        "description"           NVARCHAR(5000),
+        "location"              ST_POINT
 );
 CREATE ROW TABLE SAILING."ScoringScheme" (
 	"id" NVARCHAR(255) PRIMARY KEY,
@@ -25,11 +26,13 @@ CREATE ROW TABLE SAILING."IRM" (
         "appliesAtStartOfRace" BOOLEAN
 );
 CREATE COLUMN TABLE SAILING."Regatta" (
-	"name" NVARCHAR(255) PRIMARY KEY,
-	"boatClass" NVARCHAR(20) NOT NULL,
+	"name"          NVARCHAR(255) PRIMARY KEY,
+	"boatClass"     NVARCHAR(20) NOT NULL,
 	"scoringScheme" NVARCHAR(255) NOT NULL,
 	"rankingMetric" NVARCHAR(255) NOT NULL,
+	"eventId"       NVARCHAR(36)
 	FOREIGN KEY ("boatClass") REFERENCES SAILING."BoatClass" ("id"),
+	FOREIGN KEY ("eventId") REFERENCES SAILING."Event" ("id"),
 	FOREIGN KEY ("scoringScheme") REFERENCES SAILING."ScoringScheme" ("id")
 );
 CREATE COLUMN TABLE SAILING."Race" (

@@ -12,12 +12,18 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
+import com.sap.sailing.domain.tracking.impl.MarkPositionAtTimePointCacheImpl;
+import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -116,6 +122,51 @@ public class EventImpl extends EventBaseImpl implements Event {
                     }
                 }
             }
+        }
+        return result;
+    }
+
+    @Override
+    public Position getLocation() {
+        final int MAX_NUMBER_OF_POSITION_SAMPLES = 5;
+        final Set<Position> positionSamples = new HashSet<>();
+        for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups()) {
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                    if (trackedRace.getStartOfRace() != null) {
+                        final Position centerOfCourse = trackedRace.getCenterOfCourse(trackedRace.getStartOfRace());
+                        if (centerOfCourse != null) {
+                            positionSamples.add(centerOfCourse);
+                            if (positionSamples.size() >= MAX_NUMBER_OF_POSITION_SAMPLES) {
+                                return getAveragePosition(positionSamples);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // try to geo-code the venue:
+        final ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
+        // TODO enhance ReverseGeocoder by the use of the forward search, such as http://api.geonames.org/search?name=Kiel&username=sailtracking3, then use Placemark.ByPopulation to sort
+        return null;
+    }
+
+    private Position getAveragePosition(Set<Position> positionSamples) {
+        ScalablePosition sum = null;
+        int count = 0;
+        for (Position waypointPosition : positionSamples) {
+            ScalablePosition p = new ScalablePosition(waypointPosition);
+            if (sum == null) {
+                sum = p;
+            } else {
+                sum = sum.add(p);
+            }
+        }
+        final Position result;
+        if (sum == null) {
+            result = null;
+        } else {
+            result = sum.divide(count);
         }
         return result;
     }

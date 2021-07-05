@@ -4754,7 +4754,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         return bestMatch;
     }
 
-    private Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
+    @Override
+    public Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
         /*
          * TODO: bug5424: The code previously contained within this method has been extracted to
          * findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea for public use. Investigate whether a more

@@ -148,7 +148,8 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
 
     private void exportEvents(RacingEventService racingEventService, Connection connection) throws SQLException {
         final PreparedStatement insertEvents = connection.prepareStatement(
-                "INSERT INTO SAILING.\"Event\" (\"id\", \"name\", \"startDate\", \"endDate\", \"venue\", \"isListed\", \"description\") VALUES (?, ?, ?, ?, ?, ?, ?);");
+                "INSERT INTO SAILING.\"Event\" (\"id\", \"name\", \"startDate\", \"endDate\", \"venue\", \"isListed\", \"description\", \"location\") "+
+                "VALUES (?, ?, ?, ?, ?, ?, ?, NEW ST_POINT(?));");
         for (final Event event : racingEventService.getAllEvents()) {
             insertEvents.setString(1, event.getId().toString());
             insertEvents.setString(2, event.getName());
@@ -157,6 +158,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             insertEvents.setString(5, event.getVenue().getName());
             insertEvents.setBoolean(6, event.isPublic());
             insertEvents.setString(7, event.getDescription());
+            insertEvents.setString(8, "POINT(49.5 -2.4)");
             insertEvents.execute();
         }
     }
@@ -164,8 +166,8 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     private void exportRaces(RacingEventService racingEventService, Connection connection) throws SQLException {
         final TimePoint now = TimePoint.now();
         final PreparedStatement insertRegattas = connection.prepareStatement(
-                "INSERT INTO SAILING.\"Regatta\" (\"name\", \"boatClass\", \"scoringScheme\", \"rankingMetric\") "+
-                                       "VALUES (?, ?, ?, ?);");
+                "INSERT INTO SAILING.\"Regatta\" (\"name\", \"boatClass\", \"scoringScheme\", \"rankingMetric\", \"eventId\") "+
+                                       "VALUES (?, ?, ?, ?, ?);");
         final PreparedStatement insertRaces = connection.prepareStatement(
                 "INSERT INTO SAILING.\"Race\" (\"name\", \"regatta\", \"raceColumn\", \"fleet\", \"startOfTracking\", "+
                                        "\"startOfRace\", \"endOfTracking\", \"endOfRace\", \"avgWindSpeedInKnots\") "+
@@ -195,31 +197,34 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                                        "\"lowestSpeedInKnots\", \"toSide\") "+
                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
         for (final Regatta regatta : racingEventService.getAllRegattas()) {
+            final Leaderboard leaderboard = racingEventService.getLeaderboardByName(regatta.getName());
+            final Event event = racingEventService.findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard);
             insertRegattas.setString(1, regatta.getName());
             insertRegattas.setString(2, regatta.getBoatClass().getName());
             insertRegattas.setString(3, regatta.getScoringScheme().getType().name());
             insertRegattas.setString(4, regatta.getRankingMetricType().name());
+            insertRegattas.setString(5, event == null ? null : event.getId().toString());
             insertRegattas.execute();
-            final Leaderboard leaderboard = racingEventService.getLeaderboardByName(regatta.getName());
             if (leaderboard != null) {
                 for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     for (final Competitor competitor : raceColumn.getAllCompetitors()) {
                         parameterizeInsertRaceResult(insertRaceResults, now, competitor, leaderboard, raceColumn, regatta);
-                        insertRaceResults.execute();
+                        insertRaceResults.addBatch();
                     }
+                    insertRaceResults.executeBatch();
                     for (final Fleet fleet : raceColumn.getFleets()) {
                         final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                         if (trackedRace != null) {
                             final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(now);
                             final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(now);
                             parameterizeInsertRacesStatement(insertRaces, regatta, raceColumn, fleet, trackedRace);
-                            insertRaces.execute();
+                            insertRaces.addBatch();
                             for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
                                 parameterizeInsertLegsStatement(insertLegs, now, regatta, trackedRace, trackedLeg);
-                                insertLegs.execute();
+                                insertLegs.addBatch();
                                 for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
                                     parameterizeInsertLegStatsStatement(insertLegStats, now, trackedLeg.getTrackedLeg(competitor), rankingInfo, cache);
-                                    insertLegStats.execute();
+                                    insertLegStats.addBatch();
                                 }
                             }
                         }
@@ -227,7 +232,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                         if (trackedRace != null) {
                             for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
                                 parameterizeInsertRaceStats(insertRaceStats, now, startWaypoint, competitor, trackedRace);
-                                insertRaceStats.execute();
+                                insertRaceStats.addBatch();
                                 final LinkedHashMap<TimePoint, Maneuver> timepointUniqueManeuvers = new LinkedHashMap<>();
                                 for (final Maneuver maneuver : trackedRace.getManeuvers(competitor, /* waitForLatest */ false)) {
                                     if (maneuver.getType() == ManeuverType.TACK || maneuver.getType() == ManeuverType.JIBE || maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
@@ -238,10 +243,14 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                                     parameterizeInsertManeuvers(insertManeuvers, competitor, maneuver, trackedRace);
                                     insertManeuvers.addBatch();
                                 }
-                                insertManeuvers.executeBatch();
                             }
                         }
                     }
+                    insertRaces.executeBatch();
+                    insertLegs.executeBatch();
+                    insertLegStats.executeBatch();
+                    insertRaceStats.executeBatch();
+                    insertManeuvers.executeBatch();
                 }
             }
         }
