@@ -115,7 +115,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         assertNull(new AbortingFlagFinder(raceLog).analyze());
         when(tractracRace.getStatus()).thenReturn(RaceStatusType.ABANDONED);
         final TimePoint abandonTimePoint = startOfPass.plus(Duration.ONE_MINUTE);
-        when(tractracRace.getStatusTime()).thenReturn(abandonTimePoint.asMillis());
+        when(tractracRace.getStatusLastChangedTime()).thenReturn(abandonTimePoint.asMillis());
         reconciler.reconcileRaceStatus(tractracRace, trackedRace);
         final RaceLogFlagEvent abandonFlagEvent = new AbortingFlagFinder(raceLog).analyze();
         assertNotNull(abandonFlagEvent);
@@ -125,7 +125,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         // now change status back to START
         when(tractracRace.getStatus()).thenReturn(RaceStatusType.START);
         final TimePoint restartTimePoint = startOfPass.plus(Duration.ONE_MINUTE.times(2));
-        when(tractracRace.getStatusTime()).thenReturn(restartTimePoint.asMillis());
+        when(tractracRace.getStatusLastChangedTime()).thenReturn(restartTimePoint.asMillis());
         reconciler.reconcileRaceStatus(tractracRace, trackedRace);
         final RaceLogFlagEvent newAbandonFlagEvent = new AbortingFlagFinder(raceLog).analyze();
         assertNull(newAbandonFlagEvent);
@@ -141,7 +141,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         raceLog.add(new RaceLogPassChangeEventImpl(manualAbortTimePoint, author, /* pass id */ 2));
         when(tractracRace.getStatus()).thenReturn(RaceStatusType.GENERAL_RECALL);
         final TimePoint generalRecallTimePoint = manualAbortTimePoint.plus(Duration.ONE_MINUTE);
-        when(tractracRace.getStatusTime()).thenReturn(generalRecallTimePoint.asMillis());
+        when(tractracRace.getStatusLastChangedTime()).thenReturn(generalRecallTimePoint.asMillis());
         reconciler.reconcileRaceStatus(tractracRace, trackedRace);
         final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
         final RaceLogFlagEvent generalRecallFlagEvent = abortingFlagFinder.analyze();
@@ -163,7 +163,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         raceLog.add(new RaceLogPassChangeEventImpl(manualAbortTimePoint, author, /* pass id */ 2));
         when(tractracRace.getStatus()).thenReturn(RaceStatusType.GENERAL_RECALL);
         final TimePoint generalRecallTimePoint = manualAbortTimePoint.minus(Duration.ONE_MINUTE.times(2));
-        when(tractracRace.getStatusTime()).thenReturn(generalRecallTimePoint.asMillis());
+        when(tractracRace.getStatusLastChangedTime()).thenReturn(generalRecallTimePoint.asMillis());
         reconciler.reconcileRaceStatus(tractracRace, trackedRace);
         final AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
         final RaceLogFlagEvent abortFlagEvent = abortingFlagFinder.analyze();
@@ -182,7 +182,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
     public void testIRMUpdateFromTracTracMapsToRaceLogCompetitorResult() {
         // emulate we received a BFD for a competitor a second after the start of the pass
         final TimePoint resultTimePoint = startOfPass.plus(Duration.ONE_SECOND);
-        when(tractracRaceCompetitor.getStatusTime()).thenReturn(resultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(resultTimePoint.asMillis());
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.BFD);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
@@ -193,7 +193,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         }
         // now simulate an "outdated" TracTrac event and assert that it has no impact on a newer result:
         final TimePoint outdatedResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.divide(2));
-        when(tractracRaceCompetitor.getStatusTime()).thenReturn(outdatedResultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(outdatedResultTimePoint.asMillis());
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.DNF);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
@@ -204,7 +204,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         }
         // now simulate a newer TracTrac event and assert that it updates the result:
         final TimePoint newerResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(2));
-        when(tractracRaceCompetitor.getStatusTime()).thenReturn(newerResultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(newerResultTimePoint.asMillis());
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.DNC);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
@@ -215,7 +215,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         }
         // now simulate a yet newer TracTrac event that is expected to reset the "IRM" / MaxPointsReason:
         final TimePoint yetNewerResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(3));
-        when(tractracRaceCompetitor.getStatusTime()).thenReturn(yetNewerResultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(yetNewerResultTimePoint.asMillis());
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.NO_DATA);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
@@ -230,7 +230,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
     public void testOfficialRankUpdateToRaceLogCompetitorResult() {
         // emulate we received a valid official rank for a competitor a second after the start of the pass
         final TimePoint resultTimePoint = startOfPass.plus(Duration.ONE_SECOND);
-        when(tractracRaceCompetitor.getStatusTime()).thenReturn(resultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(resultTimePoint.asMillis());
         when(tractracRaceCompetitor.getOfficialRank()).thenReturn(42);
         when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.NO_DATA);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
@@ -243,7 +243,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         }
         // now simulate an "outdated" TracTrac event and assert that it has no impact on a newer result:
         final TimePoint outdatedResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.divide(2));
-        when(tractracRaceCompetitor.getStatusTime()).thenReturn(outdatedResultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(outdatedResultTimePoint.asMillis());
         when(tractracRaceCompetitor.getOfficialRank()).thenReturn(43);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
@@ -255,7 +255,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         }
         // now simulate a newer TracTrac event and assert that it updates the result:
         final TimePoint newerResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(2));
-        when(tractracRaceCompetitor.getStatusTime()).thenReturn(newerResultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(newerResultTimePoint.asMillis());
         when(tractracRaceCompetitor.getOfficialRank()).thenReturn(44);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {
@@ -267,7 +267,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         }
         // now simulate a yet newer TracTrac event that resets the official rank to 0, stating that there is no official rank yet
         final TimePoint yetNewerResultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(3));
-        when(tractracRaceCompetitor.getStatusTime()).thenReturn(yetNewerResultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(yetNewerResultTimePoint.asMillis());
         when(tractracRaceCompetitor.getOfficialRank()).thenReturn(0);
         reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
         {

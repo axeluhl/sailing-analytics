@@ -630,7 +630,10 @@ public abstract class AbstractSailMasterConnector extends SailMasterTransceiverI
                 devicesNamesStartIndex = 2;
             }
             marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]),
-                    Arrays.asList(markDetails).subList(devicesNamesStartIndex, markDetails.length).stream().map(idAsString->UUIDHelper.tryUuidConversion(idAsString)).collect(Collectors.toList()),
+                    Arrays.asList(markDetails).subList(devicesNamesStartIndex, markDetails.length).stream()
+                        .filter(idAsString->Util.hasLength(idAsString))
+                        .map(idAsString->UUIDHelper.tryUuidConversion(idAsString))
+                        .collect(Collectors.toList()),
                     markType));
         }
         return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);

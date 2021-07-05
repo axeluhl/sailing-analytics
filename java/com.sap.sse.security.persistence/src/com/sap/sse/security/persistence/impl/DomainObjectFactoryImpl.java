@@ -34,12 +34,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         sessionsCollection.find().forEach((Document sessionDocument)->{
             final String cacheName = sessionDocument.getString(FieldNames.CACHE_NAME.name());
             final Session session = loadSession(sessionDocument);
-            if (new MillisecondsTimePoint(session.getLastAccessTime()).plus(new MillisecondsDurationImpl(session.getTimeout())).before(MillisecondsTimePoint.now())) {
-                // expired
-                logger.info("Session "+session+" expired");
-                expiredSessionIds.add(session.getId());
-            } else {
-                Util.addToValueSet(sessionsByCacheName, cacheName, session);
+            if (!session.getAttributeKeys().isEmpty()) { // ignore sessions without state
+                if (new MillisecondsTimePoint(session.getLastAccessTime()).plus(new MillisecondsDurationImpl(session.getTimeout())).before(MillisecondsTimePoint.now())) {
+                    // expired
+                    logger.info("Session "+session+" expired");
+                    expiredSessionIds.add(session.getId());
+                } else {
+                    Util.addToValueSet(sessionsByCacheName, cacheName, session);
+                }
             }
         });
         final Document filter = new Document("$in", Util.map(expiredSessionIds, id->id.toString()));

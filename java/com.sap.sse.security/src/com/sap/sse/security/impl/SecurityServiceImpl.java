@@ -662,8 +662,32 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        return apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
-                displayNameOfOwnedObject));
+        final OwnershipAnnotation existingOwnership = getOwnership(objectId);
+        final User existingUserOwner;
+        final UserGroup existingTenantOwner;
+        final String existingDisplayNameOfOwnedObject;
+        final Ownership result;
+        if (existingOwnership == null || existingOwnership.getAnnotation() == null) {
+            existingUserOwner = null;
+            existingTenantOwner = null;
+        } else {
+            existingUserOwner = existingOwnership.getAnnotation().getUserOwner();
+            existingTenantOwner = existingOwnership.getAnnotation().getTenantOwner();
+        }
+        if (existingOwnership == null) {
+            existingDisplayNameOfOwnedObject = null;
+        } else {
+            existingDisplayNameOfOwnedObject = existingOwnership.getDisplayNameOfAnnotatedObject();
+        }
+        if (Util.equalsWithNull(existingDisplayNameOfOwnedObject, displayNameOfOwnedObject)
+            && existingUserOwner == userOwner
+            && existingTenantOwner == tenantOwner) {
+            result = existingOwnership.getAnnotation();
+        } else {
+            result = apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
+                    displayNameOfOwnedObject));
+        }
+        return result;
     }
     
     @Override
@@ -1213,7 +1237,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
         QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
-        setOwnership(qualifiedTypeIdentifier, user, null);
+        setOwnership(qualifiedTypeIdentifier, user, /* owning group */ null);
     }
 
     @Override

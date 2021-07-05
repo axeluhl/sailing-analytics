@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"Strømbesparelse"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"vælg sendeinterval for GPS-opdatering"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"Vælg så høj en værdi som muligt for at forlænge batterilevetiden, mens du stadig opretholder en rimelig liveoplevelse, afhængigt af din use case."</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"GPS-opdateringer sendes til serveren%1$s %2$s."</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"hver"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"straks"</item>
+    	<item>"5. sekund"</item>
+    	<item>"10. sekund"</item>
+    	<item>"20. sekund"</item>
+    	<item>"60. sekund"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Til"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Fra"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Visning: Magnetisk"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Visning: Sand"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Pejling"</string>
+</resources>

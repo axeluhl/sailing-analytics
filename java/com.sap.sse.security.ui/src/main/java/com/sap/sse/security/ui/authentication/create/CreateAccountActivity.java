@@ -98,7 +98,8 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
         private String username, fullName, locale, company, email, password, passwordConfirmation;
         
         private boolean validate() {
-            String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
+            String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation,
+                    /* tolerateLeadingOrTrailingSpacesInUsername */ false);
             boolean isValid = errorMessage == null || errorMessage.isEmpty();
             view.setErrorMessage(isValid ? null : errorMessage);
             view.getCreateAccountControl().setEnabled(isValid);

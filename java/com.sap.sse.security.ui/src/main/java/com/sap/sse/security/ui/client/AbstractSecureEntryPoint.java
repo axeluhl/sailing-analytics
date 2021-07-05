@@ -50,5 +50,4 @@ public abstract class AbstractSecureEntryPoint<S extends StringMessages> extends
     public SubscriptionServiceFactory getSubscriptionServiceFactory() {
         return securityProvider.getSubscriptionServiceFactory();
     }
-
 }

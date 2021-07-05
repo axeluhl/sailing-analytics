@@ -276,6 +276,10 @@ public interface TrackedLeg extends Serializable {
 
     Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
+    /**
+     * The true wind angle (TWA) for the leg; a perfect upwind leg would have 0deg as its TWA; a perfect downwind leg
+     * would have 180deg as its TWA.
+     */
     Bearing getTWA(TimePoint at) throws NoWindException;
     
     /**

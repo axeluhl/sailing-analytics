@@ -439,8 +439,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private boolean orientationChangeInProgress;
     
-    private final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
     private final NumberFormat numberFormatNoDecimal = NumberFormatterFactory.getDecimalFormat(0);
+    private final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
+    private final NumberFormat numberFormatTwoDecimals = NumberFormatterFactory.getDecimalFormat(2);
     
     /**
      * The competitor for which the advantage line is currently showing. Should this competitor's quick rank change, or
@@ -792,12 +793,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false, showSatelliteLayer);
                 map = new MapWidget(mapOptions);
                 rootPanel.add(map, 0, 0);
-                if (showHeaderPanel) {
-                    final Image sapLogo = createSAPLogo();
-                    if (ClientConfiguration.getInstance().isBrandingActive()) {
-                        rootPanel.add(sapLogo);
-                    }
-                }
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
                 adjustLeftControlsIndent();
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
@@ -938,6 +933,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 metricOverlay.addToMap();
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
+                    if (ClientConfiguration.getInstance().isBrandingActive()) {
+                        getLeftHeaderPanel().insert(createSAPLogo(), 0);
+                    }
                 }
                 if (shareLinkAction != null) {
                     final Button shareLinkButton = createShareLinkButton(map);
@@ -1136,11 +1134,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             switch (windSource.getType()) {
             case EXPEDITION:
             case WINDFINDER:
-                // we filter out measured wind sources with very low confidence
-                if (windTrackInfoDTO.minWindConfidence > 0.0001) {
-                    windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource,
-                            windTrackInfoDTO));
-                }
+                windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                 break;
             case COMBINED:
                 showCombinedWindOnMap(windSource, windTrackInfoDTO);
@@ -1166,6 +1160,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, selectedDetailType,
                 selectedDetailTypeChanged);
         // draw the wind into the map, get the combined wind
+        // TODO bug5586 shouldn't we extend this to fetch the one decisive averaged fix from *all* relevant sources?
+        // TODO bug5586 Then we could push the wind data received here into the WindInfoForRaceVectorField instance providing the data and
+        // TODO bug5586 interpolation for the streamlet overlay if switched on.
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
         windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
@@ -1832,7 +1829,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     double rotatedBearingDeg1 = 0.0;
                     double rotatedBearingDeg2 = 0.0;
                     if (lastBoatFix.legType == null) {
-                        GWT.log("no legType to display advantage line");
+                        GWT.log("no legType to display advantage line; competitor was "+visibleLeaderInfo.getB().getName()+
+                                ", fix from "+lastBoatFix.timepoint);
                     } else {
                         switch (lastBoatFix.legType) {
                         case UPWIND:
@@ -2097,11 +2095,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 sb.append('\n');
                 sb.append(numberFormatNoDecimal.format(
                         Math.abs(position1DTO.getDistance(position2DTO).getMeters()))+stringMessages.metersUnit());
+                sb.append(" (");
+                sb.append(numberFormatTwoDecimals.format(
+                        Math.abs(position1DTO.getDistance(position2DTO).getNauticalMiles()))+"NM");
+                sb.append(")\n");
+                final double legBearingDeg = position1DTO.getBearingGreatCircle(position2DTO).getDegrees();
+                sb.append(NumberFormatterFactory.getThreeDigitDecimalFormat(0).format(legBearingDeg)+stringMessages.degreesUnit());
                 if (lastCombinedWindTrackInfoDTO != null) {
                     final WindTrackInfoDTO windTrackAtLegMiddle = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(zeroBasedIndexOfStartWaypoint);
                     if (windTrackAtLegMiddle != null && windTrackAtLegMiddle.windFixes != null && !windTrackAtLegMiddle.windFixes.isEmpty()) {
                         WindDTO windAtLegMiddle = windTrackAtLegMiddle.windFixes.get(0);
-                        final double legBearingDeg = position1DTO.getBearingGreatCircle(position2DTO).getDegrees();
                         final String diff = numberFormatOneDecimal.format(
                                 Math.min(Math.abs(windAtLegMiddle.dampenedTrueWindBearingDeg-legBearingDeg),
                                                      Math.abs(windAtLegMiddle.dampenedTrueWindFromDeg-legBearingDeg)));
@@ -3270,12 +3273,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Image createSAPLogo() {
         ImageResource sapLogoResource = resources.sapLogoOverlay();
         Image sapLogo = new Image(sapLogoResource);
-        sapLogo.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.open(stringMessages.sapAnalyticsURL(), "_blank", null);
-            }
-        });
+        sapLogo.addClickHandler(event -> Window.open(stringMessages.sapAnalyticsURL(), "_blank", null));
         sapLogo.setStyleName("raceBoard-Logo");
         sapLogo.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "raceBoardSapLogo");
         return sapLogo;

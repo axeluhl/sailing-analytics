@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -36,8 +36,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LocalServerManagementPanel extends SimplePanel {
-
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
@@ -88,10 +87,8 @@ public class LocalServerManagementPanel extends SimplePanel {
                 .create(userService.getUserManagementWriteService(), type, updateCallback, stringMessages);
         final EditACLDialog.DialogConfig<ServerInfoDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementWriteService(), type, updateCallback, stringMessages);
-
         final Predicate<DefaultActions> permissionCheck = action -> currentServerInfo != null
                 && userService.hasPermission(type.getPermission(action), currentServerInfo.getOwnership());
-
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, type);
         buttonPanel.addAction(stringMessages.actionChangeOwnership(), () -> permissionCheck.test(CHANGE_OWNERSHIP),
                 () -> configOwner.openOwnershipDialog(currentServerInfo));
@@ -129,7 +126,6 @@ public class LocalServerManagementPanel extends SimplePanel {
         final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
                 publicServer, selfServiceServer, null);
         isSelfServiceServerCheckbox.getElement().setAttribute("updating", "true");
-
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
