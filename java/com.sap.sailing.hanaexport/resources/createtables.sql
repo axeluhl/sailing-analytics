@@ -84,6 +84,8 @@ CREATE TABLE SAILING."RaceStats" (
         "numberOfPenaltyCircles"                INTEGER,
         "startDelayInSeconds"                   DECIMAL(10, 2),
         "distanceFromStartLineInMetersAtStart"  DECIMAL(10, 2),
+        "speedWhenCrossingStartLineInKnots"     DECIMAL(10, 2),
+        "startTack"     NVARCHAR(20),
         PRIMARY KEY ("race", "regatta", "competitorId"),
         FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id"),
         FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")
@@ -112,6 +114,26 @@ CREATE TABLE SAILING."LegStats" (
         "avgVelocityMadeGoodInKnots"            DECIMAL(10, 2),
         "gapToLeaderInSeconds"                  DECIMAL(10, 2),
         PRIMARY KEY ("race", "regatta", "number", "competitorId"),
+        FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id"),
+        FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")
+);
+CREATE TABLE SAILING."Maneuver" (
+        "race"          NVARCHAR(255)    NOT NULL,
+        "regatta"       NVARCHAR(255)    NOT NULL,
+        "competitorId"  NVARCHAR(36)     NOT NULL,
+        "timepoint"     TIMESTAMP        NOT NULL,
+        "type"          NVARCHAR(20)     NOT NULL,
+        "newTack"       NVARCHAR(20),
+        "lossInMeters"  DECIMAL(10, 2),
+        "speedBeforeInKnots"                    DECIMAL(10, 2),
+        "speedAfterInKnots"                     DECIMAL(10, 2),
+        "courseBeforeInTrueDegrees"             DECIMAL(10, 2),
+	"courseAfterInTrueDegrees"              DECIMAL(10, 2),
+        "directionChangeInDegrees"              DECIMAL(10, 2),
+        "maximumTurningRateInDegreesPerSecond"  DECIMAL(10, 2),
+        "lowestSpeedInKnots"                    DECIMAL(10, 2),
+        "toSide"        NVARCHAR(20),
+        PRIMARY KEY ("race", "regatta", "competitorId", "timepoint"),
         FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id"),
         FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")
 );

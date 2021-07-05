@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.NavigableSet;
 import java.util.logging.Logger;
 
@@ -32,6 +33,7 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
@@ -175,8 +177,9 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         final PreparedStatement insertRaceStats = connection.prepareStatement(
                 "INSERT INTO SAILING.\"RaceStats\" (\"race\", \"regatta\", \"competitorId\", \"rankOneBased\", \"distanceSailedInMeters\", \"elapsedTimeInSeconds\", "+
                                        "\"avgCrossTrackErrorInMeters\", \"absoluteAvgCrossTrackErrorInMeters\", \"numberOfTacks\", "+
-                                       "\"numberOfGybes\", \"numberOfPenaltyCircles\", \"startDelayInSeconds\", \"distanceFromStartLineInMetersAtStart\") "+
-                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                                       "\"numberOfGybes\", \"numberOfPenaltyCircles\", \"startDelayInSeconds\", \"distanceFromStartLineInMetersAtStart\", "+
+                                       "\"speedWhenCrossingStartLineInKnots\", \"startTack\") "+
+                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
         final PreparedStatement insertLegs = connection.prepareStatement(
                 "INSERT INTO SAILING.\"Leg\" (\"race\", \"regatta\", \"number\", \"type\") "+
                                        "VALUES (?, ?, ?, ?);");
@@ -185,6 +188,12 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                                        "\"avgCrossTrackErrorInMeters\", \"absoluteAvgCrossTrackErrorInMeters\", \"numberOfTacks\", "+
                                        "\"numberOfGybes\", \"numberOfPenaltyCircles\", \"avgVelocityMadeGoodInKnots\", \"gapToLeaderInSeconds\") "+
                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+        final PreparedStatement insertManeuvers = connection.prepareStatement(
+                "INSERT INTO SAILING.\"Maneuver\" (\"race\", \"regatta\", \"competitorId\", \"timepoint\", \"type\", \"newTack\", "+
+                                       "\"lossInMeters\", \"speedBeforeInKnots\", \"speedAfterInKnots\", "+
+                                       "\"courseBeforeInTrueDegrees\", \"courseAfterInTrueDegrees\", \"directionChangeInDegrees\", \"maximumTurningRateInDegreesPerSecond\", "+
+                                       "\"lowestSpeedInKnots\", \"toSide\") "+
+                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
         for (final Regatta regatta : racingEventService.getAllRegattas()) {
             insertRegattas.setString(1, regatta.getName());
             insertRegattas.setString(2, regatta.getBoatClass().getName());
@@ -219,12 +228,47 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                             for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
                                 parameterizeInsertRaceStats(insertRaceStats, now, startWaypoint, competitor, trackedRace);
                                 insertRaceStats.execute();
+                                final LinkedHashMap<TimePoint, Maneuver> timepointUniqueManeuvers = new LinkedHashMap<>();
+                                for (final Maneuver maneuver : trackedRace.getManeuvers(competitor, /* waitForLatest */ false)) {
+                                    if (maneuver.getType() == ManeuverType.TACK || maneuver.getType() == ManeuverType.JIBE || maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
+                                        timepointUniqueManeuvers.put(maneuver.getTimePoint(), maneuver);
+                                    }
+                                }
+                                for (final Maneuver maneuver : timepointUniqueManeuvers.values()) {
+                                    parameterizeInsertManeuvers(insertManeuvers, competitor, maneuver, trackedRace);
+                                    insertManeuvers.addBatch();
+                                }
+                                insertManeuvers.executeBatch();
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    private void parameterizeInsertManeuvers(PreparedStatement insertManeuvers, Competitor competitor, Maneuver maneuver, TrackedRace trackedRace) throws SQLException {
+        insertManeuvers.setString(1, trackedRace.getRace().getName());
+        insertManeuvers.setString(2, trackedRace.getTrackedRegatta().getRegatta().getName());
+        insertManeuvers.setString(3, competitor.getId().toString());
+        insertManeuvers.setDate(4, new Date(maneuver.getTimePoint().asMillis()));
+        insertManeuvers.setString(5, maneuver.getType().name());
+        insertManeuvers.setString(6, maneuver.getNewTack().name());
+        if (maneuver.getManeuverLoss() != null) {
+            insertManeuvers.setDouble(7,
+                    maneuver.getManeuverLoss().getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle().getMeters()
+                    -maneuver.getManeuverLoss().getDistanceSailedProjectedOnMiddleManeuverAngle().getMeters());
+        } else {
+            insertManeuvers.setDouble(7, 0);
+        }
+        insertManeuvers.setDouble(8, maneuver.getSpeedWithBearingBefore().getKnots());
+        insertManeuvers.setDouble(9, maneuver.getSpeedWithBearingAfter().getKnots());
+        insertManeuvers.setDouble(10, maneuver.getSpeedWithBearingBefore().getBearing().getDegrees());
+        insertManeuvers.setDouble(11, maneuver.getSpeedWithBearingAfter().getBearing().getDegrees());
+        insertManeuvers.setDouble(12, maneuver.getDirectionChangeInDegrees());
+        insertManeuvers.setDouble(13, maneuver.getMaxTurningRateInDegreesPerSecond());
+        insertManeuvers.setDouble(14, maneuver.getLowestSpeed().getKnots());
+        insertManeuvers.setString(15, maneuver.getToSide().name());
     }
 
     private void parameterizeInsertLegStatsStatement(PreparedStatement insertLegStats, TimePoint now,
@@ -285,27 +329,40 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         insertRaceStats.setInt(11, Util.size(Util.filter(maneuvers, m->m.getType() == ManeuverType.PENALTY_CIRCLE)));
         final TimePoint startOfRace = trackedRace.getStartOfRace();
         final double startDelay;
+        Tack startTack;
         if (startWaypoint != null && startOfRace != null) {
             NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
             trackedRace.lockForRead(competitorMarkPassings);
             try {
                 if (!Util.isEmpty(competitorMarkPassings)) {
                     final MarkPassing competitorStartMarkPassing = competitorMarkPassings.iterator().next();
-                    startDelay = secondsOr0ForNull(startOfRace.until(competitorStartMarkPassing.getTimePoint()));
+                    final TimePoint competitorStartTime = competitorStartMarkPassing.getTimePoint();
+                    startDelay = secondsOr0ForNull(startOfRace.until(competitorStartTime));
+                    try {
+                        startTack = trackedRace.getTack(competitor, competitorStartTime);
+                    } catch (NoWindException e) {
+                        startTack = null;
+                    }
                 } else {
                     startDelay = 0;
+                    startTack = null;
                 }
             } finally {
                 trackedRace.unlockAfterRead(competitorMarkPassings);
             }
         } else {
             startDelay = 0;
+            startTack = null;
         }
         insertRaceStats.setDouble(12, startDelay);
         if (startOfRace != null) {
             insertRaceStats.setDouble(13, metersOr0ForNull(trackedRace.getDistanceToStartLine(competitor, startOfRace)));
+            final Speed speedWhenCrossingStartLine = trackedRace.getSpeedWhenCrossingStartLine(competitor);
+            insertRaceStats.setDouble(14, speedWhenCrossingStartLine==null?0:speedWhenCrossingStartLine.getKnots());
+            insertRaceStats.setString(15, startTack==null?null:startTack.name());
         } else {
             insertRaceStats.setDouble(13, 0);
+            insertRaceStats.setDouble(14, 0);
         }
     }
 
