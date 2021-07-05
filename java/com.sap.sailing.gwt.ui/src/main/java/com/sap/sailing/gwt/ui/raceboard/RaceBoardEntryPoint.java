@@ -170,7 +170,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
                 raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(),
                 createSailingServiceWriteInstance() /* create write instance for later admin usage */,
-                raceboardContextDefinition);
+                raceboardContextDefinition, getSubscriptionServiceFactory());
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
         if (raceBoardMode != null) {
             raceBoardMode.getMode().applyTo(raceBoardPerspective);

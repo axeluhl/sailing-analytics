@@ -45,6 +45,8 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomType
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class StartAnalysisCard extends Composite implements HasWidgets, StartAnalysisPageChangeListener {
 
@@ -76,6 +78,8 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
     private RaceMap raceMap;
 
     private final SailingServiceAsync sailingServiceAsync;
+    private final UserService userService;
+    private final SubscriptionServiceFactory subscriptionServiceFactory;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RaceCompetitorSelectionModel competitorSelectionModel;
@@ -85,9 +89,13 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
     private final String RACE_TIME_START = "00:00:00";
     
     private RaceMapResources raceMapResources;
-    
+
+
     public StartAnalysisCard(double leftCSSProperty, int cardId, StartAnalysisDTO startAnalysisDTO,
-            SailingServiceAsync sailingServiceAsync, ErrorReporter errorReporter, RaceMapResources raceMapResources) {
+            SailingServiceAsync sailingServiceAsync, ErrorReporter errorReporter, RaceMapResources raceMapResources,
+            SubscriptionServiceFactory subscriptionServiceFactory, UserService userService) {
+        this.userService = userService;
+        this.subscriptionServiceFactory = subscriptionServiceFactory;
         stringMessages = StringMessages.INSTANCE;
         this.sailingServiceAsync = sailingServiceAsync;
         this.errorReporter = errorReporter;
@@ -182,7 +190,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 sailingServiceAsync, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
                 startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true,
-                new DefaultQuickFlagDataProvider(), null);
+                new DefaultQuickFlagDataProvider(), userService, subscriptionServiceFactory);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);
