@@ -29,8 +29,8 @@ CREATE COLUMN TABLE SAILING."Regatta" (
 	"boatClass" NVARCHAR(20) NOT NULL,
 	"scoringScheme" NVARCHAR(255) NOT NULL,
 	"rankingMetric" NVARCHAR(255) NOT NULL,
-	FOREIGN KEY ("boatClass") REFERENCES "BoatClass" ("id"),
-	FOREIGN KEY ("scoringScheme") REFERENCES "ScoringScheme" ("id")
+	FOREIGN KEY ("boatClass") REFERENCES SAILING."BoatClass" ("id"),
+	FOREIGN KEY ("scoringScheme") REFERENCES SAILING."ScoringScheme" ("id")
 );
 CREATE COLUMN TABLE SAILING."Race" (
 	"name" NVARCHAR(255) NOT NULL,
@@ -43,7 +43,7 @@ CREATE COLUMN TABLE SAILING."Race" (
 	"endOfRace" TIMESTAMP NOT NULL,
 	"avgWindSpeedInKnots" DECIMAL(5, 3),
 	PRIMARY KEY ("name", "regatta"),
-	FOREIGN KEY ("regatta") REFERENCES "Regatta" ("name")
+	FOREIGN KEY ("regatta") REFERENCES SAILING."Regatta" ("name")
 );
 CREATE TABLE SAILING."Competitor" (
         "id"            NVARCHAR(36)    PRIMARY KEY,
@@ -57,8 +57,8 @@ CREATE TABLE SAILING."CompetitorRace" (
         "race"          NVARCHAR(255),
         "regatta"	NVARCHAR(255),
         PRIMARY KEY ("competitorId", "race"),
-        FOREIGN KEY ("competitorId")    REFERENCES "Competitor" ("id"),
-        FOREIGN KEY ("race", "regatta") REFERENCES "Race" ("name", "regatta")
+        FOREIGN KEY ("competitorId")    REFERENCES SAILING."Competitor" ("id"),
+        FOREIGN KEY ("race", "regatta") REFERENCES SAILING."Race" ("name", "regatta")
 );
 CREATE TABLE SAILING."RaceResult" (
         "regatta"       NVARCHAR(255)    NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE SAILING."RaceResult" (
         "discarded"	BOOLEAN,
         "irm"           NVARCHAR(4),
         PRIMARY KEY ("regatta", "raceColumn", "competitorId"),
-        FOREIGN KEY ("competitorId")            REFERENCES "Competitor" ("id")
+        FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id")
 );
 CREATE TABLE SAILING."RaceStats" (
         "race"          NVARCHAR(255)    NOT NULL,
@@ -78,13 +78,40 @@ CREATE TABLE SAILING."RaceStats" (
         "distanceSailedInMeters"                DECIMAL(10, 2),
         "elapsedTimeInSeconds"                  DECIMAL(10, 2),
         "avgCrossTrackErrorInMeters"            DECIMAL(10, 2),
-        "absoluteAvGCrossTrackErrorInMeters"    DECIMAL(10, 2),
+        "absoluteAvgCrossTrackErrorInMeters"    DECIMAL(10, 2),
         "numberOfTacks"                         INTEGER,
         "numberOfGybes"                         INTEGER,
         "numberOfPenaltyCircles"                INTEGER,
         "startDelayInSeconds"                   DECIMAL(10, 2),
         "distanceFromStartLineInMetersAtStart"  DECIMAL(10, 2),
         PRIMARY KEY ("race", "regatta", "competitorId"),
-        FOREIGN KEY ("competitorId")            REFERENCES "Competitor" ("id"),
-        FOREIGN KEY ("race", "regatta")         REFERENCES "Race" ("name", "regatta")
+        FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id"),
+        FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")
+);
+CREATE TABLE SAILING."Leg" (
+        "race"          NVARCHAR(255)    NOT NULL,
+        "regatta"       NVARCHAR(255)    NOT NULL,
+        "number"        INTEGER          NOT NULL,
+        "type"          NVARCHAR(20)     NOT NULL,
+        PRIMARY KEY ("race", "regatta", "number"),
+        FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")
+);
+CREATE TABLE SAILING."LegStats" (
+        "race"          NVARCHAR(255)    NOT NULL,
+        "regatta"       NVARCHAR(255)    NOT NULL,
+        "number"        INTEGER          NOT NULL,
+        "competitorId"  NVARCHAR(36)     NOT NULL,
+        "rankOneBased"  INTEGER,
+        "distanceSailedInMeters"                DECIMAL(10, 2),
+        "elapsedTimeInSeconds"                  DECIMAL(10, 2),
+        "avgCrossTrackErrorInMeters"            DECIMAL(10, 2),
+        "absoluteAvgCrossTrackErrorInMeters"    DECIMAL(10, 2),
+        "numberOfTacks"                         INTEGER,
+        "numberOfGybes"                         INTEGER,
+        "numberOfPenaltyCircles"                INTEGER,
+        "avgVelocityMadeGoodInKnots"            DECIMAL(10, 2),
+        "gapToLeaderInSeconds"                  DECIMAL(10, 2),
+        PRIMARY KEY ("race", "regatta", "number", "competitorId"),
+        FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id"),
+        FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")
 );

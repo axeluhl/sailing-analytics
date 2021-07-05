@@ -27,20 +27,29 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.hanaexport.HanaConnectionFactory;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -165,9 +174,17 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                                        "VALUES (?, ?, ?, ?, ?, ?);");
         final PreparedStatement insertRaceStats = connection.prepareStatement(
                 "INSERT INTO SAILING.\"RaceStats\" (\"race\", \"regatta\", \"competitorId\", \"rankOneBased\", \"distanceSailedInMeters\", \"elapsedTimeInSeconds\", "+
-                                       "\"avgCrossTrackErrorInMeters\", \"absoluteAvGCrossTrackErrorInMeters\", \"numberOfTacks\", "+
+                                       "\"avgCrossTrackErrorInMeters\", \"absoluteAvgCrossTrackErrorInMeters\", \"numberOfTacks\", "+
                                        "\"numberOfGybes\", \"numberOfPenaltyCircles\", \"startDelayInSeconds\", \"distanceFromStartLineInMetersAtStart\") "+
                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+        final PreparedStatement insertLegs = connection.prepareStatement(
+                "INSERT INTO SAILING.\"Leg\" (\"race\", \"regatta\", \"number\", \"type\") "+
+                                       "VALUES (?, ?, ?, ?);");
+        final PreparedStatement insertLegStats = connection.prepareStatement(
+                "INSERT INTO SAILING.\"LegStats\" (\"race\", \"regatta\", \"number\", \"competitorId\", \"rankOneBased\", \"distanceSailedInMeters\", \"elapsedTimeInSeconds\", "+
+                                       "\"avgCrossTrackErrorInMeters\", \"absoluteAvgCrossTrackErrorInMeters\", \"numberOfTacks\", "+
+                                       "\"numberOfGybes\", \"numberOfPenaltyCircles\", \"avgVelocityMadeGoodInKnots\", \"gapToLeaderInSeconds\") "+
+                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
         for (final Regatta regatta : racingEventService.getAllRegattas()) {
             insertRegattas.setString(1, regatta.getName());
             insertRegattas.setString(2, regatta.getBoatClass().getName());
@@ -184,8 +201,18 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                     for (final Fleet fleet : raceColumn.getFleets()) {
                         final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                         if (trackedRace != null) {
+                            final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(now);
+                            final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(now);
                             parameterizeInsertRacesStatement(insertRaces, regatta, raceColumn, fleet, trackedRace);
                             insertRaces.execute();
+                            for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+                                parameterizeInsertLegsStatement(insertLegs, now, regatta, trackedRace, trackedLeg);
+                                insertLegs.execute();
+                                for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                                    parameterizeInsertLegStatsStatement(insertLegStats, now, trackedLeg.getTrackedLeg(competitor), rankingInfo, cache);
+                                    insertLegStats.execute();
+                                }
+                            }
                         }
                         final Waypoint startWaypoint = trackedRace == null ? null : trackedRace.getRace().getCourse().getFirstWaypoint();
                         if (trackedRace != null) {
@@ -197,6 +224,48 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                     }
                 }
             }
+        }
+    }
+
+    private void parameterizeInsertLegStatsStatement(PreparedStatement insertLegStats, TimePoint now,
+            TrackedLegOfCompetitor trackedLegOfCompetitor, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws SQLException {
+        insertLegStats.setString(1, trackedLegOfCompetitor.getTrackedLeg().getTrackedRace().getRace().getName());
+        insertLegStats.setString(2, trackedLegOfCompetitor.getTrackedLeg().getTrackedRace().getTrackedRegatta().getRegatta().getName());
+        insertLegStats.setInt(3, trackedLegOfCompetitor.getTrackedLeg().getLeg().getZeroBasedIndexOfStartWaypoint());
+        insertLegStats.setString(4, trackedLegOfCompetitor.getCompetitor().getId().toString());
+        insertLegStats.setInt(5, trackedLegOfCompetitor.getRank(now));
+        insertLegStats.setDouble(6, metersOr0ForNull(trackedLegOfCompetitor.getDistanceTraveled(now)));
+        insertLegStats.setDouble(7, secondsOr0ForNull(trackedLegOfCompetitor.getTime(now)));
+        insertLegStats.setDouble(8, metersOr0ForNull(trackedLegOfCompetitor.getAverageSignedCrossTrackError(now, /* waitForLatest */ false)));
+        insertLegStats.setDouble(9, metersOr0ForNull(trackedLegOfCompetitor.getAverageAbsoluteCrossTrackError(now, /* waitForLatest */ false)));
+        try {
+            insertLegStats.setInt(10, intOr0ForNull(trackedLegOfCompetitor.getNumberOfTacks(now, /* waitForLatest */ false)));
+            insertLegStats.setInt(11, intOr0ForNull(trackedLegOfCompetitor.getNumberOfJibes(now, /* waitForLatest */ false)));
+            insertLegStats.setInt(12, intOr0ForNull(trackedLegOfCompetitor.getNumberOfPenaltyCircles(now, /* waitForLatest */ false)));
+        } catch (NoWindException nwe) {
+            insertLegStats.setInt(10, 0);
+            insertLegStats.setInt(11, 0);
+            insertLegStats.setInt(12, 0);
+        }
+        final Speed vmg = trackedLegOfCompetitor.getAverageVelocityMadeGood(now);
+        insertLegStats.setDouble(13, vmg==null?0:vmg.getKnots());
+        insertLegStats.setDouble(14, secondsOr0ForNull(trackedLegOfCompetitor.getGapToLeader(now, WindPositionMode.LEG_MIDDLE, rankingInfo, cache)));
+    }
+    
+    private int intOr0ForNull(Integer i) {
+        return i==null?0:i;
+    }
+
+    private void parameterizeInsertLegsStatement(PreparedStatement insertLegs, TimePoint now, Regatta regatta, TrackedRace trackedRace, TrackedLeg trackedLeg) throws SQLException {
+        insertLegs.setString(1, trackedRace.getRace().getName());
+        insertLegs.setString(2, trackedRace.getTrackedRegatta().getRegatta().getName());
+        insertLegs.setInt(3, trackedLeg.getLeg().getZeroBasedIndexOfStartWaypoint());
+        final LegType legType;
+        try {
+            legType = trackedLeg.getLegType(now);
+            insertLegs.setString(4, legType.name());
+        } catch (NoWindException nwe) {
+            insertLegs.setString(4, null);
         }
     }
 
