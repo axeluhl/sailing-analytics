@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -158,7 +159,8 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             insertEvents.setString(5, event.getVenue().getName());
             insertEvents.setBoolean(6, event.isPublic());
             insertEvents.setString(7, event.getDescription());
-            insertEvents.setString(8, "POINT(49.5 -2.4)");
+            final Position location = event.getLocation();
+            insertEvents.setString(8, location != null ? String.format("POINT(%1.5f %1.5f)", location.getLatDeg(), location.getLngDeg()) : null);
             insertEvents.execute();
         }
     }

@@ -30,7 +30,7 @@ CREATE COLUMN TABLE SAILING."Regatta" (
 	"boatClass"     NVARCHAR(20) NOT NULL,
 	"scoringScheme" NVARCHAR(255) NOT NULL,
 	"rankingMetric" NVARCHAR(255) NOT NULL,
-	"eventId"       NVARCHAR(36)
+	"eventId"       NVARCHAR(36),
 	FOREIGN KEY ("boatClass") REFERENCES SAILING."BoatClass" ("id"),
 	FOREIGN KEY ("eventId") REFERENCES SAILING."Event" ("id"),
 	FOREIGN KEY ("scoringScheme") REFERENCES SAILING."ScoringScheme" ("id")

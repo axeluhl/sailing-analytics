@@ -9,26 +9,29 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
-import com.sap.sailing.domain.tracking.impl.MarkPositionAtTimePointCacheImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;
+    private static final Logger logger = Logger.getLogger(EventImpl.class.getName());
 
     private ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
     
@@ -132,13 +135,15 @@ public class EventImpl extends EventBaseImpl implements Event {
         final Set<Position> positionSamples = new HashSet<>();
         for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups()) {
             for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-                    if (trackedRace.getStartOfRace() != null) {
-                        final Position centerOfCourse = trackedRace.getCenterOfCourse(trackedRace.getStartOfRace());
-                        if (centerOfCourse != null) {
-                            positionSamples.add(centerOfCourse);
-                            if (positionSamples.size() >= MAX_NUMBER_OF_POSITION_SAMPLES) {
-                                return getAveragePosition(positionSamples);
+                if (Util.containsAny(leaderboard.getCourseAreas(), getVenue().getCourseAreas())) {
+                    for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                        if (trackedRace.getStartOfRace() != null) {
+                            final Position centerOfCourse = trackedRace.getCenterOfCourse(trackedRace.getStartOfRace());
+                            if (centerOfCourse != null) {
+                                positionSamples.add(centerOfCourse);
+                                if (positionSamples.size() >= MAX_NUMBER_OF_POSITION_SAMPLES) {
+                                    return getAveragePosition(positionSamples);
+                                }
                             }
                         }
                     }
@@ -147,8 +152,15 @@ public class EventImpl extends EventBaseImpl implements Event {
         }
         // try to geo-code the venue:
         final ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
-        // TODO enhance ReverseGeocoder by the use of the forward search, such as http://api.geonames.org/search?name=Kiel&username=sailtracking3, then use Placemark.ByPopulation to sort
-        return null;
+        try {
+            final Placemark placemark = geocoder.getPlacemark(getVenue().getName(), new Placemark.ByPopulation().reversed());
+            if (placemark != null) {
+                positionSamples.add(placemark.getPosition());
+            }
+        } catch (IOException | ParseException e) {
+            logger.log(Level.WARNING, "Problem while trying to resolve venue name "+getVenue().getName()+" with geocoder", e);
+        }
+        return positionSamples.isEmpty() ? null : getAveragePosition(positionSamples);
     }
 
     private Position getAveragePosition(Set<Position> positionSamples) {
