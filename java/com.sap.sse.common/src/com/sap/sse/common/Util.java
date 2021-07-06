@@ -790,15 +790,18 @@ public class Util {
 
     public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection) {
         List<T> sortedCollection = new ArrayList<>(collection);
-        Collections.sort(sortedCollection, new Comparator<T>() {
+        Collections.sort(sortedCollection, naturalNamedComparator());
+        return sortedCollection;
+    }
+    
+    public static <T extends Named> Comparator<T> naturalNamedComparator() {
+        return new Comparator<T>() {
             @Override
             public int compare(T o1, T o2) {
                 return new NaturalComparator().compare(o1.getName(), o2.getName());
             }
-        });
-        return sortedCollection;
+        };
     }
-    
     /**
      * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
      * Collections of the resulting Map are created using the given {@link Supplier} instance.

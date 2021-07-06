@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -23,7 +21,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected TextBox nameEntryField;
     protected SuggestBox boatClassEntryField;
     protected CheckBox canBoatsOfCompetitorsChangePerRaceCheckBox;
-    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO defaultEvent,
+    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, Iterable<EventDTO> existingEvents, EventDTO defaultEvent,
             String title, String okButton, final SailingServiceAsync sailingService, StringMessages stringMessages,
             Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
         super(sailingService, regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);

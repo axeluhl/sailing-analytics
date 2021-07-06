@@ -144,21 +144,21 @@ public class RegattaManagementPanel extends SimplePanel implements FilterablePan
 
     private void openCreateRegattaDialog() {
         final Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
-        sailingServiceWrite.getEvents(new AsyncCallback<List<EventDTO>>() {
+        @SuppressWarnings("unchecked")
+        final Displayer<EventDTO>[] eventDisplayer = (Displayer<EventDTO>[]) new Displayer<?>[1];
+        eventDisplayer[0] = new Displayer<EventDTO>() {
             @Override
-            public void onFailure(Throwable caught) {
-                openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
+            public void fill(Iterable<EventDTO> events) {
+                openCreateRegattaDialog(existingRegattas, events);
+                presenter.getEventsRefresher().removeDisplayer(eventDisplayer[0]);
             }
-
-            @Override
-            public void onSuccess(List<EventDTO> result) {
-                openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result));
-            }
-        });
+        };
+        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(eventDisplayer[0]);
     }
 
-    private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, final List<EventDTO> existingEvents) {
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, /*eventToSelect*/ null, sailingServiceWrite, stringMessages,
+    private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, final Iterable<EventDTO> existingEvents) {
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas,
+                existingEvents, /* eventToSelect */ null, sailingServiceWrite, stringMessages,
                 new CreateRegattaCallback(stringMessages, presenter, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
