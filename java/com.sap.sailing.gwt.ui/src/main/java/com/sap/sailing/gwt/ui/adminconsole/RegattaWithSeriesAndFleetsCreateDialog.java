@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -31,9 +32,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     protected static class RegattaParameterValidator extends AbstractRegattaParameterValidator {
         private ArrayList<RegattaDTO> existingRegattas;
 
-        public RegattaParameterValidator(StringMessages stringMessages, Collection<RegattaDTO> existingRegattas) {
+        public RegattaParameterValidator(StringMessages stringMessages, Iterable<RegattaDTO> existingRegattas) {
             super(stringMessages);
-            this.existingRegattas = new ArrayList<RegattaDTO>(existingRegattas);
+            this.existingRegattas = new ArrayList<RegattaDTO>();
+            Util.addAll(existingRegattas, this.existingRegattas);
         }
 
         @Override
@@ -106,7 +108,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
+            Iterable<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
             StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO("", ScoringSchemeType.LOW_POINT), Collections.<SeriesDTO> emptySet(), existingEvents, correspondingEvent,
                 stringMessages.addRegatta(), stringMessages.ok(), sailingService, stringMessages,

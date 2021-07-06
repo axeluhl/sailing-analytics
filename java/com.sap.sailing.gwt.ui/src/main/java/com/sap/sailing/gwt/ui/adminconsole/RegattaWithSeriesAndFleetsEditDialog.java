@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -33,7 +32,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     }
     
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
+            Iterable<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
             final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(),
                 stringMessages.ok(), sailingService, stringMessages, new RegattaParameterValidator(stringMessages), callback);
