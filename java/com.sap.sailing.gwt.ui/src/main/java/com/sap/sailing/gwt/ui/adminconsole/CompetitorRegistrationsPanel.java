@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -78,10 +79,10 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
      * @param additionalWidgetsBeforeTables widgets to be inserted above / before the competitor tables; may be {@code null} or empty
      */
     protected CompetitorRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
-            Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever,
-            boolean restrictPoolToLeaderboard, Widget... additionalWidgetsBeforeTables) {
+            Refresher<CompetitorDTO> competitorsRefresher, final StringMessages stringMessages, final ErrorReporter errorReporter,
+            boolean editable, String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass,
+            Runnable validator,
+            Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever, boolean restrictPoolToLeaderboard, Widget... additionalWidgetsBeforeTables) {
         this.errorReporter = errorReporter;
         this.restrictPoolToLeaderboard = restrictPoolToLeaderboard;
         this.validator = validator;
@@ -126,7 +127,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
                         MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
-                                sailingServiceWrite, userService, stringMessages, errorReporter);
+                                sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter);
                         CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
                                 matchCompetitorsDialogFactory, CompetitorRegistrationsPanel.this, providerNames, sailingServiceWrite,
                                 stringMessages, errorReporter);
@@ -144,10 +145,11 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         final HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
         final CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         final CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
-        allCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages,
-                errorReporter, /* multiSelection */ true, /* enablePager */ true, /* filterCompetitorWithBoat */ false,
-                /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
-        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages,
+        allCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, competitorsRefresher,
+                stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true,
+                /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
+        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
+                /* competitorsRefresher not needed; filled based on registrations */ null, stringMessages,
                 errorReporter, /* multiSelection */ true, /* enablePager */ false, /* filterCompetitorWithBoat */ false,
                 /* filterCompetitorsWithoutBoat */ false);
         registeredCompetitorsTable.getSelectionModel().addSelectionChangeHandler(event -> validateAndUpdate());
@@ -208,15 +210,15 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     }
     
     private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
-            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter) {
+            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
+            final StringMessages stringMessages, final ErrorReporter errorReporter) {
         return new MatchImportedCompetitorsDialogFactory() {
             @Override
             public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
                     final Pair<List<CompetitorDescriptor>, String> competitorDescriptorsAndHint,
                     final Iterable<CompetitorDTO> competitors) {
                 return new MatchImportedCompetitorsDialog(competitorDescriptorsAndHint.getA(), competitors, competitorDescriptorsAndHint.getB(),
-                        stringMessages, sailingServiceWrite, userService, errorReporter, importCompetitorCallback);
+                        stringMessages, sailingServiceWrite, userService, competitorsRefresher, errorReporter, importCompetitorCallback);
             }
         };
     }

@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -22,7 +23,8 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
     protected final CompetitorRegistrationsPanel competitorRegistrationsPanel;
 
     public AbstractCompetitorRegistrationDialog(SailingServiceWriteAsync sailingServiceWrite,
-            final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable,
+            final UserService userService, Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass,
             String okButtonMessage, Validator<Set<CompetitorDTO>> validator) {
@@ -33,9 +35,9 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
         this.sailingService = sailingServiceWrite;
         this.leaderboardName = leaderboardName;
         this.competitorRegistrationsPanel = new CompetitorRegistrationsPanel(sailingServiceWrite, userService,
-                stringMessages, errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
-                () -> validateAndUpdate(), getRegisteredCompetitorsRetriever(), /* restrictPoolToLeaderboard */ false,
-                getAdditionalWidgetsToInsertAboveCompetitorTables(stringMessages));
+                competitorsRefresher, stringMessages, errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace,
+                boatClass, () -> validateAndUpdate(), getRegisteredCompetitorsRetriever(),
+                /* restrictPoolToLeaderboard */ false, getAdditionalWidgetsToInsertAboveCompetitorTables(stringMessages));
     }
 
     @Override

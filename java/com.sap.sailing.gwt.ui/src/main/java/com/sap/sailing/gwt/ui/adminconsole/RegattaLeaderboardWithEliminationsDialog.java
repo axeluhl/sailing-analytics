@@ -122,12 +122,14 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         competitorEliminationPanelHolder.clear();
         StrippedLeaderboardDTO selectedRegattaLeaderboard = getSelectedLeaderboard();
         final CompetitorRegistrationsPanel[] competitorEliminationPanel = new CompetitorRegistrationsPanel[1];
-        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingServiceWrite, userService, stringMessages,
-                errorReporter, /* editable */ true, regattaLeaderboardsListBox.getValue(regattaLeaderboardsListBox.getSelectedIndex()),
+        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingServiceWrite, userService,
+                /* competitorsRefresher not required; competitor set is limited to those in leaderboard */ null,
+                stringMessages, errorReporter, /* editable */ true,
+                regattaLeaderboardsListBox.getValue(regattaLeaderboardsListBox.getSelectedIndex()),
                 selectedRegattaLeaderboard.canBoatsOfCompetitorsChangePerRace, selectedRegattaLeaderboard.boatClassName,
-                /* "validator" updates eliminatedCompetitors */ ()->eliminatedCompetitors = competitorEliminationPanel[0].getResult(),
-                getEliminatedCompetitorsRetriever(),
-                /* restrictPoolToLeaderboard */ true, /* additionalWidgetsBeforeTables */ new Label(stringMessages.selectCompetitorsToEliminate()));
+                /* "validator" updates eliminatedCompetitors */ () -> eliminatedCompetitors = competitorEliminationPanel[0].getResult(),
+                getEliminatedCompetitorsRetriever(), /* restrictPoolToLeaderboard */ true,
+                /* additionalWidgetsBeforeTables */ new Label(stringMessages.selectCompetitorsToEliminate()));
         competitorEliminationPanelHolder.add(competitorEliminationPanel[0]);
     }
 

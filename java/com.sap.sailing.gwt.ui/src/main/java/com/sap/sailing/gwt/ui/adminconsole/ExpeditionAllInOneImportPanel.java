@@ -66,7 +66,6 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
         contentPanel.add(fileUpload);
-
         final FlowPanel importModePanel = new FlowPanel();
         contentPanel.add(importModePanel);
         final HorizontalPanel regattaNamePanel = new HorizontalPanel();
@@ -108,7 +107,6 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         regattaNamePanel.setCellVerticalAlignment(regattaNameLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         final TextBox regattaName = new TextBox();
         regattaName.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_REGATTA_NAME);
-
         regattaOracle = new RegattaSuggestOracle();
         final SuggestBox regattaSuggestBox = new SuggestBox(regattaOracle, regattaName);
         regattaSuggestBox.getValueBox().getElement().getStyle().setProperty("minWidth", 30, Unit.EM);
@@ -157,7 +155,7 @@ public class ExpeditionAllInOneImportPanel extends Composite {
                         response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getLeaderboardGroupId(), 
                         response.getRaceEntries(), response.getGpsDeviceIds(), response.getSensorDeviceIds(),
                         response.getSensorFixImporterType(), response.getStartTimes(), presenter.getSailingService(), 
-                        presenter.getUserService(), presenter.getErrorReporter(), stringMessages);
+                        presenter.getUserService(), presenter.getCompetitorsRefresher(), presenter.getErrorReporter(), stringMessages);
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);
             }

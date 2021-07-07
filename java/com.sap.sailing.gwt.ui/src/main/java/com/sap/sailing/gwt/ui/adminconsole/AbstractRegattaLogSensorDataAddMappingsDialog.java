@@ -55,16 +55,15 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         this.stringMessages = stringMessages;
         deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingServiceWrite, stringMessages, errorReporter);
         deviceIdTable.removeTrackNameColumn();
-
         importWidgetHolder = new SimplePanel();
         deviceIdTable.getSelectionModel().addSelectionChangeHandler(
                 event -> deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject()));
-
         boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
-        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,
-                /* multiSelection */ false, /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
-
+        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
+                /* competitorsRefresher not needed; registrations are fetched for the leaderboard specifically */ null,
+                stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+                /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         boatTable.getSelectionModel().addSelectionChangeHandler(event -> {
             this.mappedToSelectionChanged(boatTable.getSelectionModel().getSelectedObject());
             validateAndUpdate();
@@ -73,7 +72,6 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
             this.mappedToSelectionChanged(competitorTable.getSelectionModel().getSelectedObject());
             validateAndUpdate();
         });
-
         this.leaderboardName = leaderboardName;
         getBoatRegistrations(sailingServiceWrite, errorReporter);
         getCompetitorRegistrations(sailingServiceWrite, errorReporter);

@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
@@ -69,6 +70,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     private final boolean filterCompetitorsWithBoat;
     private final boolean filterCompetitorsWithoutBoat;
+    private final Refresher<CompetitorDTO> competitorsRefresher;
     
     /**
      * @param filterCompetitorsWithBoat
@@ -82,8 +84,8 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      *            to be loaded. In this case, competitors without boat will be fetched only if this flag is
      *            {@code false}.
      */
-    public CompetitorTableWrapper(SailingServiceWriteAsync sailingServiceWrite, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
+    public CompetitorTableWrapper(SailingServiceWriteAsync sailingServiceWrite, UserService userService, Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
@@ -95,6 +97,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                         return t.getIdAsString().hashCode();
                     }
                 });
+        this.competitorsRefresher = competitorsRefresher;
         this.filterCompetitorsWithBoat = filterCompetitorsWithBoat;
         this.filterCompetitorsWithoutBoat = filterCompetitorsWithoutBoat;
         ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
@@ -365,8 +368,12 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         return filterField;
     }
     
+    /**
+     * Updates the table's data model by filtering the {@code competitors} based on the settings in the fields
+     * {@link #filterCompetitorsWithBoat} and {@link #filterCompetitorsWithoutBoat}.
+     */
     public void refreshCompetitorList(Iterable<? extends CompetitorDTO> competitors) {
-        getFilteredCompetitors(competitors);
+        getFilteredCompetitors(Util.filter(competitors, c->(!c.hasBoat() || !filterCompetitorsWithBoat) && (c.hasBoat() || !filterCompetitorsWithoutBoat)));
     }
     
     public void refreshCompetitorList(String leaderboardName) {
@@ -402,7 +409,13 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         if (leaderboardName != null) {
             sailingServiceWrite.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
-            sailingServiceWrite.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
+            if (competitorsRefresher != null) {
+                // Don't fetch from server but ask our unified data model to deliver the competitors without forcing server
+                // round-trip unless the competitors haven't been loaded at all so far
+                competitorsRefresher.callFillAndReloadInitially(competitors->myCallback.onSuccess(competitors));
+            } else {
+                sailingServiceWrite.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
+            }
         }
     }
 

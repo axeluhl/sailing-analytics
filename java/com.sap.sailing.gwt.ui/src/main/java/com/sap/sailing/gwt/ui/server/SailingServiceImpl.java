@@ -4450,8 +4450,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitors(boolean ignoreCompetitorsWithBoat,
-            boolean ignoreCompetitorsWithoutBoat) {
+    public Iterable<CompetitorDTO> getCompetitors(boolean ignoreCompetitorsWithBoat, boolean ignoreCompetitorsWithoutBoat) {
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
         final Iterable<? extends Competitor> filteredCompetitors;

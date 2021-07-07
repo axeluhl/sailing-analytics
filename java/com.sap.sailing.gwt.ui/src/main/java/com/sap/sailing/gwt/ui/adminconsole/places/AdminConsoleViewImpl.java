@@ -244,7 +244,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public void refreshAfterBecomingVisible() {
                 if (getWidget() != null) {
-                    getWidget().refreshCompetitorList();
+                    presenter.getCompetitorsRefresher().callFillAndReloadInitially(getWidget().getCompetitorsDisplayer());
                 }
             }
         }, stringMessages.competitors(), new CompetitorsPlace(null),

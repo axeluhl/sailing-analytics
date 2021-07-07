@@ -33,13 +33,13 @@ public interface Refresher<T> {
     void reloadAndCallFillOnly(Displayer<T> fillOnlyDisplayer);
 
     /**
-     * Force a reload of the data from server and call afterwards asynchronously the fill method of all registered
-     * {@link Displayer}.
+     * Force a reload of the data from server and afterwards call the fill method of all registered {@link Displayer}s
+     * asynchronously.
      */
     void reloadAndCallFillAll();
 
     /**
-     * Updates the list of DTOs and call asynchronously the fill method of all registered {@link Displayer} except an
+     * Updates the list of DTOs and call the fill method of all registered {@link Displayer}s asynchronously, except an
      * optional origin {@link Displayer} if set.
      * 
      * @param dtos
@@ -50,12 +50,12 @@ public interface Refresher<T> {
     void updateAndCallFillForAll(Iterable<T> dtos, Displayer<T> origin);
 
     /**
-     * Call fill method of given {@link Displayer} even if he is not registered. If data was not loaded before, do an
+     * Call fill method of given {@link Displayer} even if it is not registered. If data was not loaded before, do an
      * initial load and call fill method of all registered {@link Displayer} asynchronously and if not registered of the
      * given {@link Displayer}, too.
      * 
      * @param displayer
-     *            the {@link Displayer} on which the fill method should be called.
+     *            the {@link Displayer} on which the fill method shall be called.
      */
     void callFillAndReloadInitially(Displayer<T> displayer);
     

@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -97,20 +98,24 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     }
 
     public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace,
-            String raceColumnName, String fleetName, List<FleetDTO> fleets,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
-        this(sailingServiceWrite, userService, stringMessages, errorReporter, editable, callback, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
-                raceColumnName, fleetName, fleets, new Validator(stringMessages));
+            Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
+            boolean canBoatsOfCompetitorsChangePerRace, String raceColumnName, String fleetName,
+            List<FleetDTO> fleets, com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
+        this(sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter, editable, callback, leaderboardName, canBoatsOfCompetitorsChangePerRace,
+                boatClass, raceColumnName, fleetName, fleets, new Validator(stringMessages));
     }
     
-    public RaceLogCompetitorRegistrationDialog(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
+    public RaceLogCompetitorRegistrationDialog(SailingServiceWriteAsync sailingServiceWrite,
+            final UserService userService, Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
-            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String raceColumnName, String fleetName, List<FleetDTO> fleets, Validator validator) {
-        super(sailingServiceWrite, userService, stringMessages, errorReporter, editable, callback, leaderboardName, 
-                canBoatsOfCompetitorsChangePerRace, boatClass, 
-                canBoatsOfCompetitorsChangePerRace ? stringMessages.actionContinueToBoatAssignment() : stringMessages.save(), validator);
+            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String raceColumnName,
+            String fleetName, List<FleetDTO> fleets, Validator validator) {
+        super(sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter, editable, callback,
+                leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
+                canBoatsOfCompetitorsChangePerRace ? stringMessages.actionContinueToBoatAssignment()
+                        : stringMessages.save(),
+                validator);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.sailingServiceWrite = sailingServiceWrite;
