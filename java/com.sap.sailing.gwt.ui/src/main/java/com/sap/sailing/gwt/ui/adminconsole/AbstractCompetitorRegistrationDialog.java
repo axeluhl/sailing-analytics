@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
@@ -50,7 +51,7 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
         return competitorRegistrationsPanel.getResult();
     }
 
-    protected abstract Consumer<AsyncCallback<Collection<CompetitorDTO>>> getRegisteredCompetitorsRetriever();
+    protected abstract Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getRegisteredCompetitorsRetriever();
 
     protected abstract Widget[] getAdditionalWidgetsToInsertAboveCompetitorTables(StringMessages stringMessages);
 }

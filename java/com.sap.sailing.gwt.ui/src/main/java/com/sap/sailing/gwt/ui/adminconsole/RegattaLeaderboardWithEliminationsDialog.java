@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -141,7 +142,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
      * this hasn't happened before, and the result is cached locally. In the {@link #getResult()} implementation the
      * eliminations are then taken from the local state.
      */
-    protected abstract Consumer<AsyncCallback<Collection<CompetitorDTO>>> getEliminatedCompetitorsRetriever();
+    protected abstract Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getEliminatedCompetitorsRetriever();
 
     /**
      * Based on the contents of {@link #regattaLeaderboardsListBox} obtains the leaderboard from

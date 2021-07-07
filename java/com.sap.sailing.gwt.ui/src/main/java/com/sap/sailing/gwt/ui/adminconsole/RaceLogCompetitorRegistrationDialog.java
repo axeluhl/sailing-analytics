@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.ParallelExecutionCallback;
 import com.sap.sse.gwt.client.async.ParallelExecutionHolder;
@@ -140,8 +141,8 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     }
 
     @Override
-    protected Consumer<AsyncCallback<Collection<CompetitorDTO>>> getRegisteredCompetitorsRetriever() {
-        return (callback)->getRegisteredCompetitors(callback);
+    protected Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getRegisteredCompetitorsRetriever() {
+        return callback->getRegisteredCompetitors(callback);
     }
 
     /**
@@ -206,11 +207,13 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         competitorRegistrationsPanel.grayOutCompetitorsFromRegistered(competitors);
     }
 
-    private void getRegisteredCompetitors(AsyncCallback<Collection<CompetitorDTO>> callback) {
-        if (competitorRegistrationsPanel.showOnlyCompetitorsOfLog()) {
-            sailingServiceWrite.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback));
+    private void getRegisteredCompetitors(Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>> callback) {
+        // take the competitorRegistrationPanel from callback's A component because the field "competitorRegistrationsPanel" may
+        // not be initialized yet; see also https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5419#c14
+        if (callback.getA().showOnlyCompetitorsOfLog()) {
+            sailingServiceWrite.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback.getB()));
         } else {
-            sailingServiceWrite.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback));
+            sailingServiceWrite.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback.getB()));
         }
     }
     

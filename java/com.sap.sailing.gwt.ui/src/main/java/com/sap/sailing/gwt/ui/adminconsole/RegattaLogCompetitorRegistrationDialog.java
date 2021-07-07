@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -31,15 +32,15 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
     }
 
     @Override
-    protected Consumer<AsyncCallback<Collection<CompetitorDTO>>> getRegisteredCompetitorsRetriever() {
-        return (callback)->getRegisteredCompetitors(callback);
+    protected Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getRegisteredCompetitorsRetriever() {
+        return callback->getRegisteredCompetitors(callback);
     }
 
-    private void getRegisteredCompetitors(AsyncCallback<Collection<CompetitorDTO>> callback) {
-        if (competitorRegistrationsPanel.showOnlyCompetitorsOfLog()) {
-            sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName, callback);
+    private void getRegisteredCompetitors(Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>> callback) {
+        if (callback.getA().showOnlyCompetitorsOfLog()) {
+            sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName, callback.getB());
         } else {
-            sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName, callback);
+            sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName, callback.getB());
         }
     }
 
