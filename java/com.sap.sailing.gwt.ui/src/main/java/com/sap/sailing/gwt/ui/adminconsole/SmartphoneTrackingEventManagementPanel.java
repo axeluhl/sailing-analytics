@@ -88,8 +88,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
-public class SmartphoneTrackingEventManagementPanel
-        extends AbstractLeaderboardConfigPanel {
+public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel {
     private ToggleButton startStopTrackingButton;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
@@ -98,10 +97,12 @@ public class SmartphoneTrackingEventManagementPanel
     private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
     private CaptionPanel importPanel;
     private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
     
     public SmartphoneTrackingEventManagementPanel(final Presenter presenter, StringMessages stringMessages) {
         super(presenter, stringMessages, /* multiSelection */ true);
         this.competitorsRefresher = presenter.getCompetitorsRefresher();
+        this.boatsRefresher = presenter.getBoatsRefresher();
         // add upload panel
         importPanel = new CaptionPanel(stringMessages.importFixes());
         importPanel.setVisible(false);
@@ -1000,9 +1001,9 @@ public class SmartphoneTrackingEventManagementPanel
             RegattaDTO regatta = getSelectedRegatta();
             String boatClassName = regatta.boatClass.getName();
 
-            new RegattaLogBoatRegistrationDialog(boatClassName, sailingServiceWrite, userService, stringMessages,
-                    errorReporter, /* editable */true, t.getName(), t.canBoatsOfCompetitorsChangePerRace,
-                    new DialogCallback<Set<BoatDTO>>() {
+            new RegattaLogBoatRegistrationDialog(boatClassName, sailingServiceWrite, userService, boatsRefresher,
+                    stringMessages, errorReporter, /* editable */true, t.getName(),
+                    t.canBoatsOfCompetitorsChangePerRace, new DialogCallback<Set<BoatDTO>>() {
                         @Override
                         public void ok(Set<BoatDTO> registeredBoats) {
                             sailingServiceWrite.setBoatRegistrationsInRegattaLog(t.getName(), registeredBoats,

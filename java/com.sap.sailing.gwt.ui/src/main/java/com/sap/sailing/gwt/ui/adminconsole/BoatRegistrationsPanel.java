@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -67,10 +68,10 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
      *            to all boats in the server's boat store
      */
     protected BoatRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
-            Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever,
-            boolean restrictPoolToLeaderboard) {
+            Refresher<BoatDTO> boatsRefresher, final StringMessages stringMessages, final ErrorReporter errorReporter,
+            boolean editable, String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass,
+            Runnable validator,
+            Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever, boolean restrictPoolToLeaderboard) {
         this.errorReporter = errorReporter;
         this.validator = validator;
          this.busyIndicator = new SimpleBusyIndicator();
@@ -88,10 +89,12 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
         final HorizontalPanel boatRegistrationPanel = new HorizontalPanel();
         final CaptionPanel allBoatsPanel = new CaptionPanel(stringMessages.boatPool());
         final CaptionPanel registeredBoatsPanel = new CaptionPanel(stringMessages.registeredBoats());
-        allBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */true, 20, false);
-        registeredBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */false,  20, false);
+        allBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, boatsRefresher, stringMessages, /* multiSelection */
+                errorReporter, true, /* enablePager */true, 20, false);
+        registeredBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService,
+                /* boatsRefresher not needed; boats fetched for registrations */ null, stringMessages,
+                errorReporter, /* multiSelection */ true,  /* enablePager */ false, /* paging size */ 20,
+                /* allowActions */ false);
         allBoatsPanel.add(allBoatsTable);
         registeredBoatsPanel.add(registeredBoatsTable);
         VerticalPanel movePanel = new VerticalPanel();
@@ -164,7 +167,7 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
     }
 
     private void setRegisterableBoatsAndRegisteredBoats() {
-        allBoatsTable.refreshBoatList(true, new Callback<Iterable<BoatDTO>, Throwable>() {
+        allBoatsTable.refreshBoatList(/* loadOnlyStandaloneBoats */ true, new Callback<Iterable<BoatDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<BoatDTO> result) {
                 registeredBoatsRetriever.accept(new AsyncCallback<Collection<BoatDTO>>() {

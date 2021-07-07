@@ -119,9 +119,14 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     }
     
     @Override
-    public void addIfNotContained(T dto) {
-        if (dto != null && dtos != null && !dtos.contains(dto)) {
-            add(dto);
+    public void addIfNotContainedElseReplace(T dto) {
+        if (dto != null && dtos != null) {
+            final int index = dtos.indexOf(dto);
+            if (index != -1) {
+                dtos.set(index, dto);
+            } else {
+                add(dto);
+            }
         }
     }
     

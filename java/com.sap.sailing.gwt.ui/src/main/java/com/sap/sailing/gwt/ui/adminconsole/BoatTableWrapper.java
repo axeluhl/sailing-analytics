@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
@@ -45,14 +46,17 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
     private final SailingServiceWriteAsync sailingServiceWrite;
-    
-    public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, boolean allowActions) {
-        this(sailingServiceWrite, userService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE,
-                allowActions);
+    private final Refresher<BoatDTO> boatsRefresher;
+
+    public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            Refresher<BoatDTO> boatsRefresher, StringMessages stringMessages, ErrorReporter errorReporter,
+            boolean multiSelection, boolean enablePager, boolean allowActions) {
+        this(sailingServiceWrite, userService, boatsRefresher, stringMessages, errorReporter, multiSelection,
+                enablePager, DEFAULT_PAGING_SIZE, allowActions);
     }
 
-    public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            Refresher<BoatDTO> boatsRefresher, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, int pagingSize, boolean allowActions) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {
@@ -65,6 +69,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                         return t.getIdAsString().hashCode();
                     }
                 });
+        this.boatsRefresher = boatsRefresher;
         this.sailingServiceWrite = sailingServiceWrite;
         ListHandler<BoatDTO> boatColumnListHandler = getColumnSortHandler();
         // boats table
@@ -227,24 +232,36 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 }
             });
         } else {
-            sailingServiceWrite.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
+            if (boatsRefresher != null) {
+                // Don't fetch from server but ask our unified data model to deliver the boats without forcing server
+                // round-trip unless the boats haven't been loaded at all so far
+                boatsRefresher.callFillAndReloadInitially(boats->{
+                    getFilteredBoats(boats);
+                    filterBoats(boats);
                     if (callback != null) {
-                        callback.onFailure(caught);
+                        callback.onSuccess(boats);
                     }
-                }
-
-                @Override
-                public void onSuccess(Iterable<BoatDTO> result) {
-                    getFilteredBoats(result);
-                    filterBoats(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
+                });
+            } else {
+                sailingServiceWrite.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
+                        if (callback != null) {
+                            callback.onFailure(caught);
+                        }
                     }
-                }
-            });
+    
+                    @Override
+                    public void onSuccess(Iterable<BoatDTO> result) {
+                        getFilteredBoats(result);
+                        filterBoats(result);
+                        if (callback != null) {
+                            callback.onSuccess(result);
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -264,6 +281,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
                     @Override
                     public void onSuccess(BoatDTO updatedBoat) {
+                        boatsRefresher.addIfNotContainedElseReplace(updatedBoat);
                         int editedBoatIndex = getFilterField().indexOf(originalBoat);
                         getFilterField().remove(originalBoat);
                         if (editedBoatIndex >= 0){

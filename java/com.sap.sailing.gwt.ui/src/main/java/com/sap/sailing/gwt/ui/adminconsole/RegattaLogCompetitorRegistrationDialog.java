@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,15 +27,12 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace,
             Validator<Set<CompetitorDTO>> validator, com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
         super(sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter, editable, callback,
-                leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass, stringMessages.save(), validator);
+                leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass, stringMessages.save(), validator,
+                cb->getRegisteredCompetitors(sailingServiceWrite, leaderboardName, cb));
     }
 
-    @Override
-    protected Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getRegisteredCompetitorsRetriever() {
-        return callback->getRegisteredCompetitors(callback);
-    }
-
-    private void getRegisteredCompetitors(Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>> callback) {
+    private static void getRegisteredCompetitors(SailingServiceWriteAsync sailingService, String leaderboardName,
+            Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>> callback) {
         if (callback.getA().showOnlyCompetitorsOfLog()) {
             sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName, callback.getB());
         } else {

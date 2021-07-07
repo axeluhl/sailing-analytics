@@ -451,6 +451,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
 
                     @Override
                     public void onSuccess(CompetitorWithBoatDTO updatedCompetitor) {
+                        if (competitorsRefresher != null) {
+                            competitorsRefresher.addIfNotContainedElseReplace(updatedCompetitor);
+                        }
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
@@ -505,6 +508,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
 
                     @Override
                     public void onSuccess(CompetitorDTO updatedCompetitor) {
+                        if (competitorsRefresher != null) {
+                            competitorsRefresher.addIfNotContainedElseReplace(updatedCompetitor);
+                        }
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
@@ -578,6 +584,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
 
             @Override
             public void onSuccess(T addedCompetitor) {
+                if (competitorsRefresher != null) {
+                    competitorsRefresher.addIfNotContainedElseReplace(addedCompetitor);
+                }
                 getFilterField().add(addedCompetitor);
                 getDataProvider().refresh();
             }

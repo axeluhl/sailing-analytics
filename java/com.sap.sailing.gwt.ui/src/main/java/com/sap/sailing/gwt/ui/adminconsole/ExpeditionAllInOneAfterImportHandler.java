@@ -86,19 +86,19 @@ public class ExpeditionAllInOneAfterImportHandler {
             @Override
             public void onSuccess(EventDTO result) {
                 event = result;
-                eventsRefresher.addIfNotContained(result);
+                eventsRefresher.addIfNotContainedElseReplace(result);
                 sailingServiceWrite.getRegattaByName(regattaName, new DataLoadingCallback<RegattaDTO>() {
                     @Override
                     public void onSuccess(RegattaDTO result) {
                         regatta = result;
-                        regattasRefresher.addIfNotContained(result);
+                        regattasRefresher.addIfNotContainedElseReplace(result);
                         regattasRefresher.callFillAndReloadInitially(regattaOracleToRefresh);
                         sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
                                 new DataLoadingCallback<StrippedLeaderboardDTOWithSecurity>() {
                             @Override
                             public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
                                 leaderboard = result;
-                                leaderboardsRefresher.addIfNotContained(result);
+                                leaderboardsRefresher.addIfNotContainedElseReplace(result);
                                 sailingServiceWrite.getTrackFileImportDeviceIds(gpsDeviceIds,
                                     new DataLoadingCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
                                         @Override

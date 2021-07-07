@@ -42,7 +42,10 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
                 /* competitorsRefresher not needed; competitors are obtained from the regatta log registrations */ null,
                 stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
                 /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
-        boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, /* allowActions */ false);
+        boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService,
+                /* boatsRefresher not needed; boats are obtained from the regatta log registrations */ null,
+                stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+                /* allowActions */ false);
         markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(/* multiSelection */ false, sailingServiceWrite,
                 stringMessages, errorReporter);
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

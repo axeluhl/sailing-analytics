@@ -255,7 +255,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public void refreshAfterBecomingVisible() {
                 if (getWidget() != null) {
-                    getWidget().refreshBoatList();
+                    presenter.getBoatsRefresher().callFillAndReloadInitially(getWidget().getBoatsDisplayer());
                 }
             }
         }, stringMessages.boats(), new BoatsPlace((String) null /* no place token */),

@@ -80,9 +80,9 @@ public interface Refresher<T> {
     void remove(T dto);
 
     /**
-     * Like {@link #add(Object)}, but the {@code dto} will not be added if it is already contained in the list of DTOs
-     * known to this refresher. This will only take place if the DTO list already exists, indicating that it has been
-     * requested before.
+     * Like {@link #add(Object)}, but an {@link Object#equals(Object) equal} DTO will be replaced by {@code dto} if
+     * found in the list of DTOs known to this refresher. This will only take place if the DTO list already exists,
+     * indicating that it has been requested before.
      */
-    void addIfNotContained(T dto);
+    void addIfNotContainedElseReplace(T dto);
 }

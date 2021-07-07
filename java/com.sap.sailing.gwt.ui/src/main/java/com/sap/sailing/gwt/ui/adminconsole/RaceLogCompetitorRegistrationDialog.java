@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -39,7 +38,6 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     private CheckBox competitorRegistrationInRaceLogCheckBox;
     private final Map<String, Set<CompetitorDTO>> fleetNameWithCompetitors;
     private final ErrorReporter errorReporter;
-    private final SailingServiceWriteAsync sailingServiceWrite;
     private final StringMessages stringMessages;
     
     private static class Validator implements com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<Set<CompetitorDTO>> {
@@ -98,28 +96,27 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         }
     }
 
-    public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceWriteAsync sailingService, final UserService userService,
             Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
             boolean canBoatsOfCompetitorsChangePerRace, String raceColumnName, String fleetName,
             List<FleetDTO> fleets, com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
-        this(sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter, editable, callback, leaderboardName, canBoatsOfCompetitorsChangePerRace,
+        this(sailingService, userService, competitorsRefresher, stringMessages, errorReporter, editable, callback, leaderboardName, canBoatsOfCompetitorsChangePerRace,
                 boatClass, raceColumnName, fleetName, fleets, new Validator(stringMessages));
     }
     
-    public RaceLogCompetitorRegistrationDialog(SailingServiceWriteAsync sailingServiceWrite,
+    public RaceLogCompetitorRegistrationDialog(SailingServiceWriteAsync sailingService,
             final UserService userService, Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String raceColumnName,
             String fleetName, List<FleetDTO> fleets, Validator validator) {
-        super(sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter, editable, callback,
+        super(sailingService, userService, competitorsRefresher, stringMessages, errorReporter, editable, callback,
                 leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
                 canBoatsOfCompetitorsChangePerRace ? stringMessages.actionContinueToBoatAssignment()
                         : stringMessages.save(),
-                validator);
+                validator, cb->getRegisteredCompetitors(sailingService, leaderboardName, raceColumnName, fleetName, cb));
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.sailingServiceWrite = sailingServiceWrite;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         fleetNameWithCompetitors = findCompetitorsFromTheSameRaceColumn(fleets);
@@ -138,11 +135,6 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
             competitorRegistrationInRaceLogCheckBox = createCheckbox(stringMessages.registerCompetitorsOnRace());
         }
         return competitorRegistrationInRaceLogCheckBox;
-    }
-
-    @Override
-    protected Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getRegisteredCompetitorsRetriever() {
-        return callback->getRegisteredCompetitors(callback);
     }
 
     /**
@@ -183,7 +175,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
             };
             for (final Entry<String, ParallelExecutionCallback<Collection<CompetitorAndBoatDTO>>> fleetNameAndCallback : callbacksForFleetNames
                     .entrySet()) {
-                sailingServiceWrite.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName,
+                sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName,
                         fleetNameAndCallback.getKey(), fleetNameAndCallback.getValue());
             }
         }
@@ -207,17 +199,19 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         competitorRegistrationsPanel.grayOutCompetitorsFromRegistered(competitors);
     }
 
-    private void getRegisteredCompetitors(Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>> callback) {
+    private static void getRegisteredCompetitors(SailingServiceWriteAsync sailingService, String leaderboardName,
+            String raceColumnName, String fleetName,
+            Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>> callback) {
         // take the competitorRegistrationPanel from callback's A component because the field "competitorRegistrationsPanel" may
         // not be initialized yet; see also https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5419#c14
         if (callback.getA().showOnlyCompetitorsOfLog()) {
-            sailingServiceWrite.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback.getB()));
+            sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback.getB()));
         } else {
-            sailingServiceWrite.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback.getB()));
+            sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName, extractCompetitorDTOFromCompetitorAndBoatDTO(callback.getB()));
         }
     }
     
-    private AsyncCallback<Collection<CompetitorAndBoatDTO>> extractCompetitorDTOFromCompetitorAndBoatDTO(final AsyncCallback<Collection<CompetitorDTO>> callback) {
+    private static AsyncCallback<Collection<CompetitorAndBoatDTO>> extractCompetitorDTOFromCompetitorAndBoatDTO(final AsyncCallback<Collection<CompetitorDTO>> callback) {
         return new AsyncCallback<Collection<CompetitorAndBoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -232,7 +226,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     }
     
     private void setupCompetitorRegistationsOnRaceCheckbox() {
-        sailingServiceWrite.areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName,
+        sailingService.areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean isEnabled) {
@@ -267,7 +261,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                             @Override
                             public void ok(Void editedObject) {
                                 if (getOrCreateCompetitorRegistrationInRaceLogCheckBox(stringMessages).getValue()) {
-                                    sailingServiceWrite.enableCompetitorRegistrationsForRace(leaderboardName,
+                                    sailingService.enableCompetitorRegistrationsForRace(leaderboardName,
                                             raceColumnName, fleetName, new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void isEnabled) {
@@ -285,7 +279,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                                             });
 
                                 } else {
-                                    sailingServiceWrite.disableCompetitorRegistrationsForRace(leaderboardName,
+                                    sailingService.disableCompetitorRegistrationsForRace(leaderboardName,
                                             raceColumnName, fleetName, new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void isEnabled) {
