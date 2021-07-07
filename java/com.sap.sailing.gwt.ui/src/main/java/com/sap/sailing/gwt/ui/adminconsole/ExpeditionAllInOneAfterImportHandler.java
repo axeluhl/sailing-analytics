@@ -10,13 +10,16 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.common.TimePoint;
@@ -64,7 +67,10 @@ public class ExpeditionAllInOneAfterImportHandler {
             List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             Iterable<TimePoint> startTimes, final SailingServiceWriteAsync sailingServiceWrite,
             final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
+            Refresher<RegattaDTO> regattasRefresher, Refresher<EventDTO> eventsRefresher,
+            Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher, Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher,
+            final ErrorReporter errorReporter, final StringMessages stringMessages,
+            Displayer<RegattaDTO> regattaOracleToRefresh) {
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardGroupId = leaderboardGroupId;
         this.sensorImporterType = sensorImporterType;
@@ -80,15 +86,19 @@ public class ExpeditionAllInOneAfterImportHandler {
             @Override
             public void onSuccess(EventDTO result) {
                 event = result;
+                eventsRefresher.addIfNotContained(result);
                 sailingServiceWrite.getRegattaByName(regattaName, new DataLoadingCallback<RegattaDTO>() {
                     @Override
                     public void onSuccess(RegattaDTO result) {
                         regatta = result;
-                        sailingServiceWrite.getLeaderboard(leaderboardName,
-                                new DataLoadingCallback<StrippedLeaderboardDTO>() {
+                        regattasRefresher.addIfNotContained(result);
+                        regattasRefresher.callFillAndReloadInitially(regattaOracleToRefresh);
+                        sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
+                                new DataLoadingCallback<StrippedLeaderboardDTOWithSecurity>() {
                             @Override
-                            public void onSuccess(StrippedLeaderboardDTO result) {
+                            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
                                 leaderboard = result;
+                                leaderboardsRefresher.addIfNotContained(result);
                                 sailingServiceWrite.getTrackFileImportDeviceIds(gpsDeviceIds,
                                     new DataLoadingCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
                                         @Override
@@ -334,7 +344,6 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
 
     private abstract class DataLoadingCallback<T> implements AsyncCallback<T> {
-
         @Override
         public final void onFailure(Throwable caught) {
             errorReporter.reportError("Failed loading importer data from server!");
@@ -342,7 +351,6 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
 
     private abstract class CancelImportDialogCallback<T> implements DialogCallback<T> {
-
         @Override
         public final void cancel() {
             Notification.notify(stringMessages.importCanceledByUser(), NotificationType.WARNING);

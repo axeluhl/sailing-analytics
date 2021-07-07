@@ -114,16 +114,25 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
 
     public abstract void reload(AsyncCallback<Iterable<T>> callback);
 
-    public void fill(Iterable<T> dtos, Displayer<T> displayer) {
+    protected void fill(Iterable<T> dtos, Displayer<T> displayer) {
         displayer.fill(dtos);
     }
     
+    @Override
+    public void addIfNotContained(T dto) {
+        if (dto != null && dtos != null && !dtos.contains(dto)) {
+            add(dto);
+        }
+    }
+    
+    @Override
     public void add(T dto) {
-        if (dto != null) {
+        if (dto != null && dtos != null) {
             dtos.add(dto);
         }
     }
     
+    @Override
     public void remove(T dto) {
         if (dto != null) {
             dtos.remove(dto);

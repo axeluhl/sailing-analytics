@@ -45,8 +45,10 @@ public class ExpeditionAllInOneImportPanel extends Composite {
     private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
 
     private final RegattaSuggestOracle regattaOracle;
+    private final Displayer<RegattaDTO> regattasDisplayer;
 
     public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final Presenter presenter) {
+        regattasDisplayer = result->fillRegattas(result);
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
         final Button uploadButton = new Button(stringMessages.upload());
@@ -155,7 +157,9 @@ public class ExpeditionAllInOneImportPanel extends Composite {
                         response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getLeaderboardGroupId(), 
                         response.getRaceEntries(), response.getGpsDeviceIds(), response.getSensorDeviceIds(),
                         response.getSensorFixImporterType(), response.getStartTimes(), presenter.getSailingService(), 
-                        presenter.getUserService(), presenter.getCompetitorsRefresher(), presenter.getErrorReporter(), stringMessages);
+                        presenter.getUserService(), presenter.getCompetitorsRefresher(), presenter.getRegattasRefresher(),
+                        presenter.getEventsRefresher(), presenter.getLeaderboardsRefresher(), presenter.getLeaderboardGroupsRefresher(),
+                        presenter.getErrorReporter(), stringMessages, getRegattasDisplayer());
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);
             }
@@ -186,14 +190,6 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         validation.run();
         initWidget(formPanel);
     }
-    
-    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
-        
-        @Override
-        public void fill(Iterable<RegattaDTO> result) {
-            fillRegattas(result);
-        }
-    };
     
     public Displayer<RegattaDTO> getRegattasDisplayer() {
         return regattasDisplayer;

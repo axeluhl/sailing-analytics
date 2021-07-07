@@ -2388,30 +2388,36 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public StrippedLeaderboardDTOWithSecurity getLeaderboardWithSecurity(String leaderboardName) {
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        StrippedLeaderboardDTOWithSecurity result = null;
-        Leaderboard leaderboard = leaderboards.get(leaderboardName);
+        Leaderboard leaderboard = getLeaderboardAndCheckReadPermission(leaderboardName);
+        final StrippedLeaderboardDTOWithSecurity result;
         if (leaderboard != null) {
-            if (leaderboard instanceof RegattaLeaderboard) {
-                getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta());
-            }
-            getSecurityService().checkCurrentUserReadPermission(leaderboard);
             result = createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false);
+        } else {
+            result = null;
         }
         return result;
     }
 
-    @Override
-    public StrippedLeaderboardDTO getLeaderboard(String leaderboardName) {
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        StrippedLeaderboardDTO result = null;
-        Leaderboard leaderboard = leaderboards.get(leaderboardName);
+    private Leaderboard getLeaderboardAndCheckReadPermission(String leaderboardName) {
+        final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        final Leaderboard leaderboard = leaderboards.get(leaderboardName);
         if (leaderboard != null) {
             if (leaderboard instanceof RegattaLeaderboard) {
                 getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta());
             }
             getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        }
+        return leaderboard;
+    }
+    
+    @Override
+    public StrippedLeaderboardDTO getLeaderboard(String leaderboardName) {
+        Leaderboard leaderboard = getLeaderboardAndCheckReadPermission(leaderboardName);
+        final StrippedLeaderboardDTO result;
+        if (leaderboard != null) {
             result = createStrippedLeaderboardDTO(leaderboard, false, false);
+        } else {
+            result = null;
         }
         return result;
     }

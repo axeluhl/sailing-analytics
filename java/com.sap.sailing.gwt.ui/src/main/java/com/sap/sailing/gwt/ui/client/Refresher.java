@@ -65,16 +65,24 @@ public interface Refresher<T> {
     void callAllFill();
     
     /**
-     * Adds a DTO to DTO list to prevent loading all data after adding single object to context.
+     * Adds a DTO to the DTO list to prevent loading all data after adding single object to context. This will
+     * only take place if the DTO list already exists, indicating that it has been requested before.
      * 
-     * @param dto DTO
+     * @param dto the DTO to add
      */
     void add(T dto);
     
     /**
      * Removes a DTO from DTO list to prevent loading all data after deleting single object to context.
      * 
-     * @param dto DTO
+     * @param dto the DTO to add
      */
     void remove(T dto);
+
+    /**
+     * Like {@link #add(Object)}, but the {@code dto} will not be added if it is already contained in the list of DTOs
+     * known to this refresher. This will only take place if the DTO list already exists, indicating that it has been
+     * requested before.
+     */
+    void addIfNotContained(T dto);
 }
