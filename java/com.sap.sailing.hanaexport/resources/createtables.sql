@@ -13,7 +13,7 @@ CREATE ROW TABLE SAILING."ScoringScheme" (
 	"higherIsBetter" BOOLEAN
 );
 CREATE ROW TABLE SAILING."BoatClass" (
-	"id" NVARCHAR(20) PRIMARY KEY,
+	"id" NVARCHAR(255) PRIMARY KEY,
 	"description" NVARCHAR(255),
 	"hullLengthInMeters" DECIMAL(10, 2),
 	"hullBeamInMeters" DECIMAL(10, 2),
@@ -27,7 +27,7 @@ CREATE ROW TABLE SAILING."IRM" (
 );
 CREATE COLUMN TABLE SAILING."Regatta" (
 	"name"          NVARCHAR(255) PRIMARY KEY,
-	"boatClass"     NVARCHAR(20) NOT NULL,
+	"boatClass"     NVARCHAR(255) NOT NULL,
 	"scoringScheme" NVARCHAR(255) NOT NULL,
 	"rankingMetric" NVARCHAR(255) NOT NULL,
 	"eventId"       NVARCHAR(36),
