@@ -57,14 +57,6 @@ public interface Maneuver extends GPSFix {
     Tack getNewTack();
 
     /**
-     * Gets the maneuver loss of this maneuver which is the distance projected onto the average course between entering
-     * and exiting the maneuver that the boat lost compared to not having maneuvered. The maneuver loss is calculated
-     * considering the maneuver curve, which was performed between {@link #getTimePointBefore()} and
-     * {@link #getTimePointAfter()}.
-//     */
-//    Distance getManeuverLossDistanceLost();
-    
-    /**
      * Gets the ManeuverLoss Object of a maneuver, that is calculated in {@link ManeuverDetectorImpl#getManeuverLoss}
      * 
      */
