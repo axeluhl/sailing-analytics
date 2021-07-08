@@ -1,8 +1,8 @@
 CREATE COLUMN TABLE SAILING."Event" (
         "id"                    NVARCHAR(36) PRIMARY KEY,
         "name"                  NVARCHAR(255) NOT NULL,
-        "startDate"             TIMESTAMP NOT NULL,
-        "endDate"               TIMESTAMP NOT NULL,
+        "startDate"             TIMESTAMP,
+        "endDate"               TIMESTAMP,
         "venue"                 NVARCHAR(255),
         "isListed"              BOOLEAN,
         "description"           NVARCHAR(5000),
