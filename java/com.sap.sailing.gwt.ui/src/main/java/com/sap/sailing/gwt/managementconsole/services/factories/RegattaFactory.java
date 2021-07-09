@@ -15,13 +15,11 @@ import com.sap.sse.common.Util;
 
 public abstract class RegattaFactory {
 
-    public static RegattaDTO createDefaultRegatta(String regattaName, String boatClassName, final RankingMetrics ranking, final ScoringSchemeType scoringSystem, 
+    public static RegattaDTO createDefaultRegatta(String regattaName, String boatClassName, final RankingMetrics ranking, final ScoringSchemeType scoringScheme, 
             final SeriesDTO series, final EventDTO event) {
-        RegattaDTO regatta = new RegattaDTO();
-        regatta.setName(regattaName);
+        RegattaDTO regatta = new RegattaDTO(regattaName, scoringScheme);
         regatta.boatClass = new BoatClassDTO(boatClassName, Distance.NULL, Distance.NULL);
         regatta.rankingMetricType = ranking;
-        regatta.scoringScheme = scoringSystem;
         regatta.series = Collections.singletonList(series);
         regatta.useStartTimeInference = false;
         regatta.controlTrackingFromStartAndFinishTimes = false;

@@ -27,8 +27,7 @@ public abstract class SeriesWithRacesFactory {
         series.setFleets(Collections.singletonList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
         List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
         for (int i = 1; i <= numberOfRaces; i++) {
-            RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO(series.getName(), regattaName);
-            raceColumnDTO.setName(DEFAULT_RACE_NAME + i);
+            RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO(DEFAULT_RACE_NAME + i, series.getName(), regattaName);
             races.add(raceColumnDTO);
         }
         series.setRaceColumns(races);          

@@ -16,11 +16,9 @@ import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOver
 import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewViewImpl;
 
 public class ViewFactory {
-
     private EventSeriesOverviewView eventSeriesOverviewView;
     private EventOverviewView eventOverviewView;
     private RegattaOverviewView regattaOverviewView;
-
     private EventMediaView eventMediaView;
 
     public DashboardView getDashboardView() {
@@ -62,5 +60,4 @@ public class ViewFactory {
     public SignInView getSignInView() {
         return new SignInViewImpl();
     }
-
 }
