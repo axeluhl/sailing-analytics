@@ -15,12 +15,15 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog<LeaderboardDescriptor> {
     protected ListBox scoringSchemeListBox;
     protected ListBox sailingEventsListBox;
     protected Collection<EventDTO> existingEvents;
     protected CourseAreaSelection courseAreaSelection;
+    private final UserService userService;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
         protected final StringMessages stringMessages;
@@ -58,10 +61,11 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
     }
 
-    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringMessages, 
-            Collection<EventDTO> existingEvents,
-            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
+    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, UserService userService, 
+            StringMessages stringMessages,
+            Collection<EventDTO> existingEvents, ErrorReporter errorReporter,  LeaderboardParameterValidator validator, DialogCallback<LeaderboardDescriptor> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
+        this.userService = userService;
         this.existingEvents = existingEvents;
         courseAreaSelection = new CourseAreaSelection(stringMessages, this);
         courseAreaSelection.setEnabled(false);
@@ -104,7 +108,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     protected ListBox createSailingEventListBox() {
         ListBox eventListBox = createListBox(false);
         eventListBox.addItem("Please select a sailing event...");
-        for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
+        for (EventDTO event : Util.filter(Util.sortNamedCollection(existingEvents), e->userService.hasPermission(e, DefaultActions.UPDATE))) {
             eventListBox.addItem(event.getName());
         }
         eventListBox.addChangeHandler(new ChangeHandler() {

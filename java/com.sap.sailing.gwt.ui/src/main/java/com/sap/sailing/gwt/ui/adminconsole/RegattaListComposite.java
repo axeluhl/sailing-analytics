@@ -336,7 +336,7 @@ public class RegattaListComposite extends Composite {
     private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             Iterable<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsDialog dialog = new RegattaWithSeriesAndFleetsEditDialog(regatta, existingRegattas,
-                existingEvents, /*correspondingEvent*/ null, sailingServiceWrite, stringMessages, new DialogCallback<RegattaDTO>() {
+                existingEvents, /*correspondingEvent*/ null, sailingServiceWrite, userService, stringMessages, new DialogCallback<RegattaDTO>() {
                     @Override
                     public void cancel() {
                     }

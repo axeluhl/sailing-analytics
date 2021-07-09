@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
     protected CheckBox regattaConfigurationCheckbox;
@@ -33,9 +34,9 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             Iterable<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
-            final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+            UserService userService, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(),
-                stringMessages.ok(), sailingService, stringMessages, new RegattaParameterValidator(stringMessages), callback);
+                stringMessages.ok(), sailingService, userService, stringMessages, new RegattaParameterValidator(stringMessages), callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
         nameEntryField.setEnabled(false);

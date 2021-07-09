@@ -16,15 +16,16 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.Distance;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWithSeriesAndFleetsDialog<RegattaDTO> {
     protected TextBox nameEntryField;
     protected SuggestBox boatClassEntryField;
     protected CheckBox canBoatsOfCompetitorsChangePerRaceCheckBox;
     public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, Iterable<EventDTO> existingEvents, EventDTO defaultEvent,
-            String title, String okButton, final SailingServiceAsync sailingService, StringMessages stringMessages,
-            Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
-        super(sailingService, regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);
+            String title, String okButton, final SailingServiceAsync sailingService, UserService userService,
+            StringMessages stringMessages, Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
+        super(sailingService, userService, regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");
