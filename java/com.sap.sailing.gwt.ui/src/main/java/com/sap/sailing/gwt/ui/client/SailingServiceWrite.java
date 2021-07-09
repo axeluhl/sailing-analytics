@@ -72,6 +72,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -694,4 +695,5 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     List<DeviceMappingDTO> getDeviceMappings(String leaderboardName)
             throws UnauthorizedException, DoesNotHaveRegattaLogException, TransformationException, NotFoundException;
 
+    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) throws UnauthorizedException;
 }

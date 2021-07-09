@@ -94,7 +94,7 @@ implements StartFromSailingAnalyticsImage {
                     new SailingAnalyticsHostImpl<>(instanceId, az, privateIpAddress, launchTimePoint, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                         try {
                             return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
-                                    ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
+                                    ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue(), landscape);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }

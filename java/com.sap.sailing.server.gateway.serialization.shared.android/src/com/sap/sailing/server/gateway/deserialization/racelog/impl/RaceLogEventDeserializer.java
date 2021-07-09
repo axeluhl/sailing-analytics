@@ -23,6 +23,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDe
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDenoteForTrackingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDependentStartTimeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEndOfTrackingEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogExcludeWindSourceEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningListChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFixedMarkPassingEventSerializer;
@@ -95,7 +96,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogORCLegDataEventDeserializer(competitorDeserializer),
                 new RaceLogORCScratchBoatEventDeserializer(competitorDeserializer),
                 new RaceLogORCCertificateAssignmentEventDeserializer(competitorDeserializer),
-                new RaceLogORCImpliedWindSourceEventDeserializer(competitorDeserializer));
+                new RaceLogORCImpliedWindSourceEventDeserializer(competitorDeserializer),
+                new RaceLogExcludeWindSourceEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -126,6 +128,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> orcCertificateAssignmentEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> orcSetImpliedWindEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> excludeWindSourceEventSerializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -154,7 +157,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> orcLegDataEventDeserializer,
             JsonDeserializer<RaceLogEvent> orcScratchBoatEventDeserializer,
             JsonDeserializer<RaceLogEvent> orcCertificateAssignmentEventDeserializer,
-            JsonDeserializer<RaceLogEvent> orcSetImpliedWindEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> orcSetImpliedWindEventDeserializer,
+            JsonDeserializer<RaceLogEvent> excludeWindSourceEventSerializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.dependentStartTimeEventDeserializer = dependentStartTimeEventDeserializer;
@@ -183,6 +187,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.orcScratchBoatEventDeserializer = orcScratchBoatEventDeserializer;
         this.orcCertificateAssignmentEventDeserializer = orcCertificateAssignmentEventDeserializer;
         this.orcSetImpliedWindEventDeserializer = orcSetImpliedWindEventDeserializer;
+        this.excludeWindSourceEventSerializer = excludeWindSourceEventSerializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -244,6 +249,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return orcCertificateAssignmentEventDeserializer;
         } else if (type.equals(RaceLogORCImpliedWindSourceEventSerializer.VALUE_CLASS)) {
             return orcSetImpliedWindEventDeserializer;
+        } else if (type.equals(RaceLogExcludeWindSourceEventSerializer.VALUE_CLASS)) {
+            return excludeWindSourceEventSerializer;
         }
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",
                 type));

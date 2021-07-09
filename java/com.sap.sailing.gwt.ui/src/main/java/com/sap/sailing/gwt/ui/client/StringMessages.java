@@ -344,6 +344,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String replication();
     String averageAbsoluteCrossTrackErrorInMeters();
     String averageSignedCrossTrackErrorInMeters();
+    String currentAbsoluteCrossTrackErrorInMeters();
+    String currentSignedCrossTrackErrorInMeters();
     String helpLines();
     String startLine();
     String finishLine();
@@ -588,6 +590,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windwardDistanceToGoInMetersTooltip();
     String averageAbsoluteCrossTrackErrorInMetersTooltip();
     String averageSignedCrossTrackErrorInMetersTooltip();
+    String currentAbsoluteCrossTrackErrorInMetersTooltip();
+    String currentSignedCrossTrackErrorInMetersTooltip();
     String raceAverageAbsoluteCrossTrackErrorInMetersTooltip();
     String raceAverageSignedCrossTrackErrorInMetersTooltip();
     String gapChangeSinceLegStartInSecondsTooltip();

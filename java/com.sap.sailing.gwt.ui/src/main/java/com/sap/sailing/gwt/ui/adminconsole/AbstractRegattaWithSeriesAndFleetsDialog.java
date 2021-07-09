@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.OptionElement;
@@ -65,13 +64,13 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
     protected final ListBox competitorRegistrationTypeListBox;
-    protected final List<EventDTO> existingEvents;
+    protected final Iterable<EventDTO> existingEvents;
     private EventDTO defaultEvent;
     private RegistrationLinkWithQRCode registrationLinkWithQRCode;
     protected final CaptionPanel secretPanel;
 
     public AbstractRegattaWithSeriesAndFleetsDialog(final SailingServiceAsync sailingService, RegattaDTO regatta,
-            Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, String title,
+            Iterable<SeriesDTO> series, Iterable<EventDTO> existingEvents, EventDTO correspondingEvent, String title,
             String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
         super(title, null, okButton, stringMessages.cancel(), validator, callback);
         this.sailingService = sailingService;
@@ -278,7 +277,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
         sailingEventsListBox.addItem(stringMessages.selectSailingEvent(), stringMessages.selectSailingEvent());
-        for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
+        final Iterable<EventDTO> eventsSortedByName = Util.stream(existingEvents).sorted(Util.naturalNamedComparator())::iterator;
+        for (EventDTO event : eventsSortedByName) {
             sailingEventsListBox.addItem(event.getName(), event.getId().toString());
             if (defaultEvent != null) {
                 if (defaultEvent.getId().equals(event.getId())) {
@@ -346,11 +346,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         return courseAreaSelection.getSelectedCourseAreas();
     }
     
-    public RegattaDTO getRegattaDTO() {
-        RegattaDTO result = new RegattaDTO();
+    public RegattaDTO getRegattaDTO(String name) {
+        RegattaDTO result = new RegattaDTO(name, getSelectedScoringSchemeType());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
-        result.scoringScheme = getSelectedScoringSchemeType();
         result.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         result.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesCheckBox.getValue();
         result.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChangeCheckBox.getValue();

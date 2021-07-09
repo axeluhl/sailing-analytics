@@ -227,7 +227,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         final PlayModes playMode = getTimer().getPlayMode();
         TimePoint startPlayingAtOverride = null;
         if (playMode != PlayModes.Live && getRaceTimesInfoForRace() != null) {
-            final RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings().getPerspectiveOwnSettings();
+            final RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getOriginalPerspectiveSettings();
             if (perspectiveOwnSettings != null) {
                 final Duration initialDurationAfterRaceStartInReplay = perspectiveOwnSettings.getInitialDurationAfterRaceStartInReplay();
                 if (initialDurationAfterRaceStartInReplay != null) {

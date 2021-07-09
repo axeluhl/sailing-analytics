@@ -32,7 +32,10 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
  * Shows the state of wind receivers regardless of them being attached to a race. Currently Expedition and Igtimi are supported.
@@ -45,6 +48,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServletWithPost
     private static final long serialVersionUID = -6791613843435003810L;
     
     protected static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
+    protected static final String REFRESHING_CONTENT_DIV_ID = "refreshingContent";
 
     protected final int NUMBER_OF_MESSAGES_TO_SHOW=100;
     protected final int NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW=10;
@@ -282,6 +286,11 @@ public abstract class WindStatusServlet extends SailingServerHttpServletWithPost
     @Override
     public void received(Iterable<Fix> fixes) {
         igtimiRawMessageCount += 1;
+    }
+
+    protected static String getPermissionToReload() {
+        return SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                SecuredSecurityTypes.ServerActions.CONFIGURE_LOCAL_SERVER, new TypeRelativeObjectIdentifier(ServerInfo.getName()));
     }
 
     public static Map<LiveDataConnection, IgtimiConnectionInfo> getIgtimiConnections() {

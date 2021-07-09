@@ -1,7 +1,6 @@
 package com.sap.sse.replication;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
@@ -17,8 +16,8 @@ import com.rabbitmq.client.QueueingConsumer;
  */
 public interface ReplicationMasterDescriptor {
 
-    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws MalformedURLException, UnsupportedEncodingException;
-    
+    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws Exception;
+
     URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException;
 
     /**
@@ -70,4 +69,14 @@ public interface ReplicationMasterDescriptor {
     Iterable<Replicable<?, ?>> getReplicables();
 
     String getBearerToken();
+    
+    /**
+     * A heuristic deciding whether to use HTTPS or HTTP depending on the port on which the master is listening.
+     * 
+     * @return "https" or "https"
+     */
+    static String getHttpRequestProtocol(int port) {
+        return port%1000==443?"https":"http";
+    }
+
 }

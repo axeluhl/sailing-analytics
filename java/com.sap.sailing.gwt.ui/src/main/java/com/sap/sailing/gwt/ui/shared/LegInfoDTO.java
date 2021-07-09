@@ -12,9 +12,11 @@ public class LegInfoDTO extends NamedDTO {
 
     public double legBearingInDegrees;
 
-    public LegInfoDTO() {}
+    @Deprecated
+    LegInfoDTO() {} // for GWT RPC serialization only
 
     public LegInfoDTO(int legNumber) {
+        super("L"+legNumber);
         this.legNumber = legNumber;
     }
 

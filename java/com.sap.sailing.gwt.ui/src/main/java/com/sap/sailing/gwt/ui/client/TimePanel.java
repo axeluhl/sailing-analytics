@@ -151,7 +151,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
                 return timeWithMinutesFormatter.format(date); 
             }
         });
-
+        timeSlider.ensureDebugId("timeSlider");
         timeSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {

@@ -14,7 +14,8 @@ public class NamedDTO implements Named, Serializable {
     private static final long serialVersionUID = -6620231501480297257L;
     private String name;
 
-    public NamedDTO() {}
+    @Deprecated
+    protected NamedDTO() {} // for GWT RPC serialization only
     
     public NamedDTO(String name) {
         this.name = name;

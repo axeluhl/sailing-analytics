@@ -114,7 +114,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         Thread.sleep(1000); // wait for master queue to get filled
         assertNull(replica.getEvent(event.getId()));
         startMessagingExchange();
-        Thread.sleep(3000); // wait for connection to recover
+        Thread.sleep(10000); // wait for connection to recover
         assertNotNull(replica.getEvent(event.getId()));
     }
     

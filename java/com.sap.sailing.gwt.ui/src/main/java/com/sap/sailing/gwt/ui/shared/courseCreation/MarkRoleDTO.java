@@ -21,6 +21,7 @@ public class MarkRoleDTO extends NamedDTO implements SecuredDTO {
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
     public MarkRoleDTO() {
+        super("");
     }
 
     public MarkRoleDTO(final UUID uuid, final String name, String shortName) {

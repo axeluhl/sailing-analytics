@@ -311,8 +311,10 @@ public class DomainFactoryImpl implements DomainFactory {
         for (Mark mark : course.getMarks()) {
             ControlPoint controlPoint = getOrCreateControlPoint(mark.getDescription(), mark.getDeviceIds(),
                     getMarkType(mark.getMarkType()), mark.getDescription());
-            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
-            waypoints.add(waypoint);
+            if (controlPoint != null) {
+                Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
+                waypoints.add(waypoint);
+            }
         }
         com.sap.sailing.domain.base.Course result = new CourseImpl(courseName, waypoints);
         return result;
@@ -350,11 +352,11 @@ public class DomainFactoryImpl implements DomainFactory {
                             getOrCreateMark(idRight, description), description, shortNameOfPotentialGate);
                     break;
                 default:
-                    throw new RuntimeException(
-                            "Don't know how to handle control points with number of devices neither 1 nor 2. Was "
-                                    + Util.size(deviceIds));
+                    logger.info("Ignoring mark "+description+" because it doesn't have any devices assigned");
                 }
-                controlPointCache.put(deviceIds, result);
+                if (result != null) {
+                    controlPointCache.put(deviceIds, result);
+                }
             }
         }
         return result;
@@ -388,7 +390,9 @@ public class DomainFactoryImpl implements DomainFactory {
             // TODO bug 1043: propagate the mark names to the waypoint names
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDescription(),
                     mark.getDeviceIds(), getMarkType(mark.getMarkType()), mark.getDescription());
-            newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
+            if (domainControlPoint != null) {
+                newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
+            }
         }
         courseToUpdate.update(newDomainControlPoints, courseToUpdate.getAssociatedRoles(),
                 courseToUpdate.getOriginatingCourseTemplateIdOrNull(), baseDomainFactory);

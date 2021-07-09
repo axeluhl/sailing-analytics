@@ -35,6 +35,12 @@ permission. Wind data will only be added if the user has this permission for the
         <td>windData, windSourceType (either "WEB" or "EXPEDITION"), windSourceId (any string identifying the sensor)</td>
     </tr>
     <tr>
+        <td>Optional parameters:</td>
+        <td>regattaNamesAndRaceNames: can be used to specify into which races to ingest the wind data; if omitted, the wind data
+            will be sent to all races for which the user making the request has the <tt>TRACKED_RACE:UPDATE</tt> permissions.
+            Example: <tt>"regattaNamesAndRaceNames":[{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"}]</tt></td>
+    </tr>
+    <tr>
         <td>Examples:</td>
         <td>
             Request: <br> {"windData":[{"position":{"latitude_deg":1,"longitude_deg":1},"timepoint":1234,"direction":120,"speedinknots":60}],"regattaNamesAndRaceNames":[{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"}],"windSourceType":"WEB","windSourceId":"tracker02"} 

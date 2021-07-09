@@ -129,6 +129,10 @@ figcaption {
 .buttonprimary:hover {
   background-color: #0081b8;
 }
+.buttonprimary:disabled {
+  cursor: not-allowed;
+  background: #cfcfcf;
+}
 .buttonprimaryoutlined {
   background-color: transparent;
   padding: .533333333333333em 1.333333333333333em;

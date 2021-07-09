@@ -86,7 +86,7 @@ table {
 }
 
 .TopLeftControlsWrapperPanelParentDiv {
-	padding-top: 34px;
+	padding-top: 27px;
 	padding-left: 10px;
 }
 
@@ -473,10 +473,6 @@ img.openColumn {
 }
 
 .raceBoard-Logo {
-	position: absolute;
-	top: 6px;
-	left: 10px;
-	z-index: 10;
 	cursor: pointer;
 }
 
@@ -672,8 +668,13 @@ img.openColumn {
 .RegattaRaceInformation-Header {
 	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	position: relative;
-	left: 140px;
-	top: 11px;
+}
+
+.raceBoard-Logo, .RegattaRaceInformation-Header {
+	display: inline-block;
+	vertical-align: text-bottom;
+	margin-left: 10px;
+	margin-top: 5px;
 }
 
 .RegattaRaceInformation-Header .RaceName-Label {
@@ -734,9 +735,6 @@ img.openColumn {
     font-size: 13px;
 }
 
-.compactHeader .RegattaRaceInformation-Header {
-    left: 110px;
-}
 .compactHeader .RegattaRaceInformation-Header .RaceName-Label {
     display: block;
     font-size: 16px;
@@ -744,7 +742,6 @@ img.openColumn {
 }
 .compactHeader .RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
     display: block;
-    margin-top: 5px;
     white-space: nowrap;
 }
 .compactHeader .RegattaAndRaceTime-Header {

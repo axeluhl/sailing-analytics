@@ -297,7 +297,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * provide this method with a {@link TimePoint} greater than the time the mark passing of the leg end mark has
      * occurred then the time point of the mark passing of the leg end mark will be taken into account.
      */
-    Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
+    Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis);
     
     /**
      * Computes the current absolute cross-track error (positive sign or zero, regardless of whether the competitor
@@ -305,7 +305,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * 
      * @return {@code null} if the competitor has not started or already finished the leg
      */
-    Distance getAbsoluteCrossTrackError(TimePoint timePoint) throws NoWindException;
+    Distance getAbsoluteCrossTrackError(TimePoint timePoint);
 
     /**
      * Computes the average signed cross track error for this leg. The cross track error for each fix is taken to be a
@@ -314,7 +314,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * provide this method with a {@link TimePoint} greater than the time the mark passing of the leg end mark has
      * occurred then the time point of the mark passing of the leg end mark will be taken into account.
      */
-    Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
+    Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis);
 
     /**
      * Computes the current signed cross-track error (negative sign means left of the course middle line looking in the direction
@@ -322,7 +322,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * 
      * @return {@code null} if the competitor has not started or already finished the leg
      */
-    Distance getSignedCrossTrackError(TimePoint timePoint) throws NoWindException;
+    Distance getSignedCrossTrackError(TimePoint timePoint);
 
     TrackedLeg getTrackedLeg();
 

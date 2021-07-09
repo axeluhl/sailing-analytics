@@ -1,5 +1,6 @@
 package com.sap.sailing.shared.server.gateway.jaxrs;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -13,6 +14,8 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -142,6 +145,43 @@ public abstract class SharedAbstractSailingServerResource extends StreamingOutpu
         return trackedRace;
     }
     
+    protected <T> T[] getServices(Class<T> clazz) {
+        final ServiceTracker<T, T> tracker = getServiceTracker(clazz);
+        final Object[] objectServices = tracker.getServices();
+        @SuppressWarnings("unchecked")
+        final T[] services = (T[]) Array.newInstance(clazz, objectServices.length);
+        System.arraycopy(objectServices, 0, services, 0, services.length);
+        tracker.close();
+        return services;
+    }
+
+    protected <T> ServiceTracker<T, T> getServiceTracker(Class<T> clazz) {
+        final BundleContext context = getBundleContext();
+        final ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
+        tracker.open();
+        return tracker;
+    }
+
+    protected TrackedRace findTrackedRace(Regatta regatta, String raceName) {
+        final TrackedRace trackedRace;
+        final RaceDefinition race = findRaceByName(regatta, raceName);
+        if (race != null) {
+            DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
+            if (trackedRegatta != null) {
+                trackedRace = trackedRegatta.getExistingTrackedRace(race);
+            } else {
+                trackedRace = null;
+            }
+        } else {
+            trackedRace = null;
+        }
+        return trackedRace;
+    }
+
+    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+        return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
+    }
+
     protected static Double roundDouble(Double value, int places) {
         BigDecimal bigDecimal = new BigDecimal(value);
         bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);

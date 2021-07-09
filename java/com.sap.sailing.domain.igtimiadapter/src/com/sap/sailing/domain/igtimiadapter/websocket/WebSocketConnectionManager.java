@@ -323,6 +323,6 @@ public class WebSocketConnectionManager implements LiveDataConnection {
 
     @Override
     public InetSocketAddress getRemoteAddress() {
-        return getSession().getRemoteAddress();
+        return getSession() == null ? null : getSession().getRemoteAddress();
     }
 }

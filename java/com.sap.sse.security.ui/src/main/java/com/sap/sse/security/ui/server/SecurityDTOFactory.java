@@ -140,7 +140,7 @@ public class SecurityDTOFactory {
                 createStrippedUserGroupDTOFromUserGroup(role.getQualifiedForTenant(),
                 fromOriginalToStrippedDownUserGroup),
                 createUserDTOFromUser(role.getQualifiedForUser(),
-                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup), role.isTransitive(),
                 identifier);
         SecurityDTOUtil.addSecurityInformation(securityService, mappedRole);
         return mappedRole;

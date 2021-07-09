@@ -1,114 +1,72 @@
 package com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.function.IntConsumer;
 
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewResources;
 import com.sap.sailing.gwt.home.shared.partials.dialog.DialogFactory;
+import com.sap.sailing.gwt.settings.client.whatsnew.AbstractWhatsNewDialogFactory;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
-import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
- * This is a factory class to create a WhatsNewDialog, if the changelog changed for more than
- * {@link #THRESHOLD_WHATS_NEW} characters since the last login of the current user.
+ * Implementation of {@link AbstractWhatsNewDialogFactory} for the Home.html change log.
  */
-public final class WhatsNewDialogFactory {
-
-    private static final long THRESHOLD_WHATS_NEW = 10;
-    private static final Logger LOG = Logger.getLogger(WhatsNewDialogFactory.class.getName());
-
-    private static boolean isUserNotified = false;
-
-    private WhatsNewDialogFactory() {
-    }
+public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<WhatsNewSettings> {
 
     /** Automatically shows the whats-new dialog after login, if necessary. */
-    public static void registerWithUserService(UserService userService, PlaceController placeController) {
-        userService.addUserStatusEventHandler((userDTO, b) -> {
-            if (userDTO != null) {
-                showWhatsNewDialogIfNecessaryAndUpdatePreference(userService, placeController);
-            }
-        }, false);
+    public static void register(final UserService userService, final PlaceController placeController) {
+        new WhatsNewDialogFactory(userService, placeController).register();
     }
 
-    /** Shows a What's New Dialog. */
-    private static void showWhatsNewDialog(PlaceController placeController, DialogCallback<Void> dialogCallback) {
+    private static boolean isUserNotified = false;
+    private final PlaceController placeController;
+
+    private WhatsNewDialogFactory(final UserService userService, final PlaceController placeController) {
+        super(userService);
+        this.placeController = placeController;
+    }
+
+    @Override
+    protected void currentCharacterCount(final IntConsumer callback) {
+        callback.accept(WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml().getText().length());
+    }
+
+    @Override
+    protected String getPrefName() {
+        return WhatsNewSettings.PREF_NAME;
+    }
+
+    @Override
+    protected WhatsNewSettings getInstanceForDeserialization() {
+        return new WhatsNewSettings();
+    }
+
+    @Override
+    protected WhatsNewSettings getInstanceForSerialization(final Long charCount) {
+        return new WhatsNewSettings(charCount);
+    }
+
+    @Override
+    protected boolean isUserAlreadyNotified() {
+        return isUserNotified;
+    }
+
+    @Override
+    protected void showDialog(final DialogCallback<Void> callback) {
         final PopupPanel dialog = DialogFactory.createDialog(StringMessages.INSTANCE.whatsNewDialogMessage(),
                 StringMessages.INSTANCE.whatsNewDialogTitle(), false, StringMessages.INSTANCE.showChangelog(),
-                StringMessages.INSTANCE.cancel(), dialogCallback);
+                StringMessages.INSTANCE.cancel(), callback);
         isUserNotified = true;
         dialog.show();
     }
 
-    /**
-     * Shows a dialog, if the changelog changed for more than {@link #THRESHOLD_WHATS_NEW} characters since the last
-     * login of the current user.
-     */
-    private static void showWhatsNewDialogIfNecessaryAndUpdatePreference(UserService userService,
-            PlaceController placeController) {
-        if (isUserNotified || !ClientConfiguration.getInstance().isBrandingActive()) {
-            return;
-        }
-        final long charactersInWhatsChangedDocument = WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml()
-                .getText().length();
-        userService.getPreference(WhatsNewSettings.PREF_NAME, new AsyncCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                SettingsToJsonSerializerGWT settingsToJsonSerializerGWT = new SettingsToJsonSerializerGWT();
-                DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
-                    @Override
-                    public void ok(Void editedObject) {
-                        updateOrCreatePreference(charactersInWhatsChangedDocument, settingsToJsonSerializerGWT);
-                        placeController.goTo(new WhatsNewPlace(WhatsNewNavigationTabs.SailingAnalytics));
-                    }
-
-                    @Override
-                    public void cancel() {
-                        updateOrCreatePreference(charactersInWhatsChangedDocument, settingsToJsonSerializerGWT);
-                    }
-                };
-                if (result != null) {
-                    // deserialize whats-new-setting
-                    WhatsNewSettings pref = settingsToJsonSerializerGWT.deserialize(new WhatsNewSettings(), result);
-                    if (pref.getNumberOfCharsOnLastLogin() + THRESHOLD_WHATS_NEW < charactersInWhatsChangedDocument) {
-                        // check if length change is over threshold
-                        WhatsNewDialogFactory.showWhatsNewDialog(placeController, dialogCallback);
-                    }
-                } else {
-                    // create preference
-                    WhatsNewDialogFactory.showWhatsNewDialog(placeController, dialogCallback);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                LOG.log(Level.SEVERE, caught.getMessage(), caught);
-            }
-
-            /** Updates or creates a {@link WhatsNewSettings} object. */
-            private void updateOrCreatePreference(long charactersInWhatsChangedDocument,
-                    SettingsToJsonSerializerGWT settingsToJsonSerializerGWT) {
-                String serializedSetting = settingsToJsonSerializerGWT
-                        .serializeToString(new WhatsNewSettings(charactersInWhatsChangedDocument));
-                userService.setPreference(WhatsNewSettings.PREF_NAME, serializedSetting, new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        LOG.log(Level.SEVERE, caught.getMessage(), caught);
-                    }
-
-                    @Override
-                    public void onSuccess(Void result) {
-                    }
-                });
-            }
-        });
+    @Override
+    protected void openReleaseNotes() {
+        placeController.goTo(new WhatsNewPlace(WhatsNewNavigationTabs.SailingAnalytics));
     }
 }

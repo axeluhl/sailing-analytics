@@ -82,7 +82,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(2, 2);
+        final Grid result = new Grid(3, 2);
         result.setWidget(0,  0, new Label(stringMessages.name()));
         result.setWidget(0, 1, roleDefinitionNameField);
         result.setWidget(1, 0, new Label(stringMessages.permissions()));
@@ -96,6 +96,6 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
         final List<WildcardPermission> permissions = permissionsList.getValue();
         return new RoleDefinitionDTO(getRoleDefinitionId(), newName, permissions);
     }
-    
+
     protected abstract UUID getRoleDefinitionId();
 }

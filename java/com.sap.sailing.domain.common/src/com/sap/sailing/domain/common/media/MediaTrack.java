@@ -143,25 +143,11 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
     }
 
     public boolean beginsAfter(Date date) {
-        if (date == null) {
-            return false;
-        } else if (startTime.asDate().after(date)) {
-            return true;
-        } else {
-            return false;
-        }
+        return startTime != null && date != null && startTime.asDate().after(date);
     }
 
     public boolean endsBefore(Date date) {
-        if (date == null) {
-            return false;
-        } else if (duration == null) {
-            return false; //null-duration implies open-ended!
-        } else if (deriveEndTime().asDate().before(date)) {
-            return true;
-        } else {
-            return false;
-        }
+        return date != null && deriveEndTime() != null && deriveEndTime().asDate().before(date);
     }
 
     @Override

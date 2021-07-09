@@ -56,8 +56,11 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
 
     @Override
     public WildcardPermission getPermission(String actionName) {
-        return new WildcardPermission(getTypeIdentifier()+WildcardPermission.PART_DIVIDER_TOKEN+actionName+WildcardPermission.PART_DIVIDER_TOKEN+
-                getTypeRelativeObjectIdentifier());
+        return WildcardPermission.builder()
+                .withTypeNames(getTypeIdentifier())
+                .withActionNames(actionName)
+                .withIds(getTypeRelativeObjectIdentifier())
+                .build();
     }
 
     @Override

@@ -59,6 +59,7 @@ import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDatabase {
     private static final Logger logger = Logger.getLogger(ORCPublicCertificateDatabaseImpl.class.getName());
@@ -339,7 +340,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     public Iterable<CertificateHandle> search(CountryCode issuingCountry, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName, boolean includeInvalid) throws Exception {
         final Set<ORCPublicCertificateDatabase.CertificateHandle> result = new HashSet<>(); 
-        final HttpClient client = HttpClientBuilder.create().build();
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         final List<NameValuePair> params = new ArrayList<>();
         params.add(ACTION_PARAM);
         params.add(XSLP_PARAM);
@@ -391,7 +392,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     public Iterable<CountryOverview> getCountriesWithValidCertificates()
             throws SAXException, IOException, ParserConfigurationException, DOMException, ParseException {
         final Set<ORCPublicCertificateDatabase.CountryOverview> result = new HashSet<>();
-        final HttpClient client = HttpClientBuilder.create().build();
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         final List<NameValuePair> params = new ArrayList<>();
         final HttpGet getRequest = new HttpGet(COUNTRY_OVERVIEW_URL);
         addAuthorizationHeader(getRequest);
@@ -639,7 +640,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private ORCCertificate getSingleCertificate(final String queryParameters)
             throws IOException, org.json.simple.parser.ParseException, ClientProtocolException {
         final HttpGet getRequest = new HttpGet(SINGLE_CERTIFICATE_DOWNLOAD_URL+"&"+queryParameters);
-        final HttpClient client = HttpClientBuilder.create().build();
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         addAuthorizationHeader(getRequest);
         final Iterable<ORCCertificate> certificates = new ORCCertificatesJsonImporter().read(client.execute(getRequest).getEntity().getContent())
                 .getCertificates();

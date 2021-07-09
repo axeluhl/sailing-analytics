@@ -24,8 +24,8 @@ public class StrippedLeaderboardDTOWithSecurity extends StrippedLeaderboardDTO i
         super(); // for GWT serialization only
     }
     
-    public StrippedLeaderboardDTOWithSecurity(BoatClassDTO boatClass) {
-        super(boatClass);
+    public StrippedLeaderboardDTOWithSecurity(String name, BoatClassDTO boatClass) {
+        super(name, boatClass);
     }
     
     @Override

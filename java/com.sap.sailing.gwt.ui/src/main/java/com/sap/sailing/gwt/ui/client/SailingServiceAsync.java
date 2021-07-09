@@ -265,8 +265,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getServerConfiguration(AsyncCallback<ServerConfigurationDTO> callback);
 
-    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration, AsyncCallback<Void> callback);
-
     void getRemoteSailingServerReferences(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);
@@ -659,6 +657,8 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             AsyncCallback<RaceCourseDTO> callback);
 
     void getRegattasForEvent(UUID eventId, AsyncCallback<List<RegattaDTO>> callback);
+    
+    void getAdminConsoleChangeLogSize(AsyncCallback<Integer> callback);
     
     // === Service method introduced for new ManagementConsole UI ===
     void getEventList(AsyncCallback<List<EventMetadataDTO>> callback);

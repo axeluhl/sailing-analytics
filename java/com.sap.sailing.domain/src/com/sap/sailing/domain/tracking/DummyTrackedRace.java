@@ -393,7 +393,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalysis) throws NoWindException {
+            boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -405,7 +405,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalysis) throws NoWindException {
+            boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -417,7 +417,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
+            boolean upwindOnly, boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -438,7 +438,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException {
+            boolean upwindOnly, boolean waitForLatestAnalyses) {
         return null;
     }
 

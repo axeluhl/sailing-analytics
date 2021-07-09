@@ -4,10 +4,62 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">July 2021</h5>
+         <ul class="bulletList">
+           <li>The data mining module (<a href="/gwt/DataMining.html">/gwt/DataMining.html</a>) now offers additional
+               metrics regarding the regular wind-based rank calculation for upwind and downwind legs as well as
+               hypothetical ranks calculated for upwind and downwind legs ignoring wind information and instead
+               projecting onto the Rhumb line. This allows for analyzing the effects of a wind-based ranking
+               on upwind and downwind legs.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2021</h5>
+         <ul class="bulletList">
+           <li>The advantage line now also (again) shows after the first competitor has crossed the finish line.</li>
+           <li>Dampening of wind, in particular the estimation from courses over ground (COG),
+               has been improved. The confidences inferred from cluster sizes sailing on separate tacks
+               are now growing more smoothly for small fleet sizes and hence cause less unexpected
+               "jumps" in estimated wind directions. Base confidence of wind estimations, compared
+               to sensor-based measurements, has been slightly reduced, as has the base confidence for
+               estimations from downwind legs.</li>
+           <li>Wind streamlet overlay on race map now scales better for long-distance races. Its spatial
+               interpolation is now a much closer approximation of the server-side wind field used which
+               also leads to smoother transitions between sensors distributed across the race course area.</li>
+           <li>Usernames with leading/trailing space characters can no longer be created in the sign-up dialog.
+               Access to existing accounts with such names now need explicit confirmation during sign-in and
+               password recovery to make users aware of the problem.</li>
+         </ul>
+         <h5 class="articleSubheadline">May 2021</h5>
+         <ul class="bulletList">
+           <li>Added language support for Danish (Dansk).</li>
+           <li>The stage will from now on randomize the order of long-running events that span more than
+               two weeks, assuming that those are actually event <em>series</em>, so these won't
+               dominate the stage.</li>
+           <li>Fixed a problem that occurred with empty tracks while trying to display a leaderboard.
+               The issue was displayed to users as error message at the bottom of the race board:
+               "Error trying to obtain leaderboard contents: ...".</li>
+           <li>The advantage line will now also be shown reliably after the first competitors have
+               finished the race.</li>
+         </ul>
          <h5 class="articleSubheadline">April 2021</h5>
          <ul class="bulletList">
            <li>Bug fix: the distance traveled in a leg is now reported correctly by the DataMining module even
                if no "end of tracking" time point is known for the containing race.</li>
+           <li>Added <tt>balaton</tt> to the list of supported <a href="https://www.windfinder.com">WindFinder</a>
+               spot collections you can use for your own events.</li>
+           <li>The polar sheet display in the DataMining front-end suffered from bad performance after the server
+               returned the query results. This is now fixed.</li>
+           <li>Cross track error (XTE) statistics have now been added to the <tt>/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/competitors/legs</tt>
+               and the <tt>/sailingserver/api/v2/leaderboards/{name}</tt> end points. The former also contains the average XTE values (signed and absolute)
+               for all legs. For the latter, specify one or more of the following new detail types:
+               <ul>
+                 <li><tt>LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS</tt> produces the new field <tt>legCurrentAbsoluteCrossTrackErrorInMeters</tt></li>
+                 <li><tt>LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS</tt> produces the new field <tt>legCurrentSignedCrossTrackErrorInMeters</tt></li>
+               </ul>
+               Note that the "...CURRENT..." values will not be present when at the time point for which the values are to be reported
+               the competitor is not actively racing in any leg.
+           </li>
+           <li>When removing a setting from <tt>gwt/Home.html#/user/profile/settings/:</tt> the filter expression is now
+               considered while refreshing the table.</li>
          </ul>
          <h5 class="articleSubheadline">March 2021</h5>
          <ul class="bulletList">
