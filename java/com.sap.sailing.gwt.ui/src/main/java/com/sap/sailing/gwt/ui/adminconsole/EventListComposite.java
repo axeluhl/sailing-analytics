@@ -95,33 +95,10 @@ public class EventListComposite extends Composite {
     private final List<EventDTO> allEvents;
     private final Label noEventsLabel;
     protected final LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
-
+    private final Displayer<LeaderboardGroupDTO> leaderboardGroupsDisplayer;
+    private final Displayer<EventDTO> eventsDisplayer;
     private Iterable<LeaderboardGroupDTO> availableLeaderboardGroups;
     
-    private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
-
-        @Override
-        public void fill(Iterable<EventDTO> result) {
-            fillEvents(result);
-        }
-    };
-    
-    public Displayer<EventDTO> getEventsDisplayer() {
-        return eventsDisplayer;
-    }
-    
-    private final Displayer<LeaderboardGroupDTO> leaderboardGroupsDisplayer = new Displayer<LeaderboardGroupDTO>() {
-        
-        @Override
-        public void fill(Iterable<LeaderboardGroupDTO> result) {
-            fillLeaderboardGroups(result);
-        }
-    };
-    
-    public Displayer<LeaderboardGroupDTO> getLeaderboardGroupsDisplayer() {
-        return leaderboardGroupsDisplayer;
-    }
-
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -153,6 +130,18 @@ public class EventListComposite extends Composite {
         final VerticalPanel panel = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
         panel.add(buttonPanel);
+        leaderboardGroupsDisplayer = new Displayer<LeaderboardGroupDTO>() {
+            @Override
+            public void fill(Iterable<LeaderboardGroupDTO> result) {
+                fillLeaderboardGroups(result);
+            }
+        };
+        eventsDisplayer = new Displayer<EventDTO>() {
+            @Override
+            public void fill(Iterable<EventDTO> result) {
+                fillEvents(result);
+            }
+        };
         eventListDataProvider = new ListDataProvider<EventDTO>();
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()),
                 allEvents, eventListDataProvider, stringMessages) {
@@ -210,6 +199,14 @@ public class EventListComposite extends Composite {
         panel.add(noEventsLabel);
         initWidget(panel);
         filterTextbox.setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
+    }
+
+    public Displayer<EventDTO> getEventsDisplayer() {
+        return eventsDisplayer;
+    }
+    
+    public Displayer<LeaderboardGroupDTO> getLeaderboardGroupsDisplayer() {
+        return leaderboardGroupsDisplayer;
     }
 
     private CellTable<EventDTO> createEventTable(UserDTO user) {
@@ -752,7 +749,7 @@ public class EventListComposite extends Composite {
     }
 
     public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
-        availableLeaderboardGroups = leaderboardGroups;
+        availableLeaderboardGroups = Util.filter(leaderboardGroups, lg->userService.hasPermission(lg, DefaultActions.UPDATE));
     }
 
     public void fillEvents(Iterable<EventDTO> events) {
