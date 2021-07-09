@@ -158,8 +158,8 @@ public class RegattaManagementPanel extends SimplePanel implements FilterablePan
 
     private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, final Iterable<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas,
-                existingEvents, /* eventToSelect */ null, sailingServiceWrite, stringMessages,
-                new CreateRegattaCallback(stringMessages, presenter, existingEvents));
+                existingEvents, /* eventToSelect */ null, sailingServiceWrite, userService,
+                stringMessages, new CreateRegattaCallback(stringMessages, presenter, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }

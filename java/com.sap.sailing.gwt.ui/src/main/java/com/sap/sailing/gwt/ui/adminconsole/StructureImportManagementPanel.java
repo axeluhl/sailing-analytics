@@ -368,7 +368,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             existingEvents.add(getSelectedEvent());
         }
         DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingEvents, regattaDefaultsPerStructure.get(regattaStructure),
-                sailingServiceWrite, errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
+                sailingServiceWrite, presenter.getUserService(), errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
                     @Override
                     public void cancel() {
                     }

@@ -550,8 +550,8 @@ public class EventListComposite extends Composite {
     private void openCreateRegattaDialog(List<RegattaDTO> existingRegattas, List<EventDTO> existingEvents,
             EventDTO createdEvent) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas,
-                existingEvents, createdEvent, sailingServiceWrite, stringMessages,
-                new CreateRegattaCallback(stringMessages, presenter, existingEvents));
+                existingEvents, createdEvent, sailingServiceWrite, userService,
+                stringMessages, new CreateRegattaCallback(stringMessages, presenter, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
