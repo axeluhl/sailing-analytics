@@ -14,7 +14,6 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 
 public abstract class RegattaFactory {
-
     public static RegattaDTO createDefaultRegatta(String regattaName, String boatClassName, final RankingMetrics ranking, final ScoringSchemeType scoringScheme, 
             final SeriesDTO series, final EventDTO event) {
         RegattaDTO regatta = new RegattaDTO(regattaName, scoringScheme);
@@ -30,5 +29,4 @@ public abstract class RegattaFactory {
         Util.addAll(event.venue.getCourseAreas(), regatta.courseAreas);
         return regatta;
     }
-    
 }
