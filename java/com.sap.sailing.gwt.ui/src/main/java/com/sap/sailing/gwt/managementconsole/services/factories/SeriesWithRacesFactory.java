@@ -36,13 +36,11 @@ public abstract class SeriesWithRacesFactory {
     
     public static LinkedHashMap<String, SeriesCreationParametersDTO> createSeriesStructure(SeriesDTO seriesDTO) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<String, SeriesCreationParametersDTO>();
-
         SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                 seriesDTO.isMedal(), seriesDTO.isFleetsCanRunInParallel(), seriesDTO.isStartsWithZeroScore(),
                 seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
                 seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
         seriesStructure.put(seriesDTO.getName(), seriesPair);
-        
         return seriesStructure;
     }
 }
