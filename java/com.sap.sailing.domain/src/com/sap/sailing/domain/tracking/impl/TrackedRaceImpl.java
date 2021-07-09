@@ -1550,18 +1550,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (markPassings.isEmpty()) {
             result = 0;
         } else {
-            final boolean hasMarkPassingAtOrBeforeTimePoint;
+            final boolean hasNoMarkPassingAtOrBeforeTimePoint;
             lockForRead(markPassings);
             try {
-                hasMarkPassingAtOrBeforeTimePoint = markPassings.floor(new DummyMarkPassingWithTimePointOnly(timePoint)) == null;
+                hasNoMarkPassingAtOrBeforeTimePoint = markPassings.floor(new DummyMarkPassingWithTimePointOnly(timePoint)) == null;
             } finally {
                 unlockAfterRead(markPassings);
             }
-            if (hasMarkPassingAtOrBeforeTimePoint) {
+            if (hasNoMarkPassingAtOrBeforeTimePoint) {
                 // no mark passing at or before timePoint; competitor has not started / participated yet
                 result = 0;
             } else {
-                result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+                result = getCompetitorsFromBestToWorst(timePoint, cache).indexOf(competitor) + 1;
             }
         }
         return result;
