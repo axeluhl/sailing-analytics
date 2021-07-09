@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.NavigableSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.POST;
@@ -85,13 +86,18 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                 new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         logger.info("Exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         final RacingEventService racingEventService = getService();
-        final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
-        exportBoatClasses(racingEventService, connection);
-        exportIrms(racingEventService, connection);
-        exportScoringSchemes(racingEventService, connection);
-        exportCompetitors(racingEventService, connection);
-        exportEvents(racingEventService, connection);
-        exportRaces(racingEventService, connection);
+        try {
+            final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
+            exportBoatClasses(racingEventService, connection);
+            exportIrms(racingEventService, connection);
+            exportScoringSchemes(racingEventService, connection);
+            exportCompetitors(racingEventService, connection);
+            exportEvents(racingEventService, connection);
+            exportRaces(racingEventService, connection);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Problem exporting data to HANA", e);
+            throw e;
+        }
         logger.info("Done exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         return Response.ok().build();
     }
@@ -140,8 +146,8 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             insertBoatClasses.setString(1, boatClass.getName().substring(0, Math.min(boatClass.getName().length(), 255)));
             insertBoatClasses.setString(2, "Type "+boatClass.getHullType().name()+", length "+
                     boatClass.getHullLength().getMeters()+"m, beam "+boatClass.getHullBeam().getMeters()+"m");
-            insertBoatClasses.setDouble(3, boatClass.getHullLength().getMeters());
-            insertBoatClasses.setDouble(4, boatClass.getHullBeam().getMeters());
+            setDouble(insertBoatClasses, 3, boatClass.getHullLength().getMeters());
+            setDouble(insertBoatClasses, 4, boatClass.getHullBeam().getMeters());
             insertBoatClasses.setString(5, boatClass.getHullType().name());
             insertBoatClasses.execute();
         }
@@ -268,19 +274,19 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         insertManeuvers.setString(5, maneuver.getType().name());
         insertManeuvers.setString(6, maneuver.getNewTack().name());
         if (maneuver.getManeuverLoss() != null) {
-            insertManeuvers.setDouble(7,
+            setDouble(insertManeuvers, 7,
                     maneuver.getManeuverLoss().getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle().getMeters()
                     -maneuver.getManeuverLoss().getDistanceSailedProjectedOnMiddleManeuverAngle().getMeters());
         } else {
-            insertManeuvers.setDouble(7, 0);
+            setDouble(insertManeuvers, 7, 0);
         }
-        insertManeuvers.setDouble(8, maneuver.getSpeedWithBearingBefore().getKnots());
-        insertManeuvers.setDouble(9, maneuver.getSpeedWithBearingAfter().getKnots());
-        insertManeuvers.setDouble(10, maneuver.getSpeedWithBearingBefore().getBearing().getDegrees());
-        insertManeuvers.setDouble(11, maneuver.getSpeedWithBearingAfter().getBearing().getDegrees());
-        insertManeuvers.setDouble(12, maneuver.getDirectionChangeInDegrees());
-        insertManeuvers.setDouble(13, maneuver.getMaxTurningRateInDegreesPerSecond());
-        insertManeuvers.setDouble(14, maneuver.getLowestSpeed().getKnots());
+        setDouble(insertManeuvers, 8, maneuver.getSpeedWithBearingBefore().getKnots());
+        setDouble(insertManeuvers, 9, maneuver.getSpeedWithBearingAfter().getKnots());
+        setDouble(insertManeuvers, 10, maneuver.getSpeedWithBearingBefore().getBearing().getDegrees());
+        setDouble(insertManeuvers, 11, maneuver.getSpeedWithBearingAfter().getBearing().getDegrees());
+        setDouble(insertManeuvers, 12, maneuver.getDirectionChangeInDegrees());
+        setDouble(insertManeuvers, 13, maneuver.getMaxTurningRateInDegreesPerSecond());
+        setDouble(insertManeuvers, 14, maneuver.getLowestSpeed().getKnots());
         insertManeuvers.setString(15, maneuver.getToSide().name());
     }
 
@@ -291,10 +297,10 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         insertLegStats.setInt(3, trackedLegOfCompetitor.getTrackedLeg().getLeg().getZeroBasedIndexOfStartWaypoint());
         insertLegStats.setString(4, trackedLegOfCompetitor.getCompetitor().getId().toString());
         insertLegStats.setInt(5, trackedLegOfCompetitor.getRank(now));
-        insertLegStats.setDouble(6, metersOr0ForNull(trackedLegOfCompetitor.getDistanceTraveled(now)));
-        insertLegStats.setDouble(7, secondsOr0ForNull(trackedLegOfCompetitor.getTime(now)));
-        insertLegStats.setDouble(8, metersOr0ForNull(trackedLegOfCompetitor.getAverageSignedCrossTrackError(now, /* waitForLatest */ false)));
-        insertLegStats.setDouble(9, metersOr0ForNull(trackedLegOfCompetitor.getAverageAbsoluteCrossTrackError(now, /* waitForLatest */ false)));
+        setDouble(insertLegStats, 6, metersOr0ForNull(trackedLegOfCompetitor.getDistanceTraveled(now)));
+        setDouble(insertLegStats, 7, secondsOr0ForNull(trackedLegOfCompetitor.getTime(now)));
+        setDouble(insertLegStats, 8, metersOr0ForNull(trackedLegOfCompetitor.getAverageSignedCrossTrackError(now, /* waitForLatest */ false)));
+        setDouble(insertLegStats, 9, metersOr0ForNull(trackedLegOfCompetitor.getAverageAbsoluteCrossTrackError(now, /* waitForLatest */ false)));
         try {
             insertLegStats.setInt(10, intOr0ForNull(trackedLegOfCompetitor.getNumberOfTacks(now, /* waitForLatest */ false)));
             insertLegStats.setInt(11, intOr0ForNull(trackedLegOfCompetitor.getNumberOfJibes(now, /* waitForLatest */ false)));
@@ -305,8 +311,8 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             insertLegStats.setInt(12, 0);
         }
         final Speed vmg = trackedLegOfCompetitor.getAverageVelocityMadeGood(now);
-        insertLegStats.setDouble(13, vmg==null?0:vmg.getKnots());
-        insertLegStats.setDouble(14, secondsOr0ForNull(trackedLegOfCompetitor.getGapToLeader(now, WindPositionMode.LEG_MIDDLE, rankingInfo, cache)));
+        setDouble(insertLegStats, 13, vmg==null?0:vmg.getKnots());
+        setDouble(insertLegStats, 14, secondsOr0ForNull(trackedLegOfCompetitor.getGapToLeader(now, WindPositionMode.LEG_MIDDLE, rankingInfo, cache)));
     }
     
     private int intOr0ForNull(Integer i) {
@@ -332,10 +338,10 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         insertRaceStats.setString(2, trackedRace.getTrackedRegatta().getRegatta().getName());
         insertRaceStats.setString(3, competitor.getId().toString());
         insertRaceStats.setInt(4, trackedRace.getRank(competitor, now));
-        insertRaceStats.setDouble(5, metersOr0ForNull(trackedRace.getDistanceTraveled(competitor, now)));
-        insertRaceStats.setDouble(6, secondsOr0ForNull(trackedRace.getTimeSailedSinceRaceStart(competitor, now)));
-        insertRaceStats.setDouble(7, metersOr0ForNull(trackedRace.getAverageSignedCrossTrackError(competitor, now, /* waitForLatest */ false)));
-        insertRaceStats.setDouble(8, metersOr0ForNull(trackedRace.getAverageAbsoluteCrossTrackError(competitor, now, /* waitForLatest */ false)));
+        setDouble(insertRaceStats, 5, metersOr0ForNull(trackedRace.getDistanceTraveled(competitor, now)));
+        setDouble(insertRaceStats, 6, secondsOr0ForNull(trackedRace.getTimeSailedSinceRaceStart(competitor, now)));
+        setDouble(insertRaceStats, 7, metersOr0ForNull(trackedRace.getAverageSignedCrossTrackError(competitor, now, /* waitForLatest */ false)));
+        setDouble(insertRaceStats, 8, metersOr0ForNull(trackedRace.getAverageAbsoluteCrossTrackError(competitor, now, /* waitForLatest */ false)));
         final Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, /* waitForLatest */ false);
         insertRaceStats.setInt(9, Util.size(Util.filter(maneuvers, m->m.getType() == ManeuverType.TACK)));
         insertRaceStats.setInt(10, Util.size(Util.filter(maneuvers, m->m.getType() == ManeuverType.JIBE)));
@@ -367,15 +373,15 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             startDelay = 0;
             startTack = null;
         }
-        insertRaceStats.setDouble(12, startDelay);
+        setDouble(insertRaceStats, 12, startDelay);
         if (startOfRace != null) {
-            insertRaceStats.setDouble(13, metersOr0ForNull(trackedRace.getDistanceToStartLine(competitor, startOfRace)));
+            setDouble(insertRaceStats, 13, metersOr0ForNull(trackedRace.getDistanceToStartLine(competitor, startOfRace)));
             final Speed speedWhenCrossingStartLine = trackedRace.getSpeedWhenCrossingStartLine(competitor);
-            insertRaceStats.setDouble(14, speedWhenCrossingStartLine==null?0:speedWhenCrossingStartLine.getKnots());
+            setDouble(insertRaceStats, 14, speedWhenCrossingStartLine==null?0:speedWhenCrossingStartLine.getKnots());
             insertRaceStats.setString(15, startTack==null?null:startTack.name());
         } else {
-            insertRaceStats.setDouble(13, 0);
-            insertRaceStats.setDouble(14, 0);
+            setDouble(insertRaceStats, 13, 0);
+            setDouble(insertRaceStats, 14, 0);
         }
     }
 
@@ -393,7 +399,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         insertRaceResults.setString(2, raceColumn.getName());
         insertRaceResults.setString(3, competitor.getId().toString());
         final Double totalPoints = leaderboard.getTotalPoints(competitor, raceColumn, now);
-        insertRaceResults.setDouble(4, totalPoints == null ? 0 : totalPoints);
+        setDouble(insertRaceResults, 4, totalPoints == null ? 0 : totalPoints);
         insertRaceResults.setBoolean(5, leaderboard.isDiscarded(competitor, raceColumn, now));
         final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, now);
         insertRaceResults.setString(6, (maxPointsReason == null ? MaxPointsReason.NONE : maxPointsReason).name());
@@ -428,9 +434,9 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         }
         final SpeedWithConfidence<TimePoint> averageWind = trackedRace.getAverageWindSpeedWithConfidenceWithNumberOfSamples(/* number of samples */ 5);
         if (averageWind != null) {
-            insertRaces.setDouble(9, averageWind.getObject().getKnots());
+            setDouble(insertRaces, 9, averageWind.getObject().getKnots());
         } else {
-            insertRaces.setDouble(9, 0.0);
+            setDouble(insertRaces, 9, 0.0);
         }
     }
 
@@ -477,6 +483,14 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     private void executeQueriesFromSqlResource(String resourceWithSemicolonSeparatedStatements, final Connection connection) throws IOException, SQLException {
         for (final String statementAsString : getStatementsFromResource(resourceWithSemicolonSeparatedStatements)) {
             connection.createStatement().execute(statementAsString);
+        }
+    }
+    
+    private void setDouble(PreparedStatement statement, int parameterIndex, double value) throws SQLException {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            setDouble(statement, parameterIndex, 0.0);
+        } else {
+            statement.setDouble(parameterIndex, value);
         }
     }
 }
