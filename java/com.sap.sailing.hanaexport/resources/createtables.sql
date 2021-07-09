@@ -97,7 +97,7 @@ CREATE TABLE SAILING."Leg" (
         "race"          NVARCHAR(255)    NOT NULL,
         "regatta"       NVARCHAR(255)    NOT NULL,
         "number"        INTEGER          NOT NULL,
-        "type"          NVARCHAR(20)     NOT NULL,
+        "type"          NVARCHAR(20),
         PRIMARY KEY ("race", "regatta", "number"),
         FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")
 );
