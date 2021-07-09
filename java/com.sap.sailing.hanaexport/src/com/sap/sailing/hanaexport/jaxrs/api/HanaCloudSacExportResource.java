@@ -143,7 +143,11 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         final PreparedStatement insertBoatClasses = connection.prepareStatement(
                 "INSERT INTO SAILING.\"BoatClass\" (\"id\", \"description\", \"hullLengthInMeters\", \"hullBeamInMeters\", \"hullType\") VALUES (?, ?, ?, ?, ?);");
         for (final BoatClass boatClass : racingEventService.getBaseDomainFactory().getBoatClasses()) {
-            insertBoatClasses.setString(1, boatClass.getName().substring(0, Math.min(boatClass.getName().length(), 255)));
+            if (boatClass.getName() == null) {
+                insertBoatClasses.setString(1, "<null>");
+            } else {
+                insertBoatClasses.setString(1, boatClass.getName().substring(0, Math.min(boatClass.getName().length(), 255)));
+            }
             insertBoatClasses.setString(2, "Type "+boatClass.getHullType().name()+", length "+
                     boatClass.getHullLength().getMeters()+"m, beam "+boatClass.getHullBeam().getMeters()+"m");
             setDouble(insertBoatClasses, 3, boatClass.getHullLength().getMeters());
