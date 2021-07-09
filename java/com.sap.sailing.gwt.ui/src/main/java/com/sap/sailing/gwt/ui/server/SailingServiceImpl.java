@@ -3476,7 +3476,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
         for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             try {
-                groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData));
+                groupDTO.leaderboards.add(createStrippedLeaderboardDTOWithSecurity(leaderboard, withGeoLocationData, withStatisticalData));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }
