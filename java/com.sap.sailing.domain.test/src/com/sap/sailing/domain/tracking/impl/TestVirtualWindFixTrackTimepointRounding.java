@@ -24,7 +24,7 @@ public class TestVirtualWindFixTrackTimepointRounding {
     @Before
     public void setUp() {
         final TrackedRace trackedRace = mock(TrackedRace.class);
-        when(trackedRace.getTimePointOfNewestEvent()).thenReturn(TimePoint.of(0));
+        when(trackedRace.getTimePointOfNewestEvent()).thenReturn(TimePoint.now());
         virtualWindFixes = new VirtualWindFixesAsNavigableSet(null, trackedRace, RESOLUTION_IN_MILLIS) {
             private static final long serialVersionUID = 1L;
 
@@ -50,6 +50,14 @@ public class TestVirtualWindFixTrackTimepointRounding {
     }
 
     @Test
+    public void testLoweringOneTickAfterEpoch() {
+        final TimePoint oneTickAfterEpoch = TimePoint.of(RESOLUTION_IN_MILLIS);
+        final TimePoint lower = virtualWindFixes.lowerToResolution(oneTickAfterEpoch);
+        assertNotEquals(oneTickAfterEpoch, lower);
+        assertEquals(TimePoint.of(0), lower);
+    }
+
+    @Test
     public void testLoweringBeforefEpoch() {
         final TimePoint beforeEpoch = TimePoint.of(-10);
         final TimePoint lower = virtualWindFixes.lowerToResolution(beforeEpoch);
@@ -58,11 +66,50 @@ public class TestVirtualWindFixTrackTimepointRounding {
     }
 
     @Test
+    public void testFloorBeforeEpoch() {
+        final TimePoint beforeEpoch = TimePoint.of(-10);
+        final TimePoint lower = virtualWindFixes.floorToResolution(beforeEpoch);
+        assertNotEquals(beforeEpoch, lower);
+        assertTrue(beforeEpoch.compareTo(lower) > 0);
+    }
+
+    @Test
+    public void testFloorAfterEpoch() {
+        final TimePoint beforeEpoch = TimePoint.of(10);
+        final TimePoint lower = virtualWindFixes.floorToResolution(beforeEpoch);
+        assertNotEquals(beforeEpoch, lower);
+        assertTrue(beforeEpoch.compareTo(lower) > 0);
+        assertEquals(TimePoint.of(0), lower);
+    }
+
+    @Test
+    public void testFloorAtBeginningOfEpoch() {
+        final TimePoint beginningOfEpoch = TimePoint.of(0);
+        final TimePoint floor = virtualWindFixes.floorToResolution(beginningOfEpoch);
+        assertEquals(beginningOfEpoch, floor);
+    }
+
+    @Test
     public void testCeilingBeforeEpoch() {
         final TimePoint beforeEpoch = TimePoint.of(-RESOLUTION_IN_MILLIS-1);
         final TimePoint higher = virtualWindFixes.ceilingToResolution(beforeEpoch);
         assertEquals(TimePoint.of(-RESOLUTION_IN_MILLIS), higher);
         assertTrue(beforeEpoch.compareTo(higher) < 0);
+    }
+
+    @Test
+    public void testCeilingAtBeginningOfEpoch() {
+        final TimePoint epoch = TimePoint.of(0);
+        final TimePoint ceil = virtualWindFixes.ceilingToResolution(epoch);
+        assertEquals(epoch, ceil);
+    }
+
+    @Test
+    public void testCeilingAfterEpoch() {
+        final TimePoint afterEpoch = TimePoint.of(RESOLUTION_IN_MILLIS-1);
+        final TimePoint higher = virtualWindFixes.ceilingToResolution(afterEpoch);
+        assertEquals(TimePoint.of(RESOLUTION_IN_MILLIS), higher);
+        assertTrue(afterEpoch.compareTo(higher) < 0);
     }
 
     @Test
@@ -80,5 +127,27 @@ public class TestVirtualWindFixTrackTimepointRounding {
         assertNotEquals(beforeEpoch, higher);
         assertTrue(beforeEpoch.compareTo(higher) < 0);
         assertEquals(TimePoint.of(-RESOLUTION_IN_MILLIS), higher);
+    }
+
+    @Test
+    public void testHigherOneTickBeforeEpoch() {
+        final TimePoint beforeEpoch = TimePoint.of(-RESOLUTION_IN_MILLIS);
+        final TimePoint higher = virtualWindFixes.higherToResolution(beforeEpoch);
+        assertEquals(TimePoint.of(0), higher);
+    }
+
+    @Test
+    public void testHigherAfterEpoch() {
+        final TimePoint afterEpoch = TimePoint.of(RESOLUTION_IN_MILLIS/2);
+        final TimePoint higher = virtualWindFixes.higherToResolution(afterEpoch);
+        assertNotEquals(afterEpoch, higher);
+        assertTrue(afterEpoch.compareTo(higher) < 0);
+    }
+
+    @Test
+    public void testHigherOneTickAfterEpoch() {
+        final TimePoint afterEpoch = TimePoint.of(RESOLUTION_IN_MILLIS);
+        final TimePoint higher = virtualWindFixes.higherToResolution(afterEpoch);
+        assertEquals(TimePoint.of(2*RESOLUTION_IN_MILLIS), higher);
     }
 }
