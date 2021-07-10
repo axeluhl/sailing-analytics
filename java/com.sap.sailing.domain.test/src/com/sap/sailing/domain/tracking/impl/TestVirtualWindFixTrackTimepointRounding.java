@@ -21,44 +21,55 @@ public class TestVirtualWindFixTrackTimepointRounding {
     private static final int RESOLUTION_IN_MILLIS = 1000;
     private VirtualWindFixesAsNavigableSet virtualWindFixes;
     
+    private static class MyVirtualWindFixesAsNavigableSet extends VirtualWindFixesAsNavigableSet {
+        private static final long serialVersionUID = 1L;
+
+        public MyVirtualWindFixesAsNavigableSet() {
+            this(mock(TrackedRace.class));
+        }
+        
+        private MyVirtualWindFixesAsNavigableSet(TrackedRace trackedRace) {
+            super(null, trackedRace, RESOLUTION_IN_MILLIS);
+            when(trackedRace.getTimePointOfNewestEvent()).thenReturn(TimePoint.now());
+        }
+        
+        @Override
+        protected Wind getWind(Position p, TimePoint timePoint) {
+            return null;
+        }
+
+        @Override
+        protected NavigableSet<Wind> createSubset(WindTrack track, TrackedRace trackedRace, TimePoint from,
+                TimePoint to) {
+            return null;
+        }
+
+        @Override
+        protected TimePoint higherToResolution(TimePoint t) {
+            return super.higherToResolution(t);
+        }
+
+        @Override
+        protected TimePoint lowerToResolution(TimePoint t) {
+            return super.lowerToResolution(t);
+        }
+
+        @Override
+        protected TimePoint ceilingToResolution(TimePoint t) {
+            return super.ceilingToResolution(t);
+        }
+
+        @Override
+        protected TimePoint floorToResolution(TimePoint t) {
+            return super.floorToResolution(t);
+        }
+    }
+    
     @Before
     public void setUp() {
         final TrackedRace trackedRace = mock(TrackedRace.class);
         when(trackedRace.getTimePointOfNewestEvent()).thenReturn(TimePoint.now());
-        virtualWindFixes = new VirtualWindFixesAsNavigableSet(null, trackedRace, RESOLUTION_IN_MILLIS) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected Wind getWind(Position p, TimePoint timePoint) {
-                return null;
-            }
-
-            @Override
-            protected NavigableSet<Wind> createSubset(WindTrack track, TrackedRace trackedRace, TimePoint from,
-                    TimePoint to) {
-                return null;
-            }
-
-            @Override
-            protected TimePoint higherToResolution(TimePoint t) {
-                return super.higherToResolution(t);
-            }
-
-            @Override
-            protected TimePoint lowerToResolution(TimePoint t) {
-                return super.lowerToResolution(t);
-            }
-
-            @Override
-            protected TimePoint ceilingToResolution(TimePoint t) {
-                return super.ceilingToResolution(t);
-            }
-
-            @Override
-            protected TimePoint floorToResolution(TimePoint t) {
-                return super.floorToResolution(t);
-            }
-        };
+        virtualWindFixes = new MyVirtualWindFixesAsNavigableSet();
     }
     
     @Test
