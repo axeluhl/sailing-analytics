@@ -89,7 +89,8 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         if (timePointOfLastEvent != null && timePoint.compareTo(timePointOfLastEvent) > 0) {
             result = lowerToResolution(timePointOfLastEvent);
         } else {
-            result = new MillisecondsTimePoint((timePoint.asMillis() - 1) / getResolutionInMilliseconds()
+            final long minuend = timePoint.asMillis() <= 0 ? getResolutionInMilliseconds()+1 : 1;
+            result = new MillisecondsTimePoint((timePoint.asMillis() - minuend) / getResolutionInMilliseconds()
                     * getResolutionInMilliseconds());
         }
         return result;
