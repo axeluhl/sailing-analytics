@@ -38,6 +38,31 @@ public class TestVirtualWindFixTrackTimepointRounding {
                     TimePoint to) {
                 return null;
             }
+
+            @Override
+            protected TimePoint higherToResolution(TimePoint t) {
+                return super.higherToResolution(t);
+            }
+
+            @Override
+            protected TimePoint lowerToResolution(TimePoint t) {
+                return super.lowerToResolution(t);
+            }
+
+            @Override
+            protected TimePoint ceilingToResolution(TimePoint t) {
+                return super.ceilingToResolution(t);
+            }
+
+            @Override
+            protected TimePoint floorToResolution(TimePoint t) {
+                return super.floorToResolution(t);
+            }
+
+            @Override
+            protected TimePoint higherToResolution(TimePoint t) {
+                return super.higherToResolution(t);
+            }
         };
     }
     
