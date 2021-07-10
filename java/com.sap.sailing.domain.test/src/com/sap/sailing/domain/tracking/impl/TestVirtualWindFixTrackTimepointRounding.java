@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 public class TestVirtualWindFixTrackTimepointRounding {
     private static final int RESOLUTION_IN_MILLIS = 1000;
-    private VirtualWindFixesAsNavigableSet virtualWindFixes;
+    private MyVirtualWindFixesAsNavigableSet virtualWindFixes;
     
     private static class MyVirtualWindFixesAsNavigableSet extends VirtualWindFixesAsNavigableSet {
         private static final long serialVersionUID = 1L;
