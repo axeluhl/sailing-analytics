@@ -20,10 +20,10 @@ public class MongoProcessImpl extends MongoEndpointImpl implements MongoProcess 
     private final Host host;
     
     public MongoProcessImpl(Host host) {
-        this(MongoDBConstants.DEFAULT_PORT, host);
+        this(host, MongoDBConstants.DEFAULT_PORT);
     }
 
-    public MongoProcessImpl(int port, Host host) {
+    public MongoProcessImpl(Host host, int port) {
         super();
         this.port = port;
         this.host = host;

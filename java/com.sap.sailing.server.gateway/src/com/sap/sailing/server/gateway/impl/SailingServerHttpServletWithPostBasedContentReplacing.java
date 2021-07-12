@@ -23,7 +23,7 @@ import com.sap.sse.common.HttpRequestHeaderConstants;
 public abstract class SailingServerHttpServletWithPostBasedContentReplacing extends SailingServerHttpServlet {
     private static final long serialVersionUID = -2819428093387051473L;
 
-    protected void writePostRefreshingHeadAndEmptyBody(HttpServletRequest req, HttpServletResponse resp, String title) throws IOException {
+    protected void writePostRefreshingHeadAndBodyWithRefreshForm(HttpServletRequest req, HttpServletResponse resp, String title) throws IOException {
         resp.setContentType("text/html");
         PrintWriter out = resp.getWriter();
         out.println("<html>");
@@ -36,9 +36,9 @@ public abstract class SailingServerHttpServletWithPostBasedContentReplacing exte
                 "        request.setRequestHeader(\""+HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA()+"\",\""+HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB()+"\");\r\n" +
                 "        request.addEventListener(\"load\", function(event) {\r\n" + 
                 "                if (request.status >= 200 && request.status < 300) {\r\n" + 
-                "                        document.getElementById(\"body\").innerHTML = request.responseText;\r\n" + 
+                "                        document.getElementById(\""+WindStatusServlet.REFRESHING_CONTENT_DIV_ID+"\").innerHTML = request.responseText;\r\n" + 
                 "                } else {\r\n" + 
-                "                        document.getElementById(\"body\").innerHTML = \"<b>error reading data from server</b>\";\r\n" + 
+                "                        document.getElementById(\""+WindStatusServlet.REFRESHING_CONTENT_DIV_ID+"\").innerHTML = \"<b>error reading data from server</b>\";\r\n" + 
                 "                }\r\n" + 
                 "        });\r\n" + 
                 "        request.send(); \r\n" + 
@@ -52,6 +52,18 @@ public abstract class SailingServerHttpServletWithPostBasedContentReplacing exte
                 "</script>");
         out.println("</head>");
         out.println("<body id=\"body\" onload=\"refresh()\" >");
+        out.println("<p>Reload wind connectors with parameter "+WindStatusServlet.PARAM_RELOAD_WIND_RECEIVER+"=true:");
+        out.println("This will force a connection reset and a reloading of the wind receivers. ");
+        out.println("It requires permission "+WindStatusServlet.getPermissionToReload()+".</p>");
+        out.println("<form action=\"/sailingserver/windStatus\" method=\"POST\">");
+        out.println("  <label for=\"username\">Username:</label>");
+        out.println("  <input type=\"text\" id=\"username\" name=\"username\"><br>");
+        out.println("  <label for=\"password\">Password:</label>");
+        out.println("  <input type=\"password\" id=\"password\" name=\"password\"><br>");
+        out.println("  <input type=\"hidden\" name=\""+WindStatusServlet.PARAM_RELOAD_WIND_RECEIVER+"\" value=\"true\"><br>");
+        out.println("  <input type=\"submit\" value=\"Reload\"><br>");
+        out.println("</form>");
+        out.println("<div id=\""+WindStatusServlet.REFRESHING_CONTENT_DIV_ID+"\"></div>");
         out.println("</body>");
         out.println("</html>");
         out.close();

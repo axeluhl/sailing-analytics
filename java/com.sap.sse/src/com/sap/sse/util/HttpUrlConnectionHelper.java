@@ -107,7 +107,7 @@ public class HttpUrlConnectionHelper {
             }
             urlConnection.setDoOutput(true);
             if (optionalRequestMethod != null) {
-                ((HttpURLConnection)urlConnection).setRequestMethod(optionalRequestMethod);
+                ((HttpURLConnection) urlConnection).setRequestMethod(optionalRequestMethod);
             }
             urlConnection.setReadTimeout((int) timeout.asMillis());
             if (urlConnection instanceof HttpURLConnection) {

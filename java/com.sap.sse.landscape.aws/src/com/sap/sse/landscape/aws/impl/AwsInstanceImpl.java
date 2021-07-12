@@ -27,7 +27,7 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.landscape.ssh.SshCommandChannelImpl;
 import com.sap.sse.landscape.ssh.YesUserInfo;
-import com.sap.sse.util.Wait;
+import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
@@ -93,7 +93,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
             final Instance instance = getInstance();
             // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
             if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
-                final String publicIpAddress = Wait.wait(()->instance.publicIpAddress(), ipAddress->ipAddress != null, /* retryOnException */ false,
+                final String publicIpAddress = Wait.wait(()->getInstance().publicIpAddress(), ipAddress->ipAddress != null, /* retryOnException */ false,
                         timeoutEmptyMeaningForever, /* sleep between attempts */ Duration.ONE_SECOND.times(5),
                         Level.INFO, "Waiting for public IP address of instance "+instance.instanceId());
                 publicAddress = publicIpAddress == null ? null : InetAddress.getByName(publicIpAddress);

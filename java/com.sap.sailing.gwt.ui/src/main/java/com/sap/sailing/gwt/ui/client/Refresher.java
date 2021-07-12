@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 /**
- * A {@link Refresher} will offer methods to register a displayer of a specific DTO, force reloads and give the
+ * A {@link Refresher} offers methods to register a displayer of a specific DTO type, force reloads and give the
  * possibility to update the centrally managed data. The displayer will be informed asynchronously after data changes
  * have applied.
  * 
@@ -20,6 +20,8 @@ public interface Refresher<T> {
      *            the {@link Displayer} to add.
      */
     void addDisplayerAndCallFillOnInit(Displayer<T> displayer);
+
+    void removeDisplayer(Displayer<T> displayer);
 
     /**
      * Force a reload of the data from server and call afterwards asynchronously the fill method of the given
@@ -56,5 +58,23 @@ public interface Refresher<T> {
      *            the {@link Displayer} on which the fill method should be called.
      */
     void callFillAndReloadInitially(Displayer<T> displayer);
-
+    
+    /**
+     * Call the fill method of all registered displayer, e.g. after removing some DTOs from list.
+     */
+    void callAllFill();
+    
+    /**
+     * Adds a DTO to DTO list to prevent loading all data after adding single object to context.
+     * 
+     * @param dto DTO
+     */
+    void add(T dto);
+    
+    /**
+     * Removes a DTO from DTO list to prevent loading all data after deleting single object to context.
+     * 
+     * @param dto DTO
+     */
+    void remove(T dto);
 }

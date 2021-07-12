@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
@@ -53,6 +54,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider {
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -368,7 +370,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             existingEvents.add(getSelectedEvent());
         }
         DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingEvents, regattaDefaultsPerStructure.get(regattaStructure),
-                sailingServiceWrite, errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
+                sailingServiceWrite, presenter.getUserService(), errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
                     @Override
                     public void cancel() {
                     }
@@ -463,10 +465,10 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void fillEvents(Iterable<EventDTO> result) {
-        if (sailingEventsListBox != null) { // is initialized only one a regatta structure has been loaded
+        if (sailingEventsListBox != null) { // is initialized only once a regatta structure has been loaded
             sailingEventsListBox.clear();
             existingEvents = new ArrayList<EventDTO>();
-            result.forEach(existingEvents::add);
+            Util.filter(result, e->presenter.getUserService().hasPermission(e, DefaultActions.UPDATE)).forEach(existingEvents::add);
             Collections.sort(existingEvents, new Comparator<EventDTO>() {
                 private final NaturalComparator comp = new NaturalComparator();
                 @Override

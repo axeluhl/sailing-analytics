@@ -97,7 +97,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     public Map<String, byte[]> exportAllPersistedModels(ModelDomainType domainType) throws ModelPersistenceException {
         Map<String, byte[]> exportedModels = new HashMap<>();
         String bucketName = getCollectionName(domainType);
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withWriteConcern(WriteConcern.MAJORITY);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withReadConcern(ReadConcern.MAJORITY);
         for (GridFSFile gridFSFile : gridFs.find()) {
             String fileName = gridFSFile.getFilename();
             byte[] exportedModel;

@@ -13,10 +13,8 @@
 #
 AVAILABILITY_ZONE=eu-west-1c
 INSTANCE_TYPE=i3.xlarge
-# eu-west-1:
-IMAGE_ID=ami-0ea8674bd290e1c5b
-# eu-west-2:
-#IMAGE_ID=ami-019319dc5c86a6bc4
+IMAGE_ID=$( `dirname $0`/getLatestImageOfType.sh mongodb-server )
+echo "Launching image with ID ${IMAGE_ID}"
 # eu-west-1:
 SECURITY_GROUP_ID=sg-0a9bc2fb61f10a342
 # eu-west-2:

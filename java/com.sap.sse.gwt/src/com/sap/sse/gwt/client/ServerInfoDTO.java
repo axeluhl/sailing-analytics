@@ -19,11 +19,11 @@ public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializab
     private String manageEventsBaseUrl;
     
     // for GWT
-    ServerInfoDTO() {
-    }
+    @Deprecated
+    ServerInfoDTO() {} // for GWT RPC serialization only
 
     public ServerInfoDTO(String serverName, String buildVersion, String manageEventsBaseUrl) {
-        setName(serverName);
+        super(serverName);
         this.buildVersion = buildVersion;
         this.manageEventsBaseUrl = manageEventsBaseUrl;
     }

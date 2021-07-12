@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 /**
  * A widget that allows the user to select a value within a range of possible values using a sliding bar that responds
@@ -1027,6 +1028,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         markerElem = DOM.createDiv();
                         markerElem.getStyle().setPosition(Position.ABSOLUTE);
                         markerElem.getStyle().setDisplay(Display.NONE);
+                        markerElem.setTitle(formatTickLabel(marker.position, null));
+                        markerElem.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "sliderBarMarker-" + marker.name);
                         DOM.appendChild(getElement(), markerElem);
                         markerElements.add(markerElem);
                     }
@@ -1090,6 +1093,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label.getStyle().setPosition(Position.ABSOLUTE);
                         label.getStyle().setDisplay(Display.NONE);
                         DOM.appendChild(getElement(), label);
+                        label.setTitle(formatTickLabel(marker.position, null));
                         markerLabelElements.add(label);
                     }
                     if (enabled) {

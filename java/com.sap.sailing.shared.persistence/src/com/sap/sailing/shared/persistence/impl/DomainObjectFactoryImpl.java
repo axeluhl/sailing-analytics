@@ -336,7 +336,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 final Document bdo = (Document) o;
                 waypointTemplates.add(loadWaypointTemplate(bdo, markRoleResolver, markRolePairFactory));
             } else {
-                logger.warning(String.format("Could not load document  for CourseTemplate %s.", id));
+                logger.warning(String.format("Could not load document for CourseTemplate %s.", id));
             }
         }
         // load repeatable parts
@@ -370,31 +370,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String shortName = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_SHORT_NAME.name());
         // load mark roles for control point
         final ArrayList<?> markRoleUUIDsDbList = bdo.get(FieldNames.WAYPOINT_TEMPLATE_MARK_ROLES.name(), ArrayList.class);
-        boolean hasParsingError = false;
         final List<MarkRole> markRoles = new ArrayList<>();
         for (Object obj : markRoleUUIDsDbList) {
             final MarkRole markRole = markRoleResolver.apply(UUID.fromString(obj.toString()));
             if (markRole == null) {
                 logger.warning(String.format("Could not resolve MarkRole with id %s for WaypointTemplate.", obj.toString()));
-                hasParsingError = true;
-                break;
             } else {
                 markRoles.add(markRole);
             }
         }
-        final WaypointTemplate result;
-        if (hasParsingError) {
-            result = null;
+        // create MarkTemplate or MarkTemplatePairImpl
+        final ControlPointTemplate controlPointTemplate;
+        if (markRoles.size() == 2) {
+            controlPointTemplate = markRolePairResolver.create(name, shortName, markRoles.get(0), markRoles.get(1));
         } else {
-            // create MarkTemplate or MarkTemplatePairImpl
-            final ControlPointTemplate controlPointTemplate;
-            if (markRoles.size() == 2) {
-                controlPointTemplate = markRolePairResolver.create(name, shortName, markRoles.get(0), markRoles.get(1));
-            } else {
-                controlPointTemplate = markRoles.get(0);
-            }
-            result = new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
+            controlPointTemplate = markRoles.get(0);
         }
-        return result;
+        return new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
     }
 }

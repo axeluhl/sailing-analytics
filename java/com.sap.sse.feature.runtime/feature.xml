@@ -46,10 +46,17 @@
          unpack="false"/>
 
    <plugin
+         id="org.hyperic.sigar"
+         download-size="0"
+         install-size="0"
+         version="1.6.4.1"
+         unpack="false"/>
+
+   <plugin
          id="slf4j.jdk14"
          download-size="0"
          install-size="0"
-         version="1.6.4"
+         version="1.7.30"
          fragment="true"
          unpack="false"/>
 
@@ -89,7 +96,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.deploy.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.http"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.http.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -103,7 +124,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.io.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.jmx"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.jmx.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -117,7 +152,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.security.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.server"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.server.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -131,7 +180,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.servlet.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.util"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.util.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -145,7 +208,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.util.ajax.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.webapp"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.webapp.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -159,7 +236,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.websocket.api.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.websocket.client"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.websocket.client.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -173,7 +264,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.websocket.common.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.xml"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.xml.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -183,7 +288,7 @@
          id="slf4j.api"
          download-size="0"
          install-size="0"
-         version="1.6.4"
+         version="1.7.30"
          unpack="false"/>
 
    <plugin
@@ -204,14 +309,14 @@
          id="jcl.over.slf4j"
          download-size="0"
          install-size="0"
-         version="1.6.4"
+         version="1.7.30"
          unpack="false"/>
 
    <plugin
          id="com.sun.mail.javax.mail"
          download-size="0"
          install-size="0"
-         version="1.4.5"
+         version="1.6.2"
          unpack="false"/>
 
    <plugin
@@ -259,63 +364,84 @@
          id="org.apache.commons.beanutils"
          download-size="0"
          install-size="0"
-         version="1.9.0"
+         version="1.9.4"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.beanutils.source"
+         download-size="0"
+         install-size="0"
+         version="1.9.4"
          unpack="false"/>
 
    <plugin
          id="org.apache.servicemix.bundles.ehcache"
          download-size="0"
          install-size="0"
-         version="2.6.9.1"
+         version="2.6.11.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.servicemix.bundles.scribe"
          download-size="0"
          install-size="0"
-         version="1.3.3.1"
+         version="1.3.7.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.owasp.encoder"
+         download-size="0"
+         install-size="0"
+         version="1.2.3"
+         unpack="false"/>
+
+   <plugin
+         id="org.owasp.encoder.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.3"
          unpack="false"/>
 
    <plugin
          id="org.apache.shiro.core"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.7.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.shiro.core.source"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.7.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.shiro.ehcache"
          download-size="0"
          install-size="0"
-         version="1.2.3"
+         version="1.7.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.shiro.ehcache.source"
          download-size="0"
          install-size="0"
-         version="1.2.3"
+         version="1.7.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.shiro.web"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.7.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.shiro.web.source"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.7.1"
          unpack="false"/>
 
    <plugin
@@ -468,7 +594,7 @@
          id="com.amazon.aws.aws-java-api"
          download-size="0"
          install-size="0"
-         version="2.15.81"
+         version="2.16.19"
          unpack="false"/>
 
    <plugin
@@ -624,6 +750,13 @@
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.db.jdbc"
+         download-size="0"
+         install-size="0"
+         version="2.8.14.2aca589e94650e4404d4796d8c0f01f2eb336f1c"
          unpack="false"/>
 
 </feature>

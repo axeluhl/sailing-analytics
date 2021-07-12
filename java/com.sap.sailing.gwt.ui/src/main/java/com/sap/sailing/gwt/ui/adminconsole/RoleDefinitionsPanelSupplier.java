@@ -20,7 +20,6 @@ public class RoleDefinitionsPanelSupplier extends AdminConsolePanelSupplier<Role
 
     @Override
     public RoleDefinitionsPanel init() {
-        logger.info("Create RoleDefinitionsPanel");
         final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanelWrapper(StringMessages.INSTANCE,
                 presenter.getUserService(), tableResources, presenter.getErrorReporter());
         roleManagementPanel.ensureDebugId("RoleDefinitionsPanelWrapper");

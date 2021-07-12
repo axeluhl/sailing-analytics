@@ -12,8 +12,8 @@ public class PathDTO extends NamedDTO {
     private boolean mixedLeg;
     private PathType pathType;
 
-    protected PathDTO() {
-    }
+    @Deprecated
+    PathDTO() {} // for GWT RPC serialization only
     
     public PathDTO(PathType pathType) {
         super(pathType.getTxtId());

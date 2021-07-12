@@ -22,9 +22,8 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO {
      */
     private String lastErrorMessage;
 
-    // for GWT
-    RemoteSailingServerReferenceDTO() {
-    }
+    @Deprecated
+    RemoteSailingServerReferenceDTO() {} // for GWT RPC serialization only
 
     public RemoteSailingServerReferenceDTO(String name, String url) {
         this(name, url, true, Collections.<UUID> emptyList(), Collections.<EventBaseDTO> emptyList());

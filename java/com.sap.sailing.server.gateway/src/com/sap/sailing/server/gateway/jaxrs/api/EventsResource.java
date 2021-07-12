@@ -118,7 +118,7 @@ import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonSerializer;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
@@ -632,8 +632,11 @@ public class EventsResource extends AbstractSailingServerResource {
                             /* leaderboardDiscardThresholdsParam */ leaderboardDiscardThresholdsParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace,
                             competitorRegistrationType, localCompetitorRegistrationSecret);
                     if (leaderboardGroup != null) {
-                        // no security checks for any overall leaderboard required here as we don't manipulate it through this service
-                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getId(), leaderboardGroup.getName(),
+                        // no security checks for any overall leaderboard required here as we don't manipulate it
+                        // through this service. leaderboardGroup.getOverallLeaderboard() == null will be true, due to
+                        // overallLeaderboardScoringSchemeTypeParam being null in validateAndAddLeaderboardGroup call.
+                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getId(),
+                                leaderboardGroup.getName(),
                                 leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
                                 Collections.singletonList(leaderboard.getName()),
                                 leaderboardGroup.getOverallLeaderboard() == null ? null

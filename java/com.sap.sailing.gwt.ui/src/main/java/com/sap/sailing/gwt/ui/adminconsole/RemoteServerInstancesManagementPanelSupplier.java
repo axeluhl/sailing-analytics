@@ -24,7 +24,6 @@ public class RemoteServerInstancesManagementPanelSupplier
 
     @Override
     public RemoteServerInstancesManagementPanel init() {
-        logger.info("Create RemoteServerInstancesManagementPanel");
         RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(
                 presenter, stringMessages, tableResources);
         remoteServerInstancesManagementPanel.ensureDebugId("remoteServerInstancesManagementPanel");

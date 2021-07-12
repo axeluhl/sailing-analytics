@@ -137,7 +137,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         int i=1;
         int selectionIndex = -1;
         for (String entry : entries) {
-            result.addItem(entry);
+            result.addItem(entry, entry);
             if (selectedItem != null && selectedItem.equals(entry)) {
                 selectionIndex = i;
             }
@@ -317,16 +317,8 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
      * @return <code>null</code> if the empty string was selected
      */
     private <T> String getSelectedString(Map<T, ListBox> choosersByT, T t) {
-        String result = null;
-        ListBox chooser = choosersByT.get(t);
-        int selectedIndex = chooser.getSelectedIndex();
-        if (selectedIndex != -1) {
-            result = chooser.getItemText(selectedIndex);
-            if (result.length() == 0) {
-                result = null;
-            }
-        }
-        return result;
+        final ListBox chooser = choosersByT.get(t);
+        return Util.hasLength(chooser.getSelectedValue()) ? chooser.getSelectedValue() : null;
     }
 
     private static class Validator implements DataEntryDialog.Validator<BulkScoreCorrectionDTO> {

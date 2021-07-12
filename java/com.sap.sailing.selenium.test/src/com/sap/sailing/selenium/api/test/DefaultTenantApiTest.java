@@ -13,6 +13,7 @@ import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
+import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class DefaultTenantApiTest extends AbstractSeleniumTest {
@@ -36,13 +37,19 @@ public class DefaultTenantApiTest extends AbstractSeleniumTest {
     @Test
     public void testEventApiWithUserTenant() {
         EventApi.create(EVENT_NAME, "GC 32", CompetitorRegistrationType.CLOSED, "somewhere").auth(userToken).run();
-        assertEquals("donald-tenant", adminConsole.goToEvents().getEventEntry(EVENT_NAME).getColumnContent("Group"));
+        EventConfigurationPanelPO configurationPanelPO =  adminConsole.goToEvents();
+        configurationPanelPO.refreshEvents();
+        String groupColumnContent = configurationPanelPO.getEventEntry(EVENT_NAME).getColumnContent("Group");
+        assertEquals("donald-tenant", groupColumnContent);
     }
 
     @Test
     public void testEventApiWithDefaultTenant() {
         EventApi.create(EVENT_NAME, "GC 32", CompetitorRegistrationType.CLOSED, "somewhere")
                 .header("tenantGroupId", tenantGroupId.toString()).auth(userToken).run();
-        assertEquals(TENANT_GROUP_NAME, adminConsole.goToEvents().getEventEntry(EVENT_NAME).getColumnContent("Group"));
+        EventConfigurationPanelPO configurationPanelPO =  adminConsole.goToEvents();
+        configurationPanelPO.refreshEvents();
+        String groupColumnContent = configurationPanelPO.getEventEntry(EVENT_NAME).getColumnContent("Group");
+        assertEquals(TENANT_GROUP_NAME, groupColumnContent);
     }
 }

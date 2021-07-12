@@ -35,13 +35,11 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     private final UserService userService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    
     private Button addConfigurationButton;
     private Button removeConfigurationButton;
     private Button refreshConfigurationsButton;
     private DeviceConfigurationListComposite listComposite;
     private DeviceConfigurationDetailComposite detailComposite;
-    
     private final RefreshableMultiSelectionModel<DeviceConfigurationWithSecurityDTO> refreshableMultiSelectionModel;
     
     public DeviceConfigurationPanel(final Presenter presenter, final StringMessages stringMessages) {
@@ -49,8 +47,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         this.userService = presenter.getUserService();
         this.stringMessages = stringMessages;
         this.errorReporter = presenter.getErrorReporter();
-        listComposite = new DeviceConfigurationListComposite(sailingServiceWrite, errorReporter, stringMessages,
-                userService);
+        listComposite = new DeviceConfigurationListComposite(sailingServiceWrite, errorReporter, stringMessages, userService);
         refreshableMultiSelectionModel = listComposite.getSelectionModel();
         detailComposite = setupUi(presenter);
         refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
@@ -68,10 +65,6 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         });
     }
     
-    protected UserService getUserService() {
-        return userService;
-    }
-
     private DeviceConfigurationDetailComposite setupUi(Presenter presenter) {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);

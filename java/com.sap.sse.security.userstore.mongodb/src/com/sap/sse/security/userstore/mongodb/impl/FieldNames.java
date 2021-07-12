@@ -24,6 +24,7 @@ public class FieldNames {
         ID,
         NAME,
         PERMISSIONS,
+        TRANSITIVE,
         QUALIFYING_TENANT_ID,
         QUALIFYING_TENANT_NAME, // for human readability only
         QUALIFYING_USERNAME

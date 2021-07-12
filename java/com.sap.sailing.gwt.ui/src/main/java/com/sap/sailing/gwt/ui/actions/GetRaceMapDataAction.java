@@ -35,7 +35,7 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
         super(sailingService, raceIdentifier, from, to, extrapolate);
         this.competitorsByIdAsString = competitorsByIdAsString;
         this.timeForEstimation = timeForEstimation;
-        this.targetEstimationRequired =targetEstimationRequired;
+        this.targetEstimationRequired = targetEstimationRequired;
         this.date = date;
         this.simulationLegIdentifier = simulationLegIdentifier;
         this.md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID = md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
@@ -56,7 +56,7 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
             toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
         }
         getSailingService().getRaceMapData(getRaceIdentifier(), date, fromByCompetitorIdAsString, toByCompetitorIdAsString, isExtrapolate(), simulationLegIdentifier,
-                md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,timeForEstimation,targetEstimationRequired, detailType,
+                md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, timeForEstimation, targetEstimationRequired, detailType,
                 leaderboardName, leaderboardGroupName, leaderboardGroupId, 
                 new AsyncCallback<CompactRaceMapDataDTO>() {
                     @Override

@@ -42,8 +42,7 @@ public interface ReplicationService {
      * bundle that starts after this bundle because then that {@link Replicable} will not yet be registered and won't
      * become part of replication.
      */
-    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
-            ClassNotFoundException, InterruptedException;
+    void startToReplicateFrom(ReplicationMasterDescriptor master) throws Exception;
 
     /**
      * Registers a replica with this master instance. The <code>replica</code> will be considered in the result of
@@ -129,11 +128,14 @@ public interface ReplicationService {
     void removeReplicationStartingListener(ReplicationStartingListener listener);
 
     /**
+     * When this service has been registered in the OSGi service registry and auto-replication has been configured,
+     * this method will return {@code true} already as soon as the service can be discovered in the registry.
+     * 
      * @return {@code true} if replication is starting; during this phase it is clear that the replicables managed by
      *         this service instance are about to be {@link Replicable#clearReplicaState() cleared} and to be initialized
      *         with an {@link Replicable#initiallyFillFrom(java.io.InputStream) initial load} obtained from the master
      *         instance. However, this initial load process may not yet have started and hence the {@link #getReplicator} method
-     *         
+     *         may return nothing.
      */
     boolean isReplicationStarting();
     

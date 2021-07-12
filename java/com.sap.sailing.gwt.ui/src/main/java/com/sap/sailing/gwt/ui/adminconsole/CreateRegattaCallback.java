@@ -32,10 +32,10 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private final List<EventDTO> existingEvents;
+    private final Iterable<EventDTO> existingEvents;
     private final Presenter presenter;
 
-    public CreateRegattaCallback(StringMessages stringMessages, Presenter presenter, List<EventDTO> existingEvents) {
+    public CreateRegattaCallback(StringMessages stringMessages, Presenter presenter, Iterable<EventDTO> existingEvents) {
         this.sailingServiceWrite = presenter.getSailingService();
         this.errorReporter = presenter.getErrorReporter();
         this.presenter = presenter;
@@ -52,7 +52,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     public void cancel() {
     }
 
-    private void createNewRegatta(final RegattaDTO newRegatta, final List<EventDTO> existingEvents) {
+    private void createNewRegatta(final RegattaDTO newRegatta, final Iterable<EventDTO> existingEvents) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         for (SeriesDTO seriesDTO : newRegatta.series) {
             SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
@@ -134,7 +134,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         }
     }
     
-    private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta, final List<EventDTO> existingEvents) {
+    private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta, final Iterable<EventDTO> existingEvents) {
         CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingServiceWrite,
                 stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaName>() {
             @Override
@@ -217,7 +217,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         dialog.show();
     }
 
-    private EventDTO getEventForCourseArea(final List<EventDTO> existingEvents, final Iterable<CourseAreaDTO> courseAreas) {
+    private EventDTO getEventForCourseArea(final Iterable<EventDTO> existingEvents, final Iterable<CourseAreaDTO> courseAreas) {
         EventDTO result = null;
         eventLoop:
         for (final EventDTO event : existingEvents) {

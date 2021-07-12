@@ -19,7 +19,6 @@ public class IgtimiAccountsPanelSupplier extends AdminConsolePanelSupplier<Igtim
 
     @Override
     public IgtimiAccountsPanel init() {
-        logger.info("Create IgtimiAccountsPanel");
         IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(presenter, stringMessages);
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
         igtimiAccountsPanel.refresh();

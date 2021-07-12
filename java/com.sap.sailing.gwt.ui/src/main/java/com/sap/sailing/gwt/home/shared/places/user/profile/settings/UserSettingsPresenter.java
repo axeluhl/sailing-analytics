@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.user.profile.settings;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
 
     private final List<UserSettingsEntry> currentlyShownEntries = new ArrayList<>();
 
-    public UserSettingsPresenter(C clientFactory) {
+    public UserSettingsPresenter(final C clientFactory) {
         this.clientFactory = clientFactory;
     }
 
@@ -41,12 +42,12 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
         if (clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn()) {
             clientFactory.getUserService().getAllPreferences(new AsyncCallback<Map<String,String>>() {
                 @Override
-                public void onSuccess(Map<String, String> result) {
+                public void onSuccess(final Map<String, String> result) {
                     loadSettingsFromLocalStorage(result, clientFactory.getUserService().getStorage());
                 }
-                
+
                 @Override
-                public void onFailure(Throwable caught) {
+                public void onFailure(final Throwable caught) {
                     final StringMessages stringMessages = GWT.create(StringMessages.class);
                     clientFactory.createErrorView(stringMessages.errorWhileLoadingUserSettings(caught.getMessage()), caught);
                 }
@@ -55,30 +56,32 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
             loadSettingsFromLocalStorage(Collections.emptyMap(), clientFactory.getUserService().getStorage());
         }
     }
-    
+
     @Override
     public void updateData() {
         view.setEntries(currentlyShownEntries.stream().filter(view.getFilter()::matches).collect(Collectors.toList()));
     }
 
-    private void loadSettingsFromLocalStorage(final Map<String, String> userSettings, CrossDomainStorage storage) {
-        loadSettingsFromLocalStorage(storage, localSettings->{
-            final Set<String> allKeys = new TreeSet<>((a, b) -> a.compareTo(b));
-            allKeys.addAll(userSettings.keySet());
-            allKeys.addAll(localSettings.keySet());
-            currentlyShownEntries.clear();
-            for (String key : allKeys) {
-                currentlyShownEntries.add(new UserSettingsEntry(key, userSettings.get(key), localSettings.get(key)));
-            }
-            this.updateData();
-        });
+    private void loadSettingsFromLocalStorage(final Map<String, String> userSettings, final CrossDomainStorage storage) {
+        loadSettingsFromLocalStorage(storage, localSettings -> updateCurrentEntries(userSettings, localSettings));
+        updateCurrentEntries(userSettings, Collections.emptyMap());
     }
-    
-    private void loadSettingsFromLocalStorage(CrossDomainStorage storage, Consumer<Map<String, String>> resultCallback) {
-        final Map<String, String> localSettings = new HashMap<String, String>();
+
+    private void updateCurrentEntries(final Map<String, String> userSettings, final Map<String, String> localSettings) {
+        final Set<String> allKeys = new TreeSet<>(Comparator.naturalOrder());
+        allKeys.addAll(userSettings.keySet());
+        allKeys.addAll(localSettings.keySet());
+        currentlyShownEntries.clear();
+        allKeys.stream().map(key -> new UserSettingsEntry(key, userSettings.get(key), localSettings.get(key)))
+                .forEach(currentlyShownEntries::add);
+        this.updateData();
+    }
+
+    private void loadSettingsFromLocalStorage(final CrossDomainStorage storage, final Consumer<Map<String, String>> resultCallback) {
+        final Map<String, String> localSettings = new HashMap<>();
         storage.getLength(length->{
-            int[] numberOfRequestsSent = new int[1];
-            int[] numberOfResponsesReceived = new int[1];
+            final int[] numberOfRequestsSent = new int[1];
+            final int[] numberOfResponsesReceived = new int[1];
             for (int i=0; i<length; i++) {
                 storage.key(i, key->{
                     if (key.startsWith(SailingSettingsConstants.USER_SETTINGS_UI)) {
@@ -97,16 +100,16 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
     }
 
     @Override
-    public void remove(UserSettingsEntry entry) {
-        String storageKey = entry.getKey();
+    public void remove(final UserSettingsEntry entry) {
+        final String storageKey = entry.getKey();
         clientFactory.getUserService().unsetPreference(storageKey);
         clientFactory.getUserService().getStorage().removeItem(storageKey, /* callback */ null);
         currentlyShownEntries.remove(entry);
-        view.setEntries(currentlyShownEntries);
+        updateData();
     }
 
     @Override
-    public void setView(UserSettingsView view) {
+    public void setView(final UserSettingsView view) {
         this.view = view;
     }
 

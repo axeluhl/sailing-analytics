@@ -22,6 +22,6 @@ public class EventSponsor extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         sponsorImage.setSrc(sponsorImageUrl);
-        sponsorLink.setHref("http://www.sap.com");
+        sponsorLink.setHref("http://www.sap.com?campaigncode=CRM-XH21-OSP-Sailing");
     }
 }

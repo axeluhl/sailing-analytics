@@ -17,6 +17,7 @@ public class RaceWithCompetitorsAndBoatsDTO extends RaceDTO {
     /**
      * Constructor for GWT serialization.
      */
+    @Deprecated
     RaceWithCompetitorsAndBoatsDTO() {}
 
     public RaceWithCompetitorsAndBoatsDTO(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, BoatDTO> competitorsAndBoats,

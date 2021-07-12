@@ -359,8 +359,6 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         totalRankFilter.setValue(50);
         topNTotalRankCompetitorsFilterSet.addFilter(totalRankFilter);
         filterSets.addFilterSet(topNTotalRankCompetitorsFilterSet);
-        // set default active filter
-        filterSets.setActiveFilterSet(topNRaceRankCompetitorsFilterSet);
         return filterSets;
     }
     

@@ -20,7 +20,6 @@ public class CourseTemplatePanelSupplier extends AdminConsolePanelSupplier<Cours
 
     @Override
     public CourseTemplatePanel init() {
-        logger.info("Create CourseTemplatePanel");
         final CourseTemplatePanel courseTemplatePanel = new CourseTemplatePanel(presenter.getSailingService(),
                 presenter.getErrorReporter(), stringMessages, presenter.getUserService());
         courseTemplatePanel.ensureDebugId("courseTemplatePanel");

@@ -291,7 +291,7 @@ public class UserStoreImpl implements UserStore {
                     }
                     groupQualifierForMigratedRole = serverGroup;
                 }
-                result = new Role(roleDefinition, groupQualifierForMigratedRole, /* user qualification */ null);
+                result = new Role(roleDefinition, groupQualifierForMigratedRole, /* user qualification */ null, /* transitive */ true);
                 break;
             }
         }
@@ -319,7 +319,8 @@ public class UserStoreImpl implements UserStore {
         if (roleDefinition == null) {
             logger.info("No " + rolePrototype.getName() + " role found. Creating default role \""
                     + rolePrototype.getName() + "\" with permission \"" + rolePrototype.getPermissions() + "\"");
-            roleDefinition = createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
+            roleDefinition = createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
+                    rolePrototype.getPermissions());
         }
         return roleDefinition;
     }
@@ -748,8 +749,11 @@ public class UserStoreImpl implements UserStore {
      */
     private void checkGroupNameAndIdUniqueness(UUID groupId, String name) throws UserGroupManagementException {
         assert userGroupsLock.isWriteLockedByCurrentThread() || userGroupsLock.getReadHoldCount() > 0;
-        if (userGroupsByName.containsKey(name) || userGroups.containsKey(groupId)) {
-            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
+        if (userGroupsByName.containsKey(name)) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS+": "+name);
+        }
+        if (userGroups.containsKey(groupId)) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS+": "+groupId);
         }
     }
 
@@ -1101,8 +1105,7 @@ public class UserStoreImpl implements UserStore {
             removeFromUsersByAccessToken(user);
             removeFromUsersByEmail(user);
             removeAllQualifiedRolesForUser(user);
-            user.getRoles()
-            .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
+            user.getRoles().forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
             // also remove from all usergroups
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
                 for (UserGroup userGroup : user.getUserGroups()) {
@@ -1460,26 +1463,21 @@ public class UserStoreImpl implements UserStore {
         });
     }
 
-    @Override
-    public void removeAllQualifiedRolesForUser(User user) {
+    private void removeAllQualifiedRolesForUser(User user) {
         LockUtil.executeWithWriteLock(usersLock, () -> {
             for (User checkUser : users.values()) {
-                Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
+                Set<Role> rolesToRemove = new HashSet<>();
                 for (Role role : checkUser.getRoles()) {
                     if (Util.equalsWithNull(role.getQualifiedForUser(), user)) {
-                        rolesToRemoveOrAdjust.add(role);
+                        rolesToRemove.add(role);
                     }
                 }
-                for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
+                for (Role roleToRremove : rolesToRemove) {
                     try {
-                        removeRoleFromUser(checkUser.getName(), removeOrAdjust);
-                        if (removeOrAdjust.getQualifiedForTenant() != null) {
-                            addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(),
-                                    removeOrAdjust.getQualifiedForTenant(), null));
-                        }
+                        removeRoleFromUser(checkUser.getName(), roleToRremove);
                     } catch (UserManagementException e) {
                         logger.log(Level.WARNING,
-                                "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                                "Could not properly update qualified roles on user delete " + roleToRremove);
                     }
                 }
             }
@@ -1489,22 +1487,18 @@ public class UserStoreImpl implements UserStore {
     private void removeAllQualifiedRolesForUserGroup(UserGroup userGroup) {
         assert usersLock.isWriteLockedByCurrentThread();
         for (User checkUser : users.values()) {
-            Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
+            Set<Role> rolesToRemove = new HashSet<>();
             for (Role role : checkUser.getRoles()) {
                 if (Util.equalsWithNull(role.getQualifiedForTenant(), userGroup)) {
-                    rolesToRemoveOrAdjust.add(role);
+                    rolesToRemove.add(role);
                 }
             }
-            for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
+            for (Role roleToRemove : rolesToRemove) {
                 try {
-                    removeRoleFromUser(checkUser.getName(), removeOrAdjust);
-                    if (removeOrAdjust.getQualifiedForUser() != null) {
-                        addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(), null,
-                                removeOrAdjust.getQualifiedForUser()));
-                    }
+                    removeRoleFromUser(checkUser.getName(), roleToRemove);
                 } catch (UserManagementException e) {
                     logger.log(Level.WARNING,
-                            "Could not properly update qualified roles on userGroup delete " + removeOrAdjust);
+                            "Could not properly update qualified roles on userGroup delete " + roleToRemove);
                 }
             }
         }

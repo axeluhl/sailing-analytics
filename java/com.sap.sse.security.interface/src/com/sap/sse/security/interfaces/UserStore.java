@@ -112,8 +112,6 @@ public interface UserStore extends BasicUserStore {
      */
     UserGroup ensureServerGroupExists() throws UserGroupManagementException;
 
-    void removeAllQualifiedRolesForUser(User user);
-
     RoleDefinition getRoleDefinitionByPrototype(RolePrototype rolePrototype);
     
     void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;

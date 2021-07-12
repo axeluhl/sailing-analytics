@@ -8,7 +8,7 @@
             content: ":";
         }
         .languageSwichLink, .languageSelection {
-            color: #efaa00;
+            color: #f0ab00;
             cursor: pointer;
             font-family: 'Open Sans', Arial, Verdana, sans-serif !important;
         }
@@ -25,7 +25,7 @@
             display: inline-block;
             border: transparent;
             padding-right: 1.2em;
-            background-color: #333;
+            background-color: #000;
             background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
             background-position: right center;
             background-repeat: no-repeat;

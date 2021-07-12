@@ -15,6 +15,7 @@ import com.google.gwt.user.client.DOM;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.TickPosition;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 /**
  * A slider bar whose values are assumed to be Unix time stamps (milliseconds since the epoch, Jan 1st 1970 00:00:00 UTC).
@@ -42,6 +43,8 @@ public class TimeSlider extends SliderBar {
      */
     private List<Element> overLayElements = new ArrayList<Element>();
 
+    private NormalizedInterval normalizedTimeTickInterval;
+
     public TimeSlider() {
         calculatedTimeTicks = new ArrayList<TickPosition>();
         overlays = new ArrayList<>();
@@ -53,7 +56,7 @@ public class TimeSlider extends SliderBar {
             calculatedTimeTicks.clear();
             long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
             long tickInterval = minMaxDiffInMs / TICKCOUNT; 
-            NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
+            normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
             calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
         }
     }
@@ -197,18 +200,18 @@ public class TimeSlider extends SliderBar {
     protected void drawKnob() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
-        
-        Element knobElement = knobImage.getElement();
+        final Element knobElement = knobImage.getElement();
         if (curValue != null && minValue != null && maxValue != null && curValue >= minValue && curValue <= maxValue) {
             // Move the knob to the correct position
-            int lineWidth = lineElement.getOffsetWidth();
-            int knobWidth = knobElement.getOffsetWidth();
+            final int lineWidth = lineElement.getOffsetWidth();
+            final int knobWidth = knobElement.getOffsetWidth();
             int knobLeftOffset = (int) (lineLeftOffset + (getKnobPercent() * lineWidth) - (knobWidth / 2));
             knobLeftOffset = Math.min(knobLeftOffset, lineLeftOffset + lineWidth - (knobWidth / 2) - 1);
-            
             knobElement.getStyle().setLeft(knobLeftOffset, Unit.PX);
             knobElement.getStyle().setVisibility(Visibility.VISIBLE);
             knobElement.getStyle().setProperty("display", "");
+            knobElement.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "sliderKnob");
+            knobElement.setTitle(formatTickLabel(curValue, null));
         } else {
             knobElement.getStyle().setDisplay(Display.NONE);
             knobElement.getStyle().setVisibility(Visibility.HIDDEN);
@@ -230,12 +233,21 @@ public class TimeSlider extends SliderBar {
             this.minValue = minValue;
         }  
     }
-    
+
     @Override
     public boolean setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
         final boolean result;
         if (!isZoomed) {
-            result = super.setMinAndMaxValue(minValue, maxValue, fireEvent);
+            // Inhibit shrinking of the slider ends if not zoomed in
+            Double minLimited = minValue;
+            if (minValue != null && this.minValue != null) {
+                minLimited = Double.min(minValue, this.minValue);
+            }
+            Double maxLimited = maxValue;
+            if (maxValue != null && this.maxValue != null) {
+                maxLimited = Double.max(maxValue, this.maxValue);
+            }
+            result = super.setMinAndMaxValue(minLimited, maxLimited, fireEvent);
         } else {
             boolean minChanged = !Util.equalsWithNull(this.minValue, minValue);
             this.minValue = minValue;
@@ -245,7 +257,7 @@ public class TimeSlider extends SliderBar {
         }
         return result;
     }
-    
+
     @Override
     protected void onMinMaxValueChanged(boolean fireEvent) {
         calculateTicks();

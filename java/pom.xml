@@ -125,6 +125,7 @@
         <module>com.sap.sailing.datamining.shared</module>
         <module>com.sap.sailing.domain.persistence</module>
         <module>com.sap.sailing.domain.deckmanadapter</module>
+        <module>com.sap.sailing.domain.oceanraceadapter</module>
         <module>com.sap.sailing.domain.bravoadapter</module>
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>
@@ -154,6 +155,7 @@
         <module>com.sap.sailing.shared.server.gateway</module>
         <module>com.sap.sailing.www</module>
         <module>com.sap.sailing.xmlexport</module>
+        <module>com.sap.sailing.hanaexport</module>
         <module>com.google.gwt.user</module>
         <module>com.google.gwt.dev</module>
         <module>com.google.gwt.servlet</module>
