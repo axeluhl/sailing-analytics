@@ -32,10 +32,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipDTO;
-import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PayWallResolver;
 import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 
 /**
@@ -68,18 +65,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private final RaceMapSettings initialSettings;
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
     private CheckBox showEstimatedDuration;
-    private final OwnershipDTO raceOwnership;
-    private final AccessControlListDTO raceACL;
-    private final UserService userService;
+    private final PayWallResolver payWallResolver;
     
     public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages,
-            boolean isSimulationEnabled, OwnershipDTO raceOwnership, AccessControlListDTO raceACL, UserService userService) {
+            boolean isSimulationEnabled, PayWallResolver payWallResolver) {
         this.isSimulationEnabled = isSimulationEnabled;
         this.stringMessages = stringMessages;
         initialSettings = settings;
-        this.raceOwnership = raceOwnership;
-        this.raceACL = raceACL;
-        this.userService = userService;
+        this.payWallResolver = payWallResolver;
     }
 
     @Override
@@ -87,31 +80,28 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         VerticalPanel vp = new VerticalPanel();
         Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
         vp.add(generalLabel);
-
         showSatelliteLayerCheckbox = dialog.createCheckbox(stringMessages.showSatelliteLayer());
         showSatelliteLayerCheckbox.setValue(initialSettings.isShowSatelliteLayer());
         showSatelliteLayerCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isShowSatelliteLayer()));
         showSatelliteLayerCheckbox.ensureDebugId("showSatelliteLayerCheckBox");
         showSatelliteLayerCheckbox.setEnabled(!initialSettings.isWindUp());
         vp.add(showSatelliteLayerCheckbox);
-
         windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
         windUpCheckbox.setValue(initialSettings.isWindUp());
         windUpCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isWindUp()));
         windUpCheckbox.ensureDebugId("windUpCheckBox");
         vp.add(windUpCheckbox);
-
-        final WildcardPermission viewStreamletsPermission = WildcardPermission.builder()
-                .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build();
+        //FIXME: See bug5593
         showWindStreamletOverlayCheckbox = new SailingPremiumCheckBox(stringMessages.showWindStreamletOverlay(),
-                userService, viewStreamletsPermission, raceOwnership, raceACL);
+                SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, payWallResolver);
         dialog.ensureHasValueIsValidated(showWindStreamletOverlayCheckbox.getCheckBox());
         dialog.ensureFocusWidgetIsLinkedToKeyStrokes(showWindStreamletOverlayCheckbox.getFocusWidget());
         showWindStreamletOverlayCheckbox.ensureDebugId("showWindStreamletOverlayCheckBox");
         showWindStreamletOverlayCheckbox.setValueifUserHasPermission(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
+        //FIXME: See bug5593
         showWindStreamletColorsCheckbox = new SailingPremiumCheckBox(stringMessages.showWindStreamletOverlay(),
-                userService, viewStreamletsPermission, raceOwnership, raceACL);
+                SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, payWallResolver);
         showWindStreamletColorsCheckbox.setValueifUserHasPermission(initialSettings.isShowWindStreamletColors());
         showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckBoxIntended");
         vp.add(showWindStreamletColorsCheckbox);
@@ -121,13 +111,11 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 showWindStreamletColorsCheckbox.setEnabledIfUserHasPermission(showWindStreamletOverlayCheckbox.getValue());
             }
         });
-        
         if (isSimulationEnabled) {
             showEstimatedDuration = dialog.createCheckbox(stringMessages.showEstimatedDuration());
             showEstimatedDuration.ensureDebugId("showEstimatedDurationCheckBox");
             showEstimatedDuration.setValue(initialSettings.isShowEstimatedDuration());
             vp.add(showEstimatedDuration);
-        
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
             showSimulationOverlayCheckbox.ensureDebugId("showSimulationOverlayCheckBox");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());

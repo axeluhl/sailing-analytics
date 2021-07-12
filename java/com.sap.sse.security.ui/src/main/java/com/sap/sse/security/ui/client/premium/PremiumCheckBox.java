@@ -6,10 +6,7 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipDTO;
-import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.shared.HasPermissions.Action;
 
 public abstract class PremiumCheckBox extends Composite {
 
@@ -17,10 +14,8 @@ public abstract class PremiumCheckBox extends Composite {
     private final Image image;
     private final HorizontalPanel mainPanel;
     private final FocusPanel wrapperPanel;
-    private final UserService userService;
-    private final WildcardPermission permission;
-    private final OwnershipDTO ownership;
-    private final AccessControlListDTO acl;
+    private final Action action;
+    private final PayWallResolver payWallResolver;
 
     /**
      * A Composite component, that includes a checkbox and an additional premium icon, 
@@ -31,18 +26,15 @@ public abstract class PremiumCheckBox extends Composite {
      * @param ownership
      * @param acl
      */
-    public PremiumCheckBox(String label, UserService userService, WildcardPermission permission, OwnershipDTO ownership,
-            AccessControlListDTO acl) {
-        this.userService = userService;
-        this.permission = permission;
-        this.ownership = ownership;
-        this.acl = acl;
-        wrapperPanel = new FocusPanel();
-        mainPanel = new HorizontalPanel();
-        wrapperPanel.add(mainPanel);
+    public PremiumCheckBox(String label, Action action, PayWallResolver payWallResolver) {
+        this.action = action;
+        this.payWallResolver = payWallResolver;
+        this.wrapperPanel = new FocusPanel();
+        this.mainPanel = new HorizontalPanel();
+        this.wrapperPanel.add(mainPanel);
         this.checkBox = new CheckBox(label);
-        if(!userService.hasPermission(permission, ownership, acl)) {
-//            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(null, null));
+        if(!payWallResolver.hasPermission(action)) {
+            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver));
             checkBox.setEnabled(false);
             this.image = createPremiumIcon();
             mainPanel.add(image);
@@ -54,9 +46,8 @@ public abstract class PremiumCheckBox extends Composite {
         initWidget(mainPanel);
     }
     
-    public PremiumCheckBox(String label, UserService userService, WildcardPermission permission, OwnershipDTO ownership,
-            AccessControlListDTO acl, DataEntryDialog<?> dialog) {
-        this(label, userService, permission, ownership, acl);
+    public PremiumCheckBox(String label, Action action, PayWallResolver payWallResolver, DataEntryDialog<?> dialog) {
+        this(label, action, payWallResolver);
         dialog.ensureHasValueIsValidated(checkBox);
         dialog.ensureFocusWidgetIsLinkedToKeyStrokes(checkBox);
     }
@@ -78,7 +69,7 @@ public abstract class PremiumCheckBox extends Composite {
     }
     
     public void setValueifUserHasPermission(boolean value) {
-        if(userService.hasPermission(permission, ownership, acl)) {
+        if(payWallResolver.hasPermission(action)) {
             this.checkBox.setValue(value);
         }
     }
@@ -88,7 +79,7 @@ public abstract class PremiumCheckBox extends Composite {
     }
 
     public void setEnabledIfUserHasPermission(Boolean value) {
-        if(userService.hasPermission(permission, ownership, acl)) {
+        if(payWallResolver.hasPermission(action)) {
             this.checkBox.setEnabled(value);
         }
     }

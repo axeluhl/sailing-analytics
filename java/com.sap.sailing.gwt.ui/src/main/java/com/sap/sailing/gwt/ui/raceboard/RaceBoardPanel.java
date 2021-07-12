@@ -132,6 +132,7 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PayWallResolver;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 /**
@@ -298,11 +299,12 @@ public class RaceBoardPanel
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
         quickFlagDataProvider = new QuickFlagDataFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
+        final PayWallResolver payWallResolver = new PayWallResolver(userService, subscriptionServiceFactory, raceDTO);
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
                 raceMapResources, /* showHeaderPanel */ true, quickFlagDataProvider, this::showInWindChart,
-                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction, userService, subscriptionServiceFactory) {
+                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction, payWallResolver) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -328,7 +330,7 @@ public class RaceBoardPanel
                     return INDENT_SMALL_CONTROL_STYLE;
                 }
                 return super.getLeftControlsIndentStyle();
-            }   
+            }
         };
         // now that the raceMap field has been initialized, check whether the buoy zone radius shall be looked up from
         // the regatta model on the server:
