@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" id="leg-stats" applyPrivilegeType="NONE" dataCategory="CUBE" schemaVersion="3.0" outputViewType="Aggregation" cacheInvalidationPeriod="NONE" enforceSqlExecution="false">
+<descriptions defaultDescription="Leg Statistics"/>
+<localVariables/>
+<variableMappings/>
+<dataSources>
+  <DataSource id="LegStats">
+    <resourceUri>LegStats</resourceUri>
+  </DataSource>
+  <DataSource id="race">
+    <resourceUri>race</resourceUri>
+  </DataSource>
+  <DataSource id="Competitor">
+    <resourceUri>Competitor</resourceUri>
+  </DataSource>
+</dataSources>
+<calculationViews>
+  <calculationView xsi:type="Calculation:ProjectionView" id="LegStatsProjection">
+    <viewAttributes>
+      <viewAttribute id="race"/>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="number"/>
+      <viewAttribute id="competitorId"/>
+      <viewAttribute id="rankOneBased"/>
+      <viewAttribute id="distanceSailedInMeters"/>
+      <viewAttribute id="elapsedTimeInSeconds"/>
+      <viewAttribute id="avgCrossTrackErrorInMeters"/>
+      <viewAttribute id="absoluteAvgCrossTrackErrorInMeters"/>
+      <viewAttribute id="numberOfTacks"/>
+      <viewAttribute id="numberOfGybes"/>
+      <viewAttribute id="numberOfPenaltyCircles"/>
+      <viewAttribute id="avgVelocityMadeGoodInKnots"/>
+      <viewAttribute id="gapToLeaderInSeconds"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="LegStats"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:ProjectionView" id="RaceCalcView">
+    <viewAttributes>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="fleet"/>
+      <viewAttribute id="raceColumn"/>
+      <viewAttribute id="startOfRace"/>
+      <viewAttribute id="endOfRace"/>
+      <viewAttribute id="monthOfRace"/>
+      <viewAttribute id="monthOfRace_name"/>
+      <viewAttribute id="yearOfRace"/>
+      <viewAttribute id="startOfTracking"/>
+      <viewAttribute id="endOfTracking"/>
+      <viewAttribute id="avgWindSpeedInKnots"/>
+      <viewAttribute id="boatClass"/>
+      <viewAttribute id="boatClassDescription"/>
+      <viewAttribute id="hullType"/>
+      <viewAttribute id="scoringScheme"/>
+      <viewAttribute id="rankingMetric"/>
+      <viewAttribute id="eventId"/>
+      <viewAttribute id="eventName"/>
+      <viewAttribute id="venue"/>
+      <viewAttribute id="isListed"/>
+      <viewAttribute id="location"/>
+      <viewAttribute id="dateOfRace"/>
+      <viewAttribute id="dayOfRace"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="race"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:ProjectionView" id="CompetitorProjection">
+    <viewAttributes>
+      <viewAttribute id="id"/>
+      <viewAttribute id="name"/>
+      <viewAttribute id="shortName"/>
+      <viewAttribute id="nationality"/>
+      <viewAttribute id="sailNumber"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="Competitor"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:JoinView" id="LegStatsJoin_1" cardinality="C1_1" joinType="leftOuter" multiJoinNode="LegStatsJoin" multiJoinCentralTable="LegStatsProjection" multiJoinOrder="Outside In">
+    <viewAttributes>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="legNumber" aggregationType="sum"/>
+      <viewAttribute id="competitorId"/>
+      <viewAttribute id="rankOneBased" aggregationType="sum"/>
+      <viewAttribute id="distanceSailedInMeters" aggregationType="sum"/>
+      <viewAttribute id="elapsedTimeInSeconds" aggregationType="sum"/>
+      <viewAttribute id="avgCrossTrackErrorInMeters" aggregationType="sum"/>
+      <viewAttribute id="absoluteAvgCrossTrackErrorInMeters" aggregationType="sum"/>
+      <viewAttribute id="numberOfTacks" aggregationType="sum"/>
+      <viewAttribute id="numberOfGybes" aggregationType="sum"/>
+      <viewAttribute id="numberOfPenaltyCircles" aggregationType="sum"/>
+      <viewAttribute id="avgVelocityMadeGoodInKnots" aggregationType="sum"/>
+      <viewAttribute id="gapToLeaderInSeconds" aggregationType="sum"/>
+      <viewAttribute id="competitorName"/>
+      <viewAttribute id="competitorShortName"/>
+      <viewAttribute id="nationality"/>
+      <viewAttribute id="sailNumber"/>
+      <viewAttribute id="race"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="LegStatsProjection">
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="race"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="legNumber" source="number"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="rankOneBased" source="rankOneBased"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="distanceSailedInMeters" source="distanceSailedInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="elapsedTimeInSeconds" source="elapsedTimeInSeconds"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="avgCrossTrackErrorInMeters" source="avgCrossTrackErrorInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="absoluteAvgCrossTrackErrorInMeters" source="absoluteAvgCrossTrackErrorInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="numberOfTacks" source="numberOfTacks"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="numberOfGybes" source="numberOfGybes"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="numberOfPenaltyCircles" source="numberOfPenaltyCircles"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="avgVelocityMadeGoodInKnots" source="avgVelocityMadeGoodInKnots"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="gapToLeaderInSeconds" source="gapToLeaderInSeconds"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="race" source="race"/>
+    </input>
+    <input node="CompetitorProjection">
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorName" source="name"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorShortName" source="shortName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="nationality" source="nationality"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="sailNumber" source="sailNumber"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="id"/>
+    </input>
+    <joinAttribute name="competitorId"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:JoinView" id="LegStatsJoin_2" cardinality="CN_1" joinType="inner" multiJoinNode="LegStatsJoin" multiJoinCentralTable="LegStatsProjection" multiJoinOrder="Outside In">
+    <viewAttributes>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="legNumber" aggregationType="sum"/>
+      <viewAttribute id="competitorId"/>
+      <viewAttribute id="rankOneBased" aggregationType="sum"/>
+      <viewAttribute id="distanceSailedInMeters" aggregationType="sum"/>
+      <viewAttribute id="elapsedTimeInSeconds" aggregationType="sum"/>
+      <viewAttribute id="avgCrossTrackErrorInMeters" aggregationType="sum"/>
+      <viewAttribute id="absoluteAvgCrossTrackErrorInMeters" aggregationType="sum"/>
+      <viewAttribute id="numberOfTacks" aggregationType="sum"/>
+      <viewAttribute id="numberOfGybes" aggregationType="sum"/>
+      <viewAttribute id="numberOfPenaltyCircles" aggregationType="sum"/>
+      <viewAttribute id="avgVelocityMadeGoodInKnots" aggregationType="sum"/>
+      <viewAttribute id="gapToLeaderInSeconds" aggregationType="sum"/>
+      <viewAttribute id="competitorName"/>
+      <viewAttribute id="competitorShortName"/>
+      <viewAttribute id="nationality"/>
+      <viewAttribute id="sailNumber"/>
+      <viewAttribute id="race"/>
+      <viewAttribute id="fleet"/>
+      <viewAttribute id="raceColumn"/>
+      <viewAttribute id="startOfRace" aggregationType="min"/>
+      <viewAttribute id="endOfRace" aggregationType="min"/>
+      <viewAttribute id="monthOfRace"/>
+      <viewAttribute id="monthOfRace_name"/>
+      <viewAttribute id="yearOfRace"/>
+      <viewAttribute id="startOfTracking" aggregationType="min"/>
+      <viewAttribute id="endOfTracking" aggregationType="min"/>
+      <viewAttribute id="avgWindSpeedInKnots" aggregationType="sum"/>
+      <viewAttribute id="boatClass"/>
+      <viewAttribute id="boatClassDescription"/>
+      <viewAttribute id="hullType"/>
+      <viewAttribute id="scoringScheme"/>
+      <viewAttribute id="rankingMetric"/>
+      <viewAttribute id="eventId"/>
+      <viewAttribute id="eventName"/>
+      <viewAttribute id="venue"/>
+      <viewAttribute id="isListed"/>
+      <viewAttribute id="location"/>
+      <viewAttribute id="dateOfRace"/>
+      <viewAttribute id="dayOfRace"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="LegStatsJoin_1">
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="raceName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="legNumber" source="legNumber"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="rankOneBased" source="rankOneBased"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="distanceSailedInMeters" source="distanceSailedInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="elapsedTimeInSeconds" source="elapsedTimeInSeconds"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="avgCrossTrackErrorInMeters" source="avgCrossTrackErrorInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="absoluteAvgCrossTrackErrorInMeters" source="absoluteAvgCrossTrackErrorInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="numberOfTacks" source="numberOfTacks"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="numberOfGybes" source="numberOfGybes"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="numberOfPenaltyCircles" source="numberOfPenaltyCircles"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="avgVelocityMadeGoodInKnots" source="avgVelocityMadeGoodInKnots"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="gapToLeaderInSeconds" source="gapToLeaderInSeconds"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorName" source="competitorName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorShortName" source="competitorShortName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="nationality" source="nationality"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="sailNumber" source="sailNumber"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="race" source="race"/>
+    </input>
+    <input node="RaceCalcView">
+      <mapping xsi:type="Calculation:AttributeMapping" target="fleet" source="fleet"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceColumn" source="raceColumn"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startOfRace" source="startOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="endOfRace" source="endOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="monthOfRace" source="monthOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="monthOfRace_name" source="monthOfRace_name"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="yearOfRace" source="yearOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startOfTracking" source="startOfTracking"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="endOfTracking" source="endOfTracking"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="avgWindSpeedInKnots" source="avgWindSpeedInKnots"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="boatClass" source="boatClass"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="boatClassDescription" source="boatClassDescription"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="hullType" source="hullType"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="scoringScheme" source="scoringScheme"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="rankingMetric" source="rankingMetric"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventId" source="eventId"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventName" source="eventName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="venue" source="venue"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="isListed" source="isListed"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="location" source="location"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="dateOfRace" source="dateOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="dayOfRace" source="dayOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="race" source="raceName"/>
+    </input>
+    <joinAttribute name="regatta"/>
+    <joinAttribute name="race"/>
+  </calculationView>
+</calculationViews>
+
+<logicalModel id="LegStatsJoin_2">
+  <attributes>
+    <attribute id="regatta" order="1" displayAttribute="false" attributeHierarchyActive="false" key="true">
+      <descriptions defaultDescription="regatta"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="regatta"/>
+    </attribute>
+    <attribute id="raceName" order="2" displayAttribute="false" attributeHierarchyActive="false" key="true">
+      <descriptions defaultDescription="raceName"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="raceName"/>
+    </attribute>
+    <attribute id="legNumber" order="3" displayAttribute="false" attributeHierarchyActive="false" key="true">
+      <descriptions defaultDescription="legNumber"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="legNumber"/>
+    </attribute>
+    <attribute id="fleet" order="4" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Fleet"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="fleet"/>
+    </attribute>
+    <attribute id="raceColumn" order="5" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Race Column"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="raceColumn"/>
+    </attribute>
+    <attribute id="competitorId" order="6" displayAttribute="false" attributeHierarchyActive="false" descriptionColumnName="competitorName">
+      <descriptions defaultDescription="competitorId"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="competitorId"/>
+    </attribute>
+    <attribute id="competitorName" order="7" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="competitorName"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="competitorName"/>
+    </attribute>
+    <attribute id="competitorShortName" order="8" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="competitorShortName"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="competitorShortName"/>
+    </attribute>
+    <attribute id="nationality" order="9" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="nationality"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="nationality"/>
+    </attribute>
+    <attribute id="sailNumber" order="10" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="sailNumber"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="sailNumber"/>
+    </attribute>
+    <attribute id="boatClass" order="11" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Boatclass"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="boatClass"/>
+    </attribute>
+    <attribute id="boatClassDescription" order="12" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Boatclass Description"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="boatClassDescription"/>
+    </attribute>
+    <attribute id="hullType" order="13" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Hull Type"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="hullType"/>
+    </attribute>
+    <attribute id="dateOfRace" order="14" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Date Of Race"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="dateOfRace"/>
+    </attribute>
+    <attribute id="dayOfRace" order="15" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Day of Race"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="dayOfRace"/>
+    </attribute>
+  
+    <attribute id="monthOfRace" order="16" displayAttribute="false" attributeHierarchyActive="false" descriptionColumnName="monthOfRace_name">
+      <descriptions defaultDescription="Month of Race"/>
+  
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="monthOfRace"/>
+  
+    </attribute>
+    <attribute id="monthOfRace_name" order="17" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Month of Race"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="monthOfRace_name"/>
+    </attribute>
+    <attribute id="yearOfRace" order="18" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Year of Race"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="yearOfRace"/>
+    </attribute>
+    <attribute id="scoringScheme" order="35" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Scoring Scheme"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="scoringScheme"/>
+    </attribute>
+    <attribute id="rankingMetric" order="36" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Ranking Metric"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="rankingMetric"/>
+    </attribute>
+    <attribute id="eventId" order="37" displayAttribute="false" attributeHierarchyActive="false" descriptionColumnName="eventName">
+      <descriptions defaultDescription="Event ID"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="eventId"/>
+    </attribute>
+    <attribute id="eventName" order="38" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Event Name"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="eventName"/>
+    </attribute>
+    <attribute id="venue" order="39" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Venue"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="venue"/>
+    </attribute>
+    <attribute id="isListed" order="40" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="isListed"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="isListed"/>
+    </attribute>
+    <attribute id="location" order="41" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Location"/>
+      <keyMapping columnObjectName="LegStatsJoin_2" columnName="location"/>
+    </attribute></attributes>
+  <calculatedAttributes/>
+  <baseMeasures>
+    <measure id="rankOneBased" order="19" aggregationType="sum" measureType="simple">
+      <descriptions defaultDescription="Rank (One Based)"/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="rankOneBased"/>
+    </measure>
+    <measure id="distanceSailedInMeters" order="20" aggregationType="sum" measureType="quantity" semanticType="quantity">
+      <descriptions defaultDescription="Distance Sailed"/>
+      <fixedUnit>M</fixedUnit>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="distanceSailedInMeters"/>
+    </measure>
+    <measure id="elapsedTimeInSeconds" order="21" aggregationType="sum" measureType="quantity" semanticType="quantity">
+      <descriptions defaultDescription="Elapsed Time"/>
+      <fixedUnit>S</fixedUnit>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="elapsedTimeInSeconds"/>
+    </measure>
+    <measure id="avgCrossTrackErrorInMeters" order="22" aggregationType="sum" measureType="quantity" semanticType="quantity">
+      <descriptions defaultDescription="Avg Crosstrack Error"/>
+      <fixedUnit>M</fixedUnit>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="avgCrossTrackErrorInMeters"/>
+    </measure>
+    <measure id="absoluteAvgCrossTrackErrorInMeters" order="23" aggregationType="sum" measureType="quantity" semanticType="quantity">
+      <descriptions defaultDescription="Abs Avg Crosstrack Error"/>
+      <fixedUnit>M</fixedUnit>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="absoluteAvgCrossTrackErrorInMeters"/>
+    </measure>
+    <measure id="numberOfTacks" order="24" aggregationType="sum" measureType="simple">
+      <descriptions defaultDescription="Number of Tacks"/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="numberOfTacks"/>
+    </measure>
+    <measure id="numberOfGybes" order="25" aggregationType="sum" measureType="simple">
+      <descriptions defaultDescription="Number of Gybes"/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="numberOfGybes"/>
+    </measure>
+    <measure id="numberOfPenaltyCircles" order="26" aggregationType="sum" measureType="simple">
+      <descriptions defaultDescription="Number of Penalty Circles"/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="numberOfPenaltyCircles"/>
+    </measure>
+    <measure id="avgVelocityMadeGoodInKnots" order="27" aggregationType="sum" measureType="quantity" semanticType="quantity">
+      <descriptions defaultDescription="Avg VMG (Velocity Made Good)"/>
+      <fixedUnit>KTS</fixedUnit>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="avgVelocityMadeGoodInKnots"/>
+    </measure>
+    <measure id="gapToLeaderInSeconds" order="28" aggregationType="sum" measureType="quantity" semanticType="quantity">
+      <descriptions defaultDescription="Gap to Leader"/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="gapToLeaderInSeconds"/>
+    </measure>
+    <measure id="startOfRace" order="29" aggregationType="min" measureType="simple">
+      <descriptions defaultDescription="Start of Race "/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="startOfRace"/>
+    </measure>
+    <measure id="endOfRace" order="30" aggregationType="min" measureType="simple">
+      <descriptions defaultDescription="End of Race"/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="endOfRace"/>
+    </measure>
+    <measure id="startOfTracking" order="31" aggregationType="min" measureType="simple">
+      <descriptions defaultDescription="Start of Tracking"/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="startOfTracking"/>
+    </measure>
+    <measure id="endOfTracking" order="32" aggregationType="min" measureType="simple">
+      <descriptions defaultDescription="End of Tracking"/>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="endOfTracking"/>
+    </measure>
+    <measure id="avgWindSpeedInKnots" order="33" aggregationType="avg" measureType="quantity" semanticType="quantity">
+      <descriptions defaultDescription="Avg Windspeed"/>
+      <fixedUnit>KTS</fixedUnit>
+      <measureMapping columnObjectName="LegStatsJoin_2" columnName="avgWindSpeedInKnots"/>
+    </measure></baseMeasures>
+  <calculatedMeasures>
+  
+    <measure id="raceCount" order="34" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
+      <descriptions defaultDescription="Race Counter"/>
+      <exceptionAggregation>
+        <attribute attributeName="regatta"/>
+        <attribute attributeName="raceName"/>
+      </exceptionAggregation>
+      <formula>1</formula>
+    </measure>
+    <measure id="competitorCount" order="42" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
+      <descriptions defaultDescription="Competitor Counter"/>
+      <exceptionAggregation>
+        <attribute attributeName="competitorId"/>
+      </exceptionAggregation>
+      <formula>1</formula>
+    </measure>
+    <measure id="legCount" order="43" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
+      <descriptions defaultDescription="Leg Counter"/>
+      <exceptionAggregation>
+        <attribute attributeName="regatta"/>
+        <attribute attributeName="raceName"/>
+        <attribute attributeName="legNumber"/>
+      </exceptionAggregation>
+      <formula>1</formula>
+    </measure>
+  </calculatedMeasures>
+  <restrictedMeasures/>
+  <localDimensions/>
+</logicalModel>
+<layout>
+  <shapes>
+    <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+      <upperLeftCorner x="361" y="112"/>
+    
+      <rectangleSize width="160"/>
+    </shape>
+    
+  
+    <shape expanded="true" modelObjectName="LegStatsProjection" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="92" y="391"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape expanded="true" modelObjectName="RaceCalcView" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="512" y="391"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape expanded="true" modelObjectName="CompetitorProjection" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="302" y="391"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+  
+    <shape expanded="true" modelObjectName="LegStatsJoin" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="302" y="236"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape modelObjectName="RaceCalcView" modelObjectNameSpace="LegStatsJoin" modelObjectType="JoinNodeInput" multiJoinViewNodeName="LegStatsJoin">
+      <upperLeftCorner x="498" y="30"/>
+      <rectangleSize width="197"/>
+    </shape>
+    <shape modelObjectName="LegStatsProjection" modelObjectNameSpace="LegStatsJoin" modelObjectType="JoinNodeInput" multiJoinViewNodeName="LegStatsJoin">
+      <upperLeftCorner x="20" y="30"/>
+      <rectangleSize width="269"/>
+    </shape>
+    <shape modelObjectName="CompetitorProjection" modelObjectNameSpace="LegStatsJoin" modelObjectType="JoinNodeInput" multiJoinViewNodeName="LegStatsJoin">
+      <upperLeftCorner x="871" y="107"/>
+      <rectangleSize width="186"/>
+    </shape></shapes>
+</layout>
+</Calculation:scenario>

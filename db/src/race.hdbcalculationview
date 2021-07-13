@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" id="race" applyPrivilegeType="NONE" dataCategory="CUBE" schemaVersion="3.0" outputViewType="Aggregation" cacheInvalidationPeriod="NONE" enforceSqlExecution="false">
+<descriptions defaultDescription="Race"/>
+<localVariables/>
+<variableMappings/>
+<dataSources>
+  <DataSource id="Regatta">
+    <resourceUri>Regatta</resourceUri>
+  </DataSource>
+  <DataSource id="BoatClass">
+    <resourceUri>BoatClass</resourceUri>
+  </DataSource>
+  <DataSource id="Event">
+    <resourceUri>Event</resourceUri>
+  </DataSource>
+  <DataSource id="Race">
+    <resourceUri>Race</resourceUri>
+  </DataSource>
+</dataSources>
+<calculationViews>
+  <calculationView xsi:type="Calculation:ProjectionView" id="RegattaProjection">
+    <viewAttributes>
+      <viewAttribute id="name"/>
+      <viewAttribute id="boatClass"/>
+      <viewAttribute id="scoringScheme"/>
+      <viewAttribute id="rankingMetric"/>
+      <viewAttribute id="eventId"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="Regatta"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:ProjectionView" id="BoatClassProjection">
+    <viewAttributes>
+      <viewAttribute id="id"/>
+      <viewAttribute id="description"/>
+      <viewAttribute id="hullLengthInMeters"/>
+      <viewAttribute id="hullBeamInMeters"/>
+      <viewAttribute id="hullType"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="BoatClass"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:ProjectionView" id="EventProjection">
+    <viewAttributes>
+      <viewAttribute id="id"/>
+      <viewAttribute id="name"/>
+      <viewAttribute id="startDate"/>
+      <viewAttribute id="endDate"/>
+      <viewAttribute id="venue"/>
+      <viewAttribute id="isListed"/>
+      <viewAttribute id="description"/>
+      <viewAttribute id="location"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="Event"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:ProjectionView" id="RaceProjection">
+    <viewAttributes>
+      <viewAttribute id="name"/>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="raceColumn"/>
+      <viewAttribute id="fleet"/>
+      <viewAttribute id="startOfTracking"/>
+      <viewAttribute id="startOfRace"/>
+      <viewAttribute id="endOfTracking"/>
+      <viewAttribute id="endOfRace"/>
+      <viewAttribute id="avgWindSpeedInKnots"/>
+    </viewAttributes>
+    <calculatedViewAttributes>
+      <calculatedViewAttribute id="yearOfRace" datatype="NVARCHAR" length="4" expressionLanguage="SQL">
+        <formula>YEAR(&quot;startOfRace&quot;)</formula>
+      </calculatedViewAttribute>
+      <calculatedViewAttribute id="monthOfRace" datatype="NVARCHAR" length="2" expressionLanguage="SQL">
+        <formula>MONTH(&quot;startOfRace&quot;)</formula>
+      </calculatedViewAttribute>
+      <calculatedViewAttribute id="monthOfRace_name" datatype="NVARCHAR" length="10" expressionLanguage="SQL">
+        <formula>MONTHNAME(&quot;startOfRace&quot;)</formula>
+      </calculatedViewAttribute>
+    
+      <calculatedViewAttribute id="dateOfRace" datatype="NVARCHAR" length="10" expressionLanguage="SQL">
+    
+        <formula>TO_DATE(&quot;startOfRace&quot;)</formula>
+    
+      </calculatedViewAttribute>
+      <calculatedViewAttribute id="dayOfRace" datatype="NVARCHAR" length="10" expressionLanguage="SQL">
+        <formula>DAYNAME(&quot;startOfRace&quot;)</formula>
+      </calculatedViewAttribute>
+    </calculatedViewAttributes>
+    <input node="Race"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:JoinView" id="RaceJoin" cardinality="CN_1" joinType="inner">
+    <viewAttributes>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="raceColumn"/>
+      <viewAttribute id="fleet"/>
+      <viewAttribute id="startOfTracking" aggregationType="min"/>
+      <viewAttribute id="startOfRace" aggregationType="min"/>
+      <viewAttribute id="endOfTracking" aggregationType="min"/>
+      <viewAttribute id="endOfRace" aggregationType="min"/>
+      <viewAttribute id="avgWindSpeedInKnots" aggregationType="sum"/>
+      <viewAttribute id="boatClass"/>
+      <viewAttribute id="scoringScheme"/>
+      <viewAttribute id="rankingMetric"/>
+      <viewAttribute id="eventId"/>
+      <viewAttribute id="boatClassDescription"/>
+      <viewAttribute id="hullLengthInMeters" aggregationType="sum"/>
+      <viewAttribute id="hullBeamInMeters" aggregationType="sum"/>
+      <viewAttribute id="hullType"/>
+      <viewAttribute id="eventName"/>
+      <viewAttribute id="startDate" aggregationType="min"/>
+      <viewAttribute id="endDate" aggregationType="min"/>
+      <viewAttribute id="venue"/>
+      <viewAttribute id="isListed"/>
+      <viewAttribute id="eventDescription"/>
+      <viewAttribute id="location"/>
+    
+      <viewAttribute id="yearOfRace"/>
+      <viewAttribute id="monthOfRace"/>
+      <viewAttribute id="monthOfRace_name"/>
+    
+      <viewAttribute id="dateOfRace"/>
+      <viewAttribute id="dayOfRace"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="RaceProjection">
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="name"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceColumn" source="raceColumn"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="fleet" source="fleet"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startOfTracking" source="startOfTracking"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startOfRace" source="startOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="endOfTracking" source="endOfTracking"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="endOfRace" source="endOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="avgWindSpeedInKnots" source="avgWindSpeedInKnots"/>
+    
+      <mapping xsi:type="Calculation:AttributeMapping" target="yearOfRace" source="yearOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="monthOfRace" source="monthOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="monthOfRace_name" source="monthOfRace_name"/>
+    
+      <mapping xsi:type="Calculation:AttributeMapping" target="dateOfRace" source="dateOfRace"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="dayOfRace" source="dayOfRace"/>
+    </input>
+    <input node="RegattaJoin_2">
+      <mapping xsi:type="Calculation:AttributeMapping" target="boatClass" source="boatClass"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="scoringScheme" source="scoringScheme"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="rankingMetric" source="rankingMetric"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventId" source="eventId"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="boatClassDescription" source="boatClassDescription"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="hullLengthInMeters" source="hullLengthInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="hullBeamInMeters" source="hullBeamInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="hullType" source="hullType"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventName" source="eventName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startDate" source="startDate"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="endDate" source="endDate"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="venue" source="venue"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="isListed" source="isListed"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventDescription" source="eventDescription"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="location" source="location"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regattaName"/>
+    </input>
+    <joinAttribute name="regatta"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:JoinView" id="RegattaJoin_1" joinType="inner" multiJoinNode="RegattaJoin" multiJoinCentralTable="RegattaProjection" multiJoinOrder="Outside In">
+    <viewAttributes>
+      <viewAttribute id="boatClass"/>
+      <viewAttribute id="scoringScheme"/>
+      <viewAttribute id="rankingMetric"/>
+      <viewAttribute id="eventId"/>
+      <viewAttribute id="eventName"/>
+      <viewAttribute id="startDate" aggregationType="min"/>
+      <viewAttribute id="endDate" aggregationType="min"/>
+      <viewAttribute id="venue"/>
+      <viewAttribute id="isListed"/>
+      <viewAttribute id="eventDescription"/>
+      <viewAttribute id="location"/>
+      <viewAttribute id="regattaName"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="RegattaProjection">
+      <mapping xsi:type="Calculation:AttributeMapping" target="regattaName" source="name"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="boatClass" source="boatClass"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="scoringScheme" source="scoringScheme"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="rankingMetric" source="rankingMetric"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventId" source="eventId"/>
+    </input>
+    <input node="EventProjection">
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventName" source="name"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startDate" source="startDate"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="endDate" source="endDate"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="venue" source="venue"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="isListed" source="isListed"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventDescription" source="description"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="location" source="location"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventId" source="id"/>
+    </input>
+    <joinAttribute name="eventId"/>
+  </calculationView>
+  <calculationView xsi:type="Calculation:JoinView" id="RegattaJoin_2" cardinality="C1_N" joinType="inner" multiJoinNode="RegattaJoin" multiJoinCentralTable="RegattaProjection" multiJoinOrder="Outside In">
+    <viewAttributes>
+      <viewAttribute id="boatClass"/>
+      <viewAttribute id="scoringScheme"/>
+      <viewAttribute id="rankingMetric"/>
+      <viewAttribute id="eventId"/>
+      <viewAttribute id="boatClassDescription"/>
+      <viewAttribute id="hullLengthInMeters" aggregationType="sum"/>
+      <viewAttribute id="hullBeamInMeters" aggregationType="sum"/>
+      <viewAttribute id="hullType"/>
+      <viewAttribute id="eventName"/>
+      <viewAttribute id="startDate" aggregationType="min"/>
+      <viewAttribute id="endDate" aggregationType="min"/>
+      <viewAttribute id="venue"/>
+      <viewAttribute id="isListed"/>
+      <viewAttribute id="eventDescription"/>
+      <viewAttribute id="location"/>
+      <viewAttribute id="regattaName"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="RegattaJoin_1">
+      <mapping xsi:type="Calculation:AttributeMapping" target="boatClass" source="boatClass"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="scoringScheme" source="scoringScheme"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="rankingMetric" source="rankingMetric"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventId" source="eventId"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventName" source="eventName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startDate" source="startDate"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="endDate" source="endDate"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="venue" source="venue"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="isListed" source="isListed"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="eventDescription" source="eventDescription"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="location" source="location"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="regattaName" source="regattaName"/>
+    </input>
+    <input node="BoatClassProjection">
+      <mapping xsi:type="Calculation:AttributeMapping" target="boatClassDescription" source="description"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="hullLengthInMeters" source="hullLengthInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="hullBeamInMeters" source="hullBeamInMeters"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="hullType" source="hullType"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="boatClass" source="id"/>
+    </input>
+    <joinAttribute name="boatClass"/>
+  </calculationView>
+</calculationViews>
+
+<logicalModel id="RaceJoin">
+  <attributes>
+    <attribute id="regatta" order="1" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race" key="true">
+      <descriptions defaultDescription="Regatta"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="regatta"/>
+    </attribute>
+    <attribute id="raceName" order="2" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race" key="true">
+      <descriptions defaultDescription="Name of Race"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="raceName"/>
+    </attribute>
+    <attribute id="fleet" order="3" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race">
+      <descriptions defaultDescription="Fleet"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="fleet"/>
+    </attribute>
+    <attribute id="raceColumn" order="4" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race">
+      <descriptions defaultDescription="Race Column"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="raceColumn"/>
+    </attribute>
+    <attribute id="startOfRace" order="5" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race">
+      <descriptions defaultDescription="Start of Race "/>
+      <keyMapping columnObjectName="RaceJoin" columnName="startOfRace"/>
+    </attribute>
+    <attribute id="endOfRace" order="6" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race">
+      <descriptions defaultDescription="End of Race"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="endOfRace"/>
+    </attribute>
+    <attribute id="dateOfRace" order="7" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Date Of Race"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="dateOfRace"/>
+    </attribute>
+    <attribute id="dayOfRace" order="8" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Day of Race"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="dayOfRace"/>
+    </attribute>
+    <attribute id="monthOfRace" order="9" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race" descriptionColumnName="monthOfRace_name">
+      <descriptions defaultDescription="Month of Race"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="monthOfRace"/>
+    </attribute>
+    <attribute id="monthOfRace_name" order="10" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race">
+      <descriptions defaultDescription="Month of Race"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="monthOfRace_name"/>
+    </attribute>
+    <attribute id="yearOfRace" order="11" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race">
+      <descriptions defaultDescription="Year of Race"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="yearOfRace"/>
+    </attribute>
+    <attribute id="startOfTracking" order="12" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race">
+      <descriptions defaultDescription="Start of Tracking"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="startOfTracking"/>
+    </attribute>
+    <attribute id="endOfTracking" order="13" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Race">
+      <descriptions defaultDescription="End of Tracking"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="endOfTracking"/>
+    </attribute>
+    <attribute id="boatClass" order="16" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Boatclass">
+      <descriptions defaultDescription="Boatclass"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="boatClass"/>
+    </attribute>
+    <attribute id="boatClassDescription" order="17" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Boatclass">
+      <descriptions defaultDescription="Boatclass Description"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="boatClassDescription"/>
+    </attribute>
+    <attribute id="hullLengthInMeters" order="18" semanticType="empty" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Boatclass">
+      <descriptions defaultDescription="Hull Length"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="hullLengthInMeters"/>
+    </attribute>
+    <attribute id="hullBeamInMeters" order="19" semanticType="empty" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Boatclass">
+      <descriptions defaultDescription="Hull Beam"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="hullBeamInMeters"/>
+    </attribute>
+    <attribute id="hullType" order="20" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Boatclass">
+      <descriptions defaultDescription="Hull Type"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="hullType"/>
+    </attribute>
+    <attribute id="scoringScheme" order="21" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="Scoring Scheme"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="scoringScheme"/>
+    </attribute>
+    <attribute id="rankingMetric" order="22" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="Ranking Metric"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="rankingMetric"/>
+    </attribute>
+    <attribute id="eventId" order="23" displayAttribute="false" attributeHierarchyActive="false" descriptionColumnName="eventName" displayFolder="Regatta">
+      <descriptions defaultDescription="Event ID"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="eventId"/>
+    </attribute>
+    <attribute id="eventName" order="24" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="Event Name"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="eventName"/>
+    </attribute>
+    <attribute id="eventDescription" order="25" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="Event Description"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="eventDescription"/>
+    </attribute>
+    <attribute id="startDate" order="26" semanticType="date.businessDateFrom" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="Start Date"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="startDate"/>
+    </attribute>
+    <attribute id="endDate" order="27" semanticType="date.businessDateTo" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="End Date"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="endDate"/>
+    </attribute>
+    <attribute id="venue" order="28" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="Venue"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="venue"/>
+    </attribute>
+    <attribute id="isListed" order="29" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="isListed"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="isListed"/>
+    </attribute>
+    <attribute id="location" order="30" displayAttribute="false" attributeHierarchyActive="false" displayFolder="Regatta">
+      <descriptions defaultDescription="Location"/>
+      <keyMapping columnObjectName="RaceJoin" columnName="location"/>
+    </attribute>
+  </attributes>
+  <calculatedAttributes/>
+  <baseMeasures>
+    <measure id="avgWindSpeedInKnots" order="14" semanticType="quantity" aggregationType="avg" measureType="quantity" displayFolder="Race">
+      <descriptions defaultDescription="Avg Windspeed"/>
+      <fixedUnit>KTS</fixedUnit>
+      <measureMapping columnObjectName="RaceJoin" columnName="avgWindSpeedInKnots"/>
+    </measure>
+  </baseMeasures>
+  <calculatedMeasures>
+    <measure id="raceCount" order="15" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="" displayFolder="Race">
+      <descriptions defaultDescription="Race Counter"/>
+      <exceptionAggregation>
+        <attribute attributeName="raceName"/>
+        <attribute attributeName="regatta"/>
+      </exceptionAggregation>
+      <formula>1</formula>
+    </measure>
+  </calculatedMeasures>
+  <restrictedMeasures/>
+  <localDimensions/>
+</logicalModel>
+<layout>
+  <shapes>
+    <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+      <upperLeftCorner x="475" y="112"/>
+    
+      <rectangleSize width="160"/>
+    </shape>
+    
+  
+    <shape expanded="true" modelObjectName="RegattaProjection" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="92" y="531"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape expanded="true" modelObjectName="BoatClassProjection" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="512" y="531"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape expanded="true" modelObjectName="EventProjection" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="302" y="531"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape expanded="true" modelObjectName="RaceProjection" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="521" y="376"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape expanded="true" modelObjectName="RaceJoin" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="475" y="217"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape modelObjectName="RaceProjection" modelObjectNameSpace="RaceJoin" modelObjectType="JoinNodeInput">
+      <upperLeftCorner x="20" y="30"/>
+      <rectangleSize width="197"/>
+    </shape>
+    <shape modelObjectName="RegattaJoin_2" modelObjectNameSpace="RaceJoin" modelObjectType="JoinNodeInput">
+      <upperLeftCorner x="320" y="30"/>
+      <rectangleSize width="250"/>
+    </shape><shape><upperLeftCorner/><rectangleSize/></shape><shape><upperLeftCorner/><rectangleSize/></shape><shape><upperLeftCorner/><rectangleSize/></shape><shape><upperLeftCorner/><rectangleSize/></shape><shape><upperLeftCorner/><rectangleSize/></shape><shape><upperLeftCorner/><rectangleSize/></shape>
+    <shape expanded="true" modelObjectName="RegattaJoin" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="302" y="376"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape modelObjectName="BoatClassProjection" modelObjectNameSpace="RegattaJoin" modelObjectType="JoinNodeInput" multiJoinViewNodeName="RegattaJoin">
+      <upperLeftCorner x="692" y="30"/>
+      <rectangleSize width="181"/>
+    </shape>
+    <shape modelObjectName="RegattaProjection" modelObjectNameSpace="RegattaJoin" modelObjectType="JoinNodeInput" multiJoinViewNodeName="RegattaJoin">
+      <upperLeftCorner x="330" y="30"/>
+      <rectangleSize width="166"/>
+    </shape>
+    <shape modelObjectName="EventProjection" modelObjectNameSpace="RegattaJoin" modelObjectType="JoinNodeInput" multiJoinViewNodeName="RegattaJoin">
+      <upperLeftCorner x="50" y="248"/>
+      <rectangleSize width="155"/>
+    </shape></shapes>
+</layout>
+</Calculation:scenario>
