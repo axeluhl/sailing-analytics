@@ -43,8 +43,8 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
 public class CompareServersResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(CompareServersResource.class.getName());
 
-    private static final String LEADERBOARDGROUPSIDENTIFIABLEPATH = "/sailingserver/api/v1/leaderboardgroups/identifiable";
     private static final String LEADERBOARDGROUPSPATH = "/sailingserver/api/v1/leaderboardgroups";
+    private static final String LEADERBOARDGROUPSIDENTIFIABLEPATH = LEADERBOARDGROUPSPATH+"/identifiable";
     /**
      * The list of keys that are compared during a compare run.
      */
@@ -83,6 +83,45 @@ public class CompareServersResource extends AbstractSailingServerResource {
     @Context
     UriInfo uriInfo;
     
+    /**
+     * @param server1
+     *            optional; if not provided, the server receiving this request will act as the default for "server1"
+     * @param user1
+     *            the username for authenticating the request for {@code server1}, together with {@code password1};
+     *            alternatively to {@code user1} and {@code password1} clients may specify {@code bearer1}. If none of
+     *            these are provided, this request's authentication will be used to obtain a bearer token for
+     *            {@code server1}.
+     * @param password1
+     *            use together with {@code user1} to provide authentication for the requests for {@code server1}
+     *            (defaulting to this server).
+     * @param bearer1
+     *            alternative for {@code user1}/{@code password1}, specifying a bearer token that is used to
+     *            authenticate a user on {@code server1} (which defaults to the server handling this request). If
+     *            neither of {@code user1}, {@code password1} and {@core bearer1} are provided, this request's
+     *            authentication is used to obtain a bearer token which is then used to authenticate the requests for
+     *            {@code server1}.
+     * @param server2
+     *            mandatory; specifies the host name or IP address of the host against which to compare the
+     *            {@code server1} content
+     * @param user2
+     *            the username for authenticating the request for {@code server2}, together with {@code password2};
+     *            alternatively to {@code user2} and {@code password2} clients may specify {@code bearer2}. If none of
+     *            these are provided, this request's authentication will be used to obtain a bearer token for
+     *            {@code server2}, assuming that the server responding to this request and {@code server2} share a
+     *            common {@code SecurityService} through replication.
+     * @param password2
+     *            use together with {@code user2} to provide authentication for the requests for {@code server2}.
+     * @param bearer2
+     *            alternative for {@code user2}/{@code password2}, specifying a bearer token that is used to
+     *            authenticate a user on {@code server2}. If neither of {@code user2}, {@code password2} and
+     *            {@core bearer2} are provided, this request's authentication is used to obtain a bearer token which is
+     *            then used to authenticate the requests for {@code server1}, assuming that the server responding to
+     *            this request and {@code server2} share a common {@code SecurityService} through replication.
+     * @param leaderboardgroupUUID
+     *            can optionally be used to specify a set of UUIDs identifying leaderboard groups to compare. If not
+     *            specified (represented as an {@link Set#isEmpty() empty} set), all leaderboard groups found on both,
+     *            {@code server1} and {@code server2} will be compared.
+     */
     @POST
     @Produces("application/json;charset=UTF-8")
     public Response compareServers(
@@ -101,11 +140,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
         effectiveServer1 = !Util.hasLength(server1) ? uriInfo.getBaseUri().getAuthority() : server1;
         if (!validateParameters(effectiveServer1, server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
             response = badRequest("Specify two server names and optionally a set of valid leaderboardgroup UUIDs.");
-        } 
-        else if (getSecurityService().getCurrentUser() == null) {
-            response = badRequest("Provide valid user.");
-        }
-        else {
+        } else {
             final String token1 = getService().getOrCreateTargetServerBearerToken(effectiveServer1, user1, password1, bearer1);
             final String token2 = getService().getOrCreateTargetServerBearerToken(server2, user2, password2, bearer2);
             result.put(effectiveServer1, new HashSet<>());
@@ -166,6 +201,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
 
     private boolean validateParameters(String server1, String server2, Set<String> uuidset, String user1, String user2,
             String password1, String password2, String bearer1, String bearer2) {
+        // FIXME bug5311: the following two statements may be redundant; re-design...
         boolean result = (validateParameters(user1, password1, bearer1) || validateParameters(user2, password2, bearer2));
         result = validateParameters(server1, server2, uuidset);
         return result;
@@ -186,6 +222,9 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return Util.hasLength(server1) && Util.hasLength(server2);
     }
 
+    /**
+     * Valid combinations: user+password; bearer; nothing
+     */
     private boolean validateParameters(String user, String password, String bearer) {
         return (((Util.hasLength(user) && Util.hasLength(password) && !Util.hasLength(bearer))
                 || (!Util.hasLength(user) && !Util.hasLength(password) && Util.hasLength(bearer)))

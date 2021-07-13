@@ -13,15 +13,15 @@
 
 <b>Description:</b>
  <p>Compares two SAP Sailing Analytics servers based on the content.
-  The return contains either the missing leaderboardgroup name and id or
+  The response contains either the missing leaderboardgroup name and id or
   if the leaderboardgroupnames match on both servers the missing parts
   within the leaderboardgroups. If the servers contain the exact same
   content the return will just have the given server hostnames in it.
   You may also query for a specific leaderboardgroup id; there the same
   logic applies. The HTTP return code will be 409 if a mismatch is
   detected in your query, if equal content is present on both servers
-  the response code will be 200. The caller needs authorization with a
-  valid user.</p>
+  the response code will be 200. Authorization must be provided in case
+  content is to be compared that is not publicly readable.</p>
  <br />
  <table>
     <tr>
@@ -41,16 +41,17 @@
     <tr>
         <td>Optional form parameters:</td>
         <td>
-            <div>server1, the hostname for the first server. Defaults to the server that you target your request</div>
-            <div>leaderboardgroupUUID[], the leaderboardgroup UUID you want to compare.
-             Use multiple times if you need to compare more then one
-             leaderboardgroup.</div>
-            <div>user1, the user to authenticate against server1.</div>
-            <div>password1, password for user1.</div>
-            <div>bearer1, you might provide a bearer token instead of user1 and password1.</div>
-            <div>user2, see user1.</div>
-            <div>password2, see password1.</div>
-            <div>bearer2, see bearer1.</div>
+            <div><tt>server1</tt>, the hostname for the first server. Defaults to the target of your request</div>
+            <div><tt>leaderboardgroupUUID[]</tt>, the leaderboardgroup UUID you want to compare.
+             Use multiple times if you need to compare more than one leaderboardgroup.</div>
+            <div><tt>user1</tt>, the user to authenticate against server1. If provided, <tt>password1</tt> must be provided, too.</div>
+            <div><tt>password1</tt>, password for <tt>user1</tt>.</div>
+            <div><tt>bearer1</tt>, you might provide a bearer token instead of <tt>user1</tt> and <tt>password1</tt>. If neither this
+                 bearer token nor user/password is provided, the request's authentication information is used to infer
+                 user credentials. If no user can be authenticated, only publicly readable content will be considered.</div>
+            <div><tt>user2</tt>, see <tt>user1</tt>.</div>
+            <div><tt>password2</tt>, see <tt>password1</tt>.</div>
+            <div><tt>bearer2</tt>, see <tt>bearer1</tt>.</div>
         </td>
     </tr>
     <tr>

@@ -1008,7 +1008,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
      * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
-     * only username and password or bearer token, not the three of them.
+     * only username and password or bearer token, not the three of them. If none is provided but there is no user
+     * currently authenticated, {@code null} will be returned.<p>
      */
     String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
             String targetServerPassword, String targetServerBearerToken);

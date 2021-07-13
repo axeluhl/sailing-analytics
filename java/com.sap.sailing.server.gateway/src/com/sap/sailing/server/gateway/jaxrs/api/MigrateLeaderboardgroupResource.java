@@ -54,10 +54,8 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             @FormParam("bearer1") String bearer1,
             @FormParam("bearer2") String bearer2) {
         Response response;
-        final String baseServerBearerToken = getService().getOrCreateTargetServerBearerToken(baseServer, user1,
-                password1, bearer1);
-        final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer,
-                user2, password2, bearer2);
+        final String baseServerBearerToken = getService().getOrCreateTargetServerBearerToken(baseServer, user1, password1, bearer1);
+        final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer, user2, password2, bearer2);
         try {
             final JSONObject result = new JSONObject();
             final Util.Pair<JSONObject, Number> mdi = doMDI(baseServer, dedicatedServer, requestedLeaderboardGroups,
@@ -85,7 +83,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response moveToArchive(
+    public Response moveToArchiveServer(
             @FormParam("archive") String archiveServer,
             @FormParam("dedicated") String dedicatedServer,
             @FormParam("UUID[]") Set<String> requestedLeaderboardGroups,

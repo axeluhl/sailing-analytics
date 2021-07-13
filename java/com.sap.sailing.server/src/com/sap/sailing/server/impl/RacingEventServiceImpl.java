@@ -5107,7 +5107,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     @Override
     public String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
             String targetServerPassword, String targetServerBearerToken) {
-        if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
+        if ((Util.hasLength(targetServerUsername) || Util.hasLength(targetServerPassword))
                 && Util.hasLength(targetServerBearerToken)) {
             IllegalArgumentException e = new IllegalArgumentException(
                     "Please use either username/password or bearer token, not both.");
@@ -5117,15 +5117,15 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         final User user = getSecurityService().getCurrentUser();
         // Default to current user's token
         final String effectiveTargetServerBearerToken;
-        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword)
-                && !Util.hasLength(targetServerBearerToken)) {
-            effectiveTargetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
+        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword) && !Util.hasLength(targetServerBearerToken)) {
+            effectiveTargetServerBearerToken = user == null ? null : getSecurityService().getOrCreateAccessToken(user.getName());
         } else {
             effectiveTargetServerBearerToken = targetServerBearerToken;
         }
         final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
-                ? RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername,
-                        targetServerPassword)
+                ? targetServerUsername != null ?
+                        RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername, targetServerPassword) :
+                        null // in case no effective bearer token has been provided but no user name either
                 : effectiveTargetServerBearerToken);
         return token;
     }
