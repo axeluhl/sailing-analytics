@@ -159,6 +159,14 @@ public class RemoteSailingServerSet {
     public RemoteSailingServerReference getServerReferenceByName(String name) {
         return remoteSailingServers.get(name);
     }
+    
+    /**
+     * @return a snapshot copy of the internal map with all remote sailing server references currently known, regardless
+     *         of whether or not they are {@link #getLiveRemoteServerReferences() live}.
+     */
+    public Map<String, RemoteSailingServerReference> getAllRemoteServerReferences() {
+        return new HashMap<>(remoteSailingServers);
+    }
 
     private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
         final Future<?> lastJobForRef = runningUpdateTasksPerServerReference.get(ref);

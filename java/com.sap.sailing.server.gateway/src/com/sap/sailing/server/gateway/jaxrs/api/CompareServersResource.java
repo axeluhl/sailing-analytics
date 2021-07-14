@@ -41,10 +41,19 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
 
 @Path("/v1/compareservers")
 public class CompareServersResource extends AbstractSailingServerResource {
-    private static final Logger logger = Logger.getLogger(CompareServersResource.class.getName());
+    public static final Logger logger = Logger.getLogger(CompareServersResource.class.getName());
 
     private static final String LEADERBOARDGROUPSPATH = "/sailingserver/api/v1/leaderboardgroups";
     private static final String LEADERBOARDGROUPSIDENTIFIABLEPATH = LEADERBOARDGROUPSPATH+"/identifiable";
+    protected static final String SERVER1_FORM_PARAM = "server1";
+    protected static final String SERVER2_FORM_PARAM = "server2";
+    protected static final String USER1_FORM_PARAM = "user1";
+    protected static final String USER2_FORM_PARAM = "user2";
+    protected static final String PASSWORD1_FORM_PARAM = "password1";
+    protected static final String PASSWORD2_FORM_PARAM = "password2";
+    protected static final String BEARER1_FORM_PARAM = "bearer1";
+    protected static final String BEARER2_FORM_PARAM = "bearer2";
+    protected static final String LEADERBOARDGROUP_UUID_FORM_PARAM = "leaderboardgroupUUID[]";
     /**
      * The list of keys that are compared during a compare run.
      */
@@ -125,15 +134,15 @@ public class CompareServersResource extends AbstractSailingServerResource {
     @POST
     @Produces("application/json;charset=UTF-8")
     public Response compareServers(
-            @FormParam("server1") String server1, 
-            @FormParam("server2") String server2,
-            @FormParam("leaderboardgroupUUID[]") Set<String> uuidset,
-            @FormParam("user1") String user1,
-            @FormParam("user2") String user2,
-            @FormParam("password1") String password1,
-            @FormParam("password2") String password2,
-            @FormParam("bearer1") String bearer1,
-            @FormParam("bearer2") String bearer2) {
+            @FormParam(SERVER1_FORM_PARAM) String server1, 
+            @FormParam(SERVER2_FORM_PARAM) String server2,
+            @FormParam(LEADERBOARDGROUP_UUID_FORM_PARAM) Set<String> uuidset,
+            @FormParam(USER1_FORM_PARAM) String user1,
+            @FormParam(USER2_FORM_PARAM) String user2,
+            @FormParam(PASSWORD1_FORM_PARAM) String password1,
+            @FormParam(PASSWORD2_FORM_PARAM) String password2,
+            @FormParam(BEARER1_FORM_PARAM) String bearer1,
+            @FormParam(BEARER2_FORM_PARAM) String bearer2) {
         final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
         final String effectiveServer1;
@@ -162,7 +171,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
                         if (!leaderboardgroupList2.contains(lg1)) {
                             result.get(effectiveServer1).add(lg1);
                         } else {
-                            final String lgId = ((JSONObject) lg1).get("id").toString();
+                            final String lgId = ((JSONObject) lg1).get(LeaderboardGroupConstants.ID).toString();
                             Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(effectiveServer1,
                                     server2, lgId, token1, token2);
                             if (jsonPair.getA() != null && jsonPair.getB() != null) {
@@ -201,7 +210,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
 
     private boolean validateParameters(String server2, Set<String> uuidset, String user1, String user2, String password1,
             String password2, String bearer1, String bearer2) {
-        boolean result = validateParameters(user1, password1, bearer1) && validateParameters(user2, password2, bearer2) &&
+        boolean result = validateAuthenticationParameters(user1, password1, bearer1) && validateAuthenticationParameters(user2, password2, bearer2) &&
                     validateParameters(server2, uuidset);
         return result;
     }
@@ -221,15 +230,6 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return result;
     }
     
-    /**
-     * Valid combinations: user+password; bearer; nothing
-     */
-    private boolean validateParameters(String user, String password, String bearer) {
-        return (((Util.hasLength(user) && Util.hasLength(password) && !Util.hasLength(bearer))
-                || (!Util.hasLength(user) && !Util.hasLength(password) && Util.hasLength(bearer)))
-                || (!Util.hasLength(user) && !Util.hasLength(password) && !Util.hasLength(bearer)));
-    }
-
     /**
      * Fetches the details for a given leaderboardgroup UUID and removes all the duplicates in the fields.
      */
@@ -313,36 +313,36 @@ public class CompareServersResource extends AbstractSailingServerResource {
      * @return the two (nested) {@link org.json.simple.JSONObject}'s, stripped by all fields and values that are equal
      *         for both.
      */
-    private Pair<Object, Object> removeDuplicateEntries(Object json1, Object json2) {
+    private Pair<Object, Object> removeDuplicateEntries(Object lg1, Object lg2) {
         Pair<Object, Object> result = new Pair<Object, Object>(null, null);
-        if (json1.equals(json2)) {
+        if (lg1.equals(lg2)) {
             return result;
         }
-        else if (json1 instanceof JSONObject && json2 instanceof JSONObject) {
-            removeDuplicateEntries((JSONObject) json1, (JSONObject) json2);
-        } else if (json1 instanceof JSONArray && json2 instanceof JSONArray) {
-            removeDuplicateEntries((JSONArray) json1, (JSONArray) json2);
+        else if (lg1 instanceof JSONObject && lg2 instanceof JSONObject) {
+            removeDuplicateEntries((JSONObject) lg1, (JSONObject) lg2);
+        } else if (lg1 instanceof JSONArray && lg2 instanceof JSONArray) {
+            removeDuplicateEntries((JSONArray) lg1, (JSONArray) lg2);
         }
-        result = new Pair<Object, Object>(json1, json2);
+        result = new Pair<Object, Object>(lg1, lg2);
         return result;
     }
     
     
-    private Pair<Object, Object> removeDuplicateEntries(JSONObject json1, JSONObject json2) {
+    private Pair<Object, Object> removeDuplicateEntries(JSONObject lg1, JSONObject lg2) {
         Pair<Object, Object> result = new Pair<Object, Object>(null, null);
-        final Iterator<Object> iter1 = json1.keySet().iterator();
+        final Iterator<Object> iter1 = lg1.keySet().iterator();
         while (iter1.hasNext()) {
             Object key = iter1.next();
-            if (json2.containsKey(key)) {
-                Object value1 = json1.get(key);
-                Object value2 = json2.get(key);
-                if (key.equals("name") && !Util.equalsWithNull(value1, value2)) {
+            if (lg2.containsKey(key)) {
+                Object value1 = lg1.get(key);
+                Object value2 = lg2.get(key);
+                if (key.equals(LeaderboardGroupConstants.NAME) && !Util.equalsWithNull(value1, value2)) {
                     break;
                 } else if (KEYSETTOPRINT.contains(key) && Util.equalsWithNull(value1, value2)) {
                     continue;
                 } else if (Util.equalsWithNull(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
                     iter1.remove();
-                    json2.remove(key);
+                    lg2.remove(key);
                 } else {
                     removeDuplicateEntries(value1, value2);
                 }
@@ -373,16 +373,4 @@ public class CompareServersResource extends AbstractSailingServerResource {
         }
         return result;
     }
-
-    private Response returnInternalServerError(Throwable e) {
-        final Response response = Response.status(Status.INTERNAL_SERVER_ERROR).build();
-        logger.severe(e.toString());
-        return response;
-    }
-
-    private Response badRequest(String message) {
-        final Response response = Response.status(Status.BAD_REQUEST).entity(message).build();
-        return response;
-    }
-    
 }

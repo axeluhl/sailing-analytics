@@ -124,7 +124,7 @@ public class HttpUrlConnectionHelper {
                     nextUrl = new URL(nextUrl, location);
                     connection.disconnect();
                 } else {
-                    break;
+                    break; // connected successfully
                 }
             } else {
                 break; // no HTTP URL connection; we need to use what we have...

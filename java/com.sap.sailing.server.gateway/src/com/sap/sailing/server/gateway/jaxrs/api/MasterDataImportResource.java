@@ -23,6 +23,18 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 @Path ("/v1/masterdataimport")
 public class MasterDataImportResource extends AbstractSailingServerResource {
+    protected static final String LEADERBOARDGROUPS_IMPORTED = "leaderboardgroupsImported";
+    protected static final String IMPORTED_FROM = "importedFrom";
+    protected static final String EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM = "exportTrackedRacesAndStartTracking";
+    protected static final String EXPORT_DEVICE_CONFIGS_FORM_PARAM = "exportDeviceConfigs";
+    protected static final String EXPORT_WIND_FORM_PARAM = "exportWind";
+    protected static final String COMPRESS_FORM_PARAM = "compress";
+    protected static final String OVERRIDE_FORM_PARAM = "override";
+    protected static final String LEADERBOARDGROUP_UUID_FORM_PARAM = "leaderboardgroupUUID[]";
+    protected static final String REMOTE_SERVER_BEARER_TOKEN_FORM_PARAM = "remoteServerBearerToken";
+    protected static final String REMOTE_SERVER_PASSWORD_FORM_PARAM = "remoteServerPassword";
+    protected static final String REMOTE_SERVER_USERNAME_FORM_PARAM = "remoteServerUsername";
+    protected static final String REMOTE_SERVER_URL_FORM_PARAM = "remoteServerUrl";
     private static final Logger logger = Logger.getLogger(MasterDataImportResource.class.getName());
     
     public MasterDataImportResource() {
@@ -31,21 +43,23 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response importMasterData(@FormParam("remoteServerUrl") String remoteServerUrlAsString,
-            @FormParam("removeServerUsername") String remoteServerUsername,
-            @FormParam("removeServerPassword") String remoteServerPassword,
-            @FormParam("removeServerBearerToken") String remoteServerBearerToken,
-            @FormParam("leaderboardgroupUUID[]") List<UUID> requestedLeaderboardGroupIds,
-            @FormParam("override") @DefaultValue("false") Boolean override,
-            @FormParam("compress") @DefaultValue("true") Boolean compress,
-            @FormParam("exportWind") @DefaultValue("true") Boolean exportWind,
-            @FormParam("exportDeviceConfigs") @DefaultValue("false") Boolean exportDeviceConfigs,
-            @FormParam("exportTrackedRacesAndStartTracking") @DefaultValue("true") Boolean exportTrackedRacesAndStartTracking) {
+    public Response importMasterData(@FormParam(REMOTE_SERVER_URL_FORM_PARAM) String remoteServerUrlAsString,
+            @FormParam(REMOTE_SERVER_USERNAME_FORM_PARAM) String remoteServerUsername,
+            @FormParam(REMOTE_SERVER_PASSWORD_FORM_PARAM) String remoteServerPassword,
+            @FormParam(REMOTE_SERVER_BEARER_TOKEN_FORM_PARAM) String remoteServerBearerToken,
+            @FormParam(LEADERBOARDGROUP_UUID_FORM_PARAM) List<UUID> requestedLeaderboardGroupIds,
+            @FormParam(OVERRIDE_FORM_PARAM) @DefaultValue("false") Boolean override,
+            @FormParam(COMPRESS_FORM_PARAM) @DefaultValue("true") Boolean compress,
+            @FormParam(EXPORT_WIND_FORM_PARAM) @DefaultValue("true") Boolean exportWind,
+            @FormParam(EXPORT_DEVICE_CONFIGS_FORM_PARAM) @DefaultValue("false") Boolean exportDeviceConfigs,
+            @FormParam(EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM) @DefaultValue("true") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
-        if (!Util.hasLength(remoteServerUrlAsString) || requestedLeaderboardGroupIds.isEmpty()
-                || ((Util.hasLength(remoteServerUsername) && Util.hasLength(remoteServerPassword))
-                        && Util.hasLength(remoteServerBearerToken))) {
-            response = Response.status(Status.BAD_REQUEST).build();
+        if (!Util.hasLength(remoteServerUrlAsString)) {
+            response = badRequest("Remote server URL parameter "+REMOTE_SERVER_URL_FORM_PARAM+" must be present and non-empty");
+        } else if (requestedLeaderboardGroupIds.isEmpty()) {
+            response = badRequest("You must specify one or more leaderboard groups by their ID using parameter "+LEADERBOARDGROUP_UUID_FORM_PARAM);
+        } else if (!validateAuthenticationParameters(remoteServerUsername, remoteServerPassword, remoteServerBearerToken)) {
+            response = badRequest("Specify "+REMOTE_SERVER_USERNAME_FORM_PARAM+" and "+REMOTE_SERVER_PASSWORD_FORM_PARAM+" or alternatively "+REMOTE_SERVER_BEARER_TOKEN_FORM_PARAM+" or none of them.");
         } else {
             final UUID importMasterDataUid = UUID.randomUUID();
             try {
@@ -55,12 +69,12 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
                         compress, exportWind, exportDeviceConfigs, remoteServerUsername, remoteServerPassword,
                         remoteServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("LeaderboardgroupsImported", getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds));
-                jsonResponse.put("ImportedFrom", remoteServerUrlAsString);
-                jsonResponse.put("override", override);
-                jsonResponse.put("exportWind", exportWind);
-                jsonResponse.put("exportDeviceConfigs", exportDeviceConfigs);
-                jsonResponse.put("exportTrackedRacesAndStartTracking", exportTrackedRacesAndStartTracking);
+                jsonResponse.put(LEADERBOARDGROUPS_IMPORTED, getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds));
+                jsonResponse.put(IMPORTED_FROM, remoteServerUrlAsString);
+                jsonResponse.put(OVERRIDE_FORM_PARAM, override);
+                jsonResponse.put(EXPORT_WIND_FORM_PARAM, exportWind);
+                jsonResponse.put(EXPORT_DEVICE_CONFIGS_FORM_PARAM, exportDeviceConfigs);
+                jsonResponse.put(EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM, exportTrackedRacesAndStartTracking);
                 response = Response.ok(streamingOutput(jsonResponse)).build();
             } catch (UnauthorizedException e) {
                 response = Response.status(Status.UNAUTHORIZED).build();

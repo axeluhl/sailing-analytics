@@ -1639,6 +1639,11 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
+    public Map<String, RemoteSailingServerReference> getAllRemoteServerReferences() {
+        return remoteSailingServerSet.getAllRemoteServerReferences();
+    }
+
+    @Override
     public RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName) {
         return remoteSailingServerSet.getServerReferenceByName(remoteServerReferenceName);
     }

@@ -720,8 +720,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * For the reference to a remote sailing server, updates its events cache and returns the event list or, if fetching
-     * the event list from the remote server did fail, the exception for which it failed. If {@link forceUpdate}
-     * parameter is <code>true</code> then remote server will be replaced in cache
+     * the event list from the remote server did fail, the exception for which it failed. If the {@link forceUpdate}
+     * parameter is <code>true</code> then the remote server will be replaced in cache
      */
     Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
             RemoteSailingServerReference ref, boolean forceUpdate);
@@ -756,6 +756,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences();
 
+    /**
+     * Obtains all remote sailing server references, regardless their "live" state
+     */
+    Map<String, RemoteSailingServerReference> getAllRemoteServerReferences();
+
+    /**
+     * @return {@code null} if no remote server reference by the name specified exists
+     */
     RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName);
 
     void addRegattaWithoutReplication(Regatta regatta);

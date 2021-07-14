@@ -12,12 +12,17 @@
 <h2>URL: /api/v1/remoteserverreference/add</h2>
 
 <b>Description:</b>
-<p>Adds a remote server reference to the target server.</p>
+<p>Updates a remote server reference on the target server. The reference is looked up by its name (not the URL).
+If the <tt>include</tt> parameter is provided, it is used to update this attribute on the remote reference.
+The <tt>eventIds</tt> will always be updated to what the request provides; in other words, if you want to only
+modify the <tt>include</tt> flag you have to pass the current set of <tt>eventIds</tt> as obtained from
+<tt>/sailingserver/api/v1/remoteserverreference</tt> for the respective remote reference.
+</p>
 <br/>
 <table>
     <tr>
         <td>Webservice Type:</td>
-        <td>POST</td>
+        <td>PUT</td>
     </tr>
     <tr>
         <td>Output format:</td>
@@ -26,31 +31,29 @@
     <tr>
         <td>Mandatory parameters:</td>
         <td>
-            <div>remoteServerUrl, the URL for the remote server.</div>
             <div>remoteServerName, the name for the reference.</div>
         </td>
     </tr>
     <tr>
         <td>Request method:</td>
-        <td>POST</td>
+        <td>PUT</td>
     </tr>
     The service requires the requesting user to have permission <tt>SERVER:CONFIGURE_REMOTE_INSTANCES:{SERVER_NAME}</tt> for the
     server to which the request is sent.
     <tr>
         <td>Example:</td>
-        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/remoteserverreference/add -d "remoteServerUrl=127.0.0.1:8888" -d "remoteServerName=1" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        <td>curl -X PUT -d 'include=false' -d 'remoteServerName=Local8889' -d 'eventIds=97cac659-6d23-4d86-9b60-44c1447b6e88' "http://admin:admin@127.0.0.1:8888/sailingserver/api/v1/remoteserverreference/update"<br>
         produces output:<pre>
-        {
-          "remoteServerName": "1",
-          "remoteServerUrl": "http://127.0.0.1:8888",
-          "include": "true",
-          "eventIds": [
-            "0f4a825a-837f-4ea6-a2b6-acb861b410af",
-            "1fc9069a-0ee8-4ca9-ba62-4ab6c410c909"
-          ]
-        }
+	{
+	  "remoteServerName": "Local8889",
+	  "remoteServerUrl": "http://127.0.0.1:8889",
+	  "include": false,
+	  "eventIds": [
+	    "97cac659-6d23-4d86-9b60-44c1447b6e88"
+	  ]
+	}
         </pre>
-        which describes the server reference that was added by the request.
+        which describes the server reference that was updated by the request.
         </td>
     </tr>
 </table>
