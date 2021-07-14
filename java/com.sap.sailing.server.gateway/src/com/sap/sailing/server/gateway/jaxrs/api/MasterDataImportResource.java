@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -15,9 +17,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.authz.UnauthorizedException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
@@ -64,12 +70,14 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             final UUID importMasterDataUid = UUID.randomUUID();
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
-                getService().importMasterData(remoteServerUrlAsString,
-                        requestedLeaderboardGroupIds.toArray(new UUID[requestedLeaderboardGroupIds.size()]), override,
-                        compress, exportWind, exportDeviceConfigs, remoteServerUsername, remoteServerPassword,
-                        remoteServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
+                final Map<LeaderboardGroup, ? extends Iterable<Event>> eventsForLeaderboardGroups = getService()
+                        .importMasterData(remoteServerUrlAsString,
+                                requestedLeaderboardGroupIds.toArray(new UUID[requestedLeaderboardGroupIds.size()]),
+                                override, compress, exportWind, exportDeviceConfigs, remoteServerUsername,
+                                remoteServerPassword, remoteServerBearerToken, exportTrackedRacesAndStartTracking,
+                                importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put(LEADERBOARDGROUPS_IMPORTED, getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds));
+                jsonResponse.put(LEADERBOARDGROUPS_IMPORTED, getLeaderboardGroupNamesFromIdList(eventsForLeaderboardGroups));
                 jsonResponse.put(IMPORTED_FROM, remoteServerUrlAsString);
                 jsonResponse.put(OVERRIDE_FORM_PARAM, override);
                 jsonResponse.put(EXPORT_WIND_FORM_PARAM, exportWind);
@@ -91,10 +99,18 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
         return response;
     }
     
-    private JSONObject getLeaderboardGroupNamesFromIdList(List<UUID> uuidList) {
-        JSONObject result = new JSONObject();
-        for (UUID uuid : uuidList) {
-            result.put(uuid, getService().getLeaderboardGroupByID(uuid).getName());
+    private JSONArray getLeaderboardGroupNamesFromIdList(Map<LeaderboardGroup, ? extends Iterable<Event>> eventsForLeaderboardGroups) {
+        final JSONArray result = new JSONArray();
+        for (Entry<LeaderboardGroup, ? extends Iterable<Event>> lgAndEventIds : eventsForLeaderboardGroups.entrySet()) {
+            final JSONObject lgJson = new JSONObject();
+            result.add(lgJson);
+            lgJson.put(LeaderboardGroupConstants.ID, lgAndEventIds.getKey().getId().toString());
+            lgJson.put(LeaderboardGroupConstants.NAME, lgAndEventIds.getKey().getName());
+            final JSONArray eventIds = new JSONArray();
+            for (final Event event : lgAndEventIds.getValue()) {
+                eventIds.add(event.getId().toString());
+            }
+            lgJson.put(LeaderboardGroupConstants.EVENTS, eventIds);
         }
         return result;
     }

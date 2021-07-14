@@ -1003,11 +1003,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Import MasterData from a remote server URL. A caller might provide either targetServerUsername and
      * targetServerPassword or targetServerBearerToken. If neither of those are provided the method will try to create
      * or get the bearer token for the current user.
+     * 
+     * @return the leaderboard groups imported as the keys, and the events belonging to those leaderboard groups as
+     *         values
      */
-    void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
-            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
-            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
+    Map<LeaderboardGroup, ? extends Iterable<Event>> importMasterData(final String urlAsString,
+            final UUID[] leaderboardGroupIds, final boolean override, final boolean compress, final boolean exportWind,
+            final boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
+            String targetServerBearerToken, final boolean exportTrackedRacesAndStartTracking,
+            final UUID importOperationId) throws IllegalArgumentException;
 
     void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
 

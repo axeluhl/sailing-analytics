@@ -50,12 +50,19 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/masterdataimport -d "remoteServerUrl=127.0.0.1:8888" -d "UUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "targetServerUsername=admin" -d "targetServerPassword=admin" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/masterdataimport -d "remoteServerUrl=127.0.0.1:8888" -d "leaderboardgroupUUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "targetServerUsername=admin" -d "targetServerPassword=admin" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
-         "leaderboardgroupsImported": {
-           "75e86618-8b0f-4291-9661-6b2a1fa47dff": "MyTestEventWithStrangeCharact/er*s",
-         },
+         "leaderboardgroupsImported": [
+           {
+             "id": "75e86618-8b0f-4291-9661-6b2a1fa47dff",
+             "name": "MyTestEventWithStrangeCharact/er*s",
+             "events": [
+               "067c5d3b-2f11-42b4-8897-2b5cfbff3eeb",
+               "8414067e-6be0-4f74-b199-d2c79d01c3c1"
+             ]
+           }
+         ],
         "importedFrom": "127.0.0.1:8888",
         "override": false,
         "exportWind": false,

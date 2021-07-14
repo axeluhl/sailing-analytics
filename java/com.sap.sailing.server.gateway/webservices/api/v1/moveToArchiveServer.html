@@ -12,7 +12,10 @@
 <h2>URL: /api/v1/scopemigration/movetoarchiveserver</h2>
 
 <b>Description:</b>
-<p>This endpoint is used to move a leaderboard group set from a dedicated server to an archive server.</p>
+<p>This endpoint is used to move a leaderboard group set from a dedicated server to an archive server. The content
+   is compared after the import and the comparison result is provided in the result object's <tt>compareServers</tt> field.
+   Any remote server reference that may have pointed from the archive server to the content moved away from the dedicated server is removed
+   or updated such that the content that was moved is no longer referenced through the remote server reference.</p>
 <br/>
 <table>
     <tr>
@@ -26,15 +29,23 @@
     <tr>
         <td>Mandatory parameters:</td>
         <td>
-            <div>archive, the host name of the archive server.</div>
             <div>dedicated, the host name of the dedicated server (where the groups currently live).</div>
             <div>leaderboardgroupUUID[], a set of leaderboardgroup UUIDs.</div>
-            <div>user1, username for archive server.</div>
-            <div>user2, username for dedicated server.</div>
-            <div>password1, password for user1 on archive server.</div>
-            <div>password2, password for user2 on dedicated server.</div>
-            <div>bearer1, bearer token for user1 on archive server, to provide instead of username and password.</div>
-            <div>bearer2, bearer token for user2 on dedicated server, see bearer1.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>
+            <div>archive, the host name of the archive server; defaults to <tt>www.sapsailing.com</tt></div>
+            <div>user1, username for archive server. Provide <tt>password1</tt> with it. Alternatively, specify <tt>bearer1</tt>
+                 or default to the authentication of this request.</div>
+            <div>user2, username for dedicated server. Provide <tt>password2</tt> with it. Alternatively, specify <tt>bearer2</tt>
+                 or default to the authentication of this request.</div>
+            <div>password1, password for <tt>user1</tt> on archive server.</div>
+            <div>password2, password for <tt>user2</tt> on dedicated server.</div>
+            <div>bearer1, bearer token to authenticate a user on the archive server, to provide instead of <tt>username1</tt> and <tt>password1</tt>.</div>
+            <div>bearer2, bearer token to authenticate a user on the dedicated server, to provide instead of <tt>username2</tt> and <tt>password2</tt>.</div>
+            <div>override, tells whether existing content with equal identify on the importing side shall be overwritten by this action; defaults to "false"</div>
         </td>
     </tr>
     <tr>
@@ -47,9 +58,16 @@
         produces output:<pre>
         {
           "MDI": {
-            "leaderboardgroupsImported": {
-              "75e86618-8b0f-4291-9661-6b2a1fa47dff": "MyTestEventWithStrangeCharact/er*s"
-            },
+	         "leaderboardgroupsImported": [
+	           {
+	             "id": "75e86618-8b0f-4291-9661-6b2a1fa47dff",
+	             "name": "MyTestEventWithStrangeCharact/er*s",
+	             "events": [
+	               "067c5d3b-2f11-42b4-8897-2b5cfbff3eeb",
+	               "8414067e-6be0-4f74-b199-d2c79d01c3c1"
+	             ]
+	           }
+	         ],
             "importedFrom": "localhost:8889",
             "override": false,
             "exportWind": true,

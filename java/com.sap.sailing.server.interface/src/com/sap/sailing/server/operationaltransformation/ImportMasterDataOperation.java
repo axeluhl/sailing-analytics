@@ -101,9 +101,8 @@ public class ImportMasterDataOperation extends
     private final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
     
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
+            User user, UserGroup tenant) {
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
-        this.creationCount.add(existingCreationCount);
         this.masterData = topLevelMasterData;
         this.override = override;
         this.importOperationId = importOperationId;
@@ -127,7 +126,6 @@ public class ImportMasterDataOperation extends
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        // TODO Implement ImportMasterDataOperation.clone(...)
         return super.clone();
     }
 

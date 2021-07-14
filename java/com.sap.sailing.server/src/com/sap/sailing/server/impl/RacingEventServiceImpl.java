@@ -4980,10 +4980,12 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
-    public void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
-            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            final String targetServerUsername, final String targetServerPassword, final String targetServerBearerToken,
-            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException {
+    public Map<LeaderboardGroup, ? extends Iterable<Event>> importMasterData(final String urlAsString,
+            final UUID[] leaderboardGroupIds, final boolean override, final boolean compress, final boolean exportWind,
+            final boolean exportDeviceConfigurations, final String targetServerUsername,
+            final String targetServerPassword, final String targetServerBearerToken,
+            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId)
+            throws IllegalArgumentException {
         if (dataImportLock.getProgress(importOperationId) != null) {
             IllegalArgumentException e = new IllegalArgumentException(
                     "The UUID for the importOperationId already exists.");
@@ -5027,7 +5029,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
             }
             final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, this, user, tenant);
-            importer.importFromStream(inputStream, importOperationId, override);
+            return importer.importFromStream(inputStream, importOperationId, override);
         } catch (Throwable e) {
             // do not assume that RuntimeException is logged properly
             String message = e.getMessage();

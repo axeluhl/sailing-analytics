@@ -26,7 +26,6 @@
     <tr>
         <td>Mandatory parameters:</td>
         <td>
-            <div>server1, the host name of the server where you want to "export" the leaderboardgroups.</div>
             <div>server2, the host name of the server where the groups should be moved to.</div>
             <div>leaderboardgroupUUID[], a set of leaderboardgroup UUIDs.</div>
             <div>user1, username for server1.</div>
@@ -35,6 +34,23 @@
             <div>password2, password for user2 on server2.</div>
             <div>bearer1, bearer token for user1 on server1, to provide instead of username and password.</div>
             <div>bearer2, bearer token for user2 on server2, see bearer1.</div>
+            <div>override, tells whether existing content with equal identify on the importing side shall be overwritten by this action; defaults to "false"</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>
+            <div>server1, the host name of the server from where you want to "export" the leaderboardgroups. Defaults to the server
+                 processing this request.</div>
+            <div>user1, username for archive server. Provide <tt>password1</tt> with it. Alternatively, specify <tt>bearer1</tt>
+                 or default to the authentication of this request.</div>
+            <div>user2, username for dedicated server. Provide <tt>password2</tt> with it. Alternatively, specify <tt>bearer2</tt>
+                 or default to the authentication of this request.</div>
+            <div>password1, password for <tt>user1</tt> on archive server.</div>
+            <div>password2, password for <tt>user2</tt> on dedicated server.</div>
+            <div>bearer1, bearer token to authenticate a user on the archive server, to provide instead of <tt>username1</tt> and <tt>password1</tt>.</div>
+            <div>bearer2, bearer token to authenticate a user on the dedicated server, to provide instead of <tt>username2</tt> and <tt>password2</tt>.</div>
+            <div>override, tells whether existing content with equal identify on the importing side shall be overwritten by this action; defaults to "false"</div>
         </td>
     </tr>
     <tr>
@@ -47,9 +63,16 @@
         produces output:<pre>
         {
           "MDI": {
-            "leaderboardgroupsImported": {
-              "75e86618-8b0f-4291-9661-6b2a1fa47dff": "MyTestEventWithStrangeCharact/er*s"
-            },
+	         "leaderboardgroupsImported": [
+	           {
+	             "id": "75e86618-8b0f-4291-9661-6b2a1fa47dff",
+	             "name": "MyTestEventWithStrangeCharact/er*s",
+	             "events": [
+	               "067c5d3b-2f11-42b4-8897-2b5cfbff3eeb",
+	               "8414067e-6be0-4f74-b199-d2c79d01c3c1"
+	             ]
+	           }
+	         ],
             "importedFrom": "localhost:8888",
             "override": false,
             "exportWind": true,

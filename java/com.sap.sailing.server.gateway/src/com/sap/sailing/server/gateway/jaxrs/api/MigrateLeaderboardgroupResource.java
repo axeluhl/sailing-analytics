@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -59,6 +60,8 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     protected static final String BEARER1_FORM_PARAM = "bearer1";
     protected static final String BEARER2_FORM_PARAM = "bearer2";
     protected static final String LEADERBOARD_GROUPS_UUID_FORM_PARAM = "leaderboardgroupUUID[]";
+    private static final String ARCHIVE_SERVER_BASE_URL = "www.sapsailing.com";
+    private static final String OVERRIDE = "override";
 
     @Context
     UriInfo uriInfo;
@@ -79,7 +82,8 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             @FormParam(PASSWORD1_FORM_PARAM) String password1,
             @FormParam(PASSWORD2_FORM_PARAM) String password2,
             @FormParam(BEARER1_FORM_PARAM) String bearer1,
-            @FormParam(BEARER2_FORM_PARAM) String bearer2) {
+            @FormParam(BEARER2_FORM_PARAM) String bearer2,
+            @FormParam(OVERRIDE) @DefaultValue("false") boolean override) {
         Response response;
         final String effectiveBaseServer = !Util.hasLength(baseServer) ? uriInfo.getBaseUri().getAuthority() : baseServer;
         if (!validateAuthenticationParameters(user1, password1, bearer1)) {
@@ -94,7 +98,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             try {
                 final JSONObject result = new JSONObject();
                 final Util.Pair<JSONObject, Number> mdi = doMDI(effectiveBaseServer, dedicatedServer, requestedLeaderboardGroups,
-                        baseServerBearerToken, dedicatedServerBearerToken);
+                        baseServerBearerToken, dedicatedServerBearerToken, override);
                 final Util.Pair<JSONObject, Number> compareServers = doCompareServers(effectiveBaseServer, dedicatedServer,
                         dedicatedServerBearerToken, baseServerBearerToken, requestedLeaderboardGroups);
                 // add a remote reference from the base server pointing to the dedicated server
@@ -123,7 +127,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
     public Response moveToArchiveServer(
-            @FormParam(ARCHIVE_SERVER_FORM_PARAM) String archiveServer,
+            @FormParam(ARCHIVE_SERVER_FORM_PARAM) @DefaultValue(ARCHIVE_SERVER_BASE_URL) String archiveServer,
             @FormParam(DEDICATED_SERVER_FORM_PARAM) String dedicatedServer,
             @FormParam(LEADERBOARD_GROUPS_UUID_FORM_PARAM) Set<String> requestedLeaderboardGroups,
             @FormParam(USER1_FORM_PARAM) String user1,
@@ -131,7 +135,8 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             @FormParam(PASSWORD1_FORM_PARAM) String password1,
             @FormParam(PASSWORD2_FORM_PARAM) String password2,
             @FormParam(BEARER1_FORM_PARAM) String bearer1,
-            @FormParam(BEARER2_FORM_PARAM) String bearer2) {
+            @FormParam(BEARER2_FORM_PARAM) String bearer2,
+            @FormParam(OVERRIDE) @DefaultValue("false") boolean override) {
         Response response;
         if (!validateAuthenticationParameters(user1, password1, bearer1)) {
             response = badRequest("Specify "+USER1_FORM_PARAM+" and "+PASSWORD1_FORM_PARAM+" or alternatively "+BEARER1_FORM_PARAM+" or none of them.");
@@ -145,7 +150,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             try {
                 final JSONObject result = new JSONObject();
                 final Util.Pair<JSONObject, Number> mdi = doMDI(dedicatedServer, archiveServer, requestedLeaderboardGroups,
-                        dedicatedServerBearerToken, archiveServerBearerToken);
+                        dedicatedServerBearerToken, archiveServerBearerToken, override);
                 final Util.Pair<JSONObject, Number> compareServers = doCompareServers(dedicatedServer, archiveServer,
                         archiveServerBearerToken, dedicatedServerBearerToken, requestedLeaderboardGroups);
                 final Util.Pair<JSONObject, Number> remoteServerReferenceRemove = doRemoteServerReferenceRemove(
@@ -169,22 +174,24 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     
     /**
      * @param remoteServerHostAsString
-     *          the server from which to import / the exporting server
+     *            the server from which to import / the exporting server
      * @param dedicatedServerHostAsString
-     *          the server where to import to 
+     *            the server where to import to
      * @param leaderboardGroupIds
-     *          leaderboardgroup UUIDs to import
+     *            leaderboardgroup UUIDs to import
      * @param remoteServerBearerToken
-     *          authentication towards the exporting server
+     *            authentication towards the exporting server
      * @param dedicatedServerBearerToken
-     *          authentication towards the importing server
+     *            authentication towards the importing server
+     * @param override
+     *            whether to override existing content in the importing server
      */
     private Util.Pair<JSONObject, Number> doMDI(String remoteServerHostAsString, String dedicatedServerHostAsString,
-            Set<String> leaderboardGroupIds, String remoteServerBearerToken, String dedicatedServerBearerToken)
+            Set<String> leaderboardGroupIds, String remoteServerBearerToken, String dedicatedServerBearerToken, boolean override)
             throws Exception {
         final StringJoiner form = new StringJoiner("&");
         form.add(MasterDataImportResource.REMOTE_SERVER_URL_FORM_PARAM + "=" + remoteServerHostAsString);
-        form.add(MasterDataImportResource.OVERRIDE_FORM_PARAM + "=false");
+        form.add(MasterDataImportResource.OVERRIDE_FORM_PARAM + "=" + override);
         form.add(MasterDataImportResource.COMPRESS_FORM_PARAM + "=true");
         form.add(MasterDataImportResource.EXPORT_WIND_FORM_PARAM + "=true");
         form.add(MasterDataImportResource.EXPORT_DEVICE_CONFIGS_FORM_PARAM + "=false");
@@ -252,7 +259,10 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
 
     private JSONObject parseInputStreamToJsonAndLog(HttpURLConnection connection) throws Exception {
         final JSONParser parser = new JSONParser();
-        final JSONObject json = (JSONObject) parser.parse(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        final JSONObject json = (JSONObject) parser.parse(new InputStreamReader(
+                connection.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST ?
+                        connection.getInputStream() :
+                        connection.getErrorStream(), "UTF-8"));
         logger.info(connection.getURL().toString() + " returned: " + json.toString());
         return json;
     }
