@@ -138,7 +138,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
         Response response = null;
         final String effectiveServer1;
         effectiveServer1 = !Util.hasLength(server1) ? uriInfo.getBaseUri().getAuthority() : server1;
-        if (!validateParameters(effectiveServer1, server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
+        if (!validateParameters(server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
             response = badRequest("Specify two server names and optionally a set of valid leaderboardgroup UUIDs.");
         } else {
             final String token1 = getService().getOrCreateTargetServerBearerToken(effectiveServer1, user1, password1, bearer1);
@@ -199,16 +199,19 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return response;
     }
 
-    private boolean validateParameters(String server1, String server2, Set<String> uuidset, String user1, String user2,
-            String password1, String password2, String bearer1, String bearer2) {
-        // FIXME bug5311: the following two statements may be redundant; re-design...
-        boolean result = (validateParameters(user1, password1, bearer1) || validateParameters(user2, password2, bearer2));
-        result = validateParameters(server1, server2, uuidset);
+    private boolean validateParameters(String server2, Set<String> uuidset, String user1, String user2, String password1,
+            String password2, String bearer1, String bearer2) {
+        boolean result = validateParameters(user1, password1, bearer1) && validateParameters(user2, password2, bearer2) &&
+                    validateParameters(server2, uuidset);
         return result;
     }
     
-    private boolean validateParameters(String server1, String server2, Set<String> uuidset) {
-        boolean result = validateParameters(server1, server2);
+    /**
+     * Validates the {@code uuidset} so that it contains only valid UUIDs that parse properly, and ensures that {@code server2}
+     * is set
+     */
+    private boolean validateParameters(String server2, Set<String> uuidset) {
+        boolean result = Util.hasLength(server2);
         for (String uuid : uuidset) {
             if (Util.hasLength(uuid) && !UUID.fromString(uuid).toString().equals(uuid)) {
                 result = false;
@@ -218,10 +221,6 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return result;
     }
     
-    private boolean validateParameters(String server1, String server2) {
-        return Util.hasLength(server1) && Util.hasLength(server2);
-    }
-
     /**
      * Valid combinations: user+password; bearer; nothing
      */
