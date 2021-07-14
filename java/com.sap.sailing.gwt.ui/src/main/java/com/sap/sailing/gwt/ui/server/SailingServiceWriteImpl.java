@@ -1654,8 +1654,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final boolean exportTrackedRacesAndStartTracking) {
         final UUID importOperationId = UUID.randomUUID();
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
-        // // Create a progress indicator for as long as the server gets data from the other server.
-        // // As soon as the server starts the import operation, a progress object will be built on every server
+        // Create a progress indicator for as long as the server gets data from the other server.
+        // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
             @Override
             public void run() {

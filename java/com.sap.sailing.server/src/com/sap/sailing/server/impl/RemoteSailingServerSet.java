@@ -378,7 +378,8 @@ public class RemoteSailingServerSet {
                 Duration.ONE_SECOND.times(1000), "POST", (connection) -> {
                     connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     connection.setRequestProperty(HEADER_FORWARD_TO_REPLICA.getA(), HEADER_FORWARD_TO_REPLICA.getB());
-                }, Optional.of(outputStream -> {
+                }, /* post-connect modifier */ null,
+                Optional.of(outputStream -> {
                     try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, "utf-8")) {
                         writer.write(formParams.toString());
                     }

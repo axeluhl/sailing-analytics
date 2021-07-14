@@ -20,7 +20,8 @@ public class HttpUrlConnectionHelper {
      */
     public static URLConnection redirectConnection(URL url, Duration timeout,
             Consumer<URLConnection> preConnectionModifier) throws MalformedURLException, IOException {
-        return redirectConnection(url, timeout, /* optional request method */ null, preConnectionModifier, /* optional output stream consumer */ Optional.empty());
+        return redirectConnection(url, timeout, /* optional request method */ null, preConnectionModifier, 
+                /* post-connect modifier */ null, /* optional output stream consumer */ Optional.empty());
     }
     
     /**
@@ -38,6 +39,24 @@ public class HttpUrlConnectionHelper {
         return redirectConnectionWithBearerToken(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, optionalBearerToken, null, /* optional output stream consumer */ Optional.empty());
     }
 
+    public static URLConnection redirectConnectionWithBearerToken(URL url, Duration timeout,
+            String optionalRequestMethod, String optionalBearerToken, String optionalContentType,
+            Consumer<URLConnection> preConnectionModifier, Consumer<URLConnection> postConnectModifier,
+            Optional<OutputStreamConsumer> optionalOutputStreamConsumer)
+            throws MalformedURLException, IOException {
+        return redirectConnection(url, timeout, optionalRequestMethod, t -> {
+            if (optionalBearerToken != null && !optionalBearerToken.isEmpty()) {
+                t.setRequestProperty("Authorization", "Bearer " + optionalBearerToken);
+            }
+            if (optionalContentType != null && !optionalContentType.isEmpty()) {
+                t.setRequestProperty("Content-Type", optionalContentType);
+            }
+            if (preConnectionModifier != null) {
+                preConnectionModifier.accept(t);
+            }
+        }, postConnectModifier, optionalOutputStreamConsumer);
+    }
+    
     /**
      * Create a URLConnection with the given parameters. If HTTP redirects are returned it will follow them.
      * 
@@ -61,7 +80,7 @@ public class HttpUrlConnectionHelper {
             if (optionalContentType != null && !optionalContentType.isEmpty()) {
                 t.setRequestProperty("Content-Type", optionalContentType);
             }
-        }, optionalOutputStreamConsumer);
+        }, /* post-connect modifier */ null, optionalOutputStreamConsumer);
     }
 
     /**
@@ -96,7 +115,8 @@ public class HttpUrlConnectionHelper {
      *            becomes available for POST/PUT requests.
      */
     public static URLConnection redirectConnection(URL url, Duration timeout, String optionalRequestMethod,
-            Consumer<URLConnection> preConnectionModifier, Optional<OutputStreamConsumer> optionalOutputStreamConsumer) throws MalformedURLException, IOException {
+            Consumer<URLConnection> preConnectionModifier, Consumer<URLConnection> postConnectModifier,
+            Optional<OutputStreamConsumer> optionalOutputStreamConsumer) throws MalformedURLException, IOException {
         URLConnection urlConnection = null;
         URL nextUrl = url;
         for (int counterOfRedirects = 0; counterOfRedirects <= HTTP_MAX_REDIRECTS; counterOfRedirects++) {
@@ -110,6 +130,9 @@ public class HttpUrlConnectionHelper {
                 ((HttpURLConnection) urlConnection).setRequestMethod(optionalRequestMethod);
             }
             urlConnection.setReadTimeout((int) timeout.asMillis());
+            if (postConnectModifier != null) {
+                postConnectModifier.accept(urlConnection);
+            }
             if (urlConnection instanceof HttpURLConnection) {
                 final HttpURLConnection connection = (HttpURLConnection) urlConnection;
                 connection.setInstanceFollowRedirects(false);
@@ -138,6 +161,7 @@ public class HttpUrlConnectionHelper {
     }
     
     public static URLConnection redirectConnection(URL url, String optionalRequestMethod) throws MalformedURLException, IOException {
-        return redirectConnection(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, null, /* optional output stream consumer */ Optional.empty());
+        return redirectConnection(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, /* pre-connect modifier */ null,
+                /* post-connect modifier */ null, /* optional output stream consumer */ Optional.empty());
     }
 }

@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -124,7 +125,8 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
     @Path("/add")
     public Response addRemoteServerReference(
             @FormParam(REMOTE_SERVER_URL) String remoteServerUrlAsString,
-            @FormParam(REMOTE_SERVER_NAME) String remoteServerName) {
+            @FormParam(REMOTE_SERVER_NAME) String remoteServerName,
+            @FormParam(REMOTE_SERVER_IS_INCLUDE) @DefaultValue("false") Boolean include) {
         Response response = null;
         if (!Util.hasLength(remoteServerUrlAsString) || !Util.hasLength(remoteServerName)) {
             response = badRequest("Both, " + REMOTE_SERVER_URL + " and " + REMOTE_SERVER_NAME
@@ -134,7 +136,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
                 final URL remoteServerUrl = RemoteServerUtil.createBaseUrl(remoteServerUrlAsString);
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
                 final RemoteSailingServerReference serverRef = getService()
-                        .apply(new AddRemoteSailingServerReference(remoteServerName, remoteServerUrl, true));
+                        .apply(new AddRemoteSailingServerReference(remoteServerName, remoteServerUrl, include));
                 final JSONObject jsonResponse = serializeRemoteServerReference(serverRef);
                 response = Response.ok(streamingOutput(jsonResponse))
                         .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

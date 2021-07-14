@@ -28,7 +28,7 @@
         <td>
             <div>archive, the host name of the archive server.</div>
             <div>dedicated, the host name of the dedicated server (where the groups currently live).</div>
-            <div>UUID[], a set of leaderboardgroup UUIDs.</div>
+            <div>leaderboardgroupUUID[], a set of leaderboardgroup UUIDs.</div>
             <div>user1, username for archive server.</div>
             <div>user2, username for dedicated server.</div>
             <div>password1, password for user1 on archive server.</div>
@@ -43,7 +43,7 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl -X POST localhost:8889/sailingserver/api/v1/scopemigration/movetoarchiveserver -d "user1=admin" -d "user2=admin" -d "password2=admin" -d "password1=admin" -d "UUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "archive=localhost:8888" -d "dedicated=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        <td>curl -X POST localhost:8889/sailingserver/api/v1/scopemigration/movetoarchiveserver -d "user1=admin" -d "user2=admin" -d "password2=admin" -d "password1=admin" -d "leaderboardgroupUUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "archive=localhost:8888" -d "dedicated=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
           "MDI": {

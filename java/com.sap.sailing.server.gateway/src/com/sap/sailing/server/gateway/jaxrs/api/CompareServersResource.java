@@ -145,8 +145,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
             @FormParam(BEARER2_FORM_PARAM) String bearer2) {
         final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
-        final String effectiveServer1;
-        effectiveServer1 = !Util.hasLength(server1) ? uriInfo.getBaseUri().getAuthority() : server1;
+        final String effectiveServer1 = !Util.hasLength(server1) ? uriInfo.getBaseUri().getAuthority() : server1;
         if (!validateParameters(server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
             response = badRequest("Specify two server names and optionally a set of valid leaderboardgroup UUIDs.");
         } else {

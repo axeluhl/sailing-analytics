@@ -28,7 +28,7 @@
         <td>
             <div>server1, the host name of the server where you want to "export" the leaderboardgroups.</div>
             <div>server2, the host name of the server where the groups should be moved to.</div>
-            <div>UUID[], a set of leaderboardgroup UUIDs.</div>
+            <div>leaderboardgroupUUID[], a set of leaderboardgroup UUIDs.</div>
             <div>user1, username for server1.</div>
             <div>user2, username for server2.</div>
             <div>password1, password for user1 on server1.</div>
@@ -43,7 +43,7 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl -X POST localhost:8889/sailingserver/api/v1/scopemigration/movetodedicatedserver -d "user1=admin" -d "user2=admin" -d "password2=admin" -d "password1=admin" -d "UUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "server1=localhost:8888" -d "server2=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        <td>curl -X POST localhost:8889/sailingserver/api/v1/scopemigration/movetodedicatedserver -d "user1=admin" -d "user2=admin" -d "password2=admin" -d "password1=admin" -d "leaderboardgroupUUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "server1=localhost:8888" -d "server2=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
           "MDI": {
