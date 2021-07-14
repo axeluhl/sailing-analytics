@@ -117,7 +117,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
      *            {@core bearer2} are provided, this request's authentication is used to obtain a bearer token which is
      *            then used to authenticate the requests for {@code server1}, assuming that the server responding to
      *            this request and {@code server2} share a common {@code SecurityService} through replication.
-     * @param leaderboardgroupUUID
+     * @param uuidset
      *            can optionally be used to specify a set of UUIDs identifying leaderboard groups to compare. If not
      *            specified (represented as an {@link Set#isEmpty() empty} set), all leaderboard groups found on both,
      *            {@code server1} and {@code server2} will be compared.

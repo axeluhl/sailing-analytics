@@ -31,10 +31,10 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response importMasterData(@FormParam("targetServerUrl") String targetServerUrlAsString,
-            @FormParam("targetServerUsername") String targetServerUsername,
-            @FormParam("targetServerPassword") String targetServerPassword,
-            @FormParam("targetServerBearerToken") String targetServerBearerToken,
+    public Response importMasterData(@FormParam("remoteServerUrl") String remoteServerUrlAsString,
+            @FormParam("removeServerUsername") String remoteServerUsername,
+            @FormParam("removeServerPassword") String remoteServerPassword,
+            @FormParam("removeServerBearerToken") String remoteServerBearerToken,
             @FormParam("leaderboardgroupUUID[]") List<UUID> requestedLeaderboardGroupIds,
             @FormParam("override") @DefaultValue("false") Boolean override,
             @FormParam("compress") @DefaultValue("true") Boolean compress,
@@ -42,21 +42,21 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             @FormParam("exportDeviceConfigs") @DefaultValue("false") Boolean exportDeviceConfigs,
             @FormParam("exportTrackedRacesAndStartTracking") @DefaultValue("true") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
-        if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroupIds.isEmpty()
-                || ((Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword))
-                        && Util.hasLength(targetServerBearerToken))) {
+        if (!Util.hasLength(remoteServerUrlAsString) || requestedLeaderboardGroupIds.isEmpty()
+                || ((Util.hasLength(remoteServerUsername) && Util.hasLength(remoteServerPassword))
+                        && Util.hasLength(remoteServerBearerToken))) {
             response = Response.status(Status.BAD_REQUEST).build();
         } else {
             final UUID importMasterDataUid = UUID.randomUUID();
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
-                getService().importMasterData(targetServerUrlAsString,
+                getService().importMasterData(remoteServerUrlAsString,
                         requestedLeaderboardGroupIds.toArray(new UUID[requestedLeaderboardGroupIds.size()]), override,
-                        compress, exportWind, exportDeviceConfigs, targetServerUsername, targetServerPassword,
-                        targetServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
+                        compress, exportWind, exportDeviceConfigs, remoteServerUsername, remoteServerPassword,
+                        remoteServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
                 jsonResponse.put("LeaderboardgroupsImported", getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds));
-                jsonResponse.put("ImportedFrom", targetServerUrlAsString);
+                jsonResponse.put("ImportedFrom", remoteServerUrlAsString);
                 jsonResponse.put("override", override);
                 jsonResponse.put("exportWind", exportWind);
                 jsonResponse.put("exportDeviceConfigs", exportDeviceConfigs);
