@@ -15,7 +15,9 @@
 <p>This endpoint is used to move a leaderboard group set from a dedicated server to an archive server. The content
    is compared after the import and the comparison result is provided in the result object's <tt>compareServers</tt> field.
    Any remote server reference that may have pointed from the archive server to the content moved away from the dedicated server is removed
-   or updated such that the content that was moved is no longer referenced through the remote server reference.</p>
+   or updated such that the content that was moved is no longer referenced through the remote server reference. Should any
+   of these steps produce a non-OK response code, the overall response code will be that, and the <tt>responseCode</tt> fields
+   of the individual objects reported in the response will show the repsonse of each sub-step.</p>
 <br/>
 <table>
     <tr>
@@ -72,18 +74,21 @@
             "override": false,
             "exportWind": true,
             "exportDeviceConfigs": false,
-            "exportTrackedRacesAndStartTracking": true
+            "exportTrackedRacesAndStartTracking": true,
+            "responseCode": 200
           },
           "compareServers": {
             "localhost:8888": [],
-            "localhost:8889": []
+            "localhost:8889": [],
+            "responseCode": 200
           },
           "remoteServerReferenceRemoved": {
             "remoteServerNameRemoved": "localhost:8888",
             "remoteServerUrlRemoved": "http://localhost:8888",
             "remoteServerEventsRemoved": [
               "Hempel World Cup Series 2019 - Genoa, Italy"
-            ]
+            ],
+            "responseCode": 200
           }
         }
         </pre>

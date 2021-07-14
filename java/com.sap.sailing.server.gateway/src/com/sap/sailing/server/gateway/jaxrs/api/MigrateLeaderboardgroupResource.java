@@ -8,9 +8,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,10 +29,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -43,8 +47,10 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
 
     private static final String MDI_PATH = "/sailingserver/api/v1/masterdataimport";
     private static final String COMPARESERVERS_PATH = "/sailingserver/api/v1/compareservers";
-    private static final String REMOTESERVERREFERENCEADD_PATH = "/sailingserver/api/v1/remoteserverreference/add";
-    private static final String REMOTESERVERREFERENCEDELETE_PATH = "/sailingserver/api/v1/remoteserverreference/remove";
+    private static final String REMOTESERVERREFERENCE_BASE_PATH = "/sailingserver/api/v1/remoteserverreference";
+    private static final String REMOTESERVERREFERENCEADD_PATH = REMOTESERVERREFERENCE_BASE_PATH+"/add";
+    private static final String REMOTESERVERREFERENCEDELETE_PATH = REMOTESERVERREFERENCE_BASE_PATH+"/remove";
+    private static final String REMOTESERVERREFERENCEUPDATE_PATH = REMOTESERVERREFERENCE_BASE_PATH+"/update";
     protected static final String REMOTE_SERVER_REFERENCE_REMOVED = "remoteServerReferenceRemoved";
     protected static final String COMPARE_SERVERS = "compareServers";
     protected static final String MDI = "MDI";
@@ -62,6 +68,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     protected static final String LEADERBOARD_GROUPS_UUID_FORM_PARAM = "leaderboardgroupUUID[]";
     private static final String ARCHIVE_SERVER_BASE_URL = "www.sapsailing.com";
     private static final String OVERRIDE = "override";
+    private static final String RESPONSE_CODE = "responseCode";
 
     @Context
     UriInfo uriInfo;
@@ -99,11 +106,15 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                 final JSONObject result = new JSONObject();
                 final Util.Pair<JSONObject, Number> mdi = doMDI(effectiveBaseServer, dedicatedServer, requestedLeaderboardGroups,
                         baseServerBearerToken, dedicatedServerBearerToken, override);
+                // TODO bug5311: the response (mdi.getA()) contains the event IDs under leaderboardgroupsImported.events[]; use those for fine-grained remote reference management and object removal
+                mdi.getA().put(RESPONSE_CODE, mdi.getB());
                 final Util.Pair<JSONObject, Number> compareServers = doCompareServers(effectiveBaseServer, dedicatedServer,
                         dedicatedServerBearerToken, baseServerBearerToken, requestedLeaderboardGroups);
+                compareServers.getA().put(RESPONSE_CODE, compareServers.getB());
                 // add a remote reference from the base server pointing to the dedicated server
                 final Util.Pair<JSONObject, Number> remoteServerReferenceAdd = doRemoteServerReferenceAdd(effectiveBaseServer,
-                        dedicatedServer, baseServerBearerToken);
+                        dedicatedServer, baseServerBearerToken, getIdsOfImportedEvents(mdi.getA()));
+                remoteServerReferenceAdd.getA().put(RESPONSE_CODE, remoteServerReferenceAdd.getB());
                 // FIXME bug5311 and now remove the event / the leaderboard groups in the base location, but preserve security/ownerships/ACLs in case of shared security!
                 // FIXME bug5311 adjust request routing such that requests targeting the content moved will be routed to the new "dedicatedServer" location
                 result.put(MDI, mdi.getA());
@@ -122,6 +133,20 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return response;
     }
     
+    /**
+     * From the leaderboardgroupsImported[].events[] paths extracts all event IDs that were imported during the master data import.
+     */
+    private Iterable<UUID> getIdsOfImportedEvents(JSONObject mdiResult) {
+        final JSONArray leaderboardgroupsImported = (JSONArray) mdiResult.get(MasterDataImportResource.LEADERBOARDGROUPS_IMPORTED);
+        final Set<UUID> result = new HashSet<>();
+        for (final Object lg : leaderboardgroupsImported) {
+            for (final Object eventIdObject : (JSONArray) ((JSONObject) lg).get(LeaderboardGroupConstants.EVENTS)) {
+                result.add(UUID.fromString(eventIdObject.toString()));
+            }
+        }
+        return result;
+    }
+
     @Path ("/movetoarchiveserver")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -151,11 +176,12 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                 final JSONObject result = new JSONObject();
                 final Util.Pair<JSONObject, Number> mdi = doMDI(dedicatedServer, archiveServer, requestedLeaderboardGroups,
                         dedicatedServerBearerToken, archiveServerBearerToken, override);
+                // TODO bug5311: the response (mdi.getA()) contains the event IDs under leaderboardgroupsImported.events[]; use those for fine-grained remote reference management and object removal
                 final Util.Pair<JSONObject, Number> compareServers = doCompareServers(dedicatedServer, archiveServer,
                         archiveServerBearerToken, dedicatedServerBearerToken, requestedLeaderboardGroups);
                 final Util.Pair<JSONObject, Number> remoteServerReferenceRemove = doRemoteServerReferenceRemove(
-                        archiveServer, dedicatedServer, archiveServerBearerToken);
-                // FIXME bug5311: update archive server reverse proxy settings for the event(s) imported, then dismantle the dedicated replica set and consider archiving its DB to "slow" if it was on "live"
+                        archiveServer, dedicatedServer, archiveServerBearerToken, getIdsOfImportedEvents(mdi.getA()));
+                // FIXME bug5311: update archive server reverse proxy settings for the event(s) imported, then dismantle the dedicated replica set and consider archiving its DB to "slow" if it was on "live", probably controlling dismantling by an optional parameter that defaults to false
                 result.put(MDI, mdi.getA());
                 result.put(COMPARE_SERVERS, compareServers.getA());
                 result.put(REMOTE_SERVER_REFERENCE_REMOVED, remoteServerReferenceRemove.getA());
@@ -241,7 +267,8 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     }
 
     private Util.Pair<JSONObject, Number> doRemoteServerReferenceAdd(String serverToAddTo, String serverToBeAdded,
-            String serverToAddToToken) throws Exception {
+            String serverToAddToToken, Iterable<UUID> eventIds) throws Exception {
+        // TODO bug5531 look for existing remote reference and extend (see with REMOTESERVERREFERENCEUPDATE_PATH) eventIds if found, or create new with explicit include for eventIds
         final StringJoiner form = new StringJoiner("&");
         form.add(RemoteServerReferenceResource.REMOTE_SERVER_URL + "=" + serverToBeAdded);
         form.add(RemoteServerReferenceResource.REMOTE_SERVER_NAME + "=" + serverToBeAdded);
@@ -250,7 +277,9 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     }
 
     private Util.Pair<JSONObject, Number> doRemoteServerReferenceRemove(String serverFromWhichToDelete,
-            String serverNameToDelete, String serverFromWhichToDeleteBearerToken) throws Exception {
+            String serverNameToDelete, String serverFromWhichToDeleteBearerToken, Iterable<UUID> eventIds)
+            throws Exception {
+        // TODO bug5531 look for existing remote reference and remove (see with REMOTESERVERREFERENCEUPDATE_PATH) explicit eventIds if found, remove entire reference if nothing else left
         final StringJoiner form = new StringJoiner("&");
         form.add(RemoteServerReferenceResource.REMOTE_SERVER_NAME + "=" + serverNameToDelete);
         return postFormAndReturnJsonAndResponseCode(serverFromWhichToDelete,

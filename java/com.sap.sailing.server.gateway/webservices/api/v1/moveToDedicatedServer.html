@@ -12,7 +12,11 @@
 <h2>URL: /api/v1/scopemigration/movetodedicatedserver</h2>
 
 <b>Description:</b>
-<p>This endpoint is used to carve out a group of leaderboard groups from a server and move them to a dedicated, possibly new server that contains only the selected leaderboard groups.</p>
+<p>This endpoint is used to carve out a group of leaderboard groups from a server and move them to a dedicated,
+   possibly new server that contains only the selected leaderboard groups. The result of the move is then compared
+   to the original, and a remote reference from the exporting to the new dedicated server is established. Should any
+   of these steps produce a non-OK response code, the overall response code will be that, and the <tt>responseCode</tt> fields
+   of the individual objects reported in the response will show the repsonse of each sub-step.</p>
 <br/>
 <table>
     <tr>
@@ -77,18 +81,21 @@
             "override": false,
             "exportWind": true,
             "exportDeviceConfigs": false,
-            "exportTrackedRacesAndStartTracking": true
+            "exportTrackedRacesAndStartTracking": true,
+            "responseCode": 200
           },
           "compareServers": {
             "localhost:8888": [],
-            "localhost:8889": []
+            "localhost:8889": [],
+            "responseCode": 200
           },
           "remoteServerReferenceAdd": {
             "remoteServerNameAdded": "localhost:8888",
             "remoteServerUrlAdded": "http://localhost:8888",
             "remoteServerEventsAdded": [
               "Hempel World Cup Series 2019 - Genoa, Italy"
-            ]
+            ],
+            "responseCode": 200
           }
         }
         </pre>
