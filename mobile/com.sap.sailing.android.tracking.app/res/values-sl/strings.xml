@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+    
+    <string name="app_name">"SAP Sail InSight"</string>
+    <string name="options_menu_settings">"Nastavitve"</string>
+    <string name="options_menu_checkout">"Odjava"</string>
+    <string name="options_add_team_photo">"Dodajanje fotografije ekipe"</string>
+    <string name="options_replace_team_photo">"Zamenjava fotografije ekipe"</string>
+    <string name="settings_category_other">"Druge nastavitve"</string>
+    <string name="device_identifier">"Identifikator naprave"</string>
+    <string name="tracker_started">"Sledenje je bilo uspešno zagnano"</string>
+    <string name="tracker_stopped">"Sledenje je bilo uspešno zaustavljeno"</string>
+    <string name="title_activity_regatta">"Regata"</string>
+    <string name="title_activity_leaderboard">"Lestvica vodilnih"</string>
+    <string name="title_activity_start">"Nastavitev GPS-sledilnika"</string>
+    <string name="title_activity_tracking">"Sledenje"</string>
+    <string name="please_confirm">"Potrdite"</string>
+    <string name="do_you_really_want_to_stop_tracking">"Želite res zaustaviti sledenje?"</string>
+    <string name="add_team_photo">"Dodajanje fotografije ekipe"</string>
+    <string name="upload_in_progress">"Prenašanje v strežnik ..."</string>
+    <string name="upload_retry">"Napaka pri prenosu v strežnik.\nTapnite za vnovični poskus."</string>
+    <string name="upload_io_error">"Napaka pri prenosu slike v strežnik:"</string>
+    <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">"Želite uporabiti obstoječo sliko ali posneti novo?"</string>
+    <string name="existing_image">"Obstoječe"</string>
+    <string name="take_photo">"Posnemi fotografijo"</string>
+    <string name="add_photo_select">"Fotografija"</string>
+    <string name="checking_in">"Prijavljanje ..."</string>
+    <string name="checking_out">"Odjavljanje ..."</string>
+    <string name="getting_event">"Pridobivanje informacij o dogodku ..."</string>
+    <string name="getting_leaderboard">"Pridobivanje informacij o lestvici vodilnih ..."</string>
+    <string name="getting_competitor">"Pridobivanje informacij o tekmovalcih ..."</string>
+    <string name="error">"Napaka"</string>
+    <string name="error_could_not_complete_operation_on_server_try_again">"V strežniku ni bilo mogoče dokončati postopka. Poskusite znova."</string>
+    <string name="error_sending_team_image_to_server">"Napaka: Slike ekipe ni bilo mogoče poslati v strežnik."</string>
+    <string name="regatta_starts_in">"Začetek regate čez:"</string>
+    <string name="hours">"Ure:"</string>
+    <string name="minutes">"Minute:"</string>
+    <string name="days">"Dnevi:"</string>
+    <string name="please_listen_to_announcements">"Poslušajte obvestila"</string>
+    <string name="close">"Zapri"</string>
+    <string name="thank_you_you_successfully_participated">"Hvala. Regate ste se uspešno udeležili.\n\nVaša SAP jadralna ekipa"</string>
+    <string name="tracking_colon">"Sledenje:"</string>
+    <string name="regatta_in_progress">"Regata poteka."</string>
+    <string name="heading">"Smer"</string>
+    <string name="course_over_ground">"Kurz preko dna"</string>
+    <string name="speed_over_ground">"Hitrost preko dna"</string>
+    <string name="none">"Brez"</string>
+    <string name="show_leaderboard">"Lestvica vodilnih"</string>
+    <string name="show_event">"Dogodek"</string>
+    <string name="error_while_receiving_server_data">"Med prejemanjem podatkov iz strežnika je prišlo do napake"</string>
+    <string name="info_already_checked_in_this_qr_code">"Na to regato ste že prijavljeni"</string>
+    <string name="warning">"Opozorilo"</string>
+    <string name="enable_gps">"GPS je izklopljen, za sledenje pa so potrebni položaji GPS. Želite vklopiti GPS v nastavitvah lokacije?"</string>
+    <string name="gps_turned_off">"GPS je izklopljen. Za začetek sledenja vklopite lokacijske storitve (GPS) v nastavitvah svojega telefona z operacijskim sistemom Android."</string>
+    <string name="knots">"%sKn"</string>
+    <string name="preferences">"Prednostne nastavitve"</string>
+    
+    
+    
+    
+    
+    <string name="tracking_notification_text">"Trenutno sledenje %s"</string>
+    <string name="waiting_for_gps">"Čakanje na GPS"</string>
+    
+</resources>
