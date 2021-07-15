@@ -27,6 +27,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.impl.RemoteSailingServerReferenceJsonSerializer;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.UpdateSailingServerReference;
@@ -74,15 +75,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
     }
 
     private JSONObject serializeRemoteServerReference(final RemoteSailingServerReference reference) {
-        final JSONObject serverRefJson = new JSONObject();
-        serverRefJson.put(REMOTE_SERVER_NAME, reference.getName());
-        serverRefJson.put(REMOTE_SERVER_URL, reference.getURL());
-        serverRefJson.put(REMOTE_SERVER_IS_INCLUDE, reference.isInclude());
-        final JSONArray eventIds = new JSONArray();
-        serverRefJson.put(REMOTE_SERVER_EVENT_IDS, eventIds);
-        for (final UUID eventId : reference.getSelectedEventIds()) {
-            eventIds.add(eventId.toString());
-        }
+        final JSONObject serverRefJson = new RemoteSailingServerReferenceJsonSerializer().serialize(reference);
         return serverRefJson;
     }
     

@@ -64,7 +64,9 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.interface;bundle-version="1.0.0",
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sailing.shared.server,
- com.sap.sailing.shared.server.gateway
+ com.sap.sailing.shared.server.gateway,
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

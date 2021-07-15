@@ -1,9 +1,11 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -29,17 +31,25 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.server.gateway.deserialization.impl.RemoteSailingServerReferenceJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
+import com.sap.sailing.server.gateway.serialization.impl.RemoteSailingServerReferenceJsonSerializer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.util.HttpUrlConnectionHelper;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 @Path ("/v1/scopemigration")
 public class MigrateLeaderboardgroupResource extends AbstractSailingServerResource {
@@ -104,15 +114,14 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer, user2, password2, bearer2);
             try {
                 final JSONObject result = new JSONObject();
-                final Util.Pair<JSONObject, Number> mdi = doMDI(effectiveBaseServer, dedicatedServer, requestedLeaderboardGroups,
+                final Pair<JSONObject, Number> mdi = doMDI(effectiveBaseServer, dedicatedServer, requestedLeaderboardGroups,
                         baseServerBearerToken, dedicatedServerBearerToken, override);
-                // TODO bug5311: the response (mdi.getA()) contains the event IDs under leaderboardgroupsImported.events[]; use those for fine-grained remote reference management and object removal
                 mdi.getA().put(RESPONSE_CODE, mdi.getB());
-                final Util.Pair<JSONObject, Number> compareServers = doCompareServers(effectiveBaseServer, dedicatedServer,
+                final Pair<JSONObject, Number> compareServers = doCompareServers(effectiveBaseServer, dedicatedServer,
                         dedicatedServerBearerToken, baseServerBearerToken, requestedLeaderboardGroups);
                 compareServers.getA().put(RESPONSE_CODE, compareServers.getB());
                 // add a remote reference from the base server pointing to the dedicated server
-                final Util.Pair<JSONObject, Number> remoteServerReferenceAdd = doRemoteServerReferenceAdd(effectiveBaseServer,
+                final Pair<JSONObject, Number> remoteServerReferenceAdd = doRemoteServerReferenceAdd(effectiveBaseServer,
                         dedicatedServer, baseServerBearerToken, getIdsOfImportedEvents(mdi.getA()));
                 remoteServerReferenceAdd.getA().put(RESPONSE_CODE, remoteServerReferenceAdd.getB());
                 // FIXME bug5311 and now remove the event / the leaderboard groups in the base location, but preserve security/ownerships/ACLs in case of shared security!
@@ -120,8 +129,8 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                 result.put(MDI, mdi.getA());
                 result.put(COMPARE_SERVERS, compareServers.getA());
                 result.put(REMOTE_SERVER_REFERENCE_ADD, remoteServerReferenceAdd.getA());
-                if (mdi.getB().intValue() != 200 || compareServers.getB().intValue() != 200
-                        || remoteServerReferenceAdd.getB().intValue() != 200) {
+                if (mdi.getB().intValue() != Status.OK.getStatusCode() || compareServers.getB().intValue() != Status.OK.getStatusCode()
+                        || remoteServerReferenceAdd.getB().intValue() != Status.OK.getStatusCode()) {
                     response = Response.status(Status.CONFLICT).entity(streamingOutput(result)).build();
                 } else {
                     response = Response.ok(streamingOutput(result)).build();
@@ -174,19 +183,18 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                     dedicatedServer, user2, password2, bearer2);
             try {
                 final JSONObject result = new JSONObject();
-                final Util.Pair<JSONObject, Number> mdi = doMDI(dedicatedServer, archiveServer, requestedLeaderboardGroups,
+                final Pair<JSONObject, Number> mdi = doMDI(dedicatedServer, archiveServer, requestedLeaderboardGroups,
                         dedicatedServerBearerToken, archiveServerBearerToken, override);
-                // TODO bug5311: the response (mdi.getA()) contains the event IDs under leaderboardgroupsImported.events[]; use those for fine-grained remote reference management and object removal
-                final Util.Pair<JSONObject, Number> compareServers = doCompareServers(dedicatedServer, archiveServer,
+                final Pair<JSONObject, Number> compareServers = doCompareServers(dedicatedServer, archiveServer,
                         archiveServerBearerToken, dedicatedServerBearerToken, requestedLeaderboardGroups);
-                final Util.Pair<JSONObject, Number> remoteServerReferenceRemove = doRemoteServerReferenceRemove(
+                final Pair<JSONObject, Number> remoteServerReferenceRemove = doRemoteServerReferenceRemove(
                         archiveServer, dedicatedServer, archiveServerBearerToken, getIdsOfImportedEvents(mdi.getA()));
                 // FIXME bug5311: update archive server reverse proxy settings for the event(s) imported, then dismantle the dedicated replica set and consider archiving its DB to "slow" if it was on "live", probably controlling dismantling by an optional parameter that defaults to false
                 result.put(MDI, mdi.getA());
                 result.put(COMPARE_SERVERS, compareServers.getA());
                 result.put(REMOTE_SERVER_REFERENCE_REMOVED, remoteServerReferenceRemove.getA());
-                if (mdi.getB().intValue() != 200 || compareServers.getB().intValue() != 200
-                        || remoteServerReferenceRemove.getB().intValue() != 200) {
+                if (mdi.getB().intValue() != Status.OK.getStatusCode() || compareServers.getB().intValue() != Status.OK.getStatusCode()
+                        || remoteServerReferenceRemove.getB().intValue() != Status.OK.getStatusCode()) {
                     response = Response.status(Status.CONFLICT).entity(streamingOutput(result)).build();
                 } else {
                     response = Response.ok(streamingOutput(result)).build();
@@ -212,7 +220,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
      * @param override
      *            whether to override existing content in the importing server
      */
-    private Util.Pair<JSONObject, Number> doMDI(String remoteServerHostAsString, String dedicatedServerHostAsString,
+    private Pair<JSONObject, Number> doMDI(String remoteServerHostAsString, String dedicatedServerHostAsString,
             Set<String> leaderboardGroupIds, String remoteServerBearerToken, String dedicatedServerBearerToken, boolean override)
             throws Exception {
         final StringJoiner form = new StringJoiner("&");
@@ -231,7 +239,25 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
      * @return a pair whose {@link Pair#getA() first component} holds the parsed response as a JSON object, and whose
      *         {@link Pair#getB() second element} is the HTTP response code
      */
+    private Pair<JSONObject, Number> putFormAndReturnJsonAndResponseCode(String serverHost, String serverToken,
+            String serverPath, final StringJoiner formBody) throws IOException, Exception {
+        return submitFormAndReturnJsonAndResponseCode("PUT", serverHost, serverToken, serverPath, formBody);
+    }
+
+    /**
+     * @return a pair whose {@link Pair#getA() first component} holds the parsed response as a JSON object, and whose
+     *         {@link Pair#getB() second element} is the HTTP response code
+     */
     private Pair<JSONObject, Number> postFormAndReturnJsonAndResponseCode(String serverHost, String serverToken,
+            String serverPath, final StringJoiner formBody) throws IOException, Exception {
+        return submitFormAndReturnJsonAndResponseCode("POST", serverHost, serverToken, serverPath, formBody);
+    }
+    
+    /**
+     * @return a pair whose {@link Pair#getA() first component} holds the parsed response as a JSON object, and whose
+     *         {@link Pair#getB() second element} is the HTTP response code
+     */
+    private Pair<JSONObject, Number> submitFormAndReturnJsonAndResponseCode(String httpMethod, String serverHost, String serverToken,
             String serverPath, final StringJoiner formBody) throws IOException, Exception {
         final byte[] out = formBody.toString().getBytes(StandardCharsets.UTF_8);
         final int length = out.length;
@@ -249,13 +275,13 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             }
         };
         final HttpURLConnection urlConnection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnectionWithBearerToken(
-                url, /* timeout */ Duration.ONE_MINUTE, "POST", serverToken, contentType, preConnectModifier, postConnectModifier,
+                url, /* timeout */ Duration.ONE_MINUTE, httpMethod, serverToken, contentType, preConnectModifier, postConnectModifier,
                 /* output stream consumer */ Optional.empty());
         final JSONObject json = parseInputStreamToJsonAndLog(urlConnection);
-        return new Util.Pair<>(json, urlConnection.getResponseCode());
+        return new Pair<>(json, urlConnection.getResponseCode());
     }
 
-    private Util.Pair<JSONObject, Number> doCompareServers(String server1, String server2, String bearer1,
+    private Pair<JSONObject, Number> doCompareServers(String server1, String server2, String bearer1,
             String bearer2, Set<String> leaderboardGroupIds) throws Exception {
         final StringJoiner form = new StringJoiner("&");
         form.add(CompareServersResource.SERVER1_FORM_PARAM + "=" + server1);
@@ -266,24 +292,113 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return postFormAndReturnJsonAndResponseCode(server2, bearer1, COMPARESERVERS_PATH, form);
     }
 
-    private Util.Pair<JSONObject, Number> doRemoteServerReferenceAdd(String serverToAddTo, String serverToBeAdded,
-            String serverToAddToToken, Iterable<UUID> eventIds) throws Exception {
-        // TODO bug5531 look for existing remote reference and extend (see with REMOTESERVERREFERENCEUPDATE_PATH) eventIds if found, or create new with explicit include for eventIds
+    private Pair<JSONObject, Number> doRemoteServerReferenceAdd(String serverToAddTo, String serverUrlToBeAdded,
+            String serverToAddToBearerToken, Iterable<UUID> eventIds) throws Exception {
+        final Pair<JSONObject, Number> result;
+        final RemoteSailingServerReference existingRef = getExistingRemoteServerReference(serverToAddTo, serverToAddToBearerToken, serverUrlToBeAdded);
+        if (existingRef == null) {
+            final StringJoiner form = new StringJoiner("&");
+            form.add(RemoteServerReferenceResource.REMOTE_SERVER_URL + "=" + serverUrlToBeAdded);
+            form.add(RemoteServerReferenceResource.REMOTE_SERVER_NAME + "=" + serverUrlToBeAdded);
+            result = postFormAndReturnJsonAndResponseCode(serverToAddTo, serverToAddToBearerToken, REMOTESERVERREFERENCEADD_PATH, form);
+        } else {
+            if (existingRef.isInclude()) {
+                final Set<UUID> eventsToAdd = new HashSet<>();
+                Util.addAll(eventIds, eventsToAdd);
+                Util.removeAll(existingRef.getSelectedEventIds(), eventsToAdd);
+                if (!eventsToAdd.isEmpty()) {
+                    eventsToAdd.addAll(existingRef.getSelectedEventIds());
+                    existingRef.updateSelectedEventIds(eventsToAdd);
+                    result = doRemoteServerReferenceUpdate(serverToAddTo, serverToAddToBearerToken, existingRef);
+                } else {
+                    // nothing to do, all events migrated are already referenced by the inclusive reference
+                    result = new Pair<>(new RemoteSailingServerReferenceJsonSerializer().serialize(existingRef), Status.OK.getStatusCode());
+                }
+            } else {
+                // exclusive; are any of those events we migrated excluded explicitly? If so, "un-exclude":
+                final Set<UUID> eventsToUnexclude = new HashSet<>();
+                Util.addAll(eventIds, eventsToUnexclude);
+                Util.retainAll(existingRef.getSelectedEventIds(), eventsToUnexclude);
+                if (!eventsToUnexclude.isEmpty()) {
+                    final Set<UUID> eventsToExclude = new HashSet<>(existingRef.getSelectedEventIds());
+                    Util.removeAll(eventIds, eventsToExclude);
+                    existingRef.updateSelectedEventIds(eventsToExclude);
+                    result = doRemoteServerReferenceUpdate(serverToAddTo, serverToAddToBearerToken, existingRef);
+                } else {
+                    // nothing to do, all events migrated are already referenced by the inclusive reference
+                    result = new Pair<>(new RemoteSailingServerReferenceJsonSerializer().serialize(existingRef), Status.OK.getStatusCode());
+                }
+            }
+        }
+        return result;
+    }
+    
+    private Pair<JSONObject, Number> doRemoteServerReferenceUpdate(String serverOnWhichToUpdateRemoteReference,
+            String bearerToken, RemoteSailingServerReference updatedRef) throws IOException, Exception {
         final StringJoiner form = new StringJoiner("&");
-        form.add(RemoteServerReferenceResource.REMOTE_SERVER_URL + "=" + serverToBeAdded);
-        form.add(RemoteServerReferenceResource.REMOTE_SERVER_NAME + "=" + serverToBeAdded);
-        return postFormAndReturnJsonAndResponseCode(serverToAddTo, serverToAddToToken, REMOTESERVERREFERENCEADD_PATH, form);
-
+        form.add(RemoteServerReferenceResource.REMOTE_SERVER_NAME + "=" + updatedRef.getName());
+        form.add(RemoteServerReferenceResource.REMOTE_SERVER_IS_INCLUDE + "=" + updatedRef.isInclude());
+        for (final UUID eventId : updatedRef.getSelectedEventIds()) {
+            form.add(RemoteServerReferenceResource.REMOTE_SERVER_EVENT_IDS + "=" + eventId);
+        }
+        return putFormAndReturnJsonAndResponseCode(serverOnWhichToUpdateRemoteReference, bearerToken, REMOTESERVERREFERENCEUPDATE_PATH, form);
     }
 
-    private Util.Pair<JSONObject, Number> doRemoteServerReferenceRemove(String serverFromWhichToDelete,
-            String serverNameToDelete, String serverFromWhichToDeleteBearerToken, Iterable<UUID> eventIds)
+    private RemoteSailingServerReference getExistingRemoteServerReference(final String serverUrlFromWhereToFetch,
+            final String bearerToken, final String remoteReferenceServerUrl) throws MalformedURLException, Exception {
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
+        final URL getRemoteReferencesUrl = RemoteServerUtil.createRemoteServerUrl(RemoteServerUtil.createBaseUrl(serverUrlFromWhereToFetch), REMOTESERVERREFERENCE_BASE_PATH, null);
+        final HttpGet getRequest = new HttpGet(getRemoteReferencesUrl.toString());
+        getRequest.addHeader("Authorization", "Bearer "+bearerToken);
+        final HttpResponse response = client.execute(getRequest);
+        final InputStream inputStream = response.getEntity().getContent();
+        final JSONArray remoteServerReferencesJson = (JSONArray) new JSONParser().parse(new InputStreamReader(inputStream));
+        final URL remoteReferenceServerUrlAsUrl = new URL(remoteReferenceServerUrl);
+        for (final Object o : remoteServerReferencesJson) {
+            final RemoteSailingServerReference ref = new RemoteSailingServerReferenceJsonDeserializer().deserialize((JSONObject) o);
+            if (ref.getURL().equals(remoteReferenceServerUrlAsUrl)) {
+                return ref;
+            }
+        }
+        return null;
+    }
+
+    private Pair<JSONObject, Number> doRemoteServerReferenceRemove(String serverFromWhichToDelete,
+            String serverUrlToDelete, String serverFromWhichToDeleteBearerToken, Iterable<UUID> eventIds)
             throws Exception {
-        // TODO bug5531 look for existing remote reference and remove (see with REMOTESERVERREFERENCEUPDATE_PATH) explicit eventIds if found, remove entire reference if nothing else left
-        final StringJoiner form = new StringJoiner("&");
-        form.add(RemoteServerReferenceResource.REMOTE_SERVER_NAME + "=" + serverNameToDelete);
-        return postFormAndReturnJsonAndResponseCode(serverFromWhichToDelete,
-                serverFromWhichToDeleteBearerToken, REMOTESERVERREFERENCEDELETE_PATH, form);
+        final RemoteSailingServerReference existingRef = getExistingRemoteServerReference(serverFromWhichToDelete, serverFromWhichToDeleteBearerToken, serverUrlToDelete);
+        final Pair<JSONObject, Number> result;
+        if (existingRef != null) {
+            if (existingRef.isInclude()) {
+                final Set<UUID> eventIdsToKeep = new HashSet<>(existingRef.getSelectedEventIds());
+                Util.removeAll(eventIds, eventIdsToKeep);
+                if (eventIdsToKeep.isEmpty()) {
+                    // remove ref entirely
+                    final StringJoiner form = new StringJoiner("&");
+                    form.add(RemoteServerReferenceResource.REMOTE_SERVER_NAME + "=" + serverUrlToDelete);
+                    result = postFormAndReturnJsonAndResponseCode(serverFromWhichToDelete,
+                            serverFromWhichToDeleteBearerToken, REMOTESERVERREFERENCEDELETE_PATH, form);
+                } else {
+                    existingRef.updateSelectedEventIds(eventIdsToKeep);
+                    result = doRemoteServerReferenceUpdate(serverFromWhichToDelete, serverFromWhichToDeleteBearerToken, existingRef);
+                }
+            } else {
+                // check if more events now need to be excluded
+                if (!Util.containsAll(existingRef.getSelectedEventIds(), eventIds)) {
+                    final Set<UUID> extendedEventIdsToExclude = new HashSet<>(existingRef.getSelectedEventIds());
+                    Util.addAll(eventIds, extendedEventIdsToExclude);
+                    existingRef.updateSelectedEventIds(extendedEventIdsToExclude);
+                    result = doRemoteServerReferenceUpdate(serverFromWhichToDelete, serverFromWhichToDeleteBearerToken, existingRef);
+                } else {
+                    // everything that needs to be excluded is already excluded; nothing more to do
+                    result = new Pair<>(new RemoteSailingServerReferenceJsonSerializer().serialize(existingRef), Status.OK.getStatusCode());
+                }
+            }
+        } else {
+            // no reference to serverUrlToDelete found, therefore nothing to delete
+            result = new Pair<>(new RemoteSailingServerReferenceJsonSerializer().serialize(existingRef), Status.OK.getStatusCode());
+        }
+        return result;
     }
 
     private JSONObject parseInputStreamToJsonAndLog(HttpURLConnection connection) throws Exception {
