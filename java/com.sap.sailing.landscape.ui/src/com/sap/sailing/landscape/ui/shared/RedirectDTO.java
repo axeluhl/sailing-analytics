@@ -8,6 +8,12 @@ import com.sap.sse.common.Util;
 
 public interface RedirectDTO extends IsSerializable {
     /**
+     * Each literal represents one distinct concrete subtype implementing this interface.
+     * Each one provides a parser that accepts a redirect path/query combination and tries
+     * to construct an instance of the respective subtype that produces an equal result
+     * with its {@link RedirectDTO#getPathAndQuery} method, or {@code null} if no such
+     * instance can be produced for that subtype.<p>
+     * 
      * Order matters; the types are traversed in their natural order while trying to parse
      * a redirect path in {@link RedirectDTO#from(String)}. The first valid parsing result
      * will be returned.
@@ -19,14 +25,14 @@ public interface RedirectDTO extends IsSerializable {
         PLAIN(PlainRedirectDTO::parse), HOME(HomeRedirectDTO::parse),
         EVENT(EventRedirectDTO::parse), EVENT_SERIES(EventSeriesRedirectDTO::parse);
         
-        private Function<String, RedirectDTO> constructor; 
+        private Function<String, RedirectDTO> parserFromPathAndQuery; 
         
-        private Type(Function<String, RedirectDTO> constructor) {
-            this.constructor = constructor;
+        private Type(Function<String, RedirectDTO> parserFromPathAndQuery) {
+            this.parserFromPathAndQuery = parserFromPathAndQuery;
         }
         
-        private Function<String, RedirectDTO> getConstructor() {
-            return constructor;
+        private Function<String, RedirectDTO> getParserFromPathAndQuery() {
+            return parserFromPathAndQuery;
         }
     }
     
@@ -70,7 +76,7 @@ public interface RedirectDTO extends IsSerializable {
      */
     static RedirectDTO from(String redirectPath) {
         for (final Type type : Type.values()) {
-            final RedirectDTO redirect = type.getConstructor().apply(redirectPath);
+            final RedirectDTO redirect = type.getParserFromPathAndQuery().apply(redirectPath);
             if (redirect != null) {
                 return redirect;
             }
