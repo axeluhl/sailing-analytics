@@ -41,6 +41,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     protected static final String REMOTE_SERVER_PASSWORD_FORM_PARAM = "remoteServerPassword";
     protected static final String REMOTE_SERVER_USERNAME_FORM_PARAM = "remoteServerUsername";
     protected static final String REMOTE_SERVER_URL_FORM_PARAM = "remoteServerUrl";
+    protected static final String PROGRSS_TRACKING_UUID_FORM_PARAM = "progressTrackingUUID";
     private static final Logger logger = Logger.getLogger(MasterDataImportResource.class.getName());
     
     public MasterDataImportResource() {
@@ -58,7 +59,8 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             @FormParam(COMPRESS_FORM_PARAM) @DefaultValue("true") Boolean compress,
             @FormParam(EXPORT_WIND_FORM_PARAM) @DefaultValue("true") Boolean exportWind,
             @FormParam(EXPORT_DEVICE_CONFIGS_FORM_PARAM) @DefaultValue("false") Boolean exportDeviceConfigs,
-            @FormParam(EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM) @DefaultValue("true") Boolean exportTrackedRacesAndStartTracking) {
+            @FormParam(EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM) @DefaultValue("true") Boolean exportTrackedRacesAndStartTracking,
+            @FormParam(PROGRSS_TRACKING_UUID_FORM_PARAM) String progressTrackingUuid) {
         Response response = null;
         if (!Util.hasLength(remoteServerUrlAsString)) {
             response = badRequest("Remote server URL parameter "+REMOTE_SERVER_URL_FORM_PARAM+" must be present and non-empty");
@@ -67,7 +69,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
         } else if (!validateAuthenticationParameters(remoteServerUsername, remoteServerPassword, remoteServerBearerToken)) {
             response = badRequest("Specify "+REMOTE_SERVER_USERNAME_FORM_PARAM+" and "+REMOTE_SERVER_PASSWORD_FORM_PARAM+" or alternatively "+REMOTE_SERVER_BEARER_TOKEN_FORM_PARAM+" or none of them.");
         } else {
-            final UUID importMasterDataUid = UUID.randomUUID();
+            final UUID importMasterDataUid = progressTrackingUuid == null ? UUID.randomUUID() : UUID.fromString(progressTrackingUuid);
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
                 final Map<LeaderboardGroup, ? extends Iterable<Event>> eventsForLeaderboardGroups = getService()

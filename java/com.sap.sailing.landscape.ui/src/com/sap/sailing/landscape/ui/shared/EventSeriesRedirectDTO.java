@@ -12,16 +12,22 @@ import java.util.UUID;
  *
  */
 public class EventSeriesRedirectDTO extends RedirectWithIdDTO {
+    // TODO _=_ is a workaround only; see https://console.aws.amazon.com/support/home#/case/?displayId=8094019001&language=en
+    private static final String QUERY_PREFIX = "_=_&#{query}#/series/:leaderboardGroupId=";
+
     @Deprecated
     EventSeriesRedirectDTO() {} // for GWT RPC only
 
     public EventSeriesRedirectDTO(UUID id) {
-        super(id);
+        super(id, Type.EVENT_SERIES);
     }
     
     @Override
     public Optional<String> getQuery() {
-        // TODO _=_ is a workaround only; see https://console.aws.amazon.com/support/home#/case/?displayId=8094019001&language=en
-        return Optional.of("_=_&#{query}#/series/:leaderboardGroupId="+getId().toString());
+        return Optional.of(QUERY_PREFIX+getId().toString());
+    }
+
+    static EventSeriesRedirectDTO parse(String redirectPath) {
+        return parse(redirectPath, QUERY_PREFIX, EventSeriesRedirectDTO::new);
     }
 }

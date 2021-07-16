@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
@@ -13,6 +14,7 @@ import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
+import com.sap.sse.common.Duration;
 
 public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<String> getRegions();
@@ -86,4 +88,10 @@ public interface LandscapeManagementWriteService extends RemoteService {
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken) throws Exception;
 
     ArrayList<ReleaseDTO> getReleases();
+
+    UUID archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
+            SailingApplicationReplicaSetDTO<String> archiveReplicaSet, Duration durationToWaitBeforeCompareServers,
+            int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet,
+            MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
+            throws Exception;
 }

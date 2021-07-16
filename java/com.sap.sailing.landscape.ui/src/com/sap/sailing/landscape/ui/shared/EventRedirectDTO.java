@@ -10,16 +10,22 @@ import java.util.UUID;
  *
  */
 public class EventRedirectDTO extends RedirectWithIdDTO {
+    // TODO _=_ is a workaround only; see https://console.aws.amazon.com/support/home#/case/?displayId=8094019001&language=en
+    private static final String QUERY_PREFIX = "_=_&#{query}#/event/:eventId=";
+
     @Deprecated
     EventRedirectDTO() {} // for GWT RPC only
 
     public EventRedirectDTO(UUID id) {
-        super(id);
+        super(id, Type.EVENT);
     }
 
     @Override
     public Optional<String> getQuery() {
-        // TODO _=_ is a workaround only; see https://console.aws.amazon.com/support/home#/case/?displayId=8094019001&language=en
-        return Optional.of("_=_&#{query}#/event/:eventId="+getId().toString());
+        return Optional.of(QUERY_PREFIX+getId().toString());
+    }
+    
+    static EventRedirectDTO parse(String redirectPath) {
+        return parse(redirectPath, QUERY_PREFIX, EventRedirectDTO::new);
     }
 }

@@ -658,10 +658,28 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO) {
         return null;
     }
+    
+    @Override
+    public UUID archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
+            SailingApplicationReplicaSetDTO<String> archiveReplicaSet, Duration durationToWaitBeforeCompareServers,
+            int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet, MongoEndpointDTO moveDatabaseHere,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
+            throws Exception {
+        final UUID idForProgressTracking = UUID.randomUUID();
+        final RedirectDTO defaultRedirect = applicationReplicaSetToArchive.getDefaultRedirect();
+        // TODO bug5497 retrieve RedirectDTO from applicationReplicaSetToArchive in case we need it later for updating central reverse proxy's routine rules
+        // TODO bug5311: obtain all leaderboard group IDs from applicationReplicaSetToArchive
+        // TODO bug5311: issue MDI for all leaderboard group IDs obtained from applicationReplicaSetToArchive into archiveReplicaSet
+        // TODO bug5311: compare archived result, based on durationToWaitBeforeCompareServers and maxNumberOfCompareServerAttempts
+        // TODO bug5311: if comparison successful, update central reverse proxy from RedirectDTO (defaulting to first event found)
+        // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true, removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption)
+        // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true and moveDatabaseHere != null, use CopyAndCompareMongoDatabase to move master DB and delete replica DBs
+        return idForProgressTracking;
+    }
 
     @Override
     public void removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName, byte[] passphraseForPrivateKeyDescryption)
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsRegion region = new AwsRegion(regionId);
@@ -678,10 +696,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         }
         // terminate the instances
         autoScalingGroupRemoval.thenAccept(v->
-            applicationReplicaSet.getMaster().stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDescryption));
+            applicationReplicaSet.getMaster().stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
         autoScalingGroupRemoval.thenAccept(v->{
             for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
-                replica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDescryption);
+                replica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
             }
         });
         // remove the load balancer rules
