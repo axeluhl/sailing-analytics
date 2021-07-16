@@ -667,7 +667,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             throws Exception {
         final UUID idForProgressTracking = UUID.randomUUID();
         final RedirectDTO defaultRedirect = applicationReplicaSetToArchive.getDefaultRedirect();
-        // TODO bug5497 retrieve RedirectDTO from applicationReplicaSetToArchive in case we need it later for updating central reverse proxy's routine rules
         // TODO bug5311: obtain all leaderboard group IDs from applicationReplicaSetToArchive
         // TODO bug5311: issue MDI for all leaderboard group IDs obtained from applicationReplicaSetToArchive into archiveReplicaSet
         // TODO bug5311: compare archived result, based on durationToWaitBeforeCompareServers and maxNumberOfCompareServerAttempts
