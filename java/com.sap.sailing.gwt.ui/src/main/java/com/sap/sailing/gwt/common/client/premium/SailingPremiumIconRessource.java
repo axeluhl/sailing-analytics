@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.partials.premium;
+package com.sap.sailing.gwt.common.client.premium;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.resources.client.DataResource;
