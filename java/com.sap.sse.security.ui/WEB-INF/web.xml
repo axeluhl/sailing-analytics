@@ -83,6 +83,15 @@
         <servlet-name>RedirectServlet</servlet-name>
         <url-pattern>/redirect</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <display-name>Chargebee Subscription Service</display-name>
+        <servlet-name>ChargebeeSubscriptionService</servlet-name>
+        <servlet-class>com.sap.sse.security.ui.server.subscription.chargebee.ChargebeeSubscriptionWriteServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ChargebeeSubscriptionService</servlet-name>
+        <url-pattern>/service/subscription/chargebee</url-pattern>
+    </servlet-mapping>
     <!-- enabling remote logging -->
     <servlet>
         <servlet-name>remoteLogging</servlet-name>
