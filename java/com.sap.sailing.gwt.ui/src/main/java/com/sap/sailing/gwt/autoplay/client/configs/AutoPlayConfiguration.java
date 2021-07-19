@@ -10,6 +10,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.gwt.settings.UrlBuilderUtil;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public abstract class AutoPlayConfiguration {
     public abstract void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
@@ -21,7 +22,7 @@ public abstract class AutoPlayConfiguration {
      */
     public void openSettingsDialog(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
             OnSettingsCallback holder, PerspectiveCompositeSettings<?> settings, AutoPlayContextDefinition apcd,
-            UserService userService) {
+            UserService userService, SubscriptionServiceFactory subscriptionServiceFactory) {
         Notification.notify("This configuration does not have settings", NotificationType.WARNING);
     }
 
@@ -30,7 +31,7 @@ public abstract class AutoPlayConfiguration {
      * as it can be called before that
      */
     public void loadSettingsDefault(EventDTO selectedEvent, AutoPlayContextDefinition apcd,
-            StrippedLeaderboardDTO leaderboard, UserService userService, OnSettingsCallback holder) {
+            StrippedLeaderboardDTO leaderboard, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory, OnSettingsCallback holder) {
         holder.newSettings(null, getUrlWithSettings(apcd, null));
     }
     

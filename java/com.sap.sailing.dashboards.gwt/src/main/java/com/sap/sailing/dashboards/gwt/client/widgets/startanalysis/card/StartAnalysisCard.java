@@ -46,6 +46,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PayWallResolver;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class StartAnalysisCard extends Composite implements HasWidgets, StartAnalysisPageChangeListener {
@@ -185,12 +186,12 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         final RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, errorReporter,
                 Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        // FIXME: UserService must not be null at this point. Else the streamlet feature permission check will not succeed.
-        raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings,
+        final PayWallResolver payWallResolver = new PayWallResolver(userService, subscriptionServiceFactory, null);
+        raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE, payWallResolver), raceMapSettings,
                 sailingServiceAsync, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
                 startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true,
-                new DefaultQuickFlagDataProvider(), userService, subscriptionServiceFactory);
+                new DefaultQuickFlagDataProvider(), payWallResolver);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);
