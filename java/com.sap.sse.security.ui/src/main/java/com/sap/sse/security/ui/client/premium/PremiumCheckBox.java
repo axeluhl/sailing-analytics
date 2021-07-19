@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client.premium;
 
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -7,6 +8,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public abstract class PremiumCheckBox extends Composite {
 
@@ -27,6 +29,7 @@ public abstract class PremiumCheckBox extends Composite {
      * @param acl
      */
     public PremiumCheckBox(String label, Action action, PayWallResolver payWallResolver) {
+        final StringMessages stringMessages = StringMessages.INSTANCE;
         this.action = action;
         this.payWallResolver = payWallResolver;
         this.wrapperPanel = new FocusPanel();
@@ -34,13 +37,19 @@ public abstract class PremiumCheckBox extends Composite {
         this.wrapperPanel.add(mainPanel);
         this.checkBox = new CheckBox(label);
         if(!payWallResolver.hasPermission(action)) {
-            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver));
+            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver).show());
+            wrapperPanel.getElement().getStyle().setCursor(Cursor.POINTER);
             checkBox.setEnabled(false);
-            this.image = createPremiumIcon();
+            image = createPremiumIcon();
             mainPanel.add(image);
+            //FIXME: See bug5593 - This message should contain the plan, which would provide the needed access (if the access is not otherwise blocked)
+            mainPanel.setTitle(stringMessages.unlockWithSubscription());
+            image.setWidth("1em");
+            image.setHeight("1em");
         }else {
             //TODO: Might want to use an "unlocked" image.
             image = null;
+            checkBox.setEnabled(true);
         }
         mainPanel.add(checkBox);
         initWidget(mainPanel);
