@@ -100,7 +100,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showWindStreamletOverlayCheckbox.setValueifUserHasPermission(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
         //FIXME: See bug5593
-        showWindStreamletColorsCheckbox = new SailingPremiumCheckBox(stringMessages.showWindStreamletOverlay(),
+        showWindStreamletColorsCheckbox = new SailingPremiumCheckBox(stringMessages.showWindStreamletColors(),
                 SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, payWallResolver);
         showWindStreamletColorsCheckbox.setValueifUserHasPermission(initialSettings.isShowWindStreamletColors());
         showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckBoxIntended");
