@@ -1,5 +1,7 @@
 # Setup for the Olympic Summer Games 2020/2021 Tokyo
 
+[[_TOC_]]
+
 ## Local Installation
 
 For the Olympic Summer Games 2020/2021 Tokyo we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with equal hardware configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices.
