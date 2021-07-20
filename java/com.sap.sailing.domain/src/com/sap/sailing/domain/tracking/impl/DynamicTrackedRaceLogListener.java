@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ExcludedWindSourcesFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
@@ -216,6 +218,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         trackedRace.setFinishedTime(getFinishedTime());
         analyzeCourseDesign(null);
         initializeWindTrack(raceLog);
+        updateWindSourcesToExclude();
         if (markPassingUpdateListener != null) {
             markPassingDataFinder = new MarkPassingDataFinder(raceLog);
             analyzeMarkPassings();
@@ -353,12 +356,10 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                 } finally {
                     log.unlockAfterRead();
                 }
-
             }
             if (revokedEvent instanceof RaceLogSuppressedMarkPassingsEvent) {
                 markPassingUpdateListener.removeSuppressedPassing(revokedEvent.getInvolvedCompetitors().get(0));
-            }
-            if (revokedEvent instanceof RaceLogFixedMarkPassingEvent) {
+            } else if (revokedEvent instanceof RaceLogFixedMarkPassingEvent) {
                 markPassingUpdateListener.removeFixedPassing(revokedEvent.getInvolvedCompetitors().get(0),
                         ((RaceLogFixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
             }
@@ -384,6 +385,20 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     public void visit(RaceLogRaceStatusEvent event) {
         if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
             trackedRace.invalidateEndTime();
+        }
+    }
+
+    @Override
+    public void visit(RaceLogExcludeWindSourcesEvent event) {
+        updateWindSourcesToExclude();
+    }
+
+    private void updateWindSourcesToExclude() {
+        for (RaceLog raceLog : raceLogs.keySet()) {
+            final Iterable<WindSource> windSourcesToExclude = new ExcludedWindSourcesFinder(raceLog).analyze();
+            if (windSourcesToExclude != null) {
+                trackedRace.setWindSourcesToExclude(windSourcesToExclude);
+            }
         }
     }
 }

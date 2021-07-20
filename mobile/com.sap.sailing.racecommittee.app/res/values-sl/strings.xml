@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+
+    
+    
+    
+    <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
+    <string name="running_on_course">"(na progi %s)"</string>
+    <string name="course_design_number_waypoints">"Proga ima vmesne cilje (%d)"</string>
+    
+    <string name="service_text_no_races">"Čakanje na plove, ki jih želite spremljati ..."</string>
+    <string name="service_text_num_races">"Plovi, ki jih trenutno spremljate: %d."</string>
+    
+    <string name="set_time">"Začni"</string>
+    <string name="reset_time">"Zaženi znova"</string>
+    <string name="choose">"Izberi"</string>
+    <string name="current_time">"Trenutni čas"</string>
+    <string name="race_finished_template">"%s je končano"</string>
+    <string name="race_first_boat_finished">"Prva jadrnica je končala ob:"</string>
+    <string name="race_first_finisher">"Prvi tekmovalec končal ob %1$s"</string>
+    <string name="race_first_finisher_and_time_limit">"Prvi tekmovalec končal ob %1$s, časovna omejitev za zaključek plova je ob %2$s"</string>
+    <string name="race_time_limit">"Časovna omejitev za zaključek plova je ob %s"</string>
+    <string name="choose_startmode">"Izberite način štarta za ta plov"</string>
+    <string name="choose_abort_mode">"Izberite oznake, ki jih želite prikazati"</string>
+    <string name="choose_abort_flag_mode">"Izberite način oznake za preklic"</string>
+    <string name="flags_up">"GOR"</string>
+    <string name="flags_down">"DOL"</string>
+    <string name="ap_or_november">"Izberite oznako za preklic"</string>
+    <string name="choose_start_mode_flag">"Izberite oznako načina štarta"</string>
+    <string name="abort_starting_phase">"Prikliči fazo začetka"</string>
+    <string name="abort_running_race">"Prekliči plov"</string>
+    <string name="choose_xray_flag_up">"Prikaži posamezni odpoklic"</string>
+    <string name="choose_xray_flag_down">"Odstrani posamezni odpoklic"</string>
+    <string name="choose_first_substitute_flag">"Splošni odpoklic"</string>
+    <string name="confirm_general_recall">"Ali želite izvesti splošni odpoklic?"</string>
+    <string name="confirm">"Potrdi"</string>
+    <string name="abort">"Prekliči"</string>
+    <string name="choose_blue_flag">"Začni fazo zaključka"</string>
+    <string name="flag_ap">"AP"</string>
+    <string name="flag_november">"November"</string>
+    <string name="flag_jury">"Žirija"</string>
+    <string name="label_login_events">"Regata"</string>
+    <string name="label_login_course_area">"Področje"</string>
+    <string name="label_login_position">"Položaj"</string>
+    <string name="login_type_superuser">"Prijava kot naduporabnik"</string>
+    <string name="login_type_officer_on_vessel">"Prijava kot regatni funkcionar na plovilu."</string>
+    <string name="login_type_shore_control">"Prijava kot obalni nadzor."</string>
+    <string name="login_type_viewer">"Prijava kot uporabnik samo za pogled (predstavitveni način)"</string>
+    <string name="racelist_unscheduled">"Še ni načrtovano"</string>
+    <string name="racelist_prescheduled">"Predhodno načrtovano za %s"</string>
+    <string name="racelist_scheduled">"Načrtovano za %s"</string>
+    <string name="racelist_startphase">"Začetek ob %s poteka"</string>
+    <string name="racelist_running">"Se izvaja od %s"</string>
+    <string name="racelist_finishing">"Se končuje"</string>
+    <string name="racelist_finished">"Končano"</string>
+    <string name="racelist_unknown">"Neznano"</string>
+    <string name="currentlyLoading">"Trenutno se nalaga …"</string>
+    <string name="racingview_header">"Plovi v regatnem polju \'%s\'"</string>
+    <string name="running_on_unknown">"(kliknite, da nastavite progo)"</string>
+    <string name="updateIndicator">"Posodobi oznako"</string>
+    <string name="reset_race">"Ponastavi plov"</string>
+    <string name="postpone">"Preloži"</string>
+    <string name="race_running_since_template">"%1$s izvedb od %2$s"</string>
+    <string name="race_reset_confirmation_header">"Ponastavili boste plov"</string>
+    <string name="race_reset_confirmation_warning">"Če boste ponastavili plov, bodo vsi shranjeni podatki trajno odstranjeni. Vse podatke o plovu boste morali znova vnesti. Ohranjeni bodo samo podatki o vneseni progi. Svetujemo, da ne ponastavite plova."</string>
+    <string name="race_reset_confirmation_title">"Ali želite ponastaviti ta plov?"</string>
+    <string name="race_reset_reset_button">"Kljub temu ponastavi"</string>
+    <string name="race_finished_start_time">"Čas začetka plova:"</string>
+    <string name="race_finished_end_time">"Čas konca plova:"</string>
+    <string name="race_startphase_countdown_mode_remove">"%1$s do %2$s je odstranjeno"</string>
+    <string name="race_startphase_countdown_mode_display">"%1$s do %2$s je prikazano"</string>
+    <string name="race_startphase_countdown_start">"%1$s do %2$s se začne"</string>
+    <string name="set_pathfinder">"Pathfinder"</string>
+    <string name="set_pathfinder_title">"Izberite pathfinderja"</string>
+    <string name="protest_dialog_title">"Čas začetka ugovora"</string>
+    <string name="finished_dialog_title">"Nastavite čas, ko se plov konča"</string>
+    <string name="protest_start_time">"Čas začetka ugovora: %s"</string>
+    <string name="protest_duration">"Trajanje ugovora: %d min"</string>
+    <string name="protest_end_time">"Čas konca ugovora: %s"</string>
+    <string name="protest_duration_dialog_title">"Trajanje v minutah"</string>
+    <string name="no_pathfinder_selected">"Pathfinder ni izbran"</string>
+    <string name="set_line_opening_time">"Štart pri vratih"</string>
+    <string name="no_line_opening_time_selected">"Čas ni izbran"</string>
+    <string name="set_gate_line_opening_time_title">"Nastavite čas za štart pri vratih"</string>
+    <string name="choose_line_open_min">"min"</string>
+    <string name="previous_course">"Prejšnja proga"</string>
+    <string name="make_new_course">"Ustvari progo"</string>
+    <string name="course_design_assets">"Sredstva za načrtovanje proge"</string>
+    <string name="course_design_dialog_title">"Nastavite načrt proge"</string>
+    <string name="pick_a_rounding_direction">"Izberite smer obračanja"</string>
+    <string name="select_penalty_reason">"Izberite razlog za kazen"</string>
+
+    <string name="passing_instruction_none">"Brez"</string>
+    <string name="passing_instruction_port">"Levi bok"</string>
+    <string name="passing_instruction_starboard">"Desni bok"</string>
+    <string name="passing_instruction_single_unknown">"Posamezno, neznano"</string>
+    <string name="passing_instruction_gate">"Vrata"</string>
+    <string name="passing_instruction_line">"Linija"</string>
+    <string name="passing_instruction_offset">"Odmik"</string>
+    <string name="passing_instruction_fixed_bearing">"Fiksna smer"</string>
+
+    <string name="publish">"Objavi"</string>
+    <string name="unpublish">"Prekliči objavo"</string>
+    <string name="take_previous">"Uporabi prejšnjo progo"</string>
+    <string name="take_previous_short">"Uporabi to"</string>
+    <string name="markImage">"Označi sliko"</string>
+    <string name="cancel">"Prekliči"</string>
+    <string name="retry">"Poskusi znova"</string>
+    <string name="yes">"Da"</string>
+    <string name="no">"Ne"</string>
+    <string name="tracking_list_01">"Seznam tekmovalcev"</string>
+    <string name="tracking_list_02">"Seznam rezultatov"</string>
+    <string name="availableFinishingCompetitors">"Tekmovalci"</string>
+    <string name="choose_blue_flag_finishing">"Končaj plov"</string>
+    <string name="drag_handle_description">"Ročica za vlečenje"</string>
+    <string name="options_menu_settings">"Nastavitve"</string>
+    <string name="results_capturing_title">"Rezultati plova"</string>
+    <string name="results_capturing_view_subject">"Zadeva pošte"</string>
+    <string name="results_capturing_view_body">"Telo pošte"</string>
+    <string name="results_capturing_view_send">"Pošlji rezultate"</string>
+    <string name="results_capturing_view_add_photo">"Dodaj fotografijo"</string>
+    <string name="results_capturing_view_list_header">"Priložene fotografije"</string>
+    <string name="results_capturing_view_list_empty">"Fotografije še niso dodane"</string>
+    <string name="results_mail_subject">"[Regatni odbor - %1$s] %2$s"</string>
+    <string name="results_mail_body">"Rezultati plova \'%s\' so priloženi.\n\n"</string>
+    <string name="results_mail_body_boat_class">"Kategorija jadrnice: %s\n"</string>
+    <string name="results_mail_body_race_group">"Skupina plovov: %s\n"</string>
+    <string name="results_mail_body_start">"Čas začetka: %s\n"</string>
+    <string name="results_mail_body_finish">"Čas konca: %s\n"</string>
+
+    <!-- WIND FRAGMENT -->
+    <string name="wind_direction_degrees">"Smer vetra od (stopinje)"</string>
+    <string name="enter_wind_direction">"Smer (od)"</string>
+    <string name="enter_wind_speed">"Hitrost (kt)"</string>
+    <string name="enter_wind_gps">"Položaj merjenja vetra"</string>
+    <string name="check_all_data">"3. Preverite vse podatke"</string>
+    <string name="in_degrees">"v stopinjah"</string>
+    <string name="in_knots">"v vozlih"</string>
+    <string name="wind_speed_direction_not_a_valid_number">"Hitrost ali smer vetra ni veljavna številka. Popravite vrednost."</string>
+    <string name="wind_location_or_fields_not_valid">"Vnesena lokacija, hitrost vetra ali smer je prazna. Popravite vrednosti."</string>
+    <string name="waiting_for_gps">"Čakanje na GPS-signal ..."</string>
+    <string name="manual_entry">"Ročni vnos položaja"</string>
+    <string name="found_gps_position">"Položaj na podlagi GPS"</string>
+    <string name="set_position_manually">"Ročno dodajte položaj"</string>
+    <string name="searchPosition">"Iskanje lokacije ..."</string>
+    <string name="no_location_found">"Na podlagi vaše poizvedbe ni bilo mogoče najti lokacije."</string>
+    <string name="store_position">"Uporabi ta položaj"</string>
+    <string name="store_wind">"Shrani veter"</string>
+
+    <!-- SETTINGS -->
+    <string name="settings_activity_title">"Nastavitve"</string>
+    <string name="settings_category_general">"Drugo"</string>
+    <string name="settings_general_manageareas_header">"Upravljana regatna polja"</string>
+    <string name="settings_general_language_header">"Izberite jezik"</string>
+    <string name="settings_general_language_description">"Izberite jezik. Morda boste morali znova zagnati aplikacijo, da se spremembe uveljavijo."</string>
+    <string name="override_default_start_procedure_type_select_header">"Privzeta vrsta štartne procedure, ko je prepisano"</string>
+    <string name="override_default_start_procedure_type_select_description">"Plovi bodo kot privzeto uporabili izbrano vrsto štartne procedure. Če želite, da je ta možnost aktivna, mora biti omogočeno potrditveno polje Prepiši."</string>
+    <string name="settings_please_reload">"Izvedite dejanje ‘Naloži znova’, da uporabite spremembe."</string>
+    <string name="settings_advanced_service_header">"URL spletne storitve"</string>
+    <string name="settings_advanced_mail_header">"Prejemnik e-pošte z rezultati"</string>
+    <string name="settings_category_polling">"Pozivanje"</string>
+    <string name="settings_polling_active_header">"Aktiviraj pozivanje"</string>
+    <string name="settings_polling_active_description">"Ko je aktivno, bo strežnik pozvan za spremembe."</string>
+    <string name="settings_polling_interval_header">"Interval pozivanja (sekunde)"</string>
+    <string name="settings_category_developer">"Možnosti za razvijalce"</string>
+    <string name="compass_view_compass">"Kompas"</string>
+    <string name="compass_view_needle">"Igla"</string>
+    <string name="racing_course_area_missing">"Regatnega polja ni bilo mogoče naložiti. Vrnite se na prijavno stran."</string>
+    <string name="racing_load_success">"Število uspešno naloženih plovov: %d."</string>
+    <string name="generic_load_failure">"Prišlo je do napake pri nalaganju zahtevanih podatkov:\n\n\"%s\"\n\nAli želite poskusiti znova?"</string>
+    <string name="set_course_layout">"Nastavite postavitev proge"</string>
+    <string name="loading_failure">"Nalaganje ni uspelo"</string>
+    <string name="wind_unknown">"(kliknite, da nastavite veter)"</string>
+    <string name="wind_info">"%2$s/%1$f kt"</string>
+    <string name="login">"Prijava"</string>
+    <string name="please_select_a_login_type">"Izberite vrsto prijave."</string>
+    <string name="race_list_filter_show_all">"Prikaži vse"</string>
+    <string name="race_list_filter_show_active">"Prikaži aktivne"</string>
+    <string name="race_reset_time_schedule_race">"Načrtuj plov"</string>
+    <string name="race_reset_time_startmode_starttime">"Izberite način in čas začetka"</string>
+    <string name="start">"Nastavite čas začetka"</string>
+    <string name="nationality">"Narodnost"</string>
+    <string name="number">"Številka"</string>
+    <string name="set_tracking_list">"Nastavi seznam za sledenje"</string>
+    <string name="confirm_tracking_list">@string/publish_button_empty</string>
+    <string name="snap">"Poravnaj"</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">"Ali se želite odjaviti in prijaviti kot nov uporabnik?"</string>
+    <string name="change_dialog_title">"Spremeni regato"</string>
+    <string name="change_dialog_message">"Ali želite spremeniti regato in/ali polje? Povezava s plovi, ki jih trenutno spremljate, bo prekinjena."</string>
+    <string name="logout">"Odjava"</string>
+    <string name="loading_configuration">"Nalaganje konfiguracije ..."</string>
+    <string name="loading_configuration_failed">"Prišlo je do napake pri nalaganju konfiguracije."</string>
+    <string name="loading_configuration_not_found">"Oddaljena konfiguracija ni bila najdena za to napravo."</string>
+    <string name="loading_configuration_succeded">"Oddaljena konfiguracija uporabljena."</string>
+    <string name="gate_launch_stops_after">"Štart pri vratih se konča po %d min"</string>
+    <string name="settings_category_regatta_defaults">"Konfiguracija regate (privzeto)"</string>
+    <string name="settings_category_regattas">"Konfiguracija regate (specifično)"</string>
+    <string name="settings_category_course_designer">"Konfiguracija načrtovalnika proge"</string>
+    <string name="override_default_course_designer_type_select_header">"Vrsta načrtovalnika proge"</string>
+    <string name="settings_course_designer_by_name_course_names_header">"Imena prog"</string>
+    <string name="preference_racing_procedure_startmode_flags_header">"Zastave načina začetka"</string>
+    <string name="preference_racing_procedure_classflag_header">"Zastava razreda"</string>
+    <string name="preference_racing_procedure_hasxray_header">"Individualni odpoklic"</string>
+    <string name="preference_racing_procedure_hasxray_description">"Aktivirajte to možnost, če želite omogočiti individualni odpoklic"</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">"Vnos rezultata"</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">"Aktivirajte to možnost, da omogočite vnašanje rezultatov med in po koncu plova"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_description">"Aktivirajte to možnost, da omogočite izbiro pathfinderja"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_header">"Pathfinder"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">"Aktivirajte to možnost, da omogočite dodaten čas napol spuščene zastave G"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">"Dodaten čas napol spuščene zastave G"</string>
+    <string name="device_identifier">"Ime naprave"</string>
+    <string name="synchronize_connection_settings_header">"Sinhroniziraj s strežnikom"</string>
+    <string name="synchronize_connection_settings_description">"Ko ustvarjate konfiguracijo na strežniku, kliknite tukaj, da sinhronizirate aplikacijo in nastavitve povezave prek QR-kode."</string>
+    <string name="update_app_header">"Vsili posodobitev"</string>
+    <string name="update_app_description">"Vsilite posodobitev iz strežnika. Bolje je uporabiti možnost sinhronizacije."</string>
+    <string name="preference_wakelock_header">"Ohrani zaslon vključen"</string>
+    <string name="preference_wakelock_summary">"Vsilite, da zaslon ostane vključen. Pozor: poveča se poraba baterije."</string>
+    <string name="preference_offline_header">"Način brez povezave"</string>
+    <string name="preference_offline_summary">"Onemogoči povezavo s strežnikom in uporablja statične podatke"</string>
+    <string name="preference_allow_demo_header">"Omogoči prijavo kot gledalec"</string>
+    <string name="preference_allow_demo_summary">"Če je nastavljeno, se lahko prijavite kot gledalec. Spremembe plova ne bodo poslane nazaj v strežnik."</string>
+    <string name="options_menu_info">"Strokovni podatki"</string>
+    <string name="options_menu_refresh">"Osveži podatke"</string>
+    <string name="auto_update_install">"Namesti"</string>
+    <string name="auto_update_install_anyway">"Vseeno namesti"</string>
+    <string name="gate_launch">"Štart pri vratih"</string>
+    <string name="golf_down">"Napol spuščena zastava G"</string>
+    <string name="preference_regatta_specific_title">"Konfiguracija regate - %1$s"</string>
+    <string name="preference_regatta_specific_save_title">"Shrani konfiguracijo %1$s"</string>
+    <string name="preference_regatta_specific_save_description">"S tem boste shranili prikazano konfiguracijo za vse plove v %1$s."</string>
+    <string name="auto_update">"Samodejna posodobitev"</string>
+    <string name="auto_update_checking_version">"Preverjanje informacij o različici na strežniku ..."</string>
+    <string name="auto_update_downloading_version">"Poskus prenosa informacij o samodejni posodobitvi iz %1$s"</string>
+    <string name="auto_update_version_file_url_invalid">"Povezava do datoteke različice ni veljavna."</string>
+    <string name="auto_update_click_install">"Kliknite \'Namesti\', če želite posodobiti v različico %1$d."</string>
+    <string name="auto_update_force_install">"Različico, ki jo ponuja strežnik, ste že namestili (različica %1$d)."</string>
+    <string name="auto_update_with_store">"Vaša trenutna različica je nameščena iz %1$s. Če želite namestiti prenos iz strežnika, morate prej odstraniti trenutno aplikacijo."</string>
+    <string name="auto_update_already_up_to_date">"Ste že posodobili!"</string>
+    <string name="auto_update_downloading_apk">"Poteka prenos APK iz strežnika ..."</string>
+    <string name="auto_update_apk_link_invalid">"Povezava do prenosa iz strežnika ni bila veljavna."</string>
+    <string name="auto_update_apk_file_error">"Datoteke prenosa iz strežnika ni bilo mogoče ustvariti."</string>
+    <string name="auto_update_error">"Napaka pri samodejni posodobitvi."</string>
+    <string name="auto_update_completed">"Samodejna posodobitev končana"</string>
+    <string name="auto_update_completed_text">"Samodejna posodobitev je končana. Znova sinhronizirajte svoje nastavitve povezave s strežnikom."</string>
+    <string name="auto_update_completed_take_me_there">"Preusmeri me tja"</string>
+    <string name="wind_gps_is_disabled">"Kaže, da je vaš GPS onemogočen. Ali ga želite omogočiti?"</string>
+    <string name="rrs26_start_mode_changed_to">"Zastava načina za začetek spremenjena v %1$s"</string>
+    <string name="preference_there_are_no_regattas">"Nobena regata ni naložena."</string>
+    <string name="configure_regatta">"Konfiguracija regate %1$s"</string>
+    <string name="race_start_in_5_minutes">"5 minut"</string>
+    <string name="race_start_in_4_minutes">"4 minute"</string>
+    <string name="race_start_in_2_minutes">"2 minuti"</string>
+    <string name="race_start_in_1_minute">"1 minuta"</string>
+    <string name="race_set_time">"Nastavi čas"</string>
+    <string name="race_reset_course">"Ponastavi progo"</string>
+    <string name="no_course_active">"Nobena proga ni aktivna"</string>
+    <string name="toggle_group_race_mode">"Skupinski plov?"</string>
+    <string name="toggle_group_race_mode_off">"Ni skupinskega plova"</string>
+    <string name="toggle_group_race_mode_on">"Skupinski plov"</string>
+    <string name="the_selected_time_is_before_the_race_start_">"Izbrani čas je pred začetkom plova."</string>
+
+    <string name="confirm_start_time">"Potrdi čas začetka"</string>
+    <string name="confirm_start_mode">"Potrdi način začetka"</string>
+
+    <string name="start_procedure_change">"Spremeni štartno proceduro"</string>
+    <string name="start_procedure_confirm">"Potrdi štartno proceduro"</string>
+    <string name="start_procedure_line_start">"Štart na liniji"</string>
+    <string name="start_procedure_gate_start">"Štart pri vratih"</string>
+    <string name="start_procedure_ess">"ESS"</string>
+    <string name="start_procedure_simplified">"Poenostavljeno"</string>
+    <string name="nav_drawer_open">"Odpri predal za krmarjenje"</string>
+    <string name="nav_drawer_close">"Zapri predal za krmarjenje"</string>
+
+    <string name="available_races">"Razpoložljivi plovi"</string>
+
+    <string name="race_started">"Začeto %s"</string>
+    <string name="race_finished">"Končano %s"</string>
+    <string name="race_start">"Začetek %s"</string>
+    <string name="race_unscheduled">"Ni načrtovano"</string>
+
+    <string name="race_show_all">"prikaži vse"</string>
+    <string name="race_show_less">"prikaži manj"</string>
+
+    <string name="races_current">"TRENUTNI PLOVI"</string>
+    <string name="races_all">"VSI PLOVI"</string>
+
+    <string name="welcome">"POZDRAVLJENI"</string>
+    <string name="change">"Spremeni"</string>
+
+    <string name="start_procedure">"Procedura"</string>
+    <string name="start_procedure_more">"Več"</string>
+    <string name="start_mode">"Način"</string>
+    <string name="course">"Proga"</string>
+    <string name="wind">"Veter"</string>
+    <string name="loading_events_succeded">"Dogodki naloženi."</string>
+
+    <string name="login_text">"Pozdravljeni v\nSAP Sailing Race Manager"</string>
+    <string name="login_sub_text">"Izberite regato"</string>
+    <string name="login_onboarding_text">"Sprejemanje"</string>
+    <string name="sign_up">"Prijava"</string>
+    <string name="flags_abandon">"Prekini"</string>
+    <string name="flags_recall">"Odpoklic"</string>
+    <string name="flags_course">"Proga"</string>
+    <string name="flags_more">"Končaj"</string>
+    <string name="flags_postpone">"Preloži"</string>
+    <string name="race_select">"Izberite plov"</string>
+
+    <string name="gate_start_pathfinder">"Pathfinder"</string>
+    <string name="gate_start_nationality">"Država"</string>
+    <string name="gate_start_number">"Št."</string>
+    <string name="gate_start_set_pathfinder">"Nastavi pathfinderja"</string>
+    <string name="gate_start_timing">"Merjenje časa"</string>
+    <string name="gate_start_set">"Nastavi čas vrat"</string>
+
+    <string name="time_launch">"Štart pri vratih\n(minute)"</string>
+    <string name="time_golf">"Zastava G\n(minute)"</string>
+    <string name="time_total">"Skupaj\n(minute)"</string>
+
+    <string name="wind_from">"Smer prihoda"</string>
+    <string name="wind_speed">"Hitrost"</string>
+    <string name="wind_position">"Položaj"</string>
+    <string name="wind_set_data">"Nastavi podatke o vetru"</string>
+    <string name="wind_set_data_multi">"Nastavi podatke o vetru (več)"</string>
+    <string name="wind_off">"Brez senzorjev za veter"</string>
+    <string name="wind_on">"Senzorji za veter aktivni"</string>
+    <string name="wind_set_position">"Nastavite položaj"</string>
+    <string name="wind_enter_position">"Nastavite svoj položaj"</string>
+    <string name="wind_kn">"kt"</string>
+    <string name="wind_address_hint">"Vnesite naslov"</string>
+    <string name="wind_sensor">"pri %1$s / od %2$.0f° / %3$.1f kt"</string>
+    <string name="wind_panel">"Od %1$.0f°\npri %2$.1f kt"</string>
+    <string name="wind_no_data">"Ni podatkov"</string>
+
+    <string name="time_up">"Spredaj #TIME#"</string>
+    <string name="time_down">"Zaostaja #TIME#"</string>
+    <string name="time_start">"Začetek %s"</string>
+    <string name="time_finish">"Konec ni na voljo"</string>
+    <string name="time">"#TIME#"</string>
+    <string name="set_signal">"Nastavite signal"</string>
+    <string name="flag_ap_desc">"Preloži prihajajoče plove"</string>
+    <string name="flag_ap_alpha_desc">"Preloži, danes več ni plovov"</string>
+    <string name="flag_ap_hotel_desc">"Preloži, več informacij na obali"</string>
+    <string name="flag_ap_alpha">"AP &amp; Alpha"</string>
+    <string name="flag_ap_hotel">"AP &amp; Hotel"</string>
+    <string name="flag_xray">"Rentgen"</string>
+    <string name="flag_xray_desc">"Individualni odpoklic"</string>
+    <string name="flag_first_subst">"Prva nadomestna zastava"</string>
+    <string name="flag_first_subst_desc">"Splošni odpoklic"</string>
+    <string name="flag_blue">"Modra"</string>
+    <string name="flag_blue_desc">"Začni fazo zaključka"</string>
+    <string name="flag_november_desc">"Prekini vse začete plove"</string>
+    <string name="flag_november_alpha">"November &amp; Alpha"</string>
+    <string name="flag_november_hotel">"November &amp; Hotel"</string>
+    <string name="flag_november_alpha_desc">"Prekini, danes več ni plovov"</string>
+    <string name="flag_november_hotel_desc">"Prekini, več informacij na obali"</string>
+    <string name="race_reset_confirm">"Ponastavi plov"</string>
+    <string name="race_reset_cancel">"Ne, hvala"</string>
+    <string name="race_reset_message">"Ali res želite ponastaviti ta plov, vključno z vsemi nastavitvami in dejanji, ki so bila izvedena? Tega ne bo mogoče razveljaviti."</string>
+    <string name="race_begin_finish_header">"Začni zaključek"</string>
+    <string name="race_end_finish_header">"Končaj zaključek\n(Začni zaključek: %s)"</string>
+    <string name="race_begin_finish_current">"Trenutni čas"</string>
+    <string name="race_begin_finish_custom">"Čas po meri"</string>
+    <string name="race_setup_confirm">"Potrdi namestitev"</string>
+
+    <string name="race_summary_title">"Povzetek plova"</string>
+    <string name="race_summary_start">"Začetek plova"</string>
+    <string name="race_summary_finish_begin">"Začni zaključek"</string>
+    <string name="race_summary_finish_end">"Končaj zaključek"</string>
+    <string name="race_summary_finish_duration">"Trajanje zaključka"</string>
+    <string name="race_summary_wind_direction">"Povprečna smer vetra"</string>
+    <string name="race_summary_wind_direction_value">"od %.0f°"</string>
+    <string name="race_summary_wind_speed">"Povprečna hitrost vetra"</string>
+    
+    <string name="race_summary_individual_recalls">"Individualni odpoklici"</string>
+    
+    <string name="record_voice">"Glasovno snemanje"</string>
+    <string name="finishing_started">"Prvi zaključek ob %1$s"</string>
+    <string name="finishing_started_since">"(%s)"</string>
+    <string name="finishing_done">"Zdaj spuščeno"</string>
+    <string name="finished_recording">"Snemanje"</string>
+    <string name="finished_replay">"Predvajaj glasovni posnetek"</string>
+    <string name="finished_list">"Seznam končanih"</string>
+    <string name="finished_photos">"Posnemi fotografijo"</string>
+    <string name="finished_tracking">@string/competitor_list</string>
+    <string name="finished_edit">"Uredi seznam"</string>
+    <string name="finished_publishing">"Objavljanje"</string>
+    <string name="finished_submit">"Pošlji"</string>
+    <string name="finished_duration">"#TIME# min"</string>
+
+    <string name="finished_text_01">"Ocenite in pošljite ta povzetek plova."</string>
+    <string name="finished_text_02">"Vaša ocena je bila objavljena. Če želite uporabiti spremembe, jih morate znova poslati."</string>
+
+    <string name="protest_time">"Čas ugovora"</string>
+    <string name="protest_time_start">"Čas začetka ugovora"</string>
+    <string name="protest_time_end">"Čas konca ugovora"</string>
+    <string name="degrees">"Stopinje"</string>
+
+    <string name="no_camera">"Aplikacija kamere ni najdena"</string>
+    <string name="delete_file_title">"Izbriši datoteko"</string>
+    <string name="delete_file">"To bo izbrisalo sliko"</string>
+    <string name="start_time">"Čas začetka"</string>
+    <string name="start_time_value">"Ob %1$s v %2$s"</string>
+
+    <!--Extracted locales -->
+    <string name="selected_course_area_lost">"Izbrano regatno polje je bilo izgubljeno."</string>
+    <string name="no_fitting_race_group_found">"Ustrezna skupina plova ni najdena."</string>
+    <string name="loading_of_course_area_succeeded">"Nalaganje podatkov proge je uspelo."</string>
+    <string name="scores">"Rezultati"</string>
+    <string name="no_text">"Ni besedila."</string>
+    <string name="error_picture_callback">"Napaka pri zapisovanju slikovne datoteke."</string>
+    <string name="competitor_load_error">"Tekmovalci: %s"</string>
+    <string name="error_announced_finish_time">"Navedeni čas konca je pred časom prvega tekmovalca, ki je končal plov. Znova preverite čas."</string>
+    <string name="error_time_before_finish">"Izbrani čas je pred začetkom plova."</string>
+    <string name="error_set_wind">"Nastavite informacije o vetru"</string>
+    <string name="use_previous_course_dialog_title">"Uporabi prejšnji načrt proge"</string>
+    <string name="use_previous_course_dialog_message">"Želite uporabiti predhodno objavljeni načrt proge?"</string>
+    <string name="please_enter_valid_number">"Vnesite veljavno številko"</string>
+    <string name="please_enter_valid_pathfinder">"Vnesite veljavnega pathfinderja"</string>
+    <string name="error_scanning_qr">"Napaka pri skeniranju QR-kode(%d)"</string>
+    <string name="error_scanning_qr_malformed">"Nepravilno oblikovan URL"</string>
+    <string name="marks_w_placeholder">"Oznake: %s"</string>
+    <string name="error_no_course_to_copy">"Ni proge za kopiranje"</string>
+    <string name="error_missing_second_mark">"Za izbrana navodila za vožnjo mimo sta potrebni dve boji. Izberite drugo bojo."</string>
+    <string name="error_missing_passing_instructions">"Vmesni cilj nima navodil za vožnjo mimo. Izberite navodila za vožnjo mimo z dolgim pritiskom na vmesni cilj."</string>
+    <string name="error_no_way_point">"Načrt proge mora imeti vsaj en vmesni cilj."</string>
+    <string name="start_w_placeholder">"Začetek %s"</string>
+    <string name="events_waiting_to_be_sent">"Dogodki (%1$d) trenutno čakajo na pošiljanje.\nČas zadnjega uspešnega pošiljanja: %2$s."</string>
+    <string name="no_event_to_be_sent">"Trenutno noben dogodek ne čaka na pošiljanje."</string>
+    <string name="never">"nikoli"</string>
+    <string name="theme_changed_title">"Sprememba teme"</string>
+    <string name="theme_changed_message">"Spremembe teme bodo uveljavljene po vnovičnem zagonu aplikacije."</string>
+    <string name="url_refresh_title">"URL strežnika spremenjen"</string>
+    <string name="app_refresh_message">"Odjavite se iz trenutnega dogodka, da se bodo lahko naložili podatki iz novega strežnika."</string>
+    <string name="until_xray_removed">"XRAY bo odstranjen čez %s"</string>
+    <string name="send_photos">"Pošlji fotografije"</string>
+    <string name="error_wrong_degree_value_title">"Napaka"</string>
+    <string name="error_wrong_degree_value_message">"Navedite vrednost med 0 in 360"</string>
+
+    <string name="author_type_officer_vessel">"Regatni funkcionar na plovilu"</string>
+    <string name="author_type_shore_control">"Nadzor z obale"</string>
+    <string name="author_viewer">"Predstavitveni način"</string>
+    <string name="author_type_superuser">"Naduporabnik"</string>
+    <string name="change_proceed">"Naprej"</string>
+    <string name="change_cancel">"Prekliči"</string>
+    <string name="change_message">"V skladu s pravili plova teh podatkov ni mogoče spremeniti v trenutnem stanju plova. Kljub temu lahko nadaljujete, da popravite napačne vnose."</string>
+    <string name="change_title">"Opozorilo"</string>
+    <string name="send_mail">"Pošlji pošto ..."</string>
+    <string name="data_reload_title">"Podatki so bili spremenjeni od zunaj"</string>
+    <string name="data_reload_message">"Podatke je treba znova naložiti. Mogoča je izguba podatkov."</string>
+    <string name="preference_allow_dependent_races_header">"Relativni čas začetka (minute)"</string>
+    <string name="preference_allow_dependent_races_description">"Omogoči relativni čas začetka med plovi"</string>
+    <string name="preference_dependent_races_offset_header">"Privzeti zamik relativnega časa začetka (minute)"</string>
+    <string name="preference_allow_edit_race_factor_header">"Sprememba dejavnika plova"</string>
+    <string name="preference_protest_time_header">"Trajanje ugovora (minute)"</string>
+    <string name="preference_allow_edit_race_factor_description">"Regatni vodje lahko spremenijo dejavnike plova na posamezni plov"</string>
+    <string name="error_finished_time">"Navedeni čas konca je pred časom prvega tekmovalca, ki je končal plov. Znova preverite čas."</string>
+    <string name="error_finishing_time">"Izbrani čas je pred začetkom plova."</string>
+    <string name="error_time_in_future">"Navedeni čas je v prihodnosti. Znova preverite čas."</string>
+    <string name="error_wrong_race_state">"RaceState ni v pravilnem statusu (potrebno: %1$s - trenutno: %2$s)"</string>
+    <string name="wind_map_button_show">"Zemljevid vetra"</string>
+    <string name="wind_map_button_hide">"Skrij"</string>
+    <string name="wind_latitude">"Zemljepisna širina:"</string>
+    <string name="wind_longitude">"Zemljepisna dolžina:"</string>
+    <string name="wind_accuracy">"Natančnost:"</string>
+    <string name="dependent_races_absolute">"Absolutni čas začetka"</string>
+    <string name="dependent_races_relative">"Relativni čas začetka"</string>
+    <string name="dependent_races_prompt">"Izberite plov"</string>
+    <string name="minutes_after">"Minute po"</string>
+    <string name="minutes_after_long">"%1$.0f min po %2$s"</string>
+    <string name="wind_accuracy_ago">"nazaj"</string>
+    <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d minut"</string>
+    <string name="gate_time_schedule_short">"%d minut"</string>
+    <string name="not_available">"Ni na voljo"</string>
+    
+    
+    
+    <string name="accuracy_timestamp">"(od %s)"</string>
+    <string name="prev_course">"Prejšnja proga"</string>
+    <string name="layout_course">"Postavitev proge"</string>
+    <string name="wind_degree">"°"</string>
+    <string name="add_waypoint">"Pritisnite plus, da dodate vmesni cilj"</string>
+    <string name="unpublished_course">"Neobjavljeni načrt proge"</string>
+    <string name="reset_state_1">"Novo"</string>
+    <string name="reset_state_2">"Ponastavi"</string>
+    <string name="reset_message_1">"Ali želite počistiti seznam?"</string>
+    <string name="reset_message_2">"Ali želite ponastaviti zadnje stanje?"</string>
+    
+    <string name="onboarding_scan">"Optično branje QR-kode"</string>
+    <string name="onboarding_input">"Ročni vnos"</string>
+    <string name="race_group">"Skupinski plov"</string>
+    <string name="wind_select_race">"Izberite plov"</string>
+    <string name="added_to_result_list">"\'%1$s\' dodano seznamu rezultatov na položaju %2$d"</string>
+    <string name="get_started">"Uvod"</string>
+    <string name="position">"Položaj"</string>
+    <string name="server_deeplink_message">"Strežnik uspešno spremenjen v %1$s."</string>
+    <string name="penalty">"Kazen"</string>
+    <string name="score">"Vrednost"</string>
+    <string name="finishing_time">"Čas za končanje"</string>
+    <string name="comment">"Komentar"</string>
+    <string name="get_started_url">"https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp"</string>
+    <string name="user_unauthorized">"Zahteva ni uspela. Uporabnik ni pooblaščen."</string>
+    <string name="server_url">"Strežnik"</string>
+    <string name="username">"Uporabniško ime"</string>
+    <string name="password">"Geslo"</string>
+    <string name="wrong_credentials">"Uporabniško ime ali geslo ni veljavno"</string>
+    <string name="unexpected_error">"Prišlo je do nepričakovane napake"</string>
+    <string name="sending_exception_title">"Opozorilo"</string>
+    <string name="sending_exception_message">"Najbrž nimate pooblastila za pošiljanje podatkov v strežnik. Ali želite spremeniti svoje poverilnice za prijavo?"</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Vklopi"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Izklopi"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Magnetni"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Glede na sever"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Smer"</string>
+    <string name="finishing_date">"Datum konca"</string>
+    <string-array name="sort_by_values">
+        <item>"po ID-ju na jadru"</item>
+        <item>"po imenu"</item>
+    </string-array>
+
+    <string name="preference_non_public_events_header">"Prikaži nejavne dogodke"</string>
+    <string name="preference_non_public_events_summary">"Naloži vse dogodke, vključno z nejavnimi."</string>
+    <string name="race_factor">"Dejavnik"</string>
+    <string name="options_menu_role">"Spremeni regato"</string>
+    <string name="reload_config">"Znova naloži konfiguracijo iz strežnika"</string>
+    <string name="abort_title">"Prekini plove"</string>
+    <string name="abort_hint">"Katere aktivne plove želite prekiniti?"</string>
+    <string name="abort_dismiss">"Opusti"</string>
+    
+    <string name="set_column_factor">"Nastavi dejavnik"</string>
+    <string name="set_factor_error">"Prišlo je do napake pri nastavljanju dejavnika: %s"</string>
+    <string name="sync_to_minute">"Sinhronizacija na minuto"</string>
+    <string name="non_public_changed_title">"Nejavni dogodki"</string>
+
+    <string name="competitor_list">"Rezultati"</string>
+    <string name="sort_by_boat">"po številki na jadru"</string>
+    <string name="sort_by_short_name">"po kratkem imenu"</string>
+    <string name="sort_by_name">"po imenu tekmovalca"</string>
+    <string name="sort_by_start">"po položaju na štartni liniji"</string>
+    <string name="sort_by_goal">"po sledenem položaju"</string>
+
+    <string name="apply_button">"Uporabi"</string>
+    <string name="publish_button_empty">"Objavi"</string>
+    <string name="publish_button_other">"Objavi (%d)"</string>
+    <string name="publish_clicked">"Rezultati objavljeni"</string>
+    <string name="competitor_count">"%d"</string>
+
+    <string name="refresh_title">"Podatki spremenjeni"</string>
+    <string name="refresh_message">"Podatki naslednjih tekmovalcev so bili spremenjeni. Preglejte:\n\n%s"</string>
+    <string name="refresh_positive">@android:string/ok</string>
+    <string name="hello_call_error_title">"Povezava s SAP-jem ni mogoča"</string>
+    <string name="hello_call_error_message">"Aplikacija ni mogla vzpostaviti povezave s SAP Sailing.\nPreverite, ali imate stabilno mobilno povezavo.\nAli želite poskusiti znova?"</string>
+    <string name="hello_call_error_positive">"Poskusi znova"</string>
+    <string name="hello_call_error_negative">"Izhod"</string>
+    <string name="hello_call_error_neutral">"Spremeni strežnik"</string>
+
+    <string name="competitor_merge_error_message">"Ta tekmovalec je bil spremenjen iz druge naprave in vi ste spremenili iste podatke. Preverite, ali so podatki zdaj pravilni."</string>
+
+    <string name="finishing_revoke">"Prekliči"</string>
+    <string name="error_revoke_finished">"Časa konca ni mogoče preklicati"</string>
+    <string name="error_revoke_finishing">"Časa za končanje ni mogoče preklicati"</string>
+</resources>

@@ -596,7 +596,7 @@
     "disclaimers":[
         {
             "title":"SAP Legal Disclosure",
-            "link": "https://www.sap.com/corporate/en/legal/impressum.html",
+            "link": "https://www.sap.com/corporate/en/legal/impressum.html?campaigncode=CRM-XH21-OSP-Sailing",
             "content": "Please visit ${link} to view the general SAP legal disclosure."
         },
         {

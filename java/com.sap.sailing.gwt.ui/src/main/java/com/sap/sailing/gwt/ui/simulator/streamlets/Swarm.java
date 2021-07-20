@@ -170,7 +170,7 @@ public class Swarm implements TimeListener {
         // animationIntervalMillis if possible
         double timeDelta = time1 - time0;
         // log("fps: "+(1000.0/timeDelta));
-        loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
+        loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta)); // TODO consider using AnimationScheduler instead!
     }
 
     private void removeBoundsChangeHandler() {
@@ -346,8 +346,7 @@ public class Swarm implements TimeListener {
                     particle.v = null;
                 }
             } else {
-                // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new
-                // one
+                // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new one
                 particles[idx] = this.recycleOrCreateParticle(particles[idx]);
             }
             if (particles[idx] != null && particles[idx].v != null) {

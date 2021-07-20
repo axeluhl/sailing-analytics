@@ -96,7 +96,8 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
                 return resolvingUsername ? stringMessages.pleaseWaitUntilUsernameIsResolved()
                         : (usernameUnavailable ? stringMessages.userAlreadyExists(nameBox.getText())
                                 : validator.validateUsernameAndPassword(valueToValidate.getUsername(),
-                                        valueToValidate.getPassword(), valueToValidate.getPasswordRepeat()));
+                                        valueToValidate.getPassword(), valueToValidate.getPasswordRepeat(),
+                                        /* reallyUseLeadingOrTrailingSpacesInUsername */ true));
             }
         });
     }

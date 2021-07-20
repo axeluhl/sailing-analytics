@@ -11,7 +11,7 @@
     <div class="logoAndTitlePanel">
         <script>
             if (!${applicationScope['clientConfigurationContext.debrandingActive']}){
-                document.write("<a class=\"sapLogo\" href=\"http://www.sap.com\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n");
+                document.write("<a class=\"sapLogo\" href=\"https://www.sap.com?campaigncode=CRM-XH21-OSP-Sailing\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n");
             }
         </script>
         <div class="sailingAnalyticsLabelPanel">
@@ -23,12 +23,38 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">July 2021</h2>
+                    <ul class="bulletList">
+			<li>Creating and editing a Regatta object now uses the already loaded Events with their course areas
+			    to offer the event and course area selection in the Regatta dialog. This accelerates opening
+			    the dialog significantly, especially when used on a server with many events, such as the archive
+			    server or any public server such as my.sapsailing.com.</li>
+			<li>Fixed a problem with Manage2Sail competitor import which had been introduced when the YachtScoring
+			    competitor import had been added.</li>
+			<li>In order to restrict an overwhelming and uselessly long list of objects to select from, object lists
+			    are now reduced in several more places, based on permissions. For example, a user will only be offered
+			    those Leaderboard Groups for selection in the Event create/edit dialog that the user has the
+			    <tt>UPDATE</tt> permission for. Likewise, the events providing the course areas to select from
+			    are restricted when creating/editing a Regatta or a Flexible Leaderboard and when setting up a
+			    Race Manager App device configuration. The same applies to the
+			    list of events shown in the select box in the Manage2Sail Regatta Structure Import panel. Also,
+			    the leaderboards table in the "Leaderboards / Leaderboard groups" panel now has a filter checkbox
+			    that by default displays only those leaderboards that the user has the <tt>UPDATE</tt> permission
+			    for.</li>
+			<li>A problem with uninitialized race timings may have led to endless loops trying to identify a valid
+			    time range for wind sampling. This has been fixed now.</li>
+			<li>A Slovenian translation of the user interface has been added.</li>
+                    </ul>
                     <h2 class="articleSubheadline">June 2021</h2>
                     <ul class="bulletList">
                         <li>Infer a tracking start/end time from race start/end time only if the regatta is marked accordingly.</li>
                         <li>Bugfix in landscape management: when upgrading a replica set whose SERVER_NAME property does
 			                not equal the hostname used to address it, the temporary replica was trying to replicate
 			                from {SERVER_NAME}.sapsailing.com instead of {hostname}.sapsailing.com.</li>
+			<li>GRIB file import in the "Tracked Races / Wind" panel now turns each position into a separate wind source,
+			    leading to better visual interpolation in streamlet display on map.</li>
+			<li>The de-selection of wind sources for particular races in the tab "Tracked Races / Wind" is now stored persistently.
+			    This way, the de-selection survives re-loading of the race as well as re-starting or upgrading a server.</li>
                     </ul>
                     <h2 class="articleSubheadline">May 2021</h2>
                     <ul class="bulletList">

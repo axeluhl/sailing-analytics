@@ -78,7 +78,13 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
             // Try to encode the caught exception
             Throwable cause = resolveCause(e);
             logger.log(Level.SEVERE, "Uncaught exception, forwarded to client", cause);
-            responsePayload = RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags);
+            try {
+                responsePayload = RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags);
+            } catch (SerializationException se) {
+                logger.warning("Couldn't serialize exception of type " + cause.getClass()
+                + "; serializing a RuntimeException with the message \"" + cause.getMessage() + "\" only.");
+                responsePayload = RPC.encodeResponseForFailure(serviceMethod, new RuntimeException(cause.getMessage()), serializationPolicy, flags);
+            }
         }
         return responsePayload;
     }

@@ -1387,7 +1387,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
-                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent FIXME why not pass through onlyUpToNewestEvent here??? */ true, includeCombinedWindForAllLegMiddles);
+                windSourceTypeNames, trackedRace, onlyUpToNewestEvent, includeCombinedWindForAllLegMiddles);
         return result;
     }
 
@@ -1500,9 +1500,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     /**
+     * @param from
+     *            if {@code null}, start of tracking is used, and if that's not available, start of race is used. If
+     *            that is also {@code null}, {@code null} is returned by the method.
      * @param to
-     *            if <code>null</code>, data is returned up to end of race; if the end of race is not known and
-     *            <code>null</code> is used for this parameter, <code>null</code> is returned.
+     *            if <code>null</code>, data is returned up to end of race or, if that is not available, end of
+     *            tracking; it that is not available either, data is returned up to "now-livedelay"
      * @param onlyUpToNewestEvent
      *            if <code>true</code>, no wind data will be returned for time points later than
      *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
@@ -1517,10 +1520,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
-            TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() == null ? trackedRace
-                    .getStartOfRace() : trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
-            TimePoint toTimePoint = to == null ? trackedRace.getEndOfRace() == null ?
-                    MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace() : new MillisecondsTimePoint(to);
+            TimePoint fromTimePoint = from == null ?
+                    trackedRace.getStartOfTracking() == null ?
+                            trackedRace.getStartOfRace() :
+                            trackedRace.getStartOfTracking() :
+                    new MillisecondsTimePoint(from);
+            TimePoint toTimePoint = to == null ?
+                    trackedRace.getEndOfRace() == null ?
+                            trackedRace.getEndOfTracking() == null ?
+                                    MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) :
+                                    trackedRace.getEndOfTracking() :
+                            trackedRace.getEndOfRace() :
+                    new MillisecondsTimePoint(to);
             if (fromTimePoint != null && toTimePoint != null) {
                 int numberOfFixes = Math.min(SailingServiceConstants.MAX_NUMBER_OF_WIND_FIXES_TO_DELIVER_IN_ONE_CALL,
                         (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds));
@@ -2315,7 +2326,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result.windSourcesToExclude = windSourcesToExclude;
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-
             for (WindSource windSource: trackedRace.getWindSources()) {
                 windTrackInfoDTOs.put(windSource, new WindTrackInfoDTO());
             }
@@ -3466,7 +3476,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
         for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             try {
-                groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData));
+                groupDTO.leaderboards.add(createStrippedLeaderboardDTOWithSecurity(leaderboard, withGeoLocationData, withStatisticalData));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }

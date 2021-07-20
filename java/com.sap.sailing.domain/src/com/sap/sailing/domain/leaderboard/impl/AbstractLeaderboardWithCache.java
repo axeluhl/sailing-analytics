@@ -911,7 +911,9 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                                 // TODO see bug 1358: for now, use waitForLatest==false until we've switched to optimistic locking for the course read lock
                                 /* TODO old comment when it was still true: "because this is done only once after end of tracking" */
                                 /* waitForLatestAnalyses (maneuver and cross track error) */ false,
-                                legRanksCache, cache, rankingInfo);
+                                legRanksCache, cache,
+                                // can't re-use rankingInfo because we're now computing for a different time point:
+                                trackedRace.getRankingMetric().getRankingInfo(end, cache));
                     }
                 });
                 raceDetailsAtEndOfTrackingCache.put(key, raceDetails); // this way, 
@@ -952,13 +954,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final Distance windwardDistanceToCompetitorFarthestAhead = trackedRace == null ? null : trackedRace
                     .getWindwardDistanceToCompetitorFarthestAhead(competitor, timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
             Distance averageAbsoluteCrossTrackError;
-            try {
-                averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(
-                    competitor, timePoint, waitForLatestAnalyses, cache);
-            } catch (NoWindException nwe) {
-                // without wind information, use null meaning "unknown"
-                averageAbsoluteCrossTrackError = null;
-            }
+            averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(
+                competitor, timePoint, waitForLatestAnalyses, cache);
             Distance averageSignedCrossTrackError;
             averageSignedCrossTrackError = trackedRace == null ? null : trackedRace.getAverageSignedCrossTrackError(
                 competitor, timePoint, waitForLatestAnalyses, cache);

@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.google.common.base.Objects;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
@@ -88,15 +90,20 @@ public class RegattaDetailsCompositePO extends PageArea {
     }
     
     public List<String> getRaceNames(String seriesName) {
-        final DataEntryPO seriesEntry = findSeries(seriesName);
-        final String racesColumnContent = seriesEntry.getColumnContent("Races");
-        if (racesColumnContent != null && ! racesColumnContent.isEmpty()) {
-            return Arrays.asList(racesColumnContent.split(", "));
+        try {
+            final DataEntryPO seriesEntry = findSeries(seriesName);
+            final String racesColumnContent = seriesEntry.getColumnContent("Races");
+            if (racesColumnContent != null && ! racesColumnContent.isEmpty()) {
+                return Arrays.asList(racesColumnContent.split(", "));
+            }
+        } catch(StaleElementReferenceException e) {
+            // DOM is currently changing and therefore elements are no longer attached or document was refreshed.
+            return null;
         }
         return Collections.emptyList();
     }
     
     public void waitForRacesOfSeries(final String series, final List<String> races) {
-        waitUntil(() -> getRaceNames(series).equals(races));
+        waitUntil(() -> Objects.equal(getRaceNames(series), races));
     }
 }

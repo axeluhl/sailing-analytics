@@ -22,12 +22,15 @@ import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
 
 /**
  * Subscribes for changes in an {@link IRaceCompetitor} object, such as the {@link IRaceCompetitor#getStatus() status}
- * or {@link IRaceCompetitor#getOfficialFinishTime() the official finishing time} and compares that with what we
- * have in the {@link RaceLog} {@link TrackedRace#getAttachedRaceLogs() attached} to the {@link TrackedRace} to
- * which this receiver belongs. If a valid {@link CompetitorResult} is found for the respective competitor already
- * in the race log that matches the new state of the {@link IRaceCompetitor}, no action is needed. Otherwise,
- * a {@link CompetitorResult} object will be constructed and added in a {@link RaceLogFinishPositioningConfirmedEvent}
- * to the race log from where it will go into the leaderboard.<p>
+ * or {@link IRaceCompetitor#getOfficialFinishTime() the official finishing time} and compares that with what we have in
+ * the {@link RaceLog} {@link TrackedRace#getAttachedRaceLogs() attached} to the {@link TrackedRace} to which this
+ * receiver belongs. If a valid {@link CompetitorResult} is found for the respective competitor already in the race log
+ * that matches the new state of the {@link IRaceCompetitor}, a time stamp comparison is performed. The second component
+ * of the triple enqueued by this receiver represents the time stamp in milliseconds since the epoch (Unix time) telling
+ * when the event was originally created. If older than what we have in the race log already, we'll ignore the event.
+ * Otherwise, a {@link CompetitorResult} object will be constructed and added in a
+ * {@link RaceLogFinishPositioningConfirmedEvent} to the race log from where it will go into the leaderboard.
+ * <p>
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -47,26 +50,26 @@ implements OfficialCompetitorUpdateProvider {
         reconciler.setOfficialCompetitorUpdateProvider(this);
         listener = new IRaceCompetitorListener() {
             @Override
-            public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
+            public void addRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
                 // can't handle competitor list changes once the RaceDefinition exists
                 logger.warning("The competitor "+raceCompetitor+" was added to the race "+getTrackedRace(raceCompetitor.getRace())+
                         " but we don't know how to handle this. Ignoring.");
             }
 
             @Override
-            public void updateRaceCompetitor(IRaceCompetitor raceCompetitor) {
+            public void updateRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
                 enqueue(new Triple<>(raceCompetitor, null, null));
             }
 
             @Override
-            public void deleteRaceCompetitor(UUID competitorId) {
+            public void deleteRaceCompetitor(long timestamp, UUID competitorId) {
                 // can't handle competitor list changes once the RaceDefinition exists
                 logger.warning("The competitor with ID "+competitorId+" was removed from a race "+
                         " but we don't know how to handle this. Ignoring.");
             }
 
             @Override
-            public void removeOffsetPositions(UUID competitorId, int offset) {
+            public void removeOffsetPositions(long timestamp, UUID competitorId, int offset) {
                 // not sure what this means
             }
         };

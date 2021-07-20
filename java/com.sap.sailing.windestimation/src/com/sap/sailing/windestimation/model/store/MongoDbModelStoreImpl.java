@@ -7,10 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 
 import com.mongodb.MongoException;
+import com.mongodb.MongoGridFSException;
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
@@ -33,7 +35,7 @@ import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
  *
  */
 public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
-
+    private static final Logger logger = Logger.getLogger(MongoDbModelStoreImpl.class.getName());
     private final MongoDatabase db;
 
     /**
@@ -136,20 +138,25 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withReadConcern(ReadConcern.MAJORITY);
         for (GridFSFile gridFSFile : gridFs.find()) {
             String fileName = gridFSFile.getFilename();
-            ModelSerializationStrategy serializationStrategy = getModelSerializationStrategyFromPersistenceKey(
-                    fileName);
+            ModelSerializationStrategy serializationStrategy = getModelSerializationStrategyFromPersistenceKey(fileName);
             if (serializationStrategy == null) {
                 throw new ModelLoadingException(
-                        "Persistence support could not be determined due to invalid filename pattern: \"" + fileName
-                                + "\"");
+                        "Persistence support could not be determined due to invalid filename pattern: \"" + fileName + "\"");
             }
-            PersistableModel<?, ?> loadedModel;
-            try (GridFSDownloadStream downloadStream = gridFs.openDownloadStream(fileName)) {
-                loadedModel = serializationStrategy.deserializeFromStream(downloadStream);
-            } catch (IOException e) {
-                throw new ModelLoadingException("Could not read model \"" + fileName + "\" from MongoDB", e);
+            try {
+                PersistableModel<?, ?> loadedModel;
+                try (GridFSDownloadStream downloadStream = gridFs.openDownloadStream(fileName)) {
+                    loadedModel = serializationStrategy.deserializeFromStream(downloadStream);
+                } catch (IOException e) {
+                    throw new ModelLoadingException("Could not read model \"" + fileName + "\" from MongoDB", e);
+                }
+                loadedModels.add(loadedModel);
+            } catch (MongoGridFSException e) {
+                logger.severe("Couldn't load file "+fileName+" while loading persistent models of type "+domainType+
+                        " although the directory listing of bucket "+bucketName+
+                        " said it should be there. Ignoring. Model may be incomplete."+
+                        " If this happens while launching a replica, don't worry... the initial load from the master will fix this.");
             }
-            loadedModels.add(loadedModel);
         }
         return loadedModels;
     }
