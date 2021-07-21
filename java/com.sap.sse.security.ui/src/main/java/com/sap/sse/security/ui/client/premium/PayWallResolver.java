@@ -3,8 +3,10 @@ package com.sap.sse.security.ui.client.premium;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
+import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
 
 public class PayWallResolver {
 
@@ -28,5 +30,14 @@ public class PayWallResolver {
 
     public boolean hasPermission(Action action) {
         return userService.hasPermission(dtoContext, action);
+    }
+    
+    public SubscriptionWriteServiceAsync<?, ?, ?> getSubscriptionWriteService() {
+        try {
+            return subscriptionServiceFactory.getDefaultWriteAsyncService();
+        } catch (InvalidSubscriptionProviderException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

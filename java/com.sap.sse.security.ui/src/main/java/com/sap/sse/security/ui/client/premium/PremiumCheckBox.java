@@ -14,7 +14,7 @@ public abstract class PremiumCheckBox extends Composite {
 
     private final CheckBox checkBox;
     private final Image image;
-    private final HorizontalPanel mainPanel;
+    private final HorizontalPanel layoutPanel;
     private final FocusPanel wrapperPanel;
     private final Action action;
     private final PayWallResolver payWallResolver;
@@ -33,17 +33,17 @@ public abstract class PremiumCheckBox extends Composite {
         this.action = action;
         this.payWallResolver = payWallResolver;
         this.wrapperPanel = new FocusPanel();
-        this.mainPanel = new HorizontalPanel();
-        this.wrapperPanel.add(mainPanel);
+        this.layoutPanel = new HorizontalPanel();
+        this.wrapperPanel.add(layoutPanel);
         this.checkBox = new CheckBox(label);
         if(!payWallResolver.hasPermission(action)) {
             wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver).show());
-            wrapperPanel.getElement().getStyle().setCursor(Cursor.POINTER);
+            layoutPanel.getElement().getStyle().setCursor(Cursor.POINTER);
             checkBox.setEnabled(false);
             image = createPremiumIcon();
-            mainPanel.add(image);
+            layoutPanel.add(image);
             //FIXME: See bug5593 - This message should contain the plan, which would provide the needed access (if the access is not otherwise blocked)
-            mainPanel.setTitle(stringMessages.unlockWithSubscription());
+            layoutPanel.setTitle(stringMessages.unlockWithSubscription());
             image.setWidth("1em");
             image.setHeight("1em");
         }else {
@@ -51,8 +51,8 @@ public abstract class PremiumCheckBox extends Composite {
             image = null;
             checkBox.setEnabled(true);
         }
-        mainPanel.add(checkBox);
-        initWidget(mainPanel);
+        layoutPanel.add(checkBox);
+        initWidget(wrapperPanel);
     }
     
     public PremiumCheckBox(String label, Action action, PayWallResolver payWallResolver, DataEntryDialog<?> dialog) {
