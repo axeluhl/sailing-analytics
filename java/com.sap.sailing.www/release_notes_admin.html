@@ -48,6 +48,8 @@
 		        <li>Empty Igtimi WindBot messages, such as a COG message with no payload, no longer causes an uncaught
 		            exception but is now handled properly and logged accordingly. Other fixes in the same message now
 		            are processed as they should.</li>
+		        <li>After Igtimi changed their WebSocket implementation, we had to lower the heartbeat sending interval
+		            from 120s to 15s which now avoids connection interrupts.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2021</h2>
                     <ul class="bulletList">
