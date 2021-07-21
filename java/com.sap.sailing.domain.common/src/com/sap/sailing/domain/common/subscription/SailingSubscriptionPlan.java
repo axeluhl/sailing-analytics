@@ -21,15 +21,14 @@ public class SailingSubscriptionPlan extends SubscriptionPlan{
     private static final long serialVersionUID = 2563619370274543312L;
     private static final Map<String, SubscriptionPlan> plansById = new HashMap<>();
     
-    private SailingSubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features) {
-        super(id, name, roles, features);
+    private SailingSubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features, String price) {
+        super(id, name, roles, features, price);
         plansById.put(id, this);
     }
     
     public static final SubscriptionPlan PRO = new SailingSubscriptionPlan ("pro", "PRO", new SubscriptionPlanRole[] {
             new SubscriptionPlanRole(StreamletViewerRole.ROLE_ID)},
-            convertPermissionsIterable(StreamletViewerRole.getInstance().getPermissions())
-            );
+            convertPermissionsIterable(StreamletViewerRole.getInstance().getPermissions()), "99$");
     
     public static Map<Serializable, SubscriptionPlan> getAllInstances(){
         return Collections.unmodifiableMap(plansById);

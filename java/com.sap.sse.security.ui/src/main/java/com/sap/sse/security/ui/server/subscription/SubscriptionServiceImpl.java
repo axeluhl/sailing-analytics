@@ -61,7 +61,7 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         Set<SubscriptionPlanDTO> allSubscriptionPlanDTOs = new HashSet<>();
         for (SubscriptionPlan subscriptionPlan : allSubscriptionPlans) {
             allSubscriptionPlanDTOs.add(new SubscriptionPlanDTO(subscriptionPlan.getId(), subscriptionPlan.getName(),
-                    subscriptionPlan.getFeatures(), null));
+                    subscriptionPlan.getFeatures(), subscriptionPlan.getPrice(), null));
         }
         return allSubscriptionPlanDTOs;
     }
@@ -72,7 +72,7 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         for (Entry<Serializable, SubscriptionPlan> subscriptionPlan : getSecurityService().getAllSubscriptionPlans()
                 .entrySet()) {
             SubscriptionPlanDTO subscriptionPlanDTO = new SubscriptionPlanDTO(subscriptionPlan.getKey().toString(), 
-                    subscriptionPlan.getValue().getName(), subscriptionPlan.getValue().getFeatures(), null);
+                    subscriptionPlan.getValue().getName(), subscriptionPlan.getValue().getFeatures(), subscriptionPlan.getValue().getPrice(), null);
             allSubscriptionPlans.put(subscriptionPlan.getKey(), subscriptionPlanDTO);
         }
         return allSubscriptionPlans;

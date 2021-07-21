@@ -20,16 +20,18 @@ public abstract class SubscriptionPlan implements NamedWithID{
     private final String name;
     private final String id;
     private final List<String> features;
+    private final String price;
     /**
      * Roles assigned for this plan, if user subscribe to the plan then the user will be assigned these roles
      */
     private final SubscriptionPlanRole[] roles;
     
-    protected SubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features) {
+    protected SubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features, String price) {
         this.name = name;
         this.id = id;
         this.features = features;
         this.roles = roles;
+        this.price = price;
     }
     
     @Override
@@ -48,6 +50,10 @@ public abstract class SubscriptionPlan implements NamedWithID{
 
     public List<String> getFeatures() {
         return features;
+    }
+    
+    public String getPrice() {
+        return price;
     }
     
     @SafeVarargs

@@ -28,8 +28,7 @@ public class SSESubscriptionPlan extends SubscriptionPlan {
             new SubscriptionPlanRole(PredefinedRoles.mediaeditor.getId(),
                     SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
                     SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) },
-            convertPermissionsIterable(PredefinedRoles.spectator.getPermissions(), PredefinedRoles.mediaeditor.getPermissions())
-            );
+            convertPermissionsIterable(PredefinedRoles.spectator.getPermissions(), PredefinedRoles.mediaeditor.getPermissions()), "99$");
     public static final SSESubscriptionPlan PREMIUM = new SSESubscriptionPlan("premium", "Premium", new SubscriptionPlanRole[] {
             new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
                     SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
@@ -38,11 +37,10 @@ public class SSESubscriptionPlan extends SubscriptionPlan {
                     SubscriptionPlanRole.GroupQualificationMode.SUBSCRIBING_USER_DEFAULT_TENANT,
                     SubscriptionPlanRole.UserQualificationMode.NONE) 
             }, 
-            convertPermissionsIterable(PredefinedRoles.spectator.getPermissions(), PredefinedRoles.moderator.getPermissions())
-            );
+            convertPermissionsIterable(PredefinedRoles.spectator.getPermissions(), PredefinedRoles.moderator.getPermissions()), "99$");
 
-    private SSESubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features) {
-        super(id, name, roles, features);
+    private SSESubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features, String price) {
+        super(id, name, roles, features, price);
         plansById.put(id, this);
     }
     

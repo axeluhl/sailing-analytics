@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.shared.subscription;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -13,9 +14,11 @@ public class SubscriptionPlanDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = -1990028347487353679L;
     String id;
 
-    List<String> features;
+    ArrayList<String> features;
 
     private String error;
+    
+    private String price;
 
     /**
      * For GWT Serialization only
@@ -24,10 +27,11 @@ public class SubscriptionPlanDTO extends NamedDTO implements IsSerializable {
     public SubscriptionPlanDTO() {
     }
 
-    public SubscriptionPlanDTO(String id, String name, List<String> features, String error) {
+    public SubscriptionPlanDTO(String id, String name, List<String> features, String price, String error) {
         super(name);
         this.id = id;
-        this.features = features;
+        this.features = new ArrayList<String>(features);
+        this.price = price;
         this.error = error;
     }
     
@@ -41,5 +45,13 @@ public class SubscriptionPlanDTO extends NamedDTO implements IsSerializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+    
+    public ArrayList<String> getFeatures() {
+        return features;
+    }
+
+    public String getPrice() {
+        return price;
     }
 }
