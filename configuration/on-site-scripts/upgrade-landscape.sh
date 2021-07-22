@@ -22,7 +22,7 @@ if [ $# -eq 0 ]; then
     echo ""
     echo "-b replication bearer token; mandatory"
     echo "-i Amazon Machine Image (AMI) ID to use to launch the instance; defaults to latest image tagged with image-type:sailing-analytics-server"
-    echo "-k Key pair name, mapping to the --key-name parameter"
+    echo "-k Key pair name, mapping to the --key-name parameter; defaults to Axel"
     echo "-R release name; must be provided to select the release, e.g., build-202106040947"
     echo "-t Instance type; defaults to ${INSTANCE_TYPE}"
     echo "-s Skip release download"
