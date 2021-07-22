@@ -421,7 +421,7 @@ One way to monitor the health and replication status of the replica set is runni
 
 It shows the replication state and in particular the delay of the replicas. A cronjob exists for ``sailing@sap-p1-1`` which triggers ``/usr/local/bin/monitor-mongo-replica-set-delay`` every minute which will use ``/usr/local/bin/notify-operators`` in case the average replication delay for the last ten read-outs exceeds a threshold (currently 3s). We have a cron job monitoring this (see above) and sending out alerts if things start slowing down.
 
-In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@tokyo-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017,sap-p1-2/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
+In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db-safe-exit`` script (versioned in git under ``configuration/on-site-scripts/clone-security-service-db-safe-exit``) once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@tokyo-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017,sap-p1-2/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
 
 ```
     db.copyDatabase("security_service_bak", "security_service")
@@ -545,28 +545,105 @@ The ``Event`` object is owned by ``tokyo2020-moderators``, and that group grants
 
 ## Landscape Upgrade Procedure
 
-update git on all replicas
-stop replication on all cloud replicas:
+In the ``configuration/on-site-scripts`` we have prepared a number of scripts intended to be useful for local and cloud landscape management. TL;DR:
 ```
-$ for i in `./get-replica-ips`; do ssh -o StrictHostKeyChecking=no sailing@$i "cd /home/sailing/servers/tokyo2020; /home/sailing/code/java/target/stopReplicating.sh 4qUrxMVQanLghETmM95XX3fshkHK0wNAQycuPAVNW0E="; done
+	configuration/on-site-scripts/upgrade-landscape.sh -R {release-name} -b {replication-bearer-token}
 ```
+will upgrade the entire landscape to the release ``{release-name}`` (e.g., build-202107210711). The ``{replication-bearer-token}`` must be provided such that the user authenticated by that token will have the permission to stop replication and to replicate the ``tokyo2020`` master.
 
-stop replication on-site
+The script will proceed in the following steps:
+ - patch ``*.conf`` files in ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]`` so
+   their ``INSTALL_FROM_RELEASE`` points to the new ``${RELEASE}``
+ - Install new releases to ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]``
+ - Update all launch configurations and auto-scaling groups in the cloud (``update-launch-configuration.sh``)
+ - Tell all replicas in the cloud to stop replicating (``stop-all-cloud-replicas.sh``)
+ - Tell ``sap-p1-2`` to stop replicating
+ - on ``sap-p1-1:servers/master`` run ``./stop; ./start`` to bring the master to the new release
+ - wait until master is healthy
+ - on ``sap-p1-2:servers/replica`` run ``./stop; ./start`` to bring up on-site replica again
+ - launch upgraded cloud replicas and replace old replicas in target group (``launch-replicas-in-all-regions.sh``)
+ - terminate all instances named "SL Tokyo2020 (auto-replica)"; this should cause the auto-scaling group to launch new instances as required
+ - manually inspect the health of everything and terminate the "SL Tokyo2020 (Upgrade Replica)" instances when enough new instances
+   named "SL Tokyo2020 (auto-replica)" are available
 
-put release in /home/trac/
+The individual scripts will be described briefly in the following sub-sections. Many of them use as a common artifact the ``regions.txt`` file which contains the list of regions in which operations are executed. The ``eu-west-1`` region as our "legacy" or "primary" region requires special attention in some cases. In particular, it can use the ``live`` replica set for the replicas started in the region, also because the AMI used in this region is slightly different and in particular doesn't launch a MongoDB local replica set on each instance which the AMIs in all other regions supported do.
 
-refresh instance stop start on sap-p1-1 / on-site master
+### clone-security-service-db-safe-exit
 
-after on-site master is healthy / available register cloud master forwarder to target groups, pay attention in eu-west-1 webserver instance works as cloud master forwarder
+Creates a ``mongodump`` of "mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com,dbserver.internal.sapsailing.com:10203/security_service?replicaSet=live&retryWrites=true&readPreference=nearest" on the ``tokyo-ssh.sapsailing.com`` host and packs it into a ``.tar.gz`` file. This archive is then transferred as the standard output of an SSH command to the host executing the script where it is unpacked into ``/tmp/dump``. The local "mongodb://localhost/security_service_bak?replicaSet=security_service&retryWrites=true&readPreference=nearest" backup copy is then dropped, the local ``security_service`` DB is moved to ``security_service_bak``, and the dump from ``/tmp/dump`` is then restored to ``security_service``. If this fails, the backup from ``security_service_bak`` is restored to ``security_service``, and there won't be a backup copy anymore in ``security_service_bak`` anymore.
 
-./stop /start on on-site replica
+The script is used as a CRON job for user ``sailing@sap-p1-1``.
 
-launch more like this with new user data, append (manual) to name of instance, make sure master target group has a healthy target.
+### get-replica-ips
 
-check :8888/gwt/status , if initial load is not starting most probably registration to master has failed (check log for Exception), if so login and do stop & start
+Lists the public IP addresses of all running replicas in the regions described in ``regions.txt`` on its standard output. Progress information will be sent to standard error. Example invocation:
+<pre>
+	$ ./get-replica-ips
+	Region: eu-west-1
+	Region: ap-northeast-1
+	Region: ap-southeast-2
+	Region: us-west-1
+	Region: us-east-1
+	 34.245.148.130 18.183.234.161 3.26.60.130 13.52.238.81 18.232.169.1
+</pre>
 
-edit target group, deregister and register in the same window, save changes
+### launch-replicas-in-all-regions.sh
 
-terminate old auto-replica
+Will launch as many new replicas in the regions listed in ``regions.txt`` with the release specified with ``-R`` as there are currently healthy auto-replicas registered with the ``S-ded-tokyo2020`` target group in the region (at least one) which will register at the master proxy ``tokyo-ssh.internal.sapsailing.com:8888`` and RabbitMQ at ``rabbit-ap-northeast-1.sapsailing.com:5672``, then when healthy get added to target group ``S-ded-tokyo2020`` in that region, with all auto-replicas registered before removed from the target group.
 
-wait for autoscaling group to create a new autoscaling instance, after healthy terminate manually launched instance/replica
+The script uses the ``launch-replicas-in-region.sh`` script for each region where replicas are to be launched.
+
+Example invocation:
+<pre>
+	launch-replicas-in-all-regions.sh -R build-202107210711 -b 1234567890ABCDEFGH/+748397=
+</pre>
+
+Invoke without arguments to see a documentation of possible parameters.
+
+### launch-replicas-in-region.sh
+
+Will launch one or more (see ``-c``) new replicas in the AWS region specified with ``-g`` with the release specified with ``-R`` which will register at the master proxy ``tokyo-ssh.internal.sapsailing.com:8888`` and RabbitMQ at ``rabbit-ap-northeast-1.sapsailing.com:5672``, then when healthy get added to target group ``S-ded-tokyo2020`` in that region, with all auto-replicas registered before removed from the target group. Specify ``-r`` and ``-p`` if you are launching in ``eu-west-1`` because it has a special non-default MongoDB environment.
+
+Example invocation:
+<pre>
+	launch-replicas-in-region.sh -g us-east-1 -R build-202107210711 -b 1234567890ABCDEFGH/+748397=
+</pre>
+
+Invoke without arguments to see a documentation of possible parameters.
+
+### stop-all-cloud-replicas.sh
+
+Will tell all replicas in the cloud in those regions described by the ``regions.txt`` file to stop replicating. This works by invoking the ``get-replica-ips script`` and for each of them to stop replicating, using the ``stopReplicating.sh`` script in their ``/home/sailing/servers/tokyo2020`` directory, passing through the bearer token. Note: this will NOT stop replication on the local replica on ``sap-p1-2``!
+
+The script must be invoked with the bearer token needed to authenticate a user with replication permission for the ``tokyo2020`` application replica set.
+
+Example invocation:
+<pre>
+	stop-all-cloud-replicas.sh -b 1234567890ABCDEFGH/+748397=
+</pre>
+
+Invoke without arguments to see a documentation of possible parameters.
+
+### update-launch-configuration.sh
+
+Will upgrade the auto-scaling group ``tokyo2020*`` (such as ``tokyo2020-auto-replicas``) in the regions from ``regions.txt`` with a new launch configuration that will be derived from the existing launch configuration named ``tokyo2020-*`` by copying it to ``tokyo2020-{RELEASE_NAME}`` while updating the ``INSTALL_FROM_RELEASE`` parameter in the user data to the ``{RELEASE_NAME}`` provided in the ``-R`` parameter, and optionally adjusting the AMI, key pair name and instance type if specified by the respective parameters. Note: this will NOT terminate any instances in the target group!
+
+Example invocation:
+<pre>
+	update-launch-configuration.sh -R build-202107210711
+</pre>
+
+Invoke without arguments to see a documentation of possible parameters.
+
+### upgrade-landscape.sh
+
+See the introduction of this main section. Synopsis:
+<pre>
+  ./upgrade-landscape.sh -R &lt;release-name&gt; -b &lt;replication-bearer-token&gt; \[-t &lt;instance-type&gt;\] \[-i &lt;ami-id&gt;\] \[-k &lt;key-pair-name&gt;\] \[-s\]<br>
+	-b replication bearer token; mandatory
+	-i Amazon Machine Image (AMI) ID to use to launch the instance; defaults to latest image tagged with image-type:sailing-analytics-server
+	-k Key pair name, mapping to the --key-name parameter
+	-R release name; must be provided to select the release, e.g., build-202106040947
+	-t Instance type; defaults to
+	-s Skip release download
+</pre>

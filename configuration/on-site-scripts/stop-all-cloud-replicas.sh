@@ -5,6 +5,11 @@ if [ $# -eq 0 ]; then
     echo "-b replication bearer token; mandatory"
     echo
     echo "Example: $0 -b 7345983275087320/59870hfly945="
+    echo
+    echo "Will tell all replicas in the cloud to stop replicating. This works by invoking the"
+    echo "get-replica-ips script and for each of them to stop replicating, using the stopReplicating.sh"
+    echo "script in their /home/sailing/servers/tokyo2020 directory, passing through the bearer token."
+    echo "Note: this will NOT stop replication on the local replica on sap-p1-2!"
     exit 2
 fi
 options='b:'
