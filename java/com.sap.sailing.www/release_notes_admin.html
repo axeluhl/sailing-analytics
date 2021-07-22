@@ -44,6 +44,12 @@
 			<li>A problem with uninitialized race timings may have led to endless loops trying to identify a valid
 			    time range for wind sampling. This has been fixed now.</li>
 			<li>A Slovenian translation of the user interface has been added.</li>
+		        <li>The IOC code for "Russian Olympic Committee" is now available under the "ROC" abbreviation.</li>
+		        <li>Empty Igtimi WindBot messages, such as a COG message with no payload, no longer causes an uncaught
+		            exception but is now handled properly and logged accordingly. Other fixes in the same message now
+		            are processed as they should.</li>
+		        <li>After Igtimi changed their WebSocket implementation, we had to lower the heartbeat sending interval
+		            from 120s to 15s which now avoids connection interrupts.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2021</h2>
                     <ul class="bulletList">

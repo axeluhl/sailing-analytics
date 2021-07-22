@@ -28,12 +28,21 @@ if [ $# -eq 0 ]; then
     echo "-s Skip release download"
     echo
     echo "Example: $0 -R build-202106041327 -k Jan"
-    echo
-    echo "Will upgrade the auto-scaling group tokyo2020-* in the regions from regions.txt with a new"
-    echo "launch configuration that will be derived from the existing launch configuration named tokyo2020-*"
-    echo "by copying it to tokyo2020-{RELEASE_NAME} while updating the INSTALL_FROM_RELEASE parameter in the"
-    echo "user data to the {RELEASE_NAME}, and optionally adjuting the AMI, key pair name and instance type if specified."
-    echo "Note: this will NOT terminate any instances in the target group!"
+
+    echo "The procedure works in the following steps:"
+    echo " - patch *.conf files in sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[replica|master|security_service] so"
+    echo "   their INSTALL_FROM_RELEASE points to the new ${RELEASE}"
+    echo " - Install new releases to sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[replica|master|security_service]"
+    echo " - Update all launch configurations and auto-scaling groups in the cloud (update-launch-configuration.sh)"
+    echo " - Tell all replicas in the cloud to stop replicating (stop-all-cloud-replicas.sh)"
+    echo " - Tell sap-p1-2 to stop replicating"
+    echo " - on sap-p1-1:servers/master run ./stop; ./start to bring the master to the new release"
+    echo " - wait until master is healthy"
+    echo " - on sap-p1-2:servers/replica run ./stop; ./start to bring up on-site replica again"
+    echo " - launch upgraded cloud replicas and replace old replicas in target group (launch-replicas-in-all-regions.sh)"
+    echo " - terminate all instances named \"SL Tokyo2020 (auto-replica)\"; this should cause the auto-scaling group to launch new instances as required"
+    echo " - manually inspect the health of everything and terminate the \"SL Tokyo2020 (Upgrade Replica)\" instances when enough new instances"
+    echo "   named \"SL Tokyo2020 (auto-replica)\" are available"
     exit 2
 fi
 options='R:b:t:i:k:s'
