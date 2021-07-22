@@ -332,6 +332,21 @@ The ``monitor-mongo-replica-set-delay`` looks as the result of calling ``rs.prin
 
 The ``monitor-disk-usage`` script checks the partition holding ``/var/lib/mongodb/``. Should it fill up to more than 90%, an alert will be sent using ``notify-operators``.
 
+### Time Synchronizing
+Setup chronyd service on desktop machine, in order to regurlary connect via VPN and relay the time towards the two P1s. Added
+```
+# Tokyo2020 configuration
+server 10.1.3.221 iburst
+```
+to ``/etc/chrony/chrony.conf`` on the clients.
+Added
+```
+# FOR TOKYO SERVER SETUP
+allow all
+local stratum 10
+```
+to the server file, started ```chronyd``` service.
+
 ## AWS Setup
 
 Our primary AWS region for the event will be Tokyo (ap-northeast-1). There, we have reserved the elastic IP ``52.194.91.94`` to which we've mapped the Route53 hostname ``tokyo-ssh.sapsailing.com`` with a simple A-record. The host assigned to the IP/hostname is to be used as a "jump host" for SSH tunnels. It runs Amazon Linux with a login-user named ``ec2-user``. The ``ec2-user`` has ``sudo`` permission. In the root user's crontab we have the same set of scripts hooked up that in our eu-west-1 production landscape is responsible for obtaining and installing the landscape manager's SSH public keys to the login user's account, aligning the set of ``authorized_keys`` with those of the registered landscape managers (users with permission ``LANDSCAPE:MANAGE:AWS``). The ``authorized_keys.org`` file also contains the two public SSH keys of the ``sailing`` accounts on the two laptops, so each time the script produces a new ``authorized_keys`` file for the ``ec2-user``, the ``sailing`` keys for the laptop tunnels don't get lost.
