@@ -138,7 +138,7 @@ fi
 `dirname $0`/launch-replicas-in-all-regions.sh ${OPTIONS}
 EXIT_CODE=$?
 if [ "${EXIT_CODE}" != "0" ]; then
-  echo "Lanuching replicas in the regions failed with exit code ${EXIT_CODE}"
+  echo "Launching replicas in the regions failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
 read -p "Press ENTER to terminate all ${INSTANCE_NAME_TO_TERMINATE} instances"
