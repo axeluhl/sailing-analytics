@@ -65,7 +65,7 @@ implements OfficialCompetitorUpdateProvider {
             public void deleteRaceCompetitor(long timestamp, UUID competitorId) {
                 // can't handle competitor list changes once the RaceDefinition exists
                 logger.warning("The competitor with ID "+competitorId+" was removed from a race "+
-                        " but we don't know how to handle this. Ignoring.");
+                        "but we don't know how to handle this. Ignoring.");
             }
 
             @Override
