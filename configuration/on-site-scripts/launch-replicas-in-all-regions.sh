@@ -66,6 +66,7 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
     OPTIONS="${OPTIONS} -t ${INSTANCE_TYPE}"
   fi
   echo "Invoking launch-replicas-in-region.sh with options ${OPTIONS}"
-  `dirname $0`/launch-replicas-in-region.sh ${OPTIONS} 
+  `dirname $0`/launch-replicas-in-region.sh ${OPTIONS} &
+  echo "Waiting a minute now after having asked for replica launch in region ${REGION} to avoid overloading master with initial load requests"
+  sleep 60
 done
-

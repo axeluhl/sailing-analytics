@@ -50,6 +50,8 @@
 		            are processed as they should.</li>
 		        <li>After Igtimi changed their WebSocket implementation, we had to lower the heartbeat sending interval
 		            from 120s to 15s which now avoids connection interrupts.</li>
+		        <li>The <tt>/sailingserver/api/v2/leaderboards/{leaderboard-name}</tt> API now also delivers the
+		            <tt>currentSpeedOverGround-kts</tt> field if the competitor is not yet in the race.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2021</h2>
                     <ul class="bulletList">

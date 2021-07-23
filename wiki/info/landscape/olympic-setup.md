@@ -72,7 +72,7 @@ There are also still two personal accounts ``uhl`` and ``tim`` and an Eclipse de
 
 ### Hostnames
 
-We assume not to have DNS available on site. Therefore, for now, we have decided for host names ``sap-p1-1`` and ``sap-p1-2`` for which we have created entries in both laptops' ``/etc/hosts`` file. Currently, when testing in the SAP facilities with the SAP Guest WiFi, possibly changing IP addresses have to be updated there.
+DNS is available on site on the gateway host ``10.1.0.6``. This is essential for resolving ``www.igtimi.com``, the AWS SES SMTP server at ``email-smtp.eu-west-1.amazonaws.com`` and all e-mail address's domains for sendmail's domain verification. The DNS server is set for both, ``sap-p1-1`` and ``sap-p1-2``. It can be set from the command line using ``nmcli connection modify Wired\ connection\ 2 ipv4.dns "10.1.0.6"; nmcli connection down Wired\ connection\ 2; nmcli connection up Wired\ connection\ 2``. Currently, when testing in the SAP facilities with the SAP Guest WiFi, possibly changing IP addresses have to be updated in ``/etc/hosts``.
 
 The domain name has been set to ``sapsailing.com`` so that the fully-qualified host names are ``sap-p1-1.sapsailing.com`` and ``sap-p1-2.sapsailing.com`` respectively. Using this domain name is helpful later when it comes to the shared security realm established with the central ``security-service.sapsailing.com`` replica set.
 

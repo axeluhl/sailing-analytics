@@ -67,7 +67,7 @@ i=0
 while [ ${i} -lt ${COUNT} ]; do
   SUBNET_INDEX=$(( $RANDOM * $NUMBER_OF_SUBNETS / 32768 ))
   SUBNET_ID=$( echo "${SUBNETS}" | jq -r '.Subnets['${SUBNET_INDEX}'].SubnetId' )
-  echo "Launching image with ID ${IMAGE_ID} into subnet #${SUBNET_INDEX} with ID ${SUBNET_ID} in VPC ${VPC_ID}"
+  echo "Launching image with ID ${IMAGE_ID} into subnet #${SUBNET_INDEX} in region ${REGION} with ID ${SUBNET_ID} in VPC ${VPC_ID}"
   PRIVATE_IP_AND_INSTANCE_ID=$( aws --region ${REGION} ec2 run-instances --subnet-id ${SUBNET_ID} --instance-type ${INSTANCE_TYPE} --security-group-ids ${SECURITY_GROUP_ID} --image-id ${IMAGE_ID} --user-data "INSTALL_FROM_RELEASE=${RELEASE}
 SERVER_NAME=tokyo2020
 MONGODB_URI=\"mongodb://${REPLICA_SET_PRIMARY}/tokyo2020-replica?replicaSet=${REPLICA_SET_NAME}&retryWrites=true&readPreference=nearest\"
@@ -82,7 +82,7 @@ REPLICATE_MASTER_BEARER_TOKEN=${BEARER_TOKEN}
 ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)},{Key=sailing-analytics-server,Value=tokyo2020}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress + " " + .Instances[].InstanceId' )
   EXIT_CODE=$?
   if [ "${EXIT_CODE}" != "0" ]; then
-    echo "Error launching instance. Exiting with status ${EXIT_CODE}"
+    echo "Error launching instance in region ${REGION}. Exiting with status ${EXIT_CODE}"
     exit ${EXIT_CODE}
   fi
   PRIVATE_IP=$( echo ${PRIVATE_IP_AND_INSTANCE_ID} | awk '{print $1;}' )
@@ -94,9 +94,9 @@ ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" 
     INSTANCE_IDS="${INSTANCE_IDS},Id=${INSTANCE_ID}"
   fi
   # Now wait for those instances launched to become available
-  echo "Waiting for instance with private IP ${PRIVATE_IP} to become healthy..."
+  echo "Waiting for instance with private IP ${PRIVATE_IP} in region ${REGION} to become healthy..."
   while ! ssh -A -o StrictHostKeyChecking=no ec2-user@tokyo-ssh.sapsailing.com "ssh -o StrictHostKeyChecking=no root@${PRIVATE_IP} \"cd /home/sailing/servers/tokyo2020; ./status >/dev/null\""; do
-    echo "${PRIVATE_IP} still not healthy. Trying again in 10s..."
+    echo "${PRIVATE_IP} in region ${REGION} still not healthy. Trying again in 10s..."
     sleep 10
   done
   i=$(( i + 1 ))
@@ -110,14 +110,14 @@ for OLD_VERSION_TARGET_ID in ${OLD_VERSION_TARGET_IDS}; do
     TARGET_IDS_TO_DEREGISTER="${TARGET_IDS_TO_DEREGISTER},Id=${OLD_VERSION_TARGET_ID}"
   fi
 done
-echo "Registering instances ${INSTANCE_IDS} with target group ${TARGET_GROUP_NAME}"
+echo "Registering instances ${INSTANCE_IDS} with target group ${TARGET_GROUP_NAME} in region ${REGION}"
 aws elbv2 register-targets --target-group-arn ${TARGET_GROUP_ARN} --targets ${INSTANCE_IDS}
 EXIT_CODE=$?
 if [ "${EXIT_CODE}" = "0" ]; then
-  echo "Registering instances was successful."
-  echo "De-registering old instances ${TARGET_IDS_TO_DEREGISTER} from target group ${TARGET_GROUP_NAME}"
+  echo "Registering instances in region ${REGION} was successful."
+  echo "De-registering old instances ${TARGET_IDS_TO_DEREGISTER} from target group ${TARGET_GROUP_NAME} in region ${REGION}"
   aws elbv2 deregister-targets --target-group-arn ${TARGET_GROUP_ARN} --targets ${TARGET_IDS_TO_DEREGISTER}
 else
-  echo "Registering instances failed with exit code $?; not de-registering old instances."
+  echo "Registering instances in region ${REGION} failed with exit code $?; not de-registering old instances."
   exit ${EXIT_CODE}
 fi
