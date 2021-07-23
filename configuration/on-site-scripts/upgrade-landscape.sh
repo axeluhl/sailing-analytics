@@ -156,5 +156,7 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
       exit ${EXIT_CODE}
     fi
   done
+  echo " * Waiting for new auto-replicas to become available in region ${REGION}, then terminating upgrade replicas..."
+  `dirname $0`/wait-for-new-auto-replicas-and-terminate-upgrade-replicas.sh -g ${REGION} &
 done
 echo " * DONE"
