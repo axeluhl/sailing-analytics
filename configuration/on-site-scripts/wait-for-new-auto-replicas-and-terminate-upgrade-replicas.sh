@@ -26,23 +26,22 @@ do
             exit 4;;
     esac
 done
-if [ -n "${REGION}" ]; then
-  export AWS_DEFAULT_REGION=${REGION}
-fi
+export AWS_DEFAULT_REGION=${REGION}
 TARGET_GROUP_ARN=$( aws elbv2 describe-target-groups --names ${TARGET_GROUP_NAME} | jq -r '.TargetGroups[].TargetGroupArn' )
 echo "Found target group with name ${TARGET_GROUP_NAME} and ARN ${TARGET_GROUP_ARN}"
 
 UPGRADE_REPLICA_IDS=$( aws ec2 describe-instances --filters Name=tag:Name,Values="${UPGRADE_REPLICA_NAME}" | jq -r '.Reservations[].Instances[].InstanceId' )
-NUMBER_OF_UPGRADE_REPLICAS=$( echo ${UPGRADE_REPLICA_IDS} | wc )
+NUMBER_OF_UPGRADE_REPLICAS=$( echo ${UPGRADE_REPLICA_IDS} | wc -w )
 echo "Found ${NUMBER_OF_UPGRADE_REPLICAS} upgrade replicas. Waiting until we see this many auto-replicas named ${AUTO_REPLICA_NAME}..."
 TOTAL_NUMBER_OF_TOTAL_REPLICAS_TO_WAIT_FOR=$(( 2 * ${NUMBER_OF_UPGRADE_REPLICAS} ))
-NUMBER_OF_TOTAL_HEALTHY_REPLICAS=$( aws --region eu-west-2 elbv2 describe-target-health --target-group-arn ${TARGET_GROUP_ARN} | jq '.TargetHealthDescriptions | map(select(.TargetHealth.State=="healthy")) | length' )
+NUMBER_OF_TOTAL_HEALTHY_REPLICAS=$( aws elbv2 describe-target-health --target-group-arn ${TARGET_GROUP_ARN} | jq '.TargetHealthDescriptions | map(select(.TargetHealth.State=="healthy")) | length' )
 while [ ${NUMBER_OF_TOTAL_HEALTHY_REPLICAS} -lt ${TOTAL_NUMBER_OF_TOTAL_REPLICAS_TO_WAIT_FOR} ]; do
   echo "Found ${NUMBER_OF_TOTAL_HEALTHY_REPLICAS} healthy replicas so far; waiting until we see ${TOTAL_NUMBER_OF_TOTAL_REPLICAS_TO_WAIT_FOR}..."
+  NUMBER_OF_TOTAL_HEALTHY_REPLICAS=$( aws elbv2 describe-target-health --target-group-arn ${TARGET_GROUP_ARN} | jq '.TargetHealthDescriptions | map(select(.TargetHealth.State=="healthy")) | length' )
   sleep 10
 done
 echo "Found a total of ${TOTAL_NUMBER_OF_TOTAL_REPLICAS_TO_WAIT_FOR} healthy replicas in target group ${TARGET_GROUP_NAME}. Terminating ${UPGRADE_REPLICA_NAME} replicas..."
 for UPGRADE_REPLICA_ID in ${UPGRADE_REPLICA_IDS}; do
   echo "Terminating instance with ID ${UPGRADE_REPLICA_ID}..."
-  aws ec2 terminate-instance --instance-ids ${UPGRADE_REPLICA_ID}
+  aws ec2 terminate-instances --instance-ids ${UPGRADE_REPLICA_ID}
 done

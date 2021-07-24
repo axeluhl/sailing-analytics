@@ -38,7 +38,7 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
   echo "-------------------------------------------------------"
   TARGET_GROUP_ARN=$( aws elbv2 describe-target-groups --names ${TARGET_GROUP_NAME} | jq -r '.TargetGroups[].TargetGroupArn' )
   HEALTHY_TARGETS_IN_REGION=$( aws elbv2 describe-target-health --target-group-arn ${TARGET_GROUP_ARN} | jq '.TargetHealthDescriptions | map(select(.TargetHealth.State == "healthy")) | length' )
-  echo "Found ${HEALTHY_TARGETS_IN_REGION} healthy targets in target group ${TARGET_GROUP_NAME} in region."
+  echo "Found ${HEALTHY_TARGETS_IN_REGION} healthy targets in target group ${TARGET_GROUP_NAME} in region ${REGION}."
   if [ ${HEALTHY_TARGETS_IN_REGION} = 0 ]; then
     echo "Launching at least one replica."
     HEALTHY_TARGETS_IN_REGION=1

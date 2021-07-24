@@ -141,6 +141,7 @@ if [ "${EXIT_CODE}" != "0" ]; then
   echo "Launching replicas in the regions failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
+wait
 read -p "Press ENTER to terminate all ${INSTANCE_NAME_TO_TERMINATE} instances"
 echo " * Terminating all instances named ${INSTANCE_NAME_TO_TERMINATE} to force auto-scaling group to launch and register upgraded ones"
 for REGION in $( cat `dirname $0`/regions.txt ); do
@@ -159,4 +160,5 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
   echo " * Waiting for new auto-replicas to become available in region ${REGION}, then terminating upgrade replicas..."
   `dirname $0`/wait-for-new-auto-replicas-and-terminate-upgrade-replicas.sh -g ${REGION} &
 done
+wait
 echo " * DONE"
