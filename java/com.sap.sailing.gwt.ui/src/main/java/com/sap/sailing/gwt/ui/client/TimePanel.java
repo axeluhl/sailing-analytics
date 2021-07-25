@@ -462,23 +462,20 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
      */
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
-
-        final Optional<Pair<Double, Double>> changed;
-        changed = timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
+        final Optional<Pair<Double, Double>> changed =
+                timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
         if (changed.isPresent()) {
             final Double changedMin = changed.get().getA();
             final Double changedMax = changed.get().getB();
             if (!timeRangeProvider.isZoomed()) {
                 timeRangeProvider.setTimeRange(new Date(changedMin.longValue()), new Date(changedMax.longValue()), this);
             }
-
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
                 timeSlider.setStepSize(numSteps, fireEvent);
             } else {
                 timeSlider.setStepSize(1000, fireEvent);
             }
-
             // Christopher: following setCurrentValue requires stepsize to be set <> 0 (otherwise division by zero; NaN)
             if (timeSlider.getCurrentValue() == null) {
                 timeSlider.setCurrentValue(changedMin, fireEvent);
