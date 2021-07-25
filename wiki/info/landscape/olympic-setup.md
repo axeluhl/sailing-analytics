@@ -76,6 +76,8 @@ DNS is available on site on the gateway host ``10.1.0.6``. This is essential for
 
 The domain name has been set to ``sapsailing.com`` so that the fully-qualified host names are ``sap-p1-1.sapsailing.com`` and ``sap-p1-2.sapsailing.com`` respectively. Using this domain name is helpful later when it comes to the shared security realm established with the central ``security-service.sapsailing.com`` replica set.
 
+The hostname ``www.sapsailing.com`` is required by master instances when connected to the Internet in order to download polar data and wind estimation data from the archive server. Since direct access to ``www.sapsailing.com`` is blocked, we run this through the SSH tunnel to our jump host; in order to have matching certificates and appropriate hostname-based routing in the cloud for requests to ``www.sapsailing.com`` we alias this hostname in ``/etc/hosts`` to ``127.0.0.1`` (localhost).
+
 ### IP Addresses and VPN
 
 Here are the IP addresses as indicated by SwissTiming:
@@ -149,11 +151,13 @@ On both laptops there is a script ``/usr/local/bin/tunnels`` which establishes S
 
 During regular operations we assume that we have an Internet connection that allows us to reach our jump host ``tokyo-ssh.sapsailing.com`` through SSH, establishing various port forwards. We also expect TracTrac to have their primary server available. Furthermore, we assume both our laptops to be in service. ``sap-p1-1`` then runs the master server instance, ``sap-p1-2`` runs a local replica. The master on ``sap-p1-1`` replicates the central security service at ``security-service.sapsailing.com`` using the RabbitMQ installation on ``rabbit.internal.sapsailing.com`` in the AWS region eu-west-1. The port forwarding through tokyo-ssh.sapsailing.com (in ap-northeast-1) to the internal RabbitMQ address (in eu-west-1) works through VPC peering. The RabbitMQ instance used for outbound replication, both, into the cloud and for the on-site replica, is rabbit-ap-northeast-1.sapsailing.com. The replica on ``sap-p1-2`` obtains its replication stream from there, and for the HTTP connection for "reverse replication" it uses a direct connection to ``sap-p1-1``. The outside world, in particular all "S-ded-tokyo2020-m" master security groups in all regions supported, access the on-site master through a reverse port forward on our jump host ``tokyo-ssh.sapsailing.com:8888`` which under regular operations points to ``sap-p1-1:8888`` where the master process runs.
 
+On both laptops we establish a port forward from ``localhost:22443`` to ``sapsailing.com:443``. Together with the alias in ``/etc/hosts`` that aliases ``www.sapsailing.com`` to ``localhost``, requests to ``www.sapsailing.com:22443`` will end up on the archive server.
+
 On both laptops, we maintain SSH connections to ``localhost`` with port forwards to the current TracTrac production server for HTTP, live data, and stored data. In the test we did on 2021-05-25, those port numbers were 9081, 14001, and 14011, respectively, for the primary server, and 9082, 14002, and 14012, respectively, for the secondary server. In addition to these port forwards, an entry in ``/etc/hosts`` is required for the hostname that TracTrac will use on site for their server(s), pointing to ``127.0.0.1`` to let the Sailing Analytics process connect to localhost with the port forwards. Tests have shown that if the port forwards are changed during live operations, e.g., to point to the secondary instead of the primary TracTrac server, the TracAPI continues smoothly which is a great way of handling such a fail-over process without having to re-start our master server necessarily or reconnect to all live races.
 
 Furthermore, for administrative SSH access from outside, we establish reverse port forwards from our jump host ``tokyo-ssh.sapsailing.com`` to the SSH ports on ``sap-p1-1`` (on port 18122) and ``sap-p1-2`` (on port 18222).
 
-Both laptops have a forward from localhost:22222 to sapsailing.com:22 through tokyo-ssh, in order to be able to have a git remote ``ssh`` with the url ``ssh://trac@localhost:22222/home/trac/git``.
+Both laptops have a forward from ``localhost:22222`` to ``sapsailing.com:22`` through ``tokyo-ssh.sapsailing.com``, in order to be able to have a git remote ``ssh`` with the url ``ssh://trac@localhost:22222/home/trac/git``.
 
 The port forwards vary for exceptional situations, such as when the Internet connection is not available, or when ``sap-p1-1`` that regularly runs the master process fails and we need to make ``sap-p1-2`` the new master. See below for the details of the configurations for those scenarios.
 
