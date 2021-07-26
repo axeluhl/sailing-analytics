@@ -163,6 +163,25 @@ The port forwards vary for exceptional situations, such as when the Internet con
 
 The tunnel configurations are established and configured using a set of scripts, each to be found under ``/usr/local/bin`` on each of the two laptops.
 
+#### ssh_config and sshd_config tweaks
+
+In order to recover quickly from failures we changed ``/etc/ssh/ssh_config`` on both of the P1s and added the following parameters:
+```
+ExitOnForwardFailure yes
+ConnectTimeout 10
+ServerAliveCountMax 3
+ServerAliveInterval 10
+```
+For the server side on tokyo-ssh and on the both P1s the following parameters have been added to ``/etc/ssh/sshd_config``:
+```
+ClientAliveInterval 3
+ClientAliveCountMax 3
+```
+
+ExitOnForwardFailure will force ssh to exit if one of the port forwards fails. ConnectTimeout manages the time in seconds until an initial connection fails. AliveInterval (client and server) manages the time in seconds after ssh/sshd are sending client and server alive probes. CountMax is the number of retries for those probes. 
+
+The settings have been verified by executing a network change on both the laptops, the ssh tunnel returns after a couple of seconds.
+
 #### Regular Operations: master on sap-p1-1, replica on sap-p1-2, with Internet / Cloud connection 
 
 On sap-p1-1 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is the local master:
