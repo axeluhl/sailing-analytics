@@ -12,7 +12,6 @@ import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.Refresher;
 
 public abstract class AbstractRefresher<T> implements Refresher<T> {
-
     private Logger logger = Logger.getLogger(getClass().getName());
     private final Set<Displayer<T>> displayers = new HashSet<Displayer<T>>();
     private List<T> dtos;
@@ -30,6 +29,11 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
             logger.fine("Call fill methods from displayers with data from cache.");
             fill(dtos, displayer);
         }
+    }
+    
+    @Override
+    public void removeDisplayer(Displayer<T> displayer) {
+        displayers.remove(displayer);
     }
 
     @Override

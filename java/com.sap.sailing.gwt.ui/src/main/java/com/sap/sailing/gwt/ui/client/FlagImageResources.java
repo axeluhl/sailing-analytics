@@ -562,8 +562,11 @@ public interface FlagImageResources extends ClientBundle {
 	@Source("com/sap/sailing/gwt/ui/client/images/flags/QA.png")
 	ImageResource flagQA();
 
-	@Source("com/sap/sailing/gwt/ui/client/images/flags/RE.png")
-	ImageResource flagRE();
+        @Source("com/sap/sailing/gwt/ui/client/images/flags/RC.png")
+        ImageResource flagRC();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/flags/RE.png")
+        ImageResource flagRE();
 
 	@Source("com/sap/sailing/gwt/ui/client/images/flags/RO.png")
 	ImageResource flagRO();

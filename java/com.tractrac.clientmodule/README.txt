@@ -15,6 +15,19 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+       TracAPI 3.14.1
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 22/06/2021
+  Build number:
+
+ 1) Features
+
+ - Adding the methods IRaceCompetitor.getStatusLastChangedTime and IRace.getStatusLastChangedTime to retrieve
+ the time when the status was changed the last time  (Requested by Axel Uhl, 18/06/2021)
+
+********************************************
        TracAPI 3.14.0
 ********************************************
 This is a final version. It changes the signatures of some listeners, breaking the backward compatibility:
