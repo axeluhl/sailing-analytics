@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client.premium;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -24,28 +25,28 @@ public class FeatureOverviewTableWrapper extends
                     public int hashCode(SubscriptionPlanDTO t) {
                         return t.getId().hashCode();
                     }
-                });
+                }, GWT.create(FeatureOverviewTableResources.class));
         final Column<SubscriptionPlanDTO, String> nameColumn = new TextColumn<SubscriptionPlanDTO>() {
             @Override
             public String getValue(SubscriptionPlanDTO object) {
                 return object.getName();
             }
         };
-        table.addColumn(nameColumn);
+        table.addColumn(nameColumn, stringMessages.name());
         final Column<SubscriptionPlanDTO, String> featuresColumn = new TextColumn<SubscriptionPlanDTO>() {
             @Override
             public String getValue(SubscriptionPlanDTO object) {
                 return object.getFeatures().toString();
             }
         };
-        table.addColumn(featuresColumn);
+        table.addColumn(featuresColumn, stringMessages.features());
         final Column<SubscriptionPlanDTO, String> priceColumn = new TextColumn<SubscriptionPlanDTO>() {
             @Override
             public String getValue(SubscriptionPlanDTO object) {
                 return object.getPrice();
             }
         };
-        table.addColumn(priceColumn);
+        table.addColumn(priceColumn, stringMessages.price());
     }
     
 }
