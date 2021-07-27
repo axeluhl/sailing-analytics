@@ -37,7 +37,7 @@ public abstract class PremiumCheckBox extends Composite {
         this.wrapperPanel.add(layoutPanel);
         this.checkBox = new CheckBox(label);
         if(!payWallResolver.hasPermission(action)) {
-            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver).show());
+            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver, stringMessages).show());
             layoutPanel.getElement().getStyle().setCursor(Cursor.POINTER);
             checkBox.setEnabled(false);
             image = createPremiumIcon();

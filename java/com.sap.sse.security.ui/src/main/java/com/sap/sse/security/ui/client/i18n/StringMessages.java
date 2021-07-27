@@ -198,4 +198,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String selectOption();
     String currentlyUnableToSubscribe();
     String subscribe();
+    String subscriptionPlanOverview();
+    String selectSubscriptionPlan();
 }

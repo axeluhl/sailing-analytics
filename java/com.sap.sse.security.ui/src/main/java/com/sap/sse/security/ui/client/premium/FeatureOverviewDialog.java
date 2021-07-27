@@ -1,31 +1,46 @@
 package com.sap.sse.security.ui.client.premium;
 
 
-import java.util.Set;
-
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.SetSelectionModel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public class FeatureOverviewDialog extends DialogBox{
+public class FeatureOverviewDialog extends DataEntryDialog<SubscriptionPlanDTO>{
     
     private FeatureOverviewTableWrapper table;
     private final StringMessages stringMessages;
     private final PayWallResolver payWallResolver;
     
-    public FeatureOverviewDialog(PayWallResolver payWallResolver) {
-        this.stringMessages = StringMessages.INSTANCE;
+    public FeatureOverviewDialog(PayWallResolver payWallResolver, StringMessages stringMessages) {
+        super(stringMessages.subscriptionPlanOverview(), stringMessages.selectSubscriptionPlan(),
+                stringMessages.subscribe(), stringMessages.cancel(), null, new DialogCallback<SubscriptionPlanDTO>() {
+                    @Override
+                    public void ok(SubscriptionPlanDTO editedObject) {
+                        if (editedObject == null) {
+                            Notification.notify(stringMessages.selectOption(), NotificationType.ERROR);
+                        } else {
+                            Notification.notify("open checkout here", NotificationType.SUCCESS);
+                        }
+                    }
+                    @Override
+                    public void cancel() {
+                        //cancel operation does not require action.
+                    }
+                });
+        this.stringMessages = stringMessages;
         this.payWallResolver = payWallResolver;
-        //FIXME: TableWrapper should fit in with the overall RaceBoard Error Reporting and style.
+    }
+    
+    @Override
+    protected Widget getAdditionalWidget() {
         final VerticalPanel mainPanel = new VerticalPanel();
+        //FIXME: TableWrapper should fit in with the overall RaceBoard Error Reporting and style.
         this.table = new FeatureOverviewTableWrapper(stringMessages, null);
         final SubscriptionWriteServiceAsync<?, ?, ?> subscriptionService = payWallResolver.getSubscriptionWriteService();
         if(subscriptionService == null) {
@@ -43,25 +58,15 @@ public class FeatureOverviewDialog extends DialogBox{
             });
         }
         mainPanel.add(table);
-        final Button button = new Button(stringMessages.subscribe());
-        button.addClickHandler((event) ->{
-            final Set<SubscriptionPlanDTO> selectedSet = table.getSelectionModel().getSelectedSet();
-            if(selectedSet.size() == 1) {
-                if(selectedSet.iterator().next() == null) {
-                    Notification.notify(stringMessages.selectOption(), NotificationType.ERROR);
-                }else {
-                    Notification.notify("open checkout here", NotificationType.SUCCESS);
-                }
-            }
+        table.getSelectionModel().addSelectionChangeHandler((changeEvent) -> {
+            getOkButton().setEnabled(table.getSelectionModel().getSelectedObject() != null);
         });
-        table.getSelectionModel().addSelectionChangeHandler((changeEvent) ->{
-            GWT.debugger();
-            SetSelectionModel<SubscriptionPlanDTO> selectionModel = table.getSelectionModel();
-            Set<SubscriptionPlanDTO> selectedSet = selectionModel.getSelectedSet();
-            button.setEnabled(selectedSet.size() != 0);
-         });
-        mainPanel.add(button);
-        setWidget(mainPanel);
+        return mainPanel;
+    }
+
+    @Override
+    protected SubscriptionPlanDTO getResult() {
+        return table.getSelectionModel().getSelectedObject();
     }
     
 }
