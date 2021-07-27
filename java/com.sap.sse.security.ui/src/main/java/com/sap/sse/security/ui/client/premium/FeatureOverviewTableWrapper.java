@@ -5,13 +5,13 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public class FeatureOverviewTableWrapper extends
-        TableWrapper<SubscriptionPlanDTO, RefreshableMultiSelectionModel<SubscriptionPlanDTO>, StringMessages, CellTableWithCheckboxResources> {
+        TableWrapper<SubscriptionPlanDTO, RefreshableSingleSelectionModel<SubscriptionPlanDTO>, StringMessages, CellTableWithCheckboxResources> {
 
     public FeatureOverviewTableWrapper(StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages, errorReporter, false, false,
