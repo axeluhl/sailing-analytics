@@ -13,7 +13,10 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -29,19 +32,33 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public static final String BYWAYPOINT = "bywaypoint";
     public static final String MARKPASSINGS = "markpassings";
     public static final String TRACKED_RANK_AT_MARK_PASSING = "trackedRankAtMarkPassing";
+    public static final String TOTAL_POINTS = "totalPoints";
+    public static final String NET_POINTS = "netPoint";
+    public static final String MAX_POINTS_REASON = "maxPointsReason";
     private static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     /**
      * The time point for which to obtain the ranking information at the marks
      */
     private final TimePoint timePoint;
+    
+    /**
+     * An optional leaderboard that, when provided, is used to provide the score and IRM/penalty/MaxPointsReason in
+     * the output.
+     */
+    private final Leaderboard leaderboard;
 
     /**
-     * @param timePoint time point for which to obtain the ranking information at the marks; use {@code null}
-     * to use "now" minus the live delay
+     * @param leaderboard
+     *            An optional leaderboard that, when provided, is used to provide the score and
+     *            IRM/penalty/MaxPointsReason in the output.
+     * @param timePoint
+     *            time point for which to obtain the ranking information at the marks; use {@code null} to use "now"
+     *            minus the live delay
      */
-    public MarkPassingsJsonSerializer(TimePoint timePoint) {
+    public MarkPassingsJsonSerializer(Leaderboard leaderboard, TimePoint timePoint) {
         super();
+        this.leaderboard = leaderboard;
         this.timePoint = timePoint;
     }
 
@@ -97,6 +114,14 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                         rank = legRanks.computeIfAbsent(trackedLeg, tl->tl.getRanks(timePointForRanksAtMarks, cache)).get(competitor);
                     }
                     markPassingJson.put(TRACKED_RANK_AT_MARK_PASSING, rank);
+                    if (leaderboard != null) {
+                        final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
+                        if (raceColumnAndFleet != null) {
+                            markPassingJson.put(TOTAL_POINTS, leaderboard.getTotalPoints(competitor, raceColumnAndFleet.getA(), markPassing.getTimePoint()));
+                            markPassingJson.put(NET_POINTS, leaderboard.getNetPoints(competitor, raceColumnAndFleet.getA(), markPassing.getTimePoint()));
+                            markPassingJson.put(MAX_POINTS_REASON, leaderboard.getMaxPointsReason(competitor, raceColumnAndFleet.getA(), markPassing.getTimePoint()));
+                        }
+                    }
                 }
             } finally {
                 trackedRace.unlockAfterRead(markPassingsForCompetitor);
