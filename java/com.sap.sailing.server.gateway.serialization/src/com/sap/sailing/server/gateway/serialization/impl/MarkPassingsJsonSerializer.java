@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -117,9 +118,16 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                     if (leaderboard != null) {
                         final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
                         if (raceColumnAndFleet != null) {
-                            markPassingJson.put(TOTAL_POINTS, leaderboard.getTotalPoints(competitor, raceColumnAndFleet.getA(), markPassing.getTimePoint()));
-                            markPassingJson.put(NET_POINTS, leaderboard.getNetPoints(competitor, raceColumnAndFleet.getA(), markPassing.getTimePoint()));
-                            markPassingJson.put(MAX_POINTS_REASON, leaderboard.getMaxPointsReason(competitor, raceColumnAndFleet.getA(), markPassing.getTimePoint()));
+                            final TimePoint markPassingTimePoint = markPassing.getTimePoint();
+                            final LeaderboardDTOCalculationReuseCache cacheForMarkPassingTimePoint = new LeaderboardDTOCalculationReuseCache(markPassingTimePoint);
+                            final Double totalPoints = leaderboard.getTotalPoints(
+                                    competitor, raceColumnAndFleet.getA(), markPassingTimePoint, cacheForMarkPassingTimePoint);
+                            markPassingJson.put(TOTAL_POINTS, totalPoints);
+                            final Set<RaceColumn> discards = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard,
+                                    leaderboard.getRaceColumns(), markPassingTimePoint, cacheForMarkPassingTimePoint);
+                            markPassingJson.put(NET_POINTS, leaderboard.getNetPoints(competitor, raceColumnAndFleet.getA(), markPassingTimePoint,
+                                    discards, ()->totalPoints));
+                            markPassingJson.put(MAX_POINTS_REASON, leaderboard.getMaxPointsReason(competitor, raceColumnAndFleet.getA(), markPassingTimePoint));
                         }
                     }
                 }
