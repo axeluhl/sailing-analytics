@@ -32,7 +32,11 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>None</td>
+		<td>leaderboard</td>
+		<td>If provided, this has to be a leaderboard containing the race identified by the path parameters. In this case
+		    the leaderboard identified this way will be used for rank/score/penalty/IRM determination. Usually, this will
+		    equal the regatta name provided, but, e.g., in the case of elimination leaderboards other options are possible.
+		</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
