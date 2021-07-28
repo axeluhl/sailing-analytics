@@ -103,16 +103,21 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
             result = getLegMiddleWindTrack((WindSourceWithAdditionalID) windSource);
         } else {
             final WindTrack windTrackCreated[] = new WindTrack[1];
-            // atomically add to windTracks if not yet there and assign to windTrackCreated[0] so we know
-            // whether creation took place and we need to log/notify. See also bug5608.
-            result = windTracks.computeIfAbsent(windSource, ws->(windTrackCreated[0]=
-                windSource.getType() == WindSourceType.MANEUVER_BASED_ESTIMATION
-                    // wind track of wind estimation gets unavailable only in one case: wind estimation was detached
-                    // but it is still running. Hence, return dummy track to complete to finish the run.
-                    ? new DummyWindTrackImpl()
-                    : createWindTrack(windSource,
-                            delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
-                                    : delayForWindEstimationCacheInvalidation)));
+            LockUtil.lockForRead(getSerializationLock());
+            try {
+                // atomically add to windTracks if not yet there and assign to windTrackCreated[0] so we know
+                // whether creation took place and we need to log/notify. See also bug5608.
+                result = windTracks.computeIfAbsent(windSource, ws->(windTrackCreated[0]=
+                    windSource.getType() == WindSourceType.MANEUVER_BASED_ESTIMATION
+                        // wind track of wind estimation gets unavailable only in one case: wind estimation was detached
+                        // but it is still running. Hence, return dummy track to complete to finish the run.
+                        ? new DummyWindTrackImpl()
+                        : createWindTrack(windSource,
+                                delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
+                                        : delayForWindEstimationCacheInvalidation)));
+            } finally {
+                LockUtil.unlockAfterRead(getSerializationLock());
+            }
             if (windTrackCreated[0] != null) {
                 // give subclasses a chance to react to the creation of a wind track *after* is has been added to windTracks
                 notifyWindTrackHasBeenCreatedAndAddedToWindTracks(windSource, windTrackCreated[0]);
@@ -139,15 +144,8 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
      * no other wind source exists yet.
      */
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        WindTrack result = windStore.getWindTrack(trackedRegatta.getRegatta().getName(), this, windSource, millisecondsOverWhichToAverageWind,
+        return windStore.getWindTrack(trackedRegatta.getRegatta().getName(), this, windSource, millisecondsOverWhichToAverageWind,
                 delayForWindEstimationCacheInvalidation);
-        LockUtil.lockForRead(getSerializationLock());
-        try {
-            windTracks.put(windSource, result);
-        } finally {
-            LockUtil.unlockAfterRead(getSerializationLock());
-        }
-        return result;
     }
     
     private WindSource getLegMiddleWindSource(TrackedLeg trackedLeg) {
