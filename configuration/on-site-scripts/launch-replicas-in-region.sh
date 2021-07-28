@@ -1,5 +1,5 @@
 #!/bin/bash
-INSTANCE_TYPE=c4.2xlarge
+INSTANCE_TYPE=c5.2xlarge
 REPLICA_SET_NAME=replica
 REPLICA_SET_PRIMARY=localhost
 KEY_NAME=Axel
@@ -91,7 +91,7 @@ ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" 
   if [ -z $INSTANCE_IDS ]; then
     INSTANCE_IDS="Id=${INSTANCE_ID}"
   else
-    INSTANCE_IDS="${INSTANCE_IDS},Id=${INSTANCE_ID}"
+    INSTANCE_IDS="${INSTANCE_IDS} Id=${INSTANCE_ID}"
   fi
   # Now wait for those instances launched to become available
   echo "Waiting for instance with private IP ${PRIVATE_IP} in region ${REGION} to become healthy..."
@@ -107,7 +107,7 @@ for OLD_VERSION_TARGET_ID in ${OLD_VERSION_TARGET_IDS}; do
   if [ -z $TARGET_IDS_TO_DEREGISTER ]; then
     TARGET_IDS_TO_DEREGISTER="Id=${OLD_VERSION_TARGET_ID}"
   else
-    TARGET_IDS_TO_DEREGISTER="${TARGET_IDS_TO_DEREGISTER},Id=${OLD_VERSION_TARGET_ID}"
+    TARGET_IDS_TO_DEREGISTER="${TARGET_IDS_TO_DEREGISTER} Id=${OLD_VERSION_TARGET_ID}"
   fi
 done
 echo "Registering instances ${INSTANCE_IDS} with target group ${TARGET_GROUP_NAME} in region ${REGION}"
