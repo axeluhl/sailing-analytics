@@ -181,24 +181,30 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
         }
     }  
     
-    protected void selectCompetitorFromPerspectiveOwnSetting(RaceBoardPanel raceBoardPanel, RaceBoardPerspectiveOwnSettings perspectiveOwnSettings) {
+    /*
+     *  These competitor selections will take precedence over the mode
+     */
+    protected void selectCompetitorFromPerspectiveOwnSetting(RaceBoardPanel raceBoardPanel,
+            RaceBoardPerspectiveOwnSettings perspectiveOwnSettings) {
         if (perspectiveOwnSettings != null) {
-            final String oldCompetitorId = perspectiveOwnSettings.getSelectedCompetitor();
-            Iterable<String> competitorIds = perspectiveOwnSettings.getSelectedCompetitors();
-            if (Util.isEmpty(competitorIds) && oldCompetitorId != null) {
-                competitorIds = Collections.singleton(oldCompetitorId);
+            final HashSet<String> selectedCompetitorIds = new HashSet<>();
+            Util.addAll(perspectiveOwnSettings.getSelectedCompetitors(), selectedCompetitorIds);
+            final String selectedCompetitorId = perspectiveOwnSettings.getSelectedCompetitor();
+            if (selectedCompetitorId != null) {
+                selectedCompetitorIds.add(selectedCompetitorId);
             }
-            final Iterable<CompetitorDTO> allCompetitors = raceBoardPanel.getCompetitorSelectionProvider()
-                    .getAllCompetitors();
-            final Set<CompetitorDTO> selectedCompetitors = new HashSet<CompetitorDTO>();
-            for (String competitorId : competitorIds) {
-                for (CompetitorDTO comp : allCompetitors) {
-                    if (competitorId.equals(comp.getIdAsString())) {
-                        selectedCompetitors.add(comp);
+            if (!selectedCompetitorIds.isEmpty()) {
+                final Set<CompetitorDTO> selectedCompetitors = new HashSet<>();
+                for (String competitorId : selectedCompetitorIds) {
+                    for (CompetitorDTO comp : raceBoardPanel.getCompetitorSelectionProvider().getAllCompetitors()) {
+                        if (competitorId.equals(comp.getIdAsString())) {
+                            selectedCompetitors.add(comp);
+                        }
                     }
                 }
+                raceBoardPanel.getCompetitorSelectionProvider().setSelection(selectedCompetitors,
+                        new CompetitorSelectionChangeListener[0]);
             }
-            raceBoardPanel.getCompetitorSelectionProvider().setSelection(selectedCompetitors, new CompetitorSelectionChangeListener[0]);
         }
     }
 
