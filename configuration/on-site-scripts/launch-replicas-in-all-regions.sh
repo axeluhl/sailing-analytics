@@ -70,3 +70,4 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
   echo "Waiting a minute now after having asked for replica launch in region ${REGION} to avoid overloading master with initial load requests"
   sleep 60
 done
+wait
