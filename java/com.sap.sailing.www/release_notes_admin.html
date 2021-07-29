@@ -52,6 +52,13 @@
 		            from 120s to 15s which now avoids connection interrupts.</li>
 		        <li>The <tt>/sailingserver/api/v2/leaderboards/{leaderboard-name}</tt> API now also delivers the
 		            <tt>currentSpeedOverGround-kts</tt> field if the competitor is not yet in the race.</li>
+		        <li>The <tt>/sailingserver/api/v1/regattas/{regattaName}/races/{raceName}/markpassings</tt> API method
+		            has been extended to also deliver the "raw" passing order (which can vary from the tracked rank, e.g.,
+		            because a handicap ranking metric is in use), as well as a hypothetical score that one gets by passing
+		            the passing order through the scoring scheme and applying penalties or score corrections. Furthermore,
+		            the IRM/MaxPointsReason is output. See
+		            <a href="/sailingserver/webservices/api/v1/raceMarkPassingsGetDoc.html">/sailingserver/webservices/api/v1/raceMarkPassingsGetDoc.html</a>
+		            for more details.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2021</h2>
                     <ul class="bulletList">

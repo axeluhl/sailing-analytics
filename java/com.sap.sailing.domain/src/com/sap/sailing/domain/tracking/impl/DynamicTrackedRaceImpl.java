@@ -1042,26 +1042,25 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded by this
-     * call, all listeners are notified about these existing wind fixes using their
+     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded into this
+     * new wind track, all listeners are notified about these existing wind fixes using their
      * {@link RaceChangeListener#windDataReceived(Wind, WindSource)} callback method. In particular this replicates all
      * wind fixes that may have been loaded from the wind store for the new track.
      */
     @Override
-    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        final WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
+    protected void notifyWindTrackHasBeenCreatedAndAddedToWindTracks(WindSource windSource, WindTrack windTrack) {
+        super.notifyWindTrackHasBeenCreatedAndAddedToWindTracks(windSource, windTrack);
         if (windSource.getType().canBeStored()) {
             // replicate all wind fixes that may have been loaded by the wind store
-            result.lockForRead();
+            windTrack.lockForRead();
             try {
-                for (Wind wind : result.getRawFixes()) {
+                for (Wind wind : windTrack.getRawFixes()) {
                     notifyListeners(wind, windSource); // Note that this doesn't notify the track's listeners but the tracked race's listeners.
                 } // In particular, the wind store won't receive events (again) for the wind fixes it already has.
             } finally {
-                result.unlockAfterRead();
+                windTrack.unlockAfterRead();
             }
         }
-        return result;
     }
 
     @Override

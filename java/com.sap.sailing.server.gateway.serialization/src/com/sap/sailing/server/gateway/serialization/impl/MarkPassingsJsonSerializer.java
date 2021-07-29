@@ -1,12 +1,12 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
-import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -33,8 +33,8 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public static final String BYWAYPOINT = "bywaypoint";
     public static final String MARKPASSINGS = "markpassings";
     public static final String TRACKED_RANK_AT_MARK_PASSING = "trackedRankAtMarkPassing";
-    public static final String TOTAL_POINTS = "totalPoints";
-    public static final String NET_POINTS = "netPoint";
+    public static final String ONE_BASED_PASSING_ORDER = "oneBasedPassingOrder";
+    public static final String POINTS_BASED_ON_PASSING_ORDER = "pointsBasedOnPassingOrder";
     public static final String MAX_POINTS_REASON = "maxPointsReason";
     private static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
@@ -73,20 +73,24 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
         CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
         JSONArray byCompetitorJson = new JSONArray();
         result.put(BYCOMPETITOR, byCompetitorJson);
-        final Map<Competitor, Integer> startOrder = new HashMap<>();
         // start mark passing; rank is ordering by start time
-        final Waypoint startWaypoint = course.getFirstWaypoint();
-        if (startWaypoint != null) {
-            final Iterable<MarkPassing> startMarkPassings = trackedRace.getMarkPassingsInOrder(startWaypoint);
-            trackedRace.lockForRead(startMarkPassings);
-            try {
-                int startRank = 1;
-                for (final MarkPassing startMarkPassing : startMarkPassings) {
-                    startOrder.put(startMarkPassing.getCompetitor(), startRank++);
+        final Map<Waypoint, Map<Competitor, Integer>> orderOfMarkPassings = new HashMap<>();
+        trackedRace.getRace().getCourse().lockForRead();
+        try {
+            for (final Waypoint waypoint : course.getWaypoints()) {
+                final Iterable<MarkPassing> markPassingsInOrder = trackedRace.getMarkPassingsInOrder(waypoint);
+                trackedRace.lockForRead(markPassingsInOrder);
+                try {
+                    int markPassingCounter = 1;
+                    for (final MarkPassing markPassing : markPassingsInOrder) {
+                        orderOfMarkPassings.computeIfAbsent(waypoint, wp->new HashMap<>()).put(markPassing.getCompetitor(), markPassingCounter++);
+                    }
+                } finally {
+                    trackedRace.unlockAfterRead(markPassingsInOrder);
                 }
-            } finally {
-                trackedRace.unlockAfterRead(startMarkPassings);
             }
+        } finally {
+            trackedRace.getRace().getCourse().unlockAfterRead();
         }
         final Map<TrackedLeg, LinkedHashMap<Competitor, Integer>> legRanks = new HashMap<>();
         final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePointForRanksAtMarks);
@@ -108,26 +112,25 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                     addMarkPassingTime(markPassing, markPassingJson);
                     final int zeroBasedIndexOfWaypoint = course.getIndexOfWaypoint(markPassing.getWaypoint());
                     final Integer rank;
+                    final Integer passingOrder = orderOfMarkPassings.getOrDefault(markPassing.getWaypoint(), Collections.emptyMap()).getOrDefault(competitor, /* default */ 0);
                     if (zeroBasedIndexOfWaypoint == 0) {
-                        rank = startOrder.getOrDefault(competitor, /* default */ 0);
+                        rank = passingOrder; // for the start waypoint it doesn't make sense to look at the actual "ranking"; use passing order as default
                     } else {
                         final TrackedLeg trackedLeg = trackedRace.getTrackedLeg(course.getLeg(zeroBasedIndexOfWaypoint-1));
                         rank = legRanks.computeIfAbsent(trackedLeg, tl->tl.getRanks(timePointForRanksAtMarks, cache)).get(competitor);
                     }
                     markPassingJson.put(TRACKED_RANK_AT_MARK_PASSING, rank);
+                    markPassingJson.put(ONE_BASED_PASSING_ORDER, passingOrder);
                     if (leaderboard != null) {
                         final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
                         if (raceColumnAndFleet != null) {
-                            final TimePoint markPassingTimePoint = markPassing.getTimePoint();
-                            final LeaderboardDTOCalculationReuseCache cacheForMarkPassingTimePoint = new LeaderboardDTOCalculationReuseCache(markPassingTimePoint);
-                            final Double totalPoints = leaderboard.getTotalPoints(
-                                    competitor, raceColumnAndFleet.getA(), markPassingTimePoint, cacheForMarkPassingTimePoint);
-                            markPassingJson.put(TOTAL_POINTS, totalPoints);
-                            final Set<RaceColumn> discards = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard,
-                                    leaderboard.getRaceColumns(), markPassingTimePoint, cacheForMarkPassingTimePoint);
-                            markPassingJson.put(NET_POINTS, leaderboard.getNetPoints(competitor, raceColumnAndFleet.getA(), markPassingTimePoint,
-                                    discards, ()->totalPoints));
-                            markPassingJson.put(MAX_POINTS_REASON, leaderboard.getMaxPointsReason(competitor, raceColumnAndFleet.getA(), markPassingTimePoint));
+                            final Double totalPoints = leaderboard.getScoreCorrection().getCorrectedScore(() -> passingOrder,
+                                    competitor, raceColumnAndFleet.getA(), leaderboard, markPassing.getTimePoint(),
+                                    leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), leaderboard.getScoringScheme(), cache)
+                                    .getCorrectedScore();
+                            markPassingJson.put(POINTS_BASED_ON_PASSING_ORDER, totalPoints);
+                            markPassingJson.put(MAX_POINTS_REASON, leaderboard.getMaxPointsReason(competitor,
+                                    raceColumnAndFleet.getA(), markPassing.getTimePoint()));
                         }
                     }
                 }

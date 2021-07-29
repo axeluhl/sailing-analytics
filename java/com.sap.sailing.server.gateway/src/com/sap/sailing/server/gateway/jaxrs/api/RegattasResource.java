@@ -1784,7 +1784,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
                         .build();
             } else {
-                final Leaderboard leaderboard = leaderboardName == null ? null : getService().getLeaderboardByName(leaderboardName);
+                final Leaderboard leaderboard = leaderboardName == null
+                        ? getService().getLeaderboardByName(regattaName)
+                        : getService().getLeaderboardByName(leaderboardName);
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 getSecurityService().checkCurrentUserReadPermission(trackedRace);
                 AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(leaderboard,
