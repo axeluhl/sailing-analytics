@@ -3,10 +3,12 @@
 EXPIRY_MARKER_FILE=/tmp/aws-mfa-token-expired
 aws ec2 describe-instances >/dev/null 2>/dev/null
 EXIT_CODE=$?
-if [ "${EXIT_CODE}" = "254" -a ! -f "${EXPIRY_MARKER_FILE}" ]; then
-  message="AWS MFA token seems to have expired. aws ec2 describe-instances exited with code ${EXIT_CODE}. Not messaging you again. Try another awsmfa as root@sapsailing.com's tmux."
-  echo "${message}" | notify-operators "AWS MFA token expired"
-  touch "${EXPIRY_MARKER_FILE}"
+if [ "${EXIT_CODE}" = "255" ]; then
+  if [ ! -f "${EXPIRY_MARKER_FILE}" ]; then
+    message="AWS MFA token seems to have expired. aws ec2 describe-instances exited with code ${EXIT_CODE}. Not messaging you again. Try another awsmfa as root@sapsailing.com's tmux."
+    echo "${message}" | notify-operators "AWS MFA token expired"
+    touch "${EXPIRY_MARKER_FILE}"
+  fi
 else
   # Discover replicas
   IPs=""
