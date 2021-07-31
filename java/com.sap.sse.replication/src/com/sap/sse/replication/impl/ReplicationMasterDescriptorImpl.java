@@ -210,7 +210,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
                 /* durable */false, /* exclusive */false, /* auto-delete */false, args).getQueue();
         // from now on we get all new messages that the exchange is getting from producer
         channel.queueBind(queueName, exchangeName, "");
-        channel.basicConsume(queueName, /* auto-ack */true, consumer);
+        channel.basicConsume(queueName, /* no auto-ack; see bug5611 */ false, consumer);
         this.consumer = consumer;
         return consumer;
     }

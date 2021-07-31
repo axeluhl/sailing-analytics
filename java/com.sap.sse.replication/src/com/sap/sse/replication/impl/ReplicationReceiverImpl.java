@@ -13,12 +13,16 @@ import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
@@ -98,7 +102,35 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     private Field _queue;
     
     private int operationCounter;
+    
+    /**
+     * Keeps the maximum {@link Envelope#getDeliveryTag() delivery tags} received on the {@link Channel} to which the
+     * {@link #consumer} is attached so far. This way, messages can be acknowledged after they have been delivered to
+     * the {@link #run()} method in the background. The background task that is actually sending the acknowledgement
+     * to the RabbitMQ server must {@code synchronize} on this {@link AtomicLong} before reading its value and until
+     * having cleared the {@link #acknowledgeTaskScheduled} flag. Likewise, the {@link #acknowledgeAsync(Channel, Delivery)}
+     * method must synchronize on this {@link AtomicLong} before setting its value to a new delivery tag and until after
+     * having checked the {@link #acknowledgeTaskScheduled} flag and possible having scheduled a new task for sending the
+     * acknowledgement.
+     */
+    private final AtomicLong maximumDeliveryTagSoFar;
+    
+    long maximumDeliveryTagAcknowledged;
+    
+    /**
+     * @see #maximumDeliveryTagSoFar
+     * @see #acknowledgeAsync(Channel, Delivery)
+     */
+    private final AtomicInteger acknowledgeTaskScheduledButNotYetStarted;
 
+    /**
+     * The monitor of this object is acquired by the tasks reading the {@link #maximumDeliveryTagSoFar} value
+     * and sending the acknowledgement for that delivery tag. This way, although an executor is used with these
+     * fine-grained acknowledgement tasks, these tasks cannot run concurrently. The tasks record the last delivery tag
+     * acknowledged so that if a 
+     */
+    private static final Object acknowledgementTaskLock = new Object();
+    
     /**
      * Used for the parallel execution of operations that don't
      * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
@@ -119,6 +151,8 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
      */
     public ReplicationReceiverImpl(ReplicationMasterDescriptor master, ReplicablesProvider replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
         this.queueByReplicableIdAsString = new HashMap<>();
+        this.maximumDeliveryTagSoFar = new AtomicLong();
+        this.acknowledgeTaskScheduledButNotYetStarted = new AtomicInteger();
         this.master = master;
         this.replicableProvider = replicableProvider;
         this.suspended = startSuspended;
@@ -150,6 +184,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
            try {
                 Delivery delivery = consumer.nextDelivery();
                 messageCount++;
+                acknowledgeAsync(consumer.getChannel(), delivery);
                 if (_queue != null) {
                     synchronized (this) {
                         if (getInboundMessageQueue().isEmpty()) {
@@ -219,7 +254,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                     logger.severe("Application shut down messaging queue for " + this.toString());
                     break;
                 }
-                logger.info(sse.getMessage());
+                logger.info("ShutdownSignalException while trying to read the next message: "+sse.getMessage());
                 if (checksPerformed <= CHECK_COUNT) {
                     try {
                         Thread.sleep(CHECK_INTERVAL_MILLIS);
@@ -227,6 +262,8 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                          * does not hold when the connection is dropped.
                          */
                         if (!this.consumer.getChannel().isOpen()) {
+                            maximumDeliveryTagAcknowledged = 0;
+                            maximumDeliveryTagSoFar.set(0);
                             /* for a reconnection we need to instantiate a new consumer */
                             try {
                                 logger.info("Channel seems to be closed. Trying to reconnect consumer queue...");
@@ -257,6 +294,56 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
         synchronized (this) {
             stopped = true;
             notifyAll();
+        }
+    }
+
+    /**
+     * Acknowledges a delivery asynchronously in the background by scheduling a task that will call {@link Channel#basicAck(long, boolean)}.
+     * If further calls to this method occur, the maximum delivery tag value is recorded such that if the task gets its turn, a cumulative
+     * acknowledgement takes place.<p>
+     * 
+     * Acknowledgements must be sent in strictly monotonous order. Therefore, task scheduling must be synchronized with incrementing
+     * the delivery tag number to acknowledge. With a thread pool, task execution order is generally unpredictable. At the same time,
+     * the synchronous part of acknowledgement handling must stay short in order not to hold up the actual payload processing.
+     * The synchronous part therefore shall only check quickly for the presence of a yet unlaunched task, and this check will have to
+     * be synchronized with the beginning of each task before it reads the latest delivery tag to acknowledge. An {@link AtomicInteger}
+     * is used to count the number of not yet started tasks. This method will first increment the delivery tag to confim, then check
+     * the atomic integer for a yet unstarted task. Since {@link AtomicInteger} guarantees {@code volatile} semantics, if this value is
+     * greater than zero, a task will definitely pick up the new delivery tag. Otherwise, the AtomicInteger is incremented (it may in the
+     * meantime have been incremented by another thread), and a corresponding task is scheduled.<p>
+     * 
+     * The tasks themselves run {@code synchronized} on the {@link #acknowledgementTaskLock}. Therefore, only one can run at a time.
+     * The first thing a task does is decrement the atomic integer counting the tasks yet unstarted. Then it reads the delivery tag to
+     * acknowledge and compares it with the {@link #maximumDeliveryTagAcknowledged deliver tag last acknowledged}. Only if
+     * {@link #maximumDeliveryTagSoFar} is greater than that, an acknowledgement is sent.
+     */
+    private void acknowledgeAsync(final Channel channel, final Delivery delivery) {
+        final long deliveryTag = delivery.getEnvelope().getDeliveryTag();
+        maximumDeliveryTagSoFar.accumulateAndGet(deliveryTag, (lastMaxTag, newTag)->newTag>lastMaxTag?newTag:lastMaxTag);
+        logger.finer(()->"Asynchronously acknowledging message with delivery tag "+deliveryTag);
+        if (acknowledgeTaskScheduledButNotYetStarted.get() == 0) {
+            acknowledgeTaskScheduledButNotYetStarted.incrementAndGet();
+            logger.finer(()->"Scheduling background task to acknowledge delivery tag "+deliveryTag);
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().submit(()->{
+                synchronized (acknowledgementTaskLock) {
+                    acknowledgeTaskScheduledButNotYetStarted.decrementAndGet();
+                    final long deliveryTagToAcknowledge = maximumDeliveryTagSoFar.get();
+                    if (deliveryTagToAcknowledge > maximumDeliveryTagAcknowledged) {
+                        try {
+                            logger.fine(()->"Sending acknowledgement for delivery tag "+deliveryTagToAcknowledge+
+                                    ", scheduled at delivery tag "+deliveryTag);
+                            channel.basicAck(deliveryTagToAcknowledge, /* multiple */ true);
+                            maximumDeliveryTagAcknowledged = deliveryTagToAcknowledge;
+                        } catch (IOException e) {
+                            logger.log(Level.WARNING, "Acknowledging message with delivery tag "+deliveryTagToAcknowledge+
+                                    " cumulatively failed", e);
+                        }
+                    } else {
+                        logger.fine(()->"Not acknowledging "+deliveryTagToAcknowledge+" again because "+
+                                maximumDeliveryTagAcknowledged+" has already been acknowledged");
+                    }
+                }
+            });
         }
     }
 
