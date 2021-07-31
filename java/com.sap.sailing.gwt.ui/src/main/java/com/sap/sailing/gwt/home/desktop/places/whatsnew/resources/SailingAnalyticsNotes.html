@@ -23,6 +23,13 @@
            <li>Boat scaling on large zoom levels has been fixed. The pixel size now better corresponds to the
                boat class's hull length and beam.</li>
            <li>An issue with re-drawing the "Progression" chart during live races has been fixed.</li>
+           <li>The place for which the "combined wind" is calculated is now closer to the "middle of the course" than
+               before. Before, each waypoint's position was considered for the average, overemphasizing leeward waypoints
+               for windward-leeward courses, for example. Now, each leg's middle position is considered for the average,
+               with a weight that corresponds to the leg's length. This results in an average that virtually takes into
+               account every single point on each sailed leg's rhumb line. Note, though, that the positions are taken based
+               on the mark positions at the time point requested. If marks are moved around the course this will have an
+               effect, obviously, on how this average is calculated.</li>
          </ul>
          <h5 class="articleSubheadline">June 2021</h5>
          <ul class="bulletList">
