@@ -17,6 +17,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 
 public class SimpleRabbitMQTest {
     private final static String QUEUE_NAME = "hello";
@@ -29,8 +30,7 @@ public class SimpleRabbitMQTest {
     @Before
     public void setUp() throws IOException, TimeoutException {
         received = new HashMap<Consumer, String>();
-        factory = new ConnectionFactory();
-        factory.setAutomaticRecoveryEnabled(true);
+        factory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         factory.setHost("localhost");
         connection = factory.newConnection();
         channel = connection.createChannel();
@@ -77,8 +77,7 @@ public class SimpleRabbitMQTest {
         private boolean receivedFinished;
         
         protected Consumer() throws IOException, TimeoutException {
-            ConnectionFactory factory = new ConnectionFactory();
-            factory.setAutomaticRecoveryEnabled(true);
+            ConnectionFactory factory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
             factory.setHost("localhost");
             connection = factory.newConnection();
             channel = connection.createChannel();

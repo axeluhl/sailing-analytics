@@ -20,6 +20,7 @@ import org.junit.Test;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.impl.RabbitInputStreamProvider;
 import com.sap.sse.replication.impl.RabbitOutputStream;
 
@@ -36,8 +37,7 @@ public class RemoteMessageStreamTest {
     
     @Before
     public void setUp() throws IOException, TimeoutException {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setAutomaticRecoveryEnabled(true);
+        ConnectionFactory factory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         Connection connection = factory.newConnection();
         channel = connection.createChannel();
     }

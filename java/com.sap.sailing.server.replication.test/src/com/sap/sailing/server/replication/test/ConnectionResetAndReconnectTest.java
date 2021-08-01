@@ -27,6 +27,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
@@ -68,8 +69,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         
         @Override
         public QueueingConsumer getConsumer() throws IOException, TimeoutException {
-            ConnectionFactory connectionFactory = new ConnectionFactory();
-            connectionFactory.setAutomaticRecoveryEnabled(true);
+            final ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
             connectionFactory.setHost(getMessagingHostname());
             int port = getMessagingPort();
             if (port != 0) {

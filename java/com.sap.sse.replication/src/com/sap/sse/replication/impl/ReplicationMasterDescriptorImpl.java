@@ -17,6 +17,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationServletActions;
@@ -218,8 +219,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public Channel createChannel() throws IOException, TimeoutException {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setAutomaticRecoveryEnabled(true);
+        ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         connectionFactory.setHost(getMessagingHostname());
         int port = getMessagingPort();
         if (port != 0) {

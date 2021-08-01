@@ -277,7 +277,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                             }
                         }
                     } catch (InterruptedException eir) {
-                        eir.printStackTrace();
+                        logger.log(Level.WARNING, "Interrupted while trying to re-connect", eir);
                     }
                     checksPerformed += 1;
                     continue;
@@ -393,14 +393,14 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
 
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final O operation, Replicable<S, O> replicable) {
         final int operationCount = ++operationCounter;
-        logger.fine(()->""+operationCount+": Applying "+operation);
+        logger.finer(()->""+operationCount+": Applying "+operation);
         Runnable runnable = () -> replicable.applyReceivedReplicated(operation);
         if (operation.requiresSynchronousExecution()) {
             runnable.run();
         } else {
             executor.execute(runnable);
         }
-        logger.fine(()->""+operationCount+": Done applying "+operation);
+        logger.finer(()->""+operationCount+": Done applying "+operation);
     }
     
     private void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {

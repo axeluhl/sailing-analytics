@@ -47,6 +47,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.OperationsToMasterSendingQueue;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
@@ -428,8 +429,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
 
     @Override
     public Channel createMasterChannel() throws Exception {
-        final ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setAutomaticRecoveryEnabled(true);
+        final ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         connectionFactory.setHost(exchangeHost);
         if (exchangePort != 0) {
             connectionFactory.setPort(exchangePort);
