@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,8 +35,9 @@ public class RemoteMessageStreamTest {
     private RabbitInputStreamProvider inputStream;
     
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
+        factory.setAutomaticRecoveryEnabled(true);
         Connection connection = factory.newConnection();
         channel = connection.createChannel();
     }

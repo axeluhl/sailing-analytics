@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -173,7 +174,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public synchronized QueueingConsumer getConsumer() throws IOException {
+    public synchronized QueueingConsumer getConsumer() throws IOException, TimeoutException {
         Channel channel = createChannel();
         /*
          * Connect a queue to the given exchange that has already been created by the master server.
@@ -216,8 +217,9 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public Channel createChannel() throws IOException {
+    public Channel createChannel() throws IOException, TimeoutException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
+        connectionFactory.setAutomaticRecoveryEnabled(true);
         connectionFactory.setHost(getMessagingHostname());
         int port = getMessagingPort();
         if (port != 0) {

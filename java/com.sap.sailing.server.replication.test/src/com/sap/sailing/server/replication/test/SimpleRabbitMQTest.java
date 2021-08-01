@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,22 +27,23 @@ public class SimpleRabbitMQTest {
     private Channel channel;
     
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, TimeoutException {
         received = new HashMap<Consumer, String>();
         factory = new ConnectionFactory();
+        factory.setAutomaticRecoveryEnabled(true);
         factory.setHost("localhost");
         connection = factory.newConnection();
         channel = connection.createChannel();
     }
     
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() throws IOException, TimeoutException {
         channel.close();
         connection.close();
     }
     
     @Test
-    public void testSendReceiveHelloWorld() throws IOException, InterruptedException {
+    public void testSendReceiveHelloWorld() throws IOException, InterruptedException, TimeoutException {
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         final Consumer consumer = new QueueConsumer(QUEUE_NAME);
         new Thread(consumer).start();
@@ -52,7 +54,7 @@ public class SimpleRabbitMQTest {
     }
     
     @Test
-    public void testSendReceiveHelloWorldToTwoNodes() throws IOException, InterruptedException {
+    public void testSendReceiveHelloWorldToTwoNodes() throws IOException, InterruptedException, TimeoutException {
         final String EXCHANGE_NAME = "updates";
         channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
         final Consumer consumer1 = new ExchangeConsumer(EXCHANGE_NAME);
@@ -74,8 +76,9 @@ public class SimpleRabbitMQTest {
         private final QueueingConsumer consumer;
         private boolean receivedFinished;
         
-        protected Consumer() throws IOException {
+        protected Consumer() throws IOException, TimeoutException {
             ConnectionFactory factory = new ConnectionFactory();
+            factory.setAutomaticRecoveryEnabled(true);
             factory.setHost("localhost");
             connection = factory.newConnection();
             channel = connection.createChannel();
@@ -116,6 +119,8 @@ public class SimpleRabbitMQTest {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -123,7 +128,7 @@ public class SimpleRabbitMQTest {
     private class QueueConsumer extends Consumer {
         private final String queueName;
 
-        public QueueConsumer(String queueName) throws IOException {
+        public QueueConsumer(String queueName) throws IOException, TimeoutException {
             super();
             this.queueName = queueName;
             getChannel().queueDeclare(queueName, false, false, false, null);
@@ -138,7 +143,7 @@ public class SimpleRabbitMQTest {
     private class ExchangeConsumer extends Consumer {
         private final String queueName;
 
-        public ExchangeConsumer(String exchangeName) throws IOException {
+        public ExchangeConsumer(String exchangeName) throws IOException, TimeoutException {
             super();
             this.queueName = getChannel().queueDeclare().getQueue();
             getChannel().exchangeDeclare(exchangeName, "fanout");

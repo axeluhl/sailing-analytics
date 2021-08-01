@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import org.junit.Test;
@@ -66,8 +67,9 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         }
         
         @Override
-        public QueueingConsumer getConsumer() throws IOException {
+        public QueueingConsumer getConsumer() throws IOException, TimeoutException {
             ConnectionFactory connectionFactory = new ConnectionFactory();
+            connectionFactory.setAutomaticRecoveryEnabled(true);
             connectionFactory.setHost(getMessagingHostname());
             int port = getMessagingPort();
             if (port != 0) {

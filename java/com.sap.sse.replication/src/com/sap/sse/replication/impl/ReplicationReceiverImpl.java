@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -271,7 +272,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                                 logger.info("OK - channel reconnected!");
                                 Thread.sleep(CHECK_INTERVAL_MILLIS);
                                 checksPerformed += 1;
-                            } catch (IOException eio) {
+                            } catch (IOException | TimeoutException eio) {
                                 // do not print exceptions known to occur
                             }
                         }
