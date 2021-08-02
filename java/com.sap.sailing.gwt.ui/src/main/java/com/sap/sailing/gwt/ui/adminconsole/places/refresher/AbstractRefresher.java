@@ -2,9 +2,11 @@ package com.sap.sailing.gwt.ui.adminconsole.places.refresher;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -127,6 +129,16 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     public void remove(T dto) {
         if (dto != null) {
             dtos.remove(dto);
+        }
+    }
+
+    @Override
+    public void removeAll(Predicate<T> filter) {
+        for (final Iterator<T> i=dtos.iterator(); i.hasNext(); ) {
+            final T dto = i.next();
+            if (filter.test(dto)) {
+                i.remove();
+            }
         }
     }
 }
