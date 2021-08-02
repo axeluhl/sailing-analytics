@@ -124,7 +124,8 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
      */
     public void addColumnWithNaturalComparatorOnStringRepresentation(Column<T, ?> column, String header) {
         addColumn(column, header,
-                (t1, t2)->new NaturalComparator(/* case sensitive */ false).compare(""+column.getValue(t1), ""+column.getValue(t2)));
+                (t1, t2)->new NaturalComparator(/* case sensitive */ false)
+                    .compare(""+column.getValue(t1), ""+column.getValue(t2)));
     }
     
     /**
