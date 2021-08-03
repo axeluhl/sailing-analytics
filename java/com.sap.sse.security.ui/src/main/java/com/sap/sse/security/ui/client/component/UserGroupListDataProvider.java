@@ -31,7 +31,6 @@ public class UserGroupListDataProvider extends AbstractDataProvider<UserGroupDTO
        this.userManagementService = userManagementService;
        this.filterBox = filterBox;
        this.handlers = new ArrayList<>();
-       
        filterBox.addChangeHandler(new ChangeHandler() {
            @Override
            public void onChange(ChangeEvent event) {
