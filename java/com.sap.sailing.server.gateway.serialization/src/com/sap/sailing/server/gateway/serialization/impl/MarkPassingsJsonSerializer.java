@@ -124,6 +124,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                     if (leaderboard != null) {
                         final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
                         if (raceColumnAndFleet != null) {
+                            // TODO apply column factor!
                             final Double totalPoints = leaderboard.getScoreCorrection().getCorrectedScore(() -> passingOrder,
                                     competitor, raceColumnAndFleet.getA(), leaderboard, markPassing.getTimePoint(),
                                     leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), leaderboard.getScoringScheme(), cache)

@@ -7,7 +7,8 @@ Bundle-Activator: com.sap.sse.replication.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sse.replication.impl
+Export-Package: com.sap.sse.replication,
+ com.sap.sse.replication.impl
 Require-Bundle: com.sap.sse.common,
  com.sap.sse.operationaltransformation,
  com.sap.sse,
