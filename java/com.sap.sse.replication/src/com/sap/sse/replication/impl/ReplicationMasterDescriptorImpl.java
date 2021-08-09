@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationServletActions;
@@ -173,7 +175,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public synchronized QueueingConsumer getConsumer() throws IOException {
+    public synchronized QueueingConsumer getConsumer() throws IOException, TimeoutException {
         Channel channel = createChannel();
         /*
          * Connect a queue to the given exchange that has already been created by the master server.
@@ -210,14 +212,14 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
                 /* durable */false, /* exclusive */false, /* auto-delete */false, args).getQueue();
         // from now on we get all new messages that the exchange is getting from producer
         channel.queueBind(queueName, exchangeName, "");
-        channel.basicConsume(queueName, /* auto-ack */true, consumer);
+        channel.basicConsume(queueName, /* no auto-ack; see bug5611 */ false, consumer);
         this.consumer = consumer;
         return consumer;
     }
 
     @Override
-    public Channel createChannel() throws IOException {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
+    public Channel createChannel() throws IOException, TimeoutException {
+        ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         connectionFactory.setHost(getMessagingHostname());
         int port = getMessagingPort();
         if (port != 0) {

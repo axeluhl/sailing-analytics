@@ -578,9 +578,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             List<StrippedLeaderboardDTO> otherExistingLeaderboard, final String oldLeaderboardName,
             LeaderboardDescriptor descriptor, List<EventDTO> existingEvents) {
         FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(
-                Collections.unmodifiableCollection(otherExistingLeaderboard), descriptor, stringMessages,
-                Collections.unmodifiableList(existingEvents), errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(otherExistingLeaderboard), descriptor, userService,
+                stringMessages, Collections.unmodifiableList(existingEvents),
+                errorReporter, new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
                     }
@@ -891,9 +891,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
     private void createFlexibleLeaderboard(List<EventDTO> existingEvents) {
         final FlexibleLeaderboardCreateDialog dialog = new FlexibleLeaderboardCreateDialog(
-                Collections.unmodifiableCollection(availableLeaderboardList), stringMessages,
-                Collections.unmodifiableCollection(existingEvents), errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(availableLeaderboardList), userService,
+                stringMessages, Collections.unmodifiableCollection(existingEvents),
+                errorReporter, new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
                     }

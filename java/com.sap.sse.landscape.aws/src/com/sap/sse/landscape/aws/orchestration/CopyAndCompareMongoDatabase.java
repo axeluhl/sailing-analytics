@@ -26,12 +26,14 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     private final Database sourceDatabase;
     private final Database targetDatabase;
     private final Iterable<Database> additionalDatabasesToDelete;
+    private final boolean dropTargetFirst;
 
     public static interface Builder<BuilderT extends AbstractAwsProcedureImpl.Builder<BuilderT, CopyAndCompareMongoDatabase<ShardingKey>, ShardingKey>, ShardingKey>
     extends AbstractAwsProcedureImpl.Builder<BuilderT, CopyAndCompareMongoDatabase<ShardingKey>, ShardingKey> {
         BuilderT setSourceDatabase(Database sourceDatabase);
         BuilderT setTargetDatabase(Database targetDatabase);
         BuilderT setAdditionalDatabasesToDelete(Iterable<Database> additionalDatabasesToDelete);
+        BuilderT dropTargetFirst(boolean b);
     }
     
     public static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
@@ -40,6 +42,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         private Database sourceDatabase;
         private Database targetDatabase;
         private Iterable<Database> additionalDatabasesToDelete;
+        private boolean dropTargetFirst;
         
         @Override
         public CopyAndCompareMongoDatabase<ShardingKey> build() throws Exception {
@@ -64,6 +67,12 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             return self();
         }
 
+        @Override
+        public BuilderT dropTargetFirst(boolean dropTargetFirst) {
+            this.dropTargetFirst = dropTargetFirst;
+            return self();
+        }
+
         protected Database getSourceDatabase() {
             return sourceDatabase;
         }
@@ -74,6 +83,10 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
 
         protected Iterable<Database> getAdditionalDatabasesToDelete() {
             return additionalDatabasesToDelete;
+        }
+        
+        protected boolean isDropTargetFirst() {
+            return dropTargetFirst;
         }
     }
     
@@ -87,12 +100,17 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         this.sourceDatabase = builder.getSourceDatabase();
         this.targetDatabase = builder.getTargetDatabase();
         this.additionalDatabasesToDelete = builder.getAdditionalDatabasesToDelete() == null ? Collections.emptySet() : builder.getAdditionalDatabasesToDelete();
+        this.dropTargetFirst = builder.isDropTargetFirst();
     }
 
     @Override
     public void run() throws Exception {
         if (targetDatabase.equals(sourceDatabase)) {
             throw new IllegalArgumentException("Source and target database must be different: "+sourceDatabase);
+        }
+        if (dropTargetFirst) {
+            logger.info("Dropping target database "+targetDatabase+" before importing from "+sourceDatabase);
+            targetDatabase.drop();
         }
         final MongoDatabase result = targetDatabase.getEndpoint().importDatabase(sourceDatabase.getMongoDatabase());
         if (result == null) {

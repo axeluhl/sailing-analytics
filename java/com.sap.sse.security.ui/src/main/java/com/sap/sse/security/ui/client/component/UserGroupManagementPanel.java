@@ -41,7 +41,6 @@ public class UserGroupManagementPanel extends Composite {
     private final UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
     private GroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
-
     protected final UserGroupTableWrapper userGroupTableWrapper;
 
     public UserGroupManagementPanel(final UserService userService, final StringMessages stringMessages,

@@ -16,7 +16,7 @@ if [ $# -eq 0 ]; then
     echo "Will upgrade the auto-scaling group tokyo2020-* in the regions from regions.txt with a new"
     echo "launch configuration that will be derived from the existing launch configuration named tokyo2020-*"
     echo "by copying it to tokyo2020-{RELEASE_NAME} while updating the INSTALL_FROM_RELEASE parameter in the"
-    echo "user data to the {RELEASE_NAME}, and optionally adjuting the AMI, key pair name and instance type if specified."
+    echo "user data to the {RELEASE_NAME}, and optionally adjusting the AMI, key pair name and instance type if specified."
     echo "Note: this will NOT terminate any instances in the target group!"
     exit 2
 fi

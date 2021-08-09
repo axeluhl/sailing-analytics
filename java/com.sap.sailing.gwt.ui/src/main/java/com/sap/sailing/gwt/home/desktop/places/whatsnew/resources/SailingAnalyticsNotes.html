@@ -4,6 +4,35 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">July 2021</h5>
+         <ul class="bulletList">
+           <li>The data mining module (<a href="/gwt/DataMining.html">/gwt/DataMining.html</a>) now offers additional
+               metrics regarding the regular wind-based rank calculation for upwind and downwind legs as well as
+               hypothetical ranks calculated for upwind and downwind legs ignoring wind information and instead
+               projecting onto the Rhumb line. This allows for analyzing the effects of a wind-based ranking
+               on upwind and downwind legs.</li>
+           <li>Groups are now ordered by name in the drop-down for setting the default creation group
+               under "User Details."</li>
+           <li>A Slovenian translation of the user interface has been added.</li>
+           <li>The IOC code for "Russian Olympic Committee" has been added under the "ROC" abbreviation, together
+               with the IOC-provided flag.</li>
+           <li>Fixed a regression: competitors are now again selected correctly for the Start Analysis and for the
+               Winning Lanes modes of the race viewer.</li>
+           <li>When the streamlet settings are changed using the wind indicator on the map, these settings are now
+               also stored in the user profile as if they had been changed via the map settings dialog.</li>
+           <li>Boat scaling on large zoom levels has been fixed. The pixel size now better corresponds to the
+               boat class's hull length and beam.</li>
+           <li>An issue with re-drawing the "Progression" chart during live races has been fixed.</li>
+           <li>Wind arrows now fade according to their fading confidence, e.g., when a WindBot device has been
+               switched off, or if Wind Finder samples have aged by ten minutes or more.</li>
+           <li>The place for which the "combined wind" is calculated is now closer to the "middle of the course" than
+               before. Before, each waypoint's position was considered for the average, overemphasizing leeward waypoints
+               for windward-leeward courses, for example. Now, each leg's middle position is considered for the average,
+               with a weight that corresponds to the leg's length. This results in an average that virtually takes into
+               account every single point on each sailed leg's rhumb line. Note, though, that the positions are taken based
+               on the mark positions at the time point requested. If marks are moved around the course this will have an
+               effect, obviously, on how this average is calculated.</li>
+         </ul>
          <h5 class="articleSubheadline">June 2021</h5>
          <ul class="bulletList">
            <li>The advantage line now also (again) shows after the first competitor has crossed the finish line.</li>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="scan_qr">"Optično branje QR-kode"</string>
+    <string name="scan_hint">"QR-kodo najdete na potrditvi udeležbe"</string>
+    <string name="no_qr_code">"Ali nimate QR-kode?"</string>
+    <string name="start_tracking">"Začni sledenje"</string>
+    <string name="stop_tracking">"Ustavi sledenje"</string>
+    <string name="tracking_gps_accuracy">"Natančnost GPS-a"</string>
+    <string name="tracking_mode">"Način"</string>
+    <string name="tracking_mode_live">"V živo"</string>
+    <string name="tracking_mode_battery_saving">"Varčevanje baterije"</string>
+    <string name="tracking_unsent_fixes">"Neposlana sporočila"</string>
+    <string name="tracking_mode_caching">"Brez povezave"</string>
+    <string name="tracking_mode_api_error">"Napaka API"</string>
+    <string name="tracking_mode_no_attempt">"Inicializiranje"</string>
+    <string name="tracking_time">"Čas sledenja"</string>
+    
+    <string name="tracking_status_tracking">"Sledenje"</string>
+    <string name="tracking_status_no_gps_signal">"Ni GPS-sprememb ali GPS-signala"</string>
+    <string name="desc_regatta_user_image">"Uporabniška slika regate"</string>
+    <string name="desc_add_photo_button">"Gumb Dodaj fotografijo"</string>
+    <string name="tracking_status_gps_found">"GPS-signal je najden!"</string>
+</resources>
