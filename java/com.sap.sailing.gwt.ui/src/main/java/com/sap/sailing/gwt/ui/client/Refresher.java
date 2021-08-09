@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.function.Predicate;
+
 /**
- * A {@link Refresher} will offer methods to register a displayer of a specific DTO, force reloads and give the
+ * A {@link Refresher} offers methods to register a displayer of a specific DTO type, force reloads and give the
  * possibility to update the centrally managed data. The displayer will be informed asynchronously after data changes
  * have applied.
  * 
@@ -20,6 +22,8 @@ public interface Refresher<T> {
      *            the {@link Displayer} to add.
      */
     void addDisplayerAndCallFillOnInit(Displayer<T> displayer);
+
+    void removeDisplayer(Displayer<T> displayer);
 
     /**
      * Force a reload of the data from server and call afterwards asynchronously the fill method of the given
@@ -76,4 +80,9 @@ public interface Refresher<T> {
      */
     void remove(T dto);
 
+    /**
+     * {@link #remove(Object) Removes} all objects from this refresher that {@link Predicate#test(Object) are matched) by the
+     * {@code filter} passed.
+     */
+    void removeAll(Predicate<T> filter);
 }

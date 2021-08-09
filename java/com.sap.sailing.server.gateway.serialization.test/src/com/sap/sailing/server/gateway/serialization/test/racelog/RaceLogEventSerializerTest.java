@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.serialization.test.racelog;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -13,6 +14,7 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCImpliedWindSourceEventImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
@@ -37,6 +39,8 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
@@ -77,6 +81,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> orcScratchBoatEventSerializer;
     private JsonSerializer<RaceLogEvent> orcSetImpliedWindEventSerializer;
     private JsonSerializer<RaceLogEvent> resultsAreOfficialEventSerializer;
+    private JsonSerializer<RaceLogEvent> excludeWindSourceEventSerializer;
     
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
@@ -113,6 +118,7 @@ public class RaceLogEventSerializerTest {
         orcScratchBoatEventSerializer = mock(JsonSerializer.class);
         orcSetImpliedWindEventSerializer = mock(JsonSerializer.class);
         resultsAreOfficialEventSerializer = mock(JsonSerializer.class);
+        excludeWindSourceEventSerializer = mock(JsonSerializer.class);
         
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 passChangedSerializer, courseDesignChangedEventSerializer,
@@ -126,9 +132,18 @@ public class RaceLogEventSerializerTest {
                 startOfTrackingEventSerializer, useCompetitorsFromRaceLogEventSerializer, 
                 endOfTrackingEventSerializer, tagEventSerializer, orcLegDataEventSerializer,
                 orcCertificateAssignmentEventSerializer, orcScratchBoatEventSerializer,
-                orcSetImpliedWindEventSerializer, resultsAreOfficialEventSerializer);
+                orcSetImpliedWindEventSerializer, resultsAreOfficialEventSerializer,
+                excludeWindSourceEventSerializer);
     }
 
+    @Test
+    public void testExcludeWindSourceEventSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = new RaceLogExcludeWindSourcesEventImpl(null, author, 0, Collections.singleton(new WindSourceWithAdditionalID(WindSourceType.WEB, "123")));
+        serializer.serialize(event);
+        verify(excludeWindSourceEventSerializer).serialize(event);
+    }
+    
     @Test
     public void testChoosesFlagEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.

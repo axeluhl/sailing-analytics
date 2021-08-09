@@ -1387,7 +1387,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
-                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent FIXME why not pass through onlyUpToNewestEvent here??? */ true, includeCombinedWindForAllLegMiddles);
+                windSourceTypeNames, trackedRace, onlyUpToNewestEvent, includeCombinedWindForAllLegMiddles);
         return result;
     }
 
@@ -1500,9 +1500,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     /**
+     * @param from
+     *            if {@code null}, start of tracking is used, and if that's not available, start of race is used. If
+     *            that is also {@code null}, {@code null} is returned by the method.
      * @param to
-     *            if <code>null</code>, data is returned up to end of race; if the end of race is not known and
-     *            <code>null</code> is used for this parameter, <code>null</code> is returned.
+     *            if <code>null</code>, data is returned up to end of race or, if that is not available, end of
+     *            tracking; it that is not available either, data is returned up to "now-livedelay"
      * @param onlyUpToNewestEvent
      *            if <code>true</code>, no wind data will be returned for time points later than
      *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
@@ -1517,8 +1520,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
-            TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() == null ? trackedRace
-                    .getStartOfRace() : trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
+            TimePoint fromTimePoint = from == null ?
+                    trackedRace.getStartOfTracking() == null ?
+                            trackedRace.getStartOfRace() :
+                            trackedRace.getStartOfTracking() :
+                    new MillisecondsTimePoint(from);
             TimePoint toTimePoint = to == null ?
                     trackedRace.getEndOfRace() == null ?
                             trackedRace.getEndOfTracking() == null ?
@@ -1991,7 +1997,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) {
         RaceTimesInfoDTO raceTimesInfo = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
             raceTimesInfo = new RaceTimesInfoDTO(raceIdentifier);
@@ -1999,7 +2004,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             raceTimesInfo.setLegInfos(legInfos);
             List<MarkPassingTimesDTO> markPassingTimesDTOs = new ArrayList<MarkPassingTimesDTO>();
             raceTimesInfo.setMarkPassingTimes(markPassingTimesDTOs);
-
             raceTimesInfo.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
             raceTimesInfo.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
             raceTimesInfo.newestTrackingEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
@@ -2008,7 +2012,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             raceTimesInfo.raceFinishingTime = trackedRace.getFinishingTime() == null ? null : trackedRace.getFinishingTime().asDate();
             raceTimesInfo.raceFinishedTime = trackedRace.getFinishedTime() == null ? null : trackedRace.getFinishedTime().asDate();
             raceTimesInfo.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
-
             Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
             synchronized (markPassingsTimes) {
                 int numberOfWaypoints = Util.size(markPassingsTimes);
@@ -2320,7 +2323,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result.windSourcesToExclude = windSourcesToExclude;
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-
             for (WindSource windSource: trackedRace.getWindSources()) {
                 windTrackInfoDTOs.put(windSource, new WindTrackInfoDTO());
             }
@@ -3471,7 +3473,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
         for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             try {
-                groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData));
+                groupDTO.leaderboards.add(createStrippedLeaderboardDTOWithSecurity(leaderboard, withGeoLocationData, withStatisticalData));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }

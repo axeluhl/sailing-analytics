@@ -1,5 +1,7 @@
 # Setup for the Olympic Summer Games 2020/2021 Tokyo
 
+[[_TOC_]]
+
 ## Local Installation
 
 For the Olympic Summer Games 2020/2021 Tokyo we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with equal hardware configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices.
@@ -70,9 +72,11 @@ There are also still two personal accounts ``uhl`` and ``tim`` and an Eclipse de
 
 ### Hostnames
 
-We assume not to have DNS available on site. Therefore, for now, we have decided for host names ``sap-p1-1`` and ``sap-p1-2`` for which we have created entries in both laptops' ``/etc/hosts`` file. Currently, when testing in the SAP facilities with the SAP Guest WiFi, possibly changing IP addresses have to be updated there.
+DNS is available on site on the gateway host ``10.1.0.6``. This is essential for resolving ``www.igtimi.com``, the AWS SES SMTP server at ``email-smtp.eu-west-1.amazonaws.com`` and all e-mail address's domains for sendmail's domain verification. The DNS server is set for both, ``sap-p1-1`` and ``sap-p1-2``. It can be set from the command line using ``nmcli connection modify Wired\ connection\ 2 ipv4.dns "10.1.0.6"; nmcli connection down Wired\ connection\ 2; nmcli connection up Wired\ connection\ 2``. Currently, when testing in the SAP facilities with the SAP Guest WiFi, possibly changing IP addresses have to be updated in ``/etc/hosts``.
 
 The domain name has been set to ``sapsailing.com`` so that the fully-qualified host names are ``sap-p1-1.sapsailing.com`` and ``sap-p1-2.sapsailing.com`` respectively. Using this domain name is helpful later when it comes to the shared security realm established with the central ``security-service.sapsailing.com`` replica set.
+
+The hostname ``www.sapsailing.com`` is required by master instances when connected to the Internet in order to download polar data and wind estimation data from the archive server. Since direct access to ``www.sapsailing.com`` is blocked, we run this through the SSH tunnel to our jump host; in order to have matching certificates and appropriate hostname-based routing in the cloud for requests to ``www.sapsailing.com`` we alias this hostname in ``/etc/hosts`` to ``127.0.0.1`` (localhost).
 
 ### IP Addresses and VPN
 
@@ -147,15 +151,36 @@ On both laptops there is a script ``/usr/local/bin/tunnels`` which establishes S
 
 During regular operations we assume that we have an Internet connection that allows us to reach our jump host ``tokyo-ssh.sapsailing.com`` through SSH, establishing various port forwards. We also expect TracTrac to have their primary server available. Furthermore, we assume both our laptops to be in service. ``sap-p1-1`` then runs the master server instance, ``sap-p1-2`` runs a local replica. The master on ``sap-p1-1`` replicates the central security service at ``security-service.sapsailing.com`` using the RabbitMQ installation on ``rabbit.internal.sapsailing.com`` in the AWS region eu-west-1. The port forwarding through tokyo-ssh.sapsailing.com (in ap-northeast-1) to the internal RabbitMQ address (in eu-west-1) works through VPC peering. The RabbitMQ instance used for outbound replication, both, into the cloud and for the on-site replica, is rabbit-ap-northeast-1.sapsailing.com. The replica on ``sap-p1-2`` obtains its replication stream from there, and for the HTTP connection for "reverse replication" it uses a direct connection to ``sap-p1-1``. The outside world, in particular all "S-ded-tokyo2020-m" master security groups in all regions supported, access the on-site master through a reverse port forward on our jump host ``tokyo-ssh.sapsailing.com:8888`` which under regular operations points to ``sap-p1-1:8888`` where the master process runs.
 
+On both laptops we establish a port forward from ``localhost:22443`` to ``sapsailing.com:443``. Together with the alias in ``/etc/hosts`` that aliases ``www.sapsailing.com`` to ``localhost``, requests to ``www.sapsailing.com:22443`` will end up on the archive server.
+
 On both laptops, we maintain SSH connections to ``localhost`` with port forwards to the current TracTrac production server for HTTP, live data, and stored data. In the test we did on 2021-05-25, those port numbers were 9081, 14001, and 14011, respectively, for the primary server, and 9082, 14002, and 14012, respectively, for the secondary server. In addition to these port forwards, an entry in ``/etc/hosts`` is required for the hostname that TracTrac will use on site for their server(s), pointing to ``127.0.0.1`` to let the Sailing Analytics process connect to localhost with the port forwards. Tests have shown that if the port forwards are changed during live operations, e.g., to point to the secondary instead of the primary TracTrac server, the TracAPI continues smoothly which is a great way of handling such a fail-over process without having to re-start our master server necessarily or reconnect to all live races.
 
 Furthermore, for administrative SSH access from outside, we establish reverse port forwards from our jump host ``tokyo-ssh.sapsailing.com`` to the SSH ports on ``sap-p1-1`` (on port 18122) and ``sap-p1-2`` (on port 18222).
 
-Both laptops have a forward from localhost:22222 to sapsailing.com:22 through tokyo-ssh, in order to be able to have a git remote ``ssh`` with the url ``ssh://trac@localhost:22222/home/trac/git``.
+Both laptops have a forward from ``localhost:22222`` to ``sapsailing.com:22`` through ``tokyo-ssh.sapsailing.com``, in order to be able to have a git remote ``ssh`` with the url ``ssh://trac@localhost:22222/home/trac/git``.
 
 The port forwards vary for exceptional situations, such as when the Internet connection is not available, or when ``sap-p1-1`` that regularly runs the master process fails and we need to make ``sap-p1-2`` the new master. See below for the details of the configurations for those scenarios.
 
 The tunnel configurations are established and configured using a set of scripts, each to be found under ``/usr/local/bin`` on each of the two laptops.
+
+#### ssh_config and sshd_config tweaks
+
+In order to recover quickly from failures we changed ``/etc/ssh/ssh_config`` on both of the P1s and added the following parameters:
+```
+ExitOnForwardFailure yes
+ConnectTimeout 10
+ServerAliveCountMax 3
+ServerAliveInterval 10
+```
+For the server side on tokyo-ssh and on the both P1s the following parameters have been added to ``/etc/ssh/sshd_config``:
+```
+ClientAliveInterval 3
+ClientAliveCountMax 3
+```
+
+ExitOnForwardFailure will force ssh to exit if one of the port forwards fails. ConnectTimeout manages the time in seconds until an initial connection fails. AliveInterval (client and server) manages the time in seconds after ssh/sshd are sending client and server alive probes. CountMax is the number of retries for those probes. 
+
+The settings have been verified by executing a network change on both the laptops, the ssh tunnel returns after a couple of seconds.
 
 #### Regular Operations: master on sap-p1-1, replica on sap-p1-2, with Internet / Cloud connection 
 
@@ -330,6 +355,21 @@ The ``monitor-mongo-replica-set-delay`` looks as the result of calling ``rs.prin
 
 The ``monitor-disk-usage`` script checks the partition holding ``/var/lib/mongodb/``. Should it fill up to more than 90%, an alert will be sent using ``notify-operators``.
 
+### Time Synchronizing
+Setup chronyd service on desktop machine, in order to regurlary connect via VPN and relay the time towards the two P1s. Added
+```
+# Tokyo2020 configuration
+server 10.1.3.221 iburst
+```
+to ``/etc/chrony/chrony.conf`` on the clients.
+Added
+```
+# FOR TOKYO SERVER SETUP
+allow all
+local stratum 10
+```
+to the server file, started ```chronyd``` service.
+
 ## AWS Setup
 
 Our primary AWS region for the event will be Tokyo (ap-northeast-1). There, we have reserved the elastic IP ``52.194.91.94`` to which we've mapped the Route53 hostname ``tokyo-ssh.sapsailing.com`` with a simple A-record. The host assigned to the IP/hostname is to be used as a "jump host" for SSH tunnels. It runs Amazon Linux with a login-user named ``ec2-user``. The ``ec2-user`` has ``sudo`` permission. In the root user's crontab we have the same set of scripts hooked up that in our eu-west-1 production landscape is responsible for obtaining and installing the landscape manager's SSH public keys to the login user's account, aligning the set of ``authorized_keys`` with those of the registered landscape managers (users with permission ``LANDSCAPE:MANAGE:AWS``). The ``authorized_keys.org`` file also contains the two public SSH keys of the ``sailing`` accounts on the two laptops, so each time the script produces a new ``authorized_keys`` file for the ``ec2-user``, the ``sailing`` keys for the laptop tunnels don't get lost.
@@ -419,7 +459,7 @@ One way to monitor the health and replication status of the replica set is runni
 
 It shows the replication state and in particular the delay of the replicas. A cronjob exists for ``sailing@sap-p1-1`` which triggers ``/usr/local/bin/monitor-mongo-replica-set-delay`` every minute which will use ``/usr/local/bin/notify-operators`` in case the average replication delay for the last ten read-outs exceeds a threshold (currently 3s). We have a cron job monitoring this (see above) and sending out alerts if things start slowing down.
 
-In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@tokyo-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017,sap-p1-2/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
+In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db-safe-exit`` script (versioned in git under ``configuration/on-site-scripts/clone-security-service-db-safe-exit``) once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@tokyo-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017,sap-p1-2/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
 
 ```
     db.copyDatabase("security_service_bak", "security_service")
@@ -543,28 +583,105 @@ The ``Event`` object is owned by ``tokyo2020-moderators``, and that group grants
 
 ## Landscape Upgrade Procedure
 
-update git on all replicas
-stop replication on all cloud replicas:
+In the ``configuration/on-site-scripts`` we have prepared a number of scripts intended to be useful for local and cloud landscape management. TL;DR:
 ```
-$ for i in `./get-replica-ips`; do ssh -o StrictHostKeyChecking=no sailing@$i "cd /home/sailing/servers/tokyo2020; /home/sailing/code/java/target/stopReplicating.sh 4qUrxMVQanLghETmM95XX3fshkHK0wNAQycuPAVNW0E="; done
+	configuration/on-site-scripts/upgrade-landscape.sh -R {release-name} -b {replication-bearer-token}
 ```
+will upgrade the entire landscape to the release ``{release-name}`` (e.g., build-202107210711). The ``{replication-bearer-token}`` must be provided such that the user authenticated by that token will have the permission to stop replication and to replicate the ``tokyo2020`` master.
 
-stop replication on-site
+The script will proceed in the following steps:
+ - patch ``*.conf`` files in ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]`` so
+   their ``INSTALL_FROM_RELEASE`` points to the new ``${RELEASE}``
+ - Install new releases to ``sap-p1-1:servers/[master|security_service]`` and ``sap-p1-2:servers/[replica|master|security_service]``
+ - Update all launch configurations and auto-scaling groups in the cloud (``update-launch-configuration.sh``)
+ - Tell all replicas in the cloud to stop replicating (``stop-all-cloud-replicas.sh``)
+ - Tell ``sap-p1-2`` to stop replicating
+ - on ``sap-p1-1:servers/master`` run ``./stop; ./start`` to bring the master to the new release
+ - wait until master is healthy
+ - on ``sap-p1-2:servers/replica`` run ``./stop; ./start`` to bring up on-site replica again
+ - launch upgraded cloud replicas and replace old replicas in target group (``launch-replicas-in-all-regions.sh``)
+ - terminate all instances named "SL Tokyo2020 (auto-replica)"; this should cause the auto-scaling group to launch new instances as required
+ - manually inspect the health of everything and terminate the "SL Tokyo2020 (Upgrade Replica)" instances when enough new instances
+   named "SL Tokyo2020 (auto-replica)" are available
 
-put release in /home/trac/
+The individual scripts will be described briefly in the following sub-sections. Many of them use as a common artifact the ``regions.txt`` file which contains the list of regions in which operations are executed. The ``eu-west-1`` region as our "legacy" or "primary" region requires special attention in some cases. In particular, it can use the ``live`` replica set for the replicas started in the region, also because the AMI used in this region is slightly different and in particular doesn't launch a MongoDB local replica set on each instance which the AMIs in all other regions supported do.
 
-refresh instance stop start on sap-p1-1 / on-site master
+### clone-security-service-db-safe-exit
 
-after on-site master is healthy / available register cloud master forwarder to target groups, pay attention in eu-west-1 webserver instance works as cloud master forwarder
+Creates a ``mongodump`` of "mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com,dbserver.internal.sapsailing.com:10203/security_service?replicaSet=live&retryWrites=true&readPreference=nearest" on the ``tokyo-ssh.sapsailing.com`` host and packs it into a ``.tar.gz`` file. This archive is then transferred as the standard output of an SSH command to the host executing the script where it is unpacked into ``/tmp/dump``. The local "mongodb://localhost/security_service_bak?replicaSet=security_service&retryWrites=true&readPreference=nearest" backup copy is then dropped, the local ``security_service`` DB is moved to ``security_service_bak``, and the dump from ``/tmp/dump`` is then restored to ``security_service``. If this fails, the backup from ``security_service_bak`` is restored to ``security_service``, and there won't be a backup copy anymore in ``security_service_bak`` anymore.
 
-./stop /start on on-site replica
+The script is used as a CRON job for user ``sailing@sap-p1-1``.
 
-launch more like this with new user data, append (manual) to name of instance, make sure master target group has a healthy target.
+### get-replica-ips
 
-check :8888/gwt/status , if initial load is not starting most probably registration to master has failed (check log for Exception), if so login and do stop & start
+Lists the public IP addresses of all running replicas in the regions described in ``regions.txt`` on its standard output. Progress information will be sent to standard error. Example invocation:
+<pre>
+	$ ./get-replica-ips
+	Region: eu-west-1
+	Region: ap-northeast-1
+	Region: ap-southeast-2
+	Region: us-west-1
+	Region: us-east-1
+	 34.245.148.130 18.183.234.161 3.26.60.130 13.52.238.81 18.232.169.1
+</pre>
 
-edit target group, deregister and register in the same window, save changes
+### launch-replicas-in-all-regions.sh
 
-terminate old auto-replica
+Will launch as many new replicas in the regions listed in ``regions.txt`` with the release specified with ``-R`` as there are currently healthy auto-replicas registered with the ``S-ded-tokyo2020`` target group in the region (at least one) which will register at the master proxy ``tokyo-ssh.internal.sapsailing.com:8888`` and RabbitMQ at ``rabbit-ap-northeast-1.sapsailing.com:5672``, then when healthy get added to target group ``S-ded-tokyo2020`` in that region, with all auto-replicas registered before removed from the target group.
 
-wait for autoscaling group to create a new autoscaling instance, after healthy terminate manually launched instance/replica
+The script uses the ``launch-replicas-in-region.sh`` script for each region where replicas are to be launched.
+
+Example invocation:
+<pre>
+	launch-replicas-in-all-regions.sh -R build-202107210711 -b 1234567890ABCDEFGH/+748397=
+</pre>
+
+Invoke without arguments to see a documentation of possible parameters.
+
+### launch-replicas-in-region.sh
+
+Will launch one or more (see ``-c``) new replicas in the AWS region specified with ``-g`` with the release specified with ``-R`` which will register at the master proxy ``tokyo-ssh.internal.sapsailing.com:8888`` and RabbitMQ at ``rabbit-ap-northeast-1.sapsailing.com:5672``, then when healthy get added to target group ``S-ded-tokyo2020`` in that region, with all auto-replicas registered before removed from the target group. Specify ``-r`` and ``-p`` if you are launching in ``eu-west-1`` because it has a special non-default MongoDB environment.
+
+Example invocation:
+<pre>
+	launch-replicas-in-region.sh -g us-east-1 -R build-202107210711 -b 1234567890ABCDEFGH/+748397=
+</pre>
+
+Invoke without arguments to see a documentation of possible parameters.
+
+### stop-all-cloud-replicas.sh
+
+Will tell all replicas in the cloud in those regions described by the ``regions.txt`` file to stop replicating. This works by invoking the ``get-replica-ips script`` and for each of them to stop replicating, using the ``stopReplicating.sh`` script in their ``/home/sailing/servers/tokyo2020`` directory, passing through the bearer token. Note: this will NOT stop replication on the local replica on ``sap-p1-2``!
+
+The script must be invoked with the bearer token needed to authenticate a user with replication permission for the ``tokyo2020`` application replica set.
+
+Example invocation:
+<pre>
+	stop-all-cloud-replicas.sh -b 1234567890ABCDEFGH/+748397=
+</pre>
+
+Invoke without arguments to see a documentation of possible parameters.
+
+### update-launch-configuration.sh
+
+Will upgrade the auto-scaling group ``tokyo2020*`` (such as ``tokyo2020-auto-replicas``) in the regions from ``regions.txt`` with a new launch configuration that will be derived from the existing launch configuration named ``tokyo2020-*`` by copying it to ``tokyo2020-{RELEASE_NAME}`` while updating the ``INSTALL_FROM_RELEASE`` parameter in the user data to the ``{RELEASE_NAME}`` provided in the ``-R`` parameter, and optionally adjusting the AMI, key pair name and instance type if specified by the respective parameters. Note: this will NOT terminate any instances in the target group!
+
+Example invocation:
+<pre>
+	update-launch-configuration.sh -R build-202107210711
+</pre>
+
+Invoke without arguments to see a documentation of possible parameters.
+
+### upgrade-landscape.sh
+
+See the introduction of this main section. Synopsis:
+<pre>
+  ./upgrade-landscape.sh -R &lt;release-name&gt; -b &lt;replication-bearer-token&gt; \[-t &lt;instance-type&gt;\] \[-i &lt;ami-id&gt;\] \[-k &lt;key-pair-name&gt;\] \[-s\]<br>
+	-b replication bearer token; mandatory
+	-i Amazon Machine Image (AMI) ID to use to launch the instance; defaults to latest image tagged with image-type:sailing-analytics-server
+	-k Key pair name, mapping to the --key-name parameter
+	-R release name; must be provided to select the release, e.g., build-202106040947
+	-t Instance type; defaults to
+	-s Skip release download
+</pre>

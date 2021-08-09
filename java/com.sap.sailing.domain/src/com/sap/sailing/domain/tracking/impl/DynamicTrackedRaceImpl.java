@@ -136,12 +136,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         gpsFixReceived = new AtomicBoolean(false);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
-            Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
-            for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
-                windSourcesToExclude.add(windSourceToExclude);
-            }
-            windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
-            setWindSourcesToExclude(windSourcesToExclude);
+            setWindSourcesToExclude(getWindSourcesToExclude()); // implicitly adds COURSE_BASED to the wind sources to exclude
         }
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
@@ -520,10 +515,19 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    /**
+     * Adds the {@link WindSourceType#COURSE_BASED} wind source to those to exclude if the race is not
+     * {@link #raceIsKnownToStartUpwind known to start with an upwind leg}.
+     */
     @Override
-    public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        super.setWindSourcesToExclude(windSourcesToExclude);
-        notifyListenersWindSourcesToExcludeChanged(windSourcesToExclude);
+    public void setWindSourcesToExclude(final Iterable<? extends WindSource> windSourcesToExclude) {
+        final Set<WindSource> effectiveWindSourcesToExclude = new HashSet<>();
+        Util.addAll(windSourcesToExclude, effectiveWindSourcesToExclude);
+        if (!raceIsKnownToStartUpwind) {
+            effectiveWindSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
+        }
+        super.setWindSourcesToExclude(effectiveWindSourcesToExclude);
+        notifyListenersWindSourcesToExcludeChanged(effectiveWindSourcesToExclude);
     }
 
     @Override
@@ -1038,26 +1042,25 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded by this
-     * call, all listeners are notified about these existing wind fixes using their
+     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded into this
+     * new wind track, all listeners are notified about these existing wind fixes using their
      * {@link RaceChangeListener#windDataReceived(Wind, WindSource)} callback method. In particular this replicates all
      * wind fixes that may have been loaded from the wind store for the new track.
      */
     @Override
-    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        final WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
+    protected void notifyWindTrackHasBeenCreatedAndAddedToWindTracks(WindSource windSource, WindTrack windTrack) {
+        super.notifyWindTrackHasBeenCreatedAndAddedToWindTracks(windSource, windTrack);
         if (windSource.getType().canBeStored()) {
             // replicate all wind fixes that may have been loaded by the wind store
-            result.lockForRead();
+            windTrack.lockForRead();
             try {
-                for (Wind wind : result.getRawFixes()) {
+                for (Wind wind : windTrack.getRawFixes()) {
                     notifyListeners(wind, windSource); // Note that this doesn't notify the track's listeners but the tracked race's listeners.
                 } // In particular, the wind store won't receive events (again) for the wind fixes it already has.
             } finally {
-                result.unlockAfterRead();
+                windTrack.unlockAfterRead();
             }
         }
-        return result;
     }
 
     @Override

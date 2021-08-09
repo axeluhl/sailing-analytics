@@ -80,7 +80,8 @@ public class PasswordResetActivity extends AbstractActivity implements PasswordR
         }
 
         private boolean validate() {
-            String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
+            // TODO we could also add the hidden checkbox and label for spaces in username here...
+            String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation, /* reallyUseLeadingOrTrailingSpacesInUsername */ true);
             boolean isValid = errorMessage == null || errorMessage.isEmpty();
             view.setErrorMessage(isValid ? null : errorMessage);
             view.getChangePasswordControl().setEnabled(isValid);

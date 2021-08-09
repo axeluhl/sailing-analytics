@@ -85,7 +85,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     private boolean first = true;
                     
                     @Override
-                    public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
+                    public void gotControlPassings(long timestamp, IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
                         logger.info("Received control passings "+controlPassings+" for competitor "+raceCompetitor);
                         if (first) {
                             logger.info("Was first");

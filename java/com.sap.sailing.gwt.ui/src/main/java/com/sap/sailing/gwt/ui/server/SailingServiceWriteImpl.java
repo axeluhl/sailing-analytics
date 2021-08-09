@@ -88,6 +88,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
@@ -326,7 +327,6 @@ import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.SetRaceIsKnownToStartUpwind;
 import com.sap.sailing.server.operationaltransformation.SetSuppressedFlagForCompetitorInLeaderboard;
-import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.UpdateBoat;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
@@ -381,8 +381,8 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -770,7 +770,20 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier,
             List<WindSource> windSourcesToExclude) {
         getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
-        getService().apply(new SetWindSourcesToExclude(raceIdentifier, windSourcesToExclude));
+        final DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(raceIdentifier);
+        if (trackedRace == null) {
+            logger.info("Couldn't set wind sources to exclude for tracked race "+raceIdentifier+" because the race was not found");
+        } else {
+            final Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
+            if (raceLogs != null && !Util.isEmpty(raceLogs)) {
+                final RaceLog defaultRaceLog = raceLogs.iterator().next();
+                logger.info("Set wind sources to exclude for tracked race "+raceIdentifier+" to "+windSourcesToExclude);
+                defaultRaceLog.add(new RaceLogExcludeWindSourcesEventImpl(TimePoint.now(),
+                        getService().getServerAuthor(), defaultRaceLog.getCurrentPassId(), windSourcesToExclude));
+            } else {
+                logger.info("Couldn't set wind sources to exclude for tracked race "+raceIdentifier+" because no race log seems attached");
+            }
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
@@ -58,14 +59,14 @@ public class CompetitorDescriptor_CustomFieldSerializer extends CustomFieldSeria
         String regattaName = streamReader.readString();
         String raceName = streamReader.readString();
         String fleetName = streamReader.readString();
-        String competitorId = (String) streamReader.readObject();
+        Serializable competitorId = (Serializable) streamReader.readObject();
         String fullName = streamReader.readString();
         String shortName = streamReader.readString();
         String teamName = streamReader.readString();
         CountryCode countryCode = (CountryCode) streamReader.readObject();
         Double timeOnTimeFactor = (Double) streamReader.readObject();
         Duration timeOnDistanceAllowancePerNauticalMile = (Duration) streamReader.readObject();
-        String boatId = (String) streamReader.readObject();
+        Serializable boatId = (Serializable) streamReader.readObject();
         String boatName = streamReader.readString();
         String boatClassName = streamReader.readString();
         String sailNumber = streamReader.readString();

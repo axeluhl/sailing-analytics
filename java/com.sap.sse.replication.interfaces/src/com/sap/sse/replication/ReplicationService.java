@@ -48,7 +48,7 @@ public interface ReplicationService {
      * Registers a replica with this master instance. The <code>replica</code> will be considered in the result of
      * {@link #getReplicaInfo()} when this call has succeeded.
      */
-    void registerReplica(ReplicaDescriptor replica) throws IOException;
+    void registerReplica(ReplicaDescriptor replica) throws IOException, Exception;
 
     /**
      * When this service runs on a master instance, the <code>replica</code> will no longer be considered part of this
@@ -87,7 +87,7 @@ public interface ReplicationService {
      */
     UUID getServerIdentifier();
 
-    Channel createMasterChannel() throws IOException, ConnectException;
+    Channel createMasterChannel() throws IOException, ConnectException, Exception;
 
     long getNumberOfMessagesSent(ReplicaDescriptor replica);
 

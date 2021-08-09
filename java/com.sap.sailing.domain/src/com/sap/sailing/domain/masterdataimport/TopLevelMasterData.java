@@ -2,6 +2,7 @@ package com.sap.sailing.domain.masterdataimport;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,25 +64,42 @@ public class TopLevelMasterData implements Serializable {
             final Map<String, Regatta> regattaForRaceIdString, final Iterable<MediaTrack> allMediaTracks,
             SensorFixStore sensorFixStore, boolean exportWind,
             Iterable<DeviceConfiguration> raceManagerDeviceConfigurations, final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
-        this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
-        this.leaderboardGroups = groupsToExport;
-        this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(sensorFixStore);
-        if (exportWind) {
-            this.windTrackMasterData = fillWindMap(groupsToExport);
-        } else {
-            this.windTrackMasterData = new HashSet<WindTrackMasterData>();
-        }
-        this.deviceConfigurations = raceManagerDeviceConfigurations;
-        this.eventForLeaderboardGroup = createEventMap(groupsToExport, allEvents);
-        this.filteredMediaTracks = new HashSet<MediaTrack>();
-        filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
+        this(groupsToExport, createEventMap(groupsToExport, allEvents),
+                convertToRaceIdStringsForRegattaMap(regattaForRaceIdString),
+                filterMediaTracks(allMediaTracks, groupsToExport), getAllRelevantRaceLogTrackingFixes(sensorFixStore, groupsToExport),
+                exportWind ? fillWindMap(groupsToExport) : Collections.emptySet(), raceManagerDeviceConfigurations,
+                connectivityParametersToRestore);
+    }
+    
+    private TopLevelMasterData(final Set<LeaderboardGroup> leaderboardGroups,
+            Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup,
+            final Map<RegattaIdentifier, Set<String>> raceIdStringsForRegatta, final Set<MediaTrack> filteredMediaTracks,
+            Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes,
+            Set<WindTrackMasterData> windTrackMasterData,
+            Iterable<DeviceConfiguration> deviceConfigurations,
+            final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
+        this.raceIdStringsForRegatta = raceIdStringsForRegatta;
+        this.leaderboardGroups = leaderboardGroups;
+        this.raceLogTrackingFixes = raceLogTrackingFixes;
+        this.windTrackMasterData = windTrackMasterData;
+        this.deviceConfigurations = deviceConfigurations;
+        this.eventForLeaderboardGroup = eventForLeaderboardGroup;
+        this.filteredMediaTracks = filteredMediaTracks;
         this.connectivityParametersToRestore = connectivityParametersToRestore;
     }
+    
+    public TopLevelMasterData copyAndStripOffDataNotNeededOnReplicas() {
+        return new TopLevelMasterData(leaderboardGroups, eventForLeaderboardGroup, raceIdStringsForRegatta, filteredMediaTracks,
+                /* strip off raceLogTrackingFixes */ Collections.emptyMap(),
+                /* strip off windTrackMasterData */ Collections.emptySet(),
+                /* strip off device configurations */ Collections.emptySet(),
+                /* strip off connectivity params */ Collections.emptySet());
+    }
 
-    private Map<DeviceIdentifier, Set<Timed>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore) {
+    private static Map<DeviceIdentifier, Set<Timed>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore, Set<LeaderboardGroup> groupsToExport) {
         Map<DeviceIdentifier, Set<Timed>> relevantFixes = new HashMap<>();
         // Add fixes for regatta log mappings
-        for (Regatta regatta : getAllRegattas()) {
+        for (Regatta regatta : getAllRegattas(groupsToExport)) {
             final RegattaLog regattaLog = regatta.getRegattaLog();
             try {
                 regattaLog.lockForRead();
@@ -93,7 +111,7 @@ public class TopLevelMasterData implements Serializable {
             }
         }
         // Add fixes for race log mapping
-        for (LeaderboardGroup group : leaderboardGroups) {
+        for (LeaderboardGroup group : groupsToExport) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     for (Fleet fleet : raceColumn.getFleets()) {
@@ -113,7 +131,7 @@ public class TopLevelMasterData implements Serializable {
         return relevantFixes;
     }
 
-    private void addAllFixesIfMappingEvent(SensorFixStore sensorFixStore,
+    private static void addAllFixesIfMappingEvent(SensorFixStore sensorFixStore,
             Map<DeviceIdentifier, Set<Timed>> relevantFixes,
             AbstractLogEvent<?> logEvent) {
         if (logEvent instanceof RegattaLogDeviceMappingEvent<?>) {
@@ -127,7 +145,7 @@ public class TopLevelMasterData implements Serializable {
         }
     }
 
-    private void addAllFixesForMappingEvent(SensorFixStore sensorFixStore,
+    private static void addAllFixesForMappingEvent(SensorFixStore sensorFixStore,
             Map<DeviceIdentifier, Set<Timed>> relevantFixes,
             RegattaLogDeviceMappingEvent<?> mappingEvent) throws NoCorrespondingServiceRegisteredException, TransformationException {
         DeviceIdentifier device = mappingEvent.getDevice();
@@ -143,7 +161,7 @@ public class TopLevelMasterData implements Serializable {
      * Workaround to look for the events connected to RegattaLeadeboards. There should be a proper connection between
      * regatta and event soon. TODO See bugs 1896 and 1532
      */
-    private Map<LeaderboardGroup, Set<Event>> createEventMap(Set<LeaderboardGroup> groupsToExport,
+    private static Map<LeaderboardGroup, Set<Event>> createEventMap(Set<LeaderboardGroup> groupsToExport,
             Iterable<Event> allEvents) {
         Map<LeaderboardGroup, Set<Event>> eventsForLeaderboardGroup = new HashMap<LeaderboardGroup, Set<Event>>();
         Map<CourseArea, Event> eventForCourseArea = new HashMap<CourseArea, Event>();
@@ -167,7 +185,7 @@ public class TopLevelMasterData implements Serializable {
         return eventsForLeaderboardGroup;
     }
 
-    private Map<RegattaIdentifier, Set<String>> convertToRaceIdStringsForRegattaMap(
+    private static Map<RegattaIdentifier, Set<String>> convertToRaceIdStringsForRegattaMap(
             Map<String, Regatta> regattaForRaceIdString) {
         Map<RegattaIdentifier, Set<String>> raceIdStringsForRegatta = new HashMap<RegattaIdentifier, Set<String>>();
         for (Entry<String, Regatta> entry : regattaForRaceIdString.entrySet()) {
@@ -182,7 +200,7 @@ public class TopLevelMasterData implements Serializable {
         return raceIdStringsForRegatta;
     }
 
-    private Set<WindTrackMasterData> fillWindMap(Set<LeaderboardGroup> groupsToExport) {
+    private static Set<WindTrackMasterData> fillWindMap(Set<LeaderboardGroup> groupsToExport) {
         Set<WindTrackMasterData> windTrackMasterDataSet = new HashSet<WindTrackMasterData>();
         for (LeaderboardGroup group : groupsToExport) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
@@ -196,7 +214,7 @@ public class TopLevelMasterData implements Serializable {
         return windTrackMasterDataSet;
     }
 
-    private void addWindTracksToSetIfExistantAndSourceCanBeStored(Set<WindTrackMasterData> windTrackMasterDataSet,
+    private static void addWindTracksToSetIfExistantAndSourceCanBeStored(Set<WindTrackMasterData> windTrackMasterDataSet,
             RaceColumn raceColumn, Fleet fleet) {
         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
         if (trackedRace != null) {
@@ -262,10 +280,14 @@ public class TopLevelMasterData implements Serializable {
         }
         return allEventsInMasterData.values();
     }
-
+    
     public Iterable<Regatta> getAllRegattas() {
+        return getAllRegattas(leaderboardGroups);
+    }
+
+    private static Iterable<Regatta> getAllRegattas(Iterable<LeaderboardGroup> groupsToExport) {
         Set<Regatta> regattas = new HashSet<>();
-        for (LeaderboardGroup leaderboardGroup : leaderboardGroups) {
+        for (LeaderboardGroup leaderboardGroup : groupsToExport) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if (leaderboard instanceof RegattaLeaderboard) {
                     RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
@@ -280,22 +302,24 @@ public class TopLevelMasterData implements Serializable {
      * Copies only those media tracks from {@code allMediaTracks} to {@code filteredMediaTracks} which are 
      * assigned to races related to any of  exported {@link #leaderboardGroups}.
      */
-    private void filterMediaTracks(Iterable<MediaTrack> allMediaTracks, Set<MediaTrack> filteredMediaTracks) {
-        final Set<RaceIdentifier> raceIdentitifiersForMediaExport = collectRaceIdentifiersForMediaExport();
+    private static Set<MediaTrack> filterMediaTracks(final Iterable<MediaTrack> allMediaTracks, final Set<LeaderboardGroup> leaderboardGroups) {
+        final Set<MediaTrack> result = new HashSet<>();
+        final Set<RaceIdentifier> raceIdentitifiersForMediaExport = collectRaceIdentifiersForMediaExport(leaderboardGroups);
         for (MediaTrack mediaTrack : allMediaTracks) {
             for (RegattaAndRaceIdentifier raceIdentifier : mediaTrack.assignedRaces) {
                 if (raceIdentitifiersForMediaExport.contains(raceIdentifier)) {
-                    filteredMediaTracks.add(mediaTrack);
+                    result.add(mediaTrack);
                 }
             }
         }
+        return result;
     }
 
     /**
      * Returns the set of races (in the form of {@link RaceIdentifier}s) related to the exported
      * {@link #leaderboardGroups}.
      */
-    private Set<RaceIdentifier> collectRaceIdentifiersForMediaExport() {
+    private static Set<RaceIdentifier> collectRaceIdentifiersForMediaExport(final Set<LeaderboardGroup> leaderboardGroups) {
         final Set<RaceIdentifier> raceIdentifiers = new HashSet<>();
         for (LeaderboardGroup leaderboardGroup : leaderboardGroups) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {

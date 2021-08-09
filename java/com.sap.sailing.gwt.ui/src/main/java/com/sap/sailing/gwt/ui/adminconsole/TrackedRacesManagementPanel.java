@@ -8,14 +8,16 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.DurationAsHoursMinutesSecondsFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -24,8 +26,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
             DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     private final DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
-    private final DateTimeFormatRenderer durationFormatter = new DateTimeFormatRenderer(
-            DateTimeFormat.getFormat(PredefinedFormat.TIME_MEDIUM), TimeZone.createTimeZone(0));
+    private final DurationAsHoursMinutesSecondsFormatter durationFormatter = new DurationAsHoursMinutesSecondsFormatter();
 
     private final UserService userService;
     private final Grid raceDataGrid;
@@ -94,8 +95,8 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                 raceDataGrid.setText(2, 1, "");
             }
             if (selectedRaceDTO.startOfRace != null && selectedRaceDTO.endOfRace != null) {
-                Date duration = new Date(selectedRaceDTO.endOfRace.getTime() - selectedRaceDTO.startOfRace.getTime());
-                raceDataGrid.setText(3, 1, durationFormatter.render(duration));
+                Duration duration = new MillisecondsDurationImpl(selectedRaceDTO.endOfRace.getTime() - selectedRaceDTO.startOfRace.getTime());
+                raceDataGrid.setText(3, 1, durationFormatter.getHoursMinutesSeconds(duration));
             } else {
                 raceDataGrid.setText(3, 1, "");
             }
