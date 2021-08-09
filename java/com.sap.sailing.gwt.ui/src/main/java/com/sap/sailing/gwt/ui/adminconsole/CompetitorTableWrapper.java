@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -71,6 +72,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     private final boolean filterCompetitorsWithBoat;
     private final boolean filterCompetitorsWithoutBoat;
     private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
     
     /**
      * @param filterCompetitorsWithBoat
@@ -84,8 +86,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      *            to be loaded. In this case, competitors without boat will be fetched only if this flag is
      *            {@code false}.
      */
-    public CompetitorTableWrapper(SailingServiceWriteAsync sailingServiceWrite, UserService userService, Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
+    public CompetitorTableWrapper(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+            Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
+            StringMessages stringMessages, ErrorReporter errorReporter, boolean multiSelection, boolean enablePager,
+            boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
@@ -98,6 +102,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     }
                 });
         this.competitorsRefresher = competitorsRefresher;
+        this.boatsRefresher = boatsRefresher;
         this.filterCompetitorsWithBoat = filterCompetitorsWithBoat;
         this.filterCompetitorsWithoutBoat = filterCompetitorsWithoutBoat;
         ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
@@ -407,13 +412,16 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
         if (leaderboardName != null) {
+            GWT.log("leaderboardName != null");
             sailingServiceWrite.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
             if (competitorsRefresher != null) {
+                GWT.log("competitorsRefresher != null");
                 // Don't fetch from server but ask our unified data model to deliver the competitors without forcing server
                 // round-trip unless the competitors haven't been loaded at all so far
                 competitorsRefresher.callFillAndReloadInitially(competitors->myCallback.onSuccess(competitors));
             } else {
+                GWT.log("competitorsRefresher == null");
                 sailingServiceWrite.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
             }
         }
@@ -451,9 +459,14 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
 
                     @Override
                     public void onSuccess(CompetitorWithBoatDTO updatedCompetitor) {
+                        GWT.log("OK 002");
                         if (competitorsRefresher != null) {
                             competitorsRefresher.addIfNotContainedElseReplace(updatedCompetitor);
+                            if (updatedCompetitor.getBoat() != null) {
+                                boatsRefresher.addIfNotContainedElseReplace(updatedCompetitor.getBoat());
+                            }
                         }
+                        
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
@@ -481,6 +494,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 newCompetitor, createWithBoatByDefault, new DialogCallback<CompetitorWithBoatDTO>() {
                     @Override
                     public void ok(final CompetitorWithBoatDTO competitor) {
+                        GWT.log("OK 001");
                         if (competitor.hasBoat()) {
                             sailingServiceWrite.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
                         } else {

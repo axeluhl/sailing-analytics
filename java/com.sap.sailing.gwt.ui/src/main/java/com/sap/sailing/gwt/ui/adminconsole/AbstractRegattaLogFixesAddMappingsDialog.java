@@ -66,7 +66,8 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingServiceWrite, stringMessages, errorReporter);
         registerSelectionChangeHandler(deviceIdTable.getSelectionModel(), this::deviceSelectionChanged);
         competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
-                /* competitorsRefresher not needed; fetching competitors from registrations */ null, stringMessages,
+                /* competitorsRefresher not needed; fetching competitors from registrations */ null, 
+                /* boatsRefresher not needed; fetching competitors from registrations */ null, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enable pager */ true,
                 /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(

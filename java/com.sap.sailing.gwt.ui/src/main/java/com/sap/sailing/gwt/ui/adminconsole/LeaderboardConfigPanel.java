@@ -57,6 +57,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
@@ -121,6 +122,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private Button columnMoveUpButton;
     private Button columnMoveDownButton;
     private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
     
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -139,6 +141,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         this.showRaceDetails = showRaceDetails;
         leaderboardTable.ensureDebugId("LeaderboardsCellTable");
         competitorsRefresher = presenter.getCompetitorsRefresher();
+        boatsRefresher = presenter.getBoatsRefresher();
     }
 
     @Override
@@ -308,7 +311,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS, UPDATE,
                 leaderboardDTO -> {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingServiceWrite, userService,
-                            competitorsRefresher, leaderboardDTO.getName(),
+                            competitorsRefresher, boatsRefresher, leaderboardDTO.getName(),
                             leaderboardDTO.boatClassName,
                             /* createWithBoatByDefault */ !leaderboardDTO.canBoatsOfCompetitorsChangePerRace, stringMessages, errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
                                 @Override

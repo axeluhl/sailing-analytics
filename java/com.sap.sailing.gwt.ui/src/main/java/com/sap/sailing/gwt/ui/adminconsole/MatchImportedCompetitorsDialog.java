@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorDescriptorTableWrapper.CompetitorsToImportToExistingLinking;
@@ -74,11 +75,14 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     private final Map<CompetitorDescriptor, CompetitorDTO> existingCompetitorsByImported = new HashMap<>();
     private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
 
     public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptor> competitorDescriptors,
-            final Iterable<CompetitorDTO> existingCompetitor, String localizedHint,
-            StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            Refresher<CompetitorDTO> competitorsRefresher, ErrorReporter errorReporter, DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
+            final Iterable<CompetitorDTO> existingCompetitor, String localizedHint, StringMessages stringMessages,
+            SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
+            ErrorReporter errorReporter,
+            DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
         super(stringMessages.importCompetitors(),
                 String.join("\n", stringMessages.chooseWhichCompetitorsShouldBeImported(), localizedHint),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
@@ -88,6 +92,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
         this.errorReporter = errorReporter;
         this.competitorDescriptors = competitorDescriptors;
         this.competitorsRefresher = competitorsRefresher;
+        this.boatsRefresher = boatsRefresher;
         competitorImportMatcher = new CompetitorImportMatcher(existingCompetitor);
     }
 
@@ -98,7 +103,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     @Override
     protected Widget getAdditionalWidget() {
-        existingCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, competitorsRefresher,
+        existingCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, competitorsRefresher, boatsRefresher,
                 stringMessages, /* multiSelection */
                 errorReporter, false, /* enablePager */true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         final CompetitorsToImportToExistingLinking linker = new CompetitorsToImportToExistingLinking() {

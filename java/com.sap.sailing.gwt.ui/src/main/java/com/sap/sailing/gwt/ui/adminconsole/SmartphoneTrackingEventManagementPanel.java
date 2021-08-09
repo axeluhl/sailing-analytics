@@ -410,9 +410,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
-        RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName, sailingServiceWrite, userService, competitorsRefresher,
-            stringMessages, errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName,
-            fleetName, raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorDTO>>() {
+        RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName,
+                sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages, errorReporter,
+                editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName, fleetName,
+                raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorDTO>>() {
                 @Override
                 public void ok(final Set<CompetitorDTO> registeredCompetitors) {
                     if (canBoatsOfCompetitorsChangePerRace) {
@@ -970,8 +971,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private void handleCompetitorRegistration(StrippedLeaderboardDTOWithSecurity t) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
-        new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingServiceWrite, userService, competitorsRefresher,
-                stringMessages, errorReporter, /* editable */true, t.getName(),
+        new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingServiceWrite, userService,
+                competitorsRefresher, boatsRefresher, stringMessages, errorReporter, /* editable */true, t.getName(),
                 t.canBoatsOfCompetitorsChangePerRace, new DialogCallback<Set<CompetitorDTO>>() {
                     @Override
                     public void ok(Set<CompetitorDTO> registeredCompetitors) {

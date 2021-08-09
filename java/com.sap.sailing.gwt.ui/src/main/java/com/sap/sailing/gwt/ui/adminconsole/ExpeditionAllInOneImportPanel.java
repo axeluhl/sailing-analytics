@@ -154,11 +154,12 @@ public class ExpeditionAllInOneImportPanel extends Composite {
                 Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
             } else if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getLeaderboardGroupId(), 
-                        response.getRaceEntries(), response.getGpsDeviceIds(), response.getSensorDeviceIds(),
-                        response.getSensorFixImporterType(), response.getStartTimes(), presenter.getSailingService(), 
-                        presenter.getUserService(), presenter.getCompetitorsRefresher(), presenter.getRegattasRefresher(),
-                        presenter.getEventsRefresher(), presenter.getLeaderboardsRefresher(), presenter.getLeaderboardGroupsRefresher(),
+                        response.getLeaderboardName(), response.getLeaderboardGroupName(),
+                        response.getLeaderboardGroupId(), response.getRaceEntries(), response.getGpsDeviceIds(),
+                        response.getSensorDeviceIds(), response.getSensorFixImporterType(), response.getStartTimes(),
+                        presenter.getSailingService(), presenter.getUserService(), presenter.getCompetitorsRefresher(),
+                        presenter.getBoatsRefresher(), presenter.getRegattasRefresher(), presenter.getEventsRefresher(),
+                        presenter.getLeaderboardsRefresher(), presenter.getLeaderboardGroupsRefresher(),
                         presenter.getErrorReporter(), stringMessages, getRegattasDisplayer());
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);

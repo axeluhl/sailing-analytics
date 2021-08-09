@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.Refresher;
@@ -67,10 +68,10 @@ public class ExpeditionAllInOneAfterImportHandler {
             List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
             Iterable<TimePoint> startTimes, final SailingServiceWriteAsync sailingServiceWrite,
             final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
-            Refresher<RegattaDTO> regattasRefresher, Refresher<EventDTO> eventsRefresher,
-            Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher, Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher,
-            final ErrorReporter errorReporter, final StringMessages stringMessages,
-            Displayer<RegattaDTO> regattaOracleToRefresh) {
+            Refresher<BoatDTO> boatsRefresher, Refresher<RegattaDTO> regattasRefresher,
+            Refresher<EventDTO> eventsRefresher, Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
+            Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, Displayer<RegattaDTO> regattaOracleToRefresh) {
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardGroupId = leaderboardGroupId;
         this.sensorImporterType = sensorImporterType;
@@ -109,7 +110,7 @@ public class ExpeditionAllInOneAfterImportHandler {
                                                 @Override
                                                 public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
                                                     sensorFixesDeviceIDs = result;
-                                                    showCompetitorRegistration(competitorsRefresher);
+                                                    showCompetitorRegistration(competitorsRefresher, boatsRefresher);
                                                 }
                                             });
                                         }
@@ -124,18 +125,18 @@ public class ExpeditionAllInOneAfterImportHandler {
     
     private class RegattaLogCompetitorRegistrationAndSelectionDialog extends RegattaLogCompetitorRegistrationDialog {
         public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-                Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable,
+                Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable,
                 String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace) {
-            this(boatClass, sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter, editable,
+            this(boatClass, sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages, errorReporter, editable,
                     leaderboardName, canBoatsOfCompetitorsChangePerRace,
                     new ValidatorForCompetitorRegistrationDialog(stringMessages), new CallbackForCompetitorRegistrationDialog());
         }
         
         public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-                Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable,
+                Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable,
                 String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace,
                 ValidatorForCompetitorRegistrationDialog validator, CallbackForCompetitorRegistrationDialog callback) {
-            super(boatClass, sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter, editable,
+            super(boatClass, sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages, errorReporter, editable,
                     leaderboardName, canBoatsOfCompetitorsChangePerRace, validator, callback);
             validator.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
             callback.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
@@ -188,9 +189,9 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
 
-    private void showCompetitorRegistration(Refresher<CompetitorDTO> competitorsRefresher) {
+    private void showCompetitorRegistration(Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher) {
         new RegattaLogCompetitorRegistrationAndSelectionDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
-                sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter, true,
+                sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages, errorReporter, true,
                 leaderboard.getName(), leaderboard.canBoatsOfCompetitorsChangePerRace).show();
     }
     

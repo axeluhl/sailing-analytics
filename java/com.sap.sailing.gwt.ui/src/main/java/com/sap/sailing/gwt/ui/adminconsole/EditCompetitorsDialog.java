@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.Refresher;
@@ -21,6 +22,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
     private final String boatClassName;
     private final boolean createWithBoatByDefault;
     private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
 
     protected static class CompetitorsValidator implements Validator<List<CompetitorWithBoatDTO>> {
         public CompetitorsValidator() {
@@ -34,8 +36,10 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
     }
         
     public EditCompetitorsDialog(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            Refresher<CompetitorDTO> competitorsRefresher, final String leaderboardName, final String boatClassName,
-            boolean createWithBoatByDefault, final StringMessages stringMessages, final ErrorReporter errorReporter, DialogCallback<List<CompetitorWithBoatDTO>> callback) {
+            Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
+            final String leaderboardName, final String boatClassName, boolean createWithBoatByDefault,
+            final StringMessages stringMessages, final ErrorReporter errorReporter,
+            DialogCallback<List<CompetitorWithBoatDTO>> callback) {
         super(stringMessages.actionEditCompetitors(), null, stringMessages.ok(), stringMessages.cancel(),
                 new CompetitorsValidator(), callback);
         this.sailingServiceWrite = sailingServiceWrite;
@@ -46,6 +50,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
         this.boatClassName = boatClassName;
         this.createWithBoatByDefault = createWithBoatByDefault;
         this.competitorsRefresher = competitorsRefresher;
+        this.boatsRefresher = boatsRefresher;
     }
 
     @Override
@@ -55,7 +60,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
 
     @Override
     protected Widget getAdditionalWidget() {
-        final CompetitorPanel competitorPanel = new CompetitorPanel(sailingServiceWrite, userService, competitorsRefresher,
+        final CompetitorPanel competitorPanel = new CompetitorPanel(sailingServiceWrite, userService, competitorsRefresher, boatsRefresher,
                 leaderboardName, boatClassName, createWithBoatByDefault, stringMessages, errorReporter);
         return competitorPanel;
     }

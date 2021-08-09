@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
@@ -87,8 +88,9 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
      */
     protected CompetitorRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite,
             final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
+            Refresher<BoatDTO> boatsRefresher, final StringMessages stringMessages, final ErrorReporter errorReporter,
+            boolean editable, String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass,
+            Runnable validator,
             Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> registeredCompetitorsRetriever,
             boolean restrictPoolToLeaderboard, Widget... additionalWidgetsBeforeTables) {
         this.errorReporter = errorReporter;
@@ -134,10 +136,11 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
                         MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
-                                sailingServiceWrite, userService, competitorsRefresher, stringMessages, errorReporter);
+                                sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages,
+                                errorReporter);
                         CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
-                                matchCompetitorsDialogFactory, CompetitorRegistrationsPanel.this, providerNames, sailingServiceWrite,
-                                stringMessages, errorReporter);
+                                matchCompetitorsDialogFactory, CompetitorRegistrationsPanel.this, providerNames,
+                                sailingServiceWrite, stringMessages, errorReporter);
                         dialog.show();
                     }
 
@@ -152,11 +155,12 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         final HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
         final CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         final CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
-        allCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, competitorsRefresher,
+        allCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, competitorsRefresher, boatsRefresher,
                 stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true,
                 /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
         registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
-                /* competitorsRefresher not needed; filled based on registrations */ null, stringMessages,
+                /* competitorsRefresher not needed; filled based on registrations */ null, 
+                /* boatsRefresher not needed */ null, stringMessages,
                 errorReporter, /* multiSelection */ true, /* enablePager */ false, /* filterCompetitorWithBoat */ false,
                 /* filterCompetitorsWithoutBoat */ false);
         registeredCompetitorsTable.getSelectionModel().addSelectionChangeHandler(event -> validateAndUpdate());
@@ -217,15 +221,17 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     }
     
     private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
-            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
+            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         return new MatchImportedCompetitorsDialogFactory() {
             @Override
             public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
                     final Pair<List<CompetitorDescriptor>, String> competitorDescriptorsAndHint,
                     final Iterable<CompetitorDTO> competitors) {
-                return new MatchImportedCompetitorsDialog(competitorDescriptorsAndHint.getA(), competitors, competitorDescriptorsAndHint.getB(),
-                        stringMessages, sailingServiceWrite, userService, competitorsRefresher, errorReporter, importCompetitorCallback);
+                return new MatchImportedCompetitorsDialog(competitorDescriptorsAndHint.getA(), competitors,
+                        competitorDescriptorsAndHint.getB(), stringMessages, sailingServiceWrite, userService,
+                        competitorsRefresher, boatsRefresher, errorReporter, importCompetitorCallback);
             }
         };
     }

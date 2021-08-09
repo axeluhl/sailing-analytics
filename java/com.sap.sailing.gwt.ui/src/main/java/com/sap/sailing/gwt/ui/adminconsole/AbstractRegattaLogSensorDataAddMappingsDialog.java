@@ -63,6 +63,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
                 stringMessages, errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
         competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
                 /* competitorsRefresher not needed; registrations are fetched for the leaderboard specifically */ null,
+                /* boatsRefresher not needed; fetching competitors from registrations */ null, 
                 stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
                 /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         boatTable.getSelectionModel().addSelectionChangeHandler(event -> {

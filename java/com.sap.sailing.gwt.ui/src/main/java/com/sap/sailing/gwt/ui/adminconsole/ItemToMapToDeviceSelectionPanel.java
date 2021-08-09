@@ -40,8 +40,8 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         this.errorReporter = errorReporter;
         competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
                 /* competitorsRefresher not needed; competitors are obtained from the regatta log registrations */ null,
-                stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
-                /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
+                /* boatsRefresher not needed */ null, stringMessages, errorReporter, /* multiSelection */ false,
+                /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService,
                 /* boatsRefresher not needed; boats are obtained from the regatta log registrations */ null,
                 stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
