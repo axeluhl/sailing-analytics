@@ -15,12 +15,12 @@
                     <a ui:field="imprintAnchorLink"> 
                         <ui:text from='{i18n.footerLegal}' />
                     </a>
-<!--                     <a href="http://www.sap.com/about/legal/impressum.html" -->
+<!--                     <a href="http://www.sap.com/about/legal/impressum.html?campaigncode=CRM-XH21-OSP-Sailing" -->
 <!--                         title="{i18n.footerLegal}"> -->
 <!--                         <ui:text from='{i18n.footerLegal}' /> -->
 <!--                     </a> -->
                     |
-                    <a href="https://www.sap.com/about/legal/privacy.html"
+                    <a href="https://www.sap.com/about/legal/privacy.html?campaigncode=CRM-XH21-OSP-Sailing"
                         title="{i18n.footerPrivacy}">
                         <ui:text from='{i18n.footerPrivacy}' />
                     </a>

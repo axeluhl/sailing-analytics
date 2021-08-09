@@ -393,7 +393,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalysis) throws NoWindException {
+            boolean waitForLatestAnalysis) {
         return null;
     }
 

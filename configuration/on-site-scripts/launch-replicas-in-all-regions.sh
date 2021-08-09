@@ -6,14 +6,14 @@ if [ $# -eq 0 ]; then
     echo ""
     echo "-b replication bearer token; mandatory"
     echo "-i Amazon Machine Image (AMI) ID to use to launch the instance; defaults to latest image tagged with image-type:sailing-analytics-server"
-    echo "-k Key pair name, mapping to the --key-name parameter"
+    echo "-k Key pair name, mapping to the --key-name parameter; defaults to Axel"
     echo "-R release name; must be provided to select the release, e.g., build-202106040947"
     echo "-t Instance type; defaults to ${INSTANCE_TYPE}"
     echo
     echo "Example: $0 -b 098toyw098typ9e8/87t9shytp98894y5= -R build-202106041327 -k Jan"
     echo
     echo "Will launch as many new replicas in regions $( cat `dirname $0`/regions.txt ) with the release specified with -R"
-    echo "as there are currently healthy auto-replicas registered with teh S-ded-tokyo2020 target group in the region (at least one)."
+    echo "as there are currently healthy auto-replicas registered with the S-ded-tokyo2020 target group in the region (at least one)"
     echo "which will register at the master proxy tokyo-ssh.internal.sapsailing.com:8888 and RabbitMQ at"
     echo "rabbit-ap-northeast-1.sapsailing.com:5672, then when healthy get added to target group S-ded-tokyo2020"
     echo "in that region, with all auto-replicas registered before removed from the target group."
@@ -38,7 +38,7 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
   echo "-------------------------------------------------------"
   TARGET_GROUP_ARN=$( aws elbv2 describe-target-groups --names ${TARGET_GROUP_NAME} | jq -r '.TargetGroups[].TargetGroupArn' )
   HEALTHY_TARGETS_IN_REGION=$( aws elbv2 describe-target-health --target-group-arn ${TARGET_GROUP_ARN} | jq '.TargetHealthDescriptions | map(select(.TargetHealth.State == "healthy")) | length' )
-  echo "Found ${HEALTHY_TARGETS_IN_REGION} healthy targets in target group ${TARGET_GROUP_NAME} in region."
+  echo "Found ${HEALTHY_TARGETS_IN_REGION} healthy target(s) in target group ${TARGET_GROUP_NAME} in region ${REGION}."
   if [ ${HEALTHY_TARGETS_IN_REGION} = 0 ]; then
     echo "Launching at least one replica."
     HEALTHY_TARGETS_IN_REGION=1
@@ -66,6 +66,8 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
     OPTIONS="${OPTIONS} -t ${INSTANCE_TYPE}"
   fi
   echo "Invoking launch-replicas-in-region.sh with options ${OPTIONS}"
-  `dirname $0`/launch-replicas-in-region.sh ${OPTIONS} 
+  `dirname $0`/launch-replicas-in-region.sh ${OPTIONS} &
+  echo "Waiting a minute now after having asked for replica launch in region ${REGION} to avoid overloading master with initial load requests"
+  sleep 60
 done
-
+wait

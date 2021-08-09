@@ -17,7 +17,7 @@ import com.sap.sse.gwt.client.player.Timer;
 
 public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
     private static final long serialVersionUID = -2923229069598593687L;
-    public List<StrippedLeaderboardDTO> leaderboards;
+    public List<StrippedLeaderboardDTOWithSecurity> leaderboards;
     public boolean displayLeaderboardsInReverseOrder;
     
     private int[] overallLeaderboardDiscardThresholds;
@@ -48,7 +48,7 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
     }
 
     public LeaderboardGroupDTO(UUID id, String name, String displayName, String description) {
-        this(id, name, description, displayName, new ArrayList<StrippedLeaderboardDTO>());
+        this(id, name, description, displayName, new ArrayList<>());
     }
 
     /**
@@ -56,7 +56,7 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
      * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
-    private LeaderboardGroupDTO(UUID id, String name, String description, String displayName, List<StrippedLeaderboardDTO> leaderboards) {
+    private LeaderboardGroupDTO(UUID id, String name, String description, String displayName, List<StrippedLeaderboardDTOWithSecurity> leaderboards) {
         super(id, name, description, displayName, /* hasOverallLeaderboard */ false);
         currentServerTime = new Date();
         this.leaderboards = leaderboards;
@@ -194,7 +194,7 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
         return true;
     }
 
-    public List<StrippedLeaderboardDTO> getLeaderboards() {
+    public List<StrippedLeaderboardDTOWithSecurity> getLeaderboards() {
         return leaderboards;
     }
 

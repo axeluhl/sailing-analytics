@@ -38,7 +38,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         listener = new IControlPassingsListener() {
             @Override
-            public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
+            public void gotControlPassings(long timestamp, IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
                 enqueue(new Triple<IRaceCompetitor, IControlPassings, Void>(raceCompetitor, controlPassings, null));
             }
         };

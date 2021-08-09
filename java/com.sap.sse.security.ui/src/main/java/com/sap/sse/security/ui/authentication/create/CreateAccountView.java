@@ -29,6 +29,5 @@ public interface CreateAccountView extends ErrorMessageView, IsWidget {
         void createAccount();
         
         void signIn();
-        
     }
 }

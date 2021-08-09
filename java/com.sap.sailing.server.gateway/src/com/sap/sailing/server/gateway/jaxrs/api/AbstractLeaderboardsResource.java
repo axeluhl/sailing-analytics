@@ -133,6 +133,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("name", leaderboard.getName());
         final String displayName = leaderboard.getDisplayName();
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
+        jsonLeaderboard.put("boatClass", leaderboard.getBoatClass() == null ? null : leaderboard.getBoatClass().getName());
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.getTime() : null);
         jsonLeaderboard.put("delayToLiveInMillis", leaderboard.getDelayToLiveInMillis());
         jsonLeaderboard.put("resultState", resultState.name());

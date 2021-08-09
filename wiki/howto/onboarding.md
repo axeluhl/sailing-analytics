@@ -8,7 +8,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.15.0 ["2020-06"](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.15.0 ["2021-03"](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
 2. Get the content of the git repository (see
 Steps to build and run the Race Analysis Suite below)
 3. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
@@ -24,7 +24,7 @@ Steps to build and run the Race Analysis Suite below)
 
 The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers "2020-06"](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-eclipse-committers) by using the script "configuration/installPluginsForEclipse2020-06.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipse2020-06.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipse2021-03.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -101,6 +101,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs
   * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
   * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
+  * In "Window->Preferences->XML(Wild Web Developer)->Validation & Resolution->Enable Validation" Disable the Checkbox
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
   * Check that JDK 1.8 is available and has been set for compilation in Eclipse

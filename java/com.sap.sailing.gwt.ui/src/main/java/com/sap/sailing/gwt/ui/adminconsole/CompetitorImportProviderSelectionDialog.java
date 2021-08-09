@@ -63,7 +63,6 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-
         competitorProviderListBox = createListBox(/* isMultipleSelect */ false);
         competitorListBox = createListBox(/* isMultipleSelect */ false);
         competitorListBox.setVisible(false);

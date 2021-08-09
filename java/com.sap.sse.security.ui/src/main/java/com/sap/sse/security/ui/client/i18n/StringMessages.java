@@ -35,8 +35,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String ok();
     String cancel();
     String username();
+    String reallyUseLeadingOrTrailingSpacesInUsername();
     String email();
     String usernameMustHaveAtLeastNCharacters(int minimumUsernameLength);
+    String usernameShouldNotStartOrEndWithSpaceCharactersUnlessYouExplicitlyWantTo();
     String passwordMustHaveAtLeastNCharacters(int minimumPasswordLength);
     String passwordsDontMatch();
     String couldNotCreateUser(String message);

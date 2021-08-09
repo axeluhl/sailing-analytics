@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.OptionElement;
@@ -39,6 +38,8 @@ import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Uses a {@link RegattaDTO} to initialize the view. {@link #getRegattaDTO()} can be used by implementations of
@@ -65,16 +66,18 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
     protected final ListBox competitorRegistrationTypeListBox;
-    protected final List<EventDTO> existingEvents;
+    protected final Iterable<EventDTO> existingEvents;
     private EventDTO defaultEvent;
     private RegistrationLinkWithQRCode registrationLinkWithQRCode;
     protected final CaptionPanel secretPanel;
+    private final UserService userService;
 
-    public AbstractRegattaWithSeriesAndFleetsDialog(final SailingServiceAsync sailingService, RegattaDTO regatta,
-            Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, String title,
-            String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
+    public AbstractRegattaWithSeriesAndFleetsDialog(final SailingServiceAsync sailingService, UserService userService,
+            RegattaDTO regatta, Iterable<SeriesDTO> series, Iterable<EventDTO> existingEvents, EventDTO correspondingEvent,
+            String title, String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
         super(title, null, okButton, stringMessages.cancel(), validator, callback);
         this.sailingService = sailingService;
+        this.userService = userService;
         this.stringMessages = stringMessages;
         this.regatta = regatta;
         this.defaultEvent = correspondingEvent;
@@ -278,7 +281,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
         sailingEventsListBox.addItem(stringMessages.selectSailingEvent(), stringMessages.selectSailingEvent());
-        for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
+        final Iterable<EventDTO> eventsSortedByName = Util.stream(existingEvents)
+                .filter(event->userService.hasPermission(event, DefaultActions.UPDATE))
+                .sorted(Util.naturalNamedComparator())::iterator;
+        for (EventDTO event : eventsSortedByName) {
             sailingEventsListBox.addItem(event.getName(), event.getId().toString());
             if (defaultEvent != null) {
                 if (defaultEvent.getId().equals(event.getId())) {

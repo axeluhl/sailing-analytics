@@ -262,8 +262,13 @@ public class TrackedLegImpl implements TrackedLeg {
      */
     @Override
     public Position getMiddleOfLeg(TimePoint at) {
-        Position approximateLegStartPosition = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
-        Position approximateLegEndPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
+        return getMiddleOfLeg(at, new MarkPositionAtTimePointCacheImpl(getTrackedRace(), at));
+    }
+    
+    @Override
+    public Position getMiddleOfLeg(TimePoint at, MarkPositionAtTimePointCache cache) {
+        Position approximateLegStartPosition = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at, cache);
+        Position approximateLegEndPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), at, cache);
         final Position middleOfLeg;
         if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
             middleOfLeg = null;

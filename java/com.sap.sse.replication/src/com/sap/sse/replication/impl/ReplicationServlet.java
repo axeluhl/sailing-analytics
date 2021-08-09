@@ -100,7 +100,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
      * The operation performed is selected by passing one of the {@link Action} enumeration values for the URL parameter
      * named {@link #ACTION}.
      */
-    private void handleAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void handleAction(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         try {
             String action = req.getParameter(ReplicationServletActions.ACTION_PARAMETER_NAME);
             logger.info("Received replication-related request, action is "+action+", subject is "+
@@ -216,7 +216,14 @@ public class ReplicationServlet extends AbstractHttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (req.getParameter(ReplicationServletActions.ACTION_PARAMETER_NAME) != null) {
-            handleAction(req, resp);
+            try {
+                handleAction(req, resp);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE,
+                        "Exception occurred while trying to receive and apply operation initiated on replica", e);
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Exception " + e
+                        + " occurred while trying to receive and apply operation initiated on replica. Re-trying can make sense.");
+            }
         } else {
             // no action --> a stream of serialized operations is expected in the POST request's body
             InputStream is = req.getInputStream();
@@ -309,7 +316,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
     }
 
     private void registerClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+            throws Exception {
         final ReplicaDescriptor replica = getReplicaDescriptor(req);
         getReplicationService().registerReplica(replica);
         logger.info("Registered new replica " + replica);

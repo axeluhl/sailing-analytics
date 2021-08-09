@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
@@ -13,6 +14,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.user.client.DOM;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.TickPosition;
 import com.sap.sse.gwt.shared.DebugConstants;
@@ -235,8 +237,8 @@ public class TimeSlider extends SliderBar {
     }
 
     @Override
-    public boolean setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
-        final boolean result;
+    public Optional<Pair<Double, Double>> setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+        final Optional<Pair<Double, Double>> result;
         if (!isZoomed) {
             // Inhibit shrinking of the slider ends if not zoomed in
             Double minLimited = minValue;
@@ -253,7 +255,11 @@ public class TimeSlider extends SliderBar {
             this.minValue = minValue;
             boolean maxChanged = !Util.equalsWithNull(this.maxValue, maxValue);
             this.maxValue = maxValue;
-            result = minChanged || maxChanged;
+            if (minChanged || maxChanged) {
+                result = Optional.of(new Pair<>(this.minValue, this.maxValue));
+            } else {
+                result = Optional.empty();
+            }
         }
         return result;
     }

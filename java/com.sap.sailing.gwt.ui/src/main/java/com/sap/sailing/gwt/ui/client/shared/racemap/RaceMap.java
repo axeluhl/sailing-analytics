@@ -1342,6 +1342,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, selectedDetailType,
                 selectedDetailTypeChanged);
         // draw the wind into the map, get the combined wind
+        // TODO bug5586 shouldn't we extend this to fetch the one decisive averaged fix from *all* relevant sources?
+        // TODO bug5586 Then we could push the wind data received here into the WindInfoForRaceVectorField instance providing the data and
+        // TODO bug5586 interpolation for the streamlet overlay if switched on.
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
         windSourceTypeNames.add(WindSourceType.WINDFINDER.name());
@@ -1368,8 +1371,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             if (windInfo != null && !remoteCallsToSkipInExecution.remove(newTime)) {
                                 List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                                 lastCombinedWindTrackInfoDTO = windInfo;
-                                updateMapWithWindInfo(newTime, transitionTimeInMillis, competitorsToShow, windInfo,
-                                        windSourcesToShow);
+                                updateMapWithWindInfo(newTime, transitionTimeInMillis, competitorsToShow, windInfo, windSourcesToShow);
                                 showWindSensorsOnMap(windSourcesToShow);
                             }
                         }
@@ -1778,11 +1780,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void showWindSensorsOnMap(List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSensorsList) {
         if (map != null) {
-            Set<WindSource> toRemoveWindSources = new HashSet<WindSource>(windSensorOverlays.keySet());
+            final Set<WindSource> toRemoveWindSources = new HashSet<WindSource>(windSensorOverlays.keySet());
             for (com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO> windSourcePair : windSensorsList) {
-                WindSource windSource = windSourcePair.getA(); 
-                WindTrackInfoDTO windTrackInfoDTO = windSourcePair.getB();
-
+                final WindSource windSource = windSourcePair.getA(); 
+                final WindTrackInfoDTO windTrackInfoDTO = windSourcePair.getB();
                 WindSensorOverlay windSensorOverlay = windSensorOverlays.get(windSource);
                 if (windSensorOverlay == null) {
                     windSensorOverlay = createWindSensorOverlay(RaceMapOverlaysZIndexes.WINDSENSOR_ZINDEX, windSource, windTrackInfoDTO);

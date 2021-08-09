@@ -299,7 +299,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartOfTracking;
 import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
-import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
@@ -2321,7 +2320,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
         @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-            replicate(new UpdateWindSourcesToExclude(getRaceIdentifier(), windSourcesToExclude));
+            // nothing to replicate; wind sources to exclude are managed by RaceLogEvents which are already being replicated
         }
 
         @Override
@@ -3352,6 +3351,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 .getCachedEventsForRemoteSailingServers().keySet());
         oos.writeObject(remoteServerReferences);
         logoutput.append("Serialized " + remoteServerReferences.size() + " remote sailing server references\n");
+        logger.info("Serializing server configuration (e.g., \"local server\" state)...");
+        oos.writeObject(sailingServerConfiguration);
         logger.info(logoutput.toString());
     }
 
@@ -3476,6 +3477,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             remoteSailingServerSet.add(remoteSailingServerReference);
             logoutput.append("Received remote sailing server reference " + remoteSailingServerReference);
         }
+        logger.info("Reading sailing server configuration (e.g., \"local server\" state)...");
+        this.sailingServerConfiguration = (SailingServerConfiguration) ois.readObject();
         // make sure to initialize listeners correctly
         for (Regatta regatta : regattasByName.values()) {
             RegattaImpl regattaImpl = (RegattaImpl) regatta;
@@ -4755,7 +4758,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         return bestMatch;
     }
 
-    private Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
+    @Override
+    public Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
         /*
          * TODO: bug5424: The code previously contained within this method has been extracted to
          * findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea for public use. Investigate whether a more
@@ -4941,7 +4945,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     /**
-     * This should only be used for replicable Operations that need access to the SecurityService, all other should
+     * This should only be used for replicable Operations that need access to the SecurityService, all others should
      * obtain the SecurityService in another way.
      */
     @Override

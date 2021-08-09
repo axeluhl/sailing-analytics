@@ -57,6 +57,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -1550,18 +1551,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (markPassings.isEmpty()) {
             result = 0;
         } else {
-            final boolean hasMarkPassingAtOrBeforeTimePoint;
+            final boolean hasNoMarkPassingAtOrBeforeTimePoint;
             lockForRead(markPassings);
             try {
-                hasMarkPassingAtOrBeforeTimePoint = markPassings.floor(new DummyMarkPassingWithTimePointOnly(timePoint)) == null;
+                hasNoMarkPassingAtOrBeforeTimePoint = markPassings.floor(new DummyMarkPassingWithTimePointOnly(timePoint)) == null;
             } finally {
                 unlockAfterRead(markPassings);
             }
-            if (hasMarkPassingAtOrBeforeTimePoint) {
+            if (hasNoMarkPassingAtOrBeforeTimePoint) {
                 // no mark passing at or before timePoint; competitor has not started / participated yet
                 result = 0;
             } else {
-                result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+                result = getCompetitorsFromBestToWorst(timePoint, cache).indexOf(competitor) + 1;
             }
         }
         return result;
@@ -1645,15 +1646,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
-            throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) {
         return getAverageAbsoluteCrossTrackError(competitor, timePoint, waitForLatestAnalysis, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
-            throws NoWindException {
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         TimePoint from = null;
         lockForRead(markPassings);
@@ -3610,16 +3609,31 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         int count = 0;
         ScalablePosition sum = null;
         final MarkPositionAtTimePointCache cache = new MarkPositionAtTimePointCacheImpl(this, at);
-        for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
-            final Position waypointPosition = getApproximatePosition(waypoint, at, cache);
-            if (waypointPosition != null) {
-                ScalablePosition p = new ScalablePosition(waypointPosition);
-                if (sum == null) {
-                    sum = p;
-                } else {
-                    sum = sum.add(p);
+        final Set<Pair<ControlPoint, ControlPoint>> visited = new HashSet<>();
+        final Course course = getRace().getCourse();
+        course.lockForRead();
+        try {
+            for (final Leg leg : course.getLegs()) {
+                final Pair<ControlPoint, ControlPoint> visitedKey = new Pair<>(leg.getFrom().getControlPoint(), leg.getTo().getControlPoint());
+                if (!visited.contains(visitedKey)) {
+                    visited.add(visitedKey);
+                    visited.add(new Pair<>(visitedKey.getB(), visitedKey.getA())); // leg middle is symmetrical
+                    final Distance legDistance = getTrackedLeg(leg).getGreatCircleDistance(at, cache);
+                    final Position legMiddle = getTrackedLeg(leg).getMiddleOfLeg(at, cache);
+                    if (legMiddle != null) {
+                        // scale the leg's middle position with the leg's length; time spent varies with length
+                        ScalablePosition p = new ScalablePosition(legMiddle).multiply(legDistance.getMeters());
+                        if (sum == null) {
+                            sum = p;
+                        } else {
+                            sum = sum.add(p);
+                        }
+                        count++;
+                    }
                 }
             }
+        } finally {
+            course.unlockAfterRead();
         }
         final Position result;
         if (sum == null) {
