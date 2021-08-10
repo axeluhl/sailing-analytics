@@ -122,8 +122,8 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
      * Check if subscription is valid
      */
     protected boolean isValidSubscription(Subscription subscription) {
-        String subscriptionId = subscription.getSubscriptionId();
-        return subscription != null && !(subscriptionId == null || subscriptionId.length() == 0);
+        return subscription != null
+                && !(subscription.getSubscriptionId() == null || subscription.getSubscriptionId().length() == 0);
     }
 
     /**
