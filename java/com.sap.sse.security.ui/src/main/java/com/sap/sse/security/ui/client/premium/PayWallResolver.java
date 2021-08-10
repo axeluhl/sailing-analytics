@@ -5,6 +5,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionClientProvider;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
 
@@ -35,6 +36,15 @@ public class PayWallResolver {
     public SubscriptionWriteServiceAsync<?, ?, ?> getSubscriptionWriteService() {
         try {
             return subscriptionServiceFactory.getDefaultWriteAsyncService();
+        } catch (InvalidSubscriptionProviderException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public SubscriptionClientProvider getSubscriptionClientProvider() {
+        try {
+            return subscriptionServiceFactory.getDefaultProvider();
         } catch (InvalidSubscriptionProviderException e) {
             e.printStackTrace();
             return null;

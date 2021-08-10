@@ -8,6 +8,8 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
+import com.sap.sse.security.ui.client.subscription.SubscriptionClientProvider;
 import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
@@ -17,7 +19,7 @@ public class FeatureOverviewDialog extends DataEntryDialog<SubscriptionPlanDTO>{
     private final StringMessages stringMessages;
     private final PayWallResolver payWallResolver;
     
-    public FeatureOverviewDialog(PayWallResolver payWallResolver, StringMessages stringMessages) {
+    public FeatureOverviewDialog(PayWallResolver payWallResolver, StringMessages stringMessages, BaseUserSubscriptionView callingView) {
         super(stringMessages.subscriptionPlanOverview(), stringMessages.selectSubscriptionPlan(),
                 stringMessages.subscribe(), stringMessages.cancel(), null, new DialogCallback<SubscriptionPlanDTO>() {
                     @Override
@@ -25,7 +27,12 @@ public class FeatureOverviewDialog extends DataEntryDialog<SubscriptionPlanDTO>{
                         if (editedObject == null) {
                             Notification.notify(stringMessages.selectOption(), NotificationType.ERROR);
                         } else {
-                            Notification.notify("open checkout here", NotificationType.SUCCESS);
+                            SubscriptionClientProvider subscriptionClientProvider = payWallResolver.getSubscriptionClientProvider();
+                            if(subscriptionClientProvider != null) {
+                                subscriptionClientProvider.getSubscriptionViewPresenter().startCheckout(editedObject.getId(), callingView);
+                            }else {
+                                Notification.notify(stringMessages.currentlyUnableToSubscribe(), NotificationType.ERROR);
+                            }
                         }
                     }
                     @Override

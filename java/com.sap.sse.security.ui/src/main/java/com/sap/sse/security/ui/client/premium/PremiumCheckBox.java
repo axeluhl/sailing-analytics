@@ -1,16 +1,22 @@
 package com.sap.sse.security.ui.client.premium;
 
 import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public abstract class PremiumCheckBox extends Composite {
+public abstract class PremiumCheckBox extends Composite implements BaseUserSubscriptionView {
 
     private final CheckBox checkBox;
     private final Image image;
@@ -18,6 +24,7 @@ public abstract class PremiumCheckBox extends Composite {
     private final FocusPanel wrapperPanel;
     private final Action action;
     private final PayWallResolver payWallResolver;
+    private final StringMessages stringMessages;
 
     /**
      * A Composite component, that includes a checkbox and an additional premium icon, 
@@ -29,7 +36,7 @@ public abstract class PremiumCheckBox extends Composite {
      * @param acl
      */
     public PremiumCheckBox(String label, Action action, PayWallResolver payWallResolver) {
-        final StringMessages stringMessages = StringMessages.INSTANCE;
+        stringMessages = StringMessages.INSTANCE;
         this.action = action;
         this.payWallResolver = payWallResolver;
         this.wrapperPanel = new FocusPanel();
@@ -37,7 +44,7 @@ public abstract class PremiumCheckBox extends Composite {
         this.wrapperPanel.add(layoutPanel);
         this.checkBox = new CheckBox(label);
         if(!payWallResolver.hasPermission(action)) {
-            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver, stringMessages).show());
+            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver, stringMessages, this).show());
             layoutPanel.getElement().getStyle().setCursor(Cursor.POINTER);
             checkBox.setEnabled(false);
             image = createPremiumIcon();
@@ -91,5 +98,21 @@ public abstract class PremiumCheckBox extends Composite {
         if(payWallResolver.hasPermission(action)) {
             this.checkBox.setEnabled(value);
         }
+    }
+    
+    @Override
+    public void updateView(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
+        //TODO: As of now, there is no update mechanism implemented, therefore a page reload is forced.
+        Window.Location.reload();
+    }
+
+    @Override
+    public void onCloseCheckoutModal() {
+        // No Action required.
+    }
+
+    @Override
+    public void onOpenCheckoutError(String error) {
+        Notification.notify(stringMessages.currentlyUnableToSubscribe(), NotificationType.ERROR);
     }
 }
