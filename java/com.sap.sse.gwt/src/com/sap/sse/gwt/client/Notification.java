@@ -64,10 +64,10 @@ public class Notification {
         ress.css().ensureInjected();
         RootPanel.get().add(notifications);
         notifications.getElement().setId("notificationBar");
-        if (!DeviceDetector.isDesktop()) {
-            notifications.addStyleName(ress.css().notification_bar_mobile());
-        } else {
+        if (DeviceDetector.isDesktop()) {
             notifications.addStyleName(ress.css().notification_bar());
+        } else {
+            notifications.addStyleName(ress.css().notification_bar_mobile());
         }
     }
 
