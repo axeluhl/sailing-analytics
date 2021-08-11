@@ -18,6 +18,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.JsArray;
@@ -575,7 +576,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
 
     /**
      * Inserts a new child to this panel. When using this method make absolutely sure to
-     * call {@link #lastComponentHasBeenAdded(SideBySideComponentViewer, AbsolutePanel, List)} after
+     * call {@link #lastComponentHasBeenAdded(Runnable, AbsolutePanel, List)} after
      * all components have been added.
      * 
      * @param child the child {@link Widget} that will be added
@@ -610,7 +611,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      *          outside of the horizontal splitter panel. In most cases one will create such a panel
      *          on top of the widget that has position {@link Direction#CENTER}.
      */
-    public void lastComponentHasBeenAdded(final SideBySideComponentViewer cm, AbsolutePanel panelForHorizontalButtons, List<Pair<Button, String>> additionalVerticalButtonsAndStyles) {
+    public void lastComponentHasBeenAdded(final Consumer<Boolean> forceLayoutCallback, AbsolutePanel panelForHorizontalButtons, List<Pair<Button, String>> additionalVerticalButtonsAndStyles) {
         WidgetCollection splitterChildren = super.getChildren();
         HSplitter lastHorizontalSplitter = null;
         VSplitter lastVerticalSplitter = null;
@@ -636,7 +637,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (lastVerticalSplitter != null) {
             Panel panel = createToggleButtonPanel(allVerticalSplitters,
                     "gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel", "gwt-SplitLayoutPanel-NorthSouthToggleButton",
-                    cm, additionalVerticalButtonsAndStyles); // TODO additional buttons will only be displayed if at least one vertical splitter is... on purpose?
+                    forceLayoutCallback, additionalVerticalButtonsAndStyles); // TODO additional buttons will only be displayed if at least one vertical splitter is... on purpose?
             lastVerticalSplitter.addToogleButtons(panel);
             lastVerticalSplitter.setVisible(true);
             lastVerticalSplitter.setDraggerVisible(false);
@@ -645,12 +646,12 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (lastHorizontalSplitter != null) {
             if(horizontalEastSplitters.size() > 0) {
                 Panel horizontalButtonsPanel = createToggleButtonPanel(horizontalEastSplitters,
-                        "gwt-SplitLayoutPanel-WestToggleButton-Panel", "gwt-SplitLayoutPanel-WestToggleButton", cm, /* additional buttons and styles */ null);                
+                        "gwt-SplitLayoutPanel-WestToggleButton-Panel", "gwt-SplitLayoutPanel-WestToggleButton", forceLayoutCallback, /* additional buttons and styles */ null);
                 panelForHorizontalButtons.add(horizontalButtonsPanel);
             }
             if(horizontalWestSplitters.size() > 0) {
                 Panel horizontalButtonsPanel = createToggleButtonPanel(horizontalWestSplitters,
-                        "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, /* additional buttons and styles */ null);                
+                        "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", forceLayoutCallback, /* additional buttons and styles */ null);
                 panelForHorizontalButtons.add(horizontalButtonsPanel);
             }
             lastHorizontalSplitter.setVisible(false);
@@ -663,7 +664,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * {@link Splitter}s including the {@link Component} and {@link Widget}.
      */
     private Panel createToggleButtonPanel(List<Splitter> splitters, String panelStyleName, String buttonStyleName,
-            final SideBySideComponentViewer componentViewer, List<Pair<Button, String>> additionalButtonsAndStyles) {
+            final Consumer<Boolean> forceLayoutCallback, List<Pair<Button, String>> additionalButtonsAndStyles) {
         FlowPanel buttonFlowPanel = new FlowPanel();
         buttonFlowPanel.setStyleName(panelStyleName);
         if (additionalButtonsAndStyles != null) {
@@ -689,19 +690,19 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 public void onClick(ClickEvent event) {
                     boolean componentWasVisibleUntilNow = associatedComponent.isVisible();
                     if (associatedComponent instanceof HasAvailabilityCheck && !associatedComponent.isVisible()) {
-                        ((HasAvailabilityCheck)associatedComponent).checkBackendAvailability(available->{
+                        ((HasAvailabilityCheck) associatedComponent).checkBackendAvailability(available -> {
                             if (available) {
-                            proceed(componentViewer, splitter, associatedComponent, splitterTogglerButton,
-                                    componentWasVisibleUntilNow);
+                                proceed(forceLayoutCallback, splitter, associatedComponent, splitterTogglerButton,
+                                        componentWasVisibleUntilNow);
                             }
                         });
                     } else {
-                        proceed(componentViewer, splitter, associatedComponent, splitterTogglerButton,
+                        proceed(forceLayoutCallback, splitter, associatedComponent, splitterTogglerButton,
                                 componentWasVisibleUntilNow);
                     }
                 }
 
-                private void proceed(final SideBySideComponentViewer componentViewer, final Splitter splitter,
+                private void proceed(final Consumer<Boolean> forceLayoutCallback, final Splitter splitter,
                         final Component<?> associatedComponent, final Button splitterTogglerButton,
                         boolean componentWasVisibleUntilNow) {
                     associatedComponent.setVisible(!componentWasVisibleUntilNow);
@@ -725,7 +726,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         splitterTogglerButton.addStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
                     }
                     ensureVerticalToggleButtonPosition();
-                    componentViewer.forceLayout();
+                    forceLayoutCallback.accept(componentWasVisibleUntilNow);
                 }
             });
             buttonFlowPanel.add(splitterTogglerButton);

@@ -99,5 +99,8 @@ public abstract class RegattaCompetitionPresenter
     }
     
     protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
+    
+    protected abstract String getMapAndWindChartUrl(String leaderboardName, String raceName, String fleetName);
+
 
 }

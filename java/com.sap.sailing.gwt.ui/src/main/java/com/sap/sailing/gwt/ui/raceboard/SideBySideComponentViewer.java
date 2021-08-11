@@ -175,7 +175,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                     "managemedia"));
         userService.addUserStatusEventHandler(this, true);
         // ensure that toggle buttons are positioned right
-        splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
+        splitLayoutPanel.lastComponentHasBeenAdded(hidden -> forceLayout(), panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
         refreshMarkUi();
     }
