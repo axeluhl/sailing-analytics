@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.premium.PayWallResolver;
@@ -64,6 +65,11 @@ public class CombinedWindPanel extends FlowPanel {
                         oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
                         oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
                         oldRaceMapSettings.isShowSatelliteLayer());
+                if (map.getComponentContext() != null
+                        && map.getComponentContext().isStorageSupported(map)) {
+                    map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,
+                            new DummyOnSettingsStoredCallback());
+                }
                 map.updateSettings(newRaceMapSettings);
                 if(!hasPermission) {
                     Notification.notify("Like & Subscribe!", NotificationType.WARNING);

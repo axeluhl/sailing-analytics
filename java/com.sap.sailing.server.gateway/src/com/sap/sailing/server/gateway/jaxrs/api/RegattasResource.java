@@ -1768,7 +1768,8 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/markpassings")
-    public Response getMarkPassings(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+    public Response getMarkPassings(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+    		@QueryParam("leaderboard") String leaderboardName) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1783,9 +1784,13 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
                         .build();
             } else {
+                final Leaderboard leaderboard = leaderboardName == null
+                        ? getService().getLeaderboardByName(regattaName)
+                        : getService().getLeaderboardByName(leaderboardName);
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 getSecurityService().checkCurrentUserReadPermission(trackedRace);
-                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(/* use now-livedelay as time point for mark ranks */ null);
+                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(leaderboard,
+                		/* use now-livedelay as time point for mark ranks */ null);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 return Response.ok(streamingOutput(jsonMarkPassings)).build();
             }

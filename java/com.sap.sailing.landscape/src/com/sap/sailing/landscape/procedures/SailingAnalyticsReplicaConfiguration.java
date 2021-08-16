@@ -8,6 +8,8 @@ import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
+import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
 public class SailingAnalyticsReplicaConfiguration<ShardingKey>
 extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
@@ -24,6 +26,8 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
      * {@code "live-replica-server"}.</li>
      * <li>If no {@link #setDatabaseName(String) database name is set} explicitly, it defaults to the
      * {@link #getServerName() server name} with the suffix {@code -replica} appended to it.</li>
+     * <li>If no {@link #setDatabaseConfiguration(Database) database configuration is set} explicitly, it defaults
+     * to the "replica" replica set on "localhost:27017" on the replica node.</li>
      * </ul>
      * 
      * TODO we could default the set of replicables to replicate, competing with the live-replica-server environment
@@ -40,6 +44,8 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends SailingAnalyticsApplicationConfiguration.BuilderImpl<BuilderT, SailingAnalyticsReplicaConfiguration<ShardingKey>, ShardingKey>
     implements Builder<BuilderT, ShardingKey> {
+        private static final String DEFAULT_MONGO_REPLICA_SET_NAME_FOR_REPLICA = "replica";
+
         @Override
         public OutboundReplicationConfiguration getOutboundReplicationConfiguration() {
             final OutboundReplicationConfiguration.Builder resultBuilder;
@@ -55,6 +61,12 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
                         DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX);
             }
             return resultBuilder.build();
+        }
+        
+        @Override
+        protected Database getDatabaseConfiguration() {
+            return isDatabaseConfigurationSet() ? super.getDatabaseConfiguration() :
+                Database.of(MongoEndpoint.of("localhost", 27017, DEFAULT_MONGO_REPLICA_SET_NAME_FOR_REPLICA), getDatabaseName());
         }
 
         @Override

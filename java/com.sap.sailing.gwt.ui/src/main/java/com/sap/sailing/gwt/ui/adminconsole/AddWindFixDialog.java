@@ -104,14 +104,12 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
     @Override
     protected WindDTO getResult() {
         WindDTO result = new WindDTO();
-
         result.trueWindSpeedInKnots = speedInKnotsBox.getValue();
         result.trueWindFromDeg = fromInDegBox.getValue();
         result.measureTimepoint = timeBox.getValue() != null ? timeBox.getValue().getTime() : null;
         if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
             result.position = new DegreePosition(latDegBox.getValue(), lngDegBox.getValue());
         }
-
         return result;
     }
 

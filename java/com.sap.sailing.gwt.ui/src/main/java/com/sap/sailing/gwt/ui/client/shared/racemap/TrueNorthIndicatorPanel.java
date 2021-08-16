@@ -7,6 +7,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 
 /**
  * A true north indicator that can be added as a control to the map. Clicking / tapping the control toggles
@@ -45,7 +46,6 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
             public void onClick(ClickEvent event) {
                 RaceMapSettings oldRaceMapSettings = map.getSettings();
                 boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
-                
                 final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
                         oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
                         oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,
@@ -56,6 +56,11 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
                         oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
                         oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
                         oldRaceMapSettings.isShowSatelliteLayer());
+                if (map.getComponentContext() != null
+                        && map.getComponentContext().isStorageSupported(map)) {
+                    map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,
+                            new DummyOnSettingsStoredCallback());
+                }
                 map.updateSettings(newRaceMapSettings);
             }
         });
