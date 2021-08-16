@@ -23,7 +23,7 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
     private final HorizontalPanel layoutPanel;
     private final FocusPanel wrapperPanel;
     private final Action action;
-    private final PayWallResolver payWallResolver;
+    private final PaywallResolver paywallResolver;
     private final StringMessages stringMessages;
 
     /**
@@ -35,16 +35,16 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
      * @param ownership
      * @param acl
      */
-    public PremiumCheckBox(String label, Action action, PayWallResolver payWallResolver) {
+    public PremiumCheckBox(String label, Action action, PaywallResolver paywallResolver) {
         stringMessages = StringMessages.INSTANCE;
         this.action = action;
-        this.payWallResolver = payWallResolver;
+        this.paywallResolver = paywallResolver;
         this.wrapperPanel = new FocusPanel();
         this.layoutPanel = new HorizontalPanel();
         this.wrapperPanel.add(layoutPanel);
         this.checkBox = new CheckBox(label);
-        if(!payWallResolver.hasPermission(action)) {
-            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(payWallResolver, stringMessages, this).show());
+        if(!paywallResolver.hasPermission(action)) {
+            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(paywallResolver, stringMessages, this).show());
             layoutPanel.getElement().getStyle().setCursor(Cursor.POINTER);
             checkBox.setEnabled(false);
             image = createPremiumIcon();
@@ -62,8 +62,8 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
         initWidget(wrapperPanel);
     }
     
-    public PremiumCheckBox(String label, Action action, PayWallResolver payWallResolver, DataEntryDialog<?> dialog) {
-        this(label, action, payWallResolver);
+    public PremiumCheckBox(String label, Action action, PaywallResolver paywallResolver, DataEntryDialog<?> dialog) {
+        this(label, action, paywallResolver);
         dialog.ensureHasValueIsValidated(checkBox);
         dialog.ensureFocusWidgetIsLinkedToKeyStrokes(checkBox);
     }
@@ -85,7 +85,7 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
     }
     
     public void setValueifUserHasPermission(boolean value) {
-        if(payWallResolver.hasPermission(action)) {
+        if(paywallResolver.hasPermission(action)) {
             this.checkBox.setValue(value);
         }
     }
@@ -95,7 +95,7 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
     }
 
     public void setEnabledIfUserHasPermission(Boolean value) {
-        if(payWallResolver.hasPermission(action)) {
+        if(paywallResolver.hasPermission(action)) {
             this.checkBox.setEnabled(value);
         }
     }

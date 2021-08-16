@@ -62,7 +62,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
-import com.sap.sse.security.ui.client.premium.PayWallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
     private static final String PARAM_REGATTA_LIKE_NAME = "regattaLikeName";
@@ -214,12 +214,12 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         } else {
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider, competitorsAndBoats); // show no competitors
         }
-        final PayWallResolver payWallResolver = new PayWallResolver(getUserService(), getSubscriptionServiceFactory(), 
+        final PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), 
                 /* FIXME: 5510 Premium features wont work without raceDTO context */ null);
-        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages(), payWallResolver), raceMapSettings,
+        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages(), paywallResolver), raceMapSettings,
                 getSailingService(), asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
-                raceMapResources, /* showHeaderPanel */ false, new DefaultQuickFlagDataProvider(), payWallResolver) {
+                raceMapResources, /* showHeaderPanel */ false, new DefaultQuickFlagDataProvider(), paywallResolver) {
             @Override
             protected void showAdditionalControls(MapWidget map) {
                 backToLivePlayButton.removeFromParent();

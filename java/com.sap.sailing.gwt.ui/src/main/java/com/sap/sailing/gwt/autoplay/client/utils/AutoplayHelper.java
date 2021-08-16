@@ -44,7 +44,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PayWallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AutoplayHelper {
@@ -291,9 +291,9 @@ public class AutoplayHelper {
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
                 /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false);
-        final PayWallResolver payWallResolver = new PayWallResolver(userService, subscriptionServiceFactory,
+        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
                 /* FIXME: 5510 Premium features wont work without raceDTO context */ null);
-        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE, payWallResolver);
+        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver);
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, competitorsAndTheirBoats);
         RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
                 /* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
@@ -304,7 +304,7 @@ public class AutoplayHelper {
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
                 new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
-                raceMapResources, false, provider, payWallResolver);
+                raceMapResources, false, provider, paywallResolver);
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         raceboardTimer.setPlayMode(PlayModes.Live);

@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.security.ui.client.premium.PayWallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class CombinedWindPanel extends FlowPanel {
     
@@ -34,7 +34,7 @@ public class CombinedWindPanel extends FlowPanel {
     private final CoordinateSystem coordinateSystem;
     
     public CombinedWindPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
-            StringMessages stringMessages, CoordinateSystem coordinateSystem, PayWallResolver payWallResolver) {
+            StringMessages stringMessages, CoordinateSystem coordinateSystem, PaywallResolver paywallResolver) {
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
@@ -48,7 +48,7 @@ public class CombinedWindPanel extends FlowPanel {
         canvas.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final boolean hasPermission = payWallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS);
+                final boolean hasPermission = paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS);
                 final RaceMapSettings oldRaceMapSettings = map.getSettings();
                 // when off, turn on; when on and no color, turn on color; when on with color, turn off; Only clickable, if permissions granted
                 final boolean newShowStreamletsOverlaySetting = (oldRaceMapSettings.isShowWindStreamletOverlay() ?

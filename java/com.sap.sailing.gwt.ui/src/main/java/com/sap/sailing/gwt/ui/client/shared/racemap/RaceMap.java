@@ -169,7 +169,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
-import com.sap.sse.security.ui.client.premium.PayWallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
@@ -501,7 +501,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private int zoomingAnimationsInProgress = 0;
     private final FloatingSharingButtonsResources floatingSharingButtonsResources;
-    private final PayWallResolver payWallResolver;
+    private final PaywallResolver paywallResolver;
 
     static class MultiHashSet<T> {
         private HashMap<T, List<T>> map = new HashMap<>();
@@ -573,11 +573,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
             RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
-            boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider, PayWallResolver payWallResolver) {
+            boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider, PaywallResolver paywallResolver) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
                 showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "",
-                /* leaderboardGroupId */ null, payWallResolver);
+                /* leaderboardGroupId */ null, paywallResolver);
     }
 
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -586,11 +586,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
             boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider, String leaderboardName,
-            String leaderboardGroupName, UUID leaderboardGroupId, PayWallResolver payWallResolver) {
+            String leaderboardGroupName, UUID leaderboardGroupId, PaywallResolver paywallResolver) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
                 showHeaderPanel, quickRanksDTOProvider, visible -> {
-                }, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null, payWallResolver);
+                }, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null, paywallResolver);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -600,10 +600,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
             boolean showHeaderPanel, QuickFlagDataProvider quickFlagDataProvider,
             Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName,
-            UUID leaderboardGroupId, Runnable shareLinkAction, PayWallResolver payWallResolver) {
+            UUID leaderboardGroupId, Runnable shareLinkAction, PaywallResolver paywallResolver) {
         super(parent, context);
         this.shareLinkAction = shareLinkAction;
-        this.payWallResolver = payWallResolver;
+        this.paywallResolver = paywallResolver;
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
         this.quickFlagDataProvider = quickFlagDataProvider;
@@ -653,7 +653,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         panelForRightHeaderLabels = new AbsolutePanel();
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
-        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, payWallResolver);
+        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, paywallResolver);
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
@@ -2899,7 +2899,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent(RaceMapSettings settings) {
         return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar,
-                payWallResolver);
+                paywallResolver);
     }
 
     @Override

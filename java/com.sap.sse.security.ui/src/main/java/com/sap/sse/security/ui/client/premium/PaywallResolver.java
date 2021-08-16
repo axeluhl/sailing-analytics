@@ -9,13 +9,13 @@ import com.sap.sse.security.ui.client.subscription.SubscriptionClientProvider;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
 
-public class PayWallResolver {
+public class PaywallResolver {
 
     private final UserService userService;
     private final SubscriptionServiceFactory subscriptionServiceFactory;
     private final SecuredDTO dtoContext;
 
-    public PayWallResolver(UserService userService, SubscriptionServiceFactory subscriptionServiceFactory, SecuredDTO dtoContext){
+    public PaywallResolver(UserService userService, SubscriptionServiceFactory subscriptionServiceFactory, SecuredDTO dtoContext){
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
         this.dtoContext = dtoContext;

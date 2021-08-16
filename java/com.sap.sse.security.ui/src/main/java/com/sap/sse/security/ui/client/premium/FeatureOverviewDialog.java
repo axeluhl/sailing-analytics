@@ -17,9 +17,9 @@ public class FeatureOverviewDialog extends DataEntryDialog<SubscriptionPlanDTO>{
     
     private FeatureOverviewTableWrapper table;
     private final StringMessages stringMessages;
-    private final PayWallResolver payWallResolver;
+    private final PaywallResolver paywallResolver;
     
-    public FeatureOverviewDialog(PayWallResolver payWallResolver, StringMessages stringMessages, BaseUserSubscriptionView callingView) {
+    public FeatureOverviewDialog(PaywallResolver paywallResolver, StringMessages stringMessages, BaseUserSubscriptionView callingView) {
         super(stringMessages.subscriptionPlanOverview(), stringMessages.selectSubscriptionPlan(),
                 stringMessages.subscribe(), stringMessages.cancel(), null, new DialogCallback<SubscriptionPlanDTO>() {
                     @Override
@@ -27,7 +27,7 @@ public class FeatureOverviewDialog extends DataEntryDialog<SubscriptionPlanDTO>{
                         if (editedObject == null) {
                             Notification.notify(stringMessages.selectOption(), NotificationType.ERROR);
                         } else {
-                            SubscriptionClientProvider subscriptionClientProvider = payWallResolver.getSubscriptionClientProvider();
+                            SubscriptionClientProvider subscriptionClientProvider = paywallResolver.getSubscriptionClientProvider();
                             if(subscriptionClientProvider != null) {
                                 subscriptionClientProvider.getSubscriptionViewPresenter().startCheckout(editedObject.getId(), callingView);
                             }else {
@@ -41,7 +41,7 @@ public class FeatureOverviewDialog extends DataEntryDialog<SubscriptionPlanDTO>{
                     }
                 });
         this.stringMessages = stringMessages;
-        this.payWallResolver = payWallResolver;
+        this.paywallResolver = paywallResolver;
     }
     
     @Override
@@ -49,7 +49,7 @@ public class FeatureOverviewDialog extends DataEntryDialog<SubscriptionPlanDTO>{
         final VerticalPanel mainPanel = new VerticalPanel();
         //FIXME: TableWrapper should fit in with the overall RaceBoard Error Reporting and style.
         this.table = new FeatureOverviewTableWrapper(stringMessages, null);
-        final SubscriptionWriteServiceAsync<?, ?, ?> subscriptionService = payWallResolver.getSubscriptionWriteService();
+        final SubscriptionWriteServiceAsync<?, ?, ?> subscriptionService = paywallResolver.getSubscriptionWriteService();
         if(subscriptionService == null) {
             Notification.notify(stringMessages.currentlyUnableToSubscribe(), NotificationType.ERROR);
         }else {

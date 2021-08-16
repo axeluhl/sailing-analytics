@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PayWallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 /**
@@ -26,10 +26,10 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
                 availableDetailTypes);
         // As we cannot know, if Bravo data is available later on, we will offer DetailTypes, that might be relevant
         // despite not having data for them yet
-        final PayWallResolver payWallResolver = new PayWallResolver(userService, subscriptionServiceFactory,
+        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
                 /* TODO: raceDTO is needed for permission check */null);
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
-                DetailType.getAutoplayDetailTypesForChart(), userService, availableDetailTypes, null, payWallResolver);
+                DetailType.getAutoplayDetailTypesForChart(), userService, availableDetailTypes, null, paywallResolver);
         addLifeCycle(leaderboardLifecycle);
         addLifeCycle(raceboardLifecycle);
     }
