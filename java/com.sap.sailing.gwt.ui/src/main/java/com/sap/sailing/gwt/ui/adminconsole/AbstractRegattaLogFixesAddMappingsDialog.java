@@ -45,9 +45,9 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
 
-    public AbstractRegattaLogFixesAddMappingsDialog(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
-            DialogCallback<Collection<DeviceMappingDTO>> callback) {
+    public AbstractRegattaLogFixesAddMappingsDialog(SailingServiceWriteAsync sailingServiceWrite,
+            UserService userService, final ErrorReporter errorReporter, final StringMessages stringMessages,
+            String leaderboardName, DialogCallback<Collection<DeviceMappingDTO>> callback) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
                 stringMessages.add(), stringMessages.cancel(),
                 new DataEntryDialog.Validator<Collection<DeviceMappingDTO>>() {
@@ -70,11 +70,12 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
                 /* boatsRefresher not needed; fetching competitors from registrations */ null, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enable pager */ true,
                 /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
-        markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(
-                /* multiSelection */ false, sailingServiceWrite, stringMessages, errorReporter);
+        markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(/* multiSelection */ false,
+                sailingServiceWrite, stringMessages, errorReporter);
         boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingServiceWrite, userService,
                 /* boatsRefresher not needed; registered boats taken from regatta log */ null,
-                stringMessages, errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
+                /* competitorsRefresher not neede */ null, stringMessages, errorReporter, /* multiSelection */ false,
+                /* enable Pager */ true, /* allowActions */ false);
 
         registerSelectionChangeHandler(competitorTable.getSelectionModel(), this::mappedToSelectionChanged);
         registerSelectionChangeHandler(markTable.getSelectionModel(), this::mappedToSelectionChanged);

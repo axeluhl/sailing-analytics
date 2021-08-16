@@ -19,6 +19,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.Refresher;
@@ -47,17 +48,20 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final Refresher<BoatDTO> boatsRefresher;
+    private final Refresher<CompetitorDTO> competitorsRefresher;
 
     public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            Refresher<BoatDTO> boatsRefresher, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager, boolean allowActions) {
-        this(sailingServiceWrite, userService, boatsRefresher, stringMessages, errorReporter, multiSelection,
-                enablePager, DEFAULT_PAGING_SIZE, allowActions);
+            Refresher<BoatDTO> boatsRefresher, Refresher<CompetitorDTO> competitorsRefresher,
+            StringMessages stringMessages, ErrorReporter errorReporter, boolean multiSelection, boolean enablePager,
+            boolean allowActions) {
+        this(sailingServiceWrite, userService, boatsRefresher, competitorsRefresher, stringMessages, errorReporter,
+                multiSelection, enablePager, DEFAULT_PAGING_SIZE, allowActions);
     }
 
     public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            Refresher<BoatDTO> boatsRefresher, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager, int pagingSize, boolean allowActions) {
+            Refresher<BoatDTO> boatsRefresher, Refresher<CompetitorDTO> competitorsRefresher,
+            StringMessages stringMessages, ErrorReporter errorReporter, boolean multiSelection, boolean enablePager,
+            int pagingSize, boolean allowActions) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {
                     @Override
@@ -70,6 +74,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                     }
                 });
         this.boatsRefresher = boatsRefresher;
+        this.competitorsRefresher = competitorsRefresher;
         this.sailingServiceWrite = sailingServiceWrite;
         ListHandler<BoatDTO> boatColumnListHandler = getColumnSortHandler();
         // boats table
@@ -235,7 +240,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
             if (boatsRefresher != null) {
                 // Don't fetch from server but ask our unified data model to deliver the boats without forcing server
                 // round-trip unless the boats haven't been loaded at all so far
-                boatsRefresher.callFillAndReloadInitially(boats->{
+                boatsRefresher.callFillAndReloadInitially(boats -> {
                     getFilteredBoats(boats);
                     filterBoats(boats);
                     if (callback != null) {
@@ -281,7 +286,12 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
                     @Override
                     public void onSuccess(BoatDTO updatedBoat) {
-                        boatsRefresher.addIfNotContainedElseReplace(updatedBoat);
+                        if (boatsRefresher != null) {
+                            boatsRefresher.addIfNotContainedElseReplace(originalBoat, updatedBoat);
+                        }
+                        if (competitorsRefresher != null) {
+                            competitorsRefresher.reloadAndCallFillAll();
+                        }
                         int editedBoatIndex = getFilterField().indexOf(originalBoat);
                         getFilterField().remove(originalBoat);
                         if (editedBoatIndex >= 0){

@@ -60,6 +60,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
                 event -> deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject()));
         boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingServiceWrite, userService,
                 /* boatsRefresher not needed; registrations are fetched for the leaderboard specifically */ null,
+                /* competitorsRefresher not neede */ null,
                 stringMessages, errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
         competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
                 /* competitorsRefresher not needed; registrations are fetched for the leaderboard specifically */ null,

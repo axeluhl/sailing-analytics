@@ -121,13 +121,29 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     }
     
     @Override
-    public void addIfNotContainedElseReplace(T dto) {
+    public void addIfNotContained(T dto) {
         if (dto != null && dtos != null) {
             final int index = dtos.indexOf(dto);
             if (index != -1) {
                 dtos.set(index, dto);
             } else {
                 add(dto);
+            }
+        }
+    }
+    
+    @Override
+    public void addIfNotContainedElseReplace(T oldDto, T newDto) {
+        if (dtos != null) {
+            final int index = dtos.indexOf(oldDto);
+            if (index != -1) {
+                if (newDto == null) {
+                    dtos.remove(index);
+                } else {
+                    dtos.set(index, newDto);
+                }
+            } else {
+                add(newDto);
             }
         }
     }
@@ -141,17 +157,19 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     
     @Override
     public void remove(T dto) {
-        if (dto != null) {
+        if (dto != null && dtos != null) {
             dtos.remove(dto);
         }
     }
 
     @Override
     public void removeAll(Predicate<T> filter) {
-        for (final Iterator<T> i=dtos.iterator(); i.hasNext(); ) {
-            final T dto = i.next();
-            if (filter.test(dto)) {
-                i.remove();
+        if (dtos != null) {
+            for (final Iterator<T> i=dtos.iterator(); i.hasNext(); ) {
+                final T dto = i.next();
+                if (filter.test(dto)) {
+                    i.remove();
+                }
             }
         }
     }

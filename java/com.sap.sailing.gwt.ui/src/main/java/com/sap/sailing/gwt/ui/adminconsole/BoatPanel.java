@@ -33,8 +33,8 @@ public class BoatPanel extends SimplePanel implements FilterablePanelProvider<Bo
         super();
         this.boatsDisplayer = result->refreshBoatList();
         this.boatTable = new BoatTableWrapper<>(presenter.getSailingService(), presenter.getUserService(),
-                presenter.getBoatsRefresher(), stringMessages, presenter.getErrorReporter(), /* multiSelection */ true,
-                /* enablePager */ true, 100, true);
+                presenter.getBoatsRefresher(), presenter.getCompetitorsRefresher(), stringMessages,
+                presenter.getErrorReporter(), /* multiSelection */ true, /* enablePager */ true, 100, true);
         this.refreshableBoatSelectionModel = (RefreshableMultiSelectionModel<BoatDTO>) boatTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);

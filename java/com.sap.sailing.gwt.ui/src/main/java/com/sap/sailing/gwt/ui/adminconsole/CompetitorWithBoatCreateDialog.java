@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -44,7 +45,7 @@ public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDi
      *            already initialized or you don't want a default boat class.
      */
     public CompetitorWithBoatCreateDialog(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            Refresher<BoatDTO> boatsRefresher, StringMessages stringMessages, ErrorReporter errorReporter,
+            Refresher<BoatDTO> boatsRefresher,  Refresher<CompetitorDTO> competitorsRefresher, StringMessages stringMessages, ErrorReporter errorReporter,
             CompetitorWithBoatDTO competitorToEdit, DialogCallback<CompetitorWithBoatDTO> callback, String boatClass) {
         super("Add competitor with boat", stringMessages, competitorToEdit, callback, boatClass);
         this.ensureDebugId("CompetitorWithBoatCreateDialog");
@@ -65,7 +66,7 @@ public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDi
         });        
         newBoatPanel = new VerticalPanel();
         existingBoatPanel = new VerticalPanel();
-        this.existingBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, boatsRefresher, stringMessages, errorReporter, 
+        this.existingBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, boatsRefresher, competitorsRefresher, stringMessages, errorReporter, 
                 /* multiSelection */ false, /* enablePager */ true, /* pagingSize*/ 10, false);
         existingBoatsTable.refreshBoatList(/* loadOnlyStandaloneBoats */ true, /* callback */ null);
         this.existingBoatsTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

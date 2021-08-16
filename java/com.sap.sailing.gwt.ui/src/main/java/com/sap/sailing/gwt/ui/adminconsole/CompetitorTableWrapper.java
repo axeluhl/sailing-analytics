@@ -138,7 +138,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         TextColumn<CompetitorDTO> boatClassColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
-                return competitor.hasBoat() && ((CompetitorWithBoatDTO) competitor).getBoatClass() != null ? ((CompetitorWithBoatDTO) competitor).getBoatClass().getName() : "";
+                return competitor.hasBoat() 
+                        && ((CompetitorWithBoatDTO) competitor).getBoatClass() != null
+                            ? ((CompetitorWithBoatDTO) competitor).getBoatClass().getName()
+                            : "";
             }
         };
         boatClassColumn.setSortable(true);
@@ -459,11 +462,12 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
 
                     @Override
                     public void onSuccess(CompetitorWithBoatDTO updatedCompetitor) {
-                        GWT.log("OK 002");
                         if (competitorsRefresher != null) {
-                            competitorsRefresher.addIfNotContainedElseReplace(updatedCompetitor);
-                            if (updatedCompetitor.getBoat() != null) {
-                                boatsRefresher.addIfNotContainedElseReplace(updatedCompetitor.getBoat());
+                            competitorsRefresher.addIfNotContainedElseReplace(originalCompetitor, updatedCompetitor);
+                            competitorsRefresher.callAllFill();
+                            if (boatsRefresher != null) {
+                                boatsRefresher.addIfNotContainedElseReplace(originalCompetitor.getBoat(), updatedCompetitor.getBoat());
+                                boatsRefresher.callAllFill();
                             }
                         }
                         
@@ -523,7 +527,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     @Override
                     public void onSuccess(CompetitorDTO updatedCompetitor) {
                         if (competitorsRefresher != null) {
-                            competitorsRefresher.addIfNotContainedElseReplace(updatedCompetitor);
+                            competitorsRefresher.addIfNotContainedElseReplace(originalCompetitor, updatedCompetitor);
                         }
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
@@ -599,7 +603,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public void onSuccess(T addedCompetitor) {
                 if (competitorsRefresher != null) {
-                    competitorsRefresher.addIfNotContainedElseReplace(addedCompetitor);
+                    competitorsRefresher.add(addedCompetitor);
                 }
                 getFilterField().add(addedCompetitor);
                 getDataProvider().refresh();

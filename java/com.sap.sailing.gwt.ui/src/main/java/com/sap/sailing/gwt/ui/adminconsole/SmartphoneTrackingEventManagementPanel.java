@@ -1003,7 +1003,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             String boatClassName = regatta.boatClass.getName();
 
             new RegattaLogBoatRegistrationDialog(boatClassName, sailingServiceWrite, userService, boatsRefresher,
-                    stringMessages, errorReporter, /* editable */true, t.getName(),
+                    competitorsRefresher, stringMessages, errorReporter, /* editable */true, t.getName(),
                     t.canBoatsOfCompetitorsChangePerRace, new DialogCallback<Set<BoatDTO>>() {
                         @Override
                         public void ok(Set<BoatDTO> registeredBoats) {

@@ -82,11 +82,18 @@ public interface Refresher<T> {
     void remove(T dto);
 
     /**
-     * Like {@link #add(Object)}, but an {@link Object#equals(Object) equal} DTO will be replaced by {@code dto} if
+     * Like {@link #add(Object)}, but an {@link Object#equals(Object) equal} original DTO will be replaced by {@code newDto} if
      * found in the list of DTOs known to this refresher. This will only take place if the DTO list already exists,
      * indicating that it has been requested before.
      */
-    void addIfNotContainedElseReplace(T dto);
+    void addIfNotContainedElseReplace(T oldDto, T newDto);
+
+    /**
+     * Like {@link #add(Object)}, but an {@link Object#equals(Object) equal} DTO will be ignored if
+     * found in the list of DTOs known to this refresher. This will only take place if the DTO list already exists,
+     * indicating that it has been requested before.
+     */
+    void addIfNotContained(T dto);
 
     /**
      * {@link #remove(Object) Removes} all objects from this refresher that {@link Predicate#test(Object) are matched) by the
