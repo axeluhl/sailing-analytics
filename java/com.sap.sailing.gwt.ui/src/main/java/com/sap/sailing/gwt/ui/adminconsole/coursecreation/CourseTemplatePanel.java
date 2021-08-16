@@ -361,9 +361,14 @@ public class CourseTemplatePanel extends FlowPanel implements FilterablePanelPro
 
                                     @Override
                                     public void onSuccess(CourseTemplateDTO updatedCourseTemplate) {
-                                        int editedCourseTemplateIndex = filterableCourseTemplatePanel
-                                                .indexOf(originalCourseTemplate);
-                                        filterableCourseTemplatePanel.remove(originalCourseTemplate);
+                                        final int editedCourseTemplateIndex;
+                                        if (originalCourseTemplate != null) {
+                                            editedCourseTemplateIndex = filterableCourseTemplatePanel
+                                                    .indexOf(originalCourseTemplate);
+                                            filterableCourseTemplatePanel.remove(originalCourseTemplate);
+                                        } else {
+                                            editedCourseTemplateIndex = -1;
+                                        }
                                         if (editedCourseTemplateIndex >= 0) {
                                             filterableCourseTemplatePanel.add(editedCourseTemplateIndex,
                                                     updatedCourseTemplate);

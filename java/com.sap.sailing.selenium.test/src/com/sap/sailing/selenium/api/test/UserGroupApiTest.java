@@ -22,7 +22,7 @@ import com.sap.sailing.selenium.api.core.HttpException;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.RoleApi;
-import com.sap.sailing.selenium.api.event.RoleApi.Role;
+import com.sap.sailing.selenium.api.event.RoleApi.RoleDefinition;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi.UserGroup;
@@ -102,7 +102,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         assertNotNull("GroupId is missing in reponse!", userGroupCreated.getGroupId());
 
         // add new role to group with admin user
-        final Role createdRole = roleApi.createRole(adminCtx, "My-Epic-Role");
+        final RoleDefinition createdRole = roleApi.createRole(adminCtx, "My-Epic-Role");
         roleApi.updateRole(adminCtx, createdRole.getId(), Arrays.asList("*"), createdRole.getName());
         userGroupApi.addRoleToGroup(adminCtx, userGroupCreated.getGroupId(), createdRole.getId(), false);
 
@@ -286,7 +286,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
         // create test role
         final RoleApi roleApi = new RoleApi();
-        final Role role = roleApi.createRole(adminCtx, "test-role-01");
+        final RoleDefinition role = roleApi.createRole(adminCtx, "test-role-01");
         assertNotNull("RoleId is missing in response!", role.getId());
 
         // add role to group

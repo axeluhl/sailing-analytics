@@ -9,6 +9,7 @@ import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.RedirectDTO;
+import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
@@ -66,13 +67,23 @@ public interface LandscapeManagementWriteService extends RemoteService {
     SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
 
-    void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
-            String securityReplicationBearerToken, String optionalDomainName) throws Exception;
+    SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
+            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName) throws Exception;
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
 
     void removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String keyName,
             byte[] passphraseForPrivateKeyDescryption) throws Exception;
+
+    SailingApplicationReplicaSetDTO<String> createDefaultLoadBalancerMappings(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
+            boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate) throws Exception;
+    
+    SailingApplicationReplicaSetDTO<String> upgradeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken) throws Exception;
+
+    ArrayList<ReleaseDTO> getReleases();
 }

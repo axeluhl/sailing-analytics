@@ -57,7 +57,7 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint {
                     Anchor feedbackLink = new Anchor(new SafeHtmlBuilder()
                             .appendHtmlConstant("<img src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());
                     // TODO set image
-                    feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
+                    feedbackLink.setHref("mailto:support%40sapsailing.com?subject=[SAP Sailing] Feedback");
                     feedbackPanel.add(feedbackLink);
                     groupAndFeedbackPanel.add(feedbackPanel);
                 }

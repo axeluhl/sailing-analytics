@@ -17,6 +17,8 @@ public interface ReplicaDescriptor extends Serializable {
     UUID getUuid();
 
     InetAddress getIpAddress();
+    
+    Integer getPort();
 
     TimePoint getRegistrationTime();
     

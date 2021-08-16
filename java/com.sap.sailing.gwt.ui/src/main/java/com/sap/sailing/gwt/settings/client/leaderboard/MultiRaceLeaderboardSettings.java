@@ -67,7 +67,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
      * live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRaceColumnsToShow() {
-        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? (namesOfRaceColumnsToShow.isValuesEmpty() ? null : Util.createList(namesOfRaceColumnsToShow.getValues())) : null;
+        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? (namesOfRaceColumnsToShow.isValuesEmpty() ? null : Util.asList(namesOfRaceColumnsToShow.getValues())) : null;
     }
 
     /**

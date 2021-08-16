@@ -82,7 +82,8 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     @Override
     public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
         final String username = authenticationManager.getAuthenticationContext().getCurrentUser().getName();
-        String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
+        String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation,
+                /* reallyUseLeadingOrTrailingSpacesInUsername */ true);
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Notification.notify(errorMessage, NotificationType.ERROR);
             return;

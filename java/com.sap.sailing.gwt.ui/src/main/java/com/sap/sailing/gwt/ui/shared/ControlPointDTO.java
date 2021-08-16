@@ -14,7 +14,8 @@ public abstract class ControlPointDTO extends NamedDTO {
     private String idAsString;
     private String shortName;
     
-    public ControlPointDTO() {}
+    @Deprecated
+    ControlPointDTO() {} // for GWT RPC serialization only
     
     public ControlPointDTO(String idAsString, String name, String shortName) {
         super(name);

@@ -20,7 +20,6 @@ public class MarkRolePanelSupplier extends AdminConsolePanelSupplier<MarkRolePan
 
     @Override
     public MarkRolePanel init() {
-        logger.info("Create MarkRolePanel");
         final MarkRolePanel markRolePanel = new MarkRolePanel(presenter.getSailingService(),
                 presenter.getErrorReporter(), stringMessages, presenter.getUserService());
         markRolePanel.ensureDebugId("markRolePanel");

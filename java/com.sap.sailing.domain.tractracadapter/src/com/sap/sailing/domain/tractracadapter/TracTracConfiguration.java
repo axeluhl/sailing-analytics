@@ -56,7 +56,6 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl, String username) {
-
         return username == null ? new TypeRelativeObjectIdentifier(jsonUrl)
                 : new TypeRelativeObjectIdentifier(jsonUrl, username);
     }

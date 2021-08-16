@@ -240,8 +240,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     ServerConfigurationDTO getServerConfiguration() throws UnauthorizedException;
 
-    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) throws UnauthorizedException;
-
     List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() throws UnauthorizedException;
 
     List<UrlDTO> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
@@ -577,4 +575,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName)
             throws UnauthorizedException, NotFoundException;
+    
+    Integer getAdminConsoleChangeLogSize();
 }

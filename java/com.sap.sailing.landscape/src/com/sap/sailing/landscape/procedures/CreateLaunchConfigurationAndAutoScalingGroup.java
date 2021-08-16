@@ -156,7 +156,7 @@ implements Procedure<ShardingKey> {
     Builder<ShardingKey, BuilderT, MetricsT, ProcessT> builder(
             AwsLandscape<ShardingKey> landscape, Region region,
             ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet,
-            String replicationBearerToken, TargetGroup<ShardingKey> targetGroup) {
+            TargetGroup<ShardingKey> targetGroup) {
         return new BuilderImpl<>(landscape, region, applicationReplicaSet, targetGroup);
     }
     
@@ -180,7 +180,7 @@ implements Procedure<ShardingKey> {
 
     @Override
     public void run() throws Exception {
-        getLandscape().createLaunchConfiguration(region, applicationReplicaSet.getName(), tags,
+        getLandscape().createLaunchConfigurationAndAutoScalingGroup(region, applicationReplicaSet.getName(), tags,
                 targetGroup, keyName, instanceType, imageId, replicaConfiguration, MIN_REPLICAS, MAX_REPLICAS, MAX_REQUESTS_PER_TARGET);
     }
 }

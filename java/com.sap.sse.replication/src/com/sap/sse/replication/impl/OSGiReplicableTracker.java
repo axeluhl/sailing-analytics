@@ -66,34 +66,35 @@ public class OSGiReplicableTracker extends AbstractReplicablesProvider {
     @Override
     public Replicable<?, ?> getReplicable(final String replicableIdAsString, boolean wait) {
         final ServiceReference<Replicable<?, ?>> serviceReference = serviceReferenceByIdAsString.get(replicableIdAsString);
-        final Replicable<?, ?> preResult = serviceReference == null ? null : bundleContext.getService(serviceReference);
-        final Replicable<?, ?> result;
-        if (preResult == null && wait) {
-            final Replicable<?, ?> foundReplicable[] = new Replicable[1];
-            Object monitor = new Object();
-            // FIXME synchronize so that we won't miss a relevant service registration
-            addReplicableLifeCycleListener((AddOnlyReplicableLifeCycleListener) replicable -> {
-                if (replicable.getId().equals(replicableIdAsString)) {
-                    foundReplicable[0] = replicable;
-                    synchronized (monitor) {
-                        monitor.notifyAll();
-                    }
+        final Replicable<?, ?> foundReplicable[] = new Replicable[1];
+        final Object monitor = new Object();
+        final AddOnlyReplicableLifeCycleListener listener = (AddOnlyReplicableLifeCycleListener) replicable -> {
+            if (replicable.getId().equals(replicableIdAsString)) {
+                foundReplicable[0] = replicable;
+                synchronized (monitor) {
+                    monitor.notifyAll();
                 }
-            });
-            synchronized (monitor) {
+            }
+        };
+        synchronized (monitor) {
+            addReplicableLifeCycleListener(listener); // register before asking and while already holding the monitor
+            final Replicable<?, ?> preResult = serviceReference == null ? null : bundleContext.getService(serviceReference);
+            final Replicable<?, ?> result;
+            if (preResult == null && wait) {
                 while (foundReplicable[0] == null) {
                     try {
-                        monitor.wait();
+                        monitor.wait(); // allows the listener to take its turn
                     } catch (InterruptedException e) {
                         logger.log(Level.WARNING, "Exception while waiting for replicable "+replicableIdAsString+
                                 ". Continuing to wait...", e);
                     }
                 }
+                result = foundReplicable[0];
+            } else {
+                result = preResult;
             }
-            result = foundReplicable[0];
-        } else {
-            result = preResult;
+            removeReplicableLifeCycleListener(listener);
+            return result;
         }
-        return result;
     }
 }

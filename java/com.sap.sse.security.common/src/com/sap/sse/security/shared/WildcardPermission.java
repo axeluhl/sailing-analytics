@@ -121,6 +121,8 @@ public class WildcardPermission implements Serializable {
     |    I N S T A N C E   V A R I A B L E S    |
     ============================================*/
     private List<Set<String>> parts;
+    
+    private transient Iterable<QualifiedObjectIdentifier> qualifiedObjectIdentifiers;
 
     /*--------------------------------------------
     |         C O N S T R U C T O R S           |
@@ -251,17 +253,21 @@ public class WildcardPermission implements Serializable {
      * qualified object identifiers.
      */
     public Iterable<QualifiedObjectIdentifier> getQualifiedObjectIdentifiers() {
-        final List<QualifiedObjectIdentifier> result = new ArrayList<>();
-        final WildcardPermissionEncoder encoder = new WildcardPermissionEncoder();
-        if (getParts().size() >= 3) {
-            for (final String typeName : getParts().get(0)) {
-                for (final String encodedRelativeObjectId : getParts().get(2)) {
-                    result.add(new QualifiedObjectIdentifierImpl(typeName,
-                            new TypeRelativeObjectIdentifier(encoder.decodeStringList(encodedRelativeObjectId))));
+        if (qualifiedObjectIdentifiers == null) {
+            final List<QualifiedObjectIdentifier> result = new ArrayList<>();
+            final WildcardPermissionEncoder encoder = new WildcardPermissionEncoder();
+            if (getParts().size() >= 3) {
+                for (final String typeName : getParts().get(0)) {
+                    for (final String encodedRelativeObjectId : getParts().get(2)) {
+                        result.add(new QualifiedObjectIdentifierImpl(typeName,
+                                new TypeRelativeObjectIdentifier(encoder.decodeStringList(encodedRelativeObjectId))));
+                    }
                 }
             }
+            qualifiedObjectIdentifiers = result;
         }
-        return result;
+        return qualifiedObjectIdentifiers;
+        
     }
     
     public static WildcardPermissionBuilder builder() {

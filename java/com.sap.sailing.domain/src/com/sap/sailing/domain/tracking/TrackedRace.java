@@ -742,31 +742,28 @@ public interface TrackedRace
      *            if <code>true</code> and any cache update is currently going on, wait for the update to complete and
      *            then fetch the updated value; otherwise, serve this requests from whatever is currently in the cache
      */
-    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
-            throws NoWindException;
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis);
 
     /**
      * Same as {@link #getAverageAbsoluteCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
      * wind on leg and leg bearing is provided.
      */
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
-    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatestAnalyses) throws NoWindException;
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses);
 
-    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
-            throws NoWindException;
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis);
 
     /**
      * Same as {@link #getAverageSignedCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
      * wind direction and leg bearing is provided.
      */
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatestAnalysis) throws NoWindException;
+            boolean waitForLatestAnalysis);
 
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint);
 
@@ -978,7 +975,7 @@ public interface TrackedRace
     /**
      * The average wind speed with confidence for this race.
      */
-    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint formTimePoint, TimePoint toTimePoint, int numberOfSamples);
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint fromTimePoint, TimePoint toTimePoint, int numberOfSamples);
     
     /**
      * Computes the center point of the course's marks at the given time point.

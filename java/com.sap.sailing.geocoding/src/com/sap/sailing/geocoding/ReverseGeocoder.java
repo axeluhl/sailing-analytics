@@ -66,4 +66,10 @@ public interface ReverseGeocoder {
      */
     Placemark getPlacemarkFirst(Position position, double radius, Comparator<Placemark> comp) throws IOException,
             ParseException;
+    
+    /**
+     * Actually not a "reverse" geocoding but a name search that emits placemarks sorted with the comparator
+     * and returning the first element in the sorting order or {@code null} if the result is empty.
+     */
+    Placemark getPlacemark(String name, Comparator<Placemark> comp) throws IOException, ParseException;
 }

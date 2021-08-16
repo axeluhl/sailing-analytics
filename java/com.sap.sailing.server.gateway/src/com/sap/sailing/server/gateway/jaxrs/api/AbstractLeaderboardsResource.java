@@ -10,8 +10,6 @@ import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ResultsAreOfficialFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
@@ -135,6 +133,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("name", leaderboard.getName());
         final String displayName = leaderboard.getDisplayName();
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
+        jsonLeaderboard.put("boatClass", leaderboard.getBoatClass() == null ? null : leaderboard.getBoatClass().getName());
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.getTime() : null);
         jsonLeaderboard.put("delayToLiveInMillis", leaderboard.getDelayToLiveInMillis());
         jsonLeaderboard.put("resultState", resultState.name());
@@ -180,7 +179,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 final JSONObject fleetJson = new JSONObject();
                 fleetsJson.add(fleetJson);
                 fleetJson.put("name", fleet.getName());
-                fleetJson.put("resultsAreOfficial", isResultsAreOfficial(raceColumn, fleet));
+                fleetJson.put("resultsAreOfficial", leaderboard.isResultsAreOfficial(raceColumn, fleet));
                 final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 final JSONObject trackedRaceInfo;
                 if (trackedRace == null) {
@@ -204,11 +203,6 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 fleetJson.put("trackedRace", trackedRaceInfo);
             }
         }
-    }
-
-    private boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
-        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        return new ResultsAreOfficialFinder(raceLog).analyze() != null;
     }
 
     protected TimePoint calculateTimePointForResultState(Leaderboard leaderboard, ResultStates resultState) {

@@ -149,7 +149,7 @@ public class JorgesTracTracParallelLoadingTest {
         }
 
         @Override
-        public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
+        public void gotControlPassings(long timestamp, IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
             String outputFile = race.getName() + "-Competitor-"
                     + raceCompetitor.getCompetitor().getName() + "-MarkPassings.txt";
             StringBuilder out = getOutput(outputFile);

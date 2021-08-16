@@ -3,7 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter;
 import java.io.Serializable;
 
 public interface Mark extends WithDescription {
-    public enum MarkType { MANUAL, LINE_CROSSING, BUOY_ROUNDING };
+    public enum MarkType { MANUAL, LINE_CROSSING, BUOY_ROUNDING, GATE_ROUNDING };
     
     int getIndex();
     

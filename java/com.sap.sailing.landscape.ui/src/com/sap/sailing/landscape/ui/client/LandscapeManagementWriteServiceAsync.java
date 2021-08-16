@@ -9,6 +9,7 @@ import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.RedirectDTO;
+import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
@@ -85,17 +86,30 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
 
     void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
-            String securityReplicationBearerToken, String optionalDomainName, AsyncCallback<Void> callback);
-    
+            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
             AsyncCallback<SerializationDummyDTO> callback);
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
-            String passphraseForPrivateKeyDecryption, AsyncCallback<Void> asyncCallback);
+            String passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
     void removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> asyncCallback);
+            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> callback);
+
+    void createDefaultLoadBalancerMappings(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
+            boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void upgradeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicationBearerToken,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void getReleases(AsyncCallback<ArrayList<ReleaseDTO>> asyncCallback);
 }

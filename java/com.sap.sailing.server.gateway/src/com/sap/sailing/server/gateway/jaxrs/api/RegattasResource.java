@@ -896,7 +896,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             if (competitor.getFlagImage() != null) {
                                 jsonCompetitor.put("flagImage", competitor.getFlagImage().toString());
                             }
-                            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                            final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                             JSONArray jsonFixes = new JSONArray();
                             track.lockForRead();
                             try {
@@ -1044,7 +1044,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             JSONObject jsonMark = new JSONObject();
             jsonMark.put("name", mark.getName());
             jsonMark.put("id", mark.getId() != null ? mark.getId().toString() : null);
-            GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+            final GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
             JSONArray jsonFixes = new JSONArray();
             track.lockForRead();
             try {
@@ -1768,7 +1768,8 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/markpassings")
-    public Response getMarkPassings(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+    public Response getMarkPassings(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+    		@QueryParam("leaderboard") String leaderboardName) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1783,9 +1784,13 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
                         .build();
             } else {
+                final Leaderboard leaderboard = leaderboardName == null
+                        ? getService().getLeaderboardByName(regattaName)
+                        : getService().getLeaderboardByName(leaderboardName);
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 getSecurityService().checkCurrentUserReadPermission(trackedRace);
-                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(/* use now-livedelay as time point for mark ranks */ null);
+                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(leaderboard,
+                		/* use now-livedelay as time point for mark ranks */ null);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 return Response.ok(streamingOutput(jsonMarkPassings)).build();
             }
@@ -2065,6 +2070,25 @@ public class RegattasResource extends AbstractSailingServerResource {
                                                 .format(maxSpeedOverGround.getB().getKnots()));
                                         jsonCompetitorInLeg.put("maxSOGTimePoint-millis", RoundingUtil.knotsDecimalFormatter
                                                 .format(maxSpeedOverGround.getA().getTimePoint().asMillis()));
+                                    }
+                                    final boolean hasFinishedLeg = trackedLegOfCompetitor.hasFinishedLeg(timePoint);
+                                    if (!hasFinishedLeg) {
+                                        final Distance currentSignedXTE = trackedLegOfCompetitor.getSignedCrossTrackError(timePoint);
+                                        if (currentSignedXTE != null) {
+                                            jsonCompetitorInLeg.put("currentSignedXTE-m", currentSignedXTE.getMeters());
+                                        }
+                                        final Distance currentAbsolutXTE = trackedLegOfCompetitor.getAbsoluteCrossTrackError(timePoint);
+                                        if (currentAbsolutXTE != null) {
+                                            jsonCompetitorInLeg.put("currentAbsolutXTE-m", currentAbsolutXTE.getMeters());
+                                        }
+                                    }
+                                    final Distance averageSignedXTE = trackedLegOfCompetitor.getAverageSignedCrossTrackError(timePoint, /* waitForLatest */ false);
+                                    if (averageSignedXTE != null) {
+                                        jsonCompetitorInLeg.put("averageSignedXTE-m", averageSignedXTE.getMeters());
+                                    }
+                                    final Distance averageAbsolutXTE = trackedLegOfCompetitor.getAverageAbsoluteCrossTrackError(timePoint, /* waitForLatest */ false);
+                                    if (averageAbsolutXTE != null) {
+                                        jsonCompetitorInLeg.put("averageAbsolutXTE-m", averageAbsolutXTE.getMeters());
                                     }
                                     try {
                                         Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint, /* waitForLatest */ false);
@@ -2592,7 +2616,6 @@ public class RegattasResource extends AbstractSailingServerResource {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String regattaName = (String) requestObject.get("regattaName");
-
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
@@ -2638,23 +2661,24 @@ public class RegattasResource extends AbstractSailingServerResource {
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
-    @Deprecated
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    @Path("{regattaName}/tracking_devices")
-    public Response getTrackingStatusDeprecated(@PathParam("regattaName") String regattaName) {
-        return getTrackingStatus(regattaName);
-    }
-
+    /**
+     * Outputs device bindings in the scope of the regatta identified by {@code regattaName}, optionally limited to a single
+     * device whose ID can be provided by the {@code optionalDeviceUuid} parameter. Generally, callers need to have the
+     * {@link DefaultActions#UPDATE} permission for the regatta, but exceptionally, if a caller presents the correct
+     * {@code regattaSecret}, querying the tracking status for a single {@code optionalDeviceUuid} is permitted.
+     */
     @POST
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaName}/tracking_devices")
-    public Response getTrackingStatus(@PathParam("regattaName") String regattaName) {
+    public Response getTrackingStatus(@PathParam("regattaName") String regattaName, @QueryParam("deviceUuid") String optionalDeviceUuid,
+            @QueryParam("secret") String regattaSecret) {
         final Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             // Deeper insights to tracking data is only available to users who can administer a regatta
-            SecurityUtils.getSubject()
-                    .checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
+            boolean skip = getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret);
+            if (!skip || !Util.hasLength(optionalDeviceUuid)) {
+                SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
+            }
             final TrackingDeviceStatusSerializer serializer = new TrackingDeviceStatusSerializer(
                     new DeviceIdentifierJsonSerializer(
                             getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class)));
@@ -2681,14 +2705,17 @@ public class RegattasResource extends AbstractSailingServerResource {
                     });
                 }
                 final JSONArray deviceStatusesOfTrackedItem = new JSONArray();
-                for (DeviceMappingWithRegattaLogEvent<WithID> deviceMapping: mappingByDeviceID.values()) {
-                    JSONObject serializedDeviceStatus = serializer.serialize(
-                            TrackingDeviceStatus.calculateDeviceStatus(deviceMapping.getDevice(), getService()));
-                    deviceStatusesOfTrackedItem.add(serializedDeviceStatus);
-                    TimeRange mappedTimeRange = deviceMapping.getTimeRange();
-                    serializedDeviceStatus.put("mappedFrom", mappedTimeRange.from().asMillis());
-                    serializedDeviceStatus.put("mappedTo",
-                            mappedTimeRange.hasOpenEnd() ? null : mappedTimeRange.to().asMillis());
+                for (DeviceMappingWithRegattaLogEvent<WithID> deviceMapping : mappingByDeviceID.values()) {
+                    // if a device ID has been specified, output only content relating to that device ID:
+                    if (!Util.hasLength(optionalDeviceUuid) || Util.equalsWithNull(deviceMapping.getDevice().getStringRepresentation(), optionalDeviceUuid)) {
+                        JSONObject serializedDeviceStatus = serializer.serialize(
+                                TrackingDeviceStatus.calculateDeviceStatus(deviceMapping.getDevice(), getService()));
+                        deviceStatusesOfTrackedItem.add(serializedDeviceStatus);
+                        TimeRange mappedTimeRange = deviceMapping.getTimeRange();
+                        serializedDeviceStatus.put("mappedFrom", mappedTimeRange.from().asMillis());
+                        serializedDeviceStatus.put("mappedTo",
+                                mappedTimeRange.hasOpenEnd() ? null : mappedTimeRange.to().asMillis());
+                    }
                 }
                 final JSONObject itemObject = new JSONObject();
                 itemObject.put("deviceStatuses", deviceStatusesOfTrackedItem);

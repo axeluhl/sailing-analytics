@@ -167,39 +167,39 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     }
     
     public void resetShowLeaderBoard() {
-        this.showLeaderboard.resetToDefault();;
+        this.showLeaderboard.resetToDefault();
     }
     
     public void resetShowWindChart() {
-        this.showWindChart.resetToDefault();;
+        this.showWindChart.resetToDefault();
     }
     
     public void resetShowCompetitorsChart() {
-        this.showCompetitorsChart.resetToDefault();;
+        this.showCompetitorsChart.resetToDefault();
     }
 
     public void resetCanReplayDuringLiveRaces() {
-        this.canReplayDuringLiveRaces.resetToDefault();;
+        this.canReplayDuringLiveRaces.resetToDefault();
     }
     
     public void resetActiveCompetitorsFilterSetName() {
-        this.activeCompetitorsFilterSetName.resetToDefault();;
+        this.activeCompetitorsFilterSetName.resetToDefault();
     }
 
     public void resetInitialDurationAfterRaceStartInReplay() {
-        this.initialDurationAfterRaceStartInReplay.resetToDefault();;
+        this.initialDurationAfterRaceStartInReplay.resetToDefault();
     }
 
     public void resetSelectedCompetitor() {
-        this.selectedCompetitor.resetToDefault();;
+        this.selectedCompetitor.resetToDefault();
     }
 
     public void resetSelectedCompetitors() {
-        this.selectedCompetitors.resetToDefault();;
+        this.selectedCompetitors.resetToDefault();
     }
 
     public void resetJumpToTag() {
-        this.jumpToTag.resetToDefault();;
+        this.jumpToTag.resetToDefault();
     }
     
     public void resetZoomStart() {

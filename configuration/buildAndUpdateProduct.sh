@@ -97,10 +97,9 @@ SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 # The number of worker threads to use for building GWT permutations.
 # Can be overridden using the -x option
 GWT_WORKERS=2
-
-# The number of worker threads to use for building GWT permutations.
-# Can be overridden using the -x option
-GWT_WORKERS=2
+# The default resolution for headless Firefox for Selenium tests:
+export MOZ_HEADLESS_WIDTH=1600
+export MOZ_HEADLESS_HEIGHT=900
 
 MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
 MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
@@ -294,6 +293,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/env-default-rules.sh $ACDIR/
@@ -316,11 +316,10 @@ if [[ "$@" == "release" ]]; then
     cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    create_version_info_files
-
     if [[ $OSGI_BUNDLE_NAME != "" ]]; then
         SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
+    create_version_info_files
 
     # removing compile reports as they do not belong into a release
     find $ACDIR -name soycReport | xargs rm -rf
@@ -824,6 +823,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
 
@@ -929,6 +929,8 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/stop $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/status $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/refreshInstance.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/stopReplicating.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
 
         $SCP_CMD $PROJECT_HOME/java/target/http2udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/

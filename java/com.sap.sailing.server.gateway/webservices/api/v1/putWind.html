@@ -18,6 +18,8 @@ computational purposes internally we measure the wind in the direction <em>to</e
 If the <tt>regattaNamesAndRaceNames</tt> parameter is provided, wind data is ingested only into the
 races specified by the regatta/race name combinations. Otherwise, wind is ingested into all races
 into whose tracking interval the fixes fall.<br>
+The set of races into which wind is ingested is additionally filtered by the <tt>TRACKED_RACE:UPDATE</tt>
+permission. Wind data will only be added if the user has this permission for the race(s) in question.
 <br/>
 <table>
     <tr>
@@ -31,6 +33,12 @@ into whose tracking interval the fixes fall.<br>
     <tr>
         <td>Mandatory parameters:</td>
         <td>windData, windSourceType (either "WEB" or "EXPEDITION"), windSourceId (any string identifying the sensor)</td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>regattaNamesAndRaceNames: can be used to specify into which races to ingest the wind data; if omitted, the wind data
+            will be sent to all races for which the user making the request has the <tt>TRACKED_RACE:UPDATE</tt> permissions.
+            Example: <tt>"regattaNamesAndRaceNames":[{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"}]</tt></td>
     </tr>
     <tr>
         <td>Examples:</td>

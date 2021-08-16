@@ -23,7 +23,6 @@ public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSuppl
 
     @Override
     public TracTracEventManagementPanel init() {
-        logger.info("Create TracTracEventManagementPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
                 presenter, stringMessages, tableResources);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");

@@ -33,6 +33,18 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WebSocketConnectionManager implements LiveDataConnection {
+    /**
+     * The heartbeat receive timeout. Currently 45s because according to Brent Russel (2021-07-21) the server
+     * is expected to send every 15s, so we have a factor of two as tolerance.
+     */ 
+    private static final long TIMEOUT_AFTER_NOT_RECEIVING_HEARTBEAT_IN_MILLIS = 45000l;
+
+    /**
+     * Send ping message every 15s. The server will timeout if not receiving a heartbeat after 30s, so we have a tolerance
+     * of a factor of two, in other words allowing the heartbeat to travel for another 15s.
+     */ 
+    private static final long DURATION_BETWEEN_HEARTBEAT_SENDS_IN_MILLIS = 15000l;
+    
     private static final Logger logger = Logger.getLogger(WebSocketConnectionManager.class.getName());
     private final IgtimiConnectionFactoryImpl connectionFactory;
     private static enum TargetState { OPEN, CLOSED };
@@ -263,7 +275,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     logger.log(Level.WARNING, "Error with server heartbeat in "+this, e);
                 }
             }
-        }, /* wait for 45s for first execution */ 45000l, /* and check again every 45s*/ 45000l);
+        }, TIMEOUT_AFTER_NOT_RECEIVING_HEARTBEAT_IN_MILLIS, TIMEOUT_AFTER_NOT_RECEIVING_HEARTBEAT_IN_MILLIS);
     }
 
     private void startClientHeartbeat() {
@@ -279,7 +291,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     logger.log(Level.WARNING, "Couldn't send heartbeat to Igtimi web socket session in "+WebSocketConnectionManager.this+". Will continue to try...", e);
                 }
             }
-        }, /* delay */ 0, /* send ping message every other minute; has to be at least every five minutes, so this should be safe */ 120000l);
+        }, /* delay */ 0, DURATION_BETWEEN_HEARTBEAT_SENDS_IN_MILLIS);
     }
 
     private synchronized void reconnect() throws Exception {
@@ -323,6 +335,6 @@ public class WebSocketConnectionManager implements LiveDataConnection {
 
     @Override
     public InetSocketAddress getRemoteAddress() {
-        return getSession().getRemoteAddress();
+        return getSession() == null ? null : getSession().getRemoteAddress();
     }
 }

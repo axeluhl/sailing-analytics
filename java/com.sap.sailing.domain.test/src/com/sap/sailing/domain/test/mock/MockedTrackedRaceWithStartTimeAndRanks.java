@@ -429,7 +429,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -455,8 +455,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses)
-            throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses) {
         return null;
     }
 
@@ -598,8 +597,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -611,7 +609,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
+            boolean upwindOnly, boolean waitForLatestAnalysis) {
         return null;
     }
 

@@ -264,7 +264,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
             TimePoint to = null;
             Competitor competitor = getCompetitor();
             Course course = trackedRace.getRace().getCourse();
-            List<Waypoint> waypoints = Util.createList(course.getWaypoints());
+            List<Waypoint> waypoints = Util.asList(course.getWaypoints());
             int fromIndex = 0;
             while (fromIndex < waypoints.size()) {
                 MarkPassing markPassing = trackedRace.getMarkPassing(competitor, waypoints.get(fromIndex));

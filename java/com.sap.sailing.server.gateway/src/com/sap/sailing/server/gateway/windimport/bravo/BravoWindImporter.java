@@ -36,7 +36,7 @@ public class BravoWindImporter extends AbstractWindImporter {
     private static final Logger logger = Logger.getLogger(BravoWindImporter.class.getName());
     
     @Override
-    protected WindSource getWindSource(UploadRequest uploadRequest) {
+    protected WindSource getDefaultWindSource(UploadRequest uploadRequest) {
         final WindSource windSource;
         final String sourceName;
         logger.info("Importing Bravo wind data from "+uploadRequest.files);
@@ -50,19 +50,21 @@ public class BravoWindImporter extends AbstractWindImporter {
     }
 
     @Override
-    protected Iterable<Wind> importWind(Map<InputStream, String> inputStreamsAndFilenames) throws IOException, InterruptedException, FormatNotSupportedException {
-        final Iterable<Wind> result;
+    protected Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource, Map<InputStream, String> inputStreamsAndFilenames) throws IOException, InterruptedException, FormatNotSupportedException {
+        final Iterable<Wind> windFixes;
         if (inputStreamsAndFilenames != null && inputStreamsAndFilenames.size() == 1) {
             logger.info("Reading Bravo wind data from "+inputStreamsAndFilenames.values().iterator().next());
-            result = readWind(inputStreamsAndFilenames.values().iterator().next(), inputStreamsAndFilenames.keySet().iterator().next());
+            windFixes = readWind(inputStreamsAndFilenames.values().iterator().next(), inputStreamsAndFilenames.keySet().iterator().next());
         } else {
             final List<Wind> windList = new LinkedList<>();
             for (final Entry<InputStream, String> inputStreamAndFileName : inputStreamsAndFilenames.entrySet()) {
                 logger.info("Reading Bravo wind data from "+inputStreamAndFileName.getValue());
                 Util.addAll(readWind(inputStreamAndFileName.getValue(), inputStreamAndFileName.getKey()), windList);
             }
-            result = windList;
+            windFixes = windList;
         }
+        final Map<WindSource, Iterable<Wind>> result = new HashMap<>();
+        result.put(defaultWindSource, windFixes);
         return result;
     }
 
