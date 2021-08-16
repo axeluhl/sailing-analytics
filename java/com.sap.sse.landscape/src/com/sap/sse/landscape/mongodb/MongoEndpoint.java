@@ -9,6 +9,7 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.session.ClientSession;
 import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.mongodb.impl.SimpleMongoEndpointImpl;
 
 /**
  * A MongoDB endpoint that an application can connect to. It can produce a {@link URI} the client can use to connect to,
@@ -19,6 +20,14 @@ import com.sap.sse.common.Duration;
  *
  */
 public interface MongoEndpoint {
+    static MongoEndpoint of(String hostname, int port) {
+        return new SimpleMongoEndpointImpl(hostname, port);
+    }
+    
+    static MongoEndpoint of(String hostname, int port, String replicaSetName) {
+        return new SimpleMongoEndpointImpl(hostname, port, replicaSetName);
+    }
+    
     /**
      * When invoked on a {@link MongoProcess} that is not currently equipped with a public IP address, a
      * {@link NullPointerException} will result. Consider using {@link #getURI(Optional, Optional)} to wait for
@@ -27,6 +36,24 @@ public interface MongoEndpoint {
     URI getURI(Optional<Database> optionalDb) throws URISyntaxException;
     
     URI getURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException;
+    
+    default URI getURI(Optional<Database> optionalDb, String hostname, int port, Optional<String> replicaSetName) throws URISyntaxException {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("mongodb://");
+        sb.append(hostname);
+        sb.append(":");
+        sb.append(port);
+        sb.append("/");
+        optionalDb.ifPresent(db->sb.append(db.getName()));
+        replicaSetName.ifPresent(rsName->appendReplicaSetParametersToURI(rsName, sb));
+        return new URI(sb.toString());
+    }
+    
+    default void appendReplicaSetParametersToURI(String replicaSetName, StringBuilder uriStringBuilder) {
+        uriStringBuilder.append("?replicaSet=");
+        uriStringBuilder.append(replicaSetName);
+        uriStringBuilder.append("&retryWrites=true&readPreference=nearest");
+    }
     
     /**
      * Lists all MongoDB databases available in this end point
