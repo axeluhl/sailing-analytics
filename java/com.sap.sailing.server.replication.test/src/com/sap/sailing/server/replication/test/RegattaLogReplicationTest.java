@@ -1,7 +1,5 @@
 package com.sap.sailing.server.replication.test;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +37,7 @@ public class RegattaLogReplicationTest extends
     }
     
     @Test
-    public void testRegattaLogEmptyOnInitialLoad() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRegattaLogEmptyOnInitialLoad() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -51,7 +49,7 @@ public class RegattaLogReplicationTest extends
     }
     
     @Test
-    public void testRegattaLogStateOnInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
+    public void testRegattaLogStateOnInitialLoad() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -64,7 +62,7 @@ public class RegattaLogReplicationTest extends
     }
     
     @Test
-    public void testRaceEventReplicationOnEmptyRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnEmptyRegatta() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -77,7 +75,7 @@ public class RegattaLogReplicationTest extends
     }
     
     @Test
-    public void testRaceEventReplicationOnEmptyFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnEmptyFlexibleLeaderboard() throws Exception {
         final String leaderboardName = "Test";
         FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
         RegattaLog masterLog = masterLeaderboard.getRegattaLog();

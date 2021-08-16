@@ -1,5 +1,9 @@
 package com.sap.sailing.selenium.pages.adminconsole.usermanagement;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openqa.selenium.ElementNotSelectableException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -39,16 +43,24 @@ public class UserManagementPanelPO extends PageArea {
 
     public DataEntryPO findUser(final String username) {
         final CellTablePO<DataEntryPO> table = getUserTable();
-        for (DataEntryPO entry : table.getEntries()) {
-            String name;
+        List<DataEntryPO> dataEntries = new ArrayList<DataEntryPO>();
+        waitUntil(() -> {
+            List<DataEntryPO> entries;
             try {
-                name = entry.getColumnContent("User name");
+                entries = table.getEntries();
+                dataEntries.addAll(entries);
+            } catch (StaleElementReferenceException e) {
+                entries = null;
+            }
+            return entries != null;
+        });
+        for (DataEntryPO entry : table.getEntries()) {
+            try {
+                if (username.equals(entry.getColumnContent("User name"))) {
+                    return entry;
+                }
             } catch (StaleElementReferenceException e) {
                 // entry is not existing any more but must not break iteration
-                name = null;
-            }
-            if (username.equals(name)) {
-                return entry;
             }
         }
         return null;
@@ -56,11 +68,15 @@ public class UserManagementPanelPO extends PageArea {
 
     public EditUserDialogPO getEditUserDialog(final String username) {
         DataEntryPO entry = findUser(username);
-        if (entry != null) {
-            final WebElement action = ActionsHelper.findUpdateAction(entry.getWebElement());
-            action.click();
-            final WebElement dialog = findElementBySeleniumId(this.driver, "UserEditDialog");
-            return new EditUserDialogPO(this.driver, dialog);
+        try {
+            if (entry != null) {
+                final WebElement action = ActionsHelper.findUpdateAction(entry.getWebElement());
+                action.click();
+                final WebElement dialog = findElementBySeleniumId(this.driver, "UserEditDialog");
+                return new EditUserDialogPO(this.driver, dialog);
+            }
+        } catch (StaleElementReferenceException e) {
+            // entry is not existing any more
         }
         return null;
     }
@@ -87,16 +103,20 @@ public class UserManagementPanelPO extends PageArea {
     }
     
     public void selectUser(String name) {
-        final CellTablePO<DataEntryPO> table = getUserTable();
-        final DataEntryPO findUser = findUser(name);
-        if(findUser != null) {
-            table.selectEntry(findUser);
+        try {
+            final DataEntryPO userTableEntry = findUser(name);
+            if (userTableEntry != null) {
+                userTableEntry.select();
+            }
+        } catch (StaleElementReferenceException e) {
+            throw new ElementNotSelectableException("Cannot select user any more. Entry has already been removed from DOM.", e);
         }
     }
     
     public void deleteUser(String name) {
         selectUser(name);
         deleteSelectedUser();
+        waitUntilAlertIsPresent();
         driver.switchTo().alert().accept();
         // wait until cell is removed from page
         waitUntil(() -> findUser(name) == null);

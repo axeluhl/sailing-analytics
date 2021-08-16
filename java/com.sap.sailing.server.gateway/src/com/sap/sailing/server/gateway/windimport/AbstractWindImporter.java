@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.shiro.SecurityUtils;
@@ -135,7 +136,7 @@ public abstract class AbstractWindImporter {
 
     public void importWindForUploadRequest(RacingEventService service, WindImportResult windImportResult, UploadRequest uploadRequest)
             throws IOException, InterruptedException, FormatNotSupportedException {
-        WindSource windSource = getWindSource(uploadRequest);
+        WindSource windSource = getDefaultWindSource(uploadRequest);
         List<DynamicTrackedRace> trackedRaces = new ArrayList<DynamicTrackedRace>();
         if (uploadRequest.races.size() > 0) {
             for (RegattaAndRaceIdentifier raceEntry : uploadRequest.races) {
@@ -164,28 +165,42 @@ public abstract class AbstractWindImporter {
         importWindToWindSourceAndTrackedRaces(service, windImportResult, windSource, trackedRaces, streamsWithFilenames);
     }
 
-    public void importWindToWindSourceAndTrackedRaces(RacingEventService service, WindImportResult windImportResult, WindSource windSource,
+    /**
+     * @param defaultWindSource
+     *            the wind source to use for the wind fixes read using the {@link #importWind(WindSource, Map)} method for those
+     *            fixes for which no explicit wind source has been returned by the {@link #importWind(WindSource, Map)} method.
+     */
+    public void importWindToWindSourceAndTrackedRaces(RacingEventService service, WindImportResult windImportResult, WindSource defaultWindSource,
             List<DynamicTrackedRace> trackedRaces, final Map<InputStream, String> streamsWithFilenames)
             throws IOException, InterruptedException, FormatNotSupportedException {
-        Iterable<Wind> windFixes = importWind(streamsWithFilenames);
-        if (!Util.isEmpty(windFixes)) {
-            for (DynamicTrackedRace trackedRace : trackedRaces) {
-                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-                RaceEntry raceEntry = windImportResult.addRaceEntry(raceIdentifier.getRegattaName(),
-                        raceIdentifier.getRaceName());
-                for (Wind wind : windFixes) {
-                    windImportResult.update(wind);
-                    if (trackedRace.recordWind(wind, windSource)) {
-                        raceEntry.update(wind);
+        Map<WindSource, Iterable<Wind>> windFixes = importWind(defaultWindSource, streamsWithFilenames);
+        for (final Entry<WindSource, Iterable<Wind>> windForSource : windFixes.entrySet()) {
+            if (!Util.isEmpty(windForSource.getValue())) {
+                for (DynamicTrackedRace trackedRace : trackedRaces) {
+                    RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                    RaceEntry raceEntry = windImportResult.addRaceEntry(raceIdentifier.getRegattaName(),
+                            raceIdentifier.getRaceName());
+                    for (Wind wind : windForSource.getValue()) {
+                        windImportResult.update(wind);
+                        if (trackedRace.recordWind(wind, windForSource.getKey() == null ? defaultWindSource : windForSource.getKey())) {
+                            raceEntry.update(wind);
+                        }
                     }
+                    service.getPolarDataService().insertExistingFixes(trackedRace);
                 }
-                service.getPolarDataService().insertExistingFixes(trackedRace);
             }
         }
     }
 
-    protected abstract Iterable<Wind> importWind(Map<InputStream, String> streamsWithFilenames)
+    /**
+     * @param defaultWindSource
+     *            the default wind source to use as the key of the map returned; implementations may, however, use this
+     *            default wind source only as a copy template to produce finer-grained wind sources based on what the
+     *            import stream contains
+     * @return a map whose values are the wind fixes imported, keyed by the {@link WindSource} to which to add them.
+     */
+    protected abstract Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource, Map<InputStream, String> streamsWithFilenames)
             throws IOException, InterruptedException, FormatNotSupportedException;
 
-    protected abstract WindSource getWindSource(UploadRequest uploadRequest);
+    protected abstract WindSource getDefaultWindSource(UploadRequest uploadRequest);
 }

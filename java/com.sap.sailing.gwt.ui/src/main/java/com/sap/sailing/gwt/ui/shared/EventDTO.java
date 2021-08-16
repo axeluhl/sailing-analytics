@@ -32,21 +32,14 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
     private List<String> windFinderReviewedSpotsCollectionIds;
     private List<SpotDTO> allWindFinderSpotIdsUsedByEvent;
 
-    public EventDTO() {
-        this(new ArrayList<LeaderboardGroupDTO>());
-    }
-
-    protected EventDTO(List<LeaderboardGroupDTO> leaderboardGroups) {
-        super(leaderboardGroups);
-        this.leaderboardGroups = leaderboardGroups;
-        initCurrentServerTime();
-    }
-
+    @Deprecated
+    EventDTO() {} // for GWT RPC serialization only
+    
     public EventDTO(String name) {
         this(name, new ArrayList<LeaderboardGroupDTO>());
     }
 
-    protected EventDTO(String name, List<LeaderboardGroupDTO> leaderboardGroups) {
+    public EventDTO(String name, List<LeaderboardGroupDTO> leaderboardGroups) {
         super(name, leaderboardGroups);
         this.leaderboardGroups = leaderboardGroups;
         initCurrentServerTime();

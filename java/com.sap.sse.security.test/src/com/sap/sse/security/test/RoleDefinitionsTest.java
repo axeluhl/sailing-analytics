@@ -42,7 +42,7 @@ public class RoleDefinitionsTest {
     }
     
     private void addRoleToUser(User user, RoleDefinition role) throws UserManagementException {
-        userStore.addRoleForUser(user.getName(), new Role(role));
+        userStore.addRoleForUser(user.getName(), new Role(role, true));
     }
     
     private void addRoleToUserGroup(UserGroup userGroup, RoleDefinition role) throws UserManagementException {

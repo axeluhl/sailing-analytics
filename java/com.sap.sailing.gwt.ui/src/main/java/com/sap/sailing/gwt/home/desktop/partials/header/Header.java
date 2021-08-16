@@ -320,8 +320,10 @@ public class Header extends Composite implements HeaderConstants {
         authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
+            logoImage.setTitle(StringMessages.INSTANCE.sapSailingAnalytics());
             solutionsPageLink.getElement().getStyle().setDisplay(Display.NONE);
             logoAnchor.setHref("");
+            logoAnchor.setTitle(StringMessages.INSTANCE.sapSailingAnalytics());
             menuItemVisibilityHandler.addIgnore(solutionsPageLink);
         }
         logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");

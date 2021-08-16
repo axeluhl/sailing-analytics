@@ -408,6 +408,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource RS200Icon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS21.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource RS21Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS400.png")
     @ImageOptions(preventInlining = true)
     ImageResource RS400Icon();

@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.trackimport;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -58,9 +57,7 @@ public interface GPSFixImporter {
      *            some name that identifies the source, e.g. the file name if a file
      * @return returns if import was succesful or not
      */
-    boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
-            String sourceName)
-            throws FormatNotSupportedException, IOException;
+    boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName) throws Exception;
 
     /**
      * Return the file extensions supported by this importer. If the importer is not intended

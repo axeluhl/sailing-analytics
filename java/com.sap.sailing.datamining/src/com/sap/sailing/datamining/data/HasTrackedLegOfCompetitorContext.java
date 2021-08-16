@@ -36,8 +36,56 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     @Statistic(messageKey="RelativeScore", resultDecimals=2, ordinal=2)
     public Double getRelativeRank();
     
-    @Statistic(messageKey="AbsoluteRank", resultDecimals=2, ordinal=3)
+    @Statistic(messageKey="AbsoluteRank", resultDecimals=0, ordinal=3)
     public Integer getRankAtFinish();
+    
+    @Statistic(messageKey="AbsoluteRankAfterFirstQuarter", resultDecimals=0, ordinal=4)
+    public Integer getRankAfterFirstQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankAfterSecondQuarter", resultDecimals=0, ordinal=5)
+    public Integer getRankAfterSecondQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankAfterThirdQuarter", resultDecimals=0, ordinal=6)
+    public Integer getRankAfterThirdQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankAverageAcrossFirstThreeQuarters", resultDecimals=2, ordinal=7)
+    public Double getRankAverageAcrossFirstThreeQuarters();
+    
+    @Statistic(messageKey="AbsoluteRankRhumbLineBasedAfterFirstQuarter", resultDecimals=0, ordinal=8)
+    public Integer getRankRhumbLineBasedAfterFirstQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankRhumbLineBasedAfterSecondQuarter", resultDecimals=0, ordinal=9)
+    public Integer getRankRhumbLineBasedAfterSecondQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankRhumbLineBasedAfterThirdQuarter", resultDecimals=0, ordinal=10)
+    public Integer getRankRhumbLineBasedAfterThirdQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankRhumbLineBasedAverageAcrossFirstThreeQuarters", resultDecimals=2, ordinal=11)
+    public Double getRankRhumbLineBasedAverageAcrossFirstThreeQuarters();
+    
+    @Statistic(messageKey="AbsoluteRankPredictionErrorAfterFirstQuarter", resultDecimals=2, ordinal=12)
+    public Double getRankPredictionErrorAfterFirstQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankPredictionErrorAfterSecondQuarter", resultDecimals=2, ordinal=13)
+    public Double getRankPredictionErrorAfterSecondQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankPredictionErrorAfterThirdQuarter", resultDecimals=2, ordinal=14)
+    public Double getRankPredictionErrorAfterThirdQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankPredictionErrorAcrossFirstThreeQuarters", resultDecimals=2, ordinal=15)
+    public Double getRankPredictionErrorAcrossFirstThreeQuarters();
+    
+    @Statistic(messageKey="AbsoluteRankPredictionErrorRhumbLineBasedAfterFirstQuarter", resultDecimals=2, ordinal=16)
+    public Double getRankPredictionErrorRhumbLineBasedAfterFirstQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankPredictionErrorRhumbLineBasedAfterSecondQuarter", resultDecimals=2, ordinal=17)
+    public Double getRankPredictionErrorRhumbLineBasedAfterSecondQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankPredictionErrorRhumbLineBasedAfterThirdQuarter", resultDecimals=2, ordinal=18)
+    public Double getRankPredictionErrorRhumbLineBasedAfterThirdQuarter();
+    
+    @Statistic(messageKey="AbsoluteRankPredictionErrorRhumbLineBasedAcrossFirstThreeQuarters", resultDecimals=2, ordinal=19)
+    public Double getRankPredictionErrorRhumbLineBasedAcrossFirstThreeQuarters();
     
     @Statistic(messageKey="TimeSpentInSeconds", resultDecimals=0, ordinal=4)
     public Long getTimeTakenInSeconds();

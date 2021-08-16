@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="scan_qr">"Optično branje QR-kode"</string>
+    <string name="scan_hint">"QR-kodo najdete na potrditvi udeležbe"</string>
+    <string name="no_qr_code">"Ali nimate QR-kode?"</string>
+</resources>

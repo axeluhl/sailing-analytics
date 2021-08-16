@@ -160,6 +160,20 @@
          unpack="false"/>
          
    <plugin
+         id="com.sap.db.jdbc"
+         download-size="0"
+         install-size="0"
+         version="2.8.14.2aca589e94650e4404d4796d8c0f01f2eb336f1c"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.db.jdbc.source"
+         download-size="0"
+         install-size="0"
+         version="2.8.14.2aca589e94650e4404d4796d8c0f01f2eb336f1c"
+         unpack="false"/>
+
+   <plugin
          id="com.chargebee.chargebee-java"
          download-size="0"
          install-size="0"

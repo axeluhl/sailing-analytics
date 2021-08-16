@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.windimport.expedition;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ import com.sap.sse.common.Util;
 public class WindImporter extends AbstractWindImporter {
 
     @Override
-    protected WindSource getWindSource(UploadRequest uploadRequest) {
+    protected WindSource getDefaultWindSource(UploadRequest uploadRequest) {
         WindSource windSource;
         if (uploadRequest.boatId == null) {
             windSource = new WindSourceImpl(WindSourceType.EXPEDITION);
@@ -31,16 +32,18 @@ public class WindImporter extends AbstractWindImporter {
     }
 
     @Override
-    protected Iterable<Wind> importWind(Map<InputStream, String> streamsWithFilenames) throws IOException, FormatNotSupportedException {
-        final List<Wind> result = new ArrayList<>();
+    protected Map<WindSource, Iterable<Wind>> importWind(WindSource defaultWindSource, Map<InputStream, String> streamsWithFilenames) throws IOException, FormatNotSupportedException {
+        final List<Wind> windFixes = new ArrayList<>();
         for (final Map.Entry<InputStream, String> entry : streamsWithFilenames.entrySet()) {
             CompressedStreamsUtil.handlePotentiallyCompressedFiles(entry.getValue(), entry.getKey(), new ExpeditionImportFileHandler() {
                 @Override
                 protected void handleExpeditionFile(String fileName, InputStream inputStream) throws IOException {
-                    Util.addAll(WindLogParser.importWind(inputStream), result);
+                    Util.addAll(WindLogParser.importWind(inputStream), windFixes);
                 }
             });
         }
+        final Map<WindSource, Iterable<Wind>> result = new HashMap<>();
+        result.put(defaultWindSource, windFixes);
         return result;
     }
 }

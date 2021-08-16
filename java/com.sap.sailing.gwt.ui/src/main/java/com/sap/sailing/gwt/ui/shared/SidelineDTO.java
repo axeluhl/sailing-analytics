@@ -8,7 +8,8 @@ import com.sap.sse.security.shared.dto.NamedDTO;
 public class SidelineDTO extends NamedDTO {
     private List<MarkDTO> marks;
 
-    SidelineDTO() {}
+    @Deprecated
+    SidelineDTO() {} // for GWT RPC serialization only
 
     public SidelineDTO(String name, List<MarkDTO> marks) {
         super(name);

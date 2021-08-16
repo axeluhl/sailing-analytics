@@ -23,8 +23,12 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,11 +40,14 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.OperationsToMasterSendingQueue;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
@@ -49,6 +56,7 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
+import com.sap.sse.replication.interfaces.impl.ReplicationStatusImpl;
 import com.sap.sse.replication.persistence.MongoObjectFactory;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
@@ -145,6 +153,44 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      * constructed from equal string literals.
      */
     private final Object outboundBufferMonitor = ""+new Random().nextDouble();
+    
+    /**
+     * Allow queued outbound replication messages to consume at most 1/4 of the maximum amount of memory available to this VM.
+     */
+    private static final long SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES = Runtime.getRuntime().maxMemory() / 4;
+    
+    /**
+     * All outbound sending jobs go through this queue where a thread removing from this queue picks them up and sends
+     * them out. The order is first-in, first-out (FIFO). The total size of the {@code byte[]} objects contained in the
+     * queue is counted in {@link #totalSendJobsSize}. If the {@link #SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES} is exceeded,
+     * messages are dropped, which is logged as a {@link Level#SEVERE} error.<p>
+     * 
+     * Any significant queue-up may be expected if...
+     * <ul>
+     * <li>...writing to the RabbitMQ queue connected to the fanout exchange is slower than new replication
+     * content is produced; in this case the network simply is too slow to support the replication scenario at hand.</li>
+     * <li>...the connection to the RabbitMQ queue connected to the fanout exchange is temporarily or permanently interrupted;
+     * for temporary interruptions there is hope that re-connecting attempts succeed before the buffer runs over and that after
+     * successfully re-connecting the buffer can be send out message by message. For connections interrupted permanently a
+     * buffer overrun has to be expected at some point, and it will be better to at least keep the master healthy instead of
+     * letting it run into an {@link OutOfMemoryError} because the buffer eats up all available heap space.</li>
+     * </ul>
+     */
+    private final BlockingDeque<Pair<byte[], List<Class<?>>>> sendJobQueue;
+    
+    /**
+     * Each time a {@code byte[]} is added to the {@link #sendJobQueue}, this value is increased by the length of that array;
+     * conversely, each type a {@code byte[]} is removed from the {@link #sendJobQueue}, this value is decreased accordingly.
+     * This value can be compared to {@link #SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES} to decide whether or not more send jobs
+     * can be accepted for queuing.
+     */
+    private final AtomicLong totalSendJobsSize;
+    
+    /**
+     * The time between attempts to re-send outbound messages to the RabbitMQ exchange including re-connecting to the
+     * fanout exchange with a new channel.
+     */
+    private static final Duration DURATION_BETWTEEN_SEND_RETRIES = Duration.ONE_SECOND.times(5);
 
     /**
      * Sending operations as serialized Java objects using binary RabbitMQ messages comes at an overhead. To reduce the
@@ -307,21 +353,24 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      */
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort,
             final ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider)
-            throws IOException {
+            throws Exception {
         this(/* defaultMongoObjectFactory */ Optional.empty(), exchangeName, exchangeHost, exchangePort,
                 replicationInstancesManager, replicablesProvider);
     }
 
     public ReplicationServiceImpl(Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName,
             String exchangeHost, int exchangePort, ReplicationInstancesManager replicationInstancesManager,
-            ReplicablesProvider replicablesProvider) throws IOException {
+            ReplicablesProvider replicablesProvider) throws Exception {
         this(/* replicasToAssumeConnectedToThisMaster */ null, optionalMongoObjectFactory,
                 exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
     }
 
     public ReplicationServiceImpl(Iterable<ReplicaDescriptor> replicasToAssumeConnectedToThisMaster,
             Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName, String exchangeHost, int exchangePort,
-            ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws IOException {
+            ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws Exception {
+        this.sendJobQueue = new LinkedBlockingDeque<>();
+        this.totalSendJobsSize = new AtomicLong(0);
+        createSendJob().start();
         this.mongoObjectFactory = optionalMongoObjectFactory;
         this.replicationStartingListeners = new HashSet<>();
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
@@ -365,31 +414,36 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         return replicator;
     }
 
-    private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
+    private Channel createMasterChannelAndDeclareFanoutExchange() throws Exception {
         Channel result = createMasterChannel();
+        if (!Util.hasLength(exchangeName)) {
+            logger.severe("Replica seems registering at this master, but this master's exchange name is \""+exchangeName+
+                    "\". Failing with an exception.");
+            throw new IllegalStateException("Master's outbound replication exchange name is "+exchangeName+" but must be non-empty; "+
+                    "consider setting the REPLICATION_CHANNEL environment variable.");
+        }
         result.exchangeDeclare(exchangeName, "fanout");
         logger.info("Created fanout exchange " + exchangeName + " successfully.");
         return result;
     }
 
     @Override
-    public Channel createMasterChannel() throws IOException, ConnectException {
-        final ConnectionFactory connectionFactory = new ConnectionFactory();
+    public Channel createMasterChannel() throws Exception {
+        final ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         connectionFactory.setHost(exchangeHost);
         if (exchangePort != 0) {
             connectionFactory.setPort(exchangePort);
         }
-        Channel result = null;
         try {
-            result = connectionFactory.newConnection().createChannel();
-        } catch (ConnectException ex) {
+            final Channel result = connectionFactory.newConnection().createChannel();
+            logger.info("Connected to " + connectionFactory.getHost() + ":" + connectionFactory.getPort());
+            return result;
+        } catch (ConnectException | TimeoutException ex) {
             // make sure to log something meaningful
             logger.severe("Could not connect to messaging queue on " + connectionFactory.getHost() + ":"
                     + connectionFactory.getPort() + "/" + exchangeName);
             throw ex;
         }
-        logger.info("Connected to " + connectionFactory.getHost() + ":" + connectionFactory.getPort());
-        return result;
     }
 
     private Iterable<Replicable<?, ?>> getReplicables() {
@@ -401,11 +455,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     }
     
     @Override
-    public void registerReplica(ReplicaDescriptor replica) throws IOException {
+    public void registerReplica(ReplicaDescriptor replica) throws Exception {
+        // due to different replicables to be replicated for replica, ensure that all
+        // replicables to be replicated to replica are actually observed:
+        addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
         synchronized (replicationInstancesManager) {
-            // due to different replicables to be replicated for replica, ensure that all
-            // replicables to be replicated to replica are actually observed:
-            addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
             // need to establish the outbound messaging channel only when this is the first replica to be added:
             if (!replicationInstancesManager.hasReplicas()) {
                 synchronized (this) {
@@ -600,18 +654,100 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                 bytesToSend = null;
                 classesOfOperationsToSend = null;
             }
-        }
-        if (doSend) {
-            try {
-                broadcastOperations(bytesToSend, classesOfOperationsToSend);
-                logger.fine("Successfully handed " + classesOfOperationsToSend.size() + " operations to broadcaster");
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error trying to replicate " + classesOfOperationsToSend.size()
-                        + " operations", e);
+            if (doSend) {
+                if (totalSendJobsSize.get() < SEND_JOB_QUEUE_SIZE_THRESHOLD_IN_BYTES) {
+                    sendJobQueue.add(new Pair<>(bytesToSend, classesOfOperationsToSend));
+                    final long newTotalSendJobsSize = totalSendJobsSize.addAndGet(bytesToSend.length);
+                    logger.fine("Successfully handed " + classesOfOperationsToSend.size() +
+                            " operations to broadcaster; new outbound send queue length "+sendJobQueue.size()+
+                            " ("+newTotalSendJobsSize+"B)");
+                } else {
+                    logger.severe("Queue for outbound replication operations full ("+totalSendJobsSize.get()+
+                            "B. Dropping operations buffer with size "+bytesToSend.length+"B");
+                }
             }
         }
     }
+    
+    /**
+     * Constructs the thread assigned to {@link #sendJob}, which is responsible for watching the {@link #sendJobQueue},
+     * {@link BlockingDeque#take() taking} element from the queue and trying to send them to the {@link #exchangeHost}/{@link #exchangePort}
+     * to the exchange named as specified by the field {@link #exchangeName}, using the {@link #masterChannel}. If this fails,
+     * a re-try strategy is applied which includes trying to re-establish a connection to the fanout exchange using the
+     * {@link #createMasterChannelAndDeclareFanoutExchange()} method.<p>
+     * 
+     * If sending a message succeeded, the {@link #totalSendJobsSize} counter is decreased by the length of the message sent.
+     * Furthermore, the {@link #replicationInstancesManager} is {@link ReplicationInstancesManager#log(List, long) updated} with
+     * the statistics about the types of operations sent.
+     * 
+     * @return the thread to assign to {@link #sendJob}
+     */
+    private Thread createSendJob() {
+        final Thread result = new Thread("Replicator send job for exchange "+exchangeHost+":"+exchangePort+"/"+exchangeName) {
+            @Override
+            public void run() {
+                logger.info("Thread "+getName()+" started.");
+                while (true) {
+                    try {
+                        logger.fine("Taking a message from the sendJobQueue");
+                        final Pair<byte[], List<Class<?>>> messageAndTypesOfOperations = sendJobQueue.take();
+                        logger.fine(()->"Took a message with size "+messageAndTypesOfOperations.getA().length+"B from the sendJobQueue");
+                        boolean delivered = false;
+                        do {
+                            try {
+                                logger.fine(()->"Trying to send message with size "+messageAndTypesOfOperations.getA().length+"B");
+                                broadcastOperations(messageAndTypesOfOperations.getA(), messageAndTypesOfOperations.getB());
+                                delivered = true;
+                                final long newTotalSendJobsSize = totalSendJobsSize.addAndGet(-messageAndTypesOfOperations.getA().length);
+                                logger.fine(()->"New send queue size "+sendJobQueue.size()+" ("+newTotalSendJobsSize+"B)");
+                            } catch (Exception ioe) {
+                                logger.log(Level.WARNING, "Exception trying to send out replication operations to RabbitMQ exchange "+
+                                        exchangeHost+":"+exchangePort+"/"+exchangeName+
+                                        "; trying to re-establish a channel to the fanout exchange in "+DURATION_BETWTEEN_SEND_RETRIES,
+                                        ioe);
+                                Thread.sleep(DURATION_BETWTEEN_SEND_RETRIES.asMillis());
+                                logger.info("Creating new channel to exchange in order to re-try sending");
+                                try {
+                                    masterChannel = createMasterChannelAndDeclareFanoutExchange();
+                                    logger.info("Channel established; retrying now.");
+                                } catch (Exception e) {
+                                    logger.log(Level.SEVERE, "Re-establishing a connection to the fan-out exchange at "+
+                                            exchangeHost+":"+exchangePort+"/"+exchangeName+
+                                            " didn't work. Will try to send again through old channel which will probably fail, then sleep and try again.",
+                                            e);
+                                }
+                            }
+                        } while (!delivered);
+                    } catch (InterruptedException e) {
+                        logger.log(Level.WARNING, "Outbound replication message sender interrupted. Continuing...");
+                    }
+                }
+            }
+        };
+        result.setDaemon(true);
+        return result;
+    }
 
+    /**
+     * Bytes arriving here have gone through Java object serialization and compession, probably also grouping based on
+     * time delays, and are supposed to be sent out immediately. During sending, exceptions may occur, e.g., due to an
+     * interrupted connection, the message queuing system being temporarily unavailable or some form of re-configuration
+     * or scaling that is taking place. In order not to lose such messages, a FIFO queue exists which keeps track of all
+     * the {@code bytesToSend / classesOfOperationsToSend} pairs passed as arguments to this method, with a separate
+     * thread responsible for sending those messages out.
+     * <p>
+     * 
+     * The queue/thread combination may reject the submission of a message because the messages queued in it already
+     * consume too much memory. In this case, outbound replication has to be considered stopped. We can log this state as a
+     * {@code SEVERE} exception, and we can keep trying to re-establish connectivity, but the question is how useful it will
+     * be if connectivity can eventually be restored after so many messages have been lost. Replicas will have to be considered
+     * inconsistent from this moment on and should be re-started, at least again receiving a new initial load, to transition
+     * into a consistent state again.
+     * <p>
+     * 
+     * <b>Precondition:</b> The caller must have obtained the object monitor on {@link #outboundBufferMonitor} using a
+     * {@code synchronized} block.
+     */
     private void broadcastOperations(byte[] bytesToSend, List<Class<?>> classesOfOperationsToSend) throws IOException {
         logger.fine("broadcasting " + classesOfOperationsToSend.size() + " operations as " + bytesToSend.length
                 + " bytes");
@@ -643,8 +779,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      * replicas described in the {@code master} descriptor has completed.
      */
     @Override
-    public void startToReplicateFrom(final ReplicationMasterDescriptor master)
-            throws IOException, ClassNotFoundException, InterruptedException {
+    public void startToReplicateFrom(final ReplicationMasterDescriptor master) throws Exception {
         if (initialLoadChannels.containsKey(master)) {
             logger.warning("An initial load from "+master+" is already running, replicating the following replicables: "+
                             initialLoadChannels.get(master).getReplicables()+". Not starting a second time.");
@@ -740,10 +875,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     /**
      * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
-    private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException,
-            ClassNotFoundException {
-        URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(),
-                ServerInfo.getBuildVersion());
+    private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws Exception {
+        URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(), ServerInfo.getBuildVersion());
         logger.info("Replication registration request URL: "+replicationRegistrationRequestURL);
         final URLConnection registrationRequestConnection = HttpUrlConnectionHelper
                 .redirectConnectionWithBearerToken(replicationRegistrationRequestURL, /* HTTP method */ "POST", master.getBearerToken());

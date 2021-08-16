@@ -108,7 +108,16 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
      */
     private void addKnotSpeedFromPropertyToMap(Map<Speed, Speed> speedPredictionMap, Speed tws, String twsKey,
             String jsonPropertyName, JSONObject jsonObject) {
-        final Number value = (Number) ((JSONObject) jsonObject.get(jsonPropertyName)).get(twsKey);
+        final JSONObject speedPredictions = (JSONObject) jsonObject.get(jsonPropertyName);
+        final Object speedPredictionObject = speedPredictions.get(twsKey);
+        final Number value;
+        if (speedPredictionObject instanceof Number) {
+            value = (Number) speedPredictionObject;
+        } else if (speedPredictionObject instanceof JSONObject) {
+            value = Double.POSITIVE_INFINITY;
+        } else {
+            value = 0.0;
+        }
         speedPredictionMap.put(tws, new KnotSpeedImpl(value == null ? Double.POSITIVE_INFINITY : value.doubleValue()));
     }
 

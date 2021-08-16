@@ -11,7 +11,7 @@ public class StrippedRoleDefinitionDTO extends RoleDefinitionImpl {
 
     @Deprecated
     StrippedRoleDefinitionDTO() {} // for GWT serialization only
-    
+
     public StrippedRoleDefinitionDTO(UUID id, String name, Iterable<WildcardPermission> permissions) {
         super(id, name, permissions);
     }

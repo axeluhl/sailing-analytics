@@ -1069,7 +1069,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             throws MalformedURLException, IOException, InterruptedException {
         Leaderboard leaderBoard = getService().getLeaderboardByName(leaderboardName);
         Response result = null;
-        if(leaderBoard == null) {
+        if (leaderBoard == null) {
             result = Response.status(Status.NOT_FOUND)
                     .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();

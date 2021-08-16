@@ -190,7 +190,11 @@ implements UserDataProvider {
         }
 
         protected Database getDatabaseConfiguration() {
-            return databaseConfiguration == null ? getLandscape().getDatabase(getRegion(), getDatabaseName()) : databaseConfiguration;
+            return isDatabaseConfigurationSet() ? databaseConfiguration : getLandscape().getDatabase(getRegion(), getDatabaseName());
+        }
+        
+        protected boolean isDatabaseConfigurationSet() {
+            return databaseConfiguration != null;
         }
 
         @Override

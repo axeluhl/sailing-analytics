@@ -221,7 +221,6 @@ public class RegattaDetailsComposite extends Composite {
                 return series.getMaximumNumberOfDiscards() == null ? "" : (""+series.getMaximumNumberOfDiscards());
             }
         };
-
         TextColumn<SeriesDTO> racesColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -242,7 +241,6 @@ public class RegattaDetailsComposite extends Composite {
                 return result;
             }
         };
-        
         TextColumn<SeriesDTO> fleetsColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -260,7 +258,6 @@ public class RegattaDetailsComposite extends Composite {
                 return result;
             }
         };
-
         TextColumn<SeriesDTO> discardsColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -283,7 +280,6 @@ public class RegattaDetailsComposite extends Composite {
                 return result;
             }
         };
-
         final AccessControlledActionsColumn<SeriesDTO, SeriesConfigImagesBarCell> actionsColumn = create(
                 new SeriesConfigImagesBarCell(stringMessages), userService, series -> regatta);
         actionsColumn.addAction(SeriesConfigImagesBarCell.ACTION_EDIT, UPDATE,
@@ -302,11 +298,11 @@ public class RegattaDetailsComposite extends Composite {
                             @Override
                             public void onSuccess(Void result) {
                                 presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                             }
                         }));
             }
         });
-        
         table.addColumn(seriesNameColumn, stringMessages.series());
         table.addColumn(isMedalSeriesColumn, stringMessages.medalSeries());
         table.addColumn(racesColumn, stringMessages.races());
@@ -318,7 +314,6 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
         table.addColumn(maximumNumberOfDiscardsColumn, stringMessages.maximumNumberOfDiscards());
         table.addColumn(actionsColumn, stringMessages.actions());
-        
         return table;
     }
     
@@ -410,6 +405,7 @@ public class RegattaDetailsComposite extends Composite {
                                         @Override
                                         public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
                                             presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                            presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                         }
                                     });
                         }
@@ -432,6 +428,7 @@ public class RegattaDetailsComposite extends Composite {
                             @Override
                             public void onSuccess(Void result) {
                                 presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                             }
                         });
             }

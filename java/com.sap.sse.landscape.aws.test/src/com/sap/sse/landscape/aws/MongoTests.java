@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.net.InetAddress;
 import java.net.URISyntaxException;
@@ -98,12 +99,69 @@ public class MongoTests {
             exportFrom.getCollection("C2").insertOne(new Document("c", "d"));
             exportFrom.getCollection("C2").insertOne(new Document("e", "f"));
             exportFrom.createCollection("C3"); // force an empty C3 collection
-        CopyAndCompareMongoDatabase.builder()
+            CopyAndCompareMongoDatabase.builder()
                 .setSourceDatabase(new DatabaseImpl(mongoReplicaSet, dbName))
                 .setTargetDatabase(new DatabaseImpl(mongoProcess, dbName))
                 .build().run();
+            // the "assertion" is that this terminates normally, without exception, which happens only if
+            // the import was successful and showed no diff
         } finally {
             mongoProcess.getMongoDatabase(dbName).drop();
+            mongoReplicaSet.getMongoDatabase(dbName).drop();
+        }
+    }
+
+    @Test
+    public void testDatabaseArchivingWithPreviousContentInTargetWithoutDropping() throws Exception {
+        final String dbName = "importtest"+new Random().nextInt();
+        final MongoDatabase exportTo = mongoProcess.getMongoDatabase(dbName);
+        try { 
+            final MongoDatabase exportFrom = mongoReplicaSet.getMongoDatabase(dbName);
+            exportFrom.drop();
+            exportTo.drop();
+            exportTo.getCollection("C4").insertOne(new Document("x", "y")); // an extra record that shall spoil the comparison after archiving without dropping
+            exportFrom.getCollection("C1").insertOne(new Document("a", "b"));
+            exportFrom.getCollection("C2").insertOne(new Document("c", "d"));
+            exportFrom.getCollection("C2").insertOne(new Document("e", "f"));
+            exportFrom.createCollection("C3"); // force an empty C3 collection
+            try {
+                CopyAndCompareMongoDatabase.builder()
+                    .setSourceDatabase(new DatabaseImpl(mongoReplicaSet, dbName))
+                    .setTargetDatabase(new DatabaseImpl(mongoProcess, dbName))
+                    .build().run();
+                fail("Expected the DB comparison to fail with an IllegalStateException due to different hashes");
+            } catch (IllegalStateException e) {
+                assertTrue(e.getMessage().contains("hashes are different"));
+            }
+        } finally {
+            exportTo.drop();
+            mongoReplicaSet.getMongoDatabase(dbName).drop();
+        }
+    }
+
+    @Test
+    public void testDatabaseArchivingWithPreviousContentInTargetWithDropping() throws Exception {
+        final String dbName = "importtest"+new Random().nextInt();
+        final MongoDatabase exportTo = mongoProcess.getMongoDatabase(dbName);
+        try { 
+            final MongoDatabase exportFrom = mongoReplicaSet.getMongoDatabase(dbName);
+            exportFrom.drop();
+            exportTo.drop();
+            exportTo.getCollection("C1").insertOne(new Document("x", "y")); // an already existing collection that without dropping would cause a MongoDB command exception
+            exportTo.getCollection("C4").insertOne(new Document("x", "y")); // an extra record that shall spoil the comparison after archiving without dropping
+            exportFrom.getCollection("C1").insertOne(new Document("a", "b"));
+            exportFrom.getCollection("C2").insertOne(new Document("c", "d"));
+            exportFrom.getCollection("C2").insertOne(new Document("e", "f"));
+            exportFrom.createCollection("C3"); // force an empty C3 collection
+            CopyAndCompareMongoDatabase.builder()
+                .dropTargetFirst(true)
+                .setSourceDatabase(new DatabaseImpl(mongoReplicaSet, dbName))
+                .setTargetDatabase(new DatabaseImpl(mongoProcess, dbName))
+                .build().run();
+            // the "assertion" is that this terminates normally, without exception, which happens only if
+            // the import was successful and showed no diff
+        } finally {
+            exportTo.drop();
             mongoReplicaSet.getMongoDatabase(dbName).drop();
         }
     }

@@ -18,8 +18,8 @@ public class SimpleCompetitorDTO extends NamedDTO implements DTO, Serializable, 
     private String twoLetterIsoCountryCode;
     private String flagImageURL;
 
-    protected SimpleCompetitorDTO() {
-    }
+    @Deprecated
+    SimpleCompetitorDTO() {} // for GWT RPC serialization only
     
     @GwtIncompatible
     public SimpleCompetitorDTO(Competitor competitor) {

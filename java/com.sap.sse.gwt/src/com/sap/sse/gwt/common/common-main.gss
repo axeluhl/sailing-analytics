@@ -25,6 +25,10 @@
 .buttonprimary {
   background-color: #008fcc;
 }
+.buttonprimary:disabled {
+  cursor: not-allowed;
+  background: #cfcfcf;
+}
 .buttonprimary:hover {
   color: #fff;
   background-color: #0081b8;
