@@ -111,7 +111,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             exportBoatClasses(racingEventService, connection);
             exportIrms(racingEventService, connection);
             exportScoringSchemes(racingEventService, connection);
-            final Set<Regatta> regattasToExport = getRegattasToExport(racingEventService, leaderboardGroupIds, eventIds);
+            final Iterable<Regatta> regattasToExport = getRegattasToExport(racingEventService, leaderboardGroupIds, eventIds);
             exportRaces(racingEventService, regattasToExport, connection);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Problem exporting data to HANA", e);
@@ -121,11 +121,13 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         return Response.ok().build();
     }
 
-    private Set<Regatta> getRegattasToExport(RacingEventService racingEventService, List<String> leaderboardGroupIds, List<String> eventIds) {
+    private Iterable<Regatta> getRegattasToExport(RacingEventService racingEventService, List<String> leaderboardGroupIds, List<String> eventIds) {
         final Set<LeaderboardGroup> leaderboardGroups = new HashSet<>();
-        final Set<Regatta> result = new HashSet<>();
+        final Iterable<Regatta> result;
+        boolean atLeastOneIdProvided = false;
         if (leaderboardGroupIds != null) {
             for (final String leaderboardGroupIdAsString : leaderboardGroupIds) {
+                atLeastOneIdProvided = true;
                 try {
                     leaderboardGroups.add(racingEventService.getLeaderboardGroupByID(UUID.fromString(leaderboardGroupIdAsString)));
                 } catch (IllegalArgumentException e) {
@@ -135,6 +137,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         }
         if (eventIds != null) {
             for (final String eventIdAsString : eventIds) {
+                atLeastOneIdProvided = true;
                 try {
                     final Event event = racingEventService.getEvent(UUID.fromString(eventIdAsString));
                     Util.addAll(event.getLeaderboardGroups(), leaderboardGroups);
@@ -143,12 +146,18 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                 }
             }
         }
-        for (final LeaderboardGroup leaderboardGroup : leaderboardGroups) {
-            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard.getLeaderboardType().isRegattaLeaderboard()) {
-                    result.add(((RegattaLeaderboard) leaderboard).getRegatta());
+        if (atLeastOneIdProvided) {
+            final Set<Regatta> resultSet = new HashSet<>();
+            for (final LeaderboardGroup leaderboardGroup : leaderboardGroups) {
+                for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                    if (leaderboard.getLeaderboardType().isRegattaLeaderboard()) {
+                        resultSet.add(((RegattaLeaderboard) leaderboard).getRegatta());
+                    }
                 }
             }
+            result = resultSet;
+        } else {
+            result = racingEventService.getAllRegattas();
         }
         return result;
     }
@@ -175,7 +184,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
         insertBoatClasses.executeBatch();
     }
 
-    private void exportRaces(RacingEventService racingEventService, Set<Regatta> regattasToExport, Connection connection) throws SQLException {
+    private void exportRaces(RacingEventService racingEventService, Iterable<Regatta> regattasToExport, Connection connection) throws SQLException {
         final TimePoint now = TimePoint.now();
         final InsertEventStatement insertEvents = new InsertEventStatement(connection);
         final InsertCompetitorStatement insertCompetitors = new InsertCompetitorStatement(connection);
