@@ -8,11 +8,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -85,14 +87,18 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     @POST
     @Produces("application/json;charset=UTF-8")
     @Path("clear")
-    public Response clear() throws SQLException, IOException {
+    public Response clear(
+            @FormParam("dbendpoint") String dbEndpoint,
+            @FormParam("dbuser") String dbUser,
+            @FormParam("dbpassword") String dbPassword) throws SQLException, IOException {
         SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
                 SecuredSecurityTypes.ServerActions.CAN_EXPORT_MASTERDATA,
                 new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         logger.info("Clearing HANA Cloud SAILING DB on behalf of user "+SecurityUtils.getSubject().getPrincipal());
-        final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
+        final Connection connection = HanaConnectionFactory.INSTANCE.getConnection(Optional.ofNullable(dbEndpoint),
+                Optional.ofNullable(dbUser), Optional.ofNullable(dbPassword));
         tryExecutingQueriesFromSqlResource("/cleartables.sql", connection);
-        logger.info("Done learing HANA Cloud SAILING DB on behalf of user "+SecurityUtils.getSubject().getPrincipal());
+        logger.info("Done clearing HANA Cloud SAILING DB on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         return Response.ok().build();
     }
 
@@ -100,14 +106,18 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     @Produces("application/json;charset=UTF-8")
     @Path("export")
     public Response export(@QueryParam("leaderboardgroupid") List<String> leaderboardGroupIds,
-            @QueryParam("eventid") List<String> eventIds) throws SQLException {
+            @QueryParam("eventid") List<String> eventIds,
+            @FormParam("dbendpoint") String dbEndpoint,
+            @FormParam("dbuser") String dbUser,
+            @FormParam("dbpassword") String dbPassword) throws SQLException {
         SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
                 SecuredSecurityTypes.ServerActions.CAN_EXPORT_MASTERDATA,
                 new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         logger.info("Exporting HANA Cloud SAILING DB content on behalf of user "+SecurityUtils.getSubject().getPrincipal());
         final RacingEventService racingEventService = getService();
         try {
-            final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
+            final Connection connection = HanaConnectionFactory.INSTANCE.getConnection(Optional.ofNullable(dbEndpoint),
+                    Optional.ofNullable(dbUser), Optional.ofNullable(dbPassword));
             exportBoatClasses(racingEventService, connection);
             exportIrms(racingEventService, connection);
             exportScoringSchemes(racingEventService, connection);
@@ -225,7 +235,7 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                             final Waypoint startWaypoint = trackedRace == null ? null : trackedRace.getRace().getCourse().getFirstWaypoint();
                             if (trackedRace != null) {
                                 for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                                    insertRaceStats.insertBatch(new InsertRaceStatsStatement.TrackedRaceWithCompetitorAndStartWaypoint(now, startWaypoint, null, trackedRace));
+                                    insertRaceStats.insertBatch(new InsertRaceStatsStatement.TrackedRaceWithCompetitorAndStartWaypoint(now, startWaypoint, competitor, trackedRace));
                                     final LinkedHashMap<TimePoint, Maneuver> timepointUniqueManeuvers = new LinkedHashMap<>();
                                     for (final Maneuver maneuver : trackedRace.getManeuvers(competitor, /* waitForLatest */ false)) {
                                         if (maneuver.getType() == ManeuverType.TACK || maneuver.getType() == ManeuverType.JIBE || maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
@@ -252,11 +262,15 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
     @POST
     @Produces("application/json;charset=UTF-8")
     @Path("createtables")
-    public Response createTables(@QueryParam("drop") boolean drop) throws SQLException, IOException {
+    public Response createTables(@QueryParam("drop") boolean drop,
+            @FormParam("dbendpoint") String dbEndpoint,
+            @FormParam("dbuser") String dbUser,
+            @FormParam("dbpassword") String dbPassword) throws SQLException, IOException {
         SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
                 SecuredSecurityTypes.ServerActions.CAN_EXPORT_MASTERDATA,
                 new TypeRelativeObjectIdentifier(ServerInfo.getName())));
-        final Connection connection = HanaConnectionFactory.INSTANCE.getConnection();
+        final Connection connection = HanaConnectionFactory.INSTANCE.getConnection(Optional.ofNullable(dbEndpoint),
+                Optional.ofNullable(dbUser), Optional.ofNullable(dbPassword));
         if (drop) {
             logger.info("Dropping HANA Cloud SAILING DB tables on behalf of user "+SecurityUtils.getSubject().getPrincipal());
             tryExecutingQueriesFromSqlResource("/droptables.sql", connection);

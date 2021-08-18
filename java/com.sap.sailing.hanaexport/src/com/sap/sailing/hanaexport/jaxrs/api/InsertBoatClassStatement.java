@@ -23,6 +23,5 @@ public class InsertBoatClassStatement extends AbstractPreparedInsertStatement<Bo
         setDouble(3, boatClass.getHullLength().getMeters());
         setDouble(4, boatClass.getHullBeam().getMeters());
         getPreparedStatement().setString(5, boatClass.getHullType().name());
-        getPreparedStatement().execute();
     }
 }
