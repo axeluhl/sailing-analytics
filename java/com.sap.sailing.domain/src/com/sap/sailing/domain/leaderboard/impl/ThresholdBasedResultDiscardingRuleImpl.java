@@ -21,6 +21,8 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -78,6 +80,12 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    @Override
+    public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
+                Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
         final Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
@@ -86,7 +94,7 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 if (raceColumn.isDiscardable()) {
                     sortedRaces.add(raceColumn);
-                    totalPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
+                    totalPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache));
                 }
             }
             result = new HashSet<RaceColumn>();

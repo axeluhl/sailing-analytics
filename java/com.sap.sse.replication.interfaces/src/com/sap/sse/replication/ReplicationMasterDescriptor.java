@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
@@ -48,7 +49,7 @@ public interface ReplicationMasterDescriptor {
      * Then, adds a consumer to the queue just created and starts consuming. The caller may keep calling
      * {@link QueueingConsumer#nextDelivery()} on the consumer returned in order to obtain the next message.
      */
-    QueueingConsumer getConsumer() throws IOException;
+    QueueingConsumer getConsumer() throws IOException, TimeoutException;
 
     String getExchangeName();
 
@@ -64,7 +65,7 @@ public interface ReplicationMasterDescriptor {
     /**
      * @return a RabbitMQ channel created with the replication connectivity parameters defined by this descriptor
      */
-    Channel createChannel() throws IOException;
+    Channel createChannel() throws IOException, TimeoutException;
 
     Iterable<Replicable<?, ?>> getReplicables();
 

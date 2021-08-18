@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -22,4 +23,8 @@ public interface ResultDiscardingRule extends Serializable {
      */
     Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint);
+
+    Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 }

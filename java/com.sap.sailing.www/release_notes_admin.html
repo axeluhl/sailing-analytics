@@ -44,6 +44,21 @@
 			<li>A problem with uninitialized race timings may have led to endless loops trying to identify a valid
 			    time range for wind sampling. This has been fixed now.</li>
 			<li>A Slovenian translation of the user interface has been added.</li>
+		        <li>The IOC code for "Russian Olympic Committee" is now available under the "ROC" abbreviation.</li>
+		        <li>Empty Igtimi WindBot messages, such as a COG message with no payload, no longer causes an uncaught
+		            exception but is now handled properly and logged accordingly. Other fixes in the same message now
+		            are processed as they should.</li>
+		        <li>After Igtimi changed their WebSocket implementation, we had to lower the heartbeat sending interval
+		            from 120s to 15s which now avoids connection interrupts.</li>
+		        <li>The <tt>/sailingserver/api/v2/leaderboards/{leaderboard-name}</tt> API now also delivers the
+		            <tt>currentSpeedOverGround-kts</tt> field if the competitor is not yet in the race.</li>
+		        <li>The <tt>/sailingserver/api/v1/regattas/{regattaName}/races/{raceName}/markpassings</tt> API method
+		            has been extended to also deliver the "raw" passing order (which can vary from the tracked rank, e.g.,
+		            because a handicap ranking metric is in use), as well as a hypothetical score that one gets by passing
+		            the passing order through the scoring scheme and applying penalties or score corrections. Furthermore,
+		            the IRM/MaxPointsReason is output. See
+		            <a href="/sailingserver/webservices/api/v1/raceMarkPassingsGetDoc.html">/sailingserver/webservices/api/v1/raceMarkPassingsGetDoc.html</a>
+		            for more details.</li>
                     </ul>
                     <h2 class="articleSubheadline">June 2021</h2>
                     <ul class="bulletList">

@@ -57,9 +57,11 @@ public class FixFactory {
                                     : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
                     final Type ft = Type.valueOf(fixType);
                     if (ft != null) {
-                        Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
-                        result.add(fix);
-                        fixIndex++;
+                        final Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
+                        if (fix != null) {
+                            result.add(fix);
+                            fixIndex++;
+                        }
                     }
                 }
             }
@@ -67,14 +69,20 @@ public class FixFactory {
         return result;
     }
     
+    /**
+     * @return {@code null} in case the fix parser cannot make sense of the {@code valuesPerSubindex}, e.g., because
+     *         it's empty.
+     */
     private Fix createFix(Sensor sensor, Type fixType, TimePoint timePoint, Map<Integer, Object> valuesPerSubindex) {
         try {
             Constructor<? extends Fix> constructor = fixType.getFixClass().getConstructor(TimePoint.class, Sensor.class, Map.class);
             Fix fix = constructor.newInstance(timePoint, sensor, valuesPerSubindex);
             return fix;
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            logger.log(Level.SEVERE, "Internal error trying to find fix constructor for fix type "+fixType+" with class "+fixType.getFixClass());
-            throw new RuntimeException(e);
+            logger.log(Level.SEVERE, "Internal error trying to find fix constructor for fix type "+
+                    fixType+" with class "+fixType.getFixClass()+" or problem creating fix from data "+valuesPerSubindex+": "+
+                    e.getMessage());
+            return null;
         }
     }
 }

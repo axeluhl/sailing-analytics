@@ -216,7 +216,6 @@ public class RegattaListComposite extends Composite {
         };
         competitorRegistrationTypeColumn.setSortable(true);
         columnSortHandler.setComparator(competitorRegistrationTypeColumn, (r1, r2)->r1.competitorRegistrationType.ordinal() - r2.competitorRegistrationType.ordinal());
-
         TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -281,7 +280,10 @@ public class RegattaListComposite extends Composite {
         // https://github.com/gwtproject/gwt/issues/9333
         // https://github.com/gwtproject/gwt/issues/9307
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), type,
-                regatta -> presenter.getRegattasRefresher().reloadAndCallFillAll(), stringMessages);
+                regatta -> {
+                    presenter.getRegattasRefresher().reloadAndCallFillAll();
+                    presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
+                }, stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 regattaDTO -> config.openOwnershipDialog(regattaDTO));
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
@@ -315,6 +317,7 @@ public class RegattaListComposite extends Composite {
             public void onSuccess(Void result) {
                 presenter.getRegattasRefresher().remove(regatta);
                 presenter.getRegattasRefresher().callAllFill();
+                presenter.getLeaderboardsRefresher().removeAll(leaderboard->Util.equalsWithNull(leaderboard.regattaName, regatta.getName()));
             }
         }));
     }
@@ -365,6 +368,7 @@ public class RegattaListComposite extends Composite {
                     @Override
                     public void onSuccess(Void result) {
                         presenter.getRegattasRefresher().reloadAndCallFillAll();
+                        presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                     }
                 }));
 
@@ -387,6 +391,7 @@ public class RegattaListComposite extends Composite {
                             @Override
                             public void onSuccess(Void result) {
                                 presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                 run(); // update next series if iterator has next element
                             }
                         }));
