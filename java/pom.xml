@@ -148,6 +148,7 @@
         <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
         <module>com.sap.sailing.server.interface</module>
+        <module>com.sap.sailing.server.gateway.interfaces</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
         <module>com.sap.sailing.shared.persistence</module>
