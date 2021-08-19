@@ -18,8 +18,8 @@ import java.util.UUID;
  * by this object shares its security service with the server where this object is constructed.<p>
  */
 public interface SailingServer {
-    Iterable<UUID> getLeaderboardGroupIds();
-    Iterable<UUID> getEventIds();
+    Iterable<UUID> getLeaderboardGroupIds() throws Exception;
+    Iterable<UUID> getEventIds() throws Exception;
     MasterDataImportResult importMasterData(SailingServer from, Iterable<UUID> leaderboardGroupIds);
     CompareServersResult compareServers(SailingServer a, Optional<SailingServer> b);
     void addRemoteServerReference(SailingServer referencedServer, Optional<Set<UUID>> eventIds);

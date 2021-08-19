@@ -50,8 +50,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.util.impl.UUIDHelper;
 
-@Path("/v1/leaderboardgroups")
+@Path(LeaderboardGroupsResource.V1_LEADERBOARDGROUPS)
 public class LeaderboardGroupsResource extends AbstractSailingServerResource {
+    public static final String IDENTIFIABLE = "/identifiable";
+    public static final String V1_LEADERBOARDGROUPS = "/v1/leaderboardgroups";
     protected static final String NAME_OR_UUID_PATH_PARAM = "nameOrUUID";
     protected static final String COPY_MEMBERS_AND_ROLES_QUERY_PARAM = "copyMembersAndRoles";
     protected static final String MIGRATE_BOATS_QUERY_PARAM = "migrateBoats";
@@ -104,7 +106,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
     }
 
     @GET
-    @Path("/identifiable")
+    @Path(IDENTIFIABLE)
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboardGroupsIdentifiable() {
         final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroup->{
