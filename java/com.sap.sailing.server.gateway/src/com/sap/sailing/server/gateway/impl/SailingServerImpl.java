@@ -24,8 +24,10 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.MasterDataImportResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
+import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
+import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
@@ -68,9 +70,11 @@ public class SailingServerImpl implements SailingServer {
     }
 
     @Override
-    public Iterable<UUID> getEventIds() {
-        // TODO Implement SailingServerImpl.getEventIds(...)
-        return null;
+    public Iterable<UUID> getEventIds() throws ClientProtocolException, IOException, ParseException {
+        final URL eventsUrl = new URL(baseUrl, GATEWAY_URL_PREFIX+EventsResource.V1_EVENTS);
+        final HttpGet getEvents = new HttpGet(eventsUrl.toString());
+        final JSONArray jsonResponse = (JSONArray) getJsonParsedResponse(getEvents);
+        return Util.map(jsonResponse, o->UUID.fromString(((JSONObject) o).get(EventBaseJsonSerializer.FIELD_ID).toString()));
     }
 
     @Override
