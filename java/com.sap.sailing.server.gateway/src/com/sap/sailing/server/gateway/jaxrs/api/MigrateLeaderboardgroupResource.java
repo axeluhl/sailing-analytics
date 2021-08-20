@@ -43,6 +43,7 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.server.gateway.deserialization.impl.RemoteSailingServerReferenceJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
+import com.sap.sailing.server.gateway.serialization.impl.MasterDataImportResultJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RemoteSailingServerReferenceJsonSerializer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -146,7 +147,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
      * From the leaderboardgroupsImported[].events[] paths extracts all event IDs that were imported during the master data import.
      */
     private Iterable<UUID> getIdsOfImportedEvents(JSONObject mdiResult) {
-        final JSONArray leaderboardgroupsImported = (JSONArray) mdiResult.get(MasterDataImportResource.LEADERBOARDGROUPS_IMPORTED);
+        final JSONArray leaderboardgroupsImported = (JSONArray) mdiResult.get(MasterDataImportResultJsonSerializer.LEADERBOARDGROUPS_IMPORTED);
         final Set<UUID> result = new HashSet<>();
         for (final Object lg : leaderboardgroupsImported) {
             for (final Object eventIdObject : (JSONArray) ((JSONObject) lg).get(LeaderboardGroupConstants.EVENTS)) {
@@ -225,13 +226,13 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             throws Exception {
         final StringJoiner form = new StringJoiner("&");
         form.add(MasterDataImportResource.REMOTE_SERVER_URL_FORM_PARAM + "=" + remoteServerHostAsString);
-        form.add(MasterDataImportResource.OVERRIDE_FORM_PARAM + "=" + override);
-        form.add(MasterDataImportResource.COMPRESS_FORM_PARAM + "=true");
-        form.add(MasterDataImportResource.EXPORT_WIND_FORM_PARAM + "=true");
-        form.add(MasterDataImportResource.EXPORT_DEVICE_CONFIGS_FORM_PARAM + "=false");
-        form.add(MasterDataImportResource.EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM + "=true");
+        form.add(MasterDataImportResultJsonSerializer.OVERRIDE_FORM_PARAM + "=" + override);
+        form.add(MasterDataImportResultJsonSerializer.COMPRESS_FORM_PARAM + "=true");
+        form.add(MasterDataImportResultJsonSerializer.EXPORT_WIND_FORM_PARAM + "=true");
+        form.add(MasterDataImportResultJsonSerializer.EXPORT_DEVICE_CONFIGS_FORM_PARAM + "=false");
+        form.add(MasterDataImportResultJsonSerializer.EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM + "=true");
         form.add(MasterDataImportResource.REMOTE_SERVER_BEARER_TOKEN_FORM_PARAM + "=" + URLEncoder.encode(remoteServerBearerToken, "utf-8"));
-        form.add(addLeaderboardGroupIdsToStringJoiner(MasterDataImportResource.LEADERBOARDGROUP_UUID_FORM_PARAM, leaderboardGroupIds).toString());
+        form.add(addLeaderboardGroupIdsToStringJoiner(MasterDataImportResultJsonSerializer.LEADERBOARDGROUP_UUID_FORM_PARAM, leaderboardGroupIds).toString());
         return postFormAndReturnJsonAndResponseCode(dedicatedServerHostAsString, dedicatedServerBearerToken, MDI_PATH, form);
     }
 

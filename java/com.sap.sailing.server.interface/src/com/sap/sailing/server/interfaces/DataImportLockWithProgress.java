@@ -28,8 +28,6 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * server reached with the initial import request. The {@link SetDataImportDeleteProgressFromMapTimer} operation is
  * replicated so that the map entry is also deleted on the other servers.
  * 
- * 
- * 
  * @author Frederik Petersen (D054528)
  * 
  */

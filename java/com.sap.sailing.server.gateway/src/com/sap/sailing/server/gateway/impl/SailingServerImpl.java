@@ -5,29 +5,40 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import org.apache.http.HttpRequest;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.server.gateway.deserialization.impl.DataImportProgressJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.MasterDataImportResultJsonDeserializer;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.MasterDataImportResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
+import com.sap.sailing.server.gateway.jaxrs.api.MasterDataImportResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MasterDataImportResultJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
@@ -40,6 +51,16 @@ public class SailingServerImpl implements SailingServer {
         super();
         this.baseUrl = baseUrl;
         this.bearerToken = bearerToken;
+    }
+
+    @Override
+    public URL getBaseUrl() {
+        return baseUrl;
+    }
+
+    @Override
+    public String getBearerToken() {
+        return bearerToken;
     }
 
     @Override
@@ -78,9 +99,35 @@ public class SailingServerImpl implements SailingServer {
     }
 
     @Override
-    public MasterDataImportResult importMasterData(SailingServer from, Iterable<UUID> leaderboardGroupIds) {
-        // TODO Implement SailingServerImpl.importMasterData(...)
-        return null;
+    public MasterDataImportResult importMasterData(SailingServer from, Iterable<UUID> leaderboardGroupIds,
+            boolean override, boolean compress, boolean exportWind, boolean exportDeviceConfigs,
+            boolean exportTrackedRacesAndStartTracking, Optional<UUID> progressTrackingUuid) throws ClientProtocolException, IOException, ParseException {
+        final URL mdiUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + MasterDataImportResource.V1_MASTERDATAIMPORT);
+        final List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair(MasterDataImportResource.REMOTE_SERVER_URL_FORM_PARAM, from.getBaseUrl().toString()));
+        params.add(new BasicNameValuePair(MasterDataImportResource.REMOTE_SERVER_BEARER_TOKEN_FORM_PARAM, from.getBearerToken()));
+        for (final UUID leaderboardGroupId : leaderboardGroupIds) {
+            params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.LEADERBOARDGROUP_UUID_FORM_PARAM, leaderboardGroupId.toString()));
+        }
+        params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.OVERRIDE_FORM_PARAM, Boolean.toString(override)));
+        params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.COMPRESS_FORM_PARAM, Boolean.toString(compress)));
+        params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.EXPORT_WIND_FORM_PARAM, Boolean.toString(exportWind)));
+        params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.EXPORT_DEVICE_CONFIGS_FORM_PARAM, Boolean.toString(exportDeviceConfigs)));
+        params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM, Boolean.toString(exportTrackedRacesAndStartTracking)));
+        progressTrackingUuid.ifPresent(ptid->params.add(new BasicNameValuePair(MasterDataImportResource.PROGRSS_TRACKING_UUID_FORM_PARAM, ptid.toString())));
+        final HttpPost importMasterData = new HttpPost(mdiUrl.toString());
+        importMasterData.setEntity(EntityBuilder.create().setParameters(params).build());
+        final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(importMasterData);
+        return new MasterDataImportResultJsonDeserializer().deserialize(jsonResponse);
+    }
+
+    @Override
+    public DataImportProgress getMasterDataImportProgress(UUID progressTrackingUuid) throws ClientProtocolException, IOException, ParseException {
+        final URL progressUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + MasterDataImportResource.V1_MASTERDATAIMPORT + MasterDataImportResource.PROGRESS+
+                "?"+MasterDataImportResource.PROGRESS_TRACKING_UUID+"="+progressTrackingUuid);
+        final HttpPost getMasterDataImportProgress = new HttpPost(progressUrl.toString());
+        final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(getMasterDataImportProgress);
+        return new DataImportProgressJsonDeserializer().deserialize(jsonResponse);
     }
 
     @Override
