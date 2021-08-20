@@ -182,6 +182,7 @@ public class ImportMasterDataOperation extends
             progress.setCurrentSubProgressPct(0);
             importTrackedRaces(toState, securityService);            
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
+            progress.setOverAllProgressPct(1.0);
             return creationCount;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error during execution of ImportMasterDataOperation", e);

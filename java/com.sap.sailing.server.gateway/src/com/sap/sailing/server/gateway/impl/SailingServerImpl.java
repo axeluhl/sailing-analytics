@@ -28,11 +28,13 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.server.gateway.deserialization.impl.CompareServersResultJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DataImportProgressJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.MasterDataImportResultJsonDeserializer;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.MasterDataImportResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
+import com.sap.sailing.server.gateway.jaxrs.api.CompareServersResource;
 import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.MasterDataImportResource;
@@ -131,9 +133,26 @@ public class SailingServerImpl implements SailingServer {
     }
 
     @Override
-    public CompareServersResult compareServers(SailingServer a, Optional<SailingServer> b) {
-        // TODO Implement SailingServerImpl.compareServers(...)
-        return null;
+    public CompareServersResult compareServers(Optional<SailingServer> a, SailingServer b, Optional<Iterable<UUID>> leaderboardGroupIds) throws ClientProtocolException, IOException, ParseException {
+        final URL compareServersUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + CompareServersResource.V1_COMPARESERVERS);
+        final List<NameValuePair> params = new ArrayList<>();
+        a.ifPresent(aa->{
+            params.add(new BasicNameValuePair(CompareServersResource.BEARER1_FORM_PARAM, aa.getBearerToken()));
+            params.add(new BasicNameValuePair(CompareServersResource.SERVER1_FORM_PARAM, aa.getBaseUrl().toString()));
+        });
+        if (b.getBearerToken() != null) {
+            params.add(new BasicNameValuePair(CompareServersResource.BEARER2_FORM_PARAM, b.getBearerToken()));
+        }
+        params.add(new BasicNameValuePair(CompareServersResource.SERVER2_FORM_PARAM, b.getBaseUrl().toString()));
+        leaderboardGroupIds.ifPresent(lgids->{
+            for (final UUID leaderboardGroupId : lgids) {
+                params.add(new BasicNameValuePair(CompareServersResource.LEADERBOARDGROUP_UUID_FORM_PARAM, leaderboardGroupId.toString()));
+            }
+        });
+        final HttpPost importMasterData = new HttpPost(compareServersUrl.toString());
+        importMasterData.setEntity(EntityBuilder.create().setParameters(params).build());
+        final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(importMasterData);
+        return new CompareServersResultJsonDeserializer().deserialize(jsonResponse);
     }
 
     @Override

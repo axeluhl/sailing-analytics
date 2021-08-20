@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +29,10 @@ import java.util.logging.Logger;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
@@ -65,6 +68,9 @@ import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sailing.landscape.ui.shared.SharedLandscapeConstants;
+import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
+import com.sap.sailing.server.gateway.interfaces.SailingServer;
+import com.sap.sailing.server.gateway.interfaces.SailingServerFactory;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -113,6 +119,7 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -143,16 +150,24 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
      */
     private static final Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(30));
     
+    /**
+     * The timeout for a Master Data Import (MDI) to complete
+     */
+    private static final Optional<Duration> MDI_TIMEOUT = Optional.of(Duration.ONE_HOUR.times(6));
+    
     private static final String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
+    private final ServiceTracker<SailingServerFactory, SailingServerFactory> sailingServerFactoryTracker;
+
     private final ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory;
     
     public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
         BundleContext context = Activator.getContext();
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+        sailingServerFactoryTracker = ServiceTrackerFactory.createAndOpen(context, SailingServerFactory.class);
         processFactoryFromHostAndServerDirectory =
                 (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                     try {
@@ -661,19 +676,41 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public UUID archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
-            SailingApplicationReplicaSetDTO<String> archiveReplicaSet, Duration durationToWaitBeforeCompareServers,
+            String bearerTokenOrNullForApplicationReplicaSetToArchive,
+            SailingApplicationReplicaSetDTO<String> archiveReplicaSet,
+            String bearerTokenOrNullForArchive,
+            Duration durationToWaitBeforeCompareServers,
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet, MongoEndpointDTO moveDatabaseHere,
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         final UUID idForProgressTracking = UUID.randomUUID();
         final RedirectDTO defaultRedirect = applicationReplicaSetToArchive.getDefaultRedirect();
-        // TODO bug5311: obtain all leaderboard group IDs from applicationReplicaSetToArchive
-        // TODO bug5311: issue MDI for all leaderboard group IDs obtained from applicationReplicaSetToArchive into archiveReplicaSet
-        // TODO bug5311: compare archived result, based on durationToWaitBeforeCompareServers and maxNumberOfCompareServerAttempts
-        // TODO bug5311: if comparison successful, update central reverse proxy from RedirectDTO (defaulting to first event found)
-        // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true, removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption)
-        // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true and moveDatabaseHere != null, use CopyAndCompareMongoDatabase to move master DB and delete replica DBs
+        final String hostnameFromWhichToArchive = applicationReplicaSetToArchive.getHostname();
+        final String hostnameOfArchive = archiveReplicaSet.getHostname();
+        final SailingServerFactory sailingServerFactory = sailingServerFactoryTracker.getService();
+        if (sailingServerFactory == null) {
+            throw new IllegalStateException("Couldn't find SailingServerFactory");
+        }
+        final SailingServer from = sailingServerFactory.getSailingServer(new URL("https", hostnameFromWhichToArchive, "/"), bearerTokenOrNullForApplicationReplicaSetToArchive);
+        final SailingServer archive = sailingServerFactory.getSailingServer(new URL("https", hostnameOfArchive, "/"), bearerTokenOrNullForArchive);
+        archive.importMasterData(from, from.getLeaderboardGroupIds(), /* override */ true, /* compress */ true,
+                /* import wind */ true, /* import device configurations */ false, /* import tracked races and start tracking */ true, Optional.of(idForProgressTracking));
+        final DataImportProgress result = waitForMDICompletionOrError(archive, idForProgressTracking, durationToWaitBeforeCompareServers,
+                /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
+        if (result != null && !result.failed() && result.getResult() != null) {
+            final CompareServersResult compareServersResult = from.compareServers(Optional.empty(), archive, Optional.of(from.getLeaderboardGroupIds()));
+            // TODO bug5311: if comparison successful, update central reverse proxy from RedirectDTO (defaulting to first event found)
+            // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true, removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption)
+            // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true and moveDatabaseHere != null, use CopyAndCompareMongoDatabase to move master DB and delete replica DBs
+        }
         return idForProgressTracking;
+    }
+
+    private DataImportProgress waitForMDICompletionOrError(SailingServer archive,
+            UUID idForProgressTracking, Duration durationToWaitBeforeCompareServers, String logMessage) throws Exception {
+        return Wait.wait(()->archive.getMasterDataImportProgress(idForProgressTracking), progress->progress.failed() || progress.getResult() != null,
+                /* retryOnException */ false, MDI_TIMEOUT, /* time to wait between attempts */ Duration.ONE_SECOND.times(15),
+                Level.INFO, logMessage);
     }
 
     @Override

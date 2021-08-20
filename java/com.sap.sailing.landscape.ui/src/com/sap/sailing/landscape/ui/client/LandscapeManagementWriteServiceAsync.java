@@ -132,21 +132,22 @@ public interface LandscapeManagementWriteServiceAsync {
      * <li>The content is compared; the {@code durationToWaitBeforeCompareServers} and
      * {@code maxNumberOfCompareServerAttempts} parameters control the process.</li>
      * <li>Only when a comparison has completed successfully, the following steps take place:
-     *     <ul>
-     *          <li>The central reverse proxy in the region identified by {@code regionId} will be updated with a rule
-     *              that reflects the {@code applicationReplicaSetToArchive}'s default redirect for its base URL so that
-     *              when after removing the replica set the base URL is handled by the central reverse proxy, it redirects
-     *              to the same content that the ALB default redirect rule targeted before.</li>
-     *          <li>any remote server reference on the
-     *              {@code archiveReplicaSet} pointing to the {@code applicationReplicaSetToArchive} will be removed</li>
-     *          <li>if the {@code removeApplicationReplicaSet} parameter is {@code true}, the {@code applicationReplicaSetToArchive}
-     *              will be {@link #removeApplicationReplicaSet(String, SailingApplicationReplicaSetDTO, String, byte[], AsyncCallback)
-     *              removed}</li>
-     *          <li>if a non-{@code null} {@code moveDatabaseHere} is provided and the {@code removeApplicationReplicaSet}
-     *              was {@code true}, the {@code applicationReplicaSetToArchive}'s master database
-     *              will be moved to the database endpoint specified by {@code moveDatabaseHere} and if hashed equal to the original
-     *              database, the original database will be removed, together with the replicas' database(s).</li>
-     *     </ul>
+     * <ul>
+     * <li>The central reverse proxy in the region identified by {@code regionId} will be updated with a rule that
+     * reflects the {@code applicationReplicaSetToArchive}'s default redirect for its base URL so that when after
+     * removing the replica set the base URL is handled by the central reverse proxy, it redirects to the same content
+     * that the ALB default redirect rule targeted before.</li>
+     * <li>any remote server reference on the {@code archiveReplicaSet} pointing to the
+     * {@code applicationReplicaSetToArchive} will be removed</li>
+     * <li>if the {@code removeApplicationReplicaSet} parameter is {@code true}, the
+     * {@code applicationReplicaSetToArchive} will be
+     * {@link #removeApplicationReplicaSet(String, SailingApplicationReplicaSetDTO, String, byte[], AsyncCallback)
+     * removed}</li>
+     * <li>if a non-{@code null} {@code moveDatabaseHere} is provided and the {@code removeApplicationReplicaSet} was
+     * {@code true}, the {@code applicationReplicaSetToArchive}'s master database will be moved to the database endpoint
+     * specified by {@code moveDatabaseHere} and if hashed equal to the original database, the original database will be
+     * removed, together with the replicas' database(s).</li>
+     * </ul>
      * </li>
      * </ul>
      * 
@@ -154,6 +155,16 @@ public interface LandscapeManagementWriteServiceAsync {
      *            if 0, no comparison is tried but then <em>none</em> of the follow-up steps such as removing the
      *            replica set, moving the database, removing a remote reference from the archive to the replica set and
      *            updating the central reverse proxy will be performed.
+     * @param bearerTokenOrNullForApplicationReplicaSetToArchive
+     *            used to authentication towards the {@code applicationReplicaSetToArchive}; if {@code null}, the
+     *            current user's bearer token will be tried for authentication towards the
+     *            {@code applicationReplicaSetToArchive}, assuming this server and the {@code applicationReplicaSetToArchive}
+     *            share a common security service.
+     * @param bearerTokenOrNullForArchive
+     *            used to authentication towards the {@code archiveReplicaSet}; if {@code null}, the
+     *            current user's bearer token will be tried for authentication towards the
+     *            {@code archiveReplicaSet}, assuming this server and the {@code archiveReplicaSet}
+     *            share a common security service.
      * @param moveDatabaseHere
      *            a DB endpoint; if {@code null}, the replica set's database will be left untouched. Otherwise, after
      *            successful comparison of content archived with the original content and if the
@@ -163,12 +174,16 @@ public interface LandscapeManagementWriteServiceAsync {
      *            removed.
      * @param callback
      *            returns a UUID immediately that the client can use to query the progress of this long-running
-     *            operation, as for the MDI architecture, by invoking {@code RacingEventService.getDataImportLock().getProgress(id)}.
-     *            The resulting {@code DataImportProgress} object will then tell about progress and a possible error message
-     *            for the operation.
+     *            operation, as for the MDI architecture, by invoking
+     *            {@code RacingEventService.getDataImportLock().getProgress(id)}. The resulting
+     *            {@code DataImportProgress} object will then tell about progress and a possible error message for the
+     *            operation.
      */
     void archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
-            SailingApplicationReplicaSetDTO<String> archiveReplicaSet, Duration durationToWaitBeforeCompareServers,
+            String bearerTokenOrNullForApplicationReplicaSetToArchive,
+            SailingApplicationReplicaSetDTO<String> archiveReplicaSet,
+            String bearerTokenOrNullForArchive,
+            Duration durationToWaitBeforeCompareServers,
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet,
             MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption,
             AsyncCallback<UUID> callback);

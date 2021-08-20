@@ -34,7 +34,18 @@ public interface SailingServer {
     
     DataImportProgress getMasterDataImportProgress(UUID progressTrackingUuid) throws Exception;
 
-    CompareServersResult compareServers(SailingServer a, Optional<SailingServer> b) throws Exception;
+    /**
+     * Compares all {@link #getLeaderboardGroupIds() leaderboard groups} of {@code a} (or this server, if {@code a} is
+     * not present) with the corresponding leaderboard groups in {@code b}. The result of the comparison is returned.
+     * Note that this way leaderboard groups may exist in {@code b} that don't exist in {@code a} without producing a
+     * 
+     * @param a
+     *            if not present, this server is compared against {@code b}
+     * @param leaderboardGroupIds
+     *            if present, specifies which leaderboard groups shall be compared; otherwise, all leaderboard groups of
+     *            both servers are compared, and those missing on either end will be reported
+     */
+    CompareServersResult compareServers(Optional<SailingServer> a, SailingServer b, Optional<Iterable<UUID>> leaderboardGroupIds) throws Exception;
 
     void addRemoteServerReference(SailingServer referencedServer, Optional<Set<UUID>> eventIds) throws Exception;
 

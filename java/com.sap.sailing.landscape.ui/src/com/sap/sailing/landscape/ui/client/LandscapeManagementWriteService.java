@@ -90,7 +90,10 @@ public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<ReleaseDTO> getReleases();
 
     UUID archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
-            SailingApplicationReplicaSetDTO<String> archiveReplicaSet, Duration durationToWaitBeforeCompareServers,
+            String bearerTokenOrNullForApplicationReplicaSetToArchive,
+            SailingApplicationReplicaSetDTO<String> archiveReplicaSet,
+            String bearerTokenOrNullForArchive,
+            Duration durationToWaitBeforeCompareServers,
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet,
             MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception;

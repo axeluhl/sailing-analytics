@@ -39,21 +39,24 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
-@Path("/v1/compareservers")
+@Path(CompareServersResource.V1_COMPARESERVERS)
 public class CompareServersResource extends AbstractSailingServerResource {
+    public static final String V1_COMPARESERVERS = "/v1/compareservers";
+
     public static final Logger logger = Logger.getLogger(CompareServersResource.class.getName());
 
     private static final String LEADERBOARDGROUPSPATH = "/sailingserver/api/v1/leaderboardgroups";
     private static final String LEADERBOARDGROUPSIDENTIFIABLEPATH = LEADERBOARDGROUPSPATH+"/identifiable";
-    protected static final String SERVER1_FORM_PARAM = "server1";
-    protected static final String SERVER2_FORM_PARAM = "server2";
-    protected static final String USER1_FORM_PARAM = "user1";
-    protected static final String USER2_FORM_PARAM = "user2";
-    protected static final String PASSWORD1_FORM_PARAM = "password1";
-    protected static final String PASSWORD2_FORM_PARAM = "password2";
-    protected static final String BEARER1_FORM_PARAM = "bearer1";
-    protected static final String BEARER2_FORM_PARAM = "bearer2";
-    protected static final String LEADERBOARDGROUP_UUID_FORM_PARAM = "leaderboardgroupUUID[]";
+    public static final String SERVER1_FORM_PARAM = "server1";
+    public static final String SERVER2_FORM_PARAM = "server2";
+    public static final String USER1_FORM_PARAM = "user1";
+    public static final String USER2_FORM_PARAM = "user2";
+    public static final String PASSWORD1_FORM_PARAM = "password1";
+    public static final String PASSWORD2_FORM_PARAM = "password2";
+    public static final String BEARER1_FORM_PARAM = "bearer1";
+    public static final String BEARER2_FORM_PARAM = "bearer2";
+    public static final String LEADERBOARDGROUP_UUID_FORM_PARAM = "leaderboardgroupUUID[]";
+    
     /**
      * The list of keys that are compared during a compare run.
      */
@@ -69,12 +72,15 @@ public class CompareServersResource extends AbstractSailingServerResource {
             LeaderboardNameConstants.REGATTANAME, LeaderboardNameConstants.TRACKEDRACENAME,
             LeaderboardNameConstants.HASGPSDATA, LeaderboardNameConstants.HASWINDDATA };
     private static final Set<String> KEYSETTOCOMPARE = new HashSet<>(Arrays.asList(KEYLISTTOCOMPARE));
+    
     /**
-     * The list of keys that are not compared.
+     * The list of keys that are not compared. Represent as a path with ".{fieldname}" for field navigation and
+     * "[]" for array expansion. Example: "leaderboards[].series[].fleets[].races[].raceViewerUrls"
      */
     private static final String[] KEYSTOIGNORE = new String[] { LeaderboardGroupConstants.TIMEPOINT,
-            LeaderboardNameConstants.RACEVIEWERURLS };
+            LeaderboardGroupConstants.LEADERBOARDS+"[]."+LeaderboardNameConstants.SERIES+"[]."+LeaderboardNameConstants.FLEETS+"[]."+LeaderboardNameConstants.RACES+"[]."+LeaderboardNameConstants.RACEVIEWERURLS };
     private static final Set<String> KEYSETTOIGNORE = new HashSet<>(Arrays.asList(KEYSTOIGNORE));
+
     /**
      * The list of keys that get always printed. "name" needs a special treatment, as it should be printed, but also
      * during a compare run there is no need to compare entries with different values for "name".
@@ -82,7 +88,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
     private static final String[] KEYSTOPRINT = new String[] { LeaderboardGroupConstants.ID };
     private static final Set<String> KEYSETTOPRINT = new HashSet<>(Arrays.asList(KEYSTOPRINT));
 
-    private static final String SERVERTOOLD = "At least one server you are trying to compare has not yet enabled the "
+    private static final String SERVERTOOOLD = "At least one server you are trying to compare has not yet enabled the "
             + LEADERBOARDGROUPSIDENTIFIABLEPATH
             + " endpoint and therefore you need to fallback to running the compareServers shell script.";
     
@@ -230,15 +236,14 @@ public class CompareServersResource extends AbstractSailingServerResource {
     }
     
     /**
-     * Fetches the details for a given leaderboardgroup UUID and removes all the duplicates in the fields.
+     * Fetches the details for a given leaderboardgroup UUID and removes all the duplicates in the fields, as well as all
+     * fields contained in {@link #KEYSTOIGNORE}.
      */
     private Pair<Object, Object> fetchLeaderboardgroupDetailsAndRemoveDuplicates(String server1, String server2,
             String leaderboardgroupId, String bearer1, String bearer2) throws Exception {
-        Object lgdetail1 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server1),
-                bearer1);
+        Object lgdetail1 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server1), bearer1);
         lgdetail1 = removeUnnecessaryFields(lgdetail1);
-        Object lgdetail2 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server2),
-                bearer2);
+        Object lgdetail2 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server2), bearer2);
         lgdetail2 = removeUnnecessaryFields(lgdetail2);
         Pair<Object, Object> result = removeDuplicateEntries(lgdetail1, lgdetail2);
         return result;
@@ -252,7 +257,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
         final URLConnection leaderboardgroupListC = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(
                 RemoteServerUtil.createRemoteServerUrl(baseUrl, LEADERBOARDGROUPSIDENTIFIABLEPATH, null), bearer);
         if (((HttpURLConnection) leaderboardgroupListC).getResponseCode() == 404) {
-            throw new FileNotFoundException(SERVERTOOLD);
+            throw new FileNotFoundException(SERVERTOOOLD);
         }
         final JSONArray result = (JSONArray) parser
                 .parse(new InputStreamReader(leaderboardgroupListC.getInputStream(), "UTF-8"));
@@ -279,27 +284,40 @@ public class CompareServersResource extends AbstractSailingServerResource {
     }
     
     /**
+     * Call this for the top-level object. It invokes {@link #removeUnnecessaryFields(Object, String)} with an
+     * empty path string to start with.
+     */
+    private Object removeUnnecessaryFields(Object json) {
+        return removeUnnecessaryFields(json, "");
+    }
+    
+    /**
      * Strips a (nested) {@link org.json.simple.JSONObject} from the fields specified in
      * {@link CompareServersResource#KEYSTOIGNORE}.
+     * 
+     * @param path
+     *            the path leading to the {@code json} object; field access is represented by ".{fieldname}" whereas
+     *            array access is represented by "[]".
      *
      * @return The modified {@link org.json.simple.JSONObject}.
      */
-    
-    private Object removeUnnecessaryFields(Object json) {
+    private Object removeUnnecessaryFields(Object json, String path) {
         if (json instanceof JSONObject) {
             Iterator<Object> iter = ((JSONObject) json).keySet().iterator();
             while (iter.hasNext()) {
                 Object key = iter.next();
-                if (KEYSETTOIGNORE.contains(key)) {
+                final String nextPath = path+"."+key;
+                if (KEYSETTOIGNORE.contains(nextPath)) {
                     iter.remove();
                 } else {
                     Object value = ((JSONObject) json).get(key);
-                    removeUnnecessaryFields(value);
+                    removeUnnecessaryFields(value, nextPath);
                 }
             }
         } else if (json instanceof JSONArray) {
+            final String nextPath = path+"[]";
             for (int i = 0; i < ((JSONArray) json).size(); i++) {
-                removeUnnecessaryFields(((JSONArray) json).get(i));
+                removeUnnecessaryFields(((JSONArray) json).get(i), nextPath);
             }
         }
         return json;
