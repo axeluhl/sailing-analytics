@@ -299,31 +299,31 @@
       <descriptions defaultDescription="Year of Race"/>
       <keyMapping columnObjectName="LegStatsJoin_2" columnName="yearOfRace"/>
     </attribute>
-    <attribute id="scoringScheme" order="35" displayAttribute="false" attributeHierarchyActive="false">
+    <attribute id="scoringScheme" order="37" displayAttribute="false" attributeHierarchyActive="false">
       <descriptions defaultDescription="Scoring Scheme"/>
       <keyMapping columnObjectName="LegStatsJoin_2" columnName="scoringScheme"/>
     </attribute>
-    <attribute id="rankingMetric" order="36" displayAttribute="false" attributeHierarchyActive="false">
+    <attribute id="rankingMetric" order="38" displayAttribute="false" attributeHierarchyActive="false">
       <descriptions defaultDescription="Ranking Metric"/>
       <keyMapping columnObjectName="LegStatsJoin_2" columnName="rankingMetric"/>
     </attribute>
-    <attribute id="eventId" order="37" displayAttribute="false" attributeHierarchyActive="false" descriptionColumnName="eventName">
+    <attribute id="eventId" order="39" displayAttribute="false" attributeHierarchyActive="false" descriptionColumnName="eventName">
       <descriptions defaultDescription="Event ID"/>
       <keyMapping columnObjectName="LegStatsJoin_2" columnName="eventId"/>
     </attribute>
-    <attribute id="eventName" order="38" displayAttribute="false" attributeHierarchyActive="false">
+    <attribute id="eventName" order="40" displayAttribute="false" attributeHierarchyActive="false">
       <descriptions defaultDescription="Event Name"/>
       <keyMapping columnObjectName="LegStatsJoin_2" columnName="eventName"/>
     </attribute>
-    <attribute id="venue" order="39" displayAttribute="false" attributeHierarchyActive="false">
+    <attribute id="venue" order="41" displayAttribute="false" attributeHierarchyActive="false">
       <descriptions defaultDescription="Venue"/>
       <keyMapping columnObjectName="LegStatsJoin_2" columnName="venue"/>
     </attribute>
-    <attribute id="isListed" order="40" displayAttribute="false" attributeHierarchyActive="false">
+    <attribute id="isListed" order="42" displayAttribute="false" attributeHierarchyActive="false">
       <descriptions defaultDescription="isListed"/>
       <keyMapping columnObjectName="LegStatsJoin_2" columnName="isListed"/>
     </attribute>
-    <attribute id="location" order="41" displayAttribute="false" attributeHierarchyActive="false">
+    <attribute id="location" order="43" displayAttribute="false" attributeHierarchyActive="false">
       <descriptions defaultDescription="Location"/>
       <keyMapping columnObjectName="LegStatsJoin_2" columnName="location"/>
     </attribute></attributes>
@@ -405,14 +405,14 @@
       </exceptionAggregation>
       <formula>1</formula>
     </measure>
-    <measure id="competitorCount" order="42" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
+    <measure id="competitorCount" order="35" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
       <descriptions defaultDescription="Competitor Counter"/>
       <exceptionAggregation>
         <attribute attributeName="competitorId"/>
       </exceptionAggregation>
       <formula>1</formula>
     </measure>
-    <measure id="legCount" order="43" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
+    <measure id="legCount" order="36" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
       <descriptions defaultDescription="Leg Counter"/>
       <exceptionAggregation>
         <attribute attributeName="regatta"/>
