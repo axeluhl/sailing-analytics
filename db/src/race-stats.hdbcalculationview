@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" id="race-stats" applyPrivilegeType="NONE" dataCategory="CUBE" schemaVersion="3.0" outputViewType="Aggregation" cacheInvalidationPeriod="NONE" enforceSqlExecution="true">
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" xmlns:DataFoundation="http://www.sap.com/ndb/BiModelDataFoundation.ecore" xmlns:Dimension="http://www.sap.com/ndb/BiModelDimension.ecore" id="race-stats" applyPrivilegeType="NONE" dataCategory="CUBE" schemaVersion="3.0" outputViewType="Aggregation" cacheInvalidationPeriod="NONE" enforceSqlExecution="true">
 <descriptions defaultDescription="Some Race Stats"/>
 <localVariables/>
 <variableMappings/>
@@ -289,7 +289,7 @@
       <keyMapping columnObjectName="RaceStatsJoin_2" columnName="regatta"/>
     </attribute>
     <attribute id="race" order="2" displayAttribute="false" attributeHierarchyActive="false">
-      <descriptions defaultDescription="Racename"/>
+      <descriptions defaultDescription="Race"/>
       <keyMapping columnObjectName="RaceStatsJoin_2" columnName="race"/>
     </attribute>
     <attribute id="fleet" order="3" displayAttribute="false" attributeHierarchyActive="false">
@@ -305,11 +305,11 @@
       <keyMapping columnObjectName="RaceStatsJoin_2" columnName="competitorId"/>
     </attribute>
     <attribute id="competitorName" order="6" displayAttribute="false" attributeHierarchyActive="false" hidden="true">
-      <descriptions defaultDescription="Name"/>
+      <descriptions defaultDescription="Name of Competitor"/>
       <keyMapping columnObjectName="RaceStatsJoin_2" columnName="competitorName"/>
     </attribute>
     <attribute id="shortName" order="7" displayAttribute="false" attributeHierarchyActive="false">
-      <descriptions defaultDescription="Shortname"/>
+      <descriptions defaultDescription="Shortname of Competitor"/>
       <keyMapping columnObjectName="RaceStatsJoin_2" columnName="shortName"/>
     </attribute>
     <attribute id="nationality" order="8" displayAttribute="false" attributeHierarchyActive="false">
@@ -320,12 +320,12 @@
       <descriptions defaultDescription="SailNumber"/>
       <keyMapping columnObjectName="RaceStatsJoin_2" columnName="sailNumber"/>
     </attribute>
-    <attribute id="boatClass" order="10" displayAttribute="false" attributeHierarchyActive="false">
+    <attribute id="boatClass" order="10" displayAttribute="false" attributeHierarchyActive="false" descriptionColumnName="boatClassDescription">
       <descriptions defaultDescription="Boatclass"/>
       <keyMapping columnObjectName="RaceStatsJoin_2" columnName="boatClass"/>
     </attribute>
-    <attribute id="boatClassDescription" order="11" displayAttribute="false" attributeHierarchyActive="false">
-      <descriptions defaultDescription="boatClassDescription"/>
+    <attribute id="boatClassDescription" order="11" displayAttribute="false" attributeHierarchyActive="false" hidden="true">
+      <descriptions defaultDescription="BoatClass Description"/>
       <keyMapping columnObjectName="RaceStatsJoin_2" columnName="boatClassDescription"/>
     </attribute>
     <attribute id="hullType" order="12" displayAttribute="false" attributeHierarchyActive="false">
@@ -486,19 +486,22 @@
         <attribute attributeName="race"/>
       </exceptionAggregation>
       <formula>1</formula>
-    </measure>
+    
+      </measure>
     <measure id="competitorCount" order="46" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
       <descriptions defaultDescription="Competitor Counter"/>
       <exceptionAggregation>
         <attribute attributeName="competitorId"/>
       </exceptionAggregation>
       <formula>1</formula>
-    </measure>
+    
+      </measure>
   
     <measure id="competitorRaces" order="48" aggregationType="sum" measureType="simple" datatype="INTEGER" expressionLanguage="SQL">
       <descriptions defaultDescription="Competitors x Races (weight)"/>
       <formula>&quot;raceCount&quot;*&quot;competitorCount&quot;</formula>
-    </measure>
+    
+      </measure>
   
     <measure id="eventCount" order="49" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
       <descriptions defaultDescription="Event Counter"/>
@@ -506,10 +509,43 @@
         <attribute attributeName="eventId"/>
       </exceptionAggregation>
       <formula>1</formula>
+    
+      </measure>
+  
+    <measure id="avgNumberOfTacks" order="50" aggregationType="sum" measureType="simple" datatype="DOUBLE" presentationScale="2" expressionLanguage="SQL">
+      <descriptions defaultDescription="Avg Number of Tacks"/>
+      <formula>&quot;numberOfTacks&quot;/&quot;competitorRaces&quot;</formula>
+      </measure>
+  
+    <measure id="avgNumberOfGybes" order="51" aggregationType="sum" measureType="simple" datatype="DOUBLE" presentationScale="2" expressionLanguage="SQL">
+      <descriptions defaultDescription="Avg Number of Gybes"/>
+      <formula>&quot;numberOfGybes&quot;/&quot;competitorRaces&quot;</formula>
+    </measure>
+  
+    <measure id="avgNumberOfPenalityCircles" order="52" aggregationType="sum" measureType="simple" datatype="DOUBLE" presentationScale="2" expressionLanguage="SQL">
+      <descriptions defaultDescription="Avg Number of Penality Circles"/>
+      <formula>&quot;numberOfPenaltyCircles&quot;/&quot;competitorRaces&quot;</formula>
     </measure>
   </calculatedMeasures>
   <restrictedMeasures/>
-  <localDimensions/>
+  <localDimensions>
+    <localDimension id="EventHierarchy">
+      <attributeRef xsi:type="DataFoundation:Attribute">eventId</attributeRef>
+      <attributeRef xsi:type="DataFoundation:Attribute">regatta</attributeRef>
+      <attributeRef xsi:type="DataFoundation:Attribute">race</attributeRef>
+      <hierarchies>
+        <hierarchy xsi:type="Dimension:LeveledHierarchy" id="EventHierarchy" aggregateAllNodes="true" orphanedNodesHandling="ROOT_NODES" rootNodeVisibility="ADD_ROOT_NODE" withRootNode="true" nodeStyle="NAME_PATH_ENFORCED" cacheEnabled="true" cycleHandling="BREAKUP" emptyValueIsNull="true">
+          <descriptions defaultDescription="Event Hierarchy"/>
+          <unassignedMemberProperties mode="FALSE"/>
+          <levels>
+            <level levelAttribute="eventId" levelType="MDLEVEL_TYPE_REGULAR" order="1" orderAttribute="eventId" sortDirection="ASC"/>
+            <level levelAttribute="regatta" levelType="MDLEVEL_TYPE_REGULAR" order="2" orderAttribute="regatta" sortDirection="ASC"/>
+            <level levelAttribute="race" levelType="MDLEVEL_TYPE_REGULAR" order="3" orderAttribute="race" sortDirection="ASC"/>
+          </levels>
+        </hierarchy>
+      </hierarchies>
+    </localDimension>
+  </localDimensions>
 </logicalModel>
 <layout>
   <shapes>
