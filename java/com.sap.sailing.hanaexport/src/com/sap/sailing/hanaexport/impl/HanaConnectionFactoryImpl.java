@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
@@ -20,7 +21,7 @@ public class HanaConnectionFactoryImpl implements HanaConnectionFactory {
     public void test() throws SQLException {
         System.out.println("Java version: " + com.sap.db.jdbc.Driver.getJavaVersion());
         System.out.println("Minimum supported Java version and SAP driver version number: " + com.sap.db.jdbc.Driver.getVersionInfo());
-        final Connection connection = getConnection();
+        final Connection connection = getConnection(Optional.empty(), Optional.empty(), Optional.empty());
         if (connection == null) {
             logger.warning("Couldn't get database connection for end point "+System.getProperty(HANADB_ENDPOINT_PROPERTY_NAME));
         } else {
@@ -42,11 +43,33 @@ public class HanaConnectionFactoryImpl implements HanaConnectionFactory {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection(Optional<String> dbEndpoint, Optional<String> dbUser, Optional<String> dbPassword) throws SQLException {
+        final String dbEndpointFromSystemProperty = System.getProperty(HANADB_ENDPOINT_PROPERTY_NAME);
+        final String dbUserFromSystemProperty = System.getProperty(HANADB_USERNAME_SYSTEM_PROPERTY_NAME);
+        final String dbPasswordFromSystemProperty = System.getProperty(HANADB_PASSWORD_SYSTEM_PROPERTY_NAME);
+        final String dbUrl = "jdbc:sap://"+dbEndpoint.orElseGet(()->{
+            if (dbEndpointFromSystemProperty != null) {
+                return dbEndpointFromSystemProperty;
+            } else {
+                throw new IllegalStateException("Missing DB URL, either as parameter or from system property "+HANADB_ENDPOINT_PROPERTY_NAME);
+            }
+        });
         return DriverManager.getConnection(
-                "jdbc:sap://"+System.getProperty(HANADB_ENDPOINT_PROPERTY_NAME)+"/?encrypt=true&validateCertificate=false",
-                System.getProperty(HANADB_USERNAME_SYSTEM_PROPERTY_NAME),
-                System.getProperty(HANADB_PASSWORD_SYSTEM_PROPERTY_NAME));
+                dbUrl,
+                dbUser.orElseGet(()->{
+                    if (dbUserFromSystemProperty != null) {
+                        return dbUserFromSystemProperty;
+                    } else {
+                        throw new IllegalStateException("Missing DB user name, either as parameter or from system property "+HANADB_USERNAME_SYSTEM_PROPERTY_NAME);
+                    }
+                }),
+                dbPassword.orElseGet(()->{
+                    if (dbPasswordFromSystemProperty != null) {
+                        return dbPasswordFromSystemProperty;
+                    } else {
+                        throw new IllegalStateException("Missing DB password, either as parameter or from system property "+HANADB_PASSWORD_SYSTEM_PROPERTY_NAME);
+                    }
+                }));
     }
     
     public static void main(String[] args) throws SQLException {
