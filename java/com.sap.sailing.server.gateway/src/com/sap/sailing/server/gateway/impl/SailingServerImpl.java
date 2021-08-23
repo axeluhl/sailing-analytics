@@ -167,4 +167,8 @@ public class SailingServerImpl implements SailingServer {
 
     }
 
+    @Override
+    public String toString() {
+        return baseUrl.toString();
+    }
 }

@@ -9,6 +9,7 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.session.ClientSession;
 import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
 import com.sap.sse.landscape.mongodb.impl.SimpleMongoEndpointImpl;
 
 /**
@@ -136,4 +137,12 @@ public interface MongoEndpoint {
      * See {@link #getMD5Hash(String)}
      */
     String getMD5Hash(MongoDatabase database) throws URISyntaxException;
+
+    /**
+     * Returns a fully-configured {@link Database} that uses this {@link MongoEndpoint endpoint} to talk to the database.
+     * The result's {@link Database#getEndpoint()} method returns {@code this} object.
+     */
+    default Database getDatabase(String name) {
+        return new DatabaseImpl(this, name);
+    }
 }

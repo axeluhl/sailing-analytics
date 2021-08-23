@@ -41,6 +41,7 @@ import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.CreateLaunchConfigurationAndAutoScalingGroup;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
@@ -69,12 +70,14 @@ import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sailing.landscape.ui.shared.SharedLandscapeConstants;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
+import com.sap.sailing.server.gateway.interfaces.MasterDataImportResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sailing.server.gateway.interfaces.SailingServerFactory;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
@@ -100,12 +103,14 @@ import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.DNSCache;
+import com.sap.sse.landscape.aws.orchestration.CopyAndCompareMongoDatabase;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.CreateLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
+import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
@@ -286,6 +291,24 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 dto = new MongoEndpointDTO(/* no replica set */ null, Collections.singleton(convertToMongoProcessDTO(mongoProcess, /* replicaSetName */ null)));
             }
             result.add(dto);
+        }
+        return result;
+    }
+    
+    private MongoEndpoint getMongoEndpoint(MongoEndpointDTO mongoEndpointDTO) {
+        final MongoEndpoint result;
+        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
+        final Set<Pair<AwsInstance<String>, Integer>> nodes = new HashSet<>();
+        for (final MongoProcessDTO node : mongoEndpointDTO.getHostnamesAndPorts()) {
+            nodes.add(new Pair<>(getLandscape().getHostByInstanceId(new AwsRegion(node.getHost().getRegion()), node.getHost().getInstanceId(), hostSupplier), node.getPort()));
+        }
+        if (mongoEndpointDTO.getReplicaSetName() == null) {
+            // single node:
+            final Pair<AwsInstance<String>, Integer> hostAndPort = nodes.iterator().next();
+            result = getLandscape().getDatabaseConfigurationForSingleNode(hostAndPort.getA(), hostAndPort.getB());
+        } else {
+            // replica set
+            result = getLandscape().getDatabaseConfigurationForReplicaSet(mongoEndpointDTO.getReplicaSetName(), nodes);
         }
         return result;
     }
@@ -695,7 +718,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         }
         final SailingServer from = sailingServerFactory.getSailingServer(new URL("https", hostnameFromWhichToArchive, "/"), bearerTokenOrNullForApplicationReplicaSetToArchive);
         final SailingServer archive = sailingServerFactory.getSailingServer(new URL("https", hostnameOfArchive, "/"), bearerTokenOrNullForArchive);
-        archive.importMasterData(from, from.getLeaderboardGroupIds(), /* override */ true, /* compress */ true,
+        logger.info("Importing master data from "+from+" to "+archive);
+        final MasterDataImportResult mdiResult = archive.importMasterData(from, from.getLeaderboardGroupIds(), /* override */ true, /* compress */ true,
                 /* import wind */ true, /* import device configurations */ false, /* import tracked races and start tracking */ true, Optional.of(idForProgressTracking));
         final DataImportProgress result = waitForMDICompletionOrError(archive, idForProgressTracking, durationToWaitBeforeCompareServers,
                 /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
@@ -707,14 +731,23 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     " between importing server "+hostnameOfArchive+" and exporting server "+hostnameFromWhichToArchive);
             if (compareServersResult != null) {
                 if (!compareServersResult.hasDiffs()) {
+                    final Set<UUID> eventIDs = new HashSet<>();
+                    for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
+                        Util.addAll(eids, eventIDs);
+                    }
+                    archive.removeRemoteServerReference(from, Optional.of(eventIDs));
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
                             getLandscape().getCentralReverseProxy(new AwsRegion(regionId));
-                    // TODO bug5618: visitor pattern for RedirectDTO
                     SailingAnalyticsProcess<String> archiveMaster = getSailingAnalyticsProcessFromDTO(archiveReplicaSet.getMaster());
                     defaultRedirect.accept(new ALBToReverseProxyRedirectMapper<>(
                             centralReverseProxy, hostnameFromWhichToArchive, archiveMaster, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
-                    // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true, removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption)
-                    // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true and moveDatabaseHere != null, use CopyAndCompareMongoDatabase to move master DB and delete replica DBs
+                    if (removeApplicationReplicaSet) {
+                        final SailingAnalyticsProcess<String> fromMaster = getSailingAnalyticsProcessFromDTO(applicationReplicaSetToArchive.getMaster());
+                        removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption);
+                        final Database fromDatabase = fromMaster.getDatabaseConfiguration(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+                        final Database toDatabase = getMongoEndpoint(moveDatabaseHere).getDatabase(fromDatabase.getName());
+                        getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
+                    }
                 } else {
                     logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
                             durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)+
@@ -734,6 +767,20 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     " did not work"+(result != null ? result.getErrorMessage() : " (no result at all)"));
         }
         return idForProgressTracking;
+    }
+    
+    private <BuilderT extends CopyAndCompareMongoDatabase.Builder<BuilderT, String>> CopyAndCompareMongoDatabase<String>
+    getCopyAndCompareMongoDatabaseBuilder(Database fromDatabase, Database toDatabase) throws Exception {
+        BuilderT builder = CopyAndCompareMongoDatabase.<BuilderT, String>builder()
+                .dropTargetFirst(true)
+                .dropSourceAfterSuccessfulCopy(true)
+                .setSourceDatabase(fromDatabase)
+                .setTargetDatabase(toDatabase)
+                .setAdditionalDatabasesToDelete(Collections.singleton(fromDatabase.getWithDifferentName(
+                        fromDatabase.getName()+SailingAnalyticsReplicaConfiguration.Builder.DEFAULT_REPLICA_DATABASE_NAME_SUFFIX)));
+        builder
+            .setLandscape(getLandscape());
+        return builder.build();
     }
 
     private DataImportProgress waitForMDICompletionOrError(SailingServer archive,

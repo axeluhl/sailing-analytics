@@ -754,6 +754,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public <HostT extends AwsInstance<ShardingKey>>
+    HostT getHostByInstanceId(com.sap.sse.landscape.Region region, final String instanceId, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, instanceId,hostSupplier);
+    }
+    
+    @Override
+    public <HostT extends AwsInstance<ShardingKey>>
     Iterable<HostT> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier) {
         return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
     }
@@ -1198,15 +1204,29 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName) {
-        final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
+        final Set<Pair<AwsInstance<ShardingKey>, Integer>> nodes = new HashSet<>();
         for (final AwsInstance<ShardingKey> host : getMongoDBHosts(region)) {
             for (final Pair<String, Integer> replicaSetNameAndPort : getMongoEndpointSpecificationsAsReplicaSetNameAndPort(host)) {
                 if (replicaSetNameAndPort.getA().equals(mongoReplicaSetName)) {
-                    result.addReplica(new MongoProcessInReplicaSetImpl(result, replicaSetNameAndPort.getB(), host));
+                    nodes.add(new Pair<>(host, replicaSetNameAndPort.getB()));
                 }
             }
         }
+        return getDatabaseConfigurationForReplicaSet(mongoReplicaSetName, nodes);
+    }
+    
+    @Override
+    public MongoReplicaSet getDatabaseConfigurationForReplicaSet(String mongoReplicaSetName, Iterable<Pair<AwsInstance<ShardingKey>, Integer>> hostsAndPortsOfNodes) {
+        final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
+        for (final Pair<AwsInstance<ShardingKey>, Integer> hostAndPort : hostsAndPortsOfNodes) {
+            result.addReplica(new MongoProcessInReplicaSetImpl(result, hostAndPort.getB(), hostAndPort.getA()));
+        }
         return result;
+    }
+    
+    @Override
+    public MongoProcessImpl getDatabaseConfigurationForSingleNode(AwsInstance<ShardingKey> host, int port) {
+        return new MongoProcessImpl(host, port);
     }
 
     private Iterable<AwsInstance<ShardingKey>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
