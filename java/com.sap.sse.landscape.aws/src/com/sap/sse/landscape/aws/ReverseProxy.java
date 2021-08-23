@@ -73,10 +73,9 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * Configures a redirect in this reverse proxy such that requests for it will go to the event series page for the
      * event series identified by the UUID of the leaderboard group that represents the series and which is expected to
      * be hosted by the application replica set provided.
-     * @param optionalKeyName TODO
      */
     void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
-            UUID leaderboardGroupId, byte[] privateKeyEncryptionPassphrase, Optional<String> optionalKeyName) throws Exception;
+            UUID leaderboardGroupId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Configures a rule for requests for anything from within {@code scope} such that those requests
@@ -86,14 +85,12 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
     
     /**
      * Creates a mapping for the {@code /internal-server-status} path using the host's generic external ec2 host name 
-     * @param optionalKeyName TODO
      */
     void createInternalStatusRedirect(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Removes any existing redirect mapping for the {@code hostname} provided. If no such mapping
      * exists, the method does nothing.
-     * @param optionalKeyName TODO
      */
     void removeRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     

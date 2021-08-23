@@ -26,6 +26,11 @@ public class EventSeriesRedirectDTO extends RedirectWithIdDTO {
     public Optional<String> getQuery() {
         return Optional.of(QUERY_PREFIX+getId().toString());
     }
+    
+    @Override
+    public void accept(RedirectVisitor visitor) throws Exception {
+        visitor.visit(this);
+    }
 
     static EventSeriesRedirectDTO parse(String redirectPath) {
         return parse(redirectPath, QUERY_PREFIX, EventSeriesRedirectDTO::new);

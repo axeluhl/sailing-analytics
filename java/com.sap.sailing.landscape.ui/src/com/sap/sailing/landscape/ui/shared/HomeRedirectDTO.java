@@ -20,6 +20,11 @@ public class HomeRedirectDTO extends AbstractRedirectDTO {
         return "/gwt/Home.html";
     }
     
+    @Override
+    public void accept(RedirectVisitor visitor) throws Exception {
+        visitor.visit(this);
+    }
+
     static HomeRedirectDTO parse(String redirectPath) {
         final HomeRedirectDTO candidate = new HomeRedirectDTO();
         final HomeRedirectDTO result;

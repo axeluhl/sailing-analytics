@@ -79,6 +79,7 @@ import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
@@ -91,6 +92,7 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.ReverseProxy;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.AwsApplicationReplicaSetImpl;
@@ -698,10 +700,38 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final DataImportProgress result = waitForMDICompletionOrError(archive, idForProgressTracking, durationToWaitBeforeCompareServers,
                 /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
         if (result != null && !result.failed() && result.getResult() != null) {
-            final CompareServersResult compareServersResult = from.compareServers(Optional.empty(), archive, Optional.of(from.getLeaderboardGroupIds()));
-            // TODO bug5311: if comparison successful, update central reverse proxy from RedirectDTO (defaulting to first event found)
-            // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true, removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption)
-            // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true and moveDatabaseHere != null, use CopyAndCompareMongoDatabase to move master DB and delete replica DBs
+            logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Comparing server contents now...");
+            final CompareServersResult compareServersResult = Wait.wait(()->from.compareServers(Optional.empty(), archive, Optional.of(from.getLeaderboardGroupIds())),
+                    csr->!csr.hasDiffs(), /* retryOnException */ true, Optional.of(durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)),
+                    durationToWaitBeforeCompareServers, Level.INFO, "Comparing leaderboard groups with IDs "+from.getLeaderboardGroupIds()+
+                    " between importing server "+hostnameOfArchive+" and exporting server "+hostnameFromWhichToArchive);
+            if (compareServersResult != null) {
+                if (!compareServersResult.hasDiffs()) {
+                    final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
+                            getLandscape().getCentralReverseProxy(new AwsRegion(regionId));
+                    // TODO bug5618: visitor pattern for RedirectDTO
+                    SailingAnalyticsProcess<String> archiveMaster = getSailingAnalyticsProcessFromDTO(archiveReplicaSet.getMaster());
+                    defaultRedirect.accept(new ALBToReverseProxyRedirectMapper<>(
+                            centralReverseProxy, hostnameFromWhichToArchive, archiveMaster, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
+                    // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true, removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption)
+                    // TODO bug5311: if comparison successful and removeApplicationReplicaSet==true and moveDatabaseHere != null, use CopyAndCompareMongoDatabase to move master DB and delete replica DBs
+                } else {
+                    logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
+                            durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)+
+                            " there were the following differences between exporting server "+hostnameFromWhichToArchive+
+                            " and importing server "+hostnameOfArchive+":\nDifferences on importing side: "+compareServersResult.getADiffs()+
+                            "\nDifferences on exporting side: "+compareServersResult.getBDiffs()+
+                            "\nNot proceeding further. You need to resolve the issues manually.");
+                }
+            } else {
+                logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
+                        durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)+
+                        " the comparison of servers "+hostnameOfArchive+" and "+hostnameFromWhichToArchive+
+                        " did not produce a result. Not proceeding. You have to resolve the issue manually.");
+            }
+        } else {
+            logger.severe("The Master Data Import (MDI) from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive+
+                    " did not work"+(result != null ? result.getErrorMessage() : " (no result at all)"));
         }
         return idForProgressTracking;
     }
@@ -775,7 +805,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return applicationReplicaSet;
     }
 
-    private Iterable<SailingAnalyticsProcess<String>> getSailingAnalyticsProcessesFromDTOs(ArrayList<SailingAnalyticsProcessDTO> processDTOs) {
+    private Iterable<SailingAnalyticsProcess<String>> getSailingAnalyticsProcessesFromDTOs(Iterable<SailingAnalyticsProcessDTO> processDTOs) {
         return Util.map(processDTOs, processDTO->{
             try {
                 return getSailingAnalyticsProcessFromDTO(processDTO);

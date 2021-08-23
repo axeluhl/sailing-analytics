@@ -129,7 +129,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
 
     @Override
     public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
-            UUID leaderboardGroupId, byte[] privateKeyEncryptionPassphrase, Optional<String> optionalKeyName) throws Exception {
+            UUID leaderboardGroupId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
         setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, leaderboardGroupId.toString(), host, ""+port);

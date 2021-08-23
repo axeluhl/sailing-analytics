@@ -16,6 +16,11 @@ public class PlainRedirectDTO extends AbstractRedirectDTO {
         return "/index.html";
     }
     
+    @Override
+    public void accept(RedirectVisitor visitor) throws Exception {
+        visitor.visit(this);
+    }
+
     static PlainRedirectDTO parse(String redirectPath) {
         final PlainRedirectDTO candidate = new PlainRedirectDTO();
         final PlainRedirectDTO result;

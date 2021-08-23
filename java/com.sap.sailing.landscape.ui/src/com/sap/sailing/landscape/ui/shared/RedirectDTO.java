@@ -61,6 +61,8 @@ public interface RedirectDTO extends IsSerializable {
     }
 
     Type getType();
+    
+    void accept(RedirectVisitor visitor) throws Exception;
 
     /**
      * From a redirect path as found on {@link SailingApplicationReplicaSetDTO#getDefaultRedirectPath()} infers the
