@@ -24,6 +24,6 @@ public class InsertEventStatement extends AbstractPreparedInsertStatement<Event>
         getPreparedStatement().setBoolean(6, event.isPublic());
         getPreparedStatement().setString(7, event.getDescription());
         final Position location = event.getLocation();
-        getPreparedStatement().setString(8, location != null ? String.format("POINT(%1.8f %1.8f)", location.getLatDeg(), location.getLngDeg()) : null);
+        getPreparedStatement().setString(8, location != null ? String.format("POINT(%1.8f %1.8f)", location.getLngDeg(), location.getLatDeg()) : null);
     }
 }
