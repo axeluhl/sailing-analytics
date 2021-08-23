@@ -30,6 +30,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.security.ui.client.UserService;
@@ -87,19 +88,46 @@ public class ExpeditionAllInOneAfterImportHandler {
             @Override
             public void onSuccess(EventDTO result) {
                 event = result;
-                eventsRefresher.addIfNotContained(result);
+                eventsRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<EventDTO>() {
+                    @Override
+                    public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
+                        return dto1.id.equals(dto2.id);
+                    }
+                    @Override
+                    public int hashCode(EventDTO t) {
+                        return t.id.hashCode();
+                    }
+                });
                 sailingServiceWrite.getRegattaByName(regattaName, new DataLoadingCallback<RegattaDTO>() {
                     @Override
                     public void onSuccess(RegattaDTO result) {
                         regatta = result;
-                        regattasRefresher.addIfNotContained(result);
+                        regattasRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<RegattaDTO>() {
+                            @Override
+                            public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
+                                return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
+                            }
+                            @Override
+                            public int hashCode(RegattaDTO t) {
+                                return t.getRegattaIdentifier().hashCode();
+                            }
+                        });
                         regattasRefresher.callFillAndReloadInitially(regattaOracleToRefresh);
                         sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
                                 new DataLoadingCallback<StrippedLeaderboardDTOWithSecurity>() {
                             @Override
                             public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
                                 leaderboard = result;
-                                leaderboardsRefresher.addIfNotContained(result);
+                                leaderboardsRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<StrippedLeaderboardDTOWithSecurity>() {
+                                    @Override
+                                    public boolean representSameEntity(StrippedLeaderboardDTOWithSecurity dto1, StrippedLeaderboardDTOWithSecurity dto2) {
+                                        return dto1.getName().equals(dto2.getName());
+                                    }
+                                    @Override
+                                    public int hashCode(StrippedLeaderboardDTOWithSecurity t) {
+                                        return t.getName().hashCode();
+                                    }
+                                });
                                 sailingServiceWrite.getTrackFileImportDeviceIds(gpsDeviceIds,
                                     new DataLoadingCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
                                         @Override

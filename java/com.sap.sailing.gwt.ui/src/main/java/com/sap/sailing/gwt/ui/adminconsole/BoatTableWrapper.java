@@ -173,7 +173,10 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 return table;
             }
         };
-        filterField.setUpdatePermissionFilterForCheckbox(boat -> userService.hasPermission(boat, DefaultActions.UPDATE));
+        
+        filterField.setUpdatePermissionFilterForCheckbox(boat -> {
+            return boat != null && boat.getIdAsString() != null && userService.hasPermission(boat, DefaultActions.UPDATE);
+        });
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         // BoatTable edit features
         final HasPermissions type = SecuredDomainType.BOAT;
@@ -213,7 +216,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
     }
     
     public void filterBoats(Iterable<BoatDTO> boats) {
-        getFilteredBoats(boats);
+        filterField.updateAll(boats);
     }
     
     public void refreshBoatList(boolean loadOnlyStandaloneBoats, final Callback<Iterable<BoatDTO>, Throwable> callback) {
@@ -229,7 +232,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
                 @Override
                 public void onSuccess(Iterable<BoatDTO> result) {
-                    getFilteredBoats(result);
                     filterBoats(result);
                     if (callback != null) {
                         callback.onSuccess(result);
@@ -241,7 +243,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 // Don't fetch from server but ask our unified data model to deliver the boats without forcing server
                 // round-trip unless the boats haven't been loaded at all so far
                 boatsRefresher.callFillAndReloadInitially(boats -> {
-                    getFilteredBoats(boats);
                     filterBoats(boats);
                     if (callback != null) {
                         callback.onSuccess(boats);
@@ -259,7 +260,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
     
                     @Override
                     public void onSuccess(Iterable<BoatDTO> result) {
-                        getFilteredBoats(result);
                         filterBoats(result);
                         if (callback != null) {
                             callback.onSuccess(result);
@@ -268,10 +268,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 });
             }
         }
-    }
-
-    private void getFilteredBoats(Iterable<BoatDTO> result) {
-        filterField.updateAll(result);
     }
 
     void openEditBoatDialog(final BoatDTO originalBoat, String boatClassName) {
@@ -287,7 +283,16 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                     @Override
                     public void onSuccess(BoatDTO updatedBoat) {
                         if (boatsRefresher != null) {
-                            boatsRefresher.addIfNotContainedElseReplace(originalBoat, updatedBoat);
+                            boatsRefresher.addIfNotContainedElseReplace(updatedBoat, new EntityIdentityComparator<BoatDTO>() {
+                                @Override
+                                public boolean representSameEntity(BoatDTO dto1, BoatDTO dto2) {
+                                    return dto1.getIdAsString().equals(dto2.getIdAsString());
+                                }
+                                @Override
+                                public int hashCode(BoatDTO t) {
+                                    return t.getIdAsString().hashCode();
+                                }
+                            });
                         }
                         if (competitorsRefresher != null) {
                             competitorsRefresher.reloadAndCallFillAll();

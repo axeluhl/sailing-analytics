@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.function.Predicate;
 
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+
 /**
  * A {@link Refresher} offers methods to register a displayer of a specific DTO type, force reloads and give the
  * possibility to update the centrally managed data. The displayer will be informed asynchronously after data changes
@@ -82,18 +84,11 @@ public interface Refresher<T> {
     void remove(T dto);
 
     /**
-     * Like {@link #add(Object)}, but an {@link Object#equals(Object) equal} original DTO will be replaced by {@code newDto} if
-     * found in the list of DTOs known to this refresher. This will only take place if the DTO list already exists,
+     * Like {@link #add(Object)}, but an existing DTO will be replaced by {@code dto} if
+     * found in the list of DTOs known to this refresher, identified by {@link EntityIdentityComparator#equals(Object) equal}. This will only take place if the DTO list already exists,
      * indicating that it has been requested before.
      */
-    void addIfNotContainedElseReplace(T oldDto, T newDto);
-
-    /**
-     * Like {@link #add(Object)}, but an {@link Object#equals(Object) equal} DTO will be ignored if
-     * found in the list of DTOs known to this refresher. This will only take place if the DTO list already exists,
-     * indicating that it has been requested before.
-     */
-    void addIfNotContained(T dto);
+    void addIfNotContainedElseReplace(T dto, EntityIdentityComparator<T> comp);
 
     /**
      * {@link #remove(Object) Removes} all objects from this refresher that {@link Predicate#test(Object) are matched) by the

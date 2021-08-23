@@ -10,7 +10,6 @@ import java.util.List;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -415,16 +414,13 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
         if (leaderboardName != null) {
-            GWT.log("leaderboardName != null");
             sailingServiceWrite.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
             if (competitorsRefresher != null) {
-                GWT.log("competitorsRefresher != null");
                 // Don't fetch from server but ask our unified data model to deliver the competitors without forcing server
                 // round-trip unless the competitors haven't been loaded at all so far
                 competitorsRefresher.callFillAndReloadInitially(competitors->myCallback.onSuccess(competitors));
             } else {
-                GWT.log("competitorsRefresher == null");
                 sailingServiceWrite.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
             }
         }
@@ -463,10 +459,27 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     @Override
                     public void onSuccess(CompetitorWithBoatDTO updatedCompetitor) {
                         if (competitorsRefresher != null) {
-                            competitorsRefresher.addIfNotContainedElseReplace(originalCompetitor, updatedCompetitor);
-                            competitorsRefresher.callAllFill();
+                            competitorsRefresher.addIfNotContainedElseReplace(updatedCompetitor, new EntityIdentityComparator<CompetitorDTO>() {
+                                @Override
+                                public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
+                                    return dto1.getIdAsString().equals(dto2.getIdAsString());
+                                }
+                                @Override
+                                public int hashCode(CompetitorDTO t) {
+                                    return t.getIdAsString().hashCode();
+                                }
+                            });
                             if (boatsRefresher != null) {
-                                boatsRefresher.addIfNotContainedElseReplace(originalCompetitor.getBoat(), updatedCompetitor.getBoat());
+                                boatsRefresher.addIfNotContainedElseReplace(updatedCompetitor.getBoat(), new EntityIdentityComparator<BoatDTO>() {
+                                    @Override
+                                    public boolean representSameEntity(BoatDTO dto1, BoatDTO dto2) {
+                                        return dto1.getIdAsString().equals(dto2.getIdAsString());
+                                    }
+                                    @Override
+                                    public int hashCode(BoatDTO t) {
+                                        return t.getIdAsString().hashCode();
+                                    }
+                                });
                                 boatsRefresher.callAllFill();
                             }
                         }
@@ -498,7 +511,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 newCompetitor, createWithBoatByDefault, new DialogCallback<CompetitorWithBoatDTO>() {
                     @Override
                     public void ok(final CompetitorWithBoatDTO competitor) {
-                        GWT.log("OK 001");
                         if (competitor.hasBoat()) {
                             sailingServiceWrite.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
                         } else {
@@ -527,7 +539,16 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     @Override
                     public void onSuccess(CompetitorDTO updatedCompetitor) {
                         if (competitorsRefresher != null) {
-                            competitorsRefresher.addIfNotContainedElseReplace(originalCompetitor, updatedCompetitor);
+                            competitorsRefresher.addIfNotContainedElseReplace(updatedCompetitor, new EntityIdentityComparator<CompetitorDTO>() {
+                                @Override
+                                public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
+                                    return dto1.getIdAsString().equals(dto2.getIdAsString());
+                                }
+                                @Override
+                                public int hashCode(CompetitorDTO t) {
+                                    return t.getIdAsString().hashCode();
+                                }
+                            });
                         }
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
@@ -604,6 +625,11 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             public void onSuccess(T addedCompetitor) {
                 if (competitorsRefresher != null) {
                     competitorsRefresher.add(addedCompetitor);
+                }
+                if (boatsRefresher != null && addedCompetitor instanceof CompetitorWithBoatDTO) {
+                    CompetitorWithBoatDTO competitorWithBoatDTO = (CompetitorWithBoatDTO) addedCompetitor;
+                    boatsRefresher.add(competitorWithBoatDTO.getBoat());
+                    boatsRefresher.callAllFill();
                 }
                 getFilterField().add(addedCompetitor);
                 getDataProvider().refresh();

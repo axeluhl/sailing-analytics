@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.Refresher;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 
 public abstract class AbstractRefresher<T> implements Refresher<T> {
     private Logger logger = Logger.getLogger(getClass().getName());
@@ -121,29 +123,15 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     }
     
     @Override
-    public void addIfNotContained(T dto) {
+    public void addIfNotContainedElseReplace(T dto, EntityIdentityComparator<T> comp) {
         if (dto != null && dtos != null) {
-            final int index = dtos.indexOf(dto);
-            if (index != -1) {
+            Optional<T> existingDtoOption = dtos.stream().filter(listDto -> comp.representSameEntity(listDto, dto))
+                    .findFirst();
+            if (existingDtoOption.isPresent()) {
+                int index = dtos.indexOf(existingDtoOption.get());
                 dtos.set(index, dto);
             } else {
                 add(dto);
-            }
-        }
-    }
-    
-    @Override
-    public void addIfNotContainedElseReplace(T oldDto, T newDto) {
-        if (dtos != null) {
-            final int index = dtos.indexOf(oldDto);
-            if (index != -1) {
-                if (newDto == null) {
-                    dtos.remove(index);
-                } else {
-                    dtos.set(index, newDto);
-                }
-            } else {
-                add(newDto);
             }
         }
     }

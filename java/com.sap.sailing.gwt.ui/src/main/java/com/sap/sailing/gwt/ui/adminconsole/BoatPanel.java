@@ -31,7 +31,7 @@ public class BoatPanel extends SimplePanel implements FilterablePanelProvider<Bo
 
     public BoatPanel(final Presenter presenter, final StringMessages stringMessages) {
         super();
-        this.boatsDisplayer = result->refreshBoatList();
+        this.boatsDisplayer = result -> refreshBoatList();
         this.boatTable = new BoatTableWrapper<>(presenter.getSailingService(), presenter.getUserService(),
                 presenter.getBoatsRefresher(), presenter.getCompetitorsRefresher(), stringMessages,
                 presenter.getErrorReporter(), /* multiSelection */ true, /* enablePager */ true, 100, true);
