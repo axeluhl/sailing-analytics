@@ -736,15 +736,16 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         Util.addAll(eids, eventIDs);
                     }
                     archive.removeRemoteServerReference(from, Optional.of(eventIDs));
+                    final AwsRegion region = new AwsRegion(regionId);
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
-                            getLandscape().getCentralReverseProxy(new AwsRegion(regionId));
+                            getLandscape().getCentralReverseProxy(region);
                     SailingAnalyticsProcess<String> archiveMaster = getSailingAnalyticsProcessFromDTO(archiveReplicaSet.getMaster());
                     defaultRedirect.accept(new ALBToReverseProxyRedirectMapper<>(
                             centralReverseProxy, hostnameFromWhichToArchive, archiveMaster, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
                     if (removeApplicationReplicaSet) {
                         final SailingAnalyticsProcess<String> fromMaster = getSailingAnalyticsProcessFromDTO(applicationReplicaSetToArchive.getMaster());
                         removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption);
-                        final Database fromDatabase = fromMaster.getDatabaseConfiguration(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+                        final Database fromDatabase = fromMaster.getDatabaseConfiguration(region, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
                         final Database toDatabase = getMongoEndpoint(moveDatabaseHere).getDatabase(fromDatabase.getName());
                         getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
                     }

@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws;
 import java.util.Optional;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ProcessFactory;
@@ -16,5 +17,5 @@ extends ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     <HostT extends AwsInstance<ShardingKey>> Iterable<ProcessT> getReplicas(Optional<Duration> optionalTimeout, HostSupplier<ShardingKey, HostT> hostSupplier,
             ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactory) throws Exception;
     
-    Database getDatabaseConfiguration(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    Database getDatabaseConfiguration(Region region, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

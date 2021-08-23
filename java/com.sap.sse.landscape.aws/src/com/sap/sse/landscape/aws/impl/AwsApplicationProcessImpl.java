@@ -12,6 +12,7 @@ import org.json.simple.JSONObject;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
@@ -41,10 +42,10 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public Database getDatabaseConfiguration(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+    public Database getDatabaseConfiguration(Region region, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         if (databaseConfiguration == null) {
-            databaseConfiguration = new MongoUriParser().parseMongoUri(getEnvShValueFor(DefaultProcessConfigurationVariables.MONGODB_URI, optionalTimeout,
+            databaseConfiguration = new MongoUriParser<ShardingKey>(landscape, region).parseMongoUri(getEnvShValueFor(DefaultProcessConfigurationVariables.MONGODB_URI, optionalTimeout,
                 optionalKeyName, privateKeyEncryptionPassphrase));
         }
         return databaseConfiguration;
