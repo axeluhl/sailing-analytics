@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,5 +28,6 @@ public class ImageEditDialog extends ImageDialog {
         List<String> tags = new ArrayList<String>();
         tags.addAll(imageDTO.getTags());
         tagsListEditor.setValue(tags);
+        ValueChangeEvent.fire(imageURLAndUploadComposite, imageURLAndUploadComposite.getURLs());
     }
 }

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -25,7 +27,6 @@ import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObser
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
@@ -56,6 +57,8 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
     protected Image image;
     private final ExpandedUiWithCheckboxes<String> expandedUi;
     private final BusyIndicator busyIndicator;
+    private int busyCounter;
+    private final HashMap<String, Pair<Integer, Integer>> imageDimensionsMap;
 
     protected static class ImageParameterValidator implements Validator<List<ImageResizingTaskDTO>> {
         private final StringMessages stringMessages;
@@ -68,9 +71,15 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             this.storageServiceAvailable = storageServiceAvailable;
             this.doResize = new ArrayList<CheckBox>();
         }
-        
+
         public void setCheckBoxes(List<CheckBox> doResize) {
             this.doResize = doResize;
+        }
+
+        private enum CheckBoxStyle {
+            Invisible,
+            Normal,
+            Error
         }
 
         /*
@@ -83,6 +92,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         @Override
         public String getErrorMessage(final List<ImageResizingTaskDTO> resizingTasks) {
             StringJoiner errorJoiner = new StringJoiner("\n");
+            final Map<CheckBox, CheckBoxStyle> checkBoxStyleMap = new HashMap<>();
             for (ImageResizingTaskDTO resizingTask : resizingTasks) {
                 String errorMessage = null;
                 final ImageDTO imageToValidate = resizingTask.getImage();
@@ -111,18 +121,32 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                             final CheckBox checkBox = getCheckBoxForTag(mediaTag.getName(), imageToValidate);
                             if (imageToValidate.hasTag(mediaTag.getName())
                                     && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight())) {
-                                if (!resizingTask.getResizingTask().contains(mediaTag)) {
+                                // Image has tag but is not compatible
+                                if (!resizingTask.getResizingTask().contains(mediaTag)) { // Image has tag but resizeTask does not
                                     errorMessage += getSizeErrorMessage(mediaTag, stringMessages) + "\n";
-                                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getErrorStyle());
+                                    checkBoxStyleMap.put(checkBox, CheckBoxStyle.Error);
                                     if (!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
                                         checkBox.setEnabled(false);
                                     }
                                 } else {
-                                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getNormalStyle());
+                                    // Set checkbox to Normal if not already set to Error
+                                    checkBoxStyleMap.compute(checkBox, (k, v) -> {
+                                        if (v == CheckBoxStyle.Error) {
+                                            return CheckBoxStyle.Error;
+                                        } else {
+                                            return CheckBoxStyle.Normal;
+                                        }
+                                    });
                                 }
                             } else {
-                                checkBox.setStyleName(ExpandedUiWithCheckboxes.getInvisibleStyle());
-                                checkBox.setValue(false);
+                                // Set checkbox to Invisble if not already set to Normal or Error
+                                checkBoxStyleMap.compute(checkBox, (k, v) -> {
+                                    if (v == null || v == CheckBoxStyle.Invisible) {
+                                        return CheckBoxStyle.Invisible;
+                                    } else {
+                                        return v;
+                                    }
+                                });
                             }
                         }
                     }
@@ -135,6 +159,21 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                 }
                 if (errorMessage != null) {
                     errorJoiner.add(errorMessage);
+                }
+            }
+            for (Map.Entry<CheckBox, CheckBoxStyle> entry : checkBoxStyleMap.entrySet()) {
+                final CheckBox checkBox = entry.getKey();
+                switch (entry.getValue()) {
+                case Invisible:
+                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getInvisibleStyle());
+                    checkBox.setValue(false);
+                    break;
+                case Normal:
+                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getNormalStyle());
+                    break;
+                case Error:
+                    checkBox.setStyleName(ExpandedUiWithCheckboxes.getErrorStyle());
+                    break;
                 }
             }
             return errorJoiner.toString();
@@ -222,29 +261,40 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             @Override
             public void onValueChange(ValueChangeEvent<List<String>> event) {
                 List<String> imageUrls = event.getValue();
-                String imageUrlAsString = imageUrls.isEmpty() ? null : imageUrls.get(0);
-                if (imageUrlAsString == null || imageUrlAsString.isEmpty()) {
+                if (imageUrls == null || imageUrls.isEmpty()) {
                     widthInPxBox.setText("");
                     heightInPxBox.setText("");
                 } else {
                     busyIndicator.setBusy(true);
-                    ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString,
-                            new AsyncCallback<Util.Pair<Integer, Integer>>() {
-                                @Override
-                                public void onSuccess(Pair<Integer, Integer> imageSize) {
-                                    busyIndicator.setBusy(false);
-                                    if (imageSize != null) {
-                                        widthInPxBox.setValue(imageSize.getA());
-                                        heightInPxBox.setValue(imageSize.getB());
-                                    }
-                                    validateAndUpdate();
-                                }
+                    busyCounter = 0;
+                    for (final String imageUrl : imageUrls) {
+                        if (!imageDimensionsMap.containsKey(imageUrl)) {
+                            busyCounter += 1;
+                            ImageDialog.this.sailingService.resolveImageDimensions(imageUrl,
+                                    new AsyncCallback<Pair<Integer, Integer>>() {
+                                        @Override
+                                        public void onSuccess(Pair<Integer, Integer> imageSize) {
+                                            imageDimensionsMap.put(imageUrl, imageSize);
+                                            busyCounter -= 1;
+                                            if (busyCounter <= 0) {
+                                                busyIndicator.setBusy(false);
+                                            }
+                                            validateAndUpdate();
+                                        }
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    busyIndicator.setBusy(false);
-                                }
-                            });
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            busyCounter -= 1;
+                                            if (busyCounter <= 0) {
+                                                busyIndicator.setBusy(false);
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+                    if(busyCounter <= 0) {
+                        busyIndicator.setBusy(false);
+                    }
                 }
                 validateAndUpdate();
             }
@@ -268,6 +318,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                 validateAndUpdate();
             }
         });
+        imageDimensionsMap = new HashMap<>(4);
     }
 
     /**
@@ -282,26 +333,45 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         for (String tag : tagsListEditor.getValue()) {
             tags.add(tag);
         }
-        final List<MediaTagConstants> resizingTask = new ArrayList<MediaTagConstants>();
+        final List<MediaTagConstants> mediaTags = new ArrayList<MediaTagConstants>();
         for (int i = 0; i < tags.size(); i++) {
             if (Arrays.asList(MediaTagConstants.values()).contains(MediaTagConstants.fromName(tags.get(i)))
                     && expandedUi.getCheckBoxes().get(i).getValue()) {
-                resizingTask.add(MediaTagConstants.fromName(tags.get(i)));
+                mediaTags.add(MediaTagConstants.fromName(tags.get(i)));
             }
         }
         ArrayList<ImageResizingTaskDTO> results = new ArrayList<>(imageURLAndUploadComposite.getURLs().size());
-        for (String imageURL : imageURLAndUploadComposite.getURLs()) {
+        List<String> urls = imageURLAndUploadComposite.getURLs();
+        for (int i = 0; i < urls.size(); i++) {
+            final String imageURL = urls.get(i);
             final ImageDTO image = new ImageDTO(imageURL, creationDate);
             image.setTitle(titleTextBox.getValue());
             image.setSubtitle(subtitleTextBox.getValue());
             image.setCopyright(copyrightTextBox.getValue());
-            if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
-                image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+            final Pair<Integer, Integer> dims = imageDimensionsMap.get(imageURL);
+            if (dims != null) {
+                image.setSizeInPx(dims.getA(), dims.getB());
+                if (i == 0) {
+                    widthInPxBox.setValue(dims.getA());
+                    heightInPxBox.setValue(dims.getB());
+                }
             }
             image.setTags(tags);
-            results.add(new ImageResizingTaskDTO(image, resizingTask));
+            final List<MediaTagConstants> resizeTags = new ArrayList<>();
+            for (final MediaTagConstants mediaTag : mediaTags) {
+                if (imageNeedsResizeForTag(image, mediaTag)) {
+                    resizeTags.add(mediaTag);
+                }
+            }
+            results.add(new ImageResizingTaskDTO(image, resizeTags));
         }
         return results;
+    }
+
+    private static boolean imageNeedsResizeForTag(ImageDTO image, MediaTagConstants mediaTag) {
+        final boolean widthExceeded = image.getWidthInPx() > mediaTag.getMaxWidth();
+        final boolean heightExceeded = image.getHeightInPx() > mediaTag.getMaxHeight();
+        return widthExceeded || heightExceeded;
     }
 
     @Override
