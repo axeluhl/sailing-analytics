@@ -85,6 +85,8 @@ public interface Refresher<T> {
      * Like {@link #add(Object)}, but an {@link Object#equals(Object) equal} original DTO will be replaced by {@code newDto} if
      * found in the list of DTOs known to this refresher. This will only take place if the DTO list already exists,
      * indicating that it has been requested before.
+     * 
+     * @param newDto if {@code null}, the {@code oldDto} will be removed if found, and nothing will be added
      */
     void addIfNotContainedElseReplace(T oldDto, T newDto);
 

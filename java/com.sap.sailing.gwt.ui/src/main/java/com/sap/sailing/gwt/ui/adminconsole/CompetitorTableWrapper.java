@@ -10,7 +10,6 @@ import java.util.List;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -415,16 +414,13 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
         if (leaderboardName != null) {
-            GWT.log("leaderboardName != null");
             sailingServiceWrite.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
             if (competitorsRefresher != null) {
-                GWT.log("competitorsRefresher != null");
                 // Don't fetch from server but ask our unified data model to deliver the competitors without forcing server
                 // round-trip unless the competitors haven't been loaded at all so far
                 competitorsRefresher.callFillAndReloadInitially(competitors->myCallback.onSuccess(competitors));
             } else {
-                GWT.log("competitorsRefresher == null");
                 sailingServiceWrite.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
             }
         }
@@ -498,7 +494,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 newCompetitor, createWithBoatByDefault, new DialogCallback<CompetitorWithBoatDTO>() {
                     @Override
                     public void ok(final CompetitorWithBoatDTO competitor) {
-                        GWT.log("OK 001");
                         if (competitor.hasBoat()) {
                             sailingServiceWrite.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
                         } else {

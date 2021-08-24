@@ -74,7 +74,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
                 sailingServiceWrite, stringMessages, errorReporter);
         boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingServiceWrite, userService,
                 /* boatsRefresher not needed; registered boats taken from regatta log */ null,
-                /* competitorsRefresher not neede */ null, stringMessages, errorReporter, /* multiSelection */ false,
+                /* competitorsRefresher not needed */ null, stringMessages, errorReporter, /* multiSelection */ false,
                 /* enable Pager */ true, /* allowActions */ false);
 
         registerSelectionChangeHandler(competitorTable.getSelectionModel(), this::mappedToSelectionChanged);
