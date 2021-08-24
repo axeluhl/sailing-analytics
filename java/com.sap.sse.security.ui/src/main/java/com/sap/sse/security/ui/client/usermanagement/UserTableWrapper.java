@@ -26,6 +26,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
@@ -200,7 +201,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 string.add(t.getFullName());
                 string.add(t.getEmail());
                 string.add(t.getCompany());
-                string.add(t.getUserGroups().toString());
+                Util.addAll(Util.map(t.getUserGroups(), StrippedUserGroupDTO::getName), string);
                 return string;
             }
 
