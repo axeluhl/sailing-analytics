@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -72,16 +73,16 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, WriteConcern.UNACKNOWLEDGED);
+        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, ReadConcern.DEFAULT, WriteConcern.UNACKNOWLEDGED);
     }
     
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
-            TypeBasedServiceFinderFactory serviceFinderFactory, WriteConcern writeConcern) {
+            TypeBasedServiceFinderFactory serviceFinderFactory, ReadConcern readConcern, WriteConcern writeConcern) {
         super(serviceFinderFactory != null ? createFixServiceFinder(serviceFinderFactory) : null,
               serviceFinderFactory != null ? serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class) : null);
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
         fixesCollection = mongoOF.getGPSFixCollection();
-        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, writeConcern);
+        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, readConcern, writeConcern);
         this.writeConcern = writeConcern;
     }
 
