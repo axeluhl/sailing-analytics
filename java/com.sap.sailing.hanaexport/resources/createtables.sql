@@ -6,7 +6,7 @@ CREATE COLUMN TABLE SAILING."Event" (
         "venue"                 NVARCHAR(255),
         "isListed"              BOOLEAN,
         "description"           NVARCHAR(5000),
-        "location"              ST_POINT
+        "location"              ST_POINT(3857)
 );
 CREATE ROW TABLE SAILING."ScoringScheme" (
 	"id" NVARCHAR(255) PRIMARY KEY,
