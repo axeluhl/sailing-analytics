@@ -283,7 +283,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         sailingEventsListBox.addItem(stringMessages.selectSailingEvent(), stringMessages.selectSailingEvent());
         final Iterable<EventDTO> eventsSortedByName = Util.stream(existingEvents)
                 .filter(event->userService.hasPermission(event, DefaultActions.UPDATE))
-                .sorted(Util.naturalNamedComparator())::iterator;
+                .sorted(Util.naturalNamedComparator(/* caseSensitive */ true))::iterator;
         for (EventDTO event : eventsSortedByName) {
             sailingEventsListBox.addItem(event.getName(), event.getId().toString());
             if (defaultEvent != null) {

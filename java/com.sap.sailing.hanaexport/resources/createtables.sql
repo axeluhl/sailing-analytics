@@ -6,7 +6,7 @@ CREATE COLUMN TABLE SAILING."Event" (
         "venue"                 NVARCHAR(255),
         "isListed"              BOOLEAN,
         "description"           NVARCHAR(5000),
-        "location"              ST_POINT
+        "location"              ST_POINT(3857)
 );
 CREATE ROW TABLE SAILING."ScoringScheme" (
 	"id" NVARCHAR(255) PRIMARY KEY,
@@ -49,14 +49,14 @@ CREATE COLUMN TABLE SAILING."Race" (
 	FOREIGN KEY ("regatta") REFERENCES SAILING."Regatta" ("name")
 );
 CREATE TABLE SAILING."Competitor" (
-        "id"            NVARCHAR(36)    PRIMARY KEY,
+        "id"            NVARCHAR(255)    PRIMARY KEY,
         "name"          NVARCHAR(255)   NOT NULL,
         "shortName"     NVARCHAR(20),
         "nationality"   NVARCHAR(3)     NOT NULL,
         "sailNumber"    NVARCHAR(255)
 );
 CREATE TABLE SAILING."CompetitorRace" (
-        "competitorId"  NVARCHAR(36),
+        "competitorId"  NVARCHAR(255),
         "race"          NVARCHAR(255),
         "regatta"	NVARCHAR(255),
         PRIMARY KEY ("competitorId", "race"),
@@ -66,7 +66,7 @@ CREATE TABLE SAILING."CompetitorRace" (
 CREATE TABLE SAILING."RaceResult" (
         "regatta"       NVARCHAR(255)    NOT NULL,
         "raceColumn"	NVARCHAR(255)    NOT NULL,
-        "competitorId"  NVARCHAR(36)     NOT NULL,
+        "competitorId"  NVARCHAR(255)     NOT NULL,
         "points"        DOUBLE,
         "discarded"	BOOLEAN,
         "irm"           NVARCHAR(4),
@@ -76,7 +76,7 @@ CREATE TABLE SAILING."RaceResult" (
 CREATE TABLE SAILING."RaceStats" (
         "race"          NVARCHAR(255)    NOT NULL,
         "regatta"       NVARCHAR(255)    NOT NULL,
-        "competitorId"  NVARCHAR(36)     NOT NULL,
+        "competitorId"  NVARCHAR(255)     NOT NULL,
         "rankOneBased"  INTEGER,
         "distanceSailedInMeters"                DOUBLE,
         "elapsedTimeInSeconds"                  DOUBLE,
@@ -105,7 +105,7 @@ CREATE TABLE SAILING."LegStats" (
         "race"          NVARCHAR(255)    NOT NULL,
         "regatta"       NVARCHAR(255)    NOT NULL,
         "number"        INTEGER          NOT NULL,
-        "competitorId"  NVARCHAR(36)     NOT NULL,
+        "competitorId"  NVARCHAR(255)     NOT NULL,
         "rankOneBased"  INTEGER,
         "distanceSailedInMeters"                DOUBLE,
         "elapsedTimeInSeconds"                  DOUBLE,
@@ -123,7 +123,7 @@ CREATE TABLE SAILING."LegStats" (
 CREATE TABLE SAILING."Maneuver" (
         "race"          NVARCHAR(255)    NOT NULL,
         "regatta"       NVARCHAR(255)    NOT NULL,
-        "competitorId"  NVARCHAR(36)     NOT NULL,
+        "competitorId"  NVARCHAR(255)     NOT NULL,
         "timepoint"     TIMESTAMP        NOT NULL,
         "type"          NVARCHAR(20)     NOT NULL,
         "newTack"       NVARCHAR(20),

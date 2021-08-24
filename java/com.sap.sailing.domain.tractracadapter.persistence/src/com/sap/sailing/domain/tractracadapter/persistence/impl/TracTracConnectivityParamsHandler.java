@@ -149,8 +149,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         final String creatorName = SessionUtils.getPrincipal().toString();
         final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, tractracRace.getEvent().getName(), jsonURL,
                 (params.getLiveURI() == null ? null : params.getLiveURI().toString()),
-                /* stored URI */ params.isPreferReplayIfAvailable() && params.isReplayRace(tractracRace)
-                    ? null // we mainly want to enable the user to list the event's races again in case they are removed;
+                /* stored URI */ params.isReplayRace(tractracRace) ? null // we mainly want to enable the user to list the event's races again in case they are removed;
                     : (params.getStoredURI() == null ? null : params.getStoredURI().toString()), // live/stored stuff comes from the tracking params
                 params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword());
         tractracMongoObjectFactory.updateTracTracConfiguration(tracTracConfiguration);

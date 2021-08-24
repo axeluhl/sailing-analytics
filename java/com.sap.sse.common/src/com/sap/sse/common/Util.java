@@ -789,16 +789,20 @@ public class Util {
     }
 
     public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection) {
+        return sortNamedCollection(collection, /* caseSensitive */ true);
+    }
+
+    public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection, boolean caseSensitive) {
         List<T> sortedCollection = new ArrayList<>(collection);
-        Collections.sort(sortedCollection, naturalNamedComparator());
+        Collections.sort(sortedCollection, naturalNamedComparator(caseSensitive));
         return sortedCollection;
     }
-    
-    public static <T extends Named> Comparator<T> naturalNamedComparator() {
+
+    public static <T extends Named> Comparator<T> naturalNamedComparator(boolean caseSensitive) {
         return new Comparator<T>() {
             @Override
             public int compare(T o1, T o2) {
-                return new NaturalComparator().compare(o1.getName(), o2.getName());
+                return new NaturalComparator(caseSensitive).compare(o1.getName(), o2.getName());
             }
         };
     }

@@ -1,4 +1,4 @@
-FROM donaldduck70/sapjvm8:8.1.073
+FROM donaldduck70/sapjvm8:8.1.078
 LABEL maintainer=axel.uhl@sap.com
 # Download and extract the release
 WORKDIR /home/sailing/servers/server
@@ -12,6 +12,7 @@ RUN wget -O /tmp/RELEASE.tar.gz http://releases.sapsailing.com/RELEASE/RELEASE.t
  && tar xzvpf /tmp/RELEASE.tar.gz \
  && rm /tmp/RELEASE.tar.gz
 COPY env.sh .
+RUN cat env-default-rules.sh >>env.sh
 COPY start .
 COPY JavaSE-11.profile .
 EXPOSE 8888 14888 8000 7091 6666

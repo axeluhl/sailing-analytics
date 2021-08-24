@@ -48,13 +48,15 @@ public class MetadataCollection extends MongoFixHandler {
     private final MongoCollection<Document> metadataCollection;
     private final ConcurrentHashMap<DeviceIdentifier, MetadataUpdater> metadataUpdaters;
     private final WriteConcern writeConcern;
+    private final ReadConcern readConcern;
 
     public MetadataCollection(MongoObjectFactoryImpl mongoOF,
             TypeBasedServiceFinder<FixMongoHandler<?>> fixServiceFinder,
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder, WriteConcern writeConcern) {
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder, ReadConcern readConcern, WriteConcern writeConcern) {
         super(fixServiceFinder, deviceServiceFinder);
         this.metadataCollection = mongoOF.getGPSFixMetadataCollection();
         this.metadataUpdaters = new ConcurrentHashMap<>();
+        this.readConcern = readConcern;
         this.writeConcern = writeConcern;
     }
 
@@ -74,7 +76,7 @@ public class MetadataCollection extends MongoFixHandler {
      */
     private Document findMetadataObjectInternal(DeviceIdentifier device) throws TransformationException {
         Bson query = getDeviceQuery(device);
-        Document result = metadataCollection.withReadConcern(ReadConcern.MAJORITY).find(query).first();
+        Document result = metadataCollection.withReadConcern(readConcern).find(query).first();
         return result;
     }
 
