@@ -3,31 +3,20 @@ package com.sap.sse.security.ui.client.component.usergroup.users;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER_GROUP;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.MultiSelectionModel;
-import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sse.common.Util;
@@ -44,75 +33,21 @@ import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGr
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class UserGroupDetailPanel extends Composite
-        implements Handler, ChangeHandler, KeyUpHandler, UserGroupListDataProviderChangeHandler {
+        implements Handler, UserGroupListDataProviderChangeHandler {
 
     private final UserGroupUserResources userGroupUserResources = GWT.create(UserGroupUserResources.class);
     private final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel;
     private final UserGroupUsersTableWrapper tenantUsersTable;
-    private final TenantUsersListDataProvider tenantUsersListDataProvider;
-
-    private class TenantUsersListDataProvider extends AbstractDataProvider<StrippedUserDTO> {
-        private final TextBox filterBox;
-
-        private TenantUsersListDataProvider(TextBox filterBox) {
-            this.filterBox = filterBox;
-        }
-
-        @Override
-        protected void onRangeChanged(HasData<StrippedUserDTO> display) {
-            final Set<UserGroupDTO> selectedUserGroups = userGroupSelectionModel.getSelectedSet();
-            final UserGroupDTO selectedUserGroup;
-            if (selectedUserGroups != null && selectedUserGroups.size() == 1) {
-                selectedUserGroup = selectedUserGroups.iterator().next();
-            } else {
-                selectedUserGroup = null;
-            }
-            final List<StrippedUserDTO> result = new ArrayList<>();
-            final List<StrippedUserDTO> show = new ArrayList<>();
-            final Range range = display.getVisibleRange();
-            int start = range.getStart();
-            int end = range.getStart() + range.getLength();
-            if (selectedUserGroup != null) {
-                for (final StrippedUserDTO user : selectedUserGroup.getUsers()) {
-                    if (user.getName().contains(filterBox.getText())) {
-                        result.add(user);
-                    }
-                }
-                for (int i = start; i < end && i < result.size(); i++) {
-                    final StrippedUserDTO username = result.get(i);
-                    show.add(username);
-                }
-            }
-            updateRowData(start, show);
-            updateRowCount(result.size(), true);
-        }
-
-        public void updateDisplays() {
-            getDataDisplays().forEach(this::onRangeChanged);
-        }
-    }
 
     public UserGroupDetailPanel(MultiSelectionModel<UserGroupDTO> refreshableSelectionModel,
             UserGroupListDataProvider tenantListDataProvider, UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, CellTableWithCheckboxResources tableResources) {
         userGroupUserResources.css().ensureInjected();
-        // setup filter
-        final HorizontalPanel filterPanel = new HorizontalPanel();
-        filterPanel.setSpacing(5);
-        filterPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        final TextBox filterBox = new TextBox();
-        filterBox.addChangeHandler(this);
-        filterBox.addKeyUpHandler(this);
-        final Label labelFilter = new Label(stringMessages.filterUsers());
-        filterPanel.add(labelFilter);
-        filterPanel.add(filterBox);
         refreshableSelectionModel.addSelectionChangeHandler(this);
         this.userGroupSelectionModel = refreshableSelectionModel;
         tenantListDataProvider.addChangeHandler(this);
         this.tenantUsersTable = new UserGroupUsersTableWrapper(stringMessages, errorReporter, tableResources,
                 userService, userGroupSelectionModel, () -> updateUserList());
-        tenantUsersListDataProvider = new TenantUsersListDataProvider(filterBox);
-        tenantUsersListDataProvider.addDataDisplay(tenantUsersTable.getTable());
         // add buttons, filter and listbox to panel
         final VerticalPanel addUserToGroupPanel = new VerticalPanel();
         final Widget buttonPanel = createButtonPanel(userService, stringMessages);
@@ -120,7 +55,6 @@ public class UserGroupDetailPanel extends Composite
             buttonPanel.setVisible(userService.hasPermission(TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel), UPDATE));
         });
         addUserToGroupPanel.add(buttonPanel);
-        addUserToGroupPanel.add(filterPanel);
         // addUserToGroupPanel.add(tenantUsersPanelCaption);
         addUserToGroupPanel.add(tenantUsersTable);
         initWidget(addUserToGroupPanel);
@@ -211,23 +145,9 @@ public class UserGroupDetailPanel extends Composite
         updateUserList();
     }
 
-    @Override
-    public void onKeyUp(KeyUpEvent event) {
-        updateUserList();
-    }
-
-    @Override
-    public void onChange(ChangeEvent event) {
-        updateUserList();
-    }
-
-    @Override
-    public void onChange() {
-
-    }
-
     public void updateUserList() {
-        tenantUsersListDataProvider.updateDisplays();
+        tenantUsersTable.getFilterPanel().updateAll(userGroupSelectionModel.getSelectedSet().isEmpty() || userGroupSelectionModel.getSelectedSet().size() > 1 ?
+                Collections.emptySet() : userGroupSelectionModel.getSelectedSet().iterator().next().getUsers());
     }
 
     private List<String> getSelectedUserGroupUsernames() {
@@ -239,5 +159,10 @@ public class UserGroupDetailPanel extends Composite
             result = Collections.emptyList();
         }
         return result;
+    }
+
+    @Override
+    public void onChange() {
+        
     }
 }

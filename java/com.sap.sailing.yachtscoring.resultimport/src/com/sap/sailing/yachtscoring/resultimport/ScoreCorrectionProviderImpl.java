@@ -48,12 +48,12 @@ public class ScoreCorrectionProviderImpl extends AbstractYachtScoringProvider im
             for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
                 String eventName = resultDocDescr.getEventName() != null ? resultDocDescr.getEventName() : resultDocDescr.getRegattaName();
                 String boatClass = resultDocDescr.getBoatClass();
-                if(boatClass != null && eventName != null) {
-                    if(resultDocDescr.getCompetitorGenderType() != null) {
+                if (boatClass != null && eventName != null) {
+                    if (resultDocDescr.getCompetitorGenderType() != null) {
                         boatClass += ", " + resultDocDescr.getCompetitorGenderType().name();
                     }
                     Set<Util.Pair<String, TimePoint>> eventResultsSet = result.get(eventName);
-                    if(eventResultsSet == null) {
+                    if (eventResultsSet == null) {
                         eventResultsSet = new HashSet<Util.Pair<String, TimePoint>>();
                         result.put(eventName, eventResultsSet);
                     }

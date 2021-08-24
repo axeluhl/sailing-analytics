@@ -6,7 +6,7 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 public class ArrayListNavigableSetTest {
     @Test

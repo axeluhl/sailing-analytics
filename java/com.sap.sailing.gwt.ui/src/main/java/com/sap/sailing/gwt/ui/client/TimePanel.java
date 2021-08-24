@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
+import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -23,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.TimePanelCssResources.TimePanelCss;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider;
@@ -151,7 +153,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
                 return timeWithMinutesFormatter.format(date); 
             }
         });
-
+        timeSlider.ensureDebugId("timeSlider");
         timeSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
@@ -460,24 +462,23 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
      */
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
-                
-        boolean changed = false;
-        changed = timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
-        if (changed) {
+        final Optional<Pair<Double, Double>> changed =
+                timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
+        if (changed.isPresent()) {
+            final Double changedMin = changed.get().getA();
+            final Double changedMax = changed.get().getB();
             if (!timeRangeProvider.isZoomed()) {
-                timeRangeProvider.setTimeRange(min, max, this);
+                timeRangeProvider.setTimeRange(new Date(changedMin.longValue()), new Date(changedMax.longValue()), this);
             }
-            
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
                 timeSlider.setStepSize(numSteps, fireEvent);
             } else {
                 timeSlider.setStepSize(1000, fireEvent);
             }
-
             // Christopher: following setCurrentValue requires stepsize to be set <> 0 (otherwise division by zero; NaN)
             if (timeSlider.getCurrentValue() == null) {
-                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
+                timeSlider.setCurrentValue(changedMin, fireEvent);
             }
         }
     }

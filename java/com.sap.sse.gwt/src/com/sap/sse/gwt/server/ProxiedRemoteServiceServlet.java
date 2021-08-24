@@ -1,7 +1,10 @@
 package com.sap.sse.gwt.server;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +13,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
@@ -60,11 +64,9 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     protected SerializationPolicy doGetSerializationPolicy(
             HttpServletRequest request, String moduleBaseURL, String strongName) {
         String moduleBaseURLHdr = request.getHeader("X-GWT-Module-Base");
-
-        if(moduleBaseURLHdr != null){
+        if (moduleBaseURLHdr != null) {
             moduleBaseURL = moduleBaseURLHdr;
         }
-
         return super.doGetSerializationPolicy(request, moduleBaseURL, strongName);
     }
 
@@ -102,7 +104,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     protected Locale getClientLocale() {
         final HttpServletRequest request = getThreadLocalRequest();
         if (request != null) {
-            final String localeString = request.getHeader(HttpRequestHeaderConstants.HEADER_LOCALE);
+            final String localeString = request.getHeader(HttpRequestHeaderConstants.HEADER_KEY_LOCALE);
             if (localeString != null && ! localeString.isEmpty()) {
                 try {
                     return Locale.forLanguageTag(localeString);
@@ -171,8 +173,41 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         }
         logger.log(Level.WARNING, "GWT RPC Request "+request.getMethod()+
                 " by user "+username+
-                " with parameters "+Arrays.toString(request.getParameters())+" on "+this+
+                " with parameters "+getRequestParameterValues(request)+" on "+this+
                 " took "+processingDuration+" to process, "+sendingToResponseDuration+" to send result into response, so "+
                 totalDuration+" in total.");
+    }
+
+    /**
+     * Try to hide parameter values if their name has any of "secret", "pass", "pw", "token", or "code" in its name, regardless
+     * the case and where in the parameter name any of these sub-strings appear.
+     */
+    private List<Object> getRequestParameterValues(RPCRequest request) {
+        final Method method = request.getMethod();
+        final List<Object> result = new ArrayList<>();
+        int i=0;
+        for (final Parameter parameter : method.getParameters()) {
+            if (!parameter.isNamePresent() || isSecuritySensitiveParameterName(parameter.getName())) {
+                result.add("<hidden for security reasons>");
+            } else {
+                result.add(request.getParameters()[i]);
+            }
+            i++;
+        }
+        return result;
+    }
+
+    /**
+     * A parameter name is considered security-sensitive if it has any of "secret", "pass", "pw", "token", or "code" in
+     * its name, regardless the case and where in the parameter name any of these sub-strings appear.
+     */
+    private static final String[] SENSITIVE_PARAMETER_NAME_SUBSTRINGS = {"secret", "pass", "pw", "token", "code"};
+    private boolean isSecuritySensitiveParameterName(String name) {
+        for (final String sensitiveSubstring : SENSITIVE_PARAMETER_NAME_SUBSTRINGS) {
+            if (name.toLowerCase().contains(sensitiveSubstring)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

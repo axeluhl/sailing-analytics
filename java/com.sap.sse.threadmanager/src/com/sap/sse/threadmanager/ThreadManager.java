@@ -10,10 +10,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.rest.StreamingOutputUtil;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/threads")
 public class ThreadManager extends StreamingOutputUtil {
@@ -23,6 +27,7 @@ public class ThreadManager extends StreamingOutputUtil {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getThreads() {
+        checkThreadsPermission();
         JSONArray threadsJson = new JSONArray();
         Thread[] threads = new Thread[10000];
         Thread.enumerate(threads);
@@ -40,11 +45,18 @@ public class ThreadManager extends StreamingOutputUtil {
         return Response.ok(streamingOutput(threadsJson), MediaType.APPLICATION_JSON).build();
     }
 
+    private void checkThreadsPermission() {
+        SecurityUtils.getSubject().checkPermissions(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                SecuredSecurityTypes.ServerActions.THREADS,
+                new TypeRelativeObjectIdentifier(ServerStartupConstants.SERVER_NAME)));
+    }
+
     @SuppressWarnings("deprecation") // using Thread.suspend()
     @Path("{name}/suspend")
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response suspend(@PathParam("name") String name) {
+        checkThreadsPermission();
         final Response response;
         JSONObject result = new JSONObject();
         Thread[] threads = new Thread[10000];
@@ -52,7 +64,7 @@ public class ThreadManager extends StreamingOutputUtil {
         Thread.enumerate(threads);
         for (Thread t : threads) {
             if (t != null && t.getName().equals(name)) {
-                t.stop();
+                t.suspend();
                 result.put("status", "OK");
                 found = true;
             }
@@ -71,6 +83,7 @@ public class ThreadManager extends StreamingOutputUtil {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response stop(@PathParam("name") String name) {
+        checkThreadsPermission();
         final Response response;
         JSONObject result = new JSONObject();
         Thread[] threads = new Thread[10000];
@@ -96,6 +109,7 @@ public class ThreadManager extends StreamingOutputUtil {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response interrupt(@PathParam("name") String name) {
+        checkThreadsPermission();
         final Response response;
         JSONObject result = new JSONObject();
         Thread[] threads = new Thread[10000];
@@ -122,6 +136,7 @@ public class ThreadManager extends StreamingOutputUtil {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response resume(@PathParam("name") String name) {
+        checkThreadsPermission();
         final Response response;
         JSONObject result = new JSONObject();
         Thread[] threads = new Thread[10000];

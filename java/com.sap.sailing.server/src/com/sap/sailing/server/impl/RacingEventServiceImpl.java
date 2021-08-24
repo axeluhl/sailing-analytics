@@ -32,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -252,6 +251,7 @@ import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
@@ -299,7 +299,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartOfTracking;
 import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
-import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
@@ -330,13 +329,9 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.OperationsToMasterSender;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -351,8 +346,9 @@ import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.ThreadLocalTransporter;
 import com.sap.sse.util.ThreadPoolUtil;
 
-public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
-        LeaderboardRegistry, Replicator {
+public class RacingEventServiceImpl
+extends AbstractReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>
+implements RacingEventService, ClearStateTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -464,8 +460,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final NamedReentrantReadWriteLock regattaTrackingCacheLock;
 
-    private final ConcurrentHashMap<OperationExecutionListener<RacingEventService>, OperationExecutionListener<RacingEventService>> operationExecutionListeners;
-
     /**
      * Keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
      * {@link #setRegattaForRace(Regatta, RaceDefinition)}.
@@ -538,18 +532,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
-     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not
-     * currently replicated from any master.
-     */
-    private ReplicationMasterDescriptor replicatingFromMaster;
-
-    private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
-
-    private volatile boolean currentlyFillingFromInitialLoad;
-    
-    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
-
-    /**
      * A synchronized set of the class loaders to use for importing master data. See also {@link MasterDataImportClassLoaderService},
      * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
      * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
@@ -592,14 +574,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE; 
     
-    /**
-     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
-     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
-     * method.
-     */
-    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
-
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
     private final CourseAndMarkConfigurationFactory courseAndMarkConfigurationFactory;
@@ -644,7 +618,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
         this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
+                /* securityServiceTracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
                 /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
     }
 
@@ -816,7 +791,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
             ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         logger.info("Created " + this);
-        this.currentlyFillingFromInitialLoad = false;
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.numberOfTrackedRacesRestoredDoneLoading = new AtomicInteger();
@@ -830,7 +804,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
         this.masterDataClassLoaders.add(this.getClass().getClassLoader());
         joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
-        this.operationsSentToMasterForReplication = new HashSet<>();
         this.baseDomainFactory = constructorParameters.getBaseDomainFactory();
         populateBoatClasses(this.baseDomainFactory);
         this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
@@ -890,7 +863,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for " + this, /* fair */false);
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
         leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for " + this, /* fair */false);
-        operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
@@ -1028,26 +1000,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }).getNumberOfParametersToLoad();
-    }
-
-    @Override
-    public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
-        return currentlyApplyingOperationReceivedFromMaster.get();
-    }
-
-    @Override
-    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
-        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
     }
 
     @Override
@@ -1454,7 +1406,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
             RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(
                     identifier, getMongoObjectFactory());
-            RaceLog raceLog = raceColumn.getRaceLog(fleet);
+            final RaceLog raceLog = raceColumn.getRaceLog(fleet);
             raceLog.lockForRead();
             try {
                 for (RaceLogEvent e : raceLog.getRawFixes()) {
@@ -2368,7 +2320,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-            replicate(new UpdateWindSourcesToExclude(getRaceIdentifier(), windSourcesToExclude));
+            // nothing to replicate; wind sources to exclude are managed by RaceLogEvents which are already being replicated
         }
 
         @Override
@@ -3311,18 +3263,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             ScoringScheme scoringScheme, int[] discardThresholds) {
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
                 new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
-        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(overallLeaderboard.getName()),
-                overallLeaderboard.getDisplayName(),
-                new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
-                        addLeaderboard(overallLeaderboard);
-                        updateStoredLeaderboard(overallLeaderboard);
-                        return null;
-                    }
-                });
+        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+        addLeaderboard(overallLeaderboard);
+        updateStoredLeaderboard(overallLeaderboard);
     }
 
     @Override
@@ -3345,43 +3288,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Serializable getId() {
-        return getClass().getName();
-    }
-
-    @Override
-    public Iterable<OperationExecutionListener<RacingEventService>> getOperationExecutionListeners() {
-        return operationExecutionListeners.keySet();
-    }
-
-    @Override
-    public void addOperationExecutionListener(OperationExecutionListener<RacingEventService> listener) {
-        operationExecutionListeners.put(listener, listener);
-    }
-
-    @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<RacingEventService> listener) {
-        operationExecutionListeners.remove(listener);
-    }
-
-    @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
-
         logger.info("Serializing regattas...");
         oos.writeObject(regattasByName);
         logoutput.append("Serialized " + regattasByName.size() + " regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
         }
-
         logger.info("Serializing events...");
         oos.writeObject(eventsById);
         logoutput.append("\nSerialized " + eventsById.size() + " events\n");
         for (Event event : eventsById.values()) {
             logoutput.append(String.format("%3s\n", event.toString()));
         }
-
         logger.info("Serializing regattas observed...");
         oos.writeObject(regattasObservedWithRaceAdditionListener);
         logger.info("Serializing regatta tracking cache...");
@@ -3406,37 +3326,33 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logger.info("Serializing persisted competitors...");
         oos.writeObject(competitorAndBoatStore);
         logoutput.append("Serialized " + competitorAndBoatStore.getCompetitorsCount() + " persisted competitors\n");
-
         logger.info("Serializing configuration map...");
         oos.writeObject(raceManagerDeviceConfigurationsById);
         logoutput.append("Serialized " + raceManagerDeviceConfigurationsById.size() + " device configuration entries\n");
         for (DeviceConfiguration config : raceManagerDeviceConfigurationsById.values()) {
             logoutput.append(String.format("%3s\n", config.getName()));
         }
-
         logger.info("Serializing anniversary races...");
         final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = anniversaryRaceDeterminator
                 .getKnownAnniversaries();
         oos.writeObject(knownAnniversaries);
         logoutput.append("Serialized " + knownAnniversaries.size() + " anniversary races\n");
-
         logger.info("Serializing next anniversary...");
         final Pair<Integer, AnniversaryType> nextAnniversary = anniversaryRaceDeterminator
                 .getNextAnniversary();
         oos.writeObject(nextAnniversary);
         logoutput.append("Serialized next anniversary " + nextAnniversary + "\n");
-
         logger.info("Serializing race count for anniversaries...");
         final int currentRaceCount = anniversaryRaceDeterminator.getCurrentRaceCount();
         oos.writeInt(currentRaceCount);
         logoutput.append("Serialized race count for anniversaries " + currentRaceCount + "\n");
-
         logger.info("Serializing remote sailing server references...");
         final ArrayList<RemoteSailingServerReference> remoteServerReferences = new ArrayList<>(remoteSailingServerSet
                 .getCachedEventsForRemoteSailingServers().keySet());
         oos.writeObject(remoteServerReferences);
         logoutput.append("Serialized " + remoteServerReferences.size() + " remote sailing server references\n");
-
+        logger.info("Serializing server configuration (e.g., \"local server\" state)...");
+        oos.writeObject(sailingServerConfiguration);
         logger.info(logoutput.toString());
     }
 
@@ -3535,7 +3451,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
         }
         logoutput.append("Received " + competitorAndBoatStore.getCompetitorsCount() + " NEW competitors\n");
-
         logger.info("Reading device configurations...");
         raceManagerDeviceConfigurationsById.putAll((Map<UUID, DeviceConfiguration>) ois.readObject());
         logoutput.append("Received " + raceManagerDeviceConfigurationsById.size() + " NEW configuration entries\n");
@@ -3543,42 +3458,40 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             raceManagerDeviceConfigurationsByName.put(config.getName(), config);
             logoutput.append(String.format("%3s\n", config.getName()));
         }
-
         logger.info("Reading anniversary races...");
         final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = (Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>>) ois
                 .readObject();
         anniversaryRaceDeterminator.setKnownAnniversaries(knownAnniversaries);
         logoutput.append("Received " + knownAnniversaries.size() + " anniversary races\n");
-
         logger.info("Reading next anniversary...");
         final Pair<Integer, AnniversaryType> nextAnniversary = (Pair<Integer, AnniversaryType>) ois.readObject();
         anniversaryRaceDeterminator.setNextAnniversary(nextAnniversary);
         logoutput.append("Received next anniversary " + nextAnniversary + "\n");
-
         logger.info("Reading race count for anniversaries...");
         final int currentRaceCount = ois.readInt();
         anniversaryRaceDeterminator.setRaceCount(currentRaceCount);
         logoutput.append("Received race count for anniversaries " + currentRaceCount + "\n");
-
         logger.info("Reading remote sailing server references...");
         for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois
                 .readObject()) {
             remoteSailingServerSet.add(remoteSailingServerReference);
             logoutput.append("Received remote sailing server reference " + remoteSailingServerReference);
         }
-
+        logger.info("Reading sailing server configuration (e.g., \"local server\" state)...");
+        this.sailingServerConfiguration = (SailingServerConfiguration) ois.readObject();
         // make sure to initialize listeners correctly
         for (Regatta regatta : regattasByName.values()) {
             RegattaImpl regattaImpl = (RegattaImpl) regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
             regattaImpl.addRaceColumnListener(raceLogReplicator);
         }
-        // re-establish RaceLogResolver references to this RacingEventService in all TrackedRace instances
+        // re-establish RaceLogResolver references to this RacingEventService and regatta listeners in all TrackedRace instances
         for (DynamicTrackedRegatta trackedRegatta : regattaTrackingCache.values()) {
             trackedRegatta.lockTrackedRacesForRead();
             try {
                 for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
                     ((TrackedRaceImpl) trackedRace).setRaceLogResolver(this);
+                    ((TrackedRaceImpl) trackedRace).registerRegattaListener();
                 }
             } finally {
                 trackedRegatta.unlockTrackedRacesAfterRead();
@@ -3599,7 +3512,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             LockUtil.unlockAfterWrite(regattasByNameLock);
         }
         regattasObservedWithRaceAdditionListener.clear();
-
         if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
             for (DynamicTrackedRegatta regatta : regattaTrackingCache.values()) {
                 final Set<RaceTracker> trackers = raceTrackersByRegatta.get(regatta.getRegatta());
@@ -4437,31 +4349,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public ReplicationMasterDescriptor getMasterDescriptor() {
-        return replicatingFromMaster;
-    }
-
-    @Override
-    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = master;
-    }
-
-    @Override
     public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = null;
+        super.stoppedReplicatingFrom(master);
         anniversaryRaceDeterminator.start();
         this.remoteSailingServerSet.setRetrieveRemoteRaceResult(true);
-    }
-
-    @Override
-    public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<RacingEventService, ?> operationWithResultWithIdWrapper) {
-        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
-    }
-
-    @Override
-    public boolean hasSentOperationToMaster(OperationWithResult<RacingEventService, ?> operation) {
-        return this.operationsSentToMasterForReplication.remove(operation);
     }
 
     @Override
@@ -4867,7 +4758,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return bestMatch;
     }
 
-    private Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
+    @Override
+    public Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
         /*
          * TODO: bug5424: The code previously contained within this method has been extracted to
          * findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea for public use. Investigate whether a more
@@ -4968,7 +4860,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public PairingList<RaceColumn, Fleet, Competitor, Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
             final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumns) throws PairingListCreationException {
         final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        final List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
+        final List<Competitor> competitors = Util.asList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);
         PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = pairingListTemplate
                 .createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
@@ -5017,7 +4909,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             throw new IllegalArgumentException("The regatta identified by "+regattaIdentifier+" was not found.");
         }
         final Leaderboard regattaLeaderboard = getLeaderboardByName(regatta.getName());
-        assert regattaLeaderboard instanceof RegattaLeaderboard;
         if (regattaLeaderboard != null) {
             final Event event = findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(regattaLeaderboard);
             if (event != null) {
@@ -5054,7 +4945,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     /**
-     * This should only be used for replicable Operations that need access to the SecurityService, all other should
+     * This should only be used for replicable Operations that need access to the SecurityService, all others should
      * obtain the SecurityService in another way.
      */
     @Override
@@ -5070,18 +4961,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory() {
         return courseAndMarkConfigurationFactory;
-    }
-
-    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
-        this.unsentOperationsToMasterSender = service;
-    }
-
-    @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            O operationWithResult, OperationsToMasterSender<S, O> sender) {
-        if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
-        }
     }
 
     @Override

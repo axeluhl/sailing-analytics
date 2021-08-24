@@ -17,16 +17,14 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
- * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in <a href=
- * "https://wiki.sapsailing.com/wiki/info/security/permission-concept#algorithm-boolean-ispermitted-principalcollection-principals-wildcardpermission-permission-for-composite-realm">Permission
- * Concept Wiki article</a>. It checks permissions in four stages where earlier stages overwrite later.
- * 
- * 1. Firstly, the data object's ACL is checked if it grants or explicitly revokes the permission. 2. Thereafter, the
- * permissions directly assigned to the user are checked. 3. Finally the permissions implied by roles the user has are
- * checked. This includes roles qualified by the group/user ownerships of the objetcs to which they are applied.
+ * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in the
+ * <a href= "https://wiki.sapsailing.com/wiki/info/security/permission-concept">Concept Wiki article</a>. It checks
+ * permissions in four stages where earlier stages overwrite later. See also
+ * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)}.
  * 
  * @author Jonas Dann, Axel Uhl (d043530)
  */
@@ -92,6 +90,11 @@ public class PermissionChecker {
     }
     
     /**
+     * Like
+     * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)},
+     * determining the groups of the {@code user} and the {@code allUser} through {@link User#getUserGroups()}. See also
+     * {@link #getGroupsOfUser(SecurityUser)}.
+     * 
      * @param permission
      *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
      *            general permission for the data object type is asked after (e.g. "event:create"). If the action
@@ -109,6 +112,25 @@ public class PermissionChecker {
     }
 
     /**
+     * The following checks are performed. If a step cannot decide authoritatively, the preliminary result remains as
+     * {@link PermissionState#NONE}, and the subsequent steps are performed to find the result. If a step computes a
+     * non-{@code NONE} result, it is returned.
+     * <ol>
+     * <li>ACL check (see {@link #checkAcl(WildcardPermission, Iterable, Iterable, SecurityAccessControlList)}): If the
+     * object's {@code acl} passed to this method explicitly allows or denies access to the {@code user}'s group or to
+     * the {@code allUser}'s group then this is the result.</li>
+     * <li>User permissions (see {@link User#getPermissions()}): If any of the explicit permissions assigned to the
+     * {@code user} or the {@code allUser} passed to this method match or imply the {@code permission} requested, the
+     * result is {@link PermissionState#GRANTED}, leading to {@code true} being returned.</li>
+     * <li>If an {@code ownership} exists for the object being accessed and has a valid group ownership, that group's
+     * roles are evaluated; if any of those roles implies the {@code permission} requested to the users of that group
+     * and the {@code user} or the {@code allUser} belongs to that group, or if the role implies the {@code permission}
+     * requested to all users, the result is {@link PermissionState#GRANTED}, and {@code true} will be returned.</li>
+     * <li>If any of the roles assigned to the {@code user} or the {@code allUser}---considering their optional user/group
+     * qualificiations based on the {@code ownership}---implies the {@code permission} requested, the result is
+     * {@link PermissionState#GRANTED}, and {@code true} will be returned.</li>
+     * </ol>
+     * 
      * @param permission
      *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
      *            general permission for the data object type is asked after (e.g. "event:create"). If the action
@@ -129,14 +151,14 @@ public class PermissionChecker {
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
             PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
-                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ false);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
             result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
-                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ false);
         }
         return result == PermissionState.GRANTED;
     }
@@ -323,9 +345,9 @@ public class PermissionChecker {
                 typesAndIdsAndOwnershipsWithFullSetOfAcls.put(collationKeyBasedOnTypeAndObjectIdAndOwnership, denyingAcls);
             }
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
-                    impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
+                    impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, groupsOfAllUser,
-                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED) {
+                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED) {
                 return false;
             }
         }
@@ -451,9 +473,9 @@ public class PermissionChecker {
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, false);
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
-                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false, /* matchOnlyNonTransitiveRoles */false) == PermissionState.GRANTED
                     || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser), ownership, impliesAnyChecker,
-                            /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED) {
+                            /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false, /* matchOnlyNonTransitiveRoles */false) == PermissionState.GRANTED) {
                 return true;
             }
         }
@@ -461,23 +483,29 @@ public class PermissionChecker {
     }
     
     /**
+     * Like
+     * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)},
+     * only without the ACL check. As a matter of fact, this method is being used by
+     * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)}
+     * for all but the ACL check.
+     * 
      * @param permissionChecker
      *            The permissionChecker is the one that checks if one permission implies another permission. This means,
      *            it just calls {@link WildcardPermission#implies(WildcardPermission)} in most cases. In case of an any
      *            check this needs to call {@link WildcardPermission#impliesAny(WildcardPermission)).
      * @param matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven
      *            If {@code false} and no ownership is given, all associated {@link Role Roles} of a user are checked.
-     *            For a normal permission check, this needs to be {@code true}, because qualified {@link Role Roles}
-     *            can not grant unqualified permissions. In case of an any check it is necessary to include all
-     *            qualified roles of an user, because even a qualified {@link Role} may grant any of the included
-     *            permissions. in this case, the parameter is intended to be {@code false}.
+     *            For a normal permission check, this needs to be {@code true}, because qualified {@link Role Roles} can
+     *            not grant unqualified permissions. In case of an any check it is necessary to include all qualified
+     *            roles of an user, because even a qualified {@link Role} may grant any of the included permissions. in
+     *            this case, the parameter is intended to be {@code false}.
      */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     PermissionState checkUserPermissions(
             WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
-            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, boolean matchOnlyNonTransitiveRoles) {
         PermissionState result = PermissionState.NONE;
-        // 2. check direct permissions
+        // 1.. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
                 if (permissionChecker.apply(directPermission, permission)) {
@@ -486,16 +514,12 @@ public class PermissionChecker {
                 }
             }
         }
-        // TODO documentation
-        final boolean ownershipIsGiven = ownership != null
-                && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
-        if (ownershipIsGiven) {
+        // 2. check group permissions
+        if (ownership != null && ownership.getTenantOwner() != null) {
             final G tenantOwner = ownership.getTenantOwner();
-            if (tenantOwner != null) {
-                final boolean userIsMemberOfGroup = Util.contains(groupsOfWhichUserIsMember, tenantOwner);
-                if (isPermissionGrantedByGroup(permission, tenantOwner, userIsMemberOfGroup, permissionChecker)) {
-                    result = PermissionState.GRANTED;
-                }
+            final boolean userIsMemberOfGroup = Util.contains(groupsOfWhichUserIsMember, tenantOwner);
+            if (isPermissionGrantedByGroup(permission, tenantOwner, userIsMemberOfGroup, permissionChecker)) {
+                result = PermissionState.GRANTED;
             }
         } else if (!matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
             for (G groupToCheck : groupsOfWhichUserIsMember) {
@@ -509,7 +533,7 @@ public class PermissionChecker {
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
             for (R role : user.getRoles()) {
                 if (implies(role, permission, ownership, permissionChecker,
-                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven)) {
+                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, matchOnlyNonTransitiveRoles)) {
                     result = PermissionState.GRANTED;
                     break;
                 }
@@ -564,13 +588,17 @@ public class PermissionChecker {
     boolean implies(
             R role, WildcardPermission permission, O ownership,
             BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker,
-           boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+           boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven,
+           boolean matchOnlyNonTransitiveRoles) {
        final boolean roleIsTenantQualified = role.getQualifiedForTenant() != null;
        final boolean roleIsUserQualified = role.getQualifiedForUser() != null;
        final boolean permissionsApply;
        boolean result;
        // It is possible that we have an ownership with null tenantOwner and null userOwner. This should be handled like no ownership was given.
        final boolean ownershipIsGiven = ownership != null && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
+       if (matchOnlyNonTransitiveRoles && !role.isTransitive()) {
+           return false;
+       }
        if (roleIsTenantQualified || roleIsUserQualified) {
            if (!ownershipIsGiven) {
                permissionsApply = !matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven; // qualifications cannot be verified as no ownership info is provided; permissions do not apply

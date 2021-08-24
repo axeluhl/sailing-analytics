@@ -263,8 +263,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getServerConfiguration(AsyncCallback<ServerConfigurationDTO> callback);
 
-    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration, AsyncCallback<Void> callback);
-
     void getRemoteSailingServerReferences(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);
@@ -521,6 +519,13 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * @param asyncCallback
      */
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
+    
+    /**
+     * @see SailingService#createRaceBoardLinkQrCode(String url)
+     * @param url
+     * @param asyncCallback
+     */
+    void createRaceBoardLinkQrCode(String url, AsyncCallback<String> asyncCallback);
 
     void getAllIgtimiAccountsWithSecurity(AsyncCallback<Iterable<AccountWithSecurityDTO>> callback);
 
@@ -648,4 +653,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
+    
+    void getAdminConsoleChangeLogSize(AsyncCallback<Integer> callback);
 }

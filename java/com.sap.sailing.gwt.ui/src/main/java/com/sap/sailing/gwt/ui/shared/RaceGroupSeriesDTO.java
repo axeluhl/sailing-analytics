@@ -14,7 +14,8 @@ public class RaceGroupSeriesDTO extends NamedDTO implements IsSerializable {
     private List<FleetDTO> fleets = new ArrayList<FleetDTO>();
     private List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
     
-    protected RaceGroupSeriesDTO() {}
+    @Deprecated
+    RaceGroupSeriesDTO() {} // for GWT RPC serialization only
 
     public RaceGroupSeriesDTO(String name) {
         super(name);

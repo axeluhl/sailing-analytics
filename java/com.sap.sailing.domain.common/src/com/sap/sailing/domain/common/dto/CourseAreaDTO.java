@@ -11,8 +11,8 @@ public class CourseAreaDTO extends NamedDTO {
     private static final long serialVersionUID = -5279690838452265454L;
     public UUID id;
     
-    public CourseAreaDTO() {
-    }
+    @Deprecated
+    CourseAreaDTO() {} // for GWT RPC serialization only
 
     public CourseAreaDTO(String name) {
         super(name);

@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
-import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
 public class SailingAnalyticsReplicaConfiguration<ShardingKey>
 extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
@@ -22,21 +22,30 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
      * <li>The {@link #getInboundReplicationConfiguration() inbound replication}
      * {@link InboundReplicationConfiguration#getInboundMasterExchangeName() exchange name} defaults to the
      * {@link #setServerName(String) server name} property</li>
-     * <li>The {@link DefaultProcessConfigurationVariables#USE_ENVIRONMENT} variable is set to {@code "live-replica-server"}.</li>
+     * <li>The {@link DefaultProcessConfigurationVariables#USE_ENVIRONMENT} variable is set to
+     * {@code "live-replica-server"}.</li>
+     * <li>If no {@link #setDatabaseName(String) database name is set} explicitly, it defaults to the
+     * {@link #getServerName() server name} with the suffix {@code -replica} appended to it.</li>
+     * <li>If no {@link #setDatabaseConfiguration(Database) database configuration is set} explicitly, it defaults
+     * to the "replica" replica set on "localhost:27017" on the replica node.</li>
      * </ul>
      * 
-     * TODO we could default the set of replicables to replicate, competing with the live-replica-server environment contents
+     * TODO we could default the set of replicables to replicate, competing with the live-replica-server environment
+     * contents
      * 
      * @author Axel Uhl (D043530)
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends SailingAnalyticsApplicationConfiguration.Builder<BuilderT, SailingAnalyticsReplicaConfiguration<ShardingKey>, ShardingKey> {
         String DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX = "-replica";
+        String DEFAULT_REPLICA_DATABASE_NAME_SUFFIX = "-replica";
     }
     
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends SailingAnalyticsApplicationConfiguration.BuilderImpl<BuilderT, SailingAnalyticsReplicaConfiguration<ShardingKey>, ShardingKey>
     implements Builder<BuilderT, ShardingKey> {
+        private static final String DEFAULT_MONGO_REPLICA_SET_NAME_FOR_REPLICA = "replica";
+
         @Override
         public OutboundReplicationConfiguration getOutboundReplicationConfiguration() {
             final OutboundReplicationConfiguration.Builder resultBuilder;
@@ -52,6 +61,12 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
                         DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX);
             }
             return resultBuilder.build();
+        }
+        
+        @Override
+        protected Database getDatabaseConfiguration() {
+            return isDatabaseConfigurationSet() ? super.getDatabaseConfiguration() :
+                Database.of(MongoEndpoint.of("localhost", 27017, DEFAULT_MONGO_REPLICA_SET_NAME_FOR_REPLICA), getDatabaseName());
         }
 
         @Override
@@ -74,6 +89,11 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
             result.put(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-replica-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
             return result;
         }
+        
+        @Override
+        protected String getDatabaseName() {
+            return isDatabaseNameSet() ? super.getDatabaseName() : super.getDatabaseName()+DEFAULT_REPLICA_DATABASE_NAME_SUFFIX;
+        }
 
         @Override
         public SailingAnalyticsReplicaConfiguration<ShardingKey> build() throws Exception {
@@ -81,8 +101,7 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>,
-    ShardingKey extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> BuilderT replicaBuilder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> BuilderT replicaBuilder() {
         @SuppressWarnings("unchecked")
         final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, ShardingKey>();
         return result;

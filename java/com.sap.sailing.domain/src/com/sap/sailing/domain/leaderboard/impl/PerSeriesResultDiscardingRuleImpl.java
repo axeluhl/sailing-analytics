@@ -10,6 +10,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -33,11 +35,18 @@ public class PerSeriesResultDiscardingRuleImpl implements ResultDiscardingRule {
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    @Override
+    public Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Set<RaceColumn> result = new HashSet<>();
         for (Series s : regatta.getSeries()) {
             if (s.getResultDiscardingRule() != null) {
                 Iterable<RaceColumn> columnsToConsiderInSeries = getColumnsToConsiderInSeries(s, raceColumnsToConsider);
-                result.addAll(s.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard, columnsToConsiderInSeries, timePoint));
+                result.addAll(s.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard, columnsToConsiderInSeries, timePoint, cache));
             }
         }
         return result;
@@ -52,5 +61,4 @@ public class PerSeriesResultDiscardingRuleImpl implements ResultDiscardingRule {
         }
         return result;
     }
-
 }

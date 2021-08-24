@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=abeam-training
 SERVER_NAME=abeam-training
 SERVER_PORT=8890
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/abeam-training?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/abeam-training?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2012
 TELNET_PORT=14890

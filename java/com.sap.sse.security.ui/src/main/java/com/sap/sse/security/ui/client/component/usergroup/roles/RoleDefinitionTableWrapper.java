@@ -54,10 +54,10 @@ public class RoleDefinitionTableWrapper extends
                 }, tableResources);
         this.userGroupSelectionModel = userGroupSelectionModel;
         this.userGroupSelectionModel.addSelectionChangeHandler(e -> refreshRoleList());
-        final ListHandler<Pair<StrippedRoleDefinitionDTO, Boolean>> userColumnListHandler = getColumnSortHandler();
+        final ListHandler<Pair<StrippedRoleDefinitionDTO, Boolean>> roleColumnListHandler = getColumnSortHandler();
         // users table
-        final TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>> userGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>>(
-                dto -> dto.getA().getName(), userColumnListHandler);
+        final TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>> roleDefinitionWithSecurityDTONameColumn = new AbstractSortableTextColumn<>(
+                dto -> dto.getA().getName(), roleColumnListHandler);
         final AccessControlledActionsColumn<Pair<StrippedRoleDefinitionDTO, Boolean>, RoleDefinitionImagesBarCell> actionsColumn = AccessControlledActionsColumn
                 .create(new RoleDefinitionImagesBarCell(stringMessages), userService,
                         role -> TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel));
@@ -123,14 +123,9 @@ public class RoleDefinitionTableWrapper extends
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         mainPanel.insert(filterField, 0);
         // setup table
-        table.addColumnSortHandler(userColumnListHandler);
-        table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());
-        final TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>> forAllUsersColumn = new TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>>() {
-            @Override
-            public String getValue(Pair<StrippedRoleDefinitionDTO, Boolean> rolePair) {
-                return rolePair.getB() ? stringMessages.yes() : stringMessages.no();
-            }
-        };
+        table.addColumn(roleDefinitionWithSecurityDTONameColumn, stringMessages.roleName());
+        final TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>> forAllUsersColumn = new AbstractSortableTextColumn<>(
+                rolePair -> rolePair.getB() ? stringMessages.yes() : stringMessages.no(), roleColumnListHandler);
         table.addColumn(forAllUsersColumn, stringMessages.enabledForAllUsers());
         table.addColumn(actionsColumn);
         table.ensureDebugId("GroupRoleDefinitionDTOTable");

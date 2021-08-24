@@ -12,6 +12,7 @@ public class SshKeyPairImagesBarCell extends ImagesBarCell {
     static final String ACTION_REMOVE = "ACTION_REMOVE";
     public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
     public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
+    public static final String ACTION_SHOW_KEYS = DefaultActions.READ.name();
 
     private final StringMessages stringMessages;
 
@@ -28,11 +29,14 @@ public class SshKeyPairImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(
+                new ImageSpec(ACTION_SHOW_KEYS, stringMessages.showKeys(),
+                        IconResources.INSTANCE.downloadIcon()),
                 new ImageSpec(ACTION_REMOVE, stringMessages.remove(),
                         IconResources.INSTANCE.removeIcon()),
                 new ImageSpec(ACTION_CHANGE_OWNERSHIP, stringMessages.actionChangeOwnership(),
                         IconResources.INSTANCE.changeOwnershipIcon()),
                 new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
-                        IconResources.INSTANCE.changeACLIcon()));
+                        IconResources.INSTANCE.changeACLIcon())
+                );
     }
 }

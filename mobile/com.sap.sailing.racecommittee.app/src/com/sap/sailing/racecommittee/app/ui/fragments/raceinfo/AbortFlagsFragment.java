@@ -67,36 +67,35 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.flag_list, container, false);
 
-        Flags flag = Flags.NONE;
-        if (getArguments() != null) {
-            flag = Flags.valueOf(getArguments().getString(AppConstants.KEY_RACE_FLAG, Flags.NONE.name()));
-        }
-
         ListView listView = ViewHelper.get(layout, R.id.listView);
         if (listView != null) {
+            Flags flag = getFlag();
             listView.setAdapter(new AbortFlagsAdapter(requireContext(), this, flag));
         }
 
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
-        if (header != null && getArguments() != null) {
-            header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
-            header.setHeaderOnClickListener(v -> {
-                sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
-                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
-            });
+        if (header != null) {
+            if (getArguments() != null) {
+                header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
+            }
+            header.setHeaderOnClickListener(v -> sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT));
         }
 
         return layout;
+    }
+
+    public Flags getFlag() {
+        if (getArguments() != null) {
+            return Flags.valueOf(getArguments().getString(AppConstants.KEY_RACE_FLAG));
+        }
+        return Flags.NONE;
     }
 
     @Override
     public void onClick(Flags flag) {
         TimePoint now = MillisecondsTimePoint.now();
         RaceState state = getRaceState();
-        Flags mainFlag = Flags.NONE;
-        if (getArguments() != null) {
-            mainFlag = Flags.valueOf(getArguments().getString(AppConstants.KEY_RACE_FLAG, Flags.NONE.name()));
-        }
+        Flags mainFlag = getFlag();
         switch (mainFlag) {
             case AP:
                 logFlag(flag);
@@ -139,19 +138,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         RaceListFragment.showProtest(getActivity(), getRace());
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        sendIntent(AppConstants.ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        sendIntent(AppConstants.ACTION_TIME_SHOW);
-    }
-
-    private abstract static class ActionWithNowTimePoint implements Runnable {
+    private static abstract class ActionWithNowTimePoint implements Runnable {
         private final TimePoint now;
 
         public ActionWithNowTimePoint(TimePoint now) {
@@ -270,8 +257,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                 } else {
                     actions.add(new AbortAction(raceToAbort, now, flag));
                 }
-                for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148
-                    // comment #2
+                for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148 comment #2
                     final RaceState raceStateOfDependentRace = dependentRace.getState();
                     if (!racesToAbort.contains(dependentRace)) {
                         // materialize an absolute start time for dependentRace
@@ -287,8 +273,6 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                 action.run();
             }
             if (!racesToAbort.contains(getRace())) {
-                BroadcastManager.getInstance(getActivity())
-                        .addIntent(new Intent(AppConstants.ACTION_CLEAR_TOGGLE));
                 BroadcastManager.getInstance(getActivity())
                         .addIntent(new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT));
             }

@@ -1,23 +1,23 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.refresher;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.Refresher;
-import com.sap.sse.gwt.client.ErrorReporter;
 
 public abstract class AbstractRefresher<T> implements Refresher<T> {
-
+    private Logger logger = Logger.getLogger(getClass().getName());
     private final Set<Displayer<T>> displayers = new HashSet<Displayer<T>>();
-    private Iterable<T> dtos;
-    private final ErrorReporter errorReporter;
-
-    public AbstractRefresher(ErrorReporter errorReporter) {
-        this.errorReporter = errorReporter;
-    }
+    private List<T> dtos;
+    private boolean loading;
 
     @Override
     public void addDisplayerAndCallFillOnInit(Displayer<T> displayer) {
@@ -28,8 +28,14 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
         if (dtos == null) {
             reloadAndCallFillAll();
         } else {
+            logger.fine("Call fill methods from displayers with data from cache.");
             fill(dtos, displayer);
         }
+    }
+    
+    @Override
+    public void removeDisplayer(Displayer<T> displayer) {
+        displayers.remove(displayer);
     }
 
     @Override
@@ -41,10 +47,18 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
         AsyncCallback<Iterable<T>> callback = new AsyncCallback<Iterable<T>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to obtain list from server " + caught.getMessage());
+                // already logged. do nothing here
             }
             @Override
             public void onSuccess(Iterable<T> result) {
+                if (result != null) {
+                    dtos = new ArrayList<T>();
+                    result.forEach(dto -> dtos.add(dto));
+                } else {
+                    dtos = null;
+                }
+                loading = false;
+                logger.fine("Loading data finished. Call fill methods from displayers.");
                 if (fillOnlyDisplayer != null) {
                     fill(result, fillOnlyDisplayer);
                 } else {
@@ -55,7 +69,13 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
                 }
             }
         };
-        reload(callback);
+        if (!loading) {
+            logger.fine("Start loading data from service.");
+            loading = true;
+            reload(callback);
+        } else {
+            logger.fine("Data is already loading. Skip reload.");
+        }
     }
 
     @Override
@@ -87,10 +107,38 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
                 .filter(displayer -> !Objects.equals(displayer, origin))
                 .forEach(displayer -> fill(dtos, displayer));
     }
+    
+    @Override
+    public void callAllFill() {
+        displayers.stream()
+                .forEach(displayer -> fill(dtos, displayer));
+    }
 
     public abstract void reload(AsyncCallback<Iterable<T>> callback);
 
     public void fill(Iterable<T> dtos, Displayer<T> displayer) {
         displayer.fill(dtos);
+    }
+    
+    public void add(T dto) {
+        if (dto != null) {
+            dtos.add(dto);
+        }
+    }
+    
+    public void remove(T dto) {
+        if (dto != null) {
+            dtos.remove(dto);
+        }
+    }
+
+    @Override
+    public void removeAll(Predicate<T> filter) {
+        for (final Iterator<T> i=dtos.iterator(); i.hasNext(); ) {
+            final T dto = i.next();
+            if (filter.test(dto)) {
+                i.remove();
+            }
+        }
     }
 }

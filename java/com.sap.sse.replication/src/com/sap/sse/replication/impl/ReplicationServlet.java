@@ -32,6 +32,9 @@ import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.ReplicationServletActions;
+import com.sap.sse.replication.ReplicationServletActions.Action;
+import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.ReplicationStatus;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -56,24 +59,10 @@ public class ReplicationServlet extends AbstractHttpServlet {
     
     private static final long serialVersionUID = 4835516998934433846L;
     
-    public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER, STATUS }
-    
-    /**
-     * The parameter value found in the parameter with this name must have a value that matches any of the
-     * {@link Action} names.
-     */
-    public static final String ACTION = "action";
-    public static final String SERVER_UUID = "uuid";
-    public static final String ADDITIONAL_INFORMATION = "additional";
-
     /**
      * The size of the packages into which the initial load is split
      */
     private static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
-
-    public static final String REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED = "replicaIdsAsStringsCommaSeparated";
-
-    public static final String REPLICABLE_ID_AS_STRING = "replicaIdAsString";
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
@@ -111,9 +100,9 @@ public class ReplicationServlet extends AbstractHttpServlet {
      * The operation performed is selected by passing one of the {@link Action} enumeration values for the URL parameter
      * named {@link #ACTION}.
      */
-    private void handleAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void handleAction(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         try {
-            String action = req.getParameter(ACTION);
+            String action = req.getParameter(ReplicationServletActions.ACTION_PARAMETER_NAME);
             logger.info("Received replication-related request, action is "+action+", subject is "+
                     (SecurityUtils.getSubject()==null?null:SecurityUtils.getSubject().getPrincipal()));
             String[] replicableIdsAsStrings;
@@ -131,7 +120,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             case INITIAL_LOAD:
                 logger.info("Received replication initial load request");
                 checkReplicatorPermission(ServerActions.REPLICATE);
-                replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
+                replicableIdsAsStrings = req.getParameter(ReplicationServletActions.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED_PARAMETER_NAME).split(",");
                 Channel channel = getReplicationService().createMasterChannel();
                 try {
                     RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
@@ -171,13 +160,22 @@ public class ReplicationServlet extends AbstractHttpServlet {
             case STATUS:
                 // no permission check to read status; the same is available, e.g., through /gwt/status
                 try {
-                    reportStatus(resp);
+                    reportStatus(req, resp);
                 } catch (IllegalAccessException e) {
                     logger.info("Error obtaining replication status: " + e.getMessage());
                     logger.log(Level.SEVERE, "doGet", e);
                     resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     e.printStackTrace(resp.getWriter());
                 }
+                break;
+            case STOP_REPLICATING:
+                checkReplicatorPermission(ServerActions.REPLICATE);
+                logger.info("Stopping replication from master upon "
+                        +(SecurityUtils.getSubject()==null?null:SecurityUtils.getSubject().getPrincipal())
+                        +"'s request.");
+                getReplicationService().stopToReplicateFromMaster();
+                resp.setContentType("text/plain");
+                resp.setStatus(HttpServletResponse.SC_OK);
                 break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + StringEscapeUtils.escapeHtml(action) + " not understood. Must be one of "
@@ -200,7 +198,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
      * whether the replicable is still fetching its initial load, as well as the length of the queue of
      * inbound operations not yet processed. The JSON document is printed to the response object's writer.
      */
-    private void reportStatus(HttpServletResponse resp) throws IllegalAccessException, IOException {
+    private void reportStatus(HttpServletRequest req, HttpServletResponse resp) throws IllegalAccessException, IOException {
         final ReplicationStatus status = getReplicationService().getStatus();
         final JSONObject result = status.toJSONObject();
         resp.setContentType("application/json;charset=UTF-8");
@@ -217,8 +215,15 @@ public class ReplicationServlet extends AbstractHttpServlet {
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getParameter(ACTION) != null) {
-            handleAction(req, resp);
+        if (req.getParameter(ReplicationServletActions.ACTION_PARAMETER_NAME) != null) {
+            try {
+                handleAction(req, resp);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE,
+                        "Exception occurred while trying to receive and apply operation initiated on replica", e);
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Exception " + e
+                        + " occurred while trying to receive and apply operation initiated on replica. Re-trying can make sense.");
+            }
         } else {
             // no action --> a stream of serialized operations is expected in the POST request's body
             InputStream is = req.getInputStream();
@@ -299,7 +304,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
     }
 
     private void deregisterClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        final UUID replicaUuid = UUID.fromString(req.getParameter(SERVER_UUID));
+        final UUID replicaUuid = UUID.fromString(req.getParameter(ReplicationServletActions.SERVER_UUID_PARAMETER_NAME));
         final ReplicaDescriptor replica = getReplicationService().unregisterReplica(replicaUuid);
         if (replica != null) {
             logger.info("Deregistered replication client with this server " + replica.getIpAddress());
@@ -311,7 +316,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
     }
 
     private void registerClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+            throws Exception {
         final ReplicaDescriptor replica = getReplicaDescriptor(req);
         getReplicationService().registerReplica(replica);
         logger.info("Registered new replica " + replica);
@@ -324,9 +329,10 @@ public class ReplicationServlet extends AbstractHttpServlet {
         final InetAddress ipAddress = forwardedFor != null && !forwardedFor.trim().isEmpty()
                 ? InetAddress.getByName(forwardedFor.split(",")[0].trim())
                 : InetAddress.getByName(req.getRemoteAddr());
-        final UUID uuid = UUID.fromString(req.getParameter(SERVER_UUID));
-        final String additional = req.getParameter(ADDITIONAL_INFORMATION);
-        final String[] replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
-        return new ReplicaDescriptorImpl(ipAddress, uuid, additional, replicableIdsAsStrings);
+        final UUID uuid = UUID.fromString(req.getParameter(ReplicationServletActions.SERVER_UUID_PARAMETER_NAME));
+        final String additional = req.getParameter(ReplicationServletActions.ADDITIONAL_INFORMATION_PARAMETER_NAME);
+        final String[] replicableIdsAsStrings = req.getParameter(ReplicationServletActions.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED_PARAMETER_NAME).split(",");
+        final Integer port = req.getParameter(ReplicationServletActions.PORT_NAME) == null ? null : Integer.valueOf(req.getParameter(ReplicationServletActions.PORT_NAME));
+        return new ReplicaDescriptorImpl(ipAddress, port, uuid, additional, replicableIdsAsStrings);
     }
 }

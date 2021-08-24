@@ -18,8 +18,10 @@ public class SeriesDTO extends NamedDTO {
     private boolean firstColumnIsNonDiscardableCarryForward;
     private boolean hasSplitFleetContiguousScoring;
     private Integer maximumNumberOfDiscards;
-    
-    public SeriesDTO() {}
+
+    public SeriesDTO() {
+        super("");
+    }
     
     public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,

@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
@@ -16,7 +17,9 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.shared.util.Wait;
 
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerStateEnum;
@@ -71,15 +74,16 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
  * @author Axel Uhl (D043530)
  */
 public abstract class CreateLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
-    protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 4;
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends ProcedureWithTargetGroup<ShardingKey> {
+    protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 5;
     protected static final int MAX_RULES_PER_ALB = 100;
     protected static final int MAX_ALBS_PER_REGION = 20;
     private final ProcessT process;
     private final String hostname;
-    private TargetGroup<ShardingKey, MetricsT> masterTargetGroupCreated;
-    private TargetGroup<ShardingKey, MetricsT> publicTargetGroupCreated;
+    private final Optional<Duration> optionalTimeout;
+    private TargetGroup<ShardingKey> masterTargetGroupCreated;
+    private TargetGroup<ShardingKey> publicTargetGroupCreated;
     private Iterable<Rule> rulesAdded;
     
     /**
@@ -88,38 +92,52 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
      * <li>The {@link #setServerName(String) server name} property will be obtained from the {@link #setProcess(ApplicationProcess) process}'s
      * {@code SERVER_NAME} environment setting if not provided explicitly.</li>
      * <li>The timeout for looking up the process's server name defaults to no timeout.</li>
+     * <li>If no {@link #setKeyName(String) SSH key pair name} is specified, the key pair used to launch the
+     * instance that runs the {@link #setProcess(ApplicationProcess) application process} will be looked up and
+     * decrypted using the {@link #setPrivateKeyEncryptionPassphrase(byte[]) passphrase} that must be provided.
      * </ul>
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
+    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends ProcedureWithTargetGroup.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends ProcedureWithTargetGroup.Builder<BuilderT, T, ShardingKey> {
         BuilderT setProcess(ProcessT process);
         BuilderT setHostname(String hostname);
         BuilderT setTimeout(Duration timeout);
+        BuilderT setKeyName(String keyName);
         BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
     }
     
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
+    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends ProcedureWithTargetGroup.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends ProcedureWithTargetGroup.BuilderImpl<BuilderT, T, ShardingKey>
+    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
         private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
         private String hostname;
         private ProcessT process;
         private Optional<Duration> optionalTimeout = Optional.empty();
+        private Optional<String> optionalKeyName = Optional.empty(); // if empty, SSH key pair used to start the instance hosting the process will be used
         private byte[] privateKeyEncryptionPassphrase;
 
         @Override
         public BuilderT setProcess(ProcessT process) {
             this.process = process;
             return self();
+        }
+        
+        @Override
+        public BuilderT setKeyName(String keyName) {
+            this.optionalKeyName = Optional.ofNullable(keyName);
+            return self();
+        }
+        
+        protected Optional<String> getOptionalKeyName() {
+            return optionalKeyName;
         }
 
         @Override
@@ -158,12 +176,12 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
             if (super.getServerName() != null) {
                 result = super.getServerName();
             } else {
-                result = getProcess().getServerName(getOptionalTimeout(), privateKeyEncryptionPassphrase);
+                result = getProcess().getServerName(getOptionalTimeout(), getOptionalKeyName(), privateKeyEncryptionPassphrase);
             }
             return result;
         }
 
-        protected void waitUntilLoadBalancerProvisioned(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer) throws InterruptedException {
+        protected void waitUntilLoadBalancerProvisioned(AwsLandscape<ShardingKey> landscape, ApplicationLoadBalancer<ShardingKey> loadBalancer) throws InterruptedException {
             final TimePoint startingToPollForReady = TimePoint.now();
             while (landscape.getApplicationLoadBalancerStatus(loadBalancer).code() == LoadBalancerStateEnum.PROVISIONING
                     && (!getOptionalTimeout().isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(getOptionalTimeout().get()) <= 0)) {
@@ -173,67 +191,82 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         }
     }
 
-    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
+    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
+        this.optionalTimeout = builder.getOptionalTimeout();
         this.process = builder.getProcess();
         this.hostname = builder.getHostname();
     }
     
     @Override
-    public AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
-        return (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
+    public AwsLandscape<ShardingKey> getLandscape() {
+        return (AwsLandscape<ShardingKey>) super.getLandscape();
     }
 
     @Override
     public void run() throws JSchException, IOException, InterruptedException, SftpException {
         masterTargetGroupCreated = createTargetGroup(getLoadBalancerUsed().getRegion(), getMasterTargetGroupName(), getProcess());
         publicTargetGroupCreated = createTargetGroup(getLoadBalancerUsed().getRegion(), getPublicTargetGroupName(), getProcess());
-        getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
-        getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
-        getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true, createRules());
+        // Now wait until host is in state RUNNING which is especially important in case the host has just been launched:
+        try {
+            Wait.wait(()->getLandscape().getInstance(getHost().getId(), getHost().getRegion()).state().name() == InstanceStateName.RUNNING,
+                    optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5),
+                    Level.INFO, "Waiting for instance "+getHost().getId()+" to be in state RUNNING");
+            getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
+            getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
+            getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true, createRules());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private Rule[] createRules() {
         final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
         int ruleCount = 0;
+        rules[ruleCount++] = getLoadBalancerUsed().createDefaultRedirectRule(getHostName(), "/index.html", /* query */ Optional.empty());
         rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA())).build(),
-                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).build(),
+                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
+                actions(createForwardToTargetGroupAction(getMasterTargetGroupCreated())).
                 build();
         rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getA())).build(),
-                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB())).build(),
+                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
+                actions(createForwardToTargetGroupAction(getPublicTargetGroupCreated())).
                 build();
         rules[ruleCount++] = Rule.builder().conditions(
                 RuleCondition.builder().field("http-request-method").httpRequestMethodConfig(hrmcb->hrmcb.values("GET")).build(),
-                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
+                actions(createForwardToTargetGroupAction(getPublicTargetGroupCreated())).
                 build();
         rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
+                actions(createForwardToTargetGroupAction(getMasterTargetGroupCreated())).
                 build();
         assert ruleCount == NUMBER_OF_RULES_PER_REPLICA_SET;
         return rules;
+    }
+    
+    private Action createForwardToTargetGroupAction(TargetGroup<ShardingKey> targetGroup) {
+        return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc.targetGroups(
+                TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())) .build();
     }
 
     protected String getHostName() {
         return hostname;
     }
 
-    private AwsInstance<ShardingKey, MetricsT> getHost() {
+    private AwsInstance<ShardingKey> getHost() {
         @SuppressWarnings("unchecked")
-        final AwsInstance<ShardingKey, MetricsT> result = (AwsInstance<ShardingKey, MetricsT>) getProcess().getHost();
+        final AwsInstance<ShardingKey> result = (AwsInstance<ShardingKey>) getProcess().getHost();
         return result;
     }
     
-    public TargetGroup<ShardingKey, MetricsT> getMasterTargetGroupCreated() {
+    public TargetGroup<ShardingKey> getMasterTargetGroupCreated() {
         return masterTargetGroupCreated;
     }
 
-    public TargetGroup<ShardingKey, MetricsT> getPublicTargetGroupCreated() {
+    public TargetGroup<ShardingKey> getPublicTargetGroupCreated() {
         return publicTargetGroupCreated;
     }
 
@@ -243,9 +276,5 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
 
     public ProcessT getProcess() {
         return process;
-    }
-
-    protected static String getHostedZoneName(String hostname) {
-        return hostname.substring(hostname.indexOf('.')+1);
     }
 }

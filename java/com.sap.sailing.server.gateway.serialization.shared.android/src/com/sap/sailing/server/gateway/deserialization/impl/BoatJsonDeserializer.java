@@ -16,7 +16,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     private static final Logger logger = Logger.getLogger(BoatJsonDeserializer.class.getName());

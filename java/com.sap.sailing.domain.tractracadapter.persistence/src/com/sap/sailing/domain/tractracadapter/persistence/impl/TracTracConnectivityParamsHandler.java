@@ -26,6 +26,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 /**
@@ -143,10 +144,13 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
 
     private void updatePersistentTracTracConfiguration(RaceTrackingConnectivityParametersImpl params)
             throws MalformedURLException, IOException, ParseException, CreateModelException, URISyntaxException, TimeOutException {
-        final String jsonURL = params.getTractracRace().getParameterSet().getParameter("eventJSON");
+        final IRace tractracRace = params.getTractracRace();
+        final String jsonURL = tractracRace.getParameterSet().getParameter("eventJSON");
         final String creatorName = SessionUtils.getPrincipal().toString();
-        final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, params.getTractracRace().getEvent().getName(), jsonURL,
-                /* live URI */ null, /* stored URI */ null, // we mainly want to enable the user to list the event's races again in case they are removed; live/stored stuff comes from the tracking params
+        final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, tractracRace.getEvent().getName(), jsonURL,
+                (params.getLiveURI() == null ? null : params.getLiveURI().toString()),
+                /* stored URI */ params.isReplayRace(tractracRace) ? null // we mainly want to enable the user to list the event's races again in case they are removed;
+                    : (params.getStoredURI() == null ? null : params.getStoredURI().toString()), // live/stored stuff comes from the tracking params
                 params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword());
         tractracMongoObjectFactory.updateTracTracConfiguration(tracTracConfiguration);
         securityService.setDefaultOwnershipIfNotSet(tracTracConfiguration.getIdentifier());

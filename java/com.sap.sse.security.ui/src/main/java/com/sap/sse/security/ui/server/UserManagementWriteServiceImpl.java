@@ -414,7 +414,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     @Override
     public void setPreference(String username, String key, String value) throws UserManagementException, UnauthorizedException {
         getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getUserByName(username));
-            getSecurityService().setPreference(username, key, value);
+        getSecurityService().setPreference(username, key, value);
     }
 
     @Override
@@ -435,7 +435,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
 
     @Override
     public SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
-            String tenantQualifierName) throws UserManagementException, UnauthorizedException {
+            String tenantQualifierName, boolean transitive) throws UserManagementException, UnauthorizedException {
         SuccessInfo successInfo;
         try {
             // get user for which to add a role
@@ -445,7 +445,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             // get the group tenant the role is qualified for if one exists
             final UserGroup tenant = getOrThrowTenant(tenantQualifierName);
             final Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
-                    userQualifierName);
+                    userQualifierName, transitive);
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
             final String message = "added role " + role.getName() + " for user " + username;
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
@@ -475,7 +475,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
 
     @Override
     public SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
-            String tenantQualifierName) throws UserManagementException, UnauthorizedException {
+            String tenantQualifierName, Boolean isTransitive) throws UserManagementException, UnauthorizedException {
         SuccessInfo successInfo;
         try {
             // get user for which to remove role
@@ -485,7 +485,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             // get the group tenant the role is qualified for if one exists
             UserGroup tenant = getOrThrowTenant(tenantQualifierName);
             Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
-                    userQualifierName);
+                    userQualifierName, isTransitive);
             final String message = "removed role " + role.getName() + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
             final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
@@ -626,8 +626,8 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
      *             if the current user does not have the meta permission to give this specific, qualified role in this
      *             context.
      */
-    protected Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID tenantId, String userQualifierName) throws UserManagementException {
-        final Role role = createRoleFromIDs(roleDefinitionId, tenantId, userQualifierName);
+    protected Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID tenantId, String userQualifierName, boolean transitive) throws UserManagementException {
+        final Role role = createRoleFromIDs(roleDefinitionId, tenantId, userQualifierName, transitive);
         if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                 role.getRoleDefinition(), role.getQualificationAsOwnership())) {
             throw new UserManagementException("You are not allowed to take this role to the user.");
@@ -665,7 +665,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         return user;
     }
 
-    protected Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername) throws UserManagementException {
+    protected Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername, boolean transitive) throws UserManagementException {
         final User user;
         if (qualifyingUsername == null || qualifyingUsername.trim().isEmpty()) {
             user = null;
@@ -677,7 +677,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         }
         return new Role(
                 getSecurityService().getRoleDefinition(roleDefinitionId),
-                qualifyingTenantId == null ? null : getSecurityService().getUserGroup(qualifyingTenantId), user);
+                qualifyingTenantId == null ? null : getSecurityService().getUserGroup(qualifyingTenantId), user, transitive);
     }
 
     @Override

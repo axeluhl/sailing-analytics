@@ -1,0 +1,8 @@
+#!/bin/bash
+DIR_TO_CHECK=/var/lib/mongodb
+# Threshold in percent disk usage above which to notify operators
+THRESHOLD_FOR_ALERT=90
+usage_percent=$( df "${DIR_TO_CHECK}" | tail -n 1 | sed -e 's/^.* \([0-9]*\)% .*$/\1/' )
+if [ $usage_percent -gt $THRESHOLD_FOR_ALERT ]; then
+  echo "Disk holding ${DIR_TO_CHECK} on `hostname` used more then ${THRESHOLD_FOR_ALERT} percent" | notify-operators "DISK USAGE ALERT"
+fi

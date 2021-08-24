@@ -4,11 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +19,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.SecurityGroup;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -31,29 +27,32 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.landscape.ssh.SshCommandChannelImpl;
 import com.sap.sse.landscape.ssh.YesUserInfo;
-import com.sap.sse.util.Wait;
+import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 
-public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsInstance<ShardingKey, MetricsT> {
+public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
-    private final AwsLandscape<ShardingKey, MetricsT, ?> landscape;
+    private final InetAddress privateAddress;
+    private InetAddress publicAddress;
+    private final TimePoint launchTimePoint;
+    private final AwsLandscape<ShardingKey> landscape;
     
-    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<ShardingKey, MetricsT, ?> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
+        this.privateAddress = privateAddress;
+        this.launchTimePoint = launchTimePoint;
         this.landscape = landscape;
     }
     
     @Override
     public boolean equals(Object other) {
-        @SuppressWarnings("unchecked")
-        AwsInstance<?, ? extends ApplicationProcessMetrics> otherCast = (AwsInstance<?, ? extends ApplicationProcessMetrics>) other;
-        return otherCast.getInstanceId().equals(getInstanceId());
+        return ((AwsInstance<?>) other).getInstanceId().equals(getInstanceId());
     }
 
     @Override
@@ -67,79 +66,91 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     private Instance getInstance() {
         return landscape.getInstance(getInstanceId(), getRegion());
     }
+    
+    @Override
+    public TimePoint getLaunchTimePoint() {
+        return launchTimePoint;
+    }
 
     @Override
     public InetAddress getPublicAddress() {
-        return getIpAddress(Instance::publicIpAddress);
+        if (publicAddress == null) {
+            try {
+                publicAddress = getPublicAddress(Optional.of(Duration.NULL));
+            } catch (TimeoutException e) {
+                logger.info("Couldn't get public address of instance "+getId());
+                return null;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return publicAddress;
     }
     
     @Override
-    public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPublicAddress);
+    public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) throws TimeoutException, Exception {
+        if (publicAddress == null) {
+            final Instance instance = getInstance();
+            // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
+            if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
+                final String publicIpAddress = Wait.wait(()->getInstance().publicIpAddress(), ipAddress->ipAddress != null, /* retryOnException */ false,
+                        timeoutEmptyMeaningForever, /* sleep between attempts */ Duration.ONE_SECOND.times(5),
+                        Level.INFO, "Waiting for public IP address of instance "+instance.instanceId());
+                publicAddress = publicIpAddress == null ? null : InetAddress.getByName(publicIpAddress);
+            } else {
+                publicAddress = null;
+            }
+        }
+        return publicAddress;
     }
     
     @Override
     public InetAddress getPrivateAddress() {
-        return getIpAddress(Instance::privateIpAddress);
+        return privateAddress;
     }
     
     @Override
     public InetAddress getPrivateAddress(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPrivateAddress);
+        return getPrivateAddress();
     }
 
-    private InetAddress getIpAddress(Function<Instance, String> addressAsStringSupplier) {
-        try {
-            final Instance instance = getInstance();
-            final InetAddress result;
-            if (instance.state().name() == InstanceStateName.RUNNING) {
-                final String privateIpAddress = addressAsStringSupplier.apply(instance);
-                result = privateIpAddress==null?null:InetAddress.getByName(privateIpAddress);
-            } else {
-                result = null; // not RUNNING
-            }
-            return result;
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private InetAddress getAddressWithTimeout(Optional<Duration> timeoutNullMeaningForever, Supplier<InetAddress> addressSupplierMethod) {
-        final Instance instance = getInstance();
-        InetAddress result;
-        // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
-        if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
-            final TimePoint started = TimePoint.now();
-            while ((result = addressSupplierMethod.get()) == null &&
-                    (!timeoutNullMeaningForever.isPresent() ||
-                     started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever.get()) < 0));
-        } else {
-            result = null;
-        }
-        return result;
-    }
-    
     /**
      * Establishes an unconnected session configured for the "root" user.
      * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * @see #createRootSshChannel
      */
-    public com.jcraft.jsch.Session createRootSshSession(byte[] privateKeyEncryptionPassphrase) throws JSchException {
-        return createSshSession(ROOT_USER_NAME, privateKeyEncryptionPassphrase);
+    public com.jcraft.jsch.Session createRootSshSession(Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws TimeoutException, Exception {
+        return createSshSession(ROOT_USER_NAME, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     /**
-     * Establishes an unconnected session configured for the "root" user.
+     * Establishes an unconnected session configured for the user specified by {@code sshUserName}, trying to find and
+     * unlock the SSH private key for the key pair whose name is provided by the {@code keyName} parameter. A
+     * {@link NullPointerException} will be thrown if such a key cannot be found in the {@link #getRegion() region} of
+     * this instance.
      * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
-     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     *            the pass phrase to unlock the private key that belongs to the key pair identified by {@code keyName}
+     * @throws JSchException 
      * @see #createRootSshChannel
      */
-    public com.jcraft.jsch.Session createSshSession(String sshUserName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
-        final String keyName = getInstance().keyName(); // the SSH key pair name that can be used to log on
+    public com.jcraft.jsch.Session createSshSession(String sshUserName, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
+        final String keyName = optionalKeyName.orElseGet(()->getInstance().keyName()); // the SSH key pair name that can be used to log on
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
+        if (keyPair == null) {
+            throw new IllegalStateException("Couldn't find key pair "+keyName+" in landscape.");
+        }
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
         jsch.addIdentity(keyName, landscape.getDecryptedPrivateKey(keyPair, privateKeyEncryptionPassphrase), keyPair.getPublicKey(), /* passphrase */ null);
@@ -159,8 +170,8 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
      */
     @Override
     public SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return createSshChannel(ROOT_USER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return createSshChannel(ROOT_USER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     /**
@@ -176,22 +187,23 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
      */
     @Override
     public SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout, privateKeyEncryptionPassphrase));
-
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout,
+                optionalKeyName, privateKeyEncryptionPassphrase));
     }
     
     private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         logger.info(
                 "Creating SSH "+channelType+" channel for SSH user "+sshUserName+
+                " with key "+optionalKeyName+
                 " to instance with ID "+getInstanceId());
         Channel result;
         try {
             result = Wait.wait(()->{
                     Session session = null;
                     try {
-                        session = createSshSession(sshUserName, privateKeyEncryptionPassphrase);
+                        session = createSshSession(sshUserName, optionalKeyName, privateKeyEncryptionPassphrase);
                         session.setUserInfo(new YesUserInfo());
                         session.connect(optionalTimeout.map(d->d.asMillis()).orElse(0l).intValue());
                         return session.openChannel(channelType);
@@ -214,15 +226,15 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     
     @Override
     public ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return (ChannelSftp) createSshChannelInternal(sshUserName, "sftp", optionalTimeout,
-                privateKeyEncryptionPassphrase);
+                optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
-    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        return createSftpChannel(ROOT_USER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
+        return createSftpChannel(ROOT_USER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
@@ -246,7 +258,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
         landscape.terminate(this);
     }
     
-    protected AwsLandscape<ShardingKey, MetricsT, ?> getLandscape() {
+    protected AwsLandscape<ShardingKey> getLandscape() {
         return landscape;
     }
     

@@ -21,7 +21,6 @@ public class LeaderboardConfigPanelSupplier extends AdminConsolePanelSupplier<Le
 
     @Override
     public LeaderboardConfigPanel init() {
-        logger.info("Create LeaderboardConfigPanel");
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(presenter, stringMessages,
                 showRaceDetails);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");

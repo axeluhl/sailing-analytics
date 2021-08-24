@@ -39,7 +39,7 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        final String defaultServerGroupName = System.getProperty(UserStore.DEFAULT_SERVER_GROUP_NAME_PROPERTY_NAME, ServerInfo.getName() + "-server");
+        final String defaultServerGroupName = System.getProperty(UserStore.DEFAULT_SERVER_GROUP_NAME_PROPERTY_NAME, ServerInfo.getServerGroupName());
         logger.info("Creating user store");
         subscriptionApiServiceTracker = ServiceTrackerFactory.createAndOpen(context, SubscriptionApiService.class);
         final UserStoreImpl userStore = new UserStoreImpl(defaultServerGroupName);

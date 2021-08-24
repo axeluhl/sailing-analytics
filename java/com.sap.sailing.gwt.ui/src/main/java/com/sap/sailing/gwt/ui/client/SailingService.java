@@ -240,8 +240,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     ServerConfigurationDTO getServerConfiguration() throws UnauthorizedException;
 
-    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) throws UnauthorizedException;
-
     List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() throws UnauthorizedException;
 
     List<UrlDTO> getResultImportUrls(String resultProviderName) throws UnauthorizedException;
@@ -474,6 +472,15 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      * @return base64 encoded string containg a png-image of the genrated qrcode
      */
     String openRegattaRegistrationQrCode(String url) throws UnauthorizedException;
+    
+    /**
+     * Generates a base64-encoded qrcode.
+     * 
+     * @param url
+     *            complete url for a race with settings on the RaceBoard
+     * @return base64 encoded string containg a png-image of the genrated qrcode
+     */
+    String createRaceBoardLinkQrCode(String url);
 
     Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() throws UnauthorizedException;
 
@@ -568,4 +575,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName)
             throws UnauthorizedException, NotFoundException;
+    
+    Integer getAdminConsoleChangeLogSize();
 }

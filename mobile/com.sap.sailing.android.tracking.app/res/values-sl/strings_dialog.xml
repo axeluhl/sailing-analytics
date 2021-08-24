@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    <string name="yes">"Da"</string>
+    <string name="no">"Ne"</string>
+    <string name="confirm_data_hello_name">"Pozdravljeni, {full_name}"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"Vpisujete se kot {sail_id}"</string>
+    <string name="confirm_data_is_correct">"V redu"</string>
+    <string name="decline_data_is_incorrect">"To nisem jaz."</string>
+    <string name="confirm_delete_checkin">"Ali res želite izbrisati to prijavo?"</string>
+    <string name="download_team_image_message">"Prenašanje slike ekipe iz strežnika ..."</string>
+    <string name="checkout_warning_message">"Ali se RES želite odjaviti? Za dostop do svoje regate se boste morali znova prijaviti s prejeto QR-kodo."</string>
+</resources>

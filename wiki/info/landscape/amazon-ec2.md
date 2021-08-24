@@ -4,15 +4,70 @@
 
 ## Quickstart
 
-Our default region in AWS EC2 is eu-west-1 (Ireland).
+Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London).
 
-#### Servers, Hostnames
+### Important Servers, Hostnames
 
-- Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
-- Database Server: dbserver.internal.sapsailing.com
+- Web Server: reachable through SSH to sapsailing.com:22
+- Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com, mongo1.internal.sapsailing.com
 - RabbitMQ Server: rabbit.internal.sapsailing.com
-- Standalone MongoDB Server: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203)
-- MongoDB Servers for "live" replica set: mongo0.internal.sapsailing.com and mongo1.internal.sapsailing.com
+
+## Landscape Overview
+
+In Route53 (the AWS DNS) we have registered the sapsailing.com domain and can manage records for any sub-domains. The "apex" record for sapsailing.com points to a Network Load Balancer (NLB), currently ``NLB-sapsailing-dot-com-f937a5b33246d221.elb.eu-west-1.amazonaws.com``, which does the following things:
+
+* accept SSH connects on port 22; these are forwarded to the internal IP of the web server through the target group ``SSH-to-sapsailing-dot-com``, currently with the internal IP target ``172.31.28.212``
+* accept HTTP connections for ``sapsailing.com:80``, forwarding them to the target group ``HTTP-to-sapsailing-dot-com`` which is a TCP target group for port 80 with ip-based targets (instance-based was unfortunately not possible for the old ``m3`` instance type of our web server), again pointing to ``172.31.28.212``, the internal IP of our web server
+* accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com`` target group
+* optionally, this NLB could be extended by UDP port mappings in case we see a use case for UDP-based data streams that need forwarding to specific applications, such as the Expedition data typically sent on ports 2010 and following
+
+### Webserver
+
+The web server currently exists only as one instance but could now be replicated to other availabililty zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will described further below, to the ``CentralWebServerHTTP*`` target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
+
+* hudson.sapsailing.com - a Hudson installation on dev.internal.sapsailing.com
+* bugzilla.sapsailing.com - a Bugzilla installation under /usr/lib/bugzilla
+* wiki.sapsailing.com - a Gollum-based Wiki served off our git, see /home/wiki
+* static.sapsailing.com - static content hosted under /home/trac/static
+* releases.sapsailing.com - hub and repository for releases built by our CI infrastructure, hosted at /home/trac/releases
+* jobs.sapsailing.com - a static web page, see /home/trac/static/jobs
+* sail-insight.com - a static web page, with SSL/HTTPS support, hosted under /home/trac/sail-insight-website
+* p2.sapsailing.com - several OSGi p2 repositories relevant for our Tycho/OSGi build and our target platform definition, hosted under /home/trac/p2-repositories
+* gitlist.sapsailing.com - for our git at /home/trac/git
+* git.sapsailing.com - for git cloning for dedicated users, used among other things for replication into git.wdf.sap.corp
+
+Furthermore, it host aliases for ``sapsailing.com``, ``www.sapsailing.com`` and all subdomains for archived content, pointing to the archive server which is defined in ``/etc/httpd/conf.d/000-macros.conf``. This is also where the archive server switching has to be configured. Reload the configuration using
+
+```
+        service httpd reload
+```
+
+The webserver is registered as target in various locations:
+
+* As DNS record with its internal IP address (e.g., 172.31.19.129) for the two DNS entries ``logfiles.internal.sapsailing.com`` used by various NFS mounts, and ``smtp.internal.sapsailing.com`` for e-mail traffic sent within the landscape and not requiring the AWS SES
+* as IP target with its internal IP address for the ``HTTP-to-sapsailing-dot-com`` target group, accepting the HTTP traffic sent straight to ``sapsailing.com`` (not ``www.sapsailing.com``)
+* as IP target with its internal IP address for the ``SSH-to-sapsailing-dot-com`` target group, accepting the SSH traffic for ``sapsailing.com``
+* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on
+* as target of the elastic IP address ``54.229.94.254``
+
+Furthermore, it is important to ensure that the ``/internal-server-status`` path will resolve correctly to the Apache httpd server status page. For this, the ``/etc/httpd/conf.d/001-events.conf`` file contains three rules at the very beginning:
+
+```
+## SERVER STATUS
+Use Status ec2-54-229-94-254.eu-west-1.compute.amazonaws.com internal-server-status
+Use Status 172.31.19.129 internal-server-status
+Use Status 127.0.0.1 internal-server-status
+```
+
+The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
+
+### DNS and ALBs
+
+We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (Sailing-DNSMapped-eu-west-1-604165534.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects.
+
+Shorter-running events may not require a DNS record. The ALB ``Sailing-eu-west-1-135628335.eu-west-1.elb.amazonaws.com`` is target for ``*.sapsailing.com`` and receives all HTTP/HTTPS requests not otherwise handled. While HTTP immediately redirects to HTTPS, the HTTPS requests will pass through its rules. If application replica sets have their rules declared here, they will fire. Everything else falls through to the default rule which forwards to the web server's target groups again. This is how archived events as well as requests for ``www.sapsailing.com`` end up.
+
+The requests going straight to ``sapsailing.com`` are handled by the NLB (see above), get forwarded to the web server and are re-directed to ``www.sapsailing.com`` from there, ending up at the non-DNS-mapped load balancer where by default they are then sent again to the web server which sends it to the archive server.
 
 #### Starting an instance
 
@@ -151,19 +206,19 @@ More variables are available, and some variables---if not set in the environment
     The address to use in the "From:" header field when the application sends e-mail.
 
 * `MAIL_SMTP_HOST`
-    The SMTP host to use for sending e-mail. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    The SMTP host to use for sending e-mail. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
     
 * `MAIL_SMTP_PORT`
-    The SMTP port to use for sending e-mail. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    The SMTP port to use for sending e-mail. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
 
 * `MAIL_SMTP_AUTH`
-    `true` or `false`; defaults to `false` and tells whether or not to authenticate a user to the SMTP server using the `MAIL_SMTP_USER` and `MAIL_SMTP_PASSWORD` variables. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration and hence defaults this variable to `true`.
+    `true` or `false`; defaults to `false` and tells whether or not to authenticate a user to the SMTP server using the `MAIL_SMTP_USER` and `MAIL_SMTP_PASSWORD` variables. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration and hence defaults this variable to `true`. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
 
 * `MAIL_SMTP_USER`
-    Username for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    Username for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
 
 * `MAIL_SMTP_PASSWORD`
-    Password for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    Password for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
 
 * `EVENT_ID`
     Used to specify one or more UUIDs of events for which to create a reverse proxy mapping in `/etc/httpd/conf.d/${SERVER_NAME}.conf`. If only a single event ID is specified, as in ``EVENT_ID=34ebf96f-594b-4948-b9ea-e6074107b3e0`` then the `${EVENT_HOSTNAME}` is used as the hostname, or if `EVENT_HOSTNAME` is not specified, defaulting to `${SERVER_NAME}.sapsailing.com`, and a mapping using the `Event-SSL` macro is performed. The variable can also be used in Bash Array notation to specify more than one event ID, as in ``EVENT_ID[0]=34ebf96f-594b-4948-b9ea-e6074107b3e0`` and then ``EVENT_HOSTNAME[0]=...`` would specify the corresponding hostname (again defaulting to `${SERVER_NAME}.sapsailing.com`), followed by ``EVENT_ID[1]=...`` and then optionally ``EVENT_HOSTNAME[1]=...``, and so on. If neither `EVENT_ID` nor `SERIES_ID` is specified, a default reverse proxy mapping for the server process will be created using the `Home-SSL` macro which redirects requests for the base URL (`${SERVER_NAME}.sapsailing.com`) to the `/gwt/Home.html` entry point. 
@@ -404,7 +459,28 @@ BE CAREFUL please use for a live-server and live-master-server the traffic port 
 
 You should now be able to reach your multi instance with the dns name "ssv.sapsailing.com".
 
+### S3 Storage, `media.sapsailing.com` and CloudFront
 
+In order to serve content from media.sapsailing.com publicly through HTTPS connections with an Amazon-provided SSL certificate, we created a CloudFront distribution ``E2YEQ22MXCKC5R``. See also [https://console.aws.amazon.com/cloudfront/home?region=us-east-1#distribution-settings:E2YEQ22MXCKC5R](https://console.aws.amazon.com/cloudfront/home?region=us-east-1#distribution-settings:E2YEQ22MXCKC5R). CloudFront distributions can use AWS-provided certificates only from region us-east-1, so we created a certificate for ``*.sapsailing.com`` with additional name ``sapsailing.com`` there ([https://console.aws.amazon.com/acm/home?region=us-east-1#/?id=arn:aws:acm:us-east-1:017363970217:certificate%2Fb05e7e2b-a5ad-45e7-91c7-e9cc13e5ed4a](https://console.aws.amazon.com/acm/home?region=us-east-1#/?id=arn:aws:acm:us-east-1:017363970217:certificate%2Fb05e7e2b-a5ad-45e7-91c7-e9cc13e5ed4a)). A CloudFront distribution has a DNS name; this one has ``dieqc457smgus.cloudfront.net``. We made ``media.sapsailing.com`` an "Alias" DNS record in Route53 to point to this CloudFront distribution's DNS name, as an A-record with "Simple" routing policy. Logging for the CloudFront distribution has been enabled and set to the S3 bucket ``sapsailing-access-logs.s3.amazonaws.com``, prefix ``media-sapsailing-com``. As CloudFront distribution origin domain name we set ``media.sapsailing.com.s3.amazonaws.com`` with Origin Type set to ``S3 Origin``. We activated HTTP to HTTPS redirection.
+
+## SSH Key Management
+
+AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
+
+We decided early 2021 to change this so that things would be based on our own user and security sub-system (see [here](/wiki/info/security/security.md)). We introduced `LANDSCAPE` as a secured object type, with a special permission `MANAGE` and a special object identifier `AWS` such that the permission `LANDSCAPE:MANAGE:AWS` would permit users to manage all aspects of the AWS landscape, given they can present a valid AWS access key/secret. To keep the EC2 instances' SSH public key infrastructure in line, we made the instances poll the SSH public keys of those users with permissions, once per minute, updating the default user's `.ssh/authorized_keys` file accordingly.
+
+The REST end point `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` has been implemented which is based on state managed in the `com.sap.sse.landscape.aws` bundle's Activator. This activator registers SSH key pair listeners on any AwsLandscape object created by any of the AwsLandscape.obtain methods and uses those to update the time stamp returned by `get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` each time SSH keys are added or removed. Furthermore, the activator listens for changes regarding the `LANDSCAPE:MANAGE:AWS` permission using the new `PermissionChangeListener` observer pattern offered by SecurityService. The activator tracks the SecurityService, and the listener registration would be renewed even if the SecurityService was replaced in the OSGi registry. The actual mapping of changes to SecurityService to listener notifications is implemented by the new class PermissionChangeListeners.
+
+With this, the three REST API end points `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers`, `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS`, and `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=...` allow clients to efficiently find out whether the set of users with AWS landscape management permission and/or their set of SSH key pairs may have changed, and if so, poll the actual changes which requires a bit more computational effort.
+
+Two new scripts and a crontab file are provided under the configuration/ folder:
+- `update_authorized_keys_for_landscape_managers_if_changed`
+- `update_authorized_keys_for_landscape_managers`
+- `crontab`
+
+The first makes a call to `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` (currently coded to `https://security-service.sapsailing.com` in the crontab file). If no previous time stamp for the last change exists under `/var/run/last_change_aws_landscape_managers_ssh_keys` or the time stamp received in the response is newer, the `update_authorized_keys_for_landscape_managers` script is invoked using the bearer token provided in `/root/ssh-key-reader.token` as argument, granting the script READ access to the user list and their SSH key pairs. That script first asks for `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS` and then uses `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=..`. to obtain the actual SSH public key information for the landscape managers. The original `/root/.ssh/authorized_keys` file is copied to `/root/.ssh/authorized_keys.org` once and then used to insert the single public SSH key inserted by AWS, then appending all public keys received for the landscape-managing users.
+
+The `crontab` file which is used during image-upgrade (see `configuration/imageupdate.sh`) has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
 
 #### Setting up a Dedicated Instance
 [...]

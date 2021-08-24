@@ -2,9 +2,12 @@
 Description=Check EC2 metadata for MongoDB Replica Set Name and patch /etc/mongod.conf accordingly
 Requires=ephemeralvolume.service
 After=ephemeralvolume.service
+Requires=cloud-init.service
+After=cloud-init.service
 Before=mongod.service
 
 [Install]
+RequiredBy=mongod.service
 
 [Service]
 Type=oneshot

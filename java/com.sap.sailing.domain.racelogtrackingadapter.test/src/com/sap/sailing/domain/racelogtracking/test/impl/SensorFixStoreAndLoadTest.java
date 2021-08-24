@@ -169,6 +169,7 @@ public class SensorFixStoreAndLoadTest {
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* startDate */ null, /* endDate */null, null, null, "a", null,
                 /* registrationLinkSecret */ UUID.randomUUID().toString()));
+        regatta.getRegatta().setControlTrackingFromStartAndFinishTimes(true);
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
@@ -451,7 +452,7 @@ public class SensorFixStoreAndLoadTest {
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
         if (expected == 0) {
             if (track != null) {
-        track.lockForRead();
+                track.lockForRead();
                 try {
                     assertTrue(size(track.getRawFixes()) == 0);
                 } finally {
@@ -461,10 +462,10 @@ public class SensorFixStoreAndLoadTest {
         } else {
             track.lockForRead();
             try {
-        assertEquals(expected, size(track.getRawFixes()));
+                assertEquals(expected, size(track.getRawFixes()));
             } finally {
-        track.unlockAfterRead();
-    }
+                track.unlockAfterRead();
+            }
         }
     }
 

@@ -574,9 +574,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             List<StrippedLeaderboardDTO> otherExistingLeaderboard, final String oldLeaderboardName,
             LeaderboardDescriptor descriptor, List<EventDTO> existingEvents) {
         FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(
-                Collections.unmodifiableCollection(otherExistingLeaderboard), descriptor, stringMessages,
-                Collections.unmodifiableList(existingEvents), errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(otherExistingLeaderboard), descriptor, userService,
+                stringMessages, Collections.unmodifiableList(existingEvents),
+                errorReporter, new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
                     }
@@ -887,9 +887,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
     private void createFlexibleLeaderboard(List<EventDTO> existingEvents) {
         final FlexibleLeaderboardCreateDialog dialog = new FlexibleLeaderboardCreateDialog(
-                Collections.unmodifiableCollection(availableLeaderboardList), stringMessages,
-                Collections.unmodifiableCollection(existingEvents), errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(availableLeaderboardList), userService,
+                stringMessages, Collections.unmodifiableCollection(existingEvents),
+                errorReporter, new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
                     }
@@ -1001,6 +1001,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void addLeaderboard(StrippedLeaderboardDTOWithSecurity result) {
         filteredLeaderboardList.getList().add(result);
         availableLeaderboardList.add(result);
+        presenter.getLeaderboardsRefresher().add(result);
         leaderboardSelectionModel.clear();
         leaderboardSelectionModel.setSelected(result, true);
         loadAndRefreshLeaderboard(result);
@@ -1069,9 +1070,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 public void onSuccess(Void result) {
                     for (StrippedLeaderboardDTOWithSecurity leaderboard : leaderboards) {
                         removeLeaderboardFromTable(leaderboard);
+                        getLeaderboardsRefresher().remove(leaderboard);
                     }
-                    getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList,
-                            LeaderboardConfigPanel.this.getLeaderboardsDisplayer());
+                    getLeaderboardsRefresher().callAllFill();
                 }
             });
         }
@@ -1089,8 +1090,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     @Override
                     public void onSuccess(Void result) {
                         removeLeaderboardFromTable(leaderBoard);
-                        getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList,
-                                LeaderboardConfigPanel.this.getLeaderboardsDisplayer());
+                        getLeaderboardsRefresher().remove(leaderBoard);
+                        getLeaderboardsRefresher().callAllFill();
                     }
                 }));
     }

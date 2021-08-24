@@ -30,7 +30,6 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -186,7 +185,6 @@ public class TrackingListFragment extends BaseFragment
             mHeader.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
                     //Check if finished or not
                     boolean finished = getRaceState().getFinishedTime() != null;
                     if (finished) {
@@ -314,7 +312,6 @@ public class TrackingListFragment extends BaseFragment
                     initializeFinishList();
                     initLocalData();
                     Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
-                    sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
                     //Check if finished or not
                     boolean finished = getRaceState().getFinishedTime() != null;
                     if (finished) {
@@ -337,23 +334,18 @@ public class TrackingListFragment extends BaseFragment
     public void onStart() {
         super.onStart();
 
-        if (getRace() != null && getRaceState() != null) {
+        if (getRaceState() != null) {
             getRaceState().addChangedListener(mStateChangeListener);
         }
 
         initLocalData();
-
-        Intent intent = new Intent(AppConstants.ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.ACTION_EXTRA_LIFECYCLE, AppConstants.ACTION_EXTRA_START);
-        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_COMPETITOR);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        if (getRace() != null && getRaceState() != null) {
+        if (getRaceState() != null) {
             getRaceState().removeChangedListener(mStateChangeListener);
         }
 
@@ -362,11 +354,6 @@ public class TrackingListFragment extends BaseFragment
         if (!diff.isEmpty()) {
             getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), diff);
         }
-
-        Intent intent = new Intent(AppConstants.ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.ACTION_EXTRA_LIFECYCLE, AppConstants.ACTION_EXTRA_STOP);
-        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_COMPETITOR);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     @Override

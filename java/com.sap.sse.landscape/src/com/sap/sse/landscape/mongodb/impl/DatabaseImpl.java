@@ -17,4 +17,9 @@ public class DatabaseImpl extends NamedImpl implements Database {
     public MongoEndpoint getEndpoint() {
         return endpoint;
     }
+
+    @Override
+    public String toString() {
+        return "DatabaseImpl [endpoint=" + endpoint + "]";
+    }
 }

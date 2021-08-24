@@ -3,10 +3,10 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
 import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
@@ -32,7 +33,9 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.util.MappingIterator;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
  * Records {@link Wind} objects over time and offers to average the last so many of them into an
@@ -53,6 +56,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private long millisecondsOverWhichToAverage;
     
     private final boolean useSpeed;
+    
+    protected final Weigher<Pair<Position, TimePoint>> weigher;
     
     /**
      * Listeners won't be serialized.
@@ -107,6 +112,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         listeners = new HashSet<WindListener>();
         this.useSpeed = useSpeed;
         this.losslessCompaction = losslessCompaction;
+        this.weigher = createPositionAndTimePointWeigher();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -225,83 +231,38 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     /**
      * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface method.
-     * It does so by collecting (smoothened, outliers removed) wind fixes around the <code>at</code> time point up to
-     * an interval length as specified by {@link #getMillisecondsOverWhichToAverageWind()}. At least one fix that is
-     * closest to <code>at</code> will be picked up. If the track is empty, <code>null</code> is returned. Otherwise,
-     * the wind fixes in the interval constructed are averaged using a {@link ConfidenceBasedWindAverager}.
-     * 
+     * It does so by collecting wind fixes around the <code>at</code> time point up to half interval length specified by
+     * {@link #getMillisecondsOverWhichToAverageWind()} in each direction, starting to count at the first fix found in
+     * each direction. If available, at least the fix time-wise closest before and the fix time-wise closest after
+     * {@code at} will be picked up, which may lead to an overall interval length that exceeds
+     * {@link #getMillisecondsOverWhichToAverageWind()}.
      * <p>
-     * However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses may use this
-     * carefully if they can guarantee there are no concurrency issues with the internal fixes while iterating over the
-     * result of {@link #getInternalFixes()}.
+     * 
+     * If the track is empty, {@code null} is returned. Otherwise, the wind fixes in the interval constructed are
+     * averaged using a {@link ConfidenceBasedWindAverager}.
+     * <p>
+     * 
+     * Not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses may use this carefully
+     * if they can guarantee there are no concurrency issues with the internal fixes while iterating over the result of
+     * {@link #getInternalFixes()}.
      * 
      * @param p
      *            if <code>null</code>, the averaged position of the original wind fixes is returned; otherwise,
      *            <code>p</code> is used as the result's position and may be used for confidence determination.
      */
-    protected WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
+    protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
         lockForRead();
         try {
-            List<WindWithConfidence<Util.Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Util.Pair<Position, TimePoint>>>();
+            List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Util.Pair<Position, TimePoint>>>();
             // don't measure speed with separate confidence; return confidence obtained from averaging bearings
-            ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE
-                    .createWindAverager(new PositionAndTimePointWeigher(
-                    /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10,
-                    WIND_HALF_CONFIDENCE_DISTANCE));
-            DummyWind atTimed = new DummyWind(at);
+            ConfidenceBasedWindAverager<Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE.createWindAverager(weigher);
             Util.Pair<Position, TimePoint> relativeTo = new Util.Pair<Position, TimePoint>(p, at);
-            NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
-            NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */true);
-            Iterator<Wind> beforeIter = beforeSet.descendingIterator();
-            Iterator<Wind> afterIter = afterSet.iterator();
-            long beforeDistanceToAt = 0;
-            long afterDistanceToAt = 0;
-            TimePoint beforeIntervalEnd = null;
-            TimePoint afterIntervalStart = null;
-            long beforeIntervalLength = 0;
-            long afterIntervalLength = 0;
-            Wind beforeWind = null;
-            if (beforeIter.hasNext()) {
-                beforeWind = beforeIter.next();
-                beforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
-            }
-            Wind afterWind = null;
-            if (afterIter.hasNext()) {
-                afterWind = afterIter.next();
-                afterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
-            }
-            do {
-                if (beforeWind != null && (beforeDistanceToAt <= afterDistanceToAt || afterWind == null)) {
-                    windFixesToAverage.add(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(beforeWind,
-                            getConfidenceOfInternalWindFixUnsynchronized(beforeWind), new Util.Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind
-                                    .getTimePoint()), useSpeed));
-                    if (beforeIntervalEnd == null) {
-                        beforeIntervalEnd = beforeWind.getTimePoint();
-                    }
-                    if (beforeIter.hasNext()) {
-                        beforeWind = beforeIter.next();
-                        beforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
-                        beforeIntervalLength = beforeIntervalEnd.asMillis() - beforeWind.getTimePoint().asMillis();
-                    } else {
-                        beforeWind = null;
-                    }
-                } else if (afterWind != null) {
-                    windFixesToAverage.add(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(afterWind,
-                            getConfidenceOfInternalWindFixUnsynchronized(afterWind), new Util.Pair<Position, TimePoint>(afterWind.getPosition(), afterWind
-                                    .getTimePoint()), useSpeed));
-                    if (afterIntervalStart == null) {
-                        afterIntervalStart = afterWind.getTimePoint();
-                    }
-                    if (afterIter.hasNext()) {
-                        afterWind = afterIter.next();
-                        afterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
-                        afterIntervalLength = afterWind.getTimePoint().asMillis() - afterIntervalStart.asMillis();
-                    } else {
-                        afterWind = null;
-                    }
-                }
-            } while (beforeIntervalLength + afterIntervalLength < getMillisecondsOverWhichToAverageWind()
-                    && (beforeWind != null || afterWind != null));
+            // pick one left if possible and extend to half averaging interval length
+            final Iterator<WindWithConfidence<Pair<Position, TimePoint>>> beforeIter = getInternalFixesLimitedHeadSetDescendingIterator(at);
+            collectFixesInOneDirection(beforeIter, windFixesToAverage);
+            // pick one right if possible and extend to half averaging interval length
+            final Iterator<WindWithConfidence<Pair<Position, TimePoint>>> afterIter = getInternalFixesLimitedTailSetIterator(at);
+            collectFixesInOneDirection(afterIter, windFixesToAverage);
             if (windFixesToAverage.isEmpty()) {
                 return null;
             } else {
@@ -311,6 +272,65 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         } finally {
             unlockAfterRead();
         }
+    }
+
+    protected Iterator<WindWithConfidence<Pair<Position, TimePoint>>> getInternalFixesLimitedHeadSetDescendingIterator(TimePoint endingAt) {
+        return new MappingIterator<>(getInternalFixes().headSet(new DummyWind(endingAt), /* inclusive */false).descendingIterator(), wind->createWindWithConfidence(wind));
+    }
+
+    protected Iterator<WindWithConfidence<Pair<Position, TimePoint>>> getInternalFixesLimitedTailSetIterator(TimePoint startingAt) {
+        return new MappingIterator<>(getInternalFixes().tailSet(new DummyWind(startingAt), /* inclusive */true).iterator(), wind->createWindWithConfidence(wind));
+    }
+
+    private void collectFixesInOneDirection(final Iterator<WindWithConfidence<Pair<Position, TimePoint>>> fixIter,
+            Collection<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage) {
+        long distanceToFirst = 0;
+        WindWithConfidence<Pair<Position, TimePoint>> nextWindFix = null;
+        final TimePoint firstTimePointInDirection;
+        if (fixIter.hasNext()) {
+            nextWindFix = fixIter.next();
+            firstTimePointInDirection = nextWindFix.getObject().getTimePoint();
+            distanceToFirst = Math.abs(firstTimePointInDirection.asMillis() - nextWindFix.getObject().getTimePoint().asMillis());
+            windFixesToAverage.add(nextWindFix);
+        } else {
+            firstTimePointInDirection = null;
+        }
+        // and extend to at most half the averaging interval
+        long newDistanceToFirst;
+        if (fixIter.hasNext()) {
+            nextWindFix = fixIter.next();
+            newDistanceToFirst = Math.abs(firstTimePointInDirection.asMillis() - nextWindFix.getObject().getTimePoint().asMillis());
+        } else {
+            nextWindFix = null;
+            newDistanceToFirst = distanceToFirst;
+        }
+        // go up to half the interval:
+        while (nextWindFix != null && newDistanceToFirst <= getMillisecondsOverWhichToAverageWind()/2) {
+            windFixesToAverage.add(nextWindFix);
+            distanceToFirst = newDistanceToFirst;
+            if (fixIter.hasNext()) {
+                nextWindFix = fixIter.next();
+                newDistanceToFirst = Math.abs(firstTimePointInDirection.asMillis() - nextWindFix.getObject().getTimePoint().asMillis());
+            } else {
+                nextWindFix = null;
+                newDistanceToFirst = distanceToFirst;
+            }
+        }
+    }
+    
+    private PositionAndTimePointWeigher createPositionAndTimePointWeigher() {
+        return new PositionAndTimePointWeigher(WIND_HALF_CONFIDENCE_DURATION, WIND_HALF_CONFIDENCE_DISTANCE);
+    }
+
+    private WindWithConfidenceImpl<Pair<Position, TimePoint>> createWindWithConfidence(Wind wind) {
+        return new WindWithConfidenceImpl<Pair<Position, TimePoint>>(wind,
+                getConfidenceOfInternalWindFixUnsynchronized(wind),
+                /* relativeTo */ new Pair<Position, TimePoint>(wind.getPosition(), wind.getTimePoint()),
+                useSpeed);
+    }
+    
+    protected boolean isUseSpeed() {
+        return useSpeed;
     }
 
     /**

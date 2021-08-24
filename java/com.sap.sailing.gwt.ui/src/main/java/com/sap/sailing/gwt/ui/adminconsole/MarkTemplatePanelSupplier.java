@@ -20,7 +20,6 @@ public class MarkTemplatePanelSupplier extends AdminConsolePanelSupplier<MarkTem
 
     @Override
     public MarkTemplatePanel init() {
-        logger.info("Create MarkTemplatePanel");
         final MarkTemplatePanel markTemplatePanel = new MarkTemplatePanel(presenter.getSailingService(),
                 presenter.getErrorReporter(), stringMessages, presenter.getUserService());
         markTemplatePanel.ensureDebugId("markTemplatePanel");

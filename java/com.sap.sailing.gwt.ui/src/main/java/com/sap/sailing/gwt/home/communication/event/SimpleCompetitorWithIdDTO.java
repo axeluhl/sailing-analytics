@@ -11,8 +11,8 @@ public class SimpleCompetitorWithIdDTO extends SimpleCompetitorDTO implements Re
 
     private String idAsString;
 
-    protected SimpleCompetitorWithIdDTO() {
-    }
+    @Deprecated
+    SimpleCompetitorWithIdDTO() {} // for GWT RPC serialization only
 
     @GwtIncompatible
     public SimpleCompetitorWithIdDTO(Competitor competitor) {

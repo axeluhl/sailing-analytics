@@ -16,8 +16,38 @@ various authentication and authorization facilities. This module offers REST ser
 used to log in and log out a subject, obtain a bearer token for a subject and manage security concerns.
 By default, the base URL for these services is "/security", so a full login URL, for example, could
 be <code>http://sapsailing.com/security/api/restsecurity/login</code>.
+See also <a href="https://wiki.sapsailing.com/wiki/info/security/permission-concept">here</a> for more
+details on the permission concepts implemented.
+</p>
+<p>
+For questions and support please get in touch through <a href="mailto:support@sapsailing.com">support@sapsailing.com</a>.
 </p>
 <div style="height: 1em;"></div>
+<table>
+<thead>
+	<tr>
+		<td>Request Header Fields</td>
+		<td>Description</td>
+	</tr>
+</thead>
+<tbody>
+    <tr>
+        <td>defaultTenant</td>
+        <td>Request will be executed under a specified default tenant. This will specifically affect created items. <br>
+        Example: "defaultTenant:{valid UserGroup id}"</td>
+    </tr>
+    <tr>
+        <td>X-Client-Locale</td>
+        <td>Sets a specified client locale for a request. The locale is required to be in IETF BCP 47 format. If no locale is given, the default is English("en")<br>
+        Example: "X-Client-Locale:en"</td>
+    </tr>
+    <tr>
+        <td>X-SAPSSE-Forward-Request-To</td>
+        <td>Specifies a target group for the request to be forwarded to. Valid values are "master" and "replica"<br>
+        Example: "X-SAPSSE-Forward-Request-To:master"</td>
+    </tr>
+</tbody>
+</table>
 <table>
 <thead>
 	<tr>
@@ -27,75 +57,75 @@ be <code>http://sapsailing.com/security/api/restsecurity/login</code>.
 </thead>
 <tbody>
 	<tr>
-		<td><a href="user.html">/api/restsecurity/create_user</a></td>
+		<td><a href="user.html">/security/api/restsecurity/create_user</a></td>
 		<td>Create a user</td>
 	</tr>
 	<tr>
-		<td><a href="user.html">/api/restsecurity/change_password</a></td>
+		<td><a href="change_password.html">/security/api/restsecurity/change_password</a></td>
 		<td>Change a user's password</td>
 	</tr>
 	<tr>
-		<td><a href="forgot_password.html">/api/restsecurity/forgot_password</a></td>
+		<td><a href="forgot_password.html">/security/api/restsecurity/forgot_password</a></td>
 		<td>Trigger the process of password recovery</td>
 	</tr>
     <tr>
-        <td><a href="user.html">/api/restsecurity/user</a></td>
+        <td><a href="user.html">/security/api/restsecurity/user</a></td>
         <td>Read, update or delete a user</td>
     </tr>
     <tr>
-        <td><a href="has_permission.html">/api/restsecurity/has_permission</a></td>
+        <td><a href="has_permission.html">/security/api/restsecurity/has_permission</a></td>
         <td>Check whether the subject has one or more permissions.</td>
     </tr>
     <tr>
-        <td><a href="users_with_permission.html">/api/restsecurity/users_with_permission</a></td>
+        <td><a href="users_with_permission.html">/security/api/restsecurity/users_with_permission</a></td>
         <td>Finds the usernames of those users who have the permission specified</td>
     </tr>
     <tr>
-        <td><a href="role.html">/api/restsecurity/role</a></td>
+        <td><a href="role.html">/security/api/restsecurity/role</a></td>
         <td>Create, read, update or delete a role</td>
     </tr>
 	<tr>
-		<td><a href="usergroup.html">/api/restsecurity/usergroup</a></td>
+		<td><a href="usergroup.html">/security/api/restsecurity/usergroup</a></td>
 		<td>Read, update or delete a user group</td>
 	</tr>
 	<tr>
-		<td><a href="access_token.html">/api/restsecurity/access_token</a></td>
+		<td><a href="access_token.html">/security/api/restsecurity/access_token</a></td>
 		<td>Obtain a bearer access token</td>
 	</tr>
 	<tr>
-		<td><a href="hello.html">/api/restsecurity/hello</a></td>
+		<td><a href="hello.html">/security/api/restsecurity/hello</a></td>
 		<td>Test that a subject is authenticated</td>
 	</tr>
 	<tr>
-		<td><a href="remove_access_token.html">/api/restsecurity/remove_access_token</a></td>
+		<td><a href="remove_access_token.html">/security/api/restsecurity/remove_access_token</a></td>
 		<td>Remove an existing access token, rendering it invalid for authenticating to the server</td>
 	</tr>
     <tr>
-     <td><a href="ownership.html">/api/restsecurity/ownership</a></td>
+     <td><a href="ownership.html">/security/api/restsecurity/ownership</a></td>
      <td>Change Object ownership</td>
     </tr>
         <tr>
-        <td><a href="usergroupsSetDefaultTenantForCurrentServerAndUser.html">/api/restsecurity/usergroups/setDefaultTenantForCurrentServerAndUser</a></td>
+        <td><a href="usergroupsSetDefaultTenantForCurrentServerAndUser.html">/security/api/restsecurity/usergroups/setDefaultTenantForCurrentServerAndUser</a></td>
         <td>Allows to set a default tenant for the current user</td>
     </tr>
     <tr>
-        <td><a href="usergroupsAddAnyUserToGroup.html">/api/restsecurity/usergroups/addAnyUserToGroup</a></td>
+        <td><a href="usergroupsAddAnyUserToGroup.html">/security/api/restsecurity/usergroups/addAnyUserToGroup</a></td>
         <td>Allows to add a user to a group without permissions on the user.</td>
     </tr>
     <tr>
-        <td><a href="usergroupsGetReadable.html">/api/restsecurity/usergroups/readable</a></td>
+        <td><a href="usergroupsGetReadable.html">/security/api/restsecurity/usergroups/readable</a></td>
         <td>Lists all usergroups the current user or any user has readable permission for</td>
     </tr>
     <tr>
-        <td><a href="preferencesPut.html">/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
+        <td><a href="preferencesPut.html">/security/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
         <td>Stores a document into the preferences of a user</td>
     </tr>
     <tr>
-        <td><a href="preferencesGet.html">/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
-        <td>Retrives a document that was stored into the preferences of a user</td>
+        <td><a href="preferencesGet.html">/security/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
+        <td>Retrieves a document that was stored into the preferences of a user</td>
     </tr>
     <tr>
-        <td><a href="preferencesDelete.html">/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
+        <td><a href="preferencesDelete.html">/security/api/restsecurity/preferences/{SETTINGS_KEY}</a></td>
         <td>Removes a document from the preferences of a user</td>
     </tr>
 </tbody>

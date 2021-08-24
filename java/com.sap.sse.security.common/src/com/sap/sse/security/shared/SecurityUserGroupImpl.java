@@ -56,6 +56,7 @@ public abstract class SecurityUserGroupImpl<RD extends RoleDefinition> implement
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
+        // TODO consider caching the result; not only for this type by for all WithQualifiedObjectIdentifier...
         return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 

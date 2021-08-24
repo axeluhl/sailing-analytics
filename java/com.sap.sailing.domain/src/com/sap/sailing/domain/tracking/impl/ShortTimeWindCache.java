@@ -16,8 +16,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.util.ThreadPoolUtil;
-import com.sap.sse.util.impl.ApproximateTime;
 
 /**
  * Caches wind information across a short duration of a few seconds, based on position and time point. A separate timer

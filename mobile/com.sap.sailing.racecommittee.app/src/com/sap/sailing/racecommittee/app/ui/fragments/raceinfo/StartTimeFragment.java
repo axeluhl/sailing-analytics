@@ -137,12 +137,14 @@ public class StartTimeFragment extends BaseFragment
         final Serializable id = mDataStore.getEventUUID();
         if (id != null) {
             mEvent = mDataStore.getEvent(id);
-            if (calendar.before(mEvent.getStartDate().asDate())) {
+            final TimePoint startDate = mEvent.getStartDate();
+            final TimePoint endDate = mEvent.getEndDate();
+            if (startDate != null && calendar.before(startDate.asDate())) {
                 //Today is before the start date of the event
-                calendar.setTime(mEvent.getStartDate().asDate());
-            } else if (calendar.after(mEvent.getEndDate().asDate())) {
+                calendar.setTime(startDate.asDate());
+            } else if (endDate != null && calendar.after(endDate.asDate())) {
                 //Today is after the end date of the event
-                calendar.setTime(mEvent.getEndDate().asDate());
+                calendar.setTime(endDate.asDate());
             }
         }
         mStartTime = new MillisecondsTimePoint(calendar.getTime());
@@ -666,7 +668,6 @@ public class StartTimeFragment extends BaseFragment
                         && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
                     changeFragment();
                 } else {
-                    sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 }
                 break;
@@ -815,7 +816,6 @@ public class StartTimeFragment extends BaseFragment
         requireFragmentManager().beginTransaction()
                 .replace(viewId, fragment)
                 .commit();
-        sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
         if (requireActivity().findViewById(R.id.race_edit) != null) {
             sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
         }

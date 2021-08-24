@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -8,13 +10,13 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.AwsLandscapeState;
 import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
-import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.PermissionChangeListener;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissionsProvider;
@@ -51,16 +53,12 @@ public class Activator implements BundleActivator {
     private SSHKeyPairListener sshKeyPairListener;
     private PermissionChangeListener permissionChangeListener;
     private FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
+    private AwsLandscapeStateImpl landscapeState;
 
     public Activator() {
         super();
         this.landscapeManagerPermission = WildcardPermission.builder().withTypes(SecuredLandscapeTypes.LANDSCAPE)
                 .withActions(SecuredLandscapeTypes.LandscapeActions.MANAGE).withIds(AWS_LANDSCAPE_OBJECT_ID).build();
-    }
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-        instance = this;
         timePointOfLastChangeOfSetOfLandscapeManagers = TimePoint.now();
         sshKeyPairListener = new SSHKeyPairListener() {
             @Override
@@ -73,9 +71,15 @@ public class Activator implements BundleActivator {
                 timePointOfLastChangeOfSetOfLandscapeManagers = TimePoint.now();
             }
         };
-        AwsLandscape.addSSHKeyPairListener(sshKeyPairListener);
-        context.registerService(HasPermissionsProvider.class, SecuredAwsLandscapeType::getAllInstances, null);
         permissionChangeListener = (permission, usersNowHavingPermission) -> timePointOfLastChangeOfSetOfLandscapeManagers = TimePoint.now();
+        landscapeState = new AwsLandscapeStateImpl();
+        landscapeState.addSSHKeyPairListener(sshKeyPairListener);
+    }
+
+    @Override
+    public void start(BundleContext context) throws Exception {
+        instance = this;
+        context.registerService(HasPermissionsProvider.class, SecuredAwsLandscapeType::getAllInstances, null);
         securityServiceTracker = FullyInitializedReplicableTracker
                 .createAndOpen(context, SecurityService.class,
                         new ServiceTrackerCustomizer<SecurityService, SecurityService>() {
@@ -101,30 +105,29 @@ public class Activator implements BundleActivator {
                         });
         new Thread(() -> {
             try {
-                securityServiceTracker.getInitializedService(0).addPermissionChangeListener(landscapeManagerPermission,
-                        permissionChangeListener);
+                securityServiceTracker.getInitializedService(0).addPermissionChangeListener(landscapeManagerPermission, permissionChangeListener);
             } catch (InterruptedException e) {
                 logger.warning("Problem obtaining SecurityService in " + Activator.class.getName());
             }
         }, "Waiting for SecurityService in " + Activator.class.getName()).start();
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, landscapeState.getId().toString());
+        context.registerService(Replicable.class, landscapeState, replicableServiceProperties);
     }
 
     public static Activator getInstance() {
+        if (instance == null) {
+            instance = new Activator();
+        }
         return instance;
     }
-
-    public AwsLandscape<?, ApplicationProcessMetrics, ?> getDefaultLandscape() {
-        final AwsLandscape<?, ApplicationProcessMetrics, ?> landscape;
-        if (System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME) != null
-                || System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME) == null) {
-            logger.info("Not all system properties of " + AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME + " and "
-                    + AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME + " set. Obtaining an unauthenticated AWS landscape object.");
-            landscape = AwsLandscape.obtain();
-        } else {
-            landscape = AwsLandscape.obtain(System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
-                    System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
-        }
-        return landscape;
+    
+    /**
+     * Obtains the single landscape state object that this bundle instance has. Is manages the persistent, replicable state
+     * of the AWS landscape, such as the set of SSH key pairs.
+     */
+    public AwsLandscapeState getLandscapeState() {
+        return landscapeState;
     }
 
     public TimePoint getTimePointOfLastChangeOfSetOfLandscapeManagers() {
@@ -133,7 +136,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        AwsLandscape.removeSSHKeyPairListener(sshKeyPairListener);
+        landscapeState.removeSSHKeyPairListener(sshKeyPairListener);
         final SecurityService securityService = securityServiceTracker.getService();
         if (securityService != null) {
             securityService.removePermissionChangeListener(landscapeManagerPermission, permissionChangeListener);

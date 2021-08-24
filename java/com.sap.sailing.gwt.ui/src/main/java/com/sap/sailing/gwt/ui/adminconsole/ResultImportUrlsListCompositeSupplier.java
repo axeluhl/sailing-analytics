@@ -19,7 +19,6 @@ public class ResultImportUrlsListCompositeSupplier extends AdminConsolePanelSupp
 
     @Override
     public ResultImportUrlsListComposite init() {
-        logger.info("Create ResultImportUrlsListComposite");
         ResultImportUrlsListComposite resultUrlsListComposite = new ResultImportUrlsListComposite(presenter,
                 stringMessages);
         resultUrlsListComposite.ensureDebugId("resultUrlsListComposite");

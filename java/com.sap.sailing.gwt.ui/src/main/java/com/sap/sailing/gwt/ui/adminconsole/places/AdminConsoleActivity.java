@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.adminconsole.places;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -30,6 +32,7 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class AdminConsoleActivity extends AbstractActivity implements AdminConsoleView.Presenter {
+    private Logger logger = Logger.getLogger(getClass().getName());
     private AdminConsoleClientFactory clientFactory;
     private AdminConsoleView adminConsoleView;
     private MediaServiceWriteAsync mediaServiceWrite;
@@ -46,81 +49,96 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
-        leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTOWithSecurity>(clientFactory.getErrorReporter()) {
+        leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public void reload(AsyncCallback<Iterable<StrippedLeaderboardDTOWithSecurity>> callback) {
                 sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
                         new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
                             @Override
                             public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> result) {
+                                logger.log(Level.FINE, "reload LeaderboardDTO - success");
                                 callback.onSuccess(new ArrayList<StrippedLeaderboardDTOWithSecurity>(result));
                             }
                             @Override
                             public void onFailure(Throwable t) {
+                                getErrorReporter().reportError("Error trying to obtain list of leaderboards from server " + t.getMessage());
+                                logger.log(Level.SEVERE, "Error trying to obtain list of leaderboards from server.", t);
                                 callback.onFailure(t);
                             }
                         }));
             }
         };
-        leaderboardGroupsRefresher = new AbstractRefresher<LeaderboardGroupDTO>(clientFactory.getErrorReporter()) {
+        leaderboardGroupsRefresher = new AbstractRefresher<LeaderboardGroupDTO>() {
             @Override
             public void reload(AsyncCallback<Iterable<LeaderboardGroupDTO>> callback) {
                 sailingService.getLeaderboardGroups(false /* withGeoLocationData */,
                         new MarkedAsyncCallback<List<LeaderboardGroupDTO>>(new AsyncCallback<List<LeaderboardGroupDTO>>() {
                             @Override
                             public void onSuccess(List<LeaderboardGroupDTO> result) {
+                                logger.log(Level.FINE, "reload LeaderboardGroupDTO - success");
                                 callback.onSuccess(new ArrayList<LeaderboardGroupDTO>(result));
                             }
                             @Override
                             public void onFailure(Throwable t) {
+                                getErrorReporter().reportError("Error trying to obtain list of leaderboards groups from server " + t.getMessage());
+                                logger.log(Level.SEVERE, "Error trying to obtain list of leaderboards groups from server.", t);
                                 callback.onFailure(t);
                             }
                         }));
             }
         };
-        regattasRefresher = new AbstractRefresher<RegattaDTO>(clientFactory.getErrorReporter()) {
+        regattasRefresher = new AbstractRefresher<RegattaDTO>() {
             @Override
             public void reload(AsyncCallback<Iterable<RegattaDTO>> callback) {
                 sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
                         new AsyncCallback<List<RegattaDTO>>() {
                             @Override
                             public void onSuccess(List<RegattaDTO> result) {
+                                logger.log(Level.FINE, "reload RegattaDTO - success");
                                 callback.onSuccess(new ArrayList<RegattaDTO>(result));
                             }
                             @Override
-                            public void onFailure(Throwable caught) {
-                                callback.onFailure(caught);
+                            public void onFailure(Throwable t) {
+                                getErrorReporter().reportError("Error trying to obtain list of regattas from server " + t.getMessage());
+                                logger.log(Level.SEVERE, "Error trying to obtain list of regattas from server.", t);
+                                callback.onFailure(t);
                             }
                         }));
             }
         };
-        eventsRefresher = new AbstractRefresher<EventDTO>(clientFactory.getErrorReporter()) {
+        eventsRefresher = new AbstractRefresher<EventDTO>() {
             @Override
             public void reload(AsyncCallback<Iterable<EventDTO>> callback) {
                 sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
                     @Override
                     public void onSuccess(List<EventDTO> result) {
+                        logger.log(Level.FINE, "reload EventDTO - success");
                         callback.onSuccess(new ArrayList<EventDTO>(result));
                     }
                     
                     @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure(caught);
+                    public void onFailure(Throwable t) {
+                        getErrorReporter().reportError("Error trying to obtain list of events from server " + t.getMessage());
+                        logger.log(Level.SEVERE, "Error trying to obtain list of events from server.", t);
+                        callback.onFailure(t);
                     }
                 });
             }
         };
-        mediaTracksRefresher = new AbstractRefresher<MediaTrackWithSecurityDTO>(clientFactory.getErrorReporter()) {
+        mediaTracksRefresher = new AbstractRefresher<MediaTrackWithSecurityDTO>() {
             @Override
             public void reload(AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> callback) {
                 mediaServiceWrite.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
                     @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure(caught);
+                    public void onFailure(Throwable t) {
+                        getErrorReporter().reportError("Error trying to obtain list of media tracks from server " + t.getMessage());
+                        logger.log(Level.SEVERE, "Error trying to obtain list of media tracks from server.", t);
+                        callback.onFailure(t);
                     }
 
                     @Override
                     public void onSuccess(Iterable<MediaTrackWithSecurityDTO> result) {
+                        logger.log(Level.FINE, "reload MediaTrackWithSecurityDTO - success");
                         List<MediaTrackWithSecurityDTO> list = new ArrayList<MediaTrackWithSecurityDTO>();
                         result.forEach(mediaTrackDto -> list.add(mediaTrackDto));
                         callback.onSuccess(list);

@@ -131,8 +131,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         for (String name : raceNamesEditor.getValue()) {
             RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, name);
             if (raceColumnDTO == null) {
-                raceColumnDTO = new RaceColumnInSeriesDTO(selectedSeries.getName(), regatta.getName());
-                raceColumnDTO.setName(name);
+                raceColumnDTO = new RaceColumnInSeriesDTO(name, selectedSeries.getName(), regatta.getName());
             }
             races.add(raceColumnDTO);
         }

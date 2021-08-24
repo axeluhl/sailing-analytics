@@ -88,9 +88,10 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                 final ImageDTO imageToValidate = resizingTask.getImage();
                 final Integer imageWidth = imageToValidate.getWidthInPx();
                 final Integer imageHeight = imageToValidate.getHeightInPx();
-
                 if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
                     errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
+            } else if (imageToValidate.getSourceRef().startsWith("http:")) {
+                errorMessage = stringMessages.pleaseUseHttpsForImageUrls();
                 } else if (imageWidth == null || imageHeight == null) {
                     errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
                 } else {
