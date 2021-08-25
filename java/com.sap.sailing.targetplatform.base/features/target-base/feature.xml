@@ -104,17 +104,59 @@
          unpack="false"/>
 
    <plugin
-         id="org.mongodb.mongo-java-driver"
+         id="org.mongodb.mongodb-driver-legacy"
          download-size="0"
          install-size="0"
-         version="3.6.4"
+         version="4.3.1"
          unpack="false"/>
 
    <plugin
-         id="org.mongodb.mongo-java-driver.source"
+         id="org.mongodb.mongodb-driver-legacy.source"
          download-size="0"
          install-size="0"
-         version="3.6.4"
+         version="4.3.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.mongodb.bson"
+         download-size="0"
+         install-size="0"
+         version="4.3.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.mongodb.bson.source"
+         download-size="0"
+         install-size="0"
+         version="4.3.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.mongodb.driver-core"
+         download-size="0"
+         install-size="0"
+         version="4.3.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.mongodb.driver-core.source"
+         download-size="0"
+         install-size="0"
+         version="4.3.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.mongodb.driver-sync"
+         download-size="0"
+         install-size="0"
+         version="4.3.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.mongodb.driver-sync"
+         download-size="0"
+         install-size="0"
+         version="4.3.1"
          unpack="false"/>
 
    <plugin
