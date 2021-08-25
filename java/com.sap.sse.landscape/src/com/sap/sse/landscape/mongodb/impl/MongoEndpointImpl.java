@@ -13,6 +13,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.connection.ClusterConnectionMode;
 import com.mongodb.session.ClientSession;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -42,7 +43,7 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
             final MongoCollection<Document> sourceCollection = from.getCollection(collectionName);
             targetDatabase.createCollection(collectionName); // if we found it on the exporting side and it's empty it's important still to create it for equal hashes
             final MongoCollection<Document> targetCollection = targetDatabase.getCollection(collectionName);
-            logger.info("...importing "+sourceCollection.count()+" documents from collection "+collectionName+" from "+from+" into "+this);
+            logger.info("...importing "+sourceCollection.estimatedDocumentCount()+" documents from collection "+collectionName+" from "+from+" into "+this);
             List<Document> documentsToInsert = new ArrayList<>(BATCH_SIZE);
             int i=0;
             for (final Document document : sourceCollection.find()) {
@@ -63,7 +64,7 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
 
     @Override
     public boolean isInReplicaSet() throws URISyntaxException {
-        return getClient().getReplicaSetStatus() != null;
+        return getClient().getClusterDescription().getConnectionMode() != ClusterConnectionMode.SINGLE;
     }
     
     @Override

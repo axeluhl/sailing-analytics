@@ -59,7 +59,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     }
 
     public long countElements(Document query) {
-        return getCollection().count(query);
+        return getCollection().countDocuments(query);
     }
 
     public long countElements(String query) {
