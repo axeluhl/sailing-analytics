@@ -7,8 +7,9 @@ import java.net.UnknownHostException;
 import org.junit.After;
 import org.junit.Before;
 
-import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
@@ -31,7 +32,7 @@ public abstract class AbstractMongoDBTest {
     }
     
     protected MongoClient newMongo() throws UnknownHostException, MongoException {
-        return new MongoClient(dbConfiguration.getMongoClientURI());
+        return MongoClients.create(dbConfiguration.getMongoClientURI());
     }
     
     @Before

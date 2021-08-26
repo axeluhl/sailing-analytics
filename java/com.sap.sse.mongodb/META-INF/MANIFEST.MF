@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sse.common,
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
- org.mongodb.mongodb-driver-legacy;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1"
 Export-Package: com.sap.sse.mongodb
 Bundle-ActivationPolicy: lazy

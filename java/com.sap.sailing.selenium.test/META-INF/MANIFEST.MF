@@ -16,7 +16,6 @@ Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1",
- org.mongodb.mongodb-driver-legacy;bundle-version="4.3.1",
  com.sun.jersey;bundle-version="1.17.0",
  com.sap.sse.security
 Bundle-ClassPath: lib/cglib-nodep-2.2.3.jar,

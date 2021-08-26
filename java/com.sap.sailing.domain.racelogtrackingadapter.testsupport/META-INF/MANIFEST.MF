@@ -20,7 +20,6 @@ Require-Bundle: com.sap.sailing.domain.shared.android,
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1",
- org.mongodb.mongodb-driver-legacy;bundle-version="4.3.1",
  com.sap.sse.shared.android
 Export-Package: com.sap.sailing.domain.racelog.tracking.test.mock
 Automatic-Module-Name: com.sap.sailing.domain.racelogtrackingadapter.testsupport

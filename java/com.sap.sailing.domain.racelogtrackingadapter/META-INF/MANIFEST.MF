@@ -22,7 +22,6 @@ Require-Bundle: com.sap.sailing.domain,
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1",
- org.mongodb.mongodb-driver-legacy;bundle-version="4.3.1",
  com.sap.sailing.shared.persistence;bundle-version="1.0.0",
  com.sap.sse.shared.android
 Import-Package: com.google.zxing;version="3.1.0",

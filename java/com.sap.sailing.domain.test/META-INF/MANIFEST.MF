@@ -33,7 +33,6 @@ Require-Bundle: com.sap.sailing.domain,
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1",
- org.mongodb.mongodb-driver-legacy;bundle-version="4.3.1",
  org.apache.commons.math3;bundle-version="3.5.0",
  org.apache.shiro.core;bundle-version="1.2.2"
 Export-Package: com.sap.sailing.domain.test,

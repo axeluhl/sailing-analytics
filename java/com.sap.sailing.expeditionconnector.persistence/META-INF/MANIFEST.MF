@@ -19,6 +19,5 @@ Require-Bundle: com.sap.sailing.domain.persistence,
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1",
- org.mongodb.mongodb-driver-legacy;bundle-version="4.3.1"
 Export-Package: com.sap.sailing.expeditionconnector.persistence
 Automatic-Module-Name: com.sap.sailing.expeditionconnector.persistence
