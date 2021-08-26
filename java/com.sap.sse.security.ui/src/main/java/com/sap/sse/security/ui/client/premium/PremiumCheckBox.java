@@ -85,7 +85,7 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
         return this.checkBox;
     }
     
-    public void setValueifUserHasPermission(boolean value) {
+    public void setValueifUserHasPermission(Boolean value) {
         if(paywallResolver.hasPermission(action)) {
             this.checkBox.setValue(value);
         }
@@ -93,14 +93,14 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
     
     public Boolean getValue() {
         if(!paywallResolver.hasPermission(action)) {
-            Notification.notify(stringMessages.pleaseSubscribeToUse(), NotificationType.ERROR);
+            Notification.notify(stringMessages.pleaseSubscribeToUse(action.name()), NotificationType.ERROR);
             return false;
         }else {
             return checkBox.getValue();
         }
     }
 
-    public void setEnabledIfUserHasPermission(Boolean value) {
+    public void setEnabledIfUserHasPermission(boolean value) {
         if(paywallResolver.hasPermission(action)) {
             this.checkBox.setEnabled(value);
         }
