@@ -44,8 +44,6 @@
 <setEntry value="org.jdom@default:default"/>
 <setEntry value="org.jvnet.mimepull@default:default"/>
 <setEntry value="org.apache.commons.math3@default:default"/>
-<setEntry value="org.mongodb.mongodb-driver-legacy@default:default"/>
-<setEntry value="org.mongodb.mongodb-driver-legacy.source@default:default"/>
 <setEntry value="org.mongodb.driver-core@default:default"/>
 <setEntry value="org.mongodb.driver-core.source@default:default"/>
 <setEntry value="org.mongodb.bson@default:default"/>

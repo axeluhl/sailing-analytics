@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="192">
+<target name="Race Analysis Target" sequenceNumber="193">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -272,8 +272,6 @@
 <plugin id="org.mongodb.driver-core.source"/>
 <plugin id="org.mongodb.driver-sync"/>
 <plugin id="org.mongodb.driver-sync.source"/>
-<plugin id="org.mongodb.mongodb-driver-legacy"/>
-<plugin id="org.mongodb.mongodb-driver-legacy.source"/>
 <plugin id="org.objenesis"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>

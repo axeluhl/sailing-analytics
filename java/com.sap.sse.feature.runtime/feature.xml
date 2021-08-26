@@ -18,20 +18,6 @@
    </license>
 
    <plugin
-         id="org.mongodb.mongodb-driver-legacy"
-         download-size="0"
-         install-size="0"
-         version="4.3.1"
-         unpack="false"/>
-
-   <plugin
-         id="org.mongodb.mongodb-driver-legacy.source"
-         download-size="0"
-         install-size="0"
-         version="4.3.1"
-         unpack="false"/>
-
-   <plugin
          id="org.mongodb.driver-core"
          download-size="0"
          install-size="0"
