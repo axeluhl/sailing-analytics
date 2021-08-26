@@ -30,8 +30,6 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientSettings;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
@@ -86,16 +84,12 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             public RacingEventServiceImpl createNewReplica() {
                 final MongoDBConfiguration masterMongoDBConfig = mongoDBService.getConfiguration();
                 final ConnectionString masterMongoDbUri = masterMongoDBConfig.getMongoClientURI();
-                MongoClientSettings.builder().applyConnectionString(masterMongoDbUri).build();
                 final MongoDBConfiguration proxyReplicaMongoDBConfig = new MongoDBConfiguration(
                         masterMongoDBConfig.getHostname(), masterMongoDBConfig.getPort(),
                         masterMongoDBConfig.getDatabaseName() + "-replica"); // use to construct basic MongoDB URI for replica DB name
-                final ConnectionString replicaMongoDbUri = new ConnectionString(proxyReplicaMongoDBConfig.getMongoClientURI().toString()) {
-                    @Override
-                    public MongoClientOptions getOptions() {
-                        return masterMongoDbOptions;
-                    }
-                };
+                final ConnectionString replicaMongoDbUri = new ConnectionString(proxyReplicaMongoDBConfig.getMongoClientURI().toString()+
+                        (masterMongoDbUri.getConnectionString().indexOf("?") < 0 ? "" :
+                            ("?" + masterMongoDbUri.getConnectionString().substring(masterMongoDbUri.getConnectionString().indexOf("?")+1))));
                 final MongoDBService replicaMongoDBService = new MongoDBConfiguration(replicaMongoDbUri).getService();
                 final RacingEventServiceImpl result = new RacingEventServiceImpl(
                         (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {

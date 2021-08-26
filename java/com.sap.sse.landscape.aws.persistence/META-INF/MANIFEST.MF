@@ -14,5 +14,5 @@ Require-Bundle: com.sap.sse.mongodb,
  com.sap.sse.landscape,
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
- org.mongodb.driver-sync;bundle-version="4.3.1",
+ org.mongodb.driver-sync;bundle-version="4.3.1"
 Export-Package: com.sap.sse.landscape.aws.persistence
