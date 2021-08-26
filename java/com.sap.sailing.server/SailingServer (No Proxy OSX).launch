@@ -51,8 +51,14 @@
 <setEntry value="org.jdom@default:default"/>
 <setEntry value="org.jvnet.mimepull@default:default"/>
 <setEntry value="org.apache.commons.math3@default:default"/>
-<setEntry value="org.mongodb.mongo-java-driver@default:default"/>
-<setEntry value="org.mongodb.mongo-java-driver.source@default:default"/>
+<setEntry value="org.mongodb.mongodb-driver-legacy@default:default"/>
+<setEntry value="org.mongodb.mongodb-driver-legacy.source@default:default"/>
+<setEntry value="org.mongodb.driver-core@default:default"/>
+<setEntry value="org.mongodb.driver-core.source@default:default"/>
+<setEntry value="org.mongodb.bson@default:default"/>
+<setEntry value="org.mongodb.bson.source@default:default"/>
+<setEntry value="org.mongodb.driver-sync@default:default"/>
+<setEntry value="org.mongodb.driver-sync@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.warurl@default:default"/>
 <setEntry value="org.hyperic.sigar@default:default"/>
