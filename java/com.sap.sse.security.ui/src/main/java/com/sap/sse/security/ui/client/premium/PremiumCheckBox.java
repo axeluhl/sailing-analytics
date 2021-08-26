@@ -76,6 +76,7 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
         return new Image(PremiumIconRessource.INSTANCE.premiumIcon().getSafeUri());
     }
     
+    
     public FocusPanel getFocusWidget() {
         return this.wrapperPanel;
     }
@@ -91,7 +92,12 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
     }
     
     public Boolean getValue() {
-        return checkBox.getValue();
+        if(!paywallResolver.hasPermission(action)) {
+            Notification.notify(stringMessages.pleaseSubscribeToUse(), NotificationType.ERROR);
+            return false;
+        }else {
+            return checkBox.getValue();
+        }
     }
 
     public void setEnabledIfUserHasPermission(Boolean value) {
