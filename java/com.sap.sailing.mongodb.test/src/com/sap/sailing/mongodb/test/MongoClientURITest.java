@@ -11,7 +11,7 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 public class MongoClientURITest {
     @Test
     public void testDefaultConnectionOptions() {
-        MongoDBConfiguration config = new MongoDBConfiguration("mongodb://humba:12345/mydb");
+        MongoDBConfiguration config = new MongoDBConfiguration("mongodb://humba:12345/mydb?readPreference=primaryPreferred");
         assertEquals("humba", config.getHostname());
         assertEquals(12345, config.getPort());
         assertEquals("mydb", config.getDatabaseName());
