@@ -88,8 +88,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                         masterMongoDBConfig.getHostname(), masterMongoDBConfig.getPort(),
                         masterMongoDBConfig.getDatabaseName() + "-replica"); // use to construct basic MongoDB URI for replica DB name
                 final ConnectionString replicaMongoDbUri = new ConnectionString(proxyReplicaMongoDBConfig.getMongoClientURI().toString()+
-                        (masterMongoDbUri.getConnectionString().indexOf("?") < 0 ? "" :
-                            ("?" + masterMongoDbUri.getConnectionString().substring(masterMongoDbUri.getConnectionString().indexOf("?")+1))));
+                        (proxyReplicaMongoDBConfig.getMongoClientURI().getConnectionString().indexOf("?") < 0 ? "?" : "&") +
+                            masterMongoDbUri.getConnectionString().substring(masterMongoDbUri.getConnectionString().indexOf("?")+1));
                 final MongoDBService replicaMongoDBService = new MongoDBConfiguration(replicaMongoDbUri).getService();
                 final RacingEventServiceImpl result = new RacingEventServiceImpl(
                         (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
