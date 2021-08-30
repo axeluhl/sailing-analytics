@@ -58,6 +58,5 @@ public class ConfirmationDialog extends DialogBox {
         addStyleName(style.confirmationDialog());
         setGlassEnabled(true);
         setText(title);
-        center();
     }
 }

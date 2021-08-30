@@ -217,7 +217,7 @@ public class TagButtonDialog extends DialogBox {
                                     footerPanel.recalculateHeight();
                                 }
                                 center();
-                            });
+                            }).center();
                 } else if (DefaultActions.UPDATE.name().equals(value)) {
                     selectedTagButton = button;
                     inputPanel.setTag(button.getTag());
@@ -327,7 +327,7 @@ public class TagButtonDialog extends DialogBox {
                             setButtonMode(false);
                             center();
                         }
-                    });
+                    }).center();
         } else {
             inputPanel.clearAllValues();
             tagPreviewPanel.renderPreview(inputPanel);

@@ -70,7 +70,7 @@ public class TagModificationPanel extends FlowPanel {
                                 if (result) {
                                     resetState();
                                 }
-                            });
+                            }).center();
                 } else {
                     resetState();
                 }
@@ -114,7 +114,7 @@ public class TagModificationPanel extends FlowPanel {
                             if (result) {
                                 resetState();
                             }
-                        });
+                        }).center();
             } else {
                 resetState();
             }

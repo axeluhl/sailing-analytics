@@ -267,7 +267,7 @@ public class TagCell extends AbstractCell<TagDTO> {
                                     if (confirmed) {
                                         taggingPanel.removeTag(tag);
                                     }
-                                });
+                                }).center();
                     } else if (button.hasClassName(style.tagEditButton())) {
                         taggingPanel.setCurrentState(State.EDIT_TAG);
                     } else if (button.hasClassName(style.tagShareButton())) {
