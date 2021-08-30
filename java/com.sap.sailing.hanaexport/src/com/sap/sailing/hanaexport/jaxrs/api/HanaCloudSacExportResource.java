@@ -210,49 +210,51 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
             final Leaderboard leaderboard = racingEventService.getLeaderboardByName(regatta.getName());
             if (leaderboard != null) {
                 final Event event = racingEventService.findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard);
-                alreadyInsertedContent.ensureEventIsInserted(event);
-                insertRegattas.insert(new RegattaAndEvent(regatta, event));
-                if (leaderboard != null) {
-                    for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                        for (final Competitor competitor : raceColumn.getAllCompetitors()) {
-                            alreadyInsertedContent.ensureCompetitorIsInserted(competitor);
-                            insertRaceResults.insertBatch(new InsertRaceResultStatement.RaceResult(regatta, leaderboard, competitor, raceColumn, now));
-                        }
-                        insertRaceResults.executeBatch();
-                        for (final Fleet fleet : raceColumn.getFleets()) {
-                            final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                            if (trackedRace != null) {
-                                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(now);
-                                final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(now);
-                                insertRaces.insertBatch(new InsertRaceStatement.TrackedRaceWithRaceColumnAndFleet(trackedRace, raceColumn, fleet));
-                                for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                    insertLegs.insertBatch(new InsertLegStatement.TrackedLegAndNow(now, trackedLeg));
-                                    for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                                        insertLegStats.insertBatch(new InsertLegStatsStatement.TrackedLegOfCompetitorRankingInfoCacheAndNow(now, rankingInfo, cache, trackedLeg.getTrackedLeg(competitor)));
-                                    }
-                                }
+                if (event != null) {
+                    alreadyInsertedContent.ensureEventIsInserted(event);
+                    insertRegattas.insert(new RegattaAndEvent(regatta, event));
+                    if (leaderboard != null) {
+                        for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                            for (final Competitor competitor : raceColumn.getAllCompetitors()) {
+                                alreadyInsertedContent.ensureCompetitorIsInserted(competitor);
+                                insertRaceResults.insertBatch(new InsertRaceResultStatement.RaceResult(regatta, leaderboard, competitor, raceColumn, now));
                             }
-                            final Waypoint startWaypoint = trackedRace == null ? null : trackedRace.getRace().getCourse().getFirstWaypoint();
-                            if (trackedRace != null) {
-                                for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                                    insertRaceStats.insertBatch(new InsertRaceStatsStatement.TrackedRaceWithCompetitorAndStartWaypoint(now, startWaypoint, competitor, trackedRace));
-                                    final LinkedHashMap<TimePoint, Maneuver> timepointUniqueManeuvers = new LinkedHashMap<>();
-                                    for (final Maneuver maneuver : trackedRace.getManeuvers(competitor, /* waitForLatest */ false)) {
-                                        if (maneuver.getType() == ManeuverType.TACK || maneuver.getType() == ManeuverType.JIBE || maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
-                                            timepointUniqueManeuvers.put(maneuver.getTimePoint(), maneuver);
+                            insertRaceResults.executeBatch();
+                            for (final Fleet fleet : raceColumn.getFleets()) {
+                                final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                                if (trackedRace != null) {
+                                    final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(now);
+                                    final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(now);
+                                    insertRaces.insertBatch(new InsertRaceStatement.TrackedRaceWithRaceColumnAndFleet(trackedRace, raceColumn, fleet));
+                                    for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+                                        insertLegs.insertBatch(new InsertLegStatement.TrackedLegAndNow(now, trackedLeg));
+                                        for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                                            insertLegStats.insertBatch(new InsertLegStatsStatement.TrackedLegOfCompetitorRankingInfoCacheAndNow(now, rankingInfo, cache, trackedLeg.getTrackedLeg(competitor)));
                                         }
                                     }
-                                    for (final Maneuver maneuver : timepointUniqueManeuvers.values()) {
-                                        insertManeuvers.insertBatch(new InsertManeuverStatement.ManeuverTrackedRaceAndCompetitor(maneuver, trackedRace, competitor));
+                                }
+                                final Waypoint startWaypoint = trackedRace == null ? null : trackedRace.getRace().getCourse().getFirstWaypoint();
+                                if (trackedRace != null) {
+                                    for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                                        insertRaceStats.insertBatch(new InsertRaceStatsStatement.TrackedRaceWithCompetitorAndStartWaypoint(now, startWaypoint, competitor, trackedRace));
+                                        final LinkedHashMap<TimePoint, Maneuver> timepointUniqueManeuvers = new LinkedHashMap<>();
+                                        for (final Maneuver maneuver : trackedRace.getManeuvers(competitor, /* waitForLatest */ false)) {
+                                            if (maneuver.getType() == ManeuverType.TACK || maneuver.getType() == ManeuverType.JIBE || maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
+                                                timepointUniqueManeuvers.put(maneuver.getTimePoint(), maneuver);
+                                            }
+                                        }
+                                        for (final Maneuver maneuver : timepointUniqueManeuvers.values()) {
+                                            insertManeuvers.insertBatch(new InsertManeuverStatement.ManeuverTrackedRaceAndCompetitor(maneuver, trackedRace, competitor));
+                                        }
                                     }
                                 }
                             }
+                            insertRaces.executeBatch();
+                            insertLegs.executeBatch();
+                            insertLegStats.executeBatch();
+                            insertRaceStats.executeBatch();
+                            insertManeuvers.executeBatch();
                         }
-                        insertRaces.executeBatch();
-                        insertLegs.executeBatch();
-                        insertLegStats.executeBatch();
-                        insertRaceStats.executeBatch();
-                        insertManeuvers.executeBatch();
                     }
                 }
             }

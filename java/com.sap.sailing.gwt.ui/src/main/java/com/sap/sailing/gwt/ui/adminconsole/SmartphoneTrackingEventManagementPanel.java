@@ -50,6 +50,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -87,8 +88,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
-public class SmartphoneTrackingEventManagementPanel
-        extends AbstractLeaderboardConfigPanel {
+public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel {
     private ToggleButton startStopTrackingButton;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
@@ -96,9 +96,13 @@ public class SmartphoneTrackingEventManagementPanel
     protected boolean regattaHasCompetitors = false; 
     private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
     private CaptionPanel importPanel;
+    private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
     
     public SmartphoneTrackingEventManagementPanel(final Presenter presenter, StringMessages stringMessages) {
         super(presenter, stringMessages, /* multiSelection */ true);
+        this.competitorsRefresher = presenter.getCompetitorsRefresher();
+        this.boatsRefresher = presenter.getBoatsRefresher();
         // add upload panel
         importPanel = new CaptionPanel(stringMessages.importFixes());
         importPanel.setVisible(false);
@@ -406,9 +410,10 @@ public class SmartphoneTrackingEventManagementPanel
             RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
-        RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName, sailingServiceWrite, userService, stringMessages,
-            errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName, fleetName,
-            raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorDTO>>() {
+        RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName,
+                sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages, errorReporter,
+                editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName, fleetName,
+                raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorDTO>>() {
                 @Override
                 public void ok(final Set<CompetitorDTO> registeredCompetitors) {
                     if (canBoatsOfCompetitorsChangePerRace) {
@@ -966,10 +971,9 @@ public class SmartphoneTrackingEventManagementPanel
     private void handleCompetitorRegistration(StrippedLeaderboardDTOWithSecurity t) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
-
-        new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingServiceWrite, userService, stringMessages,
-                errorReporter, /* editable */true, t.getName(), t.canBoatsOfCompetitorsChangePerRace,
-                new DialogCallback<Set<CompetitorDTO>>() {
+        new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingServiceWrite, userService,
+                competitorsRefresher, boatsRefresher, stringMessages, errorReporter, /* editable */true, t.getName(),
+                t.canBoatsOfCompetitorsChangePerRace, new DialogCallback<Set<CompetitorDTO>>() {
                     @Override
                     public void ok(Set<CompetitorDTO> registeredCompetitors) {
                         sailingServiceWrite.setCompetitorRegistrationsInRegattaLog(t.getName(), registeredCompetitors,
@@ -998,9 +1002,9 @@ public class SmartphoneTrackingEventManagementPanel
             RegattaDTO regatta = getSelectedRegatta();
             String boatClassName = regatta.boatClass.getName();
 
-            new RegattaLogBoatRegistrationDialog(boatClassName, sailingServiceWrite, userService, stringMessages,
-                    errorReporter, /* editable */true, t.getName(), t.canBoatsOfCompetitorsChangePerRace,
-                    new DialogCallback<Set<BoatDTO>>() {
+            new RegattaLogBoatRegistrationDialog(boatClassName, sailingServiceWrite, userService, boatsRefresher,
+                    competitorsRefresher, stringMessages, errorReporter, /* editable */true, t.getName(),
+                    t.canBoatsOfCompetitorsChangePerRace, new DialogCallback<Set<BoatDTO>>() {
                         @Override
                         public void ok(Set<BoatDTO> registeredBoats) {
                             sailingServiceWrite.setBoatRegistrationsInRegattaLog(t.getName(), registeredBoats,

@@ -28,7 +28,6 @@ public class WindPanelSupplier extends AdminConsolePanelSupplier<WindPanel> {
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
-
             @Override
             public void onSuccess() {
                 widget = init();
@@ -41,5 +40,4 @@ public class WindPanelSupplier extends AdminConsolePanelSupplier<WindPanel> {
             }
         });
     }
-
 }

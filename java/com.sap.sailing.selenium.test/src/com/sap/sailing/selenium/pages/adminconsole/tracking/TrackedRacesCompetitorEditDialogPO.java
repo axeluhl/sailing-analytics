@@ -16,6 +16,15 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
     
     @FindBy(how = BySeleniumId.class, using = "ShortNameTextBox")
     private WebElement shortNameTextBox;
+
+    @FindBy(how = BySeleniumId.class, using = "BoatNameTextBox")
+    private WebElement boatNameTextBox;
+
+    @FindBy(how = BySeleniumId.class, using = "SailIdTextBox")
+    private WebElement sailIdTextBox;
+
+    @FindBy(how = BySeleniumId.class, using = "BoatClassNameSuggestBox")
+    private WebElement boatClassNameSuggestBox;
     
     @FindBy(how = BySeleniumId.class, using = "OkButton")
     private WebElement okButton;
@@ -45,6 +54,32 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
     public void setWithBoat(boolean withBoat) {
         if (withBoatCheckBox != null) {
             this.withBoatCheckBox.setSelected(withBoat);
+        }
+    }
+    
+    public void setBoatNameText(String boatNameText) {
+        if (this.boatNameTextBox != null) {
+            this.boatNameTextBox.clear();;
+            this.boatNameTextBox.sendKeys(boatNameText);
+        }
+        
+    }
+    
+    public String getBoatNameText() {
+        return this.boatNameTextBox.getAttribute("value");
+    }
+    
+    public void setBoatSailIdText(String sailIdText) {
+        if (this.sailIdTextBox != null) {
+            this.sailIdTextBox.clear();;
+            this.sailIdTextBox.sendKeys(sailIdText);
+        }
+    }
+    
+    public void setBoatClassNameSuggest(String boatClassNameSuggest) {
+        if (this.boatClassNameSuggestBox != null) {
+            this.boatClassNameSuggestBox.clear();
+            this.boatClassNameSuggestBox.sendKeys(boatClassNameSuggest);
         }
     }
 }

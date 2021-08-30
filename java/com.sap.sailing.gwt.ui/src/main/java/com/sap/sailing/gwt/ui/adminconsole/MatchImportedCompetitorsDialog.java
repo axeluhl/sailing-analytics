@@ -15,9 +15,11 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorDescriptorTableWrapper.CompetitorsToImportToExistingLinking;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -68,15 +70,19 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
     private final UserService userService;
     private final ErrorReporter errorReporter;
 
-    private final Iterable<CompetitorDescriptor> CompetitorDescriptors;
+    private final Iterable<CompetitorDescriptor> competitorDescriptors;
     private final CompetitorImportMatcher competitorImportMatcher;
 
     private final Map<CompetitorDescriptor, CompetitorDTO> existingCompetitorsByImported = new HashMap<>();
+    private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
 
-    public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptor> CompetitorDescriptors,
-            final Iterable<CompetitorDTO> existingCompetitor, String localizedHint,
-            StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            ErrorReporter errorReporter, DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
+    public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptor> competitorDescriptors,
+            final Iterable<CompetitorDTO> existingCompetitor, String localizedHint, StringMessages stringMessages,
+            SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
+            ErrorReporter errorReporter,
+            DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
         super(stringMessages.importCompetitors(),
                 String.join("\n", stringMessages.chooseWhichCompetitorsShouldBeImported(), localizedHint),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
@@ -84,7 +90,9 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.errorReporter = errorReporter;
-        this.CompetitorDescriptors = CompetitorDescriptors;
+        this.competitorDescriptors = competitorDescriptors;
+        this.competitorsRefresher = competitorsRefresher;
+        this.boatsRefresher = boatsRefresher;
         competitorImportMatcher = new CompetitorImportMatcher(existingCompetitor);
     }
 
@@ -95,9 +103,9 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     @Override
     protected Widget getAdditionalWidget() {
-        existingCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages,
-                errorReporter, /* multiSelection */
-                false, /* enablePager */true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
+        existingCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, competitorsRefresher, boatsRefresher,
+                stringMessages, /* multiSelection */
+                errorReporter, false, /* enablePager */true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         final CompetitorsToImportToExistingLinking linker = new CompetitorsToImportToExistingLinking() {
             @Override
             public void unlinkCompetitor(CompetitorDescriptor competitor) {
@@ -115,7 +123,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
         };
         importedCompetitorsTable = new CompetitorDescriptorTableWrapper<>(competitorImportMatcher, sailingServiceWrite,
                 stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */false, /* unlinkCallback */ linker);
-        importedCompetitorsTable.refreshCompetitorDescriptorList(CompetitorDescriptors);
+        importedCompetitorsTable.refreshCompetitorDescriptorList(competitorDescriptors);
         final RefreshableMultiSelectionModel<CompetitorDescriptor> importedCompetitorSelectionModel = importedCompetitorsTable.getSelectionModel();
         importedCompetitorSelectionModel.addSelectionChangeHandler(getHandlerForImportedCompetitorsModel(importedCompetitorSelectionModel));
         final RefreshableSingleSelectionModel<CompetitorDTO> existingCompetitorSelectionModel = existingCompetitorsTable.getSelectionModel();

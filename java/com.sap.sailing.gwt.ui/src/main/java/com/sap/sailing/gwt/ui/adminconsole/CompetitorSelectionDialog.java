@@ -38,9 +38,10 @@ public class CompetitorSelectionDialog extends DataEntryDialog<CompetitorDTO> {
             CompetitorDTO initialSelection,
             DialogCallback<CompetitorDTO> callback) {
         super(title, message, stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
-        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,
-                /* multiSelection */ false, /* enablePager */ true, /* filter with boat */ false,
-                /* filter without boat */ false);
+        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
+                /* competitorsRefresher not needed; using competitorProvider */ null,
+                /* boatsRefresher not needed */ null, stringMessages, errorReporter, /* multiSelection */ false,
+                /* enablePager */ true, /* filter with boat */ false, /* filter without boat */ false);
         competitorProvider.accept(new AsyncCallback<Iterable<? extends CompetitorDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
