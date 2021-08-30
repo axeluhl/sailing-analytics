@@ -44,6 +44,11 @@ public abstract class PremiumCheckBox extends PremiumUiElement {
         image.setWidth("1em");
         image.setHeight("1em");
         this.checkBox = new CheckBox(label);
+        this.checkBox.addValueChangeHandler((event) -> {
+            if(event.getValue() && !paywallResolver.hasPermission(action)) {
+                this.checkBox.setEnabled(false);
+            }
+        });
         layoutPanel.add(checkBox);
         initWidget(wrapperPanel);
         this.pleasSubscribeDialog = new ConfirmationDialog(stringMessages.subscriptionSuggestionTitle(),
@@ -87,12 +92,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement {
     }
 
     public Boolean getValue() {
-        if (!paywallResolver.hasPermission(action)) {
-            Notification.notify(stringMessages.pleaseSubscribeToUseSpecific(action.name()), NotificationType.ERROR);
-            return false;
-        } else {
-            return checkBox.getValue();
-        }
+        return checkBox.getValue();
     }
 
     public void setEnabledIfUserHasPermission(boolean value) {
