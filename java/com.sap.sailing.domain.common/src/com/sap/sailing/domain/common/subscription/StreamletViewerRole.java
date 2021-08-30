@@ -17,7 +17,7 @@ public class StreamletViewerRole extends RolePrototype {
     private static final StreamletViewerRole INSTANCE = new StreamletViewerRole();
 
     StreamletViewerRole() {
-        super("streamlet_viewer", ROLE_ID.toString(),
+        super("streamletViewer", ROLE_ID.toString(),
                 WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
                         .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build());
     }
