@@ -162,7 +162,6 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-
         return user;
     }
 
