@@ -5,6 +5,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.subscription.SubscriptionClientProvider;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
@@ -50,5 +51,10 @@ public class PaywallResolver {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public UserStatusEventHandler registerUserStatusEventHandler(UserStatusEventHandler handler) {
+        userService.addUserStatusEventHandler(handler);
+        return handler;
     }
 }
