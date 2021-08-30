@@ -52,7 +52,6 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
-@Ignore("2021-03-30: Igtimi burnt down; re-enable when Igtimi is back up and running...")
 public class WebSocketTest {
     private static final Logger logger = Logger.getLogger(WebSocketTest.class.getName());
 
@@ -133,6 +132,7 @@ public class WebSocketTest {
         Activator.getInstance().setSecurityService(null);
     }
 
+    @Ignore("echo.websocket.org is (2021-08-19) down; http://www.websocket.org/index.html says ''Service no longer available''")
     @Test
     public void simpleWebSocketEchoTest() throws Exception {
         String destUri = "ws://echo.websocket.org"; // wss currently doesn't seem to work with Jetty 9.0.4 WebSocket implementation

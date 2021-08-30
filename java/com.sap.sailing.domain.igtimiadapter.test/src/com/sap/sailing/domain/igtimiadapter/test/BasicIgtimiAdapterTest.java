@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
@@ -34,7 +33,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-@Ignore("2021-03-30: Igtimi burnt down; re-enable when Igtimi is back up and running...")
 public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testGetUsers() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
