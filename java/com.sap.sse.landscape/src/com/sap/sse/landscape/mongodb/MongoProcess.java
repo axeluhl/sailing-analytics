@@ -11,25 +11,14 @@ import com.sap.sse.landscape.RotatingFileBasedLog;
 public interface MongoProcess extends Process<RotatingFileBasedLog, MongoMetrics>, MongoEndpoint {
     @Override
     default URI getURI(Optional<Database> optionalDb) throws URISyntaxException {
-        return getURI(optionalDb, getHostname());
+        return getURI(optionalDb, getHostname(), getPort(), /* no replica set name */ Optional.empty());
     }
     
     @Override
     default URI getURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException {
-        return getURI(optionalDb, getHostname(timeoutEmptyMeaningForever));
+        return getURI(optionalDb, getHostname(timeoutEmptyMeaningForever), getPort(), /* no replica set name */ Optional.empty());
     }
 
-    default URI getURI(Optional<Database> optionalDb, String hostname) throws URISyntaxException {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("mongodb://");
-        sb.append(hostname);
-        sb.append(":");
-        sb.append(getPort());
-        sb.append("/");
-        optionalDb.ifPresent(db->sb.append(db.getName()));
-        return new URI(sb.toString());
-    }
-    
     boolean isInReplicaSet() throws URISyntaxException;
     
     /**

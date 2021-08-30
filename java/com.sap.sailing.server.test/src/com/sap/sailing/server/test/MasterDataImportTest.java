@@ -43,6 +43,7 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.mongodb.MongoException;
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -264,7 +265,7 @@ public class MasterDataImportTest {
                 .spy(new RacingEventServiceImpl(null, MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
                         PersistenceFactory.INSTANCE
                         .getDefaultMongoObjectFactory(serviceFinderFactory), PersistenceFactory.INSTANCE
-                        .getDefaultDomainObjectFactory(), serviceFinderFactory, WriteConcern.MAJORITY), serviceFinderFactory));
+                        .getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY), serviceFinderFactory));
         Mockito.doReturn(securityService).when(sourceService).getSecurityService();
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);

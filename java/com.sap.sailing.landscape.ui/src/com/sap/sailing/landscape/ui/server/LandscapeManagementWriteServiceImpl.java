@@ -141,7 +141,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     /**
      * The timeout for a host to come up
      */
-    private static final Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
+    private static final Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(30));
     
     private static final String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
     
