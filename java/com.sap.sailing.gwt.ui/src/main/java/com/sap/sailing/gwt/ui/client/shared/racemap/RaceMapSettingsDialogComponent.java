@@ -91,7 +91,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         windUpCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isWindUp()));
         windUpCheckbox.ensureDebugId("windUpCheckBox");
         vp.add(windUpCheckbox);
-        //FIXME: See bug5593
+        // FIXME: See bug5593
         showWindStreamletOverlayCheckbox = new SailingPremiumCheckBox(stringMessages.showWindStreamletOverlay(),
                 SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, paywallResolver);
         dialog.ensureHasValueIsValidated(showWindStreamletOverlayCheckbox.getCheckBox());
@@ -111,6 +111,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 showWindStreamletColorsCheckbox.setEnabledIfUserHasPermission(showWindStreamletOverlayCheckbox.getValue());
             }
         });
+        paywallResolver.registerUserStatusEventHandler((user, preAuth) -> showWindStreamletColorsCheckbox
+                .setEnabledIfUserHasPermission(showWindStreamletOverlayCheckbox.getValue()));
         if (isSimulationEnabled) {
             showEstimatedDuration = dialog.createCheckbox(stringMessages.showEstimatedDuration());
             showEstimatedDuration.ensureDebugId("showEstimatedDurationCheckBox");
