@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
+import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -260,8 +261,9 @@ public class TagCell extends AbstractCell<TagDTO> {
                     if (button == null || !button.isOrHasChild(Element.as(eventTarget))) {
                         continue;
                     } else if (button.hasClassName(style.tagDeleteButton())) {
-                        new ConfirmationDialog(stringMessages, stringMessages.tagConfirmDeletionHeading(),
-                                stringMessages.tagConfirmDeletion(tag.getTag()), (confirmed) -> {
+                        new ConfirmationDialog(stringMessages.tagConfirmDeletionHeading(),
+                                stringMessages.tagConfirmDeletion(tag.getTag()), 
+                                stringMessages.confirm(), stringMessages.cancel(), (confirmed) -> {
                                     if (confirmed) {
                                         taggingPanel.removeTag(tag);
                                     }

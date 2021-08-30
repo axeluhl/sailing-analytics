@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
+import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -63,8 +64,9 @@ public class TagModificationPanel extends FlowPanel {
                 if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
                         || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
                                 && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
-                    new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
-                            stringMessages.tagDiscardChanges(), result -> {
+                    new ConfirmationDialog(stringMessages.tagDiscardChangesHeading(),
+                            stringMessages.tagDiscardChanges(), 
+                            stringMessages.confirm(), stringMessages.cancel(), result -> {
                                 if (result) {
                                     resetState();
                                 }
@@ -106,8 +108,9 @@ public class TagModificationPanel extends FlowPanel {
             if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
                     || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
                             && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
-                new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
-                        stringMessages.tagDiscardChanges(), result -> {
+                new ConfirmationDialog(stringMessages.tagDiscardChangesHeading(),
+                        stringMessages.tagDiscardChanges(), 
+                        stringMessages.confirm(), stringMessages.cancel(), result -> {
                             if (result) {
                                 resetState();
                             }

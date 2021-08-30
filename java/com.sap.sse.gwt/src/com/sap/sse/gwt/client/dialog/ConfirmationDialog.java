@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.raceboard.tagging;
+package com.sap.sse.gwt.client.dialog;
 
 import java.util.function.Consumer;
 
@@ -8,8 +8,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
+import com.sap.sse.gwt.client.dialog.DialogResources.DialogStyle;
 
 /**
  * Used to show generic confirmation dialog to ask user for explicit confirmation of an action. Can be used to make sure
@@ -17,8 +16,8 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelSt
  */
 public class ConfirmationDialog extends DialogBox {
 
-    private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
-    private final TagPanelStyle style = resources.style();
+    private final DialogResources resources = DialogResources.INSTANCE;
+    private final DialogStyle style = resources.style();
 
     /**
      * Shows a centered dialog popup wich asks the user if the given action (<code>text</code>) should be confirmed.
@@ -30,38 +29,32 @@ public class ConfirmationDialog extends DialogBox {
      * @param consumer
      *            returns <code>true</code> if user clicks the confirm-button, otherwise <code>false</code>.
      */
-    public ConfirmationDialog(StringMessages stringMessages, String title, String text, Consumer<Boolean> consumer) {
-        Panel mainPanel = new FlowPanel();
+    public ConfirmationDialog(String title, String text, String confirmButtonText, String cancelButtonText, Consumer<Boolean> consumer) {
+        final Panel mainPanel = new FlowPanel();
         mainPanel.setStyleName(style.confirmationDialogPanel());
-
-        Label label = new Label(text);
+        final Label label = new Label(text);
         label.getElement().getStyle().setMarginBottom(10, Unit.PX);
-
-        Panel buttonsPanel = new FlowPanel();
+        final Panel buttonsPanel = new FlowPanel();
         buttonsPanel.setStyleName(style.buttonsPanel());
-
-        Button confirm = new Button(stringMessages.confirm());
-        confirm.setStyleName(style.tagDialogButton());
+        final Button confirm = new Button(confirmButtonText);
+        confirm.setStyleName(style.dialogButton());
         confirm.addStyleName("gwt-Button");
         confirm.addClickHandler(event -> {
             consumer.accept(true);
             hide();
         });
         buttonsPanel.add(confirm);
-
-        Button cancel = new Button(stringMessages.cancel());
-        cancel.setStyleName(style.tagDialogButton());
+        final Button cancel = new Button(cancelButtonText);
+        cancel.setStyleName(style.dialogButton());
         cancel.addStyleName("gwt-Button");
         cancel.addClickHandler(event -> {
             consumer.accept(false);
             hide();
         });
         buttonsPanel.add(cancel);
-
         mainPanel.add(label);
         mainPanel.add(buttonsPanel);
         setWidget(mainPanel);
-
         addStyleName(style.confirmationDialog());
         setGlassEnabled(true);
         setText(title);

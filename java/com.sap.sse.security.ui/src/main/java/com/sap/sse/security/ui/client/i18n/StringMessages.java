@@ -197,10 +197,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String unlockWithSubscription();
     String selectOption();
     String currentlyUnableToSubscribe();
-    String subscribe();
     String subscriptionPlanOverview();
     String selectSubscriptionPlan();
     String features();
     String price();
-    String pleaseSubscribeToUse(String actionName);
+    String pleaseSubscribeToUse();
+    String pleaseSubscribeToUseSpecific(String actionName);
+    String subscriptionSuggestionTitle(); 
+    String takeMeToSubscriptions();
 }
