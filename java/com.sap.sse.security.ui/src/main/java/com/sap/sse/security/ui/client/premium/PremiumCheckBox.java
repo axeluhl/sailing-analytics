@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client.premium;
 
+
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -9,6 +10,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -44,7 +46,14 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
         this.wrapperPanel.add(layoutPanel);
         this.checkBox = new CheckBox(label);
         if(!paywallResolver.hasPermission(action)) {
-            wrapperPanel.addClickHandler(clickEvent -> new FeatureOverviewDialog(paywallResolver, stringMessages, this).show());
+            ConfirmationDialog pleasSubscribeDialog = new ConfirmationDialog(stringMessages.subscriptionSuggestionTitle(),
+                    stringMessages.pleaseSubscribeToUse(), stringMessages.takeMeToSubscriptions(),
+                    stringMessages.cancel(), (confirmed) -> {
+                        if (confirmed) {
+                            // TODO open SubscriptionPlansite with action as Parameter here!!
+                        }
+                    });
+            wrapperPanel.addClickHandler(clickEvent -> pleasSubscribeDialog.center());
             layoutPanel.getElement().getStyle().setCursor(Cursor.POINTER);
             checkBox.setEnabled(false);
             image = createPremiumIcon();
@@ -93,7 +102,7 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
     
     public Boolean getValue() {
         if(!paywallResolver.hasPermission(action)) {
-            Notification.notify(stringMessages.pleaseSubscribeToUse(action.name()), NotificationType.ERROR);
+            Notification.notify(stringMessages.pleaseSubscribeToUseSpecific(action.name()), NotificationType.ERROR);
             return false;
         }else {
             return checkBox.getValue();
