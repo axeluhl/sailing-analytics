@@ -8,5 +8,5 @@ public interface SubscriptionViewPresenter {
     /**
      * Start checkout process for a plan
      */
-    public void startCheckout(String planId, BaseUserSubscriptionView view);
+    public void startCheckout(String planId, BaseUserSubscriptionView view, Runnable runnable);
 }

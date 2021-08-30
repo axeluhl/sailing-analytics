@@ -22,7 +22,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
     }
 
     @Override
-    public void startCheckout(String planId, BaseUserSubscriptionView view) {
+    public void startCheckout(String planId, BaseUserSubscriptionView view, Runnable fireUserUpdateEvent) {
         service.prepareCheckout(planId, new AsyncCallback<PrepareCheckoutDTO>() {
             @Override
             public void onSuccess(PrepareCheckoutDTO hostedPage) {
@@ -34,7 +34,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
                             new CheckoutOption.SuccessCallback() {
                                 @Override
                                 public void call(String hostedPageId) {
-                                    requestFinishingPlanUpdating(hostedPageId, view);
+                                    requestFinishingPlanUpdating(hostedPageId, view, fireUserUpdateEvent);
                                 }
                             }, new CheckoutOption.ErrorCallback() {
                                 @Override
@@ -59,13 +59,15 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
         });
     }
 
-    private void requestFinishingPlanUpdating(String hostedPageId, BaseUserSubscriptionView view) {
+    private void requestFinishingPlanUpdating(String hostedPageId, BaseUserSubscriptionView view,
+            Runnable fireUserUpdateEvent) {
         final FinishCheckoutDTO data = new FinishCheckoutDTO();
         data.setHostedPageId(hostedPageId);
         writeService.finishCheckout(/* planId */ null, data, new AsyncCallback<SubscriptionDTO>() {
             @Override
             public void onSuccess(SubscriptionDTO result) {
                 updateView(result, view);
+                fireUserUpdateEvent.run();
                 Chargebee.getInstance().closeAll();
             }
 

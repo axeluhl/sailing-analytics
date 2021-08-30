@@ -54,7 +54,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     public void openCheckout(String planId) {
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
-                    .startCheckout(planId, view);
+                    .startCheckout(planId, view, () -> clientFactory.getUserService().updateUser(true));
         } catch (InvalidSubscriptionProviderException e) {
             onInvalidSubscriptionProviderError(e);
         }
@@ -70,6 +70,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                             if (!result) {
                                 showError(StringMessages.INSTANCE.failedCancelSubscription());
                             } else {
+                                clientFactory.getUserService().updateUser(true);
                                 fetchSubscription();
                             }
                         }
