@@ -2,7 +2,6 @@ package com.sap.sse.security.ui.client.premium;
 
 
 import com.google.gwt.dom.client.Style.Cursor;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -14,11 +13,8 @@ import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public abstract class PremiumCheckBox extends Composite implements BaseUserSubscriptionView {
+public abstract class PremiumCheckBox extends Composite {
 
     private final CheckBox checkBox;
     private final Image image;
@@ -51,6 +47,7 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
                     stringMessages.cancel(), (confirmed) -> {
                         if (confirmed) {
                             // TODO open SubscriptionPlansite with action as Parameter here!!
+                            Notification.notify("redirect to new SubscriptionPlanPage", NotificationType.WARNING);
                         }
                     });
             wrapperPanel.addClickHandler(clickEvent -> pleasSubscribeDialog.center());
@@ -113,21 +110,5 @@ public abstract class PremiumCheckBox extends Composite implements BaseUserSubsc
         if(paywallResolver.hasPermission(action)) {
             this.checkBox.setEnabled(value);
         }
-    }
-    
-    @Override
-    public void updateView(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
-        //TODO: As of now, there is no update mechanism implemented, therefore a page reload is forced.
-        Window.Location.reload();
-    }
-
-    @Override
-    public void onCloseCheckoutModal() {
-        // No Action required.
-    }
-
-    @Override
-    public void onOpenCheckoutError(String error) {
-        Notification.notify(stringMessages.currentlyUnableToSubscribe(), NotificationType.ERROR);
     }
 }
