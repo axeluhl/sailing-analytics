@@ -45,9 +45,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement {
         image.setHeight("1em");
         this.checkBox = new CheckBox(label);
         this.checkBox.addValueChangeHandler((event) -> {
-            if(event.getValue() && !paywallResolver.hasPermission(action)) {
-                this.checkBox.setEnabled(false);
-            }
+            changePermissionSensitiveParts(paywallResolver.isPermitted(action));
         });
         layoutPanel.add(checkBox);
         initWidget(wrapperPanel);
@@ -69,6 +67,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement {
     }
 
     /**
+     * 
      * This Method can be overridden by Subclasses to accommodate for application specific premium icons.
      * 
      * @return Premium Icon
@@ -104,7 +103,9 @@ public abstract class PremiumCheckBox extends PremiumUiElement {
     @Override
     public void changePermissionSensitiveParts(boolean isPermitted) {
         if (!isPermitted) {
-            handlerRegistration = wrapperPanel.addClickHandler(clickEvent -> pleasSubscribeDialog.center());
+            if(handlerRegistration != null) {
+                handlerRegistration = wrapperPanel.addClickHandler(clickEvent -> pleasSubscribeDialog.center());
+            }
             layoutPanel.getElement().getStyle().setCursor(Cursor.POINTER);
             checkBox.setEnabled(false);
             checkBox.setValue(false);
