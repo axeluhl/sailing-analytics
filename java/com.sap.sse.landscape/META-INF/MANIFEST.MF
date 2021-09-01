@@ -18,7 +18,6 @@ Export-Package: com.sap.sse.landscape,
  com.sap.sse.landscape.ssh
 Require-Bundle: com.sap.sse.common,
  com.jcraft.jsch;bundle-version="0.1.54",
- org.mongodb.mongo-java-driver,
  com.sap.sse.landscape,
  org.json.simple,
  org.apache.httpcomponents.httpcore;bundle-version="4.4.9",
@@ -27,5 +26,8 @@ Require-Bundle: com.sap.sse.common,
  com.sap.sse.landscape.common,
  com.sap.sse.shared.android,
  com.sap.sse,
- com.sap.sse.replication.interfaces
+ com.sap.sse.replication.interfaces,
+ org.mongodb.bson;bundle-version="4.3.1",
+ org.mongodb.driver-core;bundle-version="4.3.1",
+ org.mongodb.driver-sync;bundle-version="4.3.1"
 Bundle-ActivationPolicy: lazy

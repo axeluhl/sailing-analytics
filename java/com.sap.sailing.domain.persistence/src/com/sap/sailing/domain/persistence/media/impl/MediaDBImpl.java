@@ -141,7 +141,7 @@ public class MediaDBImpl implements MediaDB {
     @Override
     public List<MediaTrack> loadAllMediaTracks() {
         MongoCursor<Document> cursor = getVideoCollection().find().sort(sortByStartTimeAndTitle).iterator();
-        List<MediaTrack> result = new ArrayList<>((int) getVideoCollection().count());
+        List<MediaTrack> result = new ArrayList<>((int) getVideoCollection().estimatedDocumentCount());
         while (cursor.hasNext()) {
             result.add(createMediaTrackFromDb(cursor.next()));
         }

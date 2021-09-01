@@ -6,8 +6,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.AlreadyRegisteredException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
@@ -19,9 +20,9 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private MongoDBConfiguration configuration;
 
-    private final Map<MongoClientURI, MongoClient> mongos;
+    private final Map<ConnectionString, MongoClient> mongos;
     
-    private final Map<MongoClientURI, MongoDatabase> dbs;
+    private final Map<ConnectionString, MongoDatabase> dbs;
 
     /**
      * collection name -> fully qualified class name
@@ -61,12 +62,12 @@ public class MongoDBServiceImpl implements MongoDBService {
     }
     
     private synchronized MongoDatabase getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
-        final MongoClientURI key = mongoDBConfiguration.getMongoClientURI();
+        final ConnectionString key = mongoDBConfiguration.getMongoClientURI();
         MongoDatabase db = dbs.get(key);
         if (db == null) {
             MongoClient mongo = mongos.get(key);
             if (mongo == null) {
-                mongo = new MongoClient(mongoDBConfiguration.getMongoClientURI());
+                mongo = MongoClients.create(mongoDBConfiguration.getMongoClientURI());
                 mongos.put(key, mongo);
             }
             db = mongo.getDatabase(mongoDBConfiguration.getMongoClientURI().getDatabase());
