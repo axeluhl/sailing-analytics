@@ -67,6 +67,11 @@ public abstract class PremiumCheckBox extends PremiumUiElement
         updateUserPermission();
     }
 
+    @Override
+    protected void onEnsureDebugId(final String baseID) {
+        this.checkBox.ensureDebugId(baseID);
+    }
+
     @UiHandler("container")
     void onContainerClicked(final ClickEvent event) {
         if (!hasPermission()) {

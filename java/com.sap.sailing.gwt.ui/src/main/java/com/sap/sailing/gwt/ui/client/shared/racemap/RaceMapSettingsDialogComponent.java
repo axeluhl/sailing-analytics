@@ -94,14 +94,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(windUpCheckbox);
         
         // FIXME: See bug5593
-        showWindStreamletOverlayCheckbox = dialog .create(() -> new SailingPremiumCheckBox(
+        showWindStreamletOverlayCheckbox = dialog.create(() -> new SailingPremiumCheckBox(
                 stringMessages.showWindStreamletOverlay(), VIEWSTREAMLETS, paywallResolver));
         showWindStreamletOverlayCheckbox.ensureDebugId("showWindStreamletOverlayCheckBox");
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
         
         //FIXME: See bug5593
-        showWindStreamletColorsCheckbox =  dialog .create(() -> new SailingPremiumCheckBox(
+        showWindStreamletColorsCheckbox = dialog.create(() -> new SailingPremiumCheckBox(
                 stringMessages.showWindStreamletColors(), VIEWSTREAMLETS, paywallResolver));
         showWindStreamletColorsCheckbox.setEnabled(initialSettings.isShowWindStreamletOverlay());
         showWindStreamletColorsCheckbox.setValue(initialSettings.isShowWindStreamletColors());

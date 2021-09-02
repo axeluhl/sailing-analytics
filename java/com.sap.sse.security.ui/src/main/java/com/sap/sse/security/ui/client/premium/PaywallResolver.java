@@ -16,7 +16,8 @@ public class PaywallResolver {
     private final SubscriptionServiceFactory subscriptionServiceFactory;
     private final SecuredDTO dtoContext;
 
-    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, final SecuredDTO dtoContext){
+    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory,
+            final SecuredDTO dtoContext) {
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
         subscriptionServiceFactory.initializeProviders();
