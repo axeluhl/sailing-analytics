@@ -7,7 +7,7 @@ import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 
 public class SailingPremiumCheckBox extends PremiumCheckBox{
 
-    public SailingPremiumCheckBox(String label, Action action, PaywallResolver paywallResolver) {
+    public SailingPremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver) {
         super(label, action, paywallResolver);
     }
     

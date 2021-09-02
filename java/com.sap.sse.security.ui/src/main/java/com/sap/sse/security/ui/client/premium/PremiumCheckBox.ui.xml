@@ -1,0 +1,26 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+    <ui:style>
+        .premiumContainer {
+            cursor: pointer;
+        }
+        .premiumIcon {
+            width: 13px;
+            height: 13px;
+            margin: 3px -1px 3px 4px;
+            vertical-align: bottom;
+        }
+    </ui:style>
+    <g:FocusPanel ui:field="container">
+        <g:HTMLPanel>
+            <!-- FIXME: See bug5593 - This message should contain the plan, which would -->
+            <!-- provide the needed access (if the access is not otherwise blocked) -->
+            <div ui:field="placeholder" title="{i18n.unlockWithSubscription}" class="{style.premiumContainer}">
+                <g:Image ui:field="image" addStyleNames="{style.premiumIcon}"/>
+                <g:InlineLabel ui:field="label" />
+            </div>
+            <g:CheckBox ui:field="checkBox"/>
+        </g:HTMLPanel>
+    </g:FocusPanel>
+</ui:UiBinder> 

@@ -6,7 +6,7 @@ import com.google.gwt.resources.client.DataResource.MimeType;
 import com.sap.sse.security.ui.client.premium.PremiumIconRessource;
 
 public interface SailingPremiumIconRessource extends PremiumIconRessource {
-    
+
     public static final SailingPremiumIconRessource INSTANCE = GWT.create(SailingPremiumIconRessource.class);
 
     @Source("icon_premium.svg")

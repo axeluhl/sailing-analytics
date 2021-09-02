@@ -1,128 +1,133 @@
 package com.sap.sse.security.ui.client.premium;
 
-import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public abstract class PremiumCheckBox extends PremiumUiElement {
+public abstract class PremiumCheckBox extends PremiumUiElement
+        implements HasValue<Boolean>, HasEnabled, HasAllKeyHandlers {
 
-    private final CheckBox checkBox;
-    private Image image;
-    private final HorizontalPanel layoutPanel;
-    private final FocusPanel wrapperPanel;
-    private final StringMessages stringMessages;
-    private HandlerRegistration handlerRegistration;
-    private final ConfirmationDialog pleasSubscribeDialog;
+    private static PremiumCheckBoxUiBinder uiBinder = GWT.create(PremiumCheckBoxUiBinder.class);
+
+    interface PremiumCheckBoxUiBinder extends UiBinder<FocusPanel, PremiumCheckBox> {
+    }
+
+    @UiField
+    StringMessages i18n;
+    @UiField
+    FocusPanel container;
+    @UiField
+    Element placeholder;
+    @UiField(provided = true)
+    final Image image;
+    @UiField(provided = true)
+    final InlineLabel label;
+    @UiField(provided = true)
+    final CheckBox checkBox;
+
+    private final ConfirmationDialog pleaseSubscribeDialog;
 
     /**
      * A Composite component, that includes a checkbox and an additional premium icon, indicating that the feature to be
      * enabled is a premium feature if the user does not have the permission.
-     * 
-     * @param label
-     * @param userService
-     * @param permission
-     * @param ownership
-     * @param acl
      */
-    public PremiumCheckBox(String label, Action action, PaywallResolver paywallResolver) {
+    public PremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver) {
         super(action, paywallResolver);
-        stringMessages = StringMessages.INSTANCE;
-        this.wrapperPanel = new FocusPanel();
-        this.layoutPanel = new HorizontalPanel();
-        this.wrapperPanel.add(layoutPanel);
-        image = createPremiumIcon();
-        layoutPanel.add(image);
-        image.setWidth("1em");
-        image.setHeight("1em");
+        this.image = createPremiumIcon();
+        this.label = new InlineLabel(label);
         this.checkBox = new CheckBox(label);
-        this.checkBox.addValueChangeHandler((event) -> {
-            changePermissionSensitiveParts(paywallResolver.isPermitted(action));
-        });
-        layoutPanel.add(checkBox);
-        initWidget(wrapperPanel);
-        this.pleasSubscribeDialog = new ConfirmationDialog(stringMessages.subscriptionSuggestionTitle(),
-                stringMessages.pleaseSubscribeToUse(), stringMessages.takeMeToSubscriptions(), stringMessages.cancel(),
-                (confirmed) -> {
-                    if (confirmed) {
-                        // TODO open SubscriptionPlansite with action as Parameter here!!
-                        Notification.notify("redirect to new SubscriptionPlanPage", NotificationType.WARNING);
-                    }
-        });
-        changePermissionSensitiveParts(paywallResolver.isPermitted(action));
+
+        initWidget(uiBinder.createAndBindUi(this));
+
+        this.pleaseSubscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
+                i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(),
+                // TODO open SubscriptionPlansite with action as Parameter here!!
+                () -> Notification.notify("redirect to new SubscriptionPlanPage", NotificationType.WARNING));
+        updateUserPermission();
     }
 
-    public PremiumCheckBox(String label, Action action, PaywallResolver paywallResolver, DataEntryDialog<?> dialog) {
-        this(label, action, paywallResolver);
-        dialog.ensureHasValueIsValidated(checkBox);
-        dialog.ensureFocusWidgetIsLinkedToKeyStrokes(checkBox);
-    }
-
-    /**
-     * 
-     * This Method can be overridden by Subclasses to accommodate for application specific premium icons.
-     * 
-     * @return Premium Icon
-     */
-    protected Image createPremiumIcon() {
-        return new Image(PremiumIconRessource.INSTANCE.premiumIcon().getSafeUri());
-    }
-
-    public FocusPanel getFocusWidget() {
-        return this.wrapperPanel;
-    }
-
-    public CheckBox getCheckBox() {
-        return this.checkBox;
-    }
-
-    public void setValueifUserHasPermission(Boolean value) {
-        if (paywallResolver.hasPermission(action)) {
-            this.checkBox.setValue(value);
-        }
-    }
-
-    public Boolean getValue() {
-        return checkBox.getValue();
-    }
-
-    public void setEnabledIfUserHasPermission(boolean value) {
-        if (paywallResolver.hasPermission(action)) {
-            this.checkBox.setEnabled(value);
+    @UiHandler("container")
+    void onContainerClicked(final ClickEvent event) {
+        if (!hasPermission()) {
+            this.updateUserPermission();
+            pleaseSubscribeDialog.center();
         }
     }
 
     @Override
-    public void changePermissionSensitiveParts(boolean isPermitted) {
-        if (!isPermitted) {
-            if(handlerRegistration != null) {
-                handlerRegistration = wrapperPanel.addClickHandler(clickEvent -> pleasSubscribeDialog.center());
-            }
-            layoutPanel.getElement().getStyle().setCursor(Cursor.POINTER);
-            checkBox.setEnabled(false);
-            checkBox.setValue(false);
-            image.setVisible(true);
-            // FIXME: See bug5593 - This message should contain the plan, which would provide the needed access (if the
-            // access is not otherwise blocked)
-            layoutPanel.setTitle(stringMessages.unlockWithSubscription());
-        } else {
-            // TODO: Might want to use an "unlocked" image.
-            image.setVisible(false);
-            checkBox.setEnabled(true);
-            if (handlerRegistration != null) {
-                handlerRegistration.removeHandler();
-            }
-            layoutPanel.setTitle(null);
-            layoutPanel.getElement().getStyle().setCursor(Cursor.AUTO);
-        }
+    protected void onUserPermissionUpdate(final boolean isPermitted) {
+        checkBox.setValue(getValue());
+        setVisible(placeholder, !isPermitted);
+        checkBox.setVisible(isPermitted);
     }
 
+    @Override
+    public void setValue(final Boolean value) {
+        this.checkBox.setValue(hasPermission() && value);
+    }
+
+    @Override
+    public void setValue(final Boolean value, final boolean fireEvents) {
+        this.checkBox.setValue(hasPermission() && value, fireEvents);
+    }
+
+    @Override
+    public Boolean getValue() {
+        return hasPermission() && checkBox.getValue();
+    }
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(final ValueChangeHandler<Boolean> handler) {
+        return checkBox.addValueChangeHandler(handler);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return hasPermission() && checkBox.isEnabled();
+    }
+
+    @Override
+    public void setEnabled(final boolean enabled) {
+        this.checkBox.setEnabled(hasPermission() && enabled);
+    }
+
+    @Override
+    public HandlerRegistration addKeyDownHandler(final KeyDownHandler handler) {
+        return container.addKeyDownHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addKeyPressHandler(final KeyPressHandler handler) {
+        return container.addKeyPressHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addKeyUpHandler(final KeyUpHandler handler) {
+        return container.addKeyUpHandler(handler);
+    }
+
+    public FocusWidget getFocusWidget() {
+        return this.checkBox;
+    }
 }

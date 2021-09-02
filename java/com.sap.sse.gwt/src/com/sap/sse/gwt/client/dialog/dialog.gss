@@ -1,12 +1,15 @@
-
-.buttonsPanel {
-	display: inline-block;
-	width: 100%;
-	text-align: right;
+.infoText {
+    margin-bottom: 10px;
 }
 
 .buttonsPanel {
-	padding-right: 5px;
+    display: inline-block;
+    width: 100%;
+    text-align: right;
+}
+
+.buttonsPanel {
+    padding-right: 5px;
 }
 
 .buttonsPanel button {
@@ -14,8 +17,8 @@
 }
 
 .buttonsPanel:empty {
-	display: none;
-	margin: 0;
+    display: none;
+    margin: 0;
 }
 
 .confirmationDialog {
@@ -23,7 +26,7 @@
 }
 
 .confirmationDialogPanel {
-	display: inline-block;
+    display: inline-block;
 }
 
 .dialogButton {

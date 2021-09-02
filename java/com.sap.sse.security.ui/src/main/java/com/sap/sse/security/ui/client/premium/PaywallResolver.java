@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.client.premium;
 
-import com.sap.sse.security.shared.HasPermissions;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
@@ -16,45 +16,37 @@ public class PaywallResolver {
     private final SubscriptionServiceFactory subscriptionServiceFactory;
     private final SecuredDTO dtoContext;
 
-    public PaywallResolver(UserService userService, SubscriptionServiceFactory subscriptionServiceFactory, SecuredDTO dtoContext){
+    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, final SecuredDTO dtoContext){
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
         subscriptionServiceFactory.initializeProviders();
         this.dtoContext = dtoContext;
     }
-    
-    public boolean isPermitted(HasPermissions.Action action){
-        if(dtoContext != null) {
-            return userService.hasPermission(dtoContext, action);
-        }else {
-            return false;
-        }
-    }
 
-    public boolean hasPermission(Action action) {
+    public boolean hasPermission(final Action action) {
         return userService.hasPermission(dtoContext, action);
     }
-    
+
     public SubscriptionWriteServiceAsync<?, ?, ?> getSubscriptionWriteService() {
         try {
             return subscriptionServiceFactory.getDefaultWriteAsyncService();
-        } catch (InvalidSubscriptionProviderException e) {
+        } catch (final InvalidSubscriptionProviderException e) {
             e.printStackTrace();
             return null;
         }
     }
-    
+
     public SubscriptionClientProvider getSubscriptionClientProvider() {
         try {
             return subscriptionServiceFactory.getDefaultProvider();
-        } catch (InvalidSubscriptionProviderException e) {
+        } catch (final InvalidSubscriptionProviderException e) {
             e.printStackTrace();
             return null;
         }
     }
-    
-    public UserStatusEventHandler registerUserStatusEventHandler(UserStatusEventHandler handler) {
+
+    public HandlerRegistration registerUserStatusEventHandler(final UserStatusEventHandler handler) {
         userService.addUserStatusEventHandler(handler);
-        return handler;
+        return () -> userService.removeUserStatusEventHandler(handler);
     }
 }

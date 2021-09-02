@@ -3,6 +3,7 @@ package com.sap.sse.gwt.client.dialog;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -476,6 +477,13 @@ public abstract class DataEntryDialog<T> {
         ensureHasValueIsValidated(result);
         ensureFocusWidgetIsLinkedToKeyStrokes(result);
         return result;
+    }
+    
+    public <C extends HasValueChangeHandlers<?> & HasAllKeyHandlers> C create(final Supplier<C> factory) {
+        final C control = factory.get();
+        ensureHasValueIsValidated(control);
+        ensureFocusWidgetIsLinkedToKeyStrokes(control);
+        return control;
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })

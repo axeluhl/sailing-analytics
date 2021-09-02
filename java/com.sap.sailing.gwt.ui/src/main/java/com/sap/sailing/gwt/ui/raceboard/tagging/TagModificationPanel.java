@@ -64,13 +64,9 @@ public class TagModificationPanel extends FlowPanel {
                 if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
                         || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
                                 && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
-                    new ConfirmationDialog(stringMessages.tagDiscardChangesHeading(),
-                            stringMessages.tagDiscardChanges(), 
-                            stringMessages.confirm(), stringMessages.cancel(), result -> {
-                                if (result) {
-                                    resetState();
-                                }
-                            }).center();
+                    ConfirmationDialog.create(stringMessages.tagDiscardChangesHeading(),
+                            stringMessages.tagDiscardChanges(), stringMessages.confirm(), stringMessages.cancel(),
+                            TagModificationPanel.this::resetState).center();
                 } else {
                     resetState();
                 }
@@ -108,13 +104,9 @@ public class TagModificationPanel extends FlowPanel {
             if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
                     || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
                             && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
-                new ConfirmationDialog(stringMessages.tagDiscardChangesHeading(),
-                        stringMessages.tagDiscardChanges(), 
-                        stringMessages.confirm(), stringMessages.cancel(), result -> {
-                            if (result) {
-                                resetState();
-                            }
-                        }).center();
+                ConfirmationDialog.create(stringMessages.tagDiscardChangesHeading(), stringMessages.tagDiscardChanges(),
+                        stringMessages.confirm(), stringMessages.cancel(), TagModificationPanel.this::resetState)
+                        .center();
             } else {
                 resetState();
             }

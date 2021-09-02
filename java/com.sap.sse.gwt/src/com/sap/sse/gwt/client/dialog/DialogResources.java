@@ -14,6 +14,7 @@ public interface DialogResources extends ClientBundle {
     DialogStyle style();
 
     public interface DialogStyle extends CssResource {
+        String infoText();
         String confirmationDialog();
         String confirmationDialogPanel();
         String buttonsPanel();

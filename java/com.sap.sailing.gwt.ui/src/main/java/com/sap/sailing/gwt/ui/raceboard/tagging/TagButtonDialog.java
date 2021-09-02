@@ -207,9 +207,9 @@ public class TagButtonDialog extends DialogBox {
             @Override
             public void update(int index, TagButton button, String value) {
                 if (DefaultActions.DELETE.name().equals(value)) {
-                    new ConfirmationDialog(stringMessages.tagButtonConfirmDeletionHeading(),
+                    ConfirmationDialog.create(stringMessages.tagButtonConfirmDeletionHeading(),
                             stringMessages.tagButtonConfirmDeletion(button.getTag()), 
-                            stringMessages.confirm(), stringMessages.cancel(), (confirmed) -> {
+                            stringMessages.confirm(), stringMessages.cancel(), confirmed -> {
                                 if (confirmed) {
                                     taggingPanel.getTagButtons().remove(button);
                                     footerPanel.storeAllTagButtons();
@@ -317,16 +317,13 @@ public class TagButtonDialog extends DialogBox {
     private void onCancelTagButtonChangesPressed() {
         // ask user for confirmation to discard changes if values of input fields changed
         if (!inputPanel.compareFieldsToTagButton(selectedTagButton)) {
-            new ConfirmationDialog(stringMessages.tagDiscardChangesHeading(),
-                    stringMessages.tagDiscardChanges(), 
-                    stringMessages.confirm(), stringMessages.cancel(), confirmed -> {
-                        if (confirmed) {
-                            inputPanel.clearAllValues();
-                            tagPreviewPanel.renderPreview(inputPanel);
-                            tagButtonTable.setVisible(true);
-                            setButtonMode(false);
-                            center();
-                        }
+            ConfirmationDialog.create(stringMessages.tagDiscardChangesHeading(), stringMessages.tagDiscardChanges(),
+                    stringMessages.confirm(), stringMessages.cancel(), () -> {
+                        inputPanel.clearAllValues();
+                        tagPreviewPanel.renderPreview(inputPanel);
+                        tagButtonTable.setVisible(true);
+                        setButtonMode(false);
+                        center();
                     }).center();
         } else {
             inputPanel.clearAllValues();

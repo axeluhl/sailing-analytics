@@ -261,13 +261,9 @@ public class TagCell extends AbstractCell<TagDTO> {
                     if (button == null || !button.isOrHasChild(Element.as(eventTarget))) {
                         continue;
                     } else if (button.hasClassName(style.tagDeleteButton())) {
-                        new ConfirmationDialog(stringMessages.tagConfirmDeletionHeading(),
-                                stringMessages.tagConfirmDeletion(tag.getTag()), 
-                                stringMessages.confirm(), stringMessages.cancel(), (confirmed) -> {
-                                    if (confirmed) {
-                                        taggingPanel.removeTag(tag);
-                                    }
-                                }).center();
+                        ConfirmationDialog.create(stringMessages.tagConfirmDeletionHeading(),
+                                stringMessages.tagConfirmDeletion(tag.getTag()), stringMessages.confirm(),
+                                stringMessages.cancel(), () -> taggingPanel.removeTag(tag)).center();
                     } else if (button.hasClassName(style.tagEditButton())) {
                         taggingPanel.setCurrentState(State.EDIT_TAG);
                     } else if (button.hasClassName(style.tagShareButton())) {
