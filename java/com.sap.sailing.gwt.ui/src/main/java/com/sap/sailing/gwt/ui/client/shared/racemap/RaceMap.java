@@ -945,11 +945,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
                 createAdvancedFunctionsButtonGroup(showMapControls);
-                
-                //sharingAndVideoPanel.add(testPopup);
-
-                
-                
                 // Data has been initialized
                 RaceMap.this.redraw();
                 if (trueNorthIndicatorPanel.isVisible()) {
