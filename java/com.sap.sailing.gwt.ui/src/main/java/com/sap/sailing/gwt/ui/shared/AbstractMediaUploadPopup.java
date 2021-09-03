@@ -55,7 +55,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final static String STATUS_OK = "OK";
     private final static String STATUS_NOT_OK = "NOK";
     private final static String EMPTY_MESSAGE = "-";
-    private final static String YOUTUBE_REGEX = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be\\/)([\\w\\-\\_]*)(&(amp;)?‌​[\\w\\?‌​=]*)?";
+    private final static String YOUTUBE_REGEX = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be "
+                                                + "\\/)([\\w\\-\\_]*)(&(amp;)?‌​[\\w\\?‌​=]*)?";
     protected final StringMessages i18n = StringMessages.INSTANCE;
     protected final SharedHomeResources sharedHomeResources = SharedHomeResources.INSTANCE;
     
@@ -79,48 +80,39 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     public AbstractMediaUploadPopup(Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
         this.updateVideo = updateVideo;
         this.updateImage = updateImage;
-        
         sharedHomeResources.sharedHomeCss().ensureInjected();
         addStyleName(sharedHomeResources.sharedHomeCss().popup());
         setTitle(i18n.upload());
         setText(i18n.upload());
         setGlassEnabled(true);
         setAnimationEnabled(true);
-        
         upload = new FileUpload();
         upload.getElement().setAttribute("accept", "image/*;capture=camera");
         upload.setVisible(false);
         upload.setName("file");
         this.setModal(false);
-        
         content = new FlowPanel();
         fileNameInput = new TextBox();
         urlInput = new TextBox();
-        
         // Upload form
         final FormPanel uploadForm = new FormPanel();
         // Because we're going to add a FileUpload widget, we'll need to set the
         // form to use the POST method, and multipart MIME encoding.
         uploadForm.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadForm.setMethod(FormPanel.METHOD_POST);
-
         uploadForm.setAction(UPLOAD_URL);
         uploadForm.add(upload);
         // Add an event handler to the form.
         uploadForm.addSubmitHandler(new SubmitHandler());
         uploadForm.addSubmitCompleteHandler(new SubmitCompleteHandler());
         content.add(uploadForm);
-
         final FormPanel metaDataForm = new FormPanel();
-
-        VerticalPanel metaDataPanel = new VerticalPanel();
+        final VerticalPanel metaDataPanel = new VerticalPanel();
         metaDataForm.add(metaDataPanel);
-        
-        Label fileNameLabel = new Label(i18n.fileUpload());
+        final Label fileNameLabel = new Label(i18n.fileUpload());
         fileNameLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
         metaDataPanel.add(fileNameLabel);
-
-        FlowPanel fileInputGroup = new FlowPanel();
+        final FlowPanel fileInputGroup = new FlowPanel();
         fileInputGroup.addStyleName(sharedHomeResources.sharedHomeCss().inputGroup());
         uploadButton = new Button();
         uploadButton.addClickHandler(new ClickHandler() {
@@ -135,14 +127,11 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         fileNameInput.setName("textBoxFormElement");
         fileNameInput.addStyleName(sharedHomeResources.sharedHomeCss().input());
         fileNameInput.setEnabled(false);
-        
         fileInputGroup.add(fileNameInput);
         fileInputGroup.add(uploadButton);
         metaDataPanel.add(fileInputGroup);
-        
         metaDataPanel.add(new Label("-- " + i18n.or() + " --"));
-        
-        Label urlLabel = new Label(i18n.url());
+        final Label urlLabel = new Label(i18n.url());
         urlLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
         metaDataPanel.add(urlLabel);
         urlInput.addStyleName(sharedHomeResources.sharedHomeCss().input());
@@ -160,56 +149,48 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             }
         });
         metaDataPanel.add(urlInput);
-        
         fileExistingPanel = new FlowPanel();
         fileExistingPanel.add(new Label("-- " + i18n.noMediaSelected() + " --"));
         metaDataPanel.add(fileExistingPanel);
-        
-        Label detailsSubTitle = new Label(i18n.details());
+        final Label detailsSubTitle = new Label(i18n.details());
         detailsSubTitle.addStyleName(sharedHomeResources.sharedHomeCss().subTitle());
         metaDataPanel.add(detailsSubTitle);
-        
-        Label titleLabel = new Label(i18n.title());
+        final Label titleLabel = new Label(i18n.title());
         titleLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
         metaDataPanel.add(titleLabel);
         titleTextBox = new TextBox();
         titleTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
         metaDataPanel.add(titleTextBox);
-
-        FlowPanel advancedContent = new FlowPanel();
-        CollapsablePanel collapsableAdvancedPanel = new CollapsablePanel(i18n.advanced(), true);
+        final FlowPanel advancedContent = new FlowPanel();
+        final CollapsablePanel collapsableAdvancedPanel = new CollapsablePanel(i18n.advanced(), true);
         collapsableAdvancedPanel.setContent(advancedContent);
         collapsableAdvancedPanel.setWidth("100%");
         metaDataPanel.add(collapsableAdvancedPanel);
-        
-        Label subtitleLabel = new Label(i18n.subtitle());
+        final Label subtitleLabel = new Label(i18n.subtitle());
         subtitleLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
         advancedContent.add(subtitleLabel);
         subtitleTextBox = new TextBox();
         subtitleTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
         advancedContent.add(subtitleTextBox);
-
-        Label copyrightLabel = new Label(i18n.copyright());
+        final Label copyrightLabel = new Label(i18n.copyright());
         copyrightLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
         advancedContent.add(copyrightLabel);
         copyrightTextBox = new TextBox();
         copyrightTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
         advancedContent.add(copyrightTextBox);
-
-        Label mimeTypeListLabel = new Label(i18n.mimeType());
+        final Label mimeTypeListLabel = new Label(i18n.mimeType());
         mimeTypeListLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
         advancedContent.add(mimeTypeListLabel);
         mimeTypeListBox = new ListBox();
         mimeTypeListBox.addStyleName(sharedHomeResources.sharedHomeCss().select());
         initMediaTypes();
         advancedContent.add(mimeTypeListBox);
-
-        FlowPanel buttonGroup = new FlowPanel();
+        final FlowPanel buttonGroup = new FlowPanel();
         buttonGroup.addStyleName(sharedHomeResources.sharedHomeCss().buttonGroup());
         buttonGroup.addStyleName(sharedHomeResources.sharedHomeCss().right());
         metaDataPanel.add(buttonGroup);
         // Add a 'submit' button.
-        Button cancelButton = new Button(i18n.cancel(), new ClickHandler() {
+        final Button cancelButton = new Button(i18n.cancel(), new ClickHandler() {
             public void onClick(ClickEvent event) {
                 event.stopPropagation();
                 fileNameInput.setValue("");
@@ -237,7 +218,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             }
         });
         content.add(metaDataForm);
-
         upload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -245,18 +225,15 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 uploadForm.submit();
             }
         });
-        
         progressOverlay = new FlowPanel();
         progressOverlay.ensureDebugId("ProgressOverlay");
         progressOverlay.addStyleName(sharedHomeResources.sharedHomeCss().progressOverlay());
-        FlowPanel progressSpinner = new FlowPanel();
+        final FlowPanel progressSpinner = new FlowPanel();
         progressSpinner.addStyleName(sharedHomeResources.sharedHomeCss().progressSpinner());
         progressOverlay.add(progressSpinner);
         progressOverlay.setVisible(false);
         content.add(progressOverlay);
-        
         add(content);
-        
     }
     
     private void initMediaTypes() {
