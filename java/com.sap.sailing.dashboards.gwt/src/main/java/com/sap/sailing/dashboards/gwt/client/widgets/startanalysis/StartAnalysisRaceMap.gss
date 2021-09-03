@@ -1,5 +1,4 @@
 @require 'theme';
-@external gwt-MapSettingsButton;
 
 .raceMapIndicatorPanel {
 	margin-top: DASHBOARD_SPACE_VERY_SMALL;

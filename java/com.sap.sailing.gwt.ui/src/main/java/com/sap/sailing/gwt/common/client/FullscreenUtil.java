@@ -33,8 +33,6 @@ public class FullscreenUtil {
             element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
         } else if (element.msRequestFullscreen) {
             element.msRequestFullscreen();
-        } else {
-            console.log("Fullscreen API not available (e.g. on mobile devices).");
         }
     }-*/;
     
@@ -49,8 +47,6 @@ public class FullscreenUtil {
                     $doc.mozCancelFullScreen();
             } else if ($doc.webkitCancelFullScreen) {
                     $doc.webkitCancelFullScreen();
-            } else {
-                console.log("Fullscreen API not available (e.g. on mobile devices).");
             }
         } else { 
             if (element.requestFullscreen) {
@@ -61,8 +57,6 @@ public class FullscreenUtil {
                 element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
             } else if (element.msRequestFullscreen) {
                 element.msRequestFullscreen();
-            } else {
-                console.log("Fullscreen API not available (e.g. on mobile devices).");
             }
         }
     }-*/;
@@ -77,8 +71,6 @@ public class FullscreenUtil {
                     $doc.mozCancelFullScreen();
             } else if ($doc.webkitCancelFullScreen) {
                     $doc.webkitCancelFullScreen();
-            } else {
-                console.log("Fullscreen API not available (e.g. on mobile devices).");
             }
     }-*/;
     

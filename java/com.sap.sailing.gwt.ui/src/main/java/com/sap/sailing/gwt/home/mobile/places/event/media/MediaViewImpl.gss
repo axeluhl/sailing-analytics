@@ -1,4 +1,4 @@
-@external table, Caption, chartCloseButton, gwt-HTML;
+@external table;
 
 .addButton {
     position: absolute;

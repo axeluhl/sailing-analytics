@@ -1,4 +1,4 @@
-@external button, table, Caption, chartCloseButton, gwt-HTML, collapsablePanel, collapsablePanel-content, collapsablePanel-header;
+@external button, Caption, collapsablePanel, collapsablePanel-content, collapsablePanel-header;
 
 button.primary {
     background-color: #008fcc;
