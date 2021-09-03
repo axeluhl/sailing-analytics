@@ -30,6 +30,7 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -373,7 +374,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             storeColumnFactors(leaderboard, dbLeaderboard);
             storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         }
-        leaderboardCollection.replaceOne(query, dbLeaderboard, new UpdateOptions().upsert(true));
+        leaderboardCollection.replaceOne(query, dbLeaderboard, new ReplaceOptions().upsert(true));
     }
 
     private void storeColumnFactors(Leaderboard leaderboard, Document dbLeaderboard) {
@@ -544,7 +545,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbLeaderboardIds.add(dbLeaderboardId);
         }
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
-        leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLeaderboardGroup, new UpdateOptions().upsert(true));
+        leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLeaderboardGroup, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -570,7 +571,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document currentServerConfig = serverCollection.find().first();
         if (currentServerConfig != null) {
             serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(
-                    currentServerConfig, newServerConfig, new UpdateOptions().upsert(true));
+                    currentServerConfig, newServerConfig, new ReplaceOptions().upsert(true));
         } else {
             serverCollection.insertOne(newServerConfig);
         }
@@ -587,7 +588,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
         serverDBObject.put(FieldNames.INCLUDE.name(), server.isInclude());
         serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), server.getSelectedEventIds());
-        serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject, new UpdateOptions().upsert(true));
+        serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject, new ReplaceOptions().upsert(true));
     }
     
     @Override
@@ -600,7 +601,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         serverDBObject.put(FieldNames.INCLUDE.name(), include);
         serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), selectedEventIds);
         serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject,
-                new UpdateOptions().upsert(true));
+                new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -653,7 +654,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             sailorsInfoWebsiteURLs.add(sailorsInfoWebsiteObject);
         }
         eventDBObject.put(FieldNames.EVENT_SAILORS_INFO_WEBSITES.name(), sailorsInfoWebsiteURLs);
-        eventCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, eventDBObject, new UpdateOptions().upsert(true));
+        eventCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, eventDBObject, new ReplaceOptions().upsert(true));
         // now store the links to the leaderboard groups
         MongoCollection<Document> linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
         linksCollection.createIndex(new Document(FieldNames.EVENT_ID.name(), 1));
@@ -664,7 +665,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document dbLinks = new Document();
         dbLinks.put(FieldNames.EVENT_ID.name(), event.getId());
         dbLinks.put(FieldNames.LEADERBOARD_GROUP_UUID.name(), lgUUIDs);
-        linksCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLinks, new UpdateOptions().upsert(true));
+        linksCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLinks, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -747,7 +748,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final int MAX_TRIES = 3;
         for (int i=0; i<MAX_TRIES && !success; i++) {
             try {
-                regattasCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbRegatta, new UpdateOptions().upsert(true));
+                regattasCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbRegatta, new ReplaceOptions().upsert(true));
                 success = true;
             } catch (DuplicateKeyException e) {
                 if (i+1==MAX_TRIES) {
@@ -826,7 +827,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         Document entry = new Document(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
-        regattaForRaceIDCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        regattaForRaceIDCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -1495,7 +1496,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         JSONObject json = competitorSerializer.serialize(competitor);
         Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toJSONString());
         Document entry = Document.parse(json.toJSONString());
-        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     private void storeCompetitorWithBoat(CompetitorWithBoat competitor) {
@@ -1503,7 +1504,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         JSONObject json = competitorWithBoatRefSerializer.serialize(competitor);
         Document query = Document.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         Document entry = Document.parse(json.toString());
-        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -1570,7 +1571,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         JSONObject json = boatSerializer.serialize(boat);
         Document query = Document.parse(BoatJsonSerializer.getBoatIdQuery(boat).toString());
         Document entry = Document.parse(json.toString());
-        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -1614,7 +1615,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         configDocument.put(FieldNames.CONFIGURATION_ID_AS_STRING.name(), configuration.getId().toString());
         Document query = new Document();
         query.put(FieldNames.CONFIGURATION_ID_AS_STRING.name(), configuration.getId().toString());
-        configurationsCollections.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, configDocument, new UpdateOptions().upsert(true));
+        configurationsCollections.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, configDocument, new ReplaceOptions().upsert(true));
     }
 
     private Document createDeviceConfigurationObject(DeviceConfiguration configuration) {
@@ -1665,7 +1666,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
         Document entry = new Document(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
         entry.put(FieldNames.RESULT_URL.name(), url.toString());
-        resultUrlsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new UpdateOptions().upsert(true));
+        resultUrlsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -1889,7 +1890,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 key.putAll(paramsPersistenceService.getKey(params));
                 Document dbObject = new Document();
                 dbObject.putAll(paramsPersistenceService.mapFrom(params));
-                collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, dbObject, new UpdateOptions().upsert(true));
+                collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, dbObject, new ReplaceOptions().upsert(true));
             } catch (NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
                         ". Couldn't store race "+params.getTrackerID()+" for restoring.", e);
@@ -1928,7 +1929,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 final URL remoteUrl = raceInfo.getRemoteUrl();
                 newValue.append(FieldNames.REMOTE_URL.name(), remoteUrl == null ? null : remoteUrl.toExternalForm());
                 newValue.append(FieldNames.ANNIVERSARY_TYPE.name(), anniversary.getValue().getB().toString());
-                anniversarysStored.replaceOne(currentProxy, newValue, new UpdateOptions().upsert(true));
+                anniversarysStored.replaceOne(currentProxy, newValue, new ReplaceOptions().upsert(true));
             }
         } catch (Exception e) {
             e.printStackTrace();
