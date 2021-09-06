@@ -77,7 +77,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         final EventViewBase view = initView();
         panel.setWidget(view.asWidget());
     }
-    
+
     @Override
     public com.google.web.bindery.event.shared.EventBus getEventBus() {
         return clientFactory.getEventBus();
@@ -88,9 +88,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public UserService getUserService() {
         return clientFactory.getUserService();
     }
-    
+
     protected abstract EventViewBase initView();
-    
+
     protected final void initSeriesNavigation(EventViewBase view) {
         final EventSeriesReferenceDTO seriesData;
         final RegattaMetadataDTO regatta = getRegatta();
@@ -105,7 +105,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             view.setSeriesNavigation(seriesData.getSeriesDisplayName(), navigation);
         }
     }
-    
+
     protected final void initSailorInfo(EventViewBase view) {
         String sailorInfoUrl = eventDTO.getSailorsInfoWebsiteURL();
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {

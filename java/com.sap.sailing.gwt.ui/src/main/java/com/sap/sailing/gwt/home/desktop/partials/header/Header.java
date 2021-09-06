@@ -69,7 +69,6 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Anchor solutionsPageLinkMenu;
     @UiField Anchor adminConsolePageLinkMenu;
     @UiField Anchor dataMiningPageLinkMenu;
-
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
@@ -81,9 +80,7 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Anchor hamburgerMenuIcon;
     @UiField Element headerNavigationDropDownMenuContainer;
     @UiField Element centerMenuPanel;
-
     @UiField Anchor usermenu;
-
     @UiField ImageElement logoImage;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);

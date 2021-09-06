@@ -30,7 +30,6 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo, S
     private static final long serialVersionUID = 3549272772994999483L;
 
     private TreeSet<RegattaMetadataDTO> regattas = new TreeSet<>();
-
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     
     private boolean multiRegatta;

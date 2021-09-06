@@ -26,16 +26,16 @@ public class ImageGallery extends Composite {
     @UiField SectionHeaderContent sectionHeaderUi;
     @UiField FlowPanel firstColumnUi;
     @UiField FlowPanel secondColumnUi;
+    
     private final MobileSection mobileSection;
     private boolean managed;
-    
+
     public ImageGallery() {
         ImageGalleryResources.INSTANCE.css().ensureInjected();
         initWidget(mobileSection = uiBinder.createAndBindUi(this));
         sectionHeaderUi.setSectionTitle(StringMessages.INSTANCE.images());
         sectionHeaderUi.initCollapsibility(mobileSection.getContentContainerElement(), true);
         sectionHeaderUi.addManageButtonClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 setMediaManaged(!managed);
@@ -43,7 +43,7 @@ public class ImageGallery extends Composite {
             }
         });
     }
-    
+
     public void setImages(final Collection<? extends ImageDTO> images, final Consumer<ImageDTO> deleteImage) {
         sectionHeaderUi.setInfoText(StringMessages.INSTANCE.photosCount(images.size()));
         firstColumnUi.clear();
@@ -51,7 +51,6 @@ public class ImageGallery extends Composite {
         int imageCount = 0;
         for (final ImageDTO image : images) {
             FlowPanel container = ++imageCount % 2 != 0 ? firstColumnUi : secondColumnUi;
-            
             ImageGalleryItem imageGalleryItem = new ImageGalleryItem(image, deleteImage);
             imageGalleryItem.addClickHandler(new ClickHandler() {
                 @Override
@@ -62,11 +61,11 @@ public class ImageGallery extends Composite {
             container.add(imageGalleryItem);
         }
     }
-    
+
     public void setManageButtonsVisible(boolean visible) {
         sectionHeaderUi.setManageButtonVisible(visible);
     }
-    
+
     public void setMediaManaged(boolean managed) {
         this.managed = managed;
         for (int i = 0; i < firstColumnUi.getWidgetCount(); i++) {

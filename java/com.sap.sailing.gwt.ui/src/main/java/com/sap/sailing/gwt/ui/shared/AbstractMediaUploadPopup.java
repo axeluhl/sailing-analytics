@@ -47,19 +47,19 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
 
 public abstract class AbstractMediaUploadPopup extends DialogBox {
-    
+
     private final Logger logger = Logger.getLogger(this.getClass().getName());
-    
+
     private final static String UPLOAD_URL = "/sailingserver/fileupload";
     private final static String DELETE_URL = "/sailingserver/api/v1/file?uri=";
     private final static String STATUS_OK = "OK";
     private final static String STATUS_NOT_OK = "NOK";
     private final static String EMPTY_MESSAGE = "-";
     private final static String YOUTUBE_REGEX = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be "
-                                                + "\\/)([\\w\\-\\_]*)(&(amp;)?‌​[\\w\\?‌​=]*)?";
+            + "\\/)([\\w\\-\\_]*)(&(amp;)?‌​[\\w\\?‌​=]*)?";
     protected final StringMessages i18n = StringMessages.INSTANCE;
     protected final SharedHomeResources sharedHomeResources = SharedHomeResources.INSTANCE;
-    
+
     private final Consumer<VideoDTO> updateVideo;
     private final Consumer<ImageDTO> updateImage;
 
@@ -76,7 +76,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final Button saveButton;
     private FlowPanel progressOverlay;
     private String uri;
-    
+
     public AbstractMediaUploadPopup(Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
         this.updateVideo = updateVideo;
         this.updateImage = updateImage;
@@ -210,7 +210,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         saveButton.setEnabled(false);
         buttonGroup.add(saveButton);
         metaDataForm.addSubmitHandler(new FormPanel.SubmitHandler() {
-            
             @Override
             public void onSubmit(SubmitEvent event) {
                 fileNameInput.setValue("");
@@ -235,26 +234,26 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         content.add(progressOverlay);
         add(content);
     }
-    
+
     private void initMediaTypes() {
         mimeTypeListBox.addItem(MimeType.unknown.name());
-        for (MimeType mimeType: MimeType.values()) {
+        for (MimeType mimeType : MimeType.values()) {
             if (mimeType != MimeType.unknown) {
                 mimeTypeListBox.addItem(mimeType.name());
             }
         }
         mimeTypeListBox.setSelectedIndex(0);
     }
-    
+
     private void selectMimeTypeInBox(MimeType mimeType) {
-        for (int i=0; i<mimeTypeListBox.getItemCount(); i++) {
+        for (int i = 0; i < mimeTypeListBox.getItemCount(); i++) {
             if (mimeType.name().equals(mimeTypeListBox.getValue(i))) {
                 mimeTypeListBox.setSelectedIndex(i);
                 break;
             }
         }
     }
-    
+
     private MimeType getMimeType(String urlParam) {
         String url;
         if (urlParam == null) {
@@ -262,7 +261,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         } else {
             url = urlParam.trim();
         }
-        logger.info("Check url: " + url);
         final MimeType mimeType;
         if (matches(url, YOUTUBE_REGEX)) {
             mimeType = MimeType.youtube;
@@ -273,11 +271,11 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         }
         return mimeType;
     }
-    
+
     private MimeType detectMimeTypeFromUrl(String url) {
         MimeType result = MimeType.unknown;
         if (url != null) {
-            for (MimeType mimeType: MimeType.values()) {
+            for (MimeType mimeType : MimeType.values()) {
                 if (mimeType.endingPattern.length() > 0) {
                     String regex = "[a-z\\-_0-9\\/\\:\\.]*\\.(" + mimeType.getEndingPattern() + ")";
                     if (matches(url, regex)) {
@@ -289,11 +287,11 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         }
         return result;
     }
-    
+
     private boolean matches(String matcher, String pattern) {
         return RegExp.compile(pattern, "i").test(matcher);
     }
-    
+
     private boolean isVimeoUrl(String url) {
         try {
             RegExp urlPattern = RegExp.compile("^(.*:)//([A-Za-z0-9\\-\\.]+)(:[0-9]+)?(.*)$");
@@ -304,7 +302,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             return false;
         }
     }
-    
+
     protected class SubmitHandler implements FormPanel.SubmitHandler {
         @Override
         public void onSubmit(SubmitEvent event) {
@@ -320,9 +318,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 event.cancel();
             }
         }
-        
+
     }
-    
+
     private class SubmitCompleteHandler implements FormPanel.SubmitCompleteHandler {
         @Override
         public void onSubmitComplete(SubmitCompleteEvent event) {
@@ -345,23 +343,22 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                     updateUri(uri, fileName);
                     fileNameInput.setValue(i18n.uploadSuccessful());
                 } else {
-                    String status = resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString().stringValue();
-                    String message = resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString().stringValue();
-                    Notification.notify(i18n.fileUploadResult(
-                            status,
-                            message),
-                            NotificationType.ERROR);
+                    String status = resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString()
+                            .stringValue();
+                    String message = resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString()
+                            .stringValue();
+                    Notification.notify(i18n.fileUploadResult(status, message), NotificationType.ERROR);
                     logger.log(Level.SEVERE, "Submit file failed. Status: " + status + ", message: " + message);
                 }
             }
         }
-        
+
     }
-    
+
     public void openFileUpload() {
         upload.click();
     }
-    
+
     @Override
     public void show() {
         // reset all fields
@@ -369,7 +366,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         cleanFormElements();
         super.show();
     }
-    
+
     private void cleanFormElements() {
         fileNameInput.setValue("");
         urlInput.setValue("");
@@ -377,7 +374,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         subtitleTextBox.setValue("");
         copyrightTextBox.setValue("");
         mimeTypeListBox.setSelectedIndex(0);
-        //progressOverlay.setVisible(false);
+        // progressOverlay.setVisible(false);
     }
 
     /**
@@ -388,7 +385,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         final String uploadUrl;
         if (uri == null) {
             uploadUrl = "";
-        } else if (!UriUtils.isSafeUri(uri.trim()))  {
+        } else if (!UriUtils.isSafeUri(uri.trim())) {
             logger.warning("Upload url is not valid: " + uri + ". Ignore upload url.");
             uploadUrl = "";
         } else {
@@ -409,7 +406,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         } else {
             url = uploadUrl;
         }
-        
+
         if (!url.isEmpty()) {
             final String mimeTypeName = mimeTypeListBox.getSelectedValue();
             final MimeType mimeType;
@@ -427,12 +424,12 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 logger.warning("No image nor video detected. Nothing will be saved.");
                 Notification.notify(i18n.noImageOrVideoDetected(), NotificationType.WARNING);
             }
-            
+
         } else {
             Notification.notify(i18n.invalidURL(), NotificationType.ERROR);
         }
     }
-    
+
     private ImageDTO createImage(String url) {
         final ImageDTO image = new ImageDTO(url, new Date());
         image.setTitle(titleTextBox.getValue());
@@ -440,10 +437,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         image.setCopyright(copyrightTextBox.getValue());
         Iterable<String> defaultTags = Collections.singletonList(MediaTagConstants.GALLERY.getName());
         image.setTags(defaultTags);
-        logger.info("Image ready: " + image);
         return image;
     }
-    
+
     private VideoDTO createVideo(String url, String thumbnailUrl, MimeType mimeType) {
         final VideoDTO video = new VideoDTO(url, mimeType, new Date());
         video.setTitle(titleTextBox.getValue());
@@ -452,10 +448,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         video.setThumbnailRef(thumbnailUrl);
         Iterable<String> defaultTags = Collections.singletonList(MediaTagConstants.GALLERY.getName());
         video.setTags(defaultTags);
-        logger.info("video created. " + url + ", " + mimeType);
         return video;
     }
-    
+
     private void cleanupTempFileUpload() {
         if (uri != null) {
             String url = DELETE_URL + uri;
@@ -485,7 +480,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                     } else if (EMPTY_MESSAGE.equals(message)) {
                         // No further message from service. Probably the file is not existing any more.
                         Notification.notify(i18n.error(), NotificationType.ERROR);
-                        logger.log(Level.SEVERE, "Cleanup file failed. " + status + ": File with URI could not be removed. URI: " + uri);
+                        logger.log(Level.SEVERE,
+                                "Cleanup file failed. " + status + ": File with URI could not be removed. URI: " + uri);
                     } else {
                         Notification.notify(i18n.fileUploadResult(status, message), NotificationType.ERROR);
                         logger.log(Level.SEVERE, "Cleanup file failed. Status: " + status + ", message: " + message);
@@ -495,7 +491,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 @Override
                 public void onError(Request request, Throwable exception) {
                     Notification.notify(i18n.error(), NotificationType.ERROR);
-                    logger.log(Level.SEVERE, "Cleanup file failed. Callback returned with error: " + exception.getMessage(), exception);
+                    logger.log(Level.SEVERE,
+                            "Cleanup file failed. Callback returned with error: " + exception.getMessage(), exception);
                 }
             });
             try {
@@ -518,25 +515,25 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
         return JSONParser.parseStrict(jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
     }
-    
+
     private void updateUri(String uri, String fileName) {
         this.uri = uri;
         if (uri == null) {
             fileExistingPanel.setVisible(true);
             saveButton.setEnabled(false);
-            //fileNameInput.setEnabled(false);
+            // fileNameInput.setEnabled(false);
             urlInput.setEnabled(true);
         } else {
             fileExistingPanel.setVisible(false);
             saveButton.setEnabled(true);
-            //fileNameInput.setEnabled(true);
+            // fileNameInput.setEnabled(true);
             urlInput.setEnabled(false);
             selectMimeTypeInBox(getMimeType(uri));
         }
         updateFileName(fileName);
         checkSaveButton();
     }
-    
+
     abstract protected void updateFileName(String fileName);
 
     private void checkSaveButton() {

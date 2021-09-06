@@ -535,7 +535,6 @@ public class RaceBoardPanel
                         });
             }
         };
-        
         mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingComponent,
                 mediaPlayerManagerComponent, componentsForSideBySideViewer, stringMessages, userService,
                 editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel, asyncFetcher);
@@ -619,7 +618,7 @@ public class RaceBoardPanel
     }
 
     private void setComponentVisible(SideBySideComponentViewer componentViewer, Component<?> component, boolean visible) {
-        component.setVisible(visible);      
+        component.setVisible(visible);
         componentViewer.forceLayout();
     }
     

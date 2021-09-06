@@ -18,7 +18,7 @@ public interface RaceMapResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/wind_combined.png")
     ImageResource combinedWindIcon();
-    
+
     @Source("com/sap/sailing/gwt/ui/client/images/true_north_indicator.png")
     ImageResource trueNorthIndicatorIcon();
 
@@ -30,14 +30,14 @@ public interface RaceMapResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/maneuver_green.png")
     ImageResource maneuverMarkerGreen();
-    
+
     @Source("com/sap/sailing/gwt/ui/client/images/windfinder-logo.svg")
     TextResource getWindFinderLogo();
 
     @Source("com/sap/sailing/gwt/ui/client/images/uploadVideoButton.png")
     @MimeType("image/png")
     DataResource uploadVideoIcon();
-    
+
     @Source("com/sap/sailing/gwt/ui/client/images/compass.png")
     @MimeType("image/png")
     DataResource compass();
@@ -65,7 +65,7 @@ public interface RaceMapResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/home/shared/exitFullscreen.svg")
     @MimeType("image/svg+xml")
     DataResource exitFullScreen();
-    
+
     @Source("RaceMap.css")
     RaceMapStyle raceMapStyle();
 }

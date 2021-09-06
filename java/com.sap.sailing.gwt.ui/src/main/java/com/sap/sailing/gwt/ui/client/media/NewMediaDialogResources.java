@@ -21,25 +21,25 @@ public interface NewMediaDialogResources extends ClientBundle {
 
         @ClassName("field-group")
         String fieldGroup();
-        
+
         @ClassName("resetButton")
         String resetButtonClass();
-        
+
         @ClassName("nameBox")
         String nameBoxClass();
-        
+
         @ClassName("resetNameButton")
         String resetNameButtonClass();
-        
+
         @ClassName("startTime-textbox")
         String startTimeTextboxClass();
-        
+
         @ClassName("progress-overlay")
         String progressOverlay();
-        
+
         @ClassName("progress-spinner")
         String progressSpinner();
-        
+
         @ClassName("progress-counter")
         String progressCounter();
     }

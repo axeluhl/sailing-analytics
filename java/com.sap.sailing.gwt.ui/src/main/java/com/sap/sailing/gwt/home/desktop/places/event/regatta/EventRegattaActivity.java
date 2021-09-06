@@ -59,12 +59,12 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         }
         initNavigationPath(navigationPathDisplay);
     }
-    
+
     @Override
     public com.google.web.bindery.event.shared.EventBus getEventBus() {
         return clientFactory.getEventBus();
     }
-    
+
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
         final List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
         if (showRegattaMetadata()) {

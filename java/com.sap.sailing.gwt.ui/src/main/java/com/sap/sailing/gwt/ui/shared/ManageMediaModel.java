@@ -178,7 +178,6 @@ public class ManageMediaModel {
         } else {
             hasPermission = false;
         }
-        logger.info("Check permission: " + hasPermission);
         return hasPermission;
     }
 
@@ -192,7 +191,6 @@ public class ManageMediaModel {
         } else {
             hasPermission = false;
         }
-        logger.info("Check permission: " + hasPermission);
         return hasPermission;
     }
 

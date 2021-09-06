@@ -57,7 +57,6 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     public void toggle() {
         RaceMapSettings oldRaceMapSettings = map.getSettings();
         boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
-
         final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
                 oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(),
                 oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,

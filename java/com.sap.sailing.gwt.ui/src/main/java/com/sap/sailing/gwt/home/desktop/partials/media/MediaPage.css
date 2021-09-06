@@ -79,15 +79,19 @@
     margin-left: 15px;
     border: 1px solid #dedede;
 }
+
 .manageMedia:after {
     background-image: resourceUrl("editBlack");
 }
+
 .manageMedia.active, .manageMedia.active:focus {
     background-color: #008fcc;
 }
+
 .manageMedia.active:after {
     background-image: resourceUrl("editWhite");
 }
+
 .manageMedia:hover {
     background-color: #d79900;
 }

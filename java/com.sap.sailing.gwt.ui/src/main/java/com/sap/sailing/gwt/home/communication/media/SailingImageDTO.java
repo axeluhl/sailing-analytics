@@ -18,7 +18,7 @@ public class SailingImageDTO extends ImageDTO {
         super(imageRef, createdAtDate);
         this.eventLink = eventLink;
     }
-    
+
     public SailingImageDTO(EventLinkDTO eventLink, ImageDTO imageDto) {
         super(imageDto.getSourceRef(), imageDto.getCreatedAtDate());
         setCopyright(imageDto.getCopyright());

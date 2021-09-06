@@ -961,7 +961,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final VerticalPanel sharingAndVideoPanel = new VerticalPanel();
         sharingAndVideoPanel.add(advancedFunctionsButton);
         sharingAndVideoPanel.add(createExitFullScreenButton());
-        //sharingAndVideoPanel.addStyleName(raceMapStyle.underHeaderPosition());
         map.setControls(ControlPosition.RIGHT_TOP, sharingAndVideoPanel);
         
         final HorizontalPanel popupContent = new HorizontalPanel();
@@ -970,7 +969,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         popupContent.add(createZoomInButton());
         popupContent.add(createFullScreenButton());
         popupContent.add(trueNorthIndicatorButtonButtonGroup);
-        //popupContent.add(createTagsButton());
         // add-video button
         if (shareLinkAction != null) {
             final Button shareLinkButton = createShareLinkButton();
@@ -999,7 +997,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             });
             popupContent.add(settingsButton);
         }
-        
         advancedFunctionsPopup.addStyleName(raceMapStyle.advancedFunctionsPopup());
         advancedFunctionsPopup.setAnimationEnabled(true);
         advancedFunctionsPopup.setAnimationType(AnimationType.ROLL_DOWN);
@@ -1007,7 +1004,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         advancedFunctionsPopup.setModal(false);
         advancedFunctionsPopup.setAutoHideEnabled(true);
         advancedFunctionsPopup.addAutoHidePartner(advancedFunctionsButton.getElement());
-
         advancedFunctionsButton.setStylePrimaryName(raceMapStyle.moreOptionsButton());
         advancedFunctionsButton.setTitle(stringMessages.moreOptions());
         advancedFunctionsButton.ensureDebugId("moreOptionsButton");
@@ -1029,7 +1025,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     private void showAdvancedFunctionsPopup() {
-        //advancedFunctionsPopup.showRelativeTo(advancedFunctionsButton);
         advancedFunctionsPopup.setPopupPositionAndShow(new PositionCallback() {
             @Override
             public void setPosition(int offsetWidth, int offsetHeight) {
@@ -1117,7 +1112,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         return settingsButton;
     }
-    
+
     private Button createShareLinkButton() {
         Button shareLinkButton = new Button();
         shareLinkButton.setStyleName(floatingSharingButtonsResources.css().sharing_item());
@@ -1133,7 +1128,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         return shareLinkButton;
     }
-    
+
     private Button createAddVideoToRaceButton() {
         Button addVideoButton = new Button();
         addVideoButton.setStylePrimaryName(raceMapStyle.raceMapVideoUploadButton());
@@ -1142,7 +1137,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         addVideoButton.setVisible(false);
         return addVideoButton;
     }
-    
+
     private Button createZoomInButton() {
         Button zoomInButton = new Button();
         zoomInButton.setStylePrimaryName(raceMapStyle.zoomInButton());
@@ -1156,7 +1151,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         return zoomInButton;
     }
-    
+
     private Button createFullScreenButton() {
         Button fullScreenButton = new Button();
         fullScreenButton.setStylePrimaryName(raceMapStyle.fullScreenButton());
@@ -1173,7 +1168,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         return fullScreenButton;
     }
-    
+
     private Button createExitFullScreenButton() {
         Button exitFullScreenButton = new Button();
         exitFullScreenButton.setStylePrimaryName(raceMapStyle.exitFullScreenButton());
@@ -1188,13 +1183,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         return exitFullScreenButton;
     }
-    
+
     private Button createTrueNorthIndicatorButton() {
         Button trueNorthIndicatorButton = new Button();
         trueNorthIndicatorButton.setStylePrimaryName(raceMapStyle.trueNorthIndicatorButton());
         trueNorthIndicatorButton.setTitle(stringMessages.clickToToggleWindUp());
         trueNorthIndicatorButton.ensureDebugId("trueNorthIndicatorButton");
-        
         trueNorthIndicatorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -1204,7 +1198,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         return trueNorthIndicatorButton;
     }
-    
+
     private Button createZoomOutButton() {
         Button zoomOutButton = new Button();
         zoomOutButton.setStylePrimaryName(raceMapStyle.zoomOutButton());
@@ -3348,7 +3342,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
-
         switch (displayMode) {
         case DEFAULT:
             options.setColorMode(ColorlineMode.MONOCHROMATIC);
@@ -3375,7 +3368,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
             break;
         }
-
         options.setZIndex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
         return options;
     }

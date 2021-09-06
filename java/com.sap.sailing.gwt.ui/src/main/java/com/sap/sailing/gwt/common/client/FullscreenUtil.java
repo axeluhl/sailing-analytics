@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.common.client;
 
 /**
  * A utility class to set the browser to fullscreen mode
+ * 
  * @author c5163874 (Frank)
  *
  */
@@ -22,7 +23,7 @@ public class FullscreenUtil {
     public static boolean isFullscreenSupported() {
         return nativeIsFullscreenSupported();
     };
-    
+
     private static native void nativeRequestFullScreen() /*-{
         var element = $doc.documentElement;
         if (element.requestFullscreen) {
@@ -35,7 +36,7 @@ public class FullscreenUtil {
             element.msRequestFullscreen();
         }
     }-*/;
-    
+
     private static native void nativeRequestFullScreenToggle(String elementId) /*-{
         var element = $doc.getElementById(elementId);
         if (window.matchMedia('(display-mode: fullscreen)').matches) {
@@ -73,7 +74,7 @@ public class FullscreenUtil {
                     $doc.webkitCancelFullScreen();
             }
     }-*/;
-    
+
     private static native boolean nativeIsFullscreenSupported() /*-{
         var supported;
         var element = $doc.documentElement;

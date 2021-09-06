@@ -32,7 +32,7 @@ public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplica
     public EventActivityProxy(AbstractEventPlace place, MobileApplicationClientFactory clientFactory, EventBus eventBus) {
         super(clientFactory, place);
     }
-    
+
     @Override
     protected void afterEventLoad(final MobileApplicationClientFactory clientFactory, final EventViewDTO event,
             final AbstractEventPlace place) {
@@ -53,7 +53,7 @@ public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplica
                     super.onSuccess(new MediaActivity(place, event, getNavigationPathDisplay(), clientFactory));
                 }
             }
-            
+
             private void withFlagImageResolver(final Function<FlagImageResolver, Activity> activityFactory) {
                 final Consumer<Activity> onSuccess = super::onSuccess;
                 final Consumer<Throwable> onFailure = super::onFailure;

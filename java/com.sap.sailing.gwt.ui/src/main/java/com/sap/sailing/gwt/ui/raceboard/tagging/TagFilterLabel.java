@@ -27,7 +27,6 @@ public class TagFilterLabel extends Label {
     public TagFilterLabel(TaggingComponent taggingComponent, StringMessages stringMessages) {
         this.taggingComponent = taggingComponent;
         this.stringMessages = stringMessages;
-
         addStyleName(style.tagFilterCurrentSelection());
         update(taggingComponent.getTagListProvider().getTagFilterSet());
         taggingComponent.getTagListProvider().addObserveringLabel(this);

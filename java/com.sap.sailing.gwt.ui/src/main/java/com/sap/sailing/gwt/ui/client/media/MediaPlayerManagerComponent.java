@@ -471,7 +471,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             return null;
         }
     }
-    
+
     private TimePoint getTrackingEndTime() {
         Date endOfTracking = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).endOfTracking;
         if (endOfTracking != null) {
@@ -480,7 +480,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             return null;
         }
     }
-    
+
     private TimePoint getCurrentCursorTime() {
         Date raceTimerTime = raceTimer.getTime();
         if (raceTimerTime != null) {
@@ -557,35 +557,31 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             defaultStartTime = getTrackingStartTime();
         }
         NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
-                MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
-                storageServiceAvailable, new DialogCallback<MediaTrack>() {
-
+                MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(), storageServiceAvailable,
+                new DialogCallback<MediaTrack>() {
                     @Override
                     public void cancel() {
                         // no op
                     }
-
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
                         MediaPlayerManagerComponent.this.mediaServiceWrite.addMediaTrack(mediaTrack,
                                 new AsyncCallback<MediaTrackWithSecurityDTO>() {
-
-                                @Override
-                                public void onFailure(Throwable t) {
-                                    errorReporter.reportError(t.toString());
-                                }
-
-                                @Override
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        errorReporter.reportError(t.toString());
+                                    }
+                                    @Override
                                     public void onSuccess(MediaTrackWithSecurityDTO mediaTrack) {
-                                    assignedMediaTracks.add(mediaTrack);
+                                        assignedMediaTracks.add(mediaTrack);
                                         if (!DeviceDetector.isMobile()) {
                                             playFloatingVideo(mediaTrack);
                                         }
-                                    Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
-                                    notifyStateChange();
-                                }
-                        });
-
+                                        Notification.notify(stringMessages.uploadSuccessful(),
+                                                NotificationType.SUCCESS);
+                                        notifyStateChange();
+                                    }
+                                });
                     }
                 });
         dialog.show();

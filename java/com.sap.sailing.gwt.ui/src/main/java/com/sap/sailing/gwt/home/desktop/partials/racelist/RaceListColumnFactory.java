@@ -63,8 +63,9 @@ public class RaceListColumnFactory {
         SafeHtml windDirection(SafeStyles rotation, SafeUri imageUrl);
 
         @SafeHtmlTemplates.Template("<div style='{2}'></div><span class=\"{0}\">{3}</span><div class=\"{1}\" title=\"{4}\">{4}</div>")
-        SafeHtml winner(String styleNamesSailId, String styleNamesText, SafeStyles safeStyles, String sailId, String name);
-        
+        SafeHtml winner(String styleNamesSailId, String styleNamesText, SafeStyles safeStyles, String sailId,
+                String name);
+
         @Template("<img src=\"{1}\" class=\"{0}\" />")
         SafeHtml imageHeader(String styleNames, SafeUri imageURL);
     }
@@ -91,7 +92,7 @@ public class RaceListColumnFactory {
             }
         };
     }
-    
+
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getRegattaNameColumn() {
         Cell<String> cell = new TextCell();
         RaceListColumnComparator<T, String> comparator = new RaceListColumnComparator<T, String>() {
@@ -105,12 +106,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-
             @Override
             public String getColumnStyle() {
                 return getStyleNamesString(CSS.race_item(), CSS.race_itemname());
             }
-
             @Override
             public String getValue(T object) {
                 return object.getRegattaDisplayName();
@@ -126,12 +125,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-            
             @Override
             public String getColumnStyle() {
                 return getStyleNamesString(CSS.race_item(), CSS.race_itemname());
             }
-            
             @Override
             public String getValue(T object) {
                 return object.getRaceName();
@@ -152,12 +149,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-            
             @Override
             public String getColumnStyle() {
                 return CSS.race_item();
             }
-            
             @Override
             public String getValue(T object) {
                 return object.getFleet() != null ? object.getFleet().getFleetName() : null;
@@ -167,7 +162,6 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListStartTimeColumn<T> getStartTimeColumn() {
         RaceListColumnComparator<T, Date> comparator = new RaceListColumnComparator<T, Date>() {
-
             @Override
             public Date getValue(T object) {
                 return object.getStart();
@@ -179,7 +173,6 @@ public class RaceListColumnFactory {
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, String> getDurationColumn() {
         Cell<String> cell = new TextCell();
         RaceListColumnComparator<T, Duration> comparator = new RaceListColumnComparator<T, Duration>() {
-
             @Override
             public Duration getValue(T object) {
                 return object.getDuration();
@@ -190,12 +183,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-            
             @Override
             public String getColumnStyle() {
                 return CSS.race_item();
             }
-            
             @Override
             public String getValue(T object) {
                 return object.getDuration() != null ? DateAndTimeFormatterUtil.formatElapsedTime(object.getDuration().asMillis()) : null;
@@ -218,12 +209,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-
             @Override
             public String getColumnStyle() {
                 return getStyleNamesString(CSS.race_item(), CSS.racesListIcon());
             }
-
             @Override
             public FlagStateDTO getValue(T object) {
                 return object.getFlagState();
@@ -292,12 +281,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-
             @Override
             public String getColumnStyle() {
                 return getStyleNamesString(CSS.race_item(), CSS.racesListIcon());
             }
-
             @Override
             public AbstractWindDTO getValue(T object) {
                 return object.getWind();
@@ -318,12 +305,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-            
             @Override
             public String getColumnStyle() {
                 return CSS.race_item();
             }
-            
             @Override
             public String getValue(T object) {
                 return object.getCourseArea();
@@ -344,12 +329,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-            
             @Override
             public String getColumnStyle() {
                 return CSS.race_item();
             }
-            
             @Override
             public String getValue(T object) {
                 return object.getCourse();
@@ -432,12 +415,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-            
             @Override
             public String getColumnStyle() {
                 return CSS.race_item();
             }
-            
             @Override
             public T getValue(T object) {
                 return object;
@@ -473,12 +454,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
             }
-            
             @Override
             public String getColumnStyle() {
                 return getStyleNamesString(CSS.race_item(), CSS.race_itemwinner());
             }
-            
             @Override
             public SimpleCompetitorDTO getValue(T object) {
                 return object.getWinner();
@@ -505,12 +484,10 @@ public class RaceListColumnFactory {
             public String getHeaderStyle() {
                 return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());
             }
-            
             @Override
             public String getColumnStyle() {
                 return getStyleNamesString(CSS.race_item(), CSS.race_itemright());
             }
-            
             @Override
             public T getValue(T object) {
                 return object;
@@ -570,7 +547,7 @@ public class RaceListColumnFactory {
         public String getHeaderStyle() {
             return CSS.raceslist_head_item();
         }
-        
+
         @Override
         public String getColumnStyle() {
             return CSS.race_item();

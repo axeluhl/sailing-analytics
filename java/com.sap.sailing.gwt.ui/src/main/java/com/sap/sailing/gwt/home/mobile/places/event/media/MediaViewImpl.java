@@ -27,19 +27,23 @@ import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.client.UserService;
 
 public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implements MediaView {
-    
+
     private Logger logger = Logger.getLogger(getClass().getName());
-    
+
     private static MediaViewImplUiBinder uiBinder = GWT.create(MediaViewImplUiBinder.class);
-    
+
     interface MediaViewImplUiBinder extends UiBinder<Widget, MediaViewImpl> {
     }
-    
-    @UiField Label noContentInfoUi;
-    @UiField VideoGallery videoGalleryUi;
-    @UiField ImageGallery imageGalleryUi;
-    @UiField Button addMediaButtonUi;
-    
+
+    @UiField
+    Label noContentInfoUi;
+    @UiField
+    VideoGallery videoGalleryUi;
+    @UiField
+    ImageGallery imageGalleryUi;
+    @UiField
+    Button addMediaButtonUi;
+
     private MobileMediaUploadPopup mobileMediaUploadPopup;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
@@ -50,55 +54,49 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         this.sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         this.userService = presenter.getUserService();
         final StringMessages stringMessages = StringMessages.INSTANCE;
-        this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, presenter.getEventDTO(), stringMessages);
+        this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, presenter.getEventDTO(),
+                stringMessages);
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
         MediaPageResources.INSTANCE.css().ensureInjected();
-        mobileMediaUploadPopup = new MobileMediaUploadPopup(
-                video -> {
-                    manageMediaModel.addVideo(video, eventDto -> updateMedia());
-                },
-                image -> {
-                    manageMediaModel.addImage(image, eventDto -> updateMedia());
-                });
+        mobileMediaUploadPopup = new MobileMediaUploadPopup(video -> {
+            manageMediaModel.addVideo(video, eventDto -> updateMedia());
+        }, image -> {
+            manageMediaModel.addImage(image, eventDto -> updateMedia());
+        });
         addMediaButtonUi.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 mobileMediaUploadPopup.show();
                 mobileMediaUploadPopup.openFileUpload();
             }
         });
-        presenter.getEventBus().addHandler(AuthenticationContextEvent.TYPE, event->{
+        presenter.getEventBus().addHandler(AuthenticationContextEvent.TYPE, event -> {
             logger.info("Sign out");
             // for some reason this event is only send after logout. Never the less it will also handle login.
             setMediaManaged(manageMediaModel.hasPermissions());
         });
     }
-    
+
     @Override
     public void setMedia(MediaDTO media) {
         manageMediaModel.setMedia(media);
         updateMedia();
     }
-    
+
     public void updateMedia() {
         setMediaManaged(manageMediaModel.hasPermissions());
         Collection<ImageDTO> images = manageMediaModel.getImages();
         Collection<VideoDTO> videos = manageMediaModel.getVideos();
-        
         noContentInfoUi.setVisible(videos.isEmpty() && images.isEmpty());
-        videoGalleryUi.setVideos(videos,
-                video -> deleteVideo(video));
+        videoGalleryUi.setVideos(videos, video -> deleteVideo(video));
         videoGalleryUi.setVisible(!videos.isEmpty());
-        imageGalleryUi.setImages(images, 
-                image -> deleteImage(image));
+        imageGalleryUi.setImages(images, image -> deleteImage(image));
         imageGalleryUi.setVisible(!images.isEmpty());
-
         imageGalleryUi.setMediaManaged(false);
         videoGalleryUi.setMediaManaged(false);
     }
-    
+
     private void setMediaManaged(boolean managed) {
         logger.info("Set manage media to: " + managed);
         addMediaButtonUi.setVisible(managed);
@@ -109,11 +107,11 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
             imageGalleryUi.setMediaManaged(managed);
         }
     }
-    
+
     private void deleteImage(ImageDTO imageDto) {
         manageMediaModel.deleteImage(imageDto, eventDto -> updateMedia());
     }
-    
+
     private void deleteVideo(VideoDTO videoDto) {
         manageMediaModel.deleteVideo(videoDto, eventDto -> updateMedia());
     }

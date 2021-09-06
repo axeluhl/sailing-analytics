@@ -13,19 +13,15 @@ public interface MediaPageResources extends SharedDesktopResources {
     public interface LocalCss extends CssResource {
         String media();
         String dark();
-
         String photolist();
         String imggalleryitem();
-        
         String media_settings();
         String thumbnail_edit_button();
         String thumbnail_delete_button();
-        
         String active();
         String button();
         String manageMedia();
         String addButton();
-        
         String popup();
     }
 }

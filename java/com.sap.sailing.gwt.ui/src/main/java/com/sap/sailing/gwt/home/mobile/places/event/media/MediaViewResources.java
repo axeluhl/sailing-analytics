@@ -9,13 +9,17 @@ public interface MediaViewResources extends SharedHomeResources {
 
     @Source("MediaViewImpl.gss")
     LocalCss css();
-    
+
     public interface LocalCss extends CssResource {
         String popup();
+
         String button();
+
         String addButton();
+
         String deleteButton();
+
         String editButton();
     }
-    
+
 }

@@ -13,7 +13,6 @@
         type="com.sap.sailing.gwt.home.mobile.places.event.media.MediaViewResources" />
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGalleryResources" />
-        
     <g:HTMLPanel>
         <div  style="position: relative;">
             <div class="{local_res.css.imagegallery_column_item}"

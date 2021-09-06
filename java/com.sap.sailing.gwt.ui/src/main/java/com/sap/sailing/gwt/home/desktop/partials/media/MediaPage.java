@@ -41,7 +41,7 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class MediaPage extends Composite {
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
-    
+
     private final ManageMediaModel manageMediaModel;
 
     interface MediaPageUiBinder extends UiBinder<Widget, MediaPage> {
@@ -75,7 +75,7 @@ public class MediaPage extends Composite {
     Button photoSettingsButton;
     @UiField
     Button mediaAddButton;
-    
+
     private final SimplePanel contentPanel;
     private final FlowPanel popupHolder;
     private final StringMessages stringMessages;
@@ -88,7 +88,7 @@ public class MediaPage extends Composite {
         manageVideos = !manageVideos;
         setVideosManaged(manageVideos);
     }
-    
+
     private void setVideosManaged(boolean managed) {
         if (videoSettingsButton != null) {
             if (managed) {
@@ -113,7 +113,7 @@ public class MediaPage extends Composite {
         managePhotos = !managePhotos;
         setPhotosManaged(managePhotos);
     }
-    
+
     private void setPhotosManaged(boolean managed) {
         if (photoSettingsButton != null) {
             if (managed) {
@@ -143,7 +143,7 @@ public class MediaPage extends Composite {
         popupHolder.add(popup);
         popup.center();
     }
-    
+
     public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, EventViewDTO eventViewDto) {
         MediaPageResources.INSTANCE.css().ensureInjected();
         stringMessages = StringMessages.INSTANCE;
@@ -153,17 +153,17 @@ public class MediaPage extends Composite {
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
         popupHolder = new FlowPanel();
-        eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, event -> {
             // for some reason this event is only send after logout. Never the less it will also handle login.
             setMediaManaged(manageMediaModel.hasPermissions());
         });
     }
-    
+
     public void setMedia(final MediaDTO media) {
         manageMediaModel.setMedia(media);
         updateMedia();
     }
-    
+
     private void updateMedia() {
         contentPanel.setWidget(uiBinder.createAndBindUi(this));
         setMediaManaged(manageMediaModel.hasPermissions());
@@ -195,7 +195,6 @@ public class MediaPage extends Composite {
                 photoCss = res.mediaCss().medium3();
                 break;
             }
-
             for (final ImageDTO holder : manageMediaModel.getImages()) {
                 if (holder.getSourceRef() != null) {
                     GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder));
@@ -206,15 +205,16 @@ public class MediaPage extends Composite {
                         @Override
                         public void onClick(ClickEvent event) {
                             if (!managePhotos) {
-                                Collection<SailingImageDTO> sailingImageDTOs = manageMediaModel.getImages().stream().map(imageDto -> {
-                                    if (imageDto instanceof SailingImageDTO) {
-                                        return (SailingImageDTO) imageDto;
-                                    }
-                                   return new SailingImageDTO(null, imageDto);
-                                }).collect(Collectors.toList());
+                                Collection<SailingImageDTO> sailingImageDTOs = manageMediaModel.getImages().stream()
+                                        .map(imageDto -> {
+                                            if (imageDto instanceof SailingImageDTO) {
+                                                return (SailingImageDTO) imageDto;
+                                            }
+                                            return new SailingImageDTO(null, imageDto);
+                                        }).collect(Collectors.toList());
                                 final SailingImageDTO showImage = sailingImageDTOs.stream()
-                                        .filter(sailingImageDto -> sailingImageDto.compareTo(holder) == 0)
-                                        .findFirst().orElse(new SailingImageDTO(null, holder));
+                                        .filter(sailingImageDto -> sailingImageDto.compareTo(holder) == 0).findFirst()
+                                        .orElse(new SailingImageDTO(null, holder));
                                 new SailingFullscreenViewer().show(showImage, sailingImageDTOs);
                             }
                         }
@@ -232,7 +232,8 @@ public class MediaPage extends Composite {
                     first = false;
                 }
                 if (videoCount > 0) {
-                    VideoThumbnail thumbnail = new VideoThumbnail(videoCandidateInfo, getDeleteVideoHandler(videoCandidateInfo), null);
+                    VideoThumbnail thumbnail = new VideoThumbnail(videoCandidateInfo,
+                            getDeleteVideoHandler(videoCandidateInfo), null);
                     thumbnail.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
@@ -247,7 +248,7 @@ public class MediaPage extends Composite {
         }
         if (photosCount == 0 && videoCount == 0) {
             noContent.getStyle().setDisplay(Display.BLOCK);
-        } 
+        }
         if (photosCount > 0) {
             photoSectionUi.getStyle().setDisplay(Display.BLOCK);
         }
@@ -255,7 +256,7 @@ public class MediaPage extends Composite {
             videoSectionUi.getStyle().setDisplay(Display.BLOCK);
         }
     }
-    
+
     private void updateVideoDisplay() {
         final int videoCount = manageMediaModel.getVideos().size();
         videoListOuterBoxUi.removeClassName(res.mediaCss().large3());
@@ -270,20 +271,18 @@ public class MediaPage extends Composite {
             videoListOuterBoxUi.addClassName(res.mediaCss().large3());
         }
     }
-    
+
     private ClickHandler getDeleteVideoHandler(VideoDTO videoCandidateInfo) {
         return new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 if (Window.confirm(stringMessages.confirmDeleteVideo())) {
                     manageMediaModel.deleteVideo(videoCandidateInfo, eventDto -> updateMedia());
-                    
                 }
             }
         };
     }
-    
+
     private ClickHandler getDeleteImageHandler(ImageDTO imageCandidateInfo) {
         return new ClickHandler() {
             @Override
@@ -299,15 +298,17 @@ public class MediaPage extends Composite {
     /**
      * Shows a selected video in the big viewer.
      * 
-     * @param video the video to show in the big viewer
-     * @param autoplay true, if the video should play automatically, false otherwise
+     * @param video
+     *            the video to show in the big viewer
+     * @param autoplay
+     *            true, if the video should play automatically, false otherwise
      */
     private void putVideoOnDisplay(final VideoDTO video, boolean autoplay) {
         videoDisplayUi = new VideoWithLowerThird(true, autoplay);
         videoDisplayUi.setVideo(video);
         videoDisplayHolderUi.setWidget(videoDisplayUi);
     }
-    
+
     private void setMediaManaged(boolean managed) {
         if (mediaAddButton != null) {
             mediaAddButton.setVisible(managed);

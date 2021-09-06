@@ -76,8 +76,8 @@ public class TaggingComponent extends ComponentWithoutSettings
      * Describes the {@link TaggingComponent#currentState current state} of the {@link TaggingComponent}.
      */
     protected enum State {
-            VIEW, // default
-            CREATE_TAG, EDIT_TAG
+        VIEW, // default
+        CREATE_TAG, EDIT_TAG
     }
 
     private static final int FOOTERPANEL_ANIMATION_PERIOD_MS = 500;
@@ -600,7 +600,6 @@ public class TaggingComponent extends ComponentWithoutSettings
                         public void onFailure(Throwable caught) {
                             GWT.log(caught.getMessage());
                         }
-
                         @Override
                         public void onSuccess(List<TagDTO> result) {
                             tagListProvider.removePrivateTags();
@@ -939,5 +938,4 @@ public class TaggingComponent extends ComponentWithoutSettings
     public String getDependentCssClassName() {
         return "tags";
     }
-
 }

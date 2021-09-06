@@ -315,7 +315,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         refreshMarkUi();
-        
     }
 
     private void refreshMarkUi() {

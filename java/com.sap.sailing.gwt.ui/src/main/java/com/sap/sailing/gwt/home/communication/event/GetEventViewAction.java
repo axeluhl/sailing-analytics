@@ -117,7 +117,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                         .getEventAndLeaderboardReferencesForSeriesOrdered(singleLeaderboardGroup,
                                 context.getRacingEventService());
                 Collections.reverse(eventAndLeaderboardReferencesForSeriesOrdered);
-
                 dto.setSeriesData(new SeriesReferenceWithEventsDTO(
                         HomeServiceUtil.getLeaderboardDisplayName(singleLeaderboardGroup),
                         singleLeaderboardGroup.getId(), eventAndLeaderboardReferencesForSeriesOrdered));
@@ -127,9 +126,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos().stream()
                 .map(TrackingConnectorInfoDTO::new).collect(Collectors.toSet());
         dto.setTrackingConnectorInfos(trackingConnectorInfos);
-
         SecurityDTOUtil.addSecurityInformation(context.getSecurityService(), dto);
-        
         return dto;
     }
 

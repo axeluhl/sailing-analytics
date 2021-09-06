@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Anchor;
@@ -43,19 +44,20 @@ public class GalleryImageHolder extends Composite implements HasClickHandlers {
         this.imageSourceRef = image.getSourceRef();
         this.imageCreateAt = image.getCreatedAtDate();
         deleteAnchor.addClickHandler(deleteHandler);
-        imageHolderUi.getStyle().setBackgroundImage("url(\"" + image.getSourceRef() + "\")");
-        
+        imageHolderUi.getStyle()
+                .setBackgroundImage("url(\"" + UriUtils.fromString(image.getSourceRef()).asString() + "\")");
     }
-    
+
     public boolean isImage(ImageDTO image) {
-        return image != null && image.getSourceRef().equals(imageSourceRef) && image.getCreatedAtDate().equals(imageCreateAt);
+        return image != null && image.getSourceRef().equals(imageSourceRef)
+                && image.getCreatedAtDate().equals(imageCreateAt);
     }
 
     @Override
     public HandlerRegistration addClickHandler(ClickHandler handler) {
         return addDomHandler(handler, ClickEvent.getType());
     }
-    
+
     public void setManageable(boolean manageable) {
         if (manageable) {
             overlay.getStyle().setDisplay(Display.BLOCK);

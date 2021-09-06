@@ -36,7 +36,7 @@ public class SectionHeaderContent extends Composite {
     protected static final String ACCORDION_COLLAPSED_STYLE = SectionHeaderResources.INSTANCE.css().collapsed();
     protected static final String ACTIVE_STYLE = SectionHeaderResources.INSTANCE.css().active();
     protected static final String HIDE_ICON_STYLE = SectionHeaderResources.INSTANCE.css().hideIcon();
-    
+
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     interface MyBinder extends UiBinder<Widget, SectionHeaderContent> {
@@ -195,16 +195,16 @@ public class SectionHeaderContent extends Composite {
     public boolean isExpanded() {
         return expanded;
     }
-    
+
     public void addManageButtonClickHandler(ClickHandler handler) {
         manageButtonUi.addClickHandler(handler);
         manageButtonUi.setVisible(false);
     }
-    
+
     public void setManageButtonVisible(boolean visible) {
         manageButtonUi.setVisible(visible);
     }
-    
+
     public void setManageButtonActive(boolean active) {
         if (active) {
             manageButtonUi.addStyleName(ACTIVE_STYLE);

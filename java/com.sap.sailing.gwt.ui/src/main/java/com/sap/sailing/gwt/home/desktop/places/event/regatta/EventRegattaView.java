@@ -14,11 +14,11 @@ public interface EventRegattaView extends EventView<AbstractEventRegattaPlace, E
     public interface Presenter extends EventView.Presenter {
 
         PlaceNavigation<RegattaOverviewPlace> getCurrentRegattaOverviewNavigation();
-        
+
         Timer getAutoRefreshTimer();
-        
+
         UserService getUserService();
-        
+
         void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,
                 AsyncCallback<Iterable<DetailType>> asyncCallback);
     }

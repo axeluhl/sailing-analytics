@@ -179,7 +179,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             public void onClick(ClickEvent event) {
                 mediaTrack.title = "";
                 nameBox.setValue("");
-                //refreshUI(); // Force UI update
                 validateAndUpdate();
             }
         });
@@ -226,7 +225,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         });
         storageServiceConnection.registerObserver(this);
     }
-    
+
     @Override
     protected void validateAndUpdate() {
         super.validateAndUpdate();
@@ -245,7 +244,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     protected void connectMediaWithRace() {
         mediaTrack.assignedRaces = assignedRaces;
     }
-    
+
     private void updateBoxByMimeType() {
         if (mimeTypeListBox != null) {
             for (int i = 0; i < mimeTypeListBox.getItemCount(); i++) {
@@ -478,7 +477,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                         t.cancel();
                     }
                 }
-
                 @Override
                 public void onError(Request request, Throwable exception) {
                     logger.log(Level.SEVERE, "Error occured while requesting upload status. (1)", exception);
@@ -539,8 +537,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         super.show();
         refreshPopupPosition();
     }
-    
-    
+
     private void refreshPopupPosition() {
         if (!DeviceDetector.isDesktop()) {
             final DialogBox popup = super.getDialogBox();
@@ -569,7 +566,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 remoteMp4WasFinished = true;
                 mp4MetadataResult(result);
             }
-
             @Override
             public void onFailure(Throwable caught) {
                 busyIndicator.setBusy(false);
@@ -680,7 +676,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     protected FocusWidget getInitialFocusWidget() {
         return urlBox.getInitialFocusWidget();
     }
-    
+
     public void openFileChooserDialog() {
         this.urlBox.fireClickToFileUploadField();
     }
