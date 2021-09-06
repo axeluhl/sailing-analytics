@@ -325,6 +325,8 @@ public class Header extends Composite implements HeaderConstants {
             logoAnchor.setHref("");
             logoAnchor.setTitle(StringMessages.INSTANCE.sapSailingAnalytics());
             menuItemVisibilityHandler.addIgnore(solutionsPageLink);
+        } else {
+            logoAnchor.setHref(UriUtils.fromString(StringMessages.INSTANCE.sapAnalyticsURL()).asString());
         }
         logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");
         solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");

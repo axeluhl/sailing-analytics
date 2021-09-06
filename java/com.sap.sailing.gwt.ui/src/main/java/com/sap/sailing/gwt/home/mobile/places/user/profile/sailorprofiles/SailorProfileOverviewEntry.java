@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -83,8 +84,13 @@ public class SailorProfileOverviewEntry extends Composite {
         // add boatclasses
         for (BoatClassDTO boatclass : entry.getBoatclasses()) {
             Element elem = DOM.createDiv();
-            elem.setInnerSafeHtml(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(
-                    BoatClassImageResolver.getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()));
+            SafeStylesBuilder safeStylesBuilder = new SafeStylesBuilder();
+            safeStylesBuilder
+                    .appendTrustedString(SharedSailorProfileResources.TRUSTED_BUILD_BOAT_CLASS_ICON_STYLE_STRING);
+            safeStylesBuilder
+                    .backgroundImage(BoatClassImageResolver.getBoatClassIconResource(boatclass.getName()).getSafeUri());
+            elem.setInnerSafeHtml(
+                    SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(safeStylesBuilder.toSafeStyles()));
             elem.getStyle().setDisplay(Display.INLINE_BLOCK);
             boatclassesDivUi.appendChild(elem);
         }

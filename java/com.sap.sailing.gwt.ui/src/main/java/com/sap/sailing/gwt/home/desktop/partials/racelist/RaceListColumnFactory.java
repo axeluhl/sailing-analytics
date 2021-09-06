@@ -49,6 +49,8 @@ public class RaceListColumnFactory {
     private static final LocalCss CSS = RaceListResources.INSTANCE.css(); 
     private static final StringMessages I18N = StringMessages.INSTANCE;
     private static final CellTemplates TEMPLATE = GWT.create(CellTemplates.class);
+    private static final String TRUSTED_WINNER_STYLE_STRING = "vertical-align:middle;background-repeat:no-repeat;"
+            + "background-size:contain;display:inline-block;width:18px;height:12px;";
 
     interface CellTemplates extends SafeHtmlTemplates {
         @Template("<div style=\"{1}\" class=\"{0}\"></div>")
@@ -60,8 +62,8 @@ public class RaceListColumnFactory {
         @Template("<img style=\"{0}\" src=\"{1}\"/>")
         SafeHtml windDirection(SafeStyles rotation, SafeUri imageUrl);
 
-        @SafeHtmlTemplates.Template("<div style='vertical-align:middle;background-repeat:no-repeat;background-size:contain;display:inline-block;width:18px;height:12px;background-image:url({2})'></div><span class=\"{0}\">{3}</span><div class=\"{1}\" title=\"{4}\">{4}</div>")
-        SafeHtml winner(String styleNamesSailId, String styleNamesText, String flagImageURL, String sailId, String name);
+        @SafeHtmlTemplates.Template("<div style='{2}'></div><span class=\"{0}\">{3}</span><div class=\"{1}\" title=\"{4}\">{4}</div>")
+        SafeHtml winner(String styleNamesSailId, String styleNamesText, SafeStyles safeStyles, String sailId, String name);
         
         @Template("<img src=\"{1}\" class=\"{0}\" />")
         SafeHtml imageHeader(String styleNames, SafeUri imageURL);
@@ -452,7 +454,10 @@ public class RaceListColumnFactory {
                             value.getTwoLetterIsoCountryCode());
                     String sailIdStyle = CSS.race_item_sailid();
                     String nameStyle = CSS.race_item_winner();
-                    sb.append(TEMPLATE.winner( sailIdStyle, nameStyle, flagImageUri.asString(),
+                    SafeStylesBuilder safeStylesBuilder = new SafeStylesBuilder();
+                    safeStylesBuilder.appendTrustedString(TRUSTED_WINNER_STYLE_STRING);
+                    safeStylesBuilder.backgroundImage(flagImageUri);
+                    sb.append(TEMPLATE.winner(sailIdStyle, nameStyle, safeStylesBuilder.toSafeStyles(),
                             value.getShortInfo(), value.getName()));
                 }
             }
