@@ -58,11 +58,11 @@ public interface RaceMapResources extends ClientBundle {
     @MimeType("image/png")
     DataResource settingsIcon();
 
-    @Source("com/sap/sailing/gwt/home/shared/fullscreen.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/fullscreen.svg")
     @MimeType("image/svg+xml")
     DataResource fullScreen();
 
-    @Source("com/sap/sailing/gwt/home/shared/exitFullscreen.svg")
+    @Source("com/sap/sailing/gwt/ui/client/images/exitFullscreen.svg")
     @MimeType("image/svg+xml")
     DataResource exitFullScreen();
 
