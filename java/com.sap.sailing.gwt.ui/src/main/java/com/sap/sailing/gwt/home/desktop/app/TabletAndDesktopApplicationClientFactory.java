@@ -24,6 +24,8 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew.WhatsNewDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionView;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
@@ -108,6 +110,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public SolutionsView createSolutionsView(SolutionsNavigationTabs navigationTab) {
         return new TabletAndDesktopSolutionsView(navigationTab, getHomePlacesNavigator());
+    }
+    
+    @Override
+    public SubscriptionView createSubscriptionsView() {
+        return new SubscriptionViewImpl();
     }
 
     @Override
