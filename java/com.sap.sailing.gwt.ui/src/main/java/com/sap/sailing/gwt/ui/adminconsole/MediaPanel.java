@@ -178,7 +178,7 @@ public class MediaPanel extends FlowPanel implements FilterablePanelProvider<Med
                 strings.add(t.title);
                 strings.add(t.url);
                 if (t.startTime == null) {
-                    GWT.log("startTime of media track "+t.title+" undefined");
+                    GWT.log("startTime of media track " + t.title + " undefined");
                 } else {
                     strings.add(t.startTime.toString());
                 }

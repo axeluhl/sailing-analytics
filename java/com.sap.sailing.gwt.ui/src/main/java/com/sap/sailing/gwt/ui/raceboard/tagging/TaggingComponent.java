@@ -199,7 +199,6 @@ public class TaggingComponent extends ComponentWithoutSettings
             @Override
             public void onResize() {
                 super.onResize();
-                GWT.log("currentState " + currentState);
                 if (currentState != State.VIEW) {
                     taggingPanel.setWidgetSize(footerPanel, calculateFooterPanelHeight());
                 }

@@ -317,7 +317,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                         } else {
                             mediaTrack.mimeType = null;
                         }
-                        Logger.getLogger("test").info("mimeType: " + mediaTrack.mimeType + ", ending: " + fileEnding);
                         if (mediaTrack.mimeType != null && MediaSubType.mp4 == mediaTrack.mimeType.getMediaSubType()) {
                             processMp4(mediaTrack);
                         } else {
