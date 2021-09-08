@@ -12,6 +12,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.uibinder.client.UiRenderer;
+import com.sap.sailing.gwt.home.shared.places.subscription.SailingSubscriptionStringConstants;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
@@ -50,8 +51,11 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
 
     private UserSubscriptionView.Presenter presenter;
 
+    private final SailingSubscriptionStringConstants stringConstants;
+
     public SubscriptionCell(UserSubscriptionView.Presenter presenter) {
         super("click");
+        stringConstants = SailingSubscriptionStringConstants.INSTANCE;
         this.presenter = presenter;
     }
 
@@ -59,7 +63,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     public void render(Context context, SubscriptionItem subscription, SafeHtmlBuilder sb) {
         SubscriptionPlanDTO plan = getSubscriptionPlan(subscription);
         if (plan != null) {
-            String planName = plan.getName();
+            String planName = stringConstants.getString(plan.getNameMessageKey().getKey());
             String subscriptionStatus = getSubscriptionStatusLabel(subscription);
             String subscriptionStatusCssClass = "";
             String paymentStatus = "";

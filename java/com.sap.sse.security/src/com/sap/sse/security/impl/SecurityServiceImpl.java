@@ -2663,7 +2663,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private void removeUserPlanRoles(User user, SubscriptionPlan plan, boolean checkOverlappingRoles)
             throws UserManagementException {
         if (plan != null) {
-            logger.info(() -> "Remove user roles of subscription plan " + plan.getName());
+            logger.info(() -> "Remove user roles of subscription plan " + plan.getId());
             final Role[] rolesToRemove;
             if (checkOverlappingRoles) {
                 rolesToRemove = getSubscriptionPlanUserRolesWithoutOverlapping(user, plan);
@@ -2678,7 +2678,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     private void addUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
         if (plan != null) {
-            logger.info(() -> "Add user roles for subscription plan " + plan.getName());
+            logger.info(() -> "Add user roles for subscription plan " + plan.getId());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
             for (Role role : roles) {
                 store.addRoleForUser(user.getName(), role);

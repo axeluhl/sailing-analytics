@@ -18,7 +18,7 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
 
     @Override
     public void addSubscriptionPlan(final SubscriptionPlanDTO plan, final boolean highlight) {
-        final Label label = new Label(plan.getName());
+        final Label label = new Label(plan.getId());
         label.getElement().getStyle().setFontWeight(highlight ? FontWeight.BOLD : FontWeight.NORMAL);
         container.add(label);
     }

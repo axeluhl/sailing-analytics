@@ -1,24 +1,24 @@
 package com.sap.sse.security.ui.shared.subscription;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.security.shared.dto.NamedDTO;
+import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 
 /**
  * SubscriptionPlan data transfer object {@link SubscriptionService#getAllSubscriptionPlans()}
  */
-public class SubscriptionPlanDTO extends NamedDTO implements IsSerializable {
+public class SubscriptionPlanDTO implements IsSerializable {
     private static final long serialVersionUID = -1990028347487353679L;
-    String id;
-
-    ArrayList<String> features;
-
+    private String id;
+    private StringMessagesKey nameMessageKey;
+    private StringMessagesKey descMessageKey;
+    private HashSet<StringMessagesKey> featureIds;
+    private BigDecimal price;
     private String error;
-    
-    private String price;
 
     /**
      * For GWT Serialization only
@@ -27,31 +27,46 @@ public class SubscriptionPlanDTO extends NamedDTO implements IsSerializable {
     public SubscriptionPlanDTO() {
     }
 
-    public SubscriptionPlanDTO(String id, String name, List<String> features, String price, String error) {
-        super(name);
+    public SubscriptionPlanDTO(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
+            BigDecimal price, Set<StringMessagesKey> features, String error) {
         this.id = id;
-        this.features = new ArrayList<String>(features);
+        this.nameMessageKey = nameMessageKey;
+        this.setDescMessageKey(descMessageKey);
+        this.featureIds = new HashSet<StringMessagesKey>(features);
         this.price = price;
         this.error = error;
     }
-    
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
+
     public String getId() {
         return id;
+    }
+
+    public StringMessagesKey getNameMessageKey() {
+        return nameMessageKey;
+    }
+
+    public StringMessagesKey getDescMessageKey() {
+        return descMessageKey;
+    }
+
+    public void setDescMessageKey(StringMessagesKey descMessageKey) {
+        this.descMessageKey = descMessageKey;
+    }
+
+    public Set<StringMessagesKey> getFeatures() {
+        return featureIds;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
     }
 
     public String getError() {
         return error;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-    
-    public ArrayList<String> getFeatures() {
-        return features;
-    }
-
-    public String getPrice() {
-        return price;
-    }
 }

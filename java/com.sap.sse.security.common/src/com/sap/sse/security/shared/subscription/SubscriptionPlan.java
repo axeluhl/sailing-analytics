@@ -1,10 +1,10 @@
 package com.sap.sse.security.shared.subscription;
 
-import java.util.ArrayList;
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.List;
 
-import com.sap.sse.common.NamedWithID;
+import com.sap.sse.security.shared.StringMessagesKey;
 
 /**
  * Payment subscription plans. A subscription plan has a name, a {@link String}-based ID, and a set of
@@ -15,64 +15,52 @@ import com.sap.sse.common.NamedWithID;
  * 
  * @author Tu Tran
  */
-public abstract class SubscriptionPlan implements NamedWithID{
+public abstract class SubscriptionPlan implements Serializable{
     private static final long serialVersionUID = -555811806344107292L;
-    private final String name;
     private final String id;
-    private final List<String> features;
-    private final String price;
+    private final StringMessagesKey messageKey;
+    private final StringMessagesKey descMessagesKey;
+    private final BigDecimal price;
     /**
      * Roles assigned for this plan, if user subscribe to the plan then the user will be assigned these roles
      */
     private final SubscriptionPlanRole[] roles;
     
-    protected SubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features, String price) {
-        this.name = name;
+    protected SubscriptionPlan(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
+            BigDecimal price, SubscriptionPlanRole[] roles) {
+        this.messageKey = nameMessageKey;
+        this.descMessagesKey = descMessageKey;
         this.id = id;
-        this.features = features;
         this.roles = roles;
         this.price = price;
     }
-    
-    @Override
-    public String getName() {
-        return name;
-    }
-    
-    @Override
+
     public String getId() {
         return id;
     }
 
-    public SubscriptionPlanRole[] getRoles() {
-        return this.roles;
+    public StringMessagesKey getMessageKey() {
+        return messageKey;
     }
 
-    public List<String> getFeatures() {
-        return features;
-    }
-    
-    public String getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
-    
-    @SafeVarargs
-    protected static List<String> convertPermissionsIterable (Iterable<? extends Object>... permissionIterables) {
-        //TODO: Replace this by a more formulated feature list.
-        ArrayList<String> permissions = new ArrayList<String>();
-        for (Iterable<? extends Object> permissionIterable : permissionIterables) {
-            permissionIterable.forEach(obj -> permissions.add(obj.toString()));
-        }
-        return permissions;
+
+    public SubscriptionPlanRole[] getRoles() {
+        return roles;
     }
 
+    public StringMessagesKey getDescMessagesKey() {
+        return descMessagesKey;
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((features == null) ? 0 : features.hashCode());
         result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((messageKey == null) ? 0 : messageKey.hashCode());
         result = prime * result + Arrays.hashCode(roles);
         return result;
     }
@@ -86,24 +74,19 @@ public abstract class SubscriptionPlan implements NamedWithID{
         if (getClass() != obj.getClass())
             return false;
         SubscriptionPlan other = (SubscriptionPlan) obj;
-        if (features == null) {
-            if (other.features != null)
-                return false;
-        } else if (!features.equals(other.features))
-            return false;
         if (id == null) {
             if (other.id != null)
                 return false;
         } else if (!id.equals(other.id))
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (messageKey == null) {
+            if (other.messageKey != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!messageKey.equals(other.messageKey))
             return false;
         if (!Arrays.equals(roles, other.roles))
             return false;
         return true;
     }
-    
+
 }

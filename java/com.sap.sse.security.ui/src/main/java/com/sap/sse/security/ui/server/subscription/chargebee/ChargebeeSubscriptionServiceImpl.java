@@ -62,7 +62,7 @@ public class ChargebeeSubscriptionServiceImpl extends
                     response.setHostedPageJSONString(result.hostedPage().toJson());
                 } else {
                     response.setError(
-                            "User has already subscribed to " + getSecurityService().getSubscriptionPlanById(planId).getName() + " plan");
+                            "User has already subscribed to " + getSecurityService().getSubscriptionPlanById(planId).getId() + " plan");
                 }
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);

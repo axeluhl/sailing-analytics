@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubs
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionItem;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
@@ -46,11 +47,13 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     CellList<SubscriptionItem> subscriptionListUi;
 
     private Presenter presenter;
+    private final SubscriptionStringConstants stringConstants;
 
     public UserSubscription(UserSubscriptionView.Presenter presenter) {
         initSubscriptionCellList(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         presenter.setView(this);
+        stringConstants = SubscriptionStringConstants.INSTANCE;
         this.presenter = presenter;
     }
 
@@ -110,7 +113,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
                 planListUi.addItem("", "");
             }
             for (SubscriptionPlanDTO plan : planList) {
-                planListUi.addItem(plan.getName(), plan.getId());
+                planListUi.addItem(stringConstants.getString(plan.getNameMessageKey().getKey()), plan.getId());
             }
             planListUi.setSelectedIndex(0);
         }

@@ -1,12 +1,12 @@
 package com.sap.sse.security.shared.subscription;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.sap.sse.security.shared.PredefinedRoles;
+import com.sap.sse.security.shared.StringMessagesKey;
 
 /**
  * Payment subscription plans. A subscription plan has a name, a {@link String}-based ID, and a set of
@@ -20,27 +20,10 @@ import com.sap.sse.security.shared.PredefinedRoles;
 public class SSESubscriptionPlan extends SubscriptionPlan {
     private static final long serialVersionUID = 9061666338780737555L;
     private static final Map<String, SSESubscriptionPlan> plansById = new HashMap<String, SSESubscriptionPlan>();
-    
-    public static final SSESubscriptionPlan STARTER = new SSESubscriptionPlan("starter", "Starter", new SubscriptionPlanRole[] {
-            new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
-                    SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
-                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER),
-            new SubscriptionPlanRole(PredefinedRoles.mediaeditor.getId(),
-                    SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
-                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) },
-            convertPermissionsIterable(PredefinedRoles.spectator.getPermissions(), PredefinedRoles.mediaeditor.getPermissions()), "99$");
-    public static final SSESubscriptionPlan PREMIUM = new SSESubscriptionPlan("premium", "Premium", new SubscriptionPlanRole[] {
-            new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
-                    SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
-                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER),
-            new SubscriptionPlanRole(PredefinedRoles.moderator.getId(),
-                    SubscriptionPlanRole.GroupQualificationMode.SUBSCRIBING_USER_DEFAULT_TENANT,
-                    SubscriptionPlanRole.UserQualificationMode.NONE) 
-            }, 
-            convertPermissionsIterable(PredefinedRoles.spectator.getPermissions(), PredefinedRoles.moderator.getPermissions()), "99$");
 
-    private SSESubscriptionPlan(String id, String name, SubscriptionPlanRole[] roles, List<String> features, String price) {
-        super(id, name, roles, features, price);
+    private SSESubscriptionPlan(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
+            BigDecimal price, SubscriptionPlanRole... roles) {
+        super(id, nameMessageKey, descMessageKey, price, roles);
         plansById.put(id, this);
     }
     
