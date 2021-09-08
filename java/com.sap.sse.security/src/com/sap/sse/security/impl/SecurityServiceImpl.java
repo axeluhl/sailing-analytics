@@ -2686,7 +2686,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
     }
 
-    private Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan) {
+    @Override
+    public Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan) {
         final List<Role> roles = new ArrayList<Role>();
         for (SubscriptionPlanRole planRole : plan.getRoles()) {
             roles.add(getSubscriptionPlanUserRole(user, planRole));

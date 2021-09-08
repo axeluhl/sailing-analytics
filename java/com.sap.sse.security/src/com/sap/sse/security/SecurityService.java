@@ -737,5 +737,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     default HasPermissions getHasPermissionsByName(String securedTypeName) {
         return Util.first(Util.filter(getAllHasPermissions(), hp->hp.getName().equals(securedTypeName)));
     }
+
+    /*
+     * Will resolve potential roles, which a user would inherit, when given a specific subscription plan.
+     */
+    Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan);
     
 }

@@ -2,8 +2,10 @@ package com.sap.sse.security.ui.server.subscription;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -11,6 +13,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -19,12 +23,19 @@ import org.apache.shiro.SecurityUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
@@ -57,13 +68,43 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     
     @Override
     public Iterable<SubscriptionPlanDTO> getAllSubscriptionPlans() {
-        Iterable<SubscriptionPlan> allSubscriptionPlans = getSecurityService().getAllSubscriptionPlans().values();
-        Set<SubscriptionPlanDTO> allSubscriptionPlanDTOs = new HashSet<>();
-        for (SubscriptionPlan subscriptionPlan : allSubscriptionPlans) {
-            allSubscriptionPlanDTOs.add(new SubscriptionPlanDTO(subscriptionPlan.getId(), subscriptionPlan.getName(),
-                    subscriptionPlan.getFeatures(), subscriptionPlan.getPrice(), null));
-        }
-        return allSubscriptionPlanDTOs;
+        return (convertToDtos(getSecurityService().getAllSubscriptionPlans().values()));
+    }
+    
+    @Override
+    public Set<SubscriptionPlanDTO> getUnlockingSubscriptionplans(WildcardPermission permission)
+            throws UserManagementException {
+        final HashSet<SubscriptionPlanDTO> result = new HashSet<SubscriptionPlanDTO>();
+        final User currentUser = getCurrentUser();
+        final SecurityService securityServiceInstance = getSecurityService();
+        User allUser = securityServiceInstance.getUserByName(SecurityService.ALL_USERNAME);
+        getSecurityService().getAllSubscriptionPlans().values().forEach((plan) -> {
+            final Role[] subscriptionPlanUserRolesArray = getSecurityService().getSubscriptionPlanUserRoles(currentUser, plan);
+            final Set<Role> subscriptionPlanUserRoles = Stream.of(subscriptionPlanUserRolesArray).collect(Collectors.toSet());
+            List<Set<String>> parts = permission.getParts();
+            if (parts.size() > 2 && !parts.get(2).isEmpty()) {
+                boolean allChecksPassed = true;
+                for (final QualifiedObjectIdentifier objectIdentifier : permission.getQualifiedObjectIdentifiers()) {
+                    final OwnershipAnnotation ownership = securityServiceInstance.getOwnership(objectIdentifier);
+                    final AccessControlListAnnotation acl = securityServiceInstance
+                            .getAccessControlList(objectIdentifier);
+                    allChecksPassed = PermissionChecker.isPermitted(permission, currentUser, allUser,
+                            ownership == null ? null : ownership.getAnnotation(),
+                            acl == null ? null : acl.getAnnotation(), subscriptionPlanUserRoles);
+                    if (!allChecksPassed) {
+                        break;
+                    }
+                }
+                if(allChecksPassed) {
+                    result.add(convertToDto(plan));
+                }
+            } else {
+                if(PermissionChecker.isPermitted(permission, currentUser, allUser, null, null, subscriptionPlanUserRoles)) {
+                    result.add(convertToDto(plan));
+                }
+            }
+        });
+        return result;
     }
     
     @Override
@@ -71,9 +112,7 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         Map<Serializable, SubscriptionPlanDTO> allSubscriptionPlans = new HashMap<>();
         for (Entry<Serializable, SubscriptionPlan> subscriptionPlan : getSecurityService().getAllSubscriptionPlans()
                 .entrySet()) {
-            SubscriptionPlanDTO subscriptionPlanDTO = new SubscriptionPlanDTO(subscriptionPlan.getKey().toString(), 
-                    subscriptionPlan.getValue().getName(), subscriptionPlan.getValue().getFeatures(), subscriptionPlan.getValue().getPrice(), null);
-            allSubscriptionPlans.put(subscriptionPlan.getKey(), subscriptionPlanDTO);
+            allSubscriptionPlans.put(subscriptionPlan.getKey(), convertToDto(subscriptionPlan.getValue()));
         }
         return allSubscriptionPlans;
     }
@@ -179,6 +218,15 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
             }
         }
         return null;
+    }
+    
+    private SubscriptionPlanDTO convertToDto(SubscriptionPlan plan) {
+        //TODO: implement
+        return null;
+    }
+    
+    private Iterable<SubscriptionPlanDTO> convertToDtos(Collection<SubscriptionPlan> plans) {
+        return plans.stream().map((plan) -> convertToDto(plan)).collect(Collectors.toSet());
     }
 
     protected abstract String getProviderName();
