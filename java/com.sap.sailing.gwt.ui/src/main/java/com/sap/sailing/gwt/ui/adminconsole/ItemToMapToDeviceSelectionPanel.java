@@ -34,13 +34,20 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         void onSelectionChange(MarkDTO mark);
     }
 
-    public ItemToMapToDeviceSelectionPanel(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
-            ErrorReporter errorReporter, final SelectionChangedHandler handler, MappableToDevice selected) {
+    public ItemToMapToDeviceSelectionPanel(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            StringMessages stringMessages, ErrorReporter errorReporter, final SelectionChangedHandler handler,
+            MappableToDevice selected) {
         this.selected = selected;
         this.errorReporter = errorReporter;
-        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */ false,
+        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
+                /* competitorsRefresher not needed; competitors are obtained from the regatta log registrations */ null,
+                /* boatsRefresher not needed */ null, stringMessages, errorReporter, /* multiSelection */ false,
                 /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
-        boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, /* allowActions */ false);
+        boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService,
+                /* boatsRefresher not needed; boats are obtained from the regatta log registrations */ null,
+                /* competitorsRefresher not needed */ null,
+                stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+                /* allowActions */ false);
         markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(/* multiSelection */ false, sailingServiceWrite,
                 stringMessages, errorReporter);
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

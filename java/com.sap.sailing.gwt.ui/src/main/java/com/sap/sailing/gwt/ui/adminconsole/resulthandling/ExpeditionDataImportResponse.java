@@ -82,8 +82,7 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     };
 
     public final boolean hasEventId() {
-        final String stringValue = getString("eventId");
-        return stringValue != null && !stringValue.isEmpty();
+        return getEventId() != null;
     }
 
 }

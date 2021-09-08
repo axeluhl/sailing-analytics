@@ -4,8 +4,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.session.ClientSession;
 import com.sap.sse.common.Duration;
@@ -13,7 +13,7 @@ import com.sap.sse.landscape.mongodb.impl.SimpleMongoEndpointImpl;
 
 /**
  * A MongoDB endpoint that an application can connect to. It can produce a {@link URI} the client can use to connect to,
- * e.g., with a {@code MongoClientURI}. The endpoint can be a standalone MongoDB instance, represented by a single
+ * e.g., with a {@code ConnectionString}. The endpoint can be a standalone MongoDB instance, represented by a single
  * {@link MongoProcess}, or it may be a {@link MongoReplicaSet replica set}.
  * 
  * @author Axel Uhl (D043530)
@@ -86,12 +86,12 @@ public interface MongoEndpoint {
 
     /**
      * When invoked on a {@link MongoProcess} that is not currently equipped with a public IP address, a
-     * {@link NullPointerException} will result. Consider using {@link #getMongoClientURI(Optional, Optional)} to wait for
+     * {@link NullPointerException} will result. Consider using {@link #getConnectionString(Optional, Optional)} to wait for
      * a public IP address to become available if the instance is still booting up.
      */
-    MongoClientURI getMongoClientURI(Optional<Database> optionalDb) throws URISyntaxException;
+    ConnectionString getConnectionString(Optional<Database> optionalDb) throws URISyntaxException;
 
-    MongoClientURI getMongoClientURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException;
+    ConnectionString getConnectionString(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException;
 
     /**
      * When invoked on a {@link MongoProcess} that is not currently equipped with a public IP address, a

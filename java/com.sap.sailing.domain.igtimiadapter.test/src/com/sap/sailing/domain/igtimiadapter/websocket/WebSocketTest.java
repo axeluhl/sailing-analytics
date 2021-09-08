@@ -31,6 +31,7 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -131,6 +132,7 @@ public class WebSocketTest {
         Activator.getInstance().setSecurityService(null);
     }
 
+    @Ignore("echo.websocket.org is (2021-08-19) down; http://www.websocket.org/index.html says ''Service no longer available''")
     @Test
     public void simpleWebSocketEchoTest() throws Exception {
         String destUri = "ws://echo.websocket.org"; // wss currently doesn't seem to work with Jetty 9.0.4 WebSocket implementation
