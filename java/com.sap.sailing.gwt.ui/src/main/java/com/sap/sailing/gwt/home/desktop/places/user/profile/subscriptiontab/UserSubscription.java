@@ -113,7 +113,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
                 planListUi.addItem("", "");
             }
             for (SubscriptionPlanDTO plan : planList) {
-                planListUi.addItem(stringConstants.getString(plan.getNameMessageKey().getKey()), plan.getId());
+                planListUi.addItem(stringConstants.getString(plan.getNameMessageKey()), plan.getId());
             }
             planListUi.setSelectedIndex(0);
         }

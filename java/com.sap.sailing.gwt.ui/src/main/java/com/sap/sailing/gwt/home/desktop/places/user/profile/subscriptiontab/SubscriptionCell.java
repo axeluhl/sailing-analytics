@@ -63,7 +63,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     public void render(Context context, SubscriptionItem subscription, SafeHtmlBuilder sb) {
         SubscriptionPlanDTO plan = getSubscriptionPlan(subscription);
         if (plan != null) {
-            String planName = stringConstants.getString(plan.getNameMessageKey().getKey());
+            String planName = stringConstants.getString(plan.getNameMessageKey());
             String subscriptionStatus = getSubscriptionStatusLabel(subscription);
             String subscriptionStatusCssClass = "";
             String paymentStatus = "";
