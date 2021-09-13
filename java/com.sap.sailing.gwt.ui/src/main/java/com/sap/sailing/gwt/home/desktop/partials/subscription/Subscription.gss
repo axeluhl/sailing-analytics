@@ -1,0 +1,51 @@
+.feature {
+  background-image: resourceUrl("greenCheck");
+  background-repeat: no-repeat;
+  background-size: contain;
+  padding-left: 30px;
+}
+.highlight {
+  border: solid 1px green;
+}
+.subscription {
+  border: solid;
+  border-width: 1px;
+  border-color: #ddd;
+  border-radius: .333333333333333em;
+  text-align: center;
+  max-width: 390px;
+}
+.title {
+  background-color: #f2f2f2;
+  margin: 0;
+  padding: 20px;
+  border-bottom-color: #ddd;
+}
+.description {
+  margin: 20px;
+}
+.price {
+  margin: 20px;
+}
+.features {
+  margin: 30px;
+  text-align: left;
+}
+.subscribe {
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 30px;
+  display: block;
+}
+.container {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 10px;
+}
+/* Small screens */
+@media (max-width: 500px) {
+  .container {
+    /* On small screens, we are no longer using row direction but column */
+    flex-direction: column;
+  }
+}

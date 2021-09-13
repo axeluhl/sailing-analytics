@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="main" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local" type="com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionResources"></ui:with>
+  <ui:style>
+  </ui:style>
+  <g:HTMLPanel>
+    <div class="{local.css.subscription}">
+      <h1 ui:field="title" class="{local.css.title}"></h1>
+      <h4 ui:field="description" class="{local.css.description}"></h4>
+      <h3 ui:field="price" class="{local.css.price}"></h3>
+      <g:FlowPanel ui:field="features" styleName="{local.css.features}"></g:FlowPanel>
+      <g:Button styleName="{main.mainCss.button} {main.mainCss.buttonstrong} {main.mainCss.buttonprimary} {main.mainCss.buttonarrowrightwhite} {local.css.subscribe}" ui:field="subscribeButton" text="{i18n.subscribe}"/>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder> 
