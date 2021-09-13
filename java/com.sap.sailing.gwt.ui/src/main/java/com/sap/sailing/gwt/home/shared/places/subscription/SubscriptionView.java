@@ -9,6 +9,10 @@ public interface SubscriptionView extends IsWidget {
 
     public interface Presenter {
 
+        void startSubscription(String planId);
+
+        void manageSubscriptions();
+
     }
 
 }

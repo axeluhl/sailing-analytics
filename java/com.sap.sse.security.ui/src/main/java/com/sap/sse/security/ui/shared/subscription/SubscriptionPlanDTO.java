@@ -68,5 +68,10 @@ public class SubscriptionPlanDTO implements IsSerializable {
     public String getError() {
         return error;
     }
+    
+    // TODO: Implement action information
+    public boolean isCurrentUserSubscribed() {
+        return false;
+    }
 
 }
