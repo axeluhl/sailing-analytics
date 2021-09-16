@@ -14,4 +14,8 @@ public interface SailingPremiumIconRessource extends PremiumIconRessource {
     @Override
     DataResource premiumIcon();
 
+    @Source("icon_premium_permitted.svg")
+    @MimeType("image/svg+xml")
+    DataResource premiumIconPermitted();
+
 }

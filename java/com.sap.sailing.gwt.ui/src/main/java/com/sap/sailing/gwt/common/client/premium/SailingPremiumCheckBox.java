@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.common.client.premium;
 
+import static com.sap.sailing.gwt.common.client.premium.SailingPremiumIconRessource.INSTANCE;
+
 import java.util.Set;
 
 import com.google.gwt.user.client.Window;
@@ -10,7 +12,7 @@ import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public class SailingPremiumCheckBox extends PremiumCheckBox{
+public class SailingPremiumCheckBox extends PremiumCheckBox {
 
     public SailingPremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver) {
         super(label, action, paywallResolver);
@@ -18,7 +20,13 @@ public class SailingPremiumCheckBox extends PremiumCheckBox{
 
     @Override
     protected Image createPremiumIcon() {
-        return new Image(SailingPremiumIconRessource.INSTANCE.premiumIcon().getSafeUri());
+        return new Image();
+    }
+
+    @Override
+    protected void onUserPermissionUpdate(final boolean isPermitted) {
+        super.onUserPermissionUpdate(isPermitted);
+        image.setUrl((isPermitted ? INSTANCE.premiumIconPermitted() : INSTANCE.premiumIcon()).getSafeUri());
     }
 
     @Override
