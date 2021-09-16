@@ -11,11 +11,14 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.hanaexport.jaxrs.api.InsertRaceStatsStatement.TrackedRaceWithCompetitorAndStartWaypoint;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class InsertRaceStatsStatement extends AbstractPreparedInsertStatement<TrackedRaceWithCompetitorAndStartWaypoint> {
+    private static final Duration DURATION_AFTER_START_TO_DECIDE_START_WINNER = Duration.ONE_SECOND.times(90);
+    
     static class TrackedRaceWithCompetitorAndStartWaypoint {
         private final TimePoint now;
         private final Waypoint startWaypoint;
@@ -42,13 +45,13 @@ public class InsertRaceStatsStatement extends AbstractPreparedInsertStatement<Tr
             return trackedRace;
         }
     }
-    
+
     protected InsertRaceStatsStatement(Connection connection) throws SQLException {
         super(connection.prepareStatement(
                 "INSERT INTO SAILING.\"RaceStats\" (\"race\", \"regatta\", \"competitorId\", \"rankOneBased\", \"distanceSailedInMeters\", \"elapsedTimeInSeconds\", "+
                         "\"avgCrossTrackErrorInMeters\", \"absoluteAvgCrossTrackErrorInMeters\", \"startDelayInSeconds\", \"distanceFromStartLineInMetersAtStart\", "+
-                        "\"speedWhenCrossingStartLineInKnots\", \"startTack\") "+
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"));
+                        "\"speedWhenCrossingStartLineInKnots\", \"startTack\", \"rank90sAfterStart\") "+
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"));
     }
 
     @Override
@@ -96,7 +99,8 @@ public class InsertRaceStatsStatement extends AbstractPreparedInsertStatement<Tr
             setDouble(10, metersOr0ForNull(trackedRace.getDistanceToStartLine(competitor, startOfRace)));
             final Speed speedWhenCrossingStartLine = trackedRace.getSpeedWhenCrossingStartLine(competitor);
             setDouble(11, speedWhenCrossingStartLine==null?0:speedWhenCrossingStartLine.getKnots());
-            getPreparedStatement().setString(15, startTack==null?null:startTack.name());
+            getPreparedStatement().setString(12, startTack==null?null:startTack.name());
+            getPreparedStatement().setInt(13, trackedRace.getRank(competitor, startOfRace.plus(DURATION_AFTER_START_TO_DECIDE_START_WINNER)));
         } else {
             setDouble(10, 0);
             setDouble(11, 0);

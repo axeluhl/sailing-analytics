@@ -86,6 +86,7 @@ CREATE TABLE SAILING."RaceStats" (
         "distanceFromStartLineInMetersAtStart"  DOUBLE,
         "speedWhenCrossingStartLineInKnots"     DOUBLE,
         "startTack"     NVARCHAR(20),
+        "rank90sAfterStart" INTEGER,
         PRIMARY KEY ("race", "regatta", "competitorId"),
         FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id"),
         FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")
