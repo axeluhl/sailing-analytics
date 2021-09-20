@@ -50,11 +50,11 @@ public interface RaceMapResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource plusIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/more.svg")
-    @MimeType("image/svg+xml")
+    @Source("com/sap/sailing/gwt/ui/client/images/more.png")
+    @MimeType("image/png")
     DataResource moreIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/settings.png")
     @MimeType("image/png")
     DataResource settingsIcon();
 

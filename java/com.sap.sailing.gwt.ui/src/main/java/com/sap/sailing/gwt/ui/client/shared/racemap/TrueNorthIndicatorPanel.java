@@ -3,9 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 
@@ -22,7 +20,6 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     private final StringMessages stringMessages;
     
     private final RaceMapImageManager raceMapResources;
-    private final Label textLabel;
     private final RaceMap map;
 
     private Canvas canvas;
@@ -49,9 +46,6 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
                 toggle();
             }
         });
-        textLabel = new Label("");
-        textLabel.addStyleName(this.raceMapStyle.raceMapIndicatorPanelTextLabel());
-        add(textLabel);
     }
 
     public void toggle() {
@@ -80,14 +74,6 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         String title = stringMessages.rotatedFromTrueNorth(Math.round(mappedTrueNorthDeg)) + '\n' +
                 stringMessages.clickToToggleWindUp();
         canvas.setTitle(title);
-        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-        final double windDirection;
-        if (mappedTrueNorthDeg >= 0) {
-            windDirection = 360 - mappedTrueNorthDeg;
-        } else {
-            windDirection = mappedTrueNorthDeg * -1;
-        }
-        textLabel.setText(mappedTrueNorthDeg == 0 ? "N" : numberFormat.format(windDirection) + "°");
         if (!isVisible()) {
             setVisible(true);
         }
