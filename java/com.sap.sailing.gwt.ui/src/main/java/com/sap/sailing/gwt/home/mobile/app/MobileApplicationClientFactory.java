@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.app;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -122,7 +123,18 @@ public class MobileApplicationClientFactory extends
     
     @Override
     public SubscriptionView createSubscriptionsView() {
-        return new SubscriptionViewImpl();
+        return new SubscriptionViewImpl(new SubscriptionView.Presenter() {
+            @Override
+            public void startSubscription(String planId) {
+                // TODO: implement logic
+                GWT.log("start subscription with ID: " + planId);
+            }
+            @Override
+            public void manageSubscriptions() {
+                // TODO: implement logic
+                GWT.log("manage subscriptions");
+            }
+        });
     }
     
     @Override

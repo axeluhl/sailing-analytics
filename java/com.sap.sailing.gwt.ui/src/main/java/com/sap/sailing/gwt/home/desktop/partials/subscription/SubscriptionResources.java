@@ -14,6 +14,8 @@ public interface SubscriptionResources extends SharedHomeResources {
     public interface LocalCss extends CssResource {
         String feature();
         String highlight();
+        String owned();
+        String individual();
         String subscription();
         String title();
         String description();
@@ -21,5 +23,7 @@ public interface SubscriptionResources extends SharedHomeResources {
         String features();
         String subscribe();
         String container();
+        String highlightHeader();
+        String subscriptionBody();
     }
 }

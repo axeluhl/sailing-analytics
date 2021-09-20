@@ -5,15 +5,64 @@
   padding-left: 30px;
 }
 .highlight {
-  border: solid 1px green;
+}
+.owned {
 }
 .subscription {
+  order: 2;
+  text-align: center;
+  width: 390px;
+}
+.subscription.individual {
+  order: 999;
+}
+.subscription.highlight {
+  order: 1;
+}
+.subscription.owned {
+  order: 100;
+}
+.subscriptionBody {
   border: solid;
   border-width: 1px;
   border-color: #ddd;
   border-radius: .333333333333333em;
-  text-align: center;
-  max-width: 390px;
+}
+.highlight .subscriptionBody {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: .333333333333333em;
+  border-bottom-right-radius: .333333333333333em;
+  border-color: #8ab54e;
+}
+.owned .subscriptionBody {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: .333333333333333em;
+  border-bottom-right-radius: .333333333333333em;
+  border-color: #ddd;
+}
+.highlightHeader {
+  visibility: hidden;
+  border: solid;
+  border-width: 1px;
+  border-top-left-radius: .333333333333333em;
+  border-top-right-radius: .333333333333333em;
+  height: 30px;
+  padding: 5px;
+  color: #fff;
+  font-size: 1em;
+  font-weight: bold;
+}
+.highlight .highlightHeader {
+  visibility: visible;
+  border-color: #8ab54e;
+  background-color: #8ab54e;
+}
+.owned .highlightHeader {
+  visibility: visible;
+  border-color: #ddd;
+  background-color: #ddd;
 }
 .title {
   background-color: #f2f2f2;

@@ -7,12 +7,14 @@
   <ui:style>
   </ui:style>
   <g:HTMLPanel>
-    <div class="{local.css.subscription}">
+    <g:FlowPanel ui:field="highlightHeader" styleName="{local.css.highlightHeader}">
+    </g:FlowPanel>
+    <div class="{local.css.subscriptionBody}">
       <h1 ui:field="title" class="{local.css.title}"></h1>
       <h4 ui:field="description" class="{local.css.description}"></h4>
       <h3 ui:field="price" class="{local.css.price}"></h3>
       <g:FlowPanel ui:field="features" styleName="{local.css.features}"></g:FlowPanel>
-      <g:Button styleName="{main.mainCss.button} {main.mainCss.buttonstrong} {main.mainCss.buttonprimary} {main.mainCss.buttonarrowrightwhite} {local.css.subscribe}" ui:field="subscribeButton" text="{i18n.subscribe}"/>
+      <g:Button styleName="{main.mainCss.button} {main.mainCss.buttonstrong} {main.mainCss.buttonprimary} {main.mainCss.buttonarrowrightwhite} {local.css.subscribe}" ui:field="button" text=""/>
     </div>
   </g:HTMLPanel>
 </ui:UiBinder> 
