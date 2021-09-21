@@ -101,7 +101,6 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         if (competitorStartTime == null) {
             return null;
         }
-        
         Double distance = trackedRace.getDistanceFromStarboardSideOfStartLine(getCompetitor(), competitorStartTime).getMeters();
         Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
         return distance / length;
