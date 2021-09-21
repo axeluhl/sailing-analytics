@@ -37,8 +37,9 @@ public class InsertRaceStatement extends AbstractPreparedInsertStatement<Tracked
     protected InsertRaceStatement(Connection connection) throws SQLException {
         super(connection.prepareStatement(
                 "INSERT INTO SAILING.\"Race\" (\"name\", \"regatta\", \"raceColumn\", \"fleet\", \"startOfTracking\", "+
-                        "\"startOfRace\", \"endOfTracking\", \"endOfRace\", \"avgWindSpeedInKnots\", \"raceColumnIndexZeroBased\") "+
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"));
+                        "\"startOfRace\", \"endOfTracking\", \"endOfRace\", \"avgWindSpeedInKnots\", \"raceColumnIndexZeroBased\""+
+                        "\"gateStart\") "+
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"));
     }
 
     @Override
@@ -75,5 +76,6 @@ public class InsertRaceStatement extends AbstractPreparedInsertStatement<Tracked
             setDouble(9, 0.0);
         }
         getPreparedStatement().setInt(10, Util.indexOf(trackedRace.getTrackedRegatta().getRegatta().getRaceColumns(), raceColumnFleetAndTrackedRace.getRaceColumn()));
+        getPreparedStatement().setBoolean(11, trackedRace.isGateStart());
     }
 }
