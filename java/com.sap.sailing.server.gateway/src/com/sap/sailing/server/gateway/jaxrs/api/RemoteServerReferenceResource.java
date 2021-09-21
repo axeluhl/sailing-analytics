@@ -35,13 +35,17 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.util.RemoteServerUtil;
 
-@Path ("/v1/remoteserverreference")
+@Path (RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE)
 public class RemoteServerReferenceResource extends AbstractSailingServerResource {
+    public static final String REMOVE = "/remove";
+    public static final String UPDATE = "/update";
+    public static final String ADD = "/add";
+    public static final String V1_REMOTESERVERREFERENCE = "/v1/remoteserverreference";
     public static final Logger logger = Logger.getLogger(RemoteServerReferenceResource.class.getName());
-    protected static final String REMOTE_SERVER_URL = "remoteServerUrl";
-    protected static final String REMOTE_SERVER_NAME = "remoteServerName";
-    protected static final String REMOTE_SERVER_EVENT_IDS = "eventIds";
-    protected static final String REMOTE_SERVER_IS_INCLUDE = "include";
+    public static final String REMOTE_SERVER_URL = "remoteServerUrl";
+    public static final String REMOTE_SERVER_NAME = "remoteServerName";
+    public static final String REMOTE_SERVER_EVENT_IDS = "eventIds";
+    public static final String REMOTE_SERVER_IS_INCLUDE = "include";
     
     public RemoteServerReferenceResource() {
     }
@@ -81,7 +85,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
     
     @PUT
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/update")
+    @Path(UPDATE)
     public Response updateRemoteServerReference(
             @FormParam(REMOTE_SERVER_NAME) String remoteServerName,
             @FormParam(REMOTE_SERVER_IS_INCLUDE) Boolean include,
@@ -115,7 +119,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/add")
+    @Path(ADD)
     public Response addRemoteServerReference(
             @FormParam(REMOTE_SERVER_URL) String remoteServerUrlAsString,
             @FormParam(REMOTE_SERVER_NAME) String remoteServerName,
@@ -147,7 +151,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/remove")
+    @Path(REMOVE)
     public Response removeRemoteServerReference(@FormParam(REMOTE_SERVER_NAME) String remoteServerName) {
         Response response = null;
         if (!Util.hasLength(remoteServerName)) {

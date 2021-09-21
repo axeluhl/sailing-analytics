@@ -735,7 +735,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
                         Util.addAll(eids, eventIDs);
                     }
-                    archive.removeRemoteServerReference(from, Optional.of(eventIDs));
+                    archive.removeRemoteServerEventReferences(from, eventIDs);
                     final AwsRegion region = new AwsRegion(regionId);
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
                             getLandscape().getCentralReverseProxy(region);

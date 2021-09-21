@@ -9,4 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sailing.server.gateway.interfaces
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sse.common
-Require-Bundle: org.json.simple
+Require-Bundle: org.json.simple,
+ com.sap.sailing.domain,
+ com.sap.sse.shared.android,
+ org.apache.httpcomponents.httpclient
