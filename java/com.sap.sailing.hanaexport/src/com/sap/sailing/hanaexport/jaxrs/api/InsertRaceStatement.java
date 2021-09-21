@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.hanaexport.jaxrs.api.InsertRaceStatement.TrackedRaceWithRaceColumnAndFleet;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class InsertRaceStatement extends AbstractPreparedInsertStatement<TrackedRaceWithRaceColumnAndFleet> {
     static class TrackedRaceWithRaceColumnAndFleet {
@@ -36,8 +37,9 @@ public class InsertRaceStatement extends AbstractPreparedInsertStatement<Tracked
     protected InsertRaceStatement(Connection connection) throws SQLException {
         super(connection.prepareStatement(
                 "INSERT INTO SAILING.\"Race\" (\"name\", \"regatta\", \"raceColumn\", \"fleet\", \"startOfTracking\", "+
-                        "\"startOfRace\", \"endOfTracking\", \"endOfRace\", \"avgWindSpeedInKnots\") "+
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"));
+                        "\"startOfRace\", \"endOfTracking\", \"endOfRace\", \"avgWindSpeedInKnots\", \"raceColumnIndexZeroBased\""+
+                        "\"gateStart\") "+
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"));
     }
 
     @Override
@@ -73,5 +75,7 @@ public class InsertRaceStatement extends AbstractPreparedInsertStatement<Tracked
         } else {
             setDouble(9, 0.0);
         }
+        getPreparedStatement().setInt(10, Util.indexOf(trackedRace.getTrackedRegatta().getRegatta().getRaceColumns(), raceColumnFleetAndTrackedRace.getRaceColumn()));
+        getPreparedStatement().setBoolean(11, trackedRace.isGateStart());
     }
 }

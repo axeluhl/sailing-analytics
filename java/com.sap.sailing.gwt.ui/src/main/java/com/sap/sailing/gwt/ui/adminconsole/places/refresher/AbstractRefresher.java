@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.Refresher;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 
 public abstract class AbstractRefresher<T> implements Refresher<T> {
     private Logger logger = Logger.getLogger(getClass().getName());
@@ -116,28 +118,46 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
 
     public abstract void reload(AsyncCallback<Iterable<T>> callback);
 
-    public void fill(Iterable<T> dtos, Displayer<T> displayer) {
+    protected void fill(Iterable<T> dtos, Displayer<T> displayer) {
         displayer.fill(dtos);
     }
     
+    @Override
+    public void addIfNotContainedElseReplace(T dto, EntityIdentityComparator<T> comp) {
+        if (dto != null && dtos != null) {
+            Optional<T> existingDtoOption = dtos.stream().filter(listDto -> comp.representSameEntity(listDto, dto))
+                    .findFirst();
+            if (existingDtoOption.isPresent()) {
+                int index = dtos.indexOf(existingDtoOption.get());
+                dtos.set(index, dto);
+            } else {
+                add(dto);
+            }
+        }
+    }
+    
+    @Override
     public void add(T dto) {
-        if (dto != null) {
+        if (dto != null && dtos != null) {
             dtos.add(dto);
         }
     }
     
+    @Override
     public void remove(T dto) {
-        if (dto != null) {
+        if (dto != null && dtos != null) {
             dtos.remove(dto);
         }
     }
 
     @Override
     public void removeAll(Predicate<T> filter) {
-        for (final Iterator<T> i=dtos.iterator(); i.hasNext(); ) {
-            final T dto = i.next();
-            if (filter.test(dto)) {
-                i.remove();
+        if (dtos != null) {
+            for (final Iterator<T> i=dtos.iterator(); i.hasNext(); ) {
+                final T dto = i.next();
+                if (filter.test(dto)) {
+                    i.remove();
+                }
             }
         }
     }

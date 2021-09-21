@@ -36,15 +36,17 @@ CREATE COLUMN TABLE SAILING."Regatta" (
 	FOREIGN KEY ("scoringScheme") REFERENCES SAILING."ScoringScheme" ("id")
 );
 CREATE COLUMN TABLE SAILING."Race" (
-	"name" NVARCHAR(255) NOT NULL,
-	"regatta" NVARCHAR(255) NOT NULL,
-	"raceColumn" NVARCHAR(255) NOT NULL,
-	"fleet" NVARCHAR(255) NOT NULL,
-	"startOfTracking" TIMESTAMP,
-	"startOfRace" TIMESTAMP,
-	"endOfTracking" TIMESTAMP,
-	"endOfRace" TIMESTAMP,
-	"avgWindSpeedInKnots" DOUBLE,
+	"name" 			NVARCHAR(255) NOT NULL,
+	"regatta" 		NVARCHAR(255) NOT NULL,
+	"raceColumn" 		NVARCHAR(255) NOT NULL,
+	"fleet" 		NVARCHAR(255) NOT NULL,
+	"startOfTracking"	TIMESTAMP,
+	"startOfRace"		TIMESTAMP,
+	"endOfTracking"		TIMESTAMP,
+	"endOfRace" 		TIMESTAMP,
+	"avgWindSpeedInKnots"	DOUBLE,
+	"raceColumnIndexZeroBased" INTEGER,
+	"gateStart" 		BOOLEAN,
 	PRIMARY KEY ("name", "regatta"),
 	FOREIGN KEY ("regatta") REFERENCES SAILING."Regatta" ("name")
 );
@@ -82,13 +84,11 @@ CREATE TABLE SAILING."RaceStats" (
         "elapsedTimeInSeconds"                  DOUBLE,
         "avgCrossTrackErrorInMeters"            DOUBLE,
         "absoluteAvgCrossTrackErrorInMeters"    DOUBLE,
-        "numberOfTacks"                         INTEGER,
-        "numberOfGybes"                         INTEGER,
-        "numberOfPenaltyCircles"                INTEGER,
         "startDelayInSeconds"                   DOUBLE,
         "distanceFromStartLineInMetersAtStart"  DOUBLE,
         "speedWhenCrossingStartLineInKnots"     DOUBLE,
         "startTack"     NVARCHAR(20),
+        "rank90sAfterStart" INTEGER,
         PRIMARY KEY ("race", "regatta", "competitorId"),
         FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id"),
         FOREIGN KEY ("race", "regatta")         REFERENCES SAILING."Race" ("name", "regatta")

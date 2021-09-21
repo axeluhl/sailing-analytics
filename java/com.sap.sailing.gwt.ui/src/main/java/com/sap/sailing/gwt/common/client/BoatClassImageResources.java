@@ -396,6 +396,18 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource International14Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IQFOIL_MEN.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource IQFOilMenIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IQFOIL_WOMEN.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource IQFOilWoenIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IQFOIL_YOUTH.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource IQFOilYouthIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/OPEN_BIC.png")
     @ImageOptions(preventInlining = true)
     ImageResource OpenBicIcon();

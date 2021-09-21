@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.function.Predicate;
 
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+
 /**
  * A {@link Refresher} offers methods to register a displayer of a specific DTO type, force reloads and give the
  * possibility to update the centrally managed data. The displayer will be informed asynchronously after data changes
@@ -35,13 +37,13 @@ public interface Refresher<T> {
     void reloadAndCallFillOnly(Displayer<T> fillOnlyDisplayer);
 
     /**
-     * Force a reload of the data from server and call afterwards asynchronously the fill method of all registered
-     * {@link Displayer}.
+     * Force a reload of the data from server and afterwards call the fill method of all registered {@link Displayer}s
+     * asynchronously.
      */
     void reloadAndCallFillAll();
 
     /**
-     * Updates the list of DTOs and call asynchronously the fill method of all registered {@link Displayer} except an
+     * Updates the list of DTOs and call the fill method of all registered {@link Displayer}s asynchronously, except an
      * optional origin {@link Displayer} if set.
      * 
      * @param dtos
@@ -52,12 +54,12 @@ public interface Refresher<T> {
     void updateAndCallFillForAll(Iterable<T> dtos, Displayer<T> origin);
 
     /**
-     * Call fill method of given {@link Displayer} even if he is not registered. If data was not loaded before, do an
+     * Call fill method of given {@link Displayer} even if it is not registered. If data was not loaded before, do an
      * initial load and call fill method of all registered {@link Displayer} asynchronously and if not registered of the
      * given {@link Displayer}, too.
      * 
      * @param displayer
-     *            the {@link Displayer} on which the fill method should be called.
+     *            the {@link Displayer} on which the fill method shall be called.
      */
     void callFillAndReloadInitially(Displayer<T> displayer);
     
@@ -67,18 +69,26 @@ public interface Refresher<T> {
     void callAllFill();
     
     /**
-     * Adds a DTO to DTO list to prevent loading all data after adding single object to context.
+     * Adds a DTO to the DTO list to prevent loading all data after adding single object to context. This will
+     * only take place if the DTO list already exists, indicating that it has been requested before.
      * 
-     * @param dto DTO
+     * @param dto the DTO to add
      */
     void add(T dto);
     
     /**
      * Removes a DTO from DTO list to prevent loading all data after deleting single object to context.
      * 
-     * @param dto DTO
+     * @param dto the DTO to add
      */
     void remove(T dto);
+
+    /**
+     * Like {@link #add(Object)}, but an existing DTO will be replaced by {@code dto} if
+     * found in the list of DTOs known to this refresher, identified by {@link EntityIdentityComparator#equals(Object) equal}. This will only take place if the DTO list already exists,
+     * indicating that it has been requested before.
+     */
+    void addIfNotContainedElseReplace(T dto, EntityIdentityComparator<T> comp);
 
     /**
      * {@link #remove(Object) Removes} all objects from this refresher that {@link Predicate#test(Object) are matched) by the

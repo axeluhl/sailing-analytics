@@ -29,8 +29,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
@@ -84,17 +83,13 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             @Override
             public RacingEventServiceImpl createNewReplica() {
                 final MongoDBConfiguration masterMongoDBConfig = mongoDBService.getConfiguration();
-                final MongoClientURI masterMongoDbUri = masterMongoDBConfig.getMongoClientURI();
-                final MongoClientOptions masterMongoDbOptions = masterMongoDbUri.getOptions();
+                final ConnectionString masterMongoDbUri = masterMongoDBConfig.getMongoClientURI();
                 final MongoDBConfiguration proxyReplicaMongoDBConfig = new MongoDBConfiguration(
                         masterMongoDBConfig.getHostname(), masterMongoDBConfig.getPort(),
                         masterMongoDBConfig.getDatabaseName() + "-replica"); // use to construct basic MongoDB URI for replica DB name
-                final MongoClientURI replicaMongoDbUri = new MongoClientURI(proxyReplicaMongoDBConfig.getMongoClientURI().toString()) {
-                    @Override
-                    public MongoClientOptions getOptions() {
-                        return masterMongoDbOptions;
-                    }
-                };
+                final ConnectionString replicaMongoDbUri = new ConnectionString(proxyReplicaMongoDBConfig.getMongoClientURI().toString()+
+                        (proxyReplicaMongoDBConfig.getMongoClientURI().getConnectionString().indexOf("?") < 0 ? "?" : "&") +
+                            masterMongoDbUri.getConnectionString().substring(masterMongoDbUri.getConnectionString().indexOf("?")+1));
                 final MongoDBService replicaMongoDBService = new MongoDBConfiguration(replicaMongoDbUri).getService();
                 final RacingEventServiceImpl result = new RacingEventServiceImpl(
                         (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {

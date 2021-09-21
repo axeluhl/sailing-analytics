@@ -1,18 +1,17 @@
 package com.sap.sailing.selenium.pages.adminconsole.tracking;
 
+import org.openqa.selenium.By.ByName;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatTablePO.BoatEntry;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
-import com.sap.sailing.selenium.core.BySeleniumId;
-import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatTablePO.BoatEntry;
 
 public class TrackedRacesBoatTablePO extends CellTablePO<BoatEntry> {
     public static class BoatEntry extends DataEntryPO {
-        @FindBy(how = BySeleniumId.class, using = "ACTION_EDIT")
+        @FindBy(how = ByName.class, using = "UPDATE")
         private WebElement editButton;
 
         private static final String NAME_COLUMN = "Name";
@@ -45,11 +44,10 @@ public class TrackedRacesBoatTablePO extends CellTablePO<BoatEntry> {
             return getColumnContent(BOATCLASSNAME_COLUMN);
         }
 
-        public TrackedRacesCompetitorEditDialogPO clickEditButton() {
-            WebElement action = ActionsHelper.findEditAction(getWebElement());
-            action.click();
+        public TrackedRacesBoatEditDialogPO clickEditButton() {
+            editButton.click();
             WebElement dialog = findElementBySeleniumId(this.driver, "BoatEditDialog");
-            return new TrackedRacesCompetitorEditDialogPO(this.driver, dialog);
+            return new TrackedRacesBoatEditDialogPO(this.driver, dialog);
         }
     }
 
