@@ -45,6 +45,7 @@ CREATE COLUMN TABLE SAILING."Race" (
 	"endOfTracking" TIMESTAMP,
 	"endOfRace" TIMESTAMP,
 	"avgWindSpeedInKnots" DOUBLE,
+	"raceColumnIndexZeroBased" INTEGER,
 	PRIMARY KEY ("name", "regatta"),
 	FOREIGN KEY ("regatta") REFERENCES SAILING."Regatta" ("name")
 );
