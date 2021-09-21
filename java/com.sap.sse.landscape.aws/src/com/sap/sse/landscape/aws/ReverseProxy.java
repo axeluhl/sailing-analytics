@@ -50,14 +50,12 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /index.html} landing page for the application replica set provided.
-     * @param optionalKeyName TODO
      */
     void setPlainRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /gwt/Home.html} landing page for the application replica set provided.
-     * @param optionalKeyName TODO
      */
     void setHomeRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
@@ -65,7 +63,6 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * event page for the event with ID {@code eventId} that is expected to be hosted by the
      * application replica set provided.
-     * @param optionalKeyName TODO
      */
     void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
@@ -76,6 +73,24 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      */
     void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
             UUID leaderboardGroupId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
+    /**
+     * Like {@link #setEventRedirect(String, ApplicationProcess, UUID, Optional, byte[])}, only that the redirect points
+     * to the {@code ARCHIVE} server in the landscape.
+     */
+    void setEventArchiveRedirect(String hostname, UUID eventId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
+    /**
+     * Like {@link #setEventSeriesRedirect(String, ApplicationProcess, UUID, Optional, byte[])}, only that the redirect
+     * points to the {@code ARCHIVE} server in the landscape.
+     */
+    void setEventSeriesArchiveRedirect(String hostname, UUID leaderboardGroupId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    /**
+     * Like {@link #setHomeRedirect(String, ApplicationProcess, Optional, byte[])}, only that the redirect
+     * points to the {@code ARCHIVE} server in the landscape.
+     */
+    void setHomeArchiveRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Configures a rule for requests for anything from within {@code scope} such that those requests

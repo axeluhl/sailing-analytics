@@ -224,6 +224,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     private Pair<JSONObject, Number> doMDI(String remoteServerHostAsString, String dedicatedServerHostAsString,
             Set<String> leaderboardGroupIds, String remoteServerBearerToken, String dedicatedServerBearerToken, boolean override)
             throws Exception {
+        // TODO bug5311 migrate to use SailingServer.importMasterData
         final StringJoiner form = new StringJoiner("&");
         form.add(MasterDataImportResource.REMOTE_SERVER_URL_FORM_PARAM + "=" + remoteServerHostAsString);
         form.add(MasterDataImportResultJsonSerializer.OVERRIDE_FORM_PARAM + "=" + override);
@@ -284,6 +285,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
 
     private Pair<JSONObject, Number> doCompareServers(String server1, String server2, String bearer1,
             String bearer2, Set<String> leaderboardGroupIds) throws Exception {
+        // TODO bug5311 migrate to using SailingServer.compareServers
         final StringJoiner form = new StringJoiner("&");
         form.add(CompareServersResource.SERVER1_FORM_PARAM + "=" + server1);
         form.add(CompareServersResource.SERVER2_FORM_PARAM + "=" + server2);
@@ -295,6 +297,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
 
     private Pair<JSONObject, Number> doRemoteServerReferenceAdd(String serverToAddTo, String serverUrlToBeAdded,
             String serverToAddToBearerToken, Iterable<UUID> eventIds) throws Exception {
+        // TODO bug5311 migrate to use SailingServer.addRemoteServerReference
         final Pair<JSONObject, Number> result;
         final RemoteSailingServerReference existingRef = getExistingRemoteServerReference(serverToAddTo, serverToAddToBearerToken, serverUrlToBeAdded);
         if (existingRef == null) {
@@ -334,6 +337,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return result;
     }
     
+    // TODO bug5311 can probably be removed after migrating the other doRemoteServerReference* methods to using SailingServer.* methods
     private Pair<JSONObject, Number> doRemoteServerReferenceUpdate(String serverOnWhichToUpdateRemoteReference,
             String bearerToken, RemoteSailingServerReference updatedRef) throws IOException, Exception {
         final StringJoiner form = new StringJoiner("&");
@@ -345,6 +349,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return putFormAndReturnJsonAndResponseCode(serverOnWhichToUpdateRemoteReference, bearerToken, REMOTESERVERREFERENCEUPDATE_PATH, form);
     }
 
+    // TODO bug5311 can probably be removed after migrating the other doRemoteServerReference* methods to using SailingServer.* methods
     private RemoteSailingServerReference getExistingRemoteServerReference(final String serverUrlFromWhereToFetch,
             final String bearerToken, final String remoteReferenceServerUrl) throws MalformedURLException, Exception {
         final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
@@ -367,6 +372,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     private Pair<JSONObject, Number> doRemoteServerReferenceRemove(String serverFromWhichToDelete,
             String serverUrlToDelete, String serverFromWhichToDeleteBearerToken, Iterable<UUID> eventIds)
             throws Exception {
+        // TODO bug5311 migrate to use SailingServer.removeRemoteServerReference
         final RemoteSailingServerReference existingRef = getExistingRemoteServerReference(serverFromWhichToDelete, serverFromWhichToDeleteBearerToken, serverUrlToDelete);
         final Pair<JSONObject, Number> result;
         if (existingRef != null) {

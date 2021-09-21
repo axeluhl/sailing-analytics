@@ -740,7 +740,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
                             getLandscape().getCentralReverseProxy(region);
                     SailingAnalyticsProcess<String> archiveMaster = getSailingAnalyticsProcessFromDTO(archiveReplicaSet.getMaster());
-                    defaultRedirect.accept(new ALBToReverseProxyRedirectMapper<>(
+                    // TODO bug5311: when refactoring this for general scope migration, moving to a dedicated replica set will not require this
+                    // TODO bug5311: when refactoring this for general scope migration, moving into a cold storage server other than ARCHIVE will require ALBToReverseProxyRedirectMapper instead
+                    defaultRedirect.accept(new ALBToReverseProxyArchiveRedirectMapper<>(
                             centralReverseProxy, hostnameFromWhichToArchive, archiveMaster, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
                     if (removeApplicationReplicaSet) {
                         final SailingAnalyticsProcess<String> fromMaster = getSailingAnalyticsProcessFromDTO(applicationReplicaSetToArchive.getMaster());
