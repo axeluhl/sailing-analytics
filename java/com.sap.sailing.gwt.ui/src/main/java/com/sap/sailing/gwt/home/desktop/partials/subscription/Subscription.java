@@ -13,9 +13,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.shared.places.subscription.SailingSubscriptionStringConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.StringMessagesKey;
-import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public class Subscription extends Composite {
@@ -86,15 +86,14 @@ public class Subscription extends Composite {
         default:
             break;
         }
-        title.setInnerText(SubscriptionStringConstants.INSTANCE.getString(subscriptionPlanDTO.getNameMessageKey()));
-        description
-                .setInnerText(SubscriptionStringConstants.INSTANCE.getString(subscriptionPlanDTO.getDescMessageKey()));
-
+        final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
+        title.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getNameMessageKey()));
+        description.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getDescMessageKey()));
         price.setInnerText(priceText);
         for (StringMessagesKey featureKey : subscriptionPlanDTO.getFeatures()) {
             FlowPanel feature = new FlowPanel();
             feature.addStyleName(FEATURE_STYLE);
-            feature.add(new Label(SubscriptionStringConstants.INSTANCE.getString(featureKey)));
+            feature.add(new Label(subscriptionStringConstants.getString(featureKey)));
             features.add(feature);
         }
     }

@@ -20,8 +20,12 @@ import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
  */
 public class SailingSubscriptionPlan extends SubscriptionPlan {
     private static final long serialVersionUID = 2563619370274543312L;
-    private static final String PRO_PLAN_NAME_KEY = "pro_plan_name";
-    private static final String PRO_PLAN_DESC_KEY = "pro_plan_desc";
+    private static final String BASIC_PLAN_NAME_KEY = "basic_plan_name";
+    private static final String ADVANCED_PLAN_NAME_KEY = "advanced_plan_name";
+    private static final String AAAS_PLAN_NAME_KEY = "aaas_plan_name";
+    private static final String BASIC_PLAN_DESC_KEY = "basic_plan_desc";
+    private static final String ADVANCED_PLAN_DESC_KEY = "advanced_plan_desc";
+    private static final String AAAS_PLAN_DESC_KEY = "aaas_plan_desc";
     private static final Map<String, SubscriptionPlan> plansById = new HashMap<>();
 
     private SailingSubscriptionPlan(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
@@ -30,8 +34,18 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
         plansById.put(id, this);
     }
 
-    public static final SubscriptionPlan PRO = new SailingSubscriptionPlan("pro",
-            new StringMessagesKey(PRO_PLAN_NAME_KEY), new StringMessagesKey(PRO_PLAN_DESC_KEY), new BigDecimal(100),
+    public static final SubscriptionPlan Basic = new SailingSubscriptionPlan("basic",
+            new StringMessagesKey(BASIC_PLAN_NAME_KEY), new StringMessagesKey(BASIC_PLAN_DESC_KEY), new BigDecimal(100),
+            new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
+                    new StringMessagesKey(StreamletViewerRole.getMessageKey())));
+    
+    public static final SubscriptionPlan Advanced = new SailingSubscriptionPlan("advanced",
+            new StringMessagesKey(ADVANCED_PLAN_NAME_KEY), new StringMessagesKey(ADVANCED_PLAN_DESC_KEY), new BigDecimal(100),
+            new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
+                    new StringMessagesKey(StreamletViewerRole.getMessageKey())));
+    
+    public static final SubscriptionPlan AAAS = new SailingSubscriptionPlan("aaas",
+            new StringMessagesKey(AAAS_PLAN_NAME_KEY), new StringMessagesKey(AAAS_PLAN_DESC_KEY), new BigDecimal(100),
             new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
                     new StringMessagesKey(StreamletViewerRole.getMessageKey())));
 

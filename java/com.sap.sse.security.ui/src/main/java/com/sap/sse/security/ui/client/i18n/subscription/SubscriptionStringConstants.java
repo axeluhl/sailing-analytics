@@ -20,9 +20,12 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
         }
     }
 
-    String pro_plan_name();
-    String pro_plan_desc();
-    String streamlet_viewer_role();
     String individual_subscription_plan_name();
     String individual_subscription_plan_description();
+    String basic_plan_name();
+    String basic_plan_desc();
+    String advanced_plan_name();
+    String advanced_plan_desc();
+    String aaas_plan_name();
+    String aaas_plan_desc();
 }
