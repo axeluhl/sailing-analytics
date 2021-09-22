@@ -425,136 +425,175 @@
       <descriptions defaultDescription="Rank at First Mark"/>
       <measureMapping columnObjectName="Join_1_2" columnName="firstMarkRankOneBased"/>
     </measure>
-    <measure id="avgWindSpeedInKnots" order="35" aggregationType="avg" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
+    <measure id="avgWindSpeedInKnots" order="38" aggregationType="avg" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
       <descriptions defaultDescription="Avg Windspeed"/>
-      <fixedUnit>kts</fixedUnit>
+      <fixedUnit>kn</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="avgWindSpeedInKnots"/>
     </measure>
-    <measure id="raceDurationInSeconds" order="36" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
+    <measure id="raceDurationInSeconds" order="39" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
       <descriptions defaultDescription="Raceduration"/>
       <fixedUnit>s</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="raceDurationInSeconds"/>
     </measure>
-    <measure id="startDelayInSeconds" order="37" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
+    <measure id="startDelayInSeconds" order="40" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
       <descriptions defaultDescription="Startdelay"/>
       <fixedUnit>s</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="startDelayInSeconds"/>
     </measure>
-    <measure id="distanceFromStartLineInMetersAtStart" order="38" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
+    <measure id="distanceFromStartLineInMetersAtStart" order="41" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
       <descriptions defaultDescription="Distance from Startline at Start"/>
       <measureMapping columnObjectName="Join_1_2" columnName="distanceFromStartLineInMetersAtStart"/>
     </measure>
-    <measure id="speedWhenCrossingStartLineInKnots" order="40" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
+    <measure id="speedWhenCrossingStartLineInKnots" order="43" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1" displayFolder="RaceStat">
       <descriptions defaultDescription="Speed when crossing Startline"/>
-      <fixedUnit>kts</fixedUnit>
+      <fixedUnit>kn</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="speedWhenCrossingStartLineInKnots"/>
     </measure>
-    <measure id="distanceSailedInMeters" order="42" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1">
+    <measure id="distanceSailedInMeters" order="45" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1">
       <descriptions defaultDescription="Distance Sailed"/>
       <fixedUnit>m</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="distanceSailedInMeters"/>
     </measure>
-    <measure id="firstMarkDistanceSailedInMeters" order="43" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="0" displayFolder="RaceStat">
+    <measure id="firstMarkDistanceSailedInMeters" order="47" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="0" displayFolder="RaceStat">
       <descriptions defaultDescription="Distance Sailed at 1st Mark"/>
       <fixedUnit>m</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="firstMarkDistanceSailedInMeters"/>
     </measure>
-    <measure id="elapsedTimeInSeconds" order="44" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1">
+    <measure id="elapsedTimeInSeconds" order="48" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="1">
       <descriptions defaultDescription="Elapsed Time"/>
       <measureMapping columnObjectName="Join_1_2" columnName="elapsedTimeInSeconds"/>
     </measure>
-    <measure id="firstMarkElapsedTimeInSeconds" order="45" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="0" displayFolder="RaceStat">
+    <measure id="firstMarkElapsedTimeInSeconds" order="49" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="0" displayFolder="RaceStat">
       <descriptions defaultDescription="Elapsed Time at 1st Mark"/>
       <fixedUnit>s</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="firstMarkElapsedTimeInSeconds"/>
     </measure>
   
-    <measure id="avgCrossTrackErrorInMeters" order="46" aggregationType="avg" measureType="quantity" semanticType="quantity" presentationScale="1">
+    <measure id="avgCrossTrackErrorInMeters" order="50" aggregationType="avg" measureType="quantity" semanticType="quantity" presentationScale="1">
       <descriptions defaultDescription="avgCrossTrackErrorInMeters"/>
       <fixedUnit>m</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="avgCrossTrackErrorInMeters"/>
     </measure>
-    <measure id="absoluteAvgCrossTrackErrorInMeters" order="47" aggregationType="avg" measureType="quantity" semanticType="quantity" presentationScale="1">
+    <measure id="absoluteAvgCrossTrackErrorInMeters" order="51" aggregationType="avg" measureType="quantity" semanticType="quantity" presentationScale="1">
       <descriptions defaultDescription="absoluteAvgCrossTrackErrorInMeters"/>
       <fixedUnit>m</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="absoluteAvgCrossTrackErrorInMeters"/>
     </measure>
-    <measure id="avgVMGInKnots" order="48" aggregationType="avg" measureType="quantity" semanticType="quantity" presentationScale="1">
+    <measure id="avgVMGInKnots" order="52" aggregationType="avg" measureType="quantity" semanticType="quantity" presentationScale="1">
       <descriptions defaultDescription="Avg VMG"/>
-      <fixedUnit>kts</fixedUnit>
+      <fixedUnit>kn</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="avgVMGInKnots"/>
     </measure>
-    <measure id="legGapToLeaderInSeconds" order="49" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="0">
+    <measure id="legGapToLeaderInSeconds" order="53" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="0">
       <descriptions defaultDescription="Gap to Leader (Lap)"/>
       <fixedUnit>s</fixedUnit>
       <measureMapping columnObjectName="Join_1_2" columnName="legGapToLeaderInSeconds"/>
     </measure>
-    <measure id="firstMarkGapToLeaderInSeconds" order="50" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="0" displayFolder="RaceStat">
+    <measure id="firstMarkGapToLeaderInSeconds" order="54" aggregationType="sum" measureType="quantity" semanticType="quantity" presentationScale="0" displayFolder="RaceStat">
       <descriptions defaultDescription="Gap to Leader at 1st Mark"/>
       <measureMapping columnObjectName="Join_1_2" columnName="firstMarkGapToLeaderInSeconds"/>
     </measure>
-    <measure id="numberOfTacks" order="51" aggregationType="sum" measureType="simple" displayFolder="Maneuver">
+    <measure id="numberOfTacks" order="55" aggregationType="sum" measureType="simple" displayFolder="Maneuver">
       <descriptions defaultDescription="Number Of Tacks"/>
       <measureMapping columnObjectName="Join_1_2" columnName="numberOfTacks"/>
     </measure>
-    <measure id="numberOfGybes" order="52" aggregationType="sum" measureType="simple" displayFolder="Maneuver">
+    <measure id="numberOfGybes" order="56" aggregationType="sum" measureType="simple" displayFolder="Maneuver">
       <descriptions defaultDescription="Number Of Gybes"/>
       <measureMapping columnObjectName="Join_1_2" columnName="numberOfGybes"/>
     </measure>
-    <measure id="numberOfPenaltyCircles" order="53" aggregationType="sum" measureType="simple" displayFolder="Maneuver">
+    <measure id="numberOfPenaltyCircles" order="57" aggregationType="sum" measureType="simple" displayFolder="Maneuver">
       <descriptions defaultDescription="Number Of Penalty Circles"/>
       <measureMapping columnObjectName="Join_1_2" columnName="numberOfPenaltyCircles"/>
     </measure></baseMeasures>
   <calculatedMeasures>
     <measure id="rankGain" order="34" aggregationType="sum" measureType="simple" datatype="INTEGER" displayFolder="Rank" expressionLanguage="SQL">
       <descriptions defaultDescription="Rank Gain / Loss (Start - Finish)"/>
-      <formula>&quot;startRank&quot;-&quot;rankOneBased&quot;</formula>
-    </measure>
-    <measure id="avgStartlineDistanceInMeters" order="39" semanticType="quantity" aggregationType="sum" measureType="quantity" datatype="DOUBLE" presentationScale="1" expressionLanguage="SQL">
+      <formula>CASE &quot;startRank&quot;
+	 WHEN 0 then 0
+	 ELSE &quot;startRank&quot;-&quot;rankOneBased&quot;
+ END</formula>
+    
+      </measure>
+    <measure id="relRankOneBased" order="35" aggregationType="sum" measureType="simple" datatype="INTEGER" displayFolder="Rank" expressionLanguage="SQL">
+      <descriptions defaultDescription="Rank (%)"/>
+      <formula>FLOOR(100 * &quot;rankOneBased&quot;/&quot;competitorCount&quot;)</formula>
+    
+      </measure>
+    <measure id="relStartRank" order="36" aggregationType="sum" measureType="simple" datatype="INTEGER" displayFolder="Rank" expressionLanguage="SQL">
+      <descriptions defaultDescription="Start Rank (%)"/>
+      <formula>FLOOR(100 * &quot;startRank&quot;/&quot;competitorCount&quot;)</formula>
+    
+      </measure>
+    <measure id="relFirstMarkRankOneBased" order="37" aggregationType="sum" measureType="simple" datatype="INTEGER" displayFolder="Rank" expressionLanguage="SQL">
+      <descriptions defaultDescription="Rank at 1st Mark (%)"/>
+      <formula>FLOOR(100 * &quot;firstMarkRankOneBased&quot;/&quot;competitorCount&quot;)</formula>
+    
+      </measure>
+    <measure id="avgStartlineDistanceInMeters" order="42" semanticType="quantity" aggregationType="sum" measureType="quantity" datatype="DOUBLE" presentationScale="1" expressionLanguage="SQL">
       <descriptions defaultDescription="Avg Distance from Startline at Start"/>
       <fixedUnit>m</fixedUnit>
       <formula>&quot;distanceFromStartLineInMetersAtStart&quot;/&quot;competitorRaces&quot;</formula>
-    </measure>
-    <measure id="avgStartlineSpeedInKnots" order="41" semanticType="quantity" aggregationType="sum" measureType="quantity" datatype="DOUBLE" presentationScale="1" expressionLanguage="SQL">
+    
+      </measure>
+    <measure id="avgStartlineSpeedInKnots" order="44" semanticType="quantity" aggregationType="sum" measureType="quantity" datatype="DOUBLE" presentationScale="1" expressionLanguage="SQL">
       <descriptions defaultDescription="Avg Speed when crossing Startline"/>
+      <fixedUnit>kn</fixedUnit>
       <formula>&quot;speedWhenCrossingStartLineInKnots&quot;/&quot;competitorRaces&quot;</formula>
-    </measure>
-    <measure id="avgNumberOfTacks" order="54" aggregationType="sum" measureType="simple" datatype="DOUBLE" presentationScale="1" expressionLanguage="SQL" displayFolder="Maneuver">
+    
+      </measure>
+    <measure id="distanceSailedInNM" order="46" semanticType="quantity" aggregationType="sum" measureType="quantity" datatype="DOUBLE" presentationScale="2" expressionLanguage="SQL">
+      <descriptions defaultDescription="Distance Sailed in Nautical Miles"/>
+      <fixedUnit>nmi</fixedUnit>
+      <formula>&quot;distanceSailedInMeters&quot;/0.0005399568</formula>
+      </measure>
+    <measure id="avgNumberOfTacks" order="58" aggregationType="sum" measureType="simple" datatype="DOUBLE" presentationScale="1" expressionLanguage="SQL" displayFolder="Maneuver">
       <descriptions defaultDescription="Avg Number of Tacks"/>
       <formula>&quot;numberOfTacks&quot;/&quot;competitorRaces&quot;</formula>
+      
       </measure>
-    <measure id="avgNumberOfGybes" order="55" aggregationType="sum" measureType="simple" datatype="DOUBLE" expressionLanguage="SQL" presentationScale="1" displayFolder="Maneuver">
+    <measure id="avgNumberOfGybes" order="59" aggregationType="sum" measureType="simple" datatype="DOUBLE" expressionLanguage="SQL" presentationScale="1" displayFolder="Maneuver">
       <descriptions defaultDescription="Avg Number of Gybes"/>
       <formula>&quot;numberOfGybes&quot;/&quot;competitorRaces&quot;</formula>
+      
       </measure>
   
-    <measure id="avgNumberOfPenaltyCircles" order="56" aggregationType="sum" measureType="simple" datatype="DOUBLE" presentationScale="1" displayFolder="Maneuver" expressionLanguage="SQL">
+    <measure id="avgNumberOfPenaltyCircles" order="60" aggregationType="sum" measureType="simple" datatype="DOUBLE" presentationScale="1" displayFolder="Maneuver" expressionLanguage="SQL">
       <descriptions defaultDescription="Avg Number of Penalties"/>
       <formula>&quot;numberOfPenaltyCircles&quot;/&quot;competitorRaces&quot;</formula>
-    </measure>
-    <measure id="competitorRaces" order="57" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
+    
+      </measure>
+    <measure id="competitorRaces" order="61" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
       <descriptions defaultDescription="CompetitorRaces"/>
       <exceptionAggregation>
         <attribute attributeName="raceName"/>
         <attribute attributeName="competitorId"/>
       </exceptionAggregation>
       <formula>1</formula>
+      
       </measure>
-    <measure id="competitorCount" order="58" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
+    <measure id="competitorCount" order="62" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
       <descriptions defaultDescription="Number of Competitors"/>
       <exceptionAggregation>
         <attribute attributeName="competitorId"/>
       </exceptionAggregation>
       <formula>1</formula>
-    </measure>
-    <measure id="raceCount" order="59" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
+    
+      </measure>
+    <measure id="raceCount" order="63" aggregationType="sum" measureType="simple" calculatedMeasureType="counter" aggregatable="true" datatype="BIGINT" length="">
       <descriptions defaultDescription="Number of Races"/>
       <exceptionAggregation>
         <attribute attributeName="regatta"/>
         <attribute attributeName="raceName"/>
       </exceptionAggregation>
       <formula>1</formula>
-    </measure>
+    
+      </measure>
+  
+    <measure id="avgSpeedInKnots" order="64" semanticType="quantity" aggregationType="sum" measureType="quantity" datatype="DOUBLE" presentationScale="2" expressionLanguage="SQL">
+      <descriptions defaultDescription="Avg Speed in Knots"/>
+      <fixedUnit>kn</fixedUnit>
+      <formula>&quot;distanceSailedInNM&quot;/&quot;elapsedTimeInSeconds&quot;/3600</formula>
+      </measure>
   </calculatedMeasures>
   <restrictedMeasures/>
   <localDimensions>
