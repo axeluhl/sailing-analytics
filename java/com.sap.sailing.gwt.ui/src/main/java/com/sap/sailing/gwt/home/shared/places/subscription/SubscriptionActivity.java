@@ -42,19 +42,7 @@ public class SubscriptionActivity extends AbstractActivity {
                                     view.addSubscriptionPlan(plan, Type.DEFAULT);
                                 }
                             });
-                            // TODO: remove dummy impl of subscription plan
-                            result.forEach(plan -> {
-                                view.addSubscriptionPlan(plan, Type.OWNER);
-                            });
-                            // TODO: remove dummy impl of subscription plan
-                            result.forEach(plan -> {
-                                view.addSubscriptionPlan(plan, Type.DEFAULT);
-                            });
-                            // TODO: remove dummy impl of subscription plan
-                            result.forEach(plan -> {
-                                view.addSubscriptionPlan(plan, Type.HIGHLIGHT);
-                            });
-                            SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO(null /* id */,
+                            final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO(null /* id */,
                                     new StringMessagesKey("individual_subscription_plan_name"),
                                     new StringMessagesKey("individual_subscription_plan_description"), 
                                     null /* price */,
