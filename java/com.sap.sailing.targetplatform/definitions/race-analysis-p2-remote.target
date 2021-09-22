@@ -276,6 +276,7 @@
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="com.chargebee.chargebee-java"/>
+<plugin id="com.chargebee.chargebee-java.source"/>
 <plugin id="slf4j.jdk14"/>
 <plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>
