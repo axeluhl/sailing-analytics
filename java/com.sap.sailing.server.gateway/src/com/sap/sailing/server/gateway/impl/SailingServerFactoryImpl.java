@@ -39,7 +39,13 @@ public class SailingServerFactoryImpl implements SailingServerFactory {
 
     @Override
     public SailingServer getSailingServer(URL baseUrl, String bearerToken) {
-        return new SailingServerImpl(baseUrl, bearerToken);
+        final SailingServer result;
+        if (bearerToken == null) {
+            result = getSailingServer(baseUrl);
+        } else {
+            result = new SailingServerImpl(baseUrl, bearerToken);
+        }
+        return result;
     }
 
     @Override

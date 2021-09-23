@@ -32,8 +32,10 @@ public interface SailingServerFactory {
     SailingServer getSailingServer(URL baseUrl);
     
     /**
-     * Explicitly authenticates calls to the resulting {@link SailingServer} using the {@code bearerToken}
-     * provided.
+     * Explicitly authenticates calls to the resulting {@link SailingServer} using the {@code bearerToken} provided. If
+     * the {@code bearerToken} is {@code null} then this method does the same as {@link #getSailingServer(URL)}, namely
+     * looking for a current authenticated session and then using its bearer token or, if not found, continue
+     * anonymously.
      */
     SailingServer getSailingServer(URL baseUrl, String bearerToken);
     

@@ -218,6 +218,7 @@
         <setEntry value="com.sap.sailing.resultimport@4:true"/>
         <setEntry value="com.sap.sailing.routeconverterjava11extension@default:false"/>
         <setEntry value="com.sap.sailing.sailwave.resultimport@4:true"/>
+        <setEntry value="com.sap.sailing.server.gateway.interfaces@default:default"/>
         <setEntry value="com.sap.sailing.server.gateway.serialization.shared.android@default:default"/>
         <setEntry value="com.sap.sailing.server.gateway.serialization@default:default"/>
         <setEntry value="com.sap.sailing.server.gateway@5:true"/>
