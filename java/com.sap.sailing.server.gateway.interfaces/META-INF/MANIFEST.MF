@@ -13,3 +13,4 @@ Require-Bundle: org.json.simple,
  com.sap.sailing.domain,
  com.sap.sse.shared.android,
  org.apache.httpcomponents.httpclient
+Bundle-ActivationPolicy: lazy
