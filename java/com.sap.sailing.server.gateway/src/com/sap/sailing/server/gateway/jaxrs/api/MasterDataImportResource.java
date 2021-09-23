@@ -40,7 +40,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     public static final String REMOTE_SERVER_PASSWORD_FORM_PARAM = "remoteServerPassword";
     public static final String REMOTE_SERVER_USERNAME_FORM_PARAM = "remoteServerUsername";
     public static final String REMOTE_SERVER_URL_FORM_PARAM = "remoteServerUrl";
-    public static final String PROGRSS_TRACKING_UUID_FORM_PARAM = "progressTrackingUUID";
+    public static final String PROGRESS_TRACKING_UUID_FORM_PARAM = "progressTrackingUUID";
     private static final Logger logger = Logger.getLogger(MasterDataImportResource.class.getName());
     
     public MasterDataImportResource() {
@@ -59,7 +59,7 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             @FormParam(MasterDataImportResultJsonSerializer.EXPORT_WIND_FORM_PARAM) @DefaultValue("true") Boolean exportWind,
             @FormParam(MasterDataImportResultJsonSerializer.EXPORT_DEVICE_CONFIGS_FORM_PARAM) @DefaultValue("false") Boolean exportDeviceConfigs,
             @FormParam(MasterDataImportResultJsonSerializer.EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM) @DefaultValue("true") Boolean exportTrackedRacesAndStartTracking,
-            @FormParam(PROGRSS_TRACKING_UUID_FORM_PARAM) String progressTrackingUuid) {
+            @FormParam(PROGRESS_TRACKING_UUID_FORM_PARAM) String progressTrackingUuid) {
         Response response = null;
         if (!Util.hasLength(remoteServerUrlAsString)) {
             response = badRequest("Remote server URL parameter "+REMOTE_SERVER_URL_FORM_PARAM+" must be present and non-empty");
@@ -106,7 +106,9 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
             final DataImportProgress progress = getService().getDataImportLock().getProgress(UUID.fromString(progressTrackingUuid));
             if (progress == null) {
-                response = Response.status(Status.NOT_FOUND).entity("No progress found for progess tracking UUID "+progressTrackingUuid).type(MediaType.TEXT_PLAIN).build();
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("\"No progress found for progess tracking UUID "+progressTrackingUuid+"\"")
+                        .type(MediaType.APPLICATION_JSON).build();
             } else {
                 final JSONObject jsonResponse = new DataImportProgressJsonSerializer().serialize(progress);
                 response = Response.ok(streamingOutput(jsonResponse)).build();
