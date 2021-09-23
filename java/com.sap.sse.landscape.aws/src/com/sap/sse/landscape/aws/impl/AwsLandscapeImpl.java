@@ -717,8 +717,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier) {
-        final Filter filter = getRunningHostsFilter(getHostsWithTagValueFilter(Filter.builder(), tagName, tagValue)).build();
-        return getHostsWithFilters(region, hostSupplier, filter);
+        final Filter tagFilter = getHostsWithTagValueFilter(Filter.builder(), tagName, tagValue).build();
+        final Filter runningFilter = getRunningHostsFilter();
+        return getHostsWithFilters(region, hostSupplier, tagFilter, runningFilter);
     }
     
     private Filter getRunningHostsFilter() {
