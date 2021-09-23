@@ -181,7 +181,6 @@ public interface LandscapeManagementWriteServiceAsync {
      */
     void archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
-            SailingApplicationReplicaSetDTO<String> archiveReplicaSet,
             String bearerTokenOrNullForArchive,
             Duration durationToWaitBeforeCompareServers,
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet,

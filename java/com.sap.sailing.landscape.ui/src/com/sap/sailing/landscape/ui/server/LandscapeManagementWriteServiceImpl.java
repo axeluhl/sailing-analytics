@@ -91,7 +91,6 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
-import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
@@ -330,9 +329,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final ArrayList<SailingApplicationReplicaSetDTO<String>> result = new ArrayList<>();
         final AwsRegion region = new AwsRegion(regionId);
-        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier =
-                (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape)->new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(
-                        instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape, processFactoryFromHostAndServerDirectory);
+        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
         final Set<Future<SailingApplicationReplicaSetDTO<String>>> resultFutures = new HashSet<>();
         final ScheduledExecutorService backgroundThreadPool = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Constructing SailingApplicationReplicaSetDTOs "+UUID.randomUUID());
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
@@ -592,7 +589,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setLandscape(landscape)
             .setServerName(name)
             .setRelease(release)
-            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
             .setRegion(region)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(bearerTokenUsedByMaster)).build());
         masterHostBuilder
@@ -702,12 +698,15 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public UUID archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
-            SailingApplicationReplicaSetDTO<String> archiveReplicaSet,
             String bearerTokenOrNullForArchive,
             Duration durationToWaitBeforeCompareServers,
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet, MongoEndpointDTO moveDatabaseHere,
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> archiveReplicaSet =
+                getLandscape().getApplicationReplicaSetByTagValue(new AwsRegion(regionId),
+                    "sailing-analytics-server", "ARCHIVE", new SailingAnalyticsHostSupplier<String>(), WAIT_FOR_PROCESS_TIMEOUT,
+                    Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
         final UUID idForProgressTracking = UUID.randomUUID();
         final RedirectDTO defaultRedirect = applicationReplicaSetToArchive.getDefaultRedirect();
         final String hostnameFromWhichToArchive = applicationReplicaSetToArchive.getHostname();
@@ -739,7 +738,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     final AwsRegion region = new AwsRegion(regionId);
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
                             getLandscape().getCentralReverseProxy(region);
-                    SailingAnalyticsProcess<String> archiveMaster = getSailingAnalyticsProcessFromDTO(archiveReplicaSet.getMaster());
+                    SailingAnalyticsProcess<String> archiveMaster = archiveReplicaSet.getMaster();
                     // TODO bug5311: when refactoring this for general scope migration, moving to a dedicated replica set will not require this
                     // TODO bug5311: when refactoring this for general scope migration, moving into a cold storage server other than ARCHIVE will require ALBToReverseProxyRedirectMapper instead
                     defaultRedirect.accept(new ALBToReverseProxyArchiveRedirectMapper<>(
@@ -1102,10 +1101,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
      * Returns one replica process that is healthy, or {@code null} if no such process was found
      */
     private SailingAnalyticsProcess<String> hasHealthyReplica(SailingAnalyticsProcess<String> master) throws Exception {
-        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier =
-                (String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateIpAddress, TimePoint launchTimePoint, AwsLandscape<String> landscape)->
-                    new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape,
-                            processFactoryFromHostAndServerDirectory);
+        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
         for (final SailingAnalyticsProcess<String> replica : master.getReplicas(WAIT_FOR_HOST_TIMEOUT, hostSupplier, processFactoryFromHostAndServerDirectory)) {
             if (replica.isReady(WAIT_FOR_HOST_TIMEOUT)) {
                 return replica;

@@ -657,6 +657,18 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
+     * Like {@link #getApplicationReplicaSetsByTag(Region, String, HostSupplier, Optional, Optional, byte[])}, only that the tag's
+     * value can also be constrained using this method. This way, callers can, e.g., search for a specific replica set as long as
+     * the master runs on a dedicated host with only this replica set name in the {@code sailing-analytics-server} tag.
+     */
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
+    AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSetByTagValue(
+            Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier,
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
+
+    /**
      * Obtains session credentials using an MFA token code valid for the user for which this landscape object was authenticated
      * during its creation with an access key ID and a secret. 
      */
