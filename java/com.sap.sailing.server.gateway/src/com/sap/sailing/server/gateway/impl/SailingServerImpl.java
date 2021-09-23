@@ -23,6 +23,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
@@ -98,7 +99,7 @@ public class SailingServerImpl implements SailingServer {
     
     private void authenticate(HttpRequest request) {
         if (bearerToken != null) {
-            request.setHeader("Authorization", "Bearer: "+bearerToken);
+            request.setHeader("Authorization", "Bearer "+bearerToken);
         }
     }
 
@@ -126,9 +127,10 @@ public class SailingServerImpl implements SailingServer {
         params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.EXPORT_WIND_FORM_PARAM, Boolean.toString(exportWind)));
         params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.EXPORT_DEVICE_CONFIGS_FORM_PARAM, Boolean.toString(exportDeviceConfigs)));
         params.add(new BasicNameValuePair(MasterDataImportResultJsonSerializer.EXPORT_TRACKED_RACES_AND_START_TRACKING_FORM_PARAM, Boolean.toString(exportTrackedRacesAndStartTracking)));
-        progressTrackingUuid.ifPresent(ptid->params.add(new BasicNameValuePair(MasterDataImportResource.PROGRSS_TRACKING_UUID_FORM_PARAM, ptid.toString())));
+        progressTrackingUuid.ifPresent(ptid->params.add(new BasicNameValuePair(MasterDataImportResource.PROGRESS_TRACKING_UUID_FORM_PARAM, ptid.toString())));
         final HttpPost importMasterData = new HttpPost(mdiUrl.toString());
-        importMasterData.setEntity(EntityBuilder.create().setParameters(params).build());
+        importMasterData.setEntity(EntityBuilder.create()
+                .setContentType(ContentType.APPLICATION_FORM_URLENCODED).setParameters(params).build());
         final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(importMasterData).getA();
         return new MasterDataImportResultJsonDeserializer().deserialize(jsonResponse);
     }
@@ -137,7 +139,7 @@ public class SailingServerImpl implements SailingServer {
     public DataImportProgress getMasterDataImportProgress(UUID progressTrackingUuid) throws ClientProtocolException, IOException, ParseException {
         final URL progressUrl = new URL(baseUrl, GATEWAY_URL_PREFIX + MasterDataImportResource.V1_MASTERDATAIMPORT + MasterDataImportResource.PROGRESS+
                 "?"+MasterDataImportResource.PROGRESS_TRACKING_UUID+"="+progressTrackingUuid);
-        final HttpPost getMasterDataImportProgress = new HttpPost(progressUrl.toString());
+        final HttpGet getMasterDataImportProgress = new HttpGet(progressUrl.toString());
         final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(getMasterDataImportProgress).getA();
         return new DataImportProgressJsonDeserializer().deserialize(jsonResponse);
     }
@@ -160,7 +162,8 @@ public class SailingServerImpl implements SailingServer {
             }
         });
         final HttpPost importMasterData = new HttpPost(compareServersUrl.toString());
-        importMasterData.setEntity(EntityBuilder.create().setParameters(params).build());
+        importMasterData.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED)
+                .setParameters(params).build());
         final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(importMasterData).getA();
         return new CompareServersResultJsonDeserializer().deserialize(jsonResponse);
     }
@@ -186,7 +189,8 @@ public class SailingServerImpl implements SailingServer {
         params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_NAME, referencedServer.getBaseUrl().toString()));
         params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_IS_INCLUDE, Boolean.toString(includeSpecifiedEvents)));
         final HttpPost addRemoteReference = new HttpPost(addRemoteReferenceUrl.toString());
-        addRemoteReference.setEntity(EntityBuilder.create().setParameters(params).build());
+        addRemoteReference.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED)
+                .setParameters(params).build());
         return new RemoteSailingServerReferenceJsonDeserializer().deserialize((JSONObject) getJsonParsedResponse(addRemoteReference).getA());
     }
 
@@ -197,7 +201,8 @@ public class SailingServerImpl implements SailingServer {
                         + RemoteServerReferenceResource.REMOVE).toString());
         final List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_NAME, referencedServer.getBaseUrl().toString()));
-        removeRequest.setEntity(EntityBuilder.create().setParameters(params).build());
+        removeRequest.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED)
+                .setParameters(params).build());
         return new RemoteSailingServerReferenceJsonDeserializer().deserialize((JSONObject) getJsonParsedResponse(removeRequest).getA());
     }
 
@@ -214,7 +219,8 @@ public class SailingServerImpl implements SailingServer {
             params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_NAME, referencedServerBaseUrl));
             params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_IS_INCLUDE, Boolean.toString(true)));
             final HttpPost addRemoteReference = new HttpPost(addRemoteReferenceUrl.toString());
-            addRemoteReference.setEntity(EntityBuilder.create().setParameters(params).build());
+            addRemoteReference.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED)
+                    .setParameters(params).build());
             result = new RemoteSailingServerReferenceJsonDeserializer().deserialize((JSONObject) getJsonParsedResponse(addRemoteReference).getA());
         } else {
             if (existingRef.isInclude()) {
@@ -296,7 +302,7 @@ public class SailingServerImpl implements SailingServer {
         for (final UUID eventId : updatedRef.getSelectedEventIds()) {
             params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_EVENT_IDS, eventId.toString()));
         }
-        updateRequest.setEntity(EntityBuilder.create().setParameters(params).build());
+        updateRequest.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED).setParameters(params).build());
         return new RemoteSailingServerReferenceJsonDeserializer().deserialize((JSONObject) getJsonParsedResponse(updateRequest).getA());
     }
 
