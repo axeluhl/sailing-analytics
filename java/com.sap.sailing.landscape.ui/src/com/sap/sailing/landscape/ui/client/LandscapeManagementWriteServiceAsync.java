@@ -89,7 +89,8 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String replicaReplicationBearerToken,
+            String optionalDomainName,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,

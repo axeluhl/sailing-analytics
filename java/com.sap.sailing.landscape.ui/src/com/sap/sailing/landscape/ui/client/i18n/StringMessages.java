@@ -107,4 +107,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String bearerTokenOrNullForArchive();
     String numberOfMinutesBeforeAndBetweenCompareServers();
     String numberOfCompareServersAttempts();
+    String replicaReplicationBearerToken();
 }

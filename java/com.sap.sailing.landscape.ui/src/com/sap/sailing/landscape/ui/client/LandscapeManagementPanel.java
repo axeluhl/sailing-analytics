@@ -390,7 +390,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                                         sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                                instructions.getReplicationBearerToken(),instructions.getOptionalDomainName(),
+                                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
+                                                instructions.getOptionalDomainName(),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {
@@ -678,7 +679,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                     sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                             sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                                    upgradeInstructions.getReplicationBearerToken(),
+                                                    upgradeInstructions.getMasterReplicationBearerToken(),
                                                     new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                                         @Override
                                                         public void onFailure(Throwable caught) {

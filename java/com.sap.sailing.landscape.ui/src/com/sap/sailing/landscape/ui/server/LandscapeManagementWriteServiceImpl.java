@@ -574,7 +574,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String replicationBearerToken, String optionalDomainName)
+            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
@@ -582,8 +582,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
-        final String bearerTokenUsedByMaster = Util.hasLength(replicationBearerToken) ? replicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
-        final String bearerTokenUsedByReplicas = getSecurityService().getAccessToken(SessionUtils.getPrincipal().toString()); // TODO how about using an explicit replicationBearerToken only for master and prefer the current user's token for replicas? Doesn't work, though, for testing with disconnected caller security
+        final String bearerTokenUsedByMaster = Util.hasLength(masterReplicationBearerToken) ? masterReplicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
+        final String bearerTokenUsedByReplicas = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         masterConfigurationBuilder
             .setLandscape(landscape)
@@ -949,13 +949,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public SailingApplicationReplicaSetDTO<String> upgradeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicationBearerToken) throws Exception {
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken) throws Exception {
         checkLandscapeManageAwsPermission();
         final Release release = getRelease(releaseOrNullForLatestMaster);
         final AwsRegion region = new AwsRegion(regionId);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(region, applicationReplicaSetToUpgrade);
-        final String bearerToken = Util.hasLength(replicationBearerToken) ? replicationBearerToken :
+        final String effectiveReplicaReplicationBearerToken = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken :
             getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final SailingAnalyticsProcess<String> additionalReplicaStarted;
         final int oldAutoScalingGroupMinSize;
@@ -970,7 +970,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             logger.info("No replica found for replica set " + replicaSet.getName()
                     + "; spinning one up and waiting for it to become healthy");
             additionalReplicaStarted = launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
-                    privateKeyEncryptionPassphrase, bearerToken);
+                    privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
             replicas.add(additionalReplicaStarted);
         } else {
             additionalReplicaStarted = null;
@@ -978,7 +978,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         logger.info("Stopping replication for replica set "+replicaSet.getName());
         for (final SailingAnalyticsProcess<String> replica : replicas) {
             logger.info("...asking replica "+replica+" to stop replication");
-            replica.stopReplicatingFromMaster(bearerToken, WAIT_FOR_PROCESS_TIMEOUT);
+            replica.stopReplicatingFromMaster(effectiveReplicaReplicationBearerToken, WAIT_FOR_PROCESS_TIMEOUT);
         }
         logger.info("Done stopping replication. Removing master "+replicaSet.getMaster()+" from target groups "+
                 replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
