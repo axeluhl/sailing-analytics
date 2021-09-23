@@ -583,7 +583,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion region = new AwsRegion(regionId);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
         final String bearerTokenUsedByMaster = Util.hasLength(replicationBearerToken) ? replicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
-        final String bearerTokenUsedByReplicas = bearerTokenUsedByMaster; // TODO how about using an explicit replicationBearerToken only for master and prefer the current user's token for replicas? Doesn't work, though, for testing with disconnected caller security
+        final String bearerTokenUsedByReplicas = getSecurityService().getAccessToken(SessionUtils.getPrincipal().toString()); // TODO how about using an explicit replicationBearerToken only for master and prefer the current user's token for replicas? Doesn't work, though, for testing with disconnected caller security
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         masterConfigurationBuilder
             .setLandscape(landscape)
@@ -707,6 +707,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 getLandscape().getApplicationReplicaSetByTagValue(new AwsRegion(regionId),
                     "sailing-analytics-server", "ARCHIVE", new SailingAnalyticsHostSupplier<String>(), WAIT_FOR_PROCESS_TIMEOUT,
                     Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+        logger.info("Found ARCHIVE replica set "+archiveReplicaSet+" with master "+archiveReplicaSet.getMaster());
         final UUID idForProgressTracking = UUID.randomUUID();
         final RedirectDTO defaultRedirect = applicationReplicaSetToArchive.getDefaultRedirect();
         final String hostnameFromWhichToArchive = applicationReplicaSetToArchive.getHostname();
