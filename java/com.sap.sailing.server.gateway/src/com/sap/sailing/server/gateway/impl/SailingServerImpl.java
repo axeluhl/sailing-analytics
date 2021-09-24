@@ -131,8 +131,15 @@ public class SailingServerImpl implements SailingServer {
         final HttpPost importMasterData = new HttpPost(mdiUrl.toString());
         importMasterData.setEntity(EntityBuilder.create()
                 .setContentType(ContentType.APPLICATION_FORM_URLENCODED).setParameters(params).build());
-        final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(importMasterData).getA();
-        return new MasterDataImportResultJsonDeserializer().deserialize(jsonResponse);
+        final Pair<Object, Integer> responseAndStatus = getJsonParsedResponse(importMasterData);
+        final MasterDataImportResult result;
+        if (responseAndStatus.getB() >= 200 && responseAndStatus.getB() < 300) {
+            final JSONObject jsonResponse = (JSONObject) responseAndStatus.getA();
+            result = new MasterDataImportResultJsonDeserializer().deserialize(jsonResponse);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
@@ -161,10 +168,10 @@ public class SailingServerImpl implements SailingServer {
                 params.add(new BasicNameValuePair(CompareServersResource.LEADERBOARDGROUP_UUID_FORM_PARAM, leaderboardGroupId.toString()));
             }
         });
-        final HttpPost importMasterData = new HttpPost(compareServersUrl.toString());
-        importMasterData.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED)
+        final HttpPost compareServersPostRequest = new HttpPost(compareServersUrl.toString());
+        compareServersPostRequest.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED)
                 .setParameters(params).build());
-        final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(importMasterData).getA();
+        final JSONObject jsonResponse = (JSONObject) getJsonParsedResponse(compareServersPostRequest).getA();
         return new CompareServersResultJsonDeserializer().deserialize(jsonResponse);
     }
     

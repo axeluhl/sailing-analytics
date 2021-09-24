@@ -306,12 +306,12 @@ public class CompareServersResource extends AbstractSailingServerResource {
             Iterator<Object> iter = ((JSONObject) json).keySet().iterator();
             while (iter.hasNext()) {
                 Object key = iter.next();
-                final String nextPath = path+"."+key;
+                final String nextPath = path+key;
                 if (KEYSETTOIGNORE.contains(nextPath)) {
                     iter.remove();
                 } else {
                     Object value = ((JSONObject) json).get(key);
-                    removeUnnecessaryFields(value, nextPath);
+                    removeUnnecessaryFields(value, nextPath+".");
                 }
             }
         } else if (json instanceof JSONArray) {

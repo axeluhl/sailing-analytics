@@ -26,7 +26,7 @@ extends AbstractALBToReverseProxyRedirectMapper<ShardingKey, MetricsT, ProcessT,
 implements RedirectVisitor {
     
     public ALBToReverseProxyArchiveRedirectMapper(ReverseProxy<ShardingKey, MetricsT, ProcessT, LogT> reverseProxy,
-            String hostname, ProcessT master, Optional<String> optionalKeyName, byte[] privateKeyDecryptionPassphrase) {
+            String hostname, Optional<String> optionalKeyName, byte[] privateKeyDecryptionPassphrase) {
         super(reverseProxy, hostname, optionalKeyName, privateKeyDecryptionPassphrase);
     }
 

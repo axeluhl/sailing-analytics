@@ -721,35 +721,47 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         logger.info("Importing master data from "+from+" to "+archive);
         final MasterDataImportResult mdiResult = archive.importMasterData(from, from.getLeaderboardGroupIds(), /* override */ true, /* compress */ true,
                 /* import wind */ true, /* import device configurations */ false, /* import tracked races and start tracking */ true, Optional.of(idForProgressTracking));
-        final DataImportProgress result = waitForMDICompletionOrError(archive, idForProgressTracking, durationToWaitBeforeCompareServers,
+        if (mdiResult == null) {
+            logger.severe("Couldn't find any result for the master data import. Aborting.");
+            throw new IllegalStateException("Couldn't find any result for the master data import. Aborting archiving of replica set "+from);
+        }
+        final DataImportProgress mdiProgress = waitForMDICompletionOrError(archive, idForProgressTracking, durationToWaitBeforeCompareServers,
                 /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
-        if (result != null && !result.failed() && result.getResult() != null) {
+        if (mdiProgress != null && !mdiProgress.failed() && mdiProgress.getResult() != null) {
             logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Comparing server contents now...");
             final CompareServersResult compareServersResult = Wait.wait(()->from.compareServers(Optional.empty(), archive, Optional.of(from.getLeaderboardGroupIds())),
                     csr->!csr.hasDiffs(), /* retryOnException */ true, Optional.of(durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)),
-                    durationToWaitBeforeCompareServers, Level.INFO, "Comparing leaderboard groups with IDs "+from.getLeaderboardGroupIds()+
+                    durationToWaitBeforeCompareServers, Level.INFO, "Comparing leaderboard groups with IDs "+Util.joinStrings(", ", from.getLeaderboardGroupIds())+
                     " between importing server "+hostnameOfArchive+" and exporting server "+hostnameFromWhichToArchive);
             if (compareServersResult != null) {
                 if (!compareServersResult.hasDiffs()) {
+                    logger.info("No differences found during comparing server contents. Moving on...");
                     final Set<UUID> eventIDs = new HashSet<>();
                     for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
                         Util.addAll(eids, eventIDs);
                     }
+                    logger.info("Removing remote sailing server references to events on "+from+" with IDs "+eventIDs+" from archive server "+archive);
                     archive.removeRemoteServerEventReferences(from, eventIDs);
                     final AwsRegion region = new AwsRegion(regionId);
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
                             getLandscape().getCentralReverseProxy(region);
-                    SailingAnalyticsProcess<String> archiveMaster = archiveReplicaSet.getMaster();
                     // TODO bug5311: when refactoring this for general scope migration, moving to a dedicated replica set will not require this
                     // TODO bug5311: when refactoring this for general scope migration, moving into a cold storage server other than ARCHIVE will require ALBToReverseProxyRedirectMapper instead
+                    logger.info("Adding reverse proxy rules for migrated content pointing to ARCHIVE");
                     defaultRedirect.accept(new ALBToReverseProxyArchiveRedirectMapper<>(
-                            centralReverseProxy, hostnameFromWhichToArchive, archiveMaster, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
+                            centralReverseProxy, hostnameFromWhichToArchive, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
                     if (removeApplicationReplicaSet) {
+                        logger.info("Removing the application replica set archived ("+from+") was requested");
                         final SailingAnalyticsProcess<String> fromMaster = getSailingAnalyticsProcessFromDTO(applicationReplicaSetToArchive.getMaster());
                         removeApplicationReplicaSet(regionId, applicationReplicaSetToArchive, optionalKeyName, passphraseForPrivateKeyDecryption);
                         final Database fromDatabase = fromMaster.getDatabaseConfiguration(region, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-                        final Database toDatabase = getMongoEndpoint(moveDatabaseHere).getDatabase(fromDatabase.getName());
-                        getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
+                        if (moveDatabaseHere != null) {
+                            final Database toDatabase = getMongoEndpoint(moveDatabaseHere).getDatabase(fromDatabase.getName());
+                            logger.info("Archiving the database content of "+fromDatabase.getConnectionURI()+" to "+toDatabase.getConnectionURI());
+                            getCopyAndCompareMongoDatabaseBuilder(fromDatabase, toDatabase).run();
+                        } else {
+                            logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
+                        }
                     }
                 } else {
                     logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
@@ -767,7 +779,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             }
         } else {
             logger.severe("The Master Data Import (MDI) from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive+
-                    " did not work"+(result != null ? result.getErrorMessage() : " (no result at all)"));
+                    " did not work"+(mdiProgress != null ? mdiProgress.getErrorMessage() : " (no result at all)"));
         }
         return idForProgressTracking;
     }
