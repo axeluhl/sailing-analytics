@@ -563,7 +563,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 : numberOfCompareServersAttemptsBox.getValue());
             }
         }.show();
-        // TODO Implement LandscapeManagementPanel.archiveApplicationReplicaSet(...)
     }
     
     private void createDefaultLoadBalancerMappings(final StringMessages stringMessages, String regionId,
