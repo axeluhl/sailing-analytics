@@ -18,6 +18,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -94,7 +96,9 @@ public class SailingServerImpl implements SailingServer {
     }
 
     private CloseableHttpClient createHttpClient() {
-        return HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
+        return HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes())
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
     }
     
     private void authenticate(HttpRequest request) {
@@ -315,8 +319,11 @@ public class SailingServerImpl implements SailingServer {
 
     private RemoteSailingServerReference getExistingRemoteServerReference(final String remoteReferenceServerUrl) throws MalformedURLException, Exception {
         final URL remoteReferenceServerUrlAsUrl = new URL(remoteReferenceServerUrl);
+        final URL remoteReferenceServerUrlWithoutTrailingSlash = remoteReferenceServerUrl.endsWith("/")
+                ? new URL(remoteReferenceServerUrl.substring(0, remoteReferenceServerUrl.length() - 1))
+                : remoteReferenceServerUrlAsUrl;
         for (final RemoteSailingServerReference ref : getRemoteServerReferences()) {
-            if (ref.getURL().equals(remoteReferenceServerUrlAsUrl)) {
+            if (ref.getURL().equals(remoteReferenceServerUrlAsUrl) || ref.getURL().equals(remoteReferenceServerUrlWithoutTrailingSlash)) {
                 return ref;
             }
         }
