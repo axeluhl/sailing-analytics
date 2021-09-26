@@ -77,8 +77,8 @@ public class CompareServersResource extends AbstractSailingServerResource {
      * The list of keys that are not compared. Represent as a path with ".{fieldname}" for field navigation and
      * "[]" for array expansion. Example: "leaderboards[].series[].fleets[].races[].raceViewerUrls"
      */
-    private static final String[] KEYSTOIGNORE = new String[] { LeaderboardGroupConstants.TIMEPOINT,
-            LeaderboardGroupConstants.LEADERBOARDS+"[]."+LeaderboardNameConstants.SERIES+"[]."+LeaderboardNameConstants.FLEETS+"[]."+LeaderboardNameConstants.RACES+"[]."+LeaderboardNameConstants.RACEVIEWERURLS };
+    private static final String[] KEYSTOIGNORE = new String[] { "."+LeaderboardGroupConstants.TIMEPOINT,
+            "."+LeaderboardGroupConstants.LEADERBOARDS+"[]."+LeaderboardNameConstants.SERIES+"[]."+LeaderboardNameConstants.FLEETS+"[]."+LeaderboardNameConstants.RACES+"[]."+LeaderboardNameConstants.RACEVIEWERURLS };
     private static final Set<String> KEYSETTOIGNORE = new HashSet<>(Arrays.asList(KEYSTOIGNORE));
 
     /**
@@ -306,12 +306,12 @@ public class CompareServersResource extends AbstractSailingServerResource {
             Iterator<Object> iter = ((JSONObject) json).keySet().iterator();
             while (iter.hasNext()) {
                 Object key = iter.next();
-                final String nextPath = path+key;
+                final String nextPath = path+"."+key;
                 if (KEYSETTOIGNORE.contains(nextPath)) {
                     iter.remove();
                 } else {
                     Object value = ((JSONObject) json).get(key);
-                    removeUnnecessaryFields(value, nextPath+".");
+                    removeUnnecessaryFields(value, nextPath);
                 }
             }
         } else if (json instanceof JSONArray) {
