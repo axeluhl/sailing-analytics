@@ -93,7 +93,7 @@ public class MongoUriParser<ShardingKey> {
     private Pair<AwsInstance<ShardingKey>, Integer> getHostAndPort(String hostnameAndOptionalPort) throws UnknownHostException {
         final String[] hostnameAndOptionalPortSplit = hostnameAndOptionalPort.split(":");
         final InetAddress address = InetAddress.getByName(hostnameAndOptionalPortSplit[0]);
-        final AwsInstance<ShardingKey> hostByPublicIp = landscape.getHostByPublicIpAddress(region, address.getHostAddress(), AwsInstanceImpl::new);
+        final AwsInstance<ShardingKey> hostByPublicIp = landscape.getHostByPrivateIpAddress(region, address.getHostAddress(), AwsInstanceImpl::new);
         final AwsInstance<ShardingKey> host;
         if (hostByPublicIp != null) {
             host = hostByPublicIp;
