@@ -128,7 +128,9 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
             String timeString = certificateValues.getValue(ISSUETIME);
             TimePoint issueDate;
             try {
-                issueDate = new MillisecondsTimePoint(timestampFormat.parse(dateString+" "+timeString+"+0000")); // assume UTC
+                synchronized (timestampFormat) {
+                    issueDate = new MillisecondsTimePoint(timestampFormat.parse(dateString+" "+timeString+"+0000")); // assume UTC
+                }
             } catch (ParseException e) {
                 issueDate = null;
             }

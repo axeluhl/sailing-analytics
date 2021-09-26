@@ -131,7 +131,7 @@ public class ManeuverWithContext implements HasManeuverContext {
 
     private Double getTWAAtTimepoint(TimePoint timepoint) {
         Wind wind = getTrackedLegOfCompetitorContext().getTrackedRace().getWind(maneuver.getPosition(), timepoint);
-        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
+        final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
         if (wind != null) {
             competitorTrack.lockForRead();
             try {

@@ -42,8 +42,7 @@ public class RegattaLogOpenEndedDeviceMappingCloser extends
 
     @Override
     protected List<RegattaLogCloseOpenEndedDeviceMappingEvent> performAnalysis() {
-        List<RegattaLogCloseOpenEndedDeviceMappingEvent> result = new ArrayList<RegattaLogCloseOpenEndedDeviceMappingEvent>();
-
+        final List<RegattaLogCloseOpenEndedDeviceMappingEvent> result = new ArrayList<>();
         for (Serializable eventId : mapping.getOriginalRaceLogEventIds()) {
             RegattaLogDeviceMappingEvent<?> event = (RegattaLogDeviceMappingEvent<?>) getLog().getEventById(eventId);
             if (event.getFrom() == null || event.getToInclusive() == null) {

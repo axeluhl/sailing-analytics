@@ -11,12 +11,12 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.BoatFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     private static final Logger logger = Logger.getLogger(BoatJsonDeserializer.class.getName());

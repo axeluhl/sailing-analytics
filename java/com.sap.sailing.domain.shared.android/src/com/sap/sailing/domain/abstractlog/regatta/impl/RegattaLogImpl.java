@@ -39,9 +39,7 @@ public class RegattaLogImpl extends AbstractLogImpl<RegattaLogEvent, RegattaLogE
         if (event != null){
             RegattaLogEvent revokeEvent = new RegattaLogRevokeEventImpl(author, event, "Revoked by AdminConsole (RaceLogTracking)");
             this.add(revokeEvent);
-            
             final List<RegattaLogEvent> regattaLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(this, /* only unrevoked */ true, RegattaLogDeviceMappingEvent.class).analyze();
-            
             for (RegattaLogEvent deviceMappingEvent : regattaLogDeviceMarkMappingEvents) {
                 @SuppressWarnings("unchecked") // The list can only contain device mapping events
                 WithID withID = ((RegattaLogDeviceMappingEvent<WithID>) deviceMappingEvent).getMappedTo();

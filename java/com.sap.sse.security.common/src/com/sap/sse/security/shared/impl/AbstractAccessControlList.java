@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -106,17 +107,51 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
         }
         for (final Entry<G, Set<WildcardPermission>> allowedEntry : deniedActionsByUserGroup.entrySet()) {
             for (final WildcardPermission permission : allowedEntry.getValue()) {
-                Util.addToValueSet(result, allowedEntry.getKey(), "!"+permission.toString());
+                Util.addToValueSet(result, allowedEntry.getKey(), invertAction(permission.toString()));
             }
         }
         return result;
     }
     
     @Override
-    public boolean denyPermission(G userGroup, String action) {
+    public Set<String> getAllowedActions(UserGroup group) {
+        return Util.asSet(Util.map(
+                allowedActionsByUserGroup.get(group)==null?Collections.emptySet():allowedActionsByUserGroup.get(group),
+                        wp->wp.toString()));
+    }
+
+    @Override
+    public Map<G, Set<WildcardPermission>> getAllowedActions() {
+        return Collections.unmodifiableMap(allowedActionsByUserGroup);
+    }
+
+    @Override
+    public Set<String> getDeniedActions(UserGroup group) {
+        return Util.asSet(Util.map(
+                deniedActionsByUserGroup.get(group)==null?Collections.emptySet():deniedActionsByUserGroup.get(group),
+                        wp->wp.toString()));
+    }
+
+    @Override
+    public Map<G, Set<WildcardPermission>> getDeniedActions() {
+        return Collections.unmodifiableMap(deniedActionsByUserGroup);
+    }
+
+    private boolean isDeniedAction(String action) {
+        return SecurityAccessControlList.isDeniedAction(action);
+    }
+    
+    /**
+     * Removes a leading ! if there is one; otherwise prefixes the action with a !
+     */
+    private String invertAction(String action) {
+        return SecurityAccessControlList.invertAction(action);
+    }
+    
+    private boolean denyPermission(G userGroup, String action) {
         final boolean result;
-        if (action.startsWith("!")) {
-            result = addPermission(userGroup, action.substring(1));
+        if (isDeniedAction(action)) {
+            result = addPermission(userGroup, invertAction(action));
         } else {
             result = Util.addToValueSet(deniedActionsByUserGroup, userGroup, new WildcardPermission(action));
         }
@@ -126,8 +161,8 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
     @Override
     public boolean addPermission(G userGroup, String action) {
         final boolean result;
-        if (action.startsWith("!")) {
-            result = denyPermission(userGroup, action.substring(1));
+        if (isDeniedAction(action)) {
+            result = denyPermission(userGroup, invertAction(action));
         } else {
             result = Util.addToValueSet(allowedActionsByUserGroup, userGroup, new WildcardPermission(action));
         }
@@ -137,19 +172,18 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
     @Override
     public boolean removePermission(G userGroup, String action) {
         final boolean result;
-        if (action.startsWith("!")) {
-            result = removeDenial(userGroup, action.substring(1));
+        if (isDeniedAction(action)) {
+            result = removeDenial(userGroup, invertAction(action));
         } else {
             result = Util.removeFromValueSet(allowedActionsByUserGroup, userGroup, new WildcardPermission(action));
         }
         return result;
     }
 
-    @Override
-    public boolean removeDenial(G userGroup, String action) {
+    private boolean removeDenial(G userGroup, String action) {
         final boolean result;
-        if (action.startsWith("!")) {
-            result = removeDenial(userGroup, action.substring(1));
+        if (isDeniedAction(action)) {
+            result = removeDenial(userGroup, invertAction(action));
         } else {
             result = Util.removeFromValueSet(deniedActionsByUserGroup, userGroup, new WildcardPermission(action));
         }
@@ -161,8 +195,8 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup<?>>
         allowedActionsByUserGroup.remove(userGroup);
         deniedActionsByUserGroup.remove(userGroup);
         for (final String actionAsString : actions) {
-            if (actionAsString.startsWith("!")) {
-                denyPermission(userGroup, actionAsString.substring(1));
+            if (isDeniedAction(actionAsString)) {
+                denyPermission(userGroup, invertAction(actionAsString));
             } else {
                 addPermission(userGroup, actionAsString);
             }

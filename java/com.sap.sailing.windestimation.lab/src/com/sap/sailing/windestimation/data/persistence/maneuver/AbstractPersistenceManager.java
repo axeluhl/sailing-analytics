@@ -14,12 +14,12 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 /**
  * 
@@ -59,7 +59,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     }
 
     public long countElements(Document query) {
-        return getCollection().count(query);
+        return getCollection().countDocuments(query);
     }
 
     public long countElements(String query) {

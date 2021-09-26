@@ -10,9 +10,9 @@ public class ResetPasswordAccountValidator extends NewAccountValidator {
     }
 
     @Override
-    protected String validateUsername(String username) {
+    protected String validateUsername(String username, boolean reallyUseLeadingOrTrailingSpacesInUsername) {
         // the userName is invalid, if any ErrorMessage is returned
-        boolean invalidUserName = super.validateUsername(username) != null;
+        boolean invalidUserName = super.validateUsername(username, reallyUseLeadingOrTrailingSpacesInUsername) != null;
         // however since the username is extracted from the reseturl, this means the reseturl is corrupt
         return invalidUserName ? stringMessages.cannotResetInvalidURL() : null;
     }

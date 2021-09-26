@@ -3,12 +3,12 @@ package com.sap.sse.operationaltransformation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
 
 
 /**
@@ -63,10 +63,10 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     private final ExecutorService merger;
 
     public PeerImpl(Transformer<S, O> transformer, S initialState, Role role) {
-	this.transformer = transformer;
-	currentState = initialState;
-	this.role = role;
-	this.merger = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+        this.transformer = transformer;
+        currentState = initialState;
+        this.role = role;
+        this.merger = createMerger();
     }
     
     public PeerImpl(String name, Transformer<S, O> transformer, S initialState, Role role) {
@@ -80,12 +80,12 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * the server.
      */
     public PeerImpl(Transformer<S, O> transformer, Peer<O, S> server) {
-	this.transformer = transformer;
-	S initialState = server.addPeer(this);
+        this.transformer = transformer;
+        S initialState = server.addPeer(this);
         currentState = initialState;
-	this.role = Role.CLIENT;
-	this.merger = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
-	addPeer(server);
+        this.role = Role.CLIENT;
+        this.merger = createMerger();
+        addPeer(server);
     }
 
     /**
@@ -101,6 +101,11 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     @Override
     public void finalize() {
 	merger.shutdown();
+    }
+
+    private ExecutorService createMerger() {
+        return ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(1,
+                this.getClass().getName() + " " + name + UUID.randomUUID());
     }
 
     private Transformer<S, O> getTransformer() {

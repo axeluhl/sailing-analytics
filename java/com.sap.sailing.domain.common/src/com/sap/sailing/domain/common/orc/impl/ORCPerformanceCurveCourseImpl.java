@@ -50,7 +50,9 @@ public class ORCPerformanceCurveCourseImpl implements ORCPerformanceCurveCourse 
                 }
                 resultLegs.add(potentiallyReplacedLeg);
             }
-            resultLegs.add(lastFinishedLeg.scale(shareOfCurrentLeg));
+            if (shareOfCurrentLeg > 0) {
+                resultLegs.add(lastFinishedLeg.scale(shareOfCurrentLeg));
+            }
             return new ORCPerformanceCurveCourseImpl(resultLegs);
         }
     }

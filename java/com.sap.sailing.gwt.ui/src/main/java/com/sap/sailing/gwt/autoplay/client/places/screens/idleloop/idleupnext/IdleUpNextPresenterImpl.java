@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.common.client.DateUtil;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;

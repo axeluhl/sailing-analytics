@@ -3,6 +3,7 @@ package com.sap.sse.security.jaxrs.api;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -24,16 +25,20 @@ import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/restsecurity")
 public class SecurityResource extends AbstractSecurityResource {
+    private static final Logger logger = Logger.getLogger(SecurityResource.class.getName());
     private static final String SECURITY_UI_URL_PATH = "/security/ui/";
 
     /**
@@ -47,6 +52,27 @@ public class SecurityResource extends AbstractSecurityResource {
     public Response sayHello() {
         return doSayHello();
     }
+    
+    @GET
+    @Path("/users_with_permission")
+    @Produces("text/plain;charset=UTF-8")
+    public Response getUsersWithPermission(@QueryParam("permission") String permission) {
+        final TimePoint start = TimePoint.now();
+        try {
+            final WildcardPermission wildcardPermission = new WildcardPermission(permission);
+            final Iterable<User> usersWithPermission = getService().getUsersWithPermissions(wildcardPermission);
+            final JSONArray usernames = new JSONArray();
+            for (final User userWithPermission : usersWithPermission) {
+                if (getService().hasCurrentUserReadPermission(userWithPermission)) {
+                    usernames.add(userWithPermission.getName());
+                }
+            }
+            logger.info("Request for users with permission took "+start.until(TimePoint.now()));
+            return Response.status(Status.OK).entity(streamingOutput(usernames)).build();
+        } catch (Exception e) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
+        }
+    }
 
     private Response doSayHello() {
         final Subject subject = SecurityUtils.getSubject();
@@ -54,7 +80,7 @@ public class SecurityResource extends AbstractSecurityResource {
         result.put("principal", subject.getPrincipal().toString());
         result.put("authenticated", subject.isAuthenticated());
         result.put("remembered", subject.isRemembered());
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
+        return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     /**
@@ -88,7 +114,8 @@ public class SecurityResource extends AbstractSecurityResource {
     @POST
     @Path("/forgot_password")
     @Produces("text/plain;charset=UTF-8")
-    public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email) {
+    public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam("username") String username,
+            @QueryParam("email") String email, @QueryParam("application") String application) {
         try {
             final User user;
             if (username != null) {
@@ -101,7 +128,7 @@ public class SecurityResource extends AbstractSecurityResource {
             if (user == null) {
                 return Response.status(Status.PRECONDITION_FAILED).entity("user not found").build();
             } else {
-                getService().resetPassword(user.getName(), getPasswordResetURL(uriInfo));
+                getService().resetPassword(user.getName(), getPasswordResetURL(uriInfo, application));
                 return Response.ok().build();
             }
         } catch (UserManagementException | MailException e) {
@@ -156,8 +183,9 @@ public class SecurityResource extends AbstractSecurityResource {
         return getContextUrl(uriInfo, urlPath);
     }
 
-    private String getPasswordResetURL(UriInfo uriInfo) {
-        final String urlPath = SECURITY_UI_URL_PATH+"EditProfile.html";
+    private String getPasswordResetURL(UriInfo uriInfo, String application) {
+        final SecurityUrlPathProvider securityUrlPathProvider = getSecurityUrlPathProvider(application);
+        final String urlPath = securityUrlPathProvider.getPasswordResetUrlPath();
         return getContextUrl(uriInfo, urlPath);
     }
 
@@ -177,13 +205,14 @@ public class SecurityResource extends AbstractSecurityResource {
             return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
         } else if (getService().hasCurrentUserReadPermission(user) || getService()
                 .hasCurrentUserOneOfExplicitPermissions(user, SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC)) {
-            // TODO: pruning when current user only has READ_PUBLIC
             JSONObject result = new JSONObject();
             result.put("username", user.getName());
-            result.put("fullName", user.getFullName());
-            result.put("email", user.getEmail());
-            result.put("company", user.getCompany());
-            return Response.ok(result.toJSONString()).build();
+            if (getService().hasCurrentUserReadPermission(user)) {
+                result.put("fullName", user.getFullName());
+                result.put("email", user.getEmail());
+                result.put("company", user.getCompany());
+            }
+            return Response.ok(streamingOutput(result)).build();
         } else {
             return Response.status(Status.UNAUTHORIZED).build();
         }
@@ -296,7 +325,7 @@ public class SecurityResource extends AbstractSecurityResource {
             entry.put("permission", permissionAsString);
             entry.put("granted", SecurityUtils.getSubject().isPermitted(permissionAsString));
         }
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build(); 
+        return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build(); 
     }
 
     Response respondToRemoveAccessTokenForUser(final String username) {
@@ -333,6 +362,6 @@ public class SecurityResource extends AbstractSecurityResource {
             }
         }
         response.put("access_token", accessToken);
-        return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
+        return Response.ok(streamingOutput(response), MediaType.APPLICATION_JSON_TYPE).build();
     }
 }

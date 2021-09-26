@@ -8,11 +8,12 @@ import java.util.logging.Logger;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.windestimation.integration.ReplicableWindEstimationFactoryService;
 import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 /**
  * This class is used to replicate wind estimation models from the remote server using Apache {@link HttpClient}.
@@ -61,7 +62,7 @@ public class WindEstimationDataClient {
     }
 
     protected InputStream getContentFromResponse() throws IOException, ParseException {
-        HttpClient client = new SystemDefaultHttpClient();
+        HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         HttpGet getProcessor = new HttpGet(getAPIString());
         HttpResponse processorResponse = client.execute(getProcessor);
         return processorResponse.getEntity().getContent();

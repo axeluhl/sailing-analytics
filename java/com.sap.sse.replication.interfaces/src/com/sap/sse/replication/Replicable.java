@@ -5,11 +5,16 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 import com.sap.sse.util.ThreadLocalTransporter;
 
@@ -45,6 +50,26 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * initial load is requested and when an {@link Operation} is received. The initial load streams as well as each
  * replication operation need to identify the {@link Replicable} they refer to. This identification is added as an OSGi
  * service registry parameter that is used during service discovery.
+ * <p>
+ * 
+ * To implement a new replicable, consider the following steps:
+ * <ul>
+ * <li>Consider using {@link AbstractReplicableWithObjectInputStream} as an abstract base class for your
+ * {@link Replicable} implementation.</li>
+ * <li>Implement the necessary methods, in particular ensuring that your
+ * {@link ReplicableWithObjectInputStream#createObjectInputStreamResolvingAgainstCache(InputStream)} implementation
+ * returns an object whose class is loaded by your replicable's class loader, such as an in-place anonymous inner class
+ * instantiation of the {@link ObjectInputStreamResolvingAgainstCache} class.</li>
+ * <li>In your bundle's {@link BundleActivator activator} create your replicable instance and
+ * {@link BundleContext#registerService(Class, Object, java.util.Dictionary) register it with the OSGi service registry}
+ * under the {@link Replicable} service interface, like this:
+ * <pre>
+ *     final Dictionary&lt;String, String&gt; replicableServiceProperties = new Hashtable&lt;&gt;();
+ *     replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
+ *     registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));</pre></li>
+ * <li>Add your replicable's fully-qualified class name to the {@code env-default-rules.sh} file where the
+ * {@code REPLICATE_ON_START} variable has its default value defined.</li>
+ * </ul>
  * 
  * @param <S>
  *            the type of state to which the operations are applied; usually this will be set to the implementing
@@ -55,12 +80,13 @@ import com.sap.sse.util.ThreadLocalTransporter;
  *            passing an operation intended for a different replicable service. Make sure to implement operation types
  *            as dedicated classes and withstand the temptation to use lambdas. While lambdas may work at first and look
  *            nice and compact, two major problems emerge (see also
- *            <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5197">bug 5197</a>): you may unintentionally
- *            reference comprehensive contextual state in your lambda which then needs to get serialized with it; and by
- *            using {@link Serializable} lambdas, serialization compatibility is brittle because it depends on the lambda's
- *            position in its type, and hence code insertions, removals or changes in method ordering can already cause
- *            unnecessary incompatibilities. Specifically for {@link Replicable} services shared by many instances this should
- *            be avoided at any cost because incompatible changes then require upgrading the entire landscape.
+ *            <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5197">bug 5197</a>): you may
+ *            unintentionally reference comprehensive contextual state in your lambda which then needs to get serialized
+ *            with it; and by using {@link Serializable} lambdas, serialization compatibility is brittle because it
+ *            depends on the lambda's position in its type, and hence code insertions, removals or changes in method
+ *            ordering can already cause unnecessary incompatibilities. Specifically for {@link Replicable} services
+ *            shared by many instances this should be avoided at any cost because incompatible changes then require
+ *            upgrading the entire landscape.
  * 
  * @author Axel Uhl (D043530)
  *

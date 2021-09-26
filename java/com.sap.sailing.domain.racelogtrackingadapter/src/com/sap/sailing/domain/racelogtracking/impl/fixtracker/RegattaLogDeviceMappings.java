@@ -261,30 +261,27 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         } finally {
             LockUtil.unlockAfterWrite(mappingsLock);
         }
-        calculateDiff(oldMappings, newMappings, oldDeviceIds, newDeviceIds);
+        calculateAndApplyDiff(oldMappings, newMappings, oldDeviceIds, newDeviceIds);
     }
     
     /**
      * Calculates <em>and applies</em> the mapping changes by removing listeners no longer needed for the mappings removed,
      * and by loading and adding the fixes for extended or added mappings.
      */
-    private void calculateDiff(Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
+    private void calculateAndApplyDiff(Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
             Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings,
             Set<DeviceIdentifier> oldDeviceIds, Set<DeviceIdentifier> newDeviceIds) {
         final Set<DeviceIdentifier> removedDeviceIds = new HashSet<>(oldDeviceIds);
         removedDeviceIds.removeAll(newDeviceIds);
         removedDeviceIds.forEach(this::deviceIdRemovedInternal);
-
         final Set<DeviceIdentifier> addedDeviceIds = new HashSet<>(newDeviceIds);
         addedDeviceIds.removeAll(oldDeviceIds);
         addedDeviceIds.forEach(this::deviceIdAddedInternal);
-
         // Only deviceIdentifier and mappingTypes are covered that are contained in newMappings.
         // Those that are only found in oldMappings won't lead to new covered TimeRanges.
         // DeviceIdentifiers, that aren't needed at all are already handled above.
         newMappings.forEach((item, mappingsForItem) -> {
             final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> newlyCoveredTimeRanges = new HashMap<>();
-
             // The mappings are processes grouped by DeviceIdentifier and mapping type
             // to build a consistent overall mapping update without the risk of fixes
             // to get loaded multiple times
@@ -293,7 +290,6 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                             newMappingsForDeviceIdAndMappingType) -> {
                         assert (newMappingsForDeviceIdAndMappingType != null);
                         assert (!Util.isEmpty(newMappingsForDeviceIdAndMappingType));
-
                         final MultiTimeRange newCoveredTimeRanges = getCoveredTimeRange(
                                 newMappingsForDeviceIdAndMappingType)
                                         .subtract(getCoveredTimeRange(oldMappingsForDeviceIdAndMappingType));

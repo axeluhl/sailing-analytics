@@ -414,12 +414,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public CourseArea getDefaultCourseArea() {
+                    public Iterable<CourseArea> getCourseAreas() {
                         return null;
                     }
 
                     @Override
-                    public void setDefaultCourseArea(CourseArea newCourseArea) {
+                    public void setCourseAreas(Iterable<CourseArea> newCourseAreas) {
                     }
 
                     @Override
@@ -516,12 +516,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Double getTimeOnTimeFactor(Competitor competitor) {
+                    public Double getTimeOnTimeFactor(Competitor competitor, Optional<Runnable> changeCallback) {
                         return null;
                     }
 
                     @Override
-                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor, Optional<Runnable> changeCallback) {
                         return null;
                     }
 
@@ -617,6 +617,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setCompetitorRegistrationType(CompetitorRegistrationType competitorRegistrationType) {
+                    }
+
+                    @Override
+                    public boolean isAutoRestartTrackingUponCompetitorSetChange() {
+                        return false;
+                    }
+
+                    @Override
+                    public void setAutoRestartTrackingUponCompetitorSetChange(
+                            boolean autoRestartTrackingUponCompetitorSetChange) {
                     }
                 };
             }
@@ -828,7 +838,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalysis) throws NoWindException {
+            boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -885,7 +895,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException {
+            boolean upwindOnly, boolean waitForLatestAnalyses) {
         return null;
     }
 
@@ -1053,7 +1063,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalysis) throws NoWindException {
+            boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -1065,7 +1075,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
+            boolean upwindOnly, boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -1292,4 +1302,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public void runWhenDoneLoading(Runnable runnable) {
+    }
+
+    @Override
+    public void runSynchronizedOnStatus(Runnable runnable) {
+    }
+
+    @Override
+    public boolean hasFinishedLoading() {
+        return false;
+    }
 }

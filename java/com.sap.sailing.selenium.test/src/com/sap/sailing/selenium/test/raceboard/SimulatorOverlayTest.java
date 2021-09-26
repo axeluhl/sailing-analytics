@@ -34,6 +34,7 @@ import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
+@Ignore("2021-03-30: Igtimi burnt down; re-enable when Igtimi is back up and running...")
 public class SimulatorOverlayTest extends AbstractSeleniumTest {
     private static final String JSON_URL = "http://event.tractrac.com/events/event_20150616_KielerWoch/jsonservice.php"; //$NON-NLS-1$
     private static final String EVENT = "Kieler Woche 2015"; //$NON-NLS-1$
@@ -66,8 +67,6 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
      * appears after successfully loading wind.
      */
     @Test
-    // FIXME Bug 5246: temporarily ignored due to Selenium test instabilities
-    @Ignore
     public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, UnsupportedEncodingException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
         {
@@ -96,6 +95,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             trackRacesFor49er(regattaDescriptor, adminConsole.goToTracTracEvents());
     
             final LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
+            leaderboard.refreshLeaderboard();
             final LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(REGATTA_49ER_WITH_SUFFIX);
             
             for(int i = 1; i<=11; i++) {
@@ -105,7 +105,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         }
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
-                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
+                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1), false);
             MapSettingsPO mapSettings = raceboard.openMapSettings();
             // Simulator overlay option must not be available without wind data
             Assert.assertFalse(mapSettings.isShowSimulationOverlayCheckBoxVisible());
@@ -115,11 +115,11 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             IgtimiAccountsManagementPanelPO igtimiAccountsManagementPanel = adminConsole.goToIgtimi();
             igtimiAccountsManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
             WindPanelPO windPanel = adminConsole.goToWind();
-            windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 10 * 60);
+            windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 15 * 60);
         }
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
-                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
+                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1), false);
             MapSettingsPO mapSettings = raceboard.openMapSettings();
             // Simulator overlay option must be available with the wind data being available
             Assert.assertTrue(mapSettings.isShowSimulationOverlayCheckBoxVisible());

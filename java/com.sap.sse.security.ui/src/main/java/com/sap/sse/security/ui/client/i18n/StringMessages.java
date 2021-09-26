@@ -9,6 +9,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
 
     String name();
+    String locale();
     String company();
     String password();
     String passwordRepeat();
@@ -34,8 +35,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String ok();
     String cancel();
     String username();
+    String reallyUseLeadingOrTrailingSpacesInUsername();
     String email();
     String usernameMustHaveAtLeastNCharacters(int minimumUsernameLength);
+    String usernameShouldNotStartOrEndWithSpaceCharactersUnlessYouExplicitlyWantTo();
     String passwordMustHaveAtLeastNCharacters(int minimumPasswordLength);
     String passwordsDontMatch();
     String couldNotCreateUser(String message);
@@ -122,10 +125,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterRoles();
     String actions();
     String actionEdit();
+    String actionExcludeEvents();
     String actionRemove();
     String actionChangeOwnership();
     String errorUpdatingOwnership(String name);
     String doYouReallyWantToRemoveRole(String name);
+    String doYouReallyWantToRemoveSelectedElements(String message);
     String errorTryingToDeleteRole(String rolename, String message);
     String pleaseEnterARoleName();
     String editRoles();
@@ -186,4 +191,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String editRolesAndPermissionsForUser(String username);
     String permissionType();
     String couldNotLoadMarkTemplates();
+    String transitive();
 }

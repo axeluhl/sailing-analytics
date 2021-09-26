@@ -56,28 +56,25 @@ public class WildcardPermissionPanel extends HorizontalPanel
             Function<SuggestOracle, SuggestBox> suggestBoxConstructor) {
         // create multi to single selection adapter
         final SingleSelectionModel<UserDTO> multiToSingleSelectionModelAdapter = new SingleSelectionModel<>();
+        this.ensureDebugId(this.getClass().getSimpleName());
+        final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
         userSelectionModel.addSelectionChangeHandler(event -> {
             multiToSingleSelectionModelAdapter.clear();
             if (userSelectionModel.getSelectedSet().size() != 1) {
                 this.setVisible(false);
             } else {
                 // has exactly one element in the set
-                multiToSingleSelectionModelAdapter.setSelected(userSelectionModel.getSelectedSet().iterator().next(),
-                        true);
+                multiToSingleSelectionModelAdapter.setSelected(userSelectionModel.getSelectedSet().iterator().next(), true);
                 this.setVisible(true);
-                updateOracle();
+                updatePermissionOracleWithSecuredTypes(userService, oracle);
                 updatePermissionList();
             }
         });
         this.userSelectionModel = multiToSingleSelectionModelAdapter;
         // create suggest for permission
-        final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-        for (HasPermissions permission : userService.getAllKnownPermissions()) {
-            for (HasPermissions.Action action : permission.getAvailableActions()) {
-                oracle.add(permission.getStringPermission(action));
-            }
-        }
+        updatePermissionOracleWithSecuredTypes(userService, oracle);
         suggestPermission = suggestBoxConstructor.apply(oracle);
+        suggestPermission.ensureDebugId("suggestPermission");
         roleAndPermissionResources.css().ensureInjected();
         suggestPermission.addStyleName(roleAndPermissionResources.css().enterPermissionSuggest());
         suggestPermission.getElement().setPropertyString("placeholder", stringMessages.enterPermissionName());
@@ -90,7 +87,7 @@ public class WildcardPermissionPanel extends HorizontalPanel
             if (selectedPermission != null) {
                 UserDTO selectedUser = this.userSelectionModel.getSelectedObject();
                 if (selectedUser != null) {
-                    userService.getUserManagementService().addPermissionForUser(selectedUser.getName(),
+                    userService.getUserManagementWriteService().addPermissionForUser(selectedUser.getName(),
                             selectedPermission, new AsyncCallback<SuccessInfo>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -110,6 +107,7 @@ public class WildcardPermissionPanel extends HorizontalPanel
             }
             suggestPermission.setText("");
         });
+        addPermissionButton.ensureDebugId("addPermissionButton");
         final Command addPermissionButtonUpdater = () -> addPermissionButton
                 .setEnabled(!suggestPermission.getValue().isEmpty());
         suggestPermission.addKeyUpHandler(event -> addPermissionButtonUpdater.execute());
@@ -134,22 +132,17 @@ public class WildcardPermissionPanel extends HorizontalPanel
         add(captionPanel);
     }
 
-    private void initPlaceholder(final UIObject target, final String placeholder) {
-        target.getElement().setAttribute("placeholder", placeholder);
+    private void updatePermissionOracleWithSecuredTypes(final UserService userService,
+            final MultiWordSuggestOracle oracle) {
+        for (HasPermissions permission : userService.getAllKnownPermissions()) {
+            for (HasPermissions.Action action : permission.getAvailableActions()) {
+                oracle.add(permission.getStringPermission(action));
+            }
+        }
     }
 
-    /**
-     * Updates the SuggestOracle associated with {@link #suggestPermission}. This method should be called after the
-     * selection has changed.
-     */
-    private void updateOracle() {
-        UserDTO selectedObject = this.userSelectionModel.getSelectedObject();
-        if (selectedObject != null) {
-            // Iterable<StrippedRoleDefinitionDTO> roles = StreamSupport
-            // .stream(selectedObject.getRoles().spliterator(), false).map(RoleWithSecurityDTO::getRoleDefinition)
-            // .collect(Collectors.toList());
-            // ((RoleDefinitionSuggestOracle) suggestPermission.getSuggestOracle()).resetAndRemoveExistingRoles(roles);
-        }
+    private void initPlaceholder(final UIObject target, final String placeholder) {
+        target.getElement().setAttribute("placeholder", placeholder);
     }
 
     /** Refreshes the permission list in the table. */

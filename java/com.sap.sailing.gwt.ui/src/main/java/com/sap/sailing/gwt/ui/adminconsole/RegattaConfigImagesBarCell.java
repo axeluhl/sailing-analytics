@@ -33,10 +33,9 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         final List<ImageSpec> result = new ArrayList<ImageSpec>();
-        GWT.log(getContext().getKey().getClass().getName());
         if (getContext().getKey() instanceof RaceDTO) {
             final RaceDTO object = (RaceDTO) getContext().getKey();
-            final TrackedRaceStatusEnum status = object.status.status;
+            final TrackedRaceStatusEnum status = object.status==null?null:object.status.status;
             if (status != TrackedRaceStatusEnum.ERROR && status != TrackedRaceStatusEnum.REMOVED
                     && status != TrackedRaceStatusEnum.FINISHED) {
                 result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(),
@@ -53,7 +52,8 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
                 makeImagePrototype(IconResources.INSTANCE.changeACLIcon())));
         if (getContext().getKey() instanceof RegattaDTO &&
                 (((RegattaDTO) getContext().getKey()).rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE ||
-                        ((RegattaDTO) getContext().getKey()).rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND)) {
+                        ((RegattaDTO) getContext().getKey()).rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND ||
+                        ((RegattaDTO) getContext().getKey()).rankingMetricType == RankingMetrics.ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE)) {
             result.add(new ImageSpec(ACTION_CERTIFICATES_UPDATE, stringMessages.updateCertificates(), resources.updateCertificatesIcon()));
         }
         return result;

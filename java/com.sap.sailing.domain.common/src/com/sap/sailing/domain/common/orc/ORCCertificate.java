@@ -117,7 +117,7 @@ public interface ORCCertificate extends WithID, Serializable {
      * The different division intervals are - in contrast to the intervals of the GPH - set by the Offshore Race Committee and not by the national association for a uniform handling.
      * The higher the value, the higher the overall performance, it is measured in meters.
      */
-    double getCDL();
+    Double getCDL();
     
     /**
      * Returns the LOA (length over all) of the {@link Competitor} boat which this certificate belongs to.

@@ -167,8 +167,6 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
 
     @Override
     public void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {    
-        // this method can only be called if the competitors changing the boats during the regatta  
-        assert(getRegatta().canBoatsOfCompetitorsChangePerRace());
         super.registerCompetitors(competitorsAndBoats, fleet);
     }
 

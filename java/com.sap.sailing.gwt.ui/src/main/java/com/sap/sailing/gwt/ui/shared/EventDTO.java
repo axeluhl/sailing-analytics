@@ -32,21 +32,14 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
     private List<String> windFinderReviewedSpotsCollectionIds;
     private List<SpotDTO> allWindFinderSpotIdsUsedByEvent;
 
-    public EventDTO() {
-        this(new ArrayList<LeaderboardGroupDTO>());
-    }
-
-    protected EventDTO(List<LeaderboardGroupDTO> leaderboardGroups) {
-        super(leaderboardGroups);
-        this.leaderboardGroups = leaderboardGroups;
-        initCurrentServerTime();
-    }
-
+    @Deprecated
+    EventDTO() {} // for GWT RPC serialization only
+    
     public EventDTO(String name) {
         this(name, new ArrayList<LeaderboardGroupDTO>());
     }
 
-    protected EventDTO(String name, List<LeaderboardGroupDTO> leaderboardGroups) {
+    public EventDTO(String name, List<LeaderboardGroupDTO> leaderboardGroups) {
         super(name, leaderboardGroups);
         this.leaderboardGroups = leaderboardGroups;
         initCurrentServerTime();
@@ -80,7 +73,7 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
         return leaderboardGroups;
     }
 
-    public Iterable<UUID> getLeaderboardGroupIds() {
+    public List<UUID> getLeaderboardGroupIds() {
         final List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
         for (LeaderboardGroupDTO leaderboardGroup : this.getLeaderboardGroups()) {
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
@@ -106,10 +99,10 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
      * 
      * @return always a valid {@link Iterable} which may, though, be empty
      */
-    public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
-        final Iterable<String> result;
+    public List<String> getWindFinderReviewedSpotsCollectionIds() {
+        final List<String> result;
         if (windFinderReviewedSpotsCollectionIds == null) {
-            result = Collections.emptySet();
+            result = Collections.emptyList();
         } else {
             result = windFinderReviewedSpotsCollectionIds;
         }

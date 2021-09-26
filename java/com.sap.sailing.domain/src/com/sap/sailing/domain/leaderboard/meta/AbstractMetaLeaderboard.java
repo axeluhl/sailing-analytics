@@ -210,7 +210,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         return result;
     }
 
-    protected RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
+    protected MetaLeaderboardColumn getColumnForLeaderboard(Leaderboard leaderboard) {
         MetaLeaderboardColumn result = columnsForLeaderboards.get(leaderboard);
         if (result == null) {
             result = new MetaLeaderboardColumn(leaderboard, metaFleet);
@@ -275,5 +275,22 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     @Override
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
+        if (!(raceColumn instanceof MetaLeaderboardColumn)) {
+            throw new IllegalArgumentException("Expected a MetaLeaderboardColumn in a MetaLeaderboard but got "+raceColumn.getClass());
+        }
+        final MetaLeaderboardColumn metaRaceColumn = (MetaLeaderboardColumn) raceColumn;
+        final Leaderboard leaderboard = metaRaceColumn.getLeaderboard();
+        for (final RaceColumn raceColumnLeaderboardRaceColumn : leaderboard.getRaceColumns()) {
+            for (final Fleet raceColumnLeaderboardFleet : raceColumnLeaderboardRaceColumn.getFleets()) {
+                if (!leaderboard.isResultsAreOfficial(raceColumnLeaderboardRaceColumn, raceColumnLeaderboardFleet)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

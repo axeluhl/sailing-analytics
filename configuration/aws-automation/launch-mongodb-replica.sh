@@ -12,8 +12,13 @@
 #        that the new replica never becomes PRIMARY by setting the priority to 0
 #
 AVAILABILITY_ZONE=eu-west-1c
-INSTANCE_TYPE=i2.xlarge
-IMAGE_ID=ami-0e5f927ef86e00bd2
+INSTANCE_TYPE=i3.xlarge
+IMAGE_ID=$( `dirname $0`/getLatestImageOfType.sh mongodb-server )
+echo "Launching image with ID ${IMAGE_ID}"
+# eu-west-1:
+SECURITY_GROUP_ID=sg-0a9bc2fb61f10a342
+# eu-west-2:
+#SECURITY_GROUP_ID=sg-02649c35a73ee0ae5
 KEY_NAME=Axel
 REPLICA_SET_NAME=
 REPLICA_SET_PRIMARY=
@@ -57,8 +62,7 @@ do
             exit 4;;
     esac
 done
-
-aws ec2 run-instances --placement AvailabilityZone=$AVAILABILITY_ZONE --instance-type $INSTANCE_TYPE --security-group-ids sg-0a9bc2fb61f10a342 --image-id $IMAGE_ID --count 1 --user-data "REPLICA_SET_NAME=$REPLICA_SET_NAME
+aws ec2 run-instances --placement AvailabilityZone=$AVAILABILITY_ZONE --instance-type $INSTANCE_TYPE --security-group-ids ${SECURITY_GROUP_ID} --image-id $IMAGE_ID --count 1 --user-data "REPLICA_SET_NAME=$REPLICA_SET_NAME
 REPLICA_SET_PRIMARY=$REPLICA_SET_PRIMARY
 REPLICA_SET_PRIORITY=$REPLICA_SET_PRIORITY
-REPLICA_SET_VOTES=$REPLICA_SET_VOTES" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]" "ResourceType=volume,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]"
+REPLICA_SET_VOTES=$REPLICA_SET_VOTES" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY},{Key=mongo-replica-sets,Value=$REPLICA_SET_NAME}]" "ResourceType=volume,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]"

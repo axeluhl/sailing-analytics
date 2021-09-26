@@ -9,18 +9,21 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog<LeaderboardDescriptor> {
     protected ListBox scoringSchemeListBox;
     protected ListBox sailingEventsListBox;
     protected Collection<EventDTO> existingEvents;
-    protected ListBox courseAreaListBox;
+    protected CourseAreaSelection courseAreaSelection;
+    private final UserService userService;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
         protected final StringMessages stringMessages;
@@ -58,13 +61,14 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
     }
 
-    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringMessages, 
-            Collection<EventDTO> existingEvents,
-            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
+    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, UserService userService, 
+            StringMessages stringMessages,
+            Collection<EventDTO> existingEvents, ErrorReporter errorReporter,  LeaderboardParameterValidator validator, DialogCallback<LeaderboardDescriptor> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
+        this.userService = userService;
         this.existingEvents = existingEvents;
-        courseAreaListBox = createListBox(false);
-        courseAreaListBox.setEnabled(false);
+        courseAreaSelection = new CourseAreaSelection(stringMessages, this);
+        courseAreaSelection.setEnabled(false);
     }
 
     @Override
@@ -77,12 +81,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     }
 
     private void setCourseAreaInDescriptor(LeaderboardDescriptor leaderboard) {
-        CourseAreaDTO courseArea = getSelectedCourseArea();
-        if (courseArea == null) {
-            leaderboard.setCourseAreaId(null);
-        } else {
-            leaderboard.setCourseAreaId(getSelectedCourseArea().id);
-        }
+        leaderboard.setCourseAreaIds(Util.mapToArrayList(getSelectedCourseAreas(), CourseAreaDTO::getId));
     }
 
     @Override
@@ -99,7 +98,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         formGrid.setWidget(3, 0, new Label(stringMessages.event() + ":"));
         formGrid.setWidget(3, 1, sailingEventsListBox);
         formGrid.setWidget(4, 0, new Label(stringMessages.courseArea() + ":"));
-        formGrid.setWidget(4, 1, courseAreaListBox);
+        formGrid.setWidget(4, 1, courseAreaSelection);
         mainPanel.add(formGrid);
         mainPanel.add(discardThresholdBoxes.getWidget());
 
@@ -109,7 +108,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     protected ListBox createSailingEventListBox() {
         ListBox eventListBox = createListBox(false);
         eventListBox.addItem("Please select a sailing event...");
-        for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
+        for (EventDTO event : Util.filter(Util.sortNamedCollection(existingEvents), e->userService.hasPermission(e, DefaultActions.UPDATE))) {
             eventListBox.addItem(event.getName());
         }
         eventListBox.addChangeHandler(new ChangeHandler() {
@@ -123,28 +122,27 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
 
     protected void onEventSelectionChanged() {
         EventDTO selectedEvent = getSelectedEvent();
-        courseAreaListBox.clear();
-        courseAreaListBox.setEnabled(false);
+        courseAreaSelection.removeAll();
+        courseAreaSelection.setEnabled(false);
         if (selectedEvent != null) {
             fillCourseAreaListBox(selectedEvent);
         }
     }
     
     private void fillCourseAreaListBox(EventDTO selectedEvent) {
-        courseAreaListBox.addItem(stringMessages.pleaseSelectACourseArea());
         for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
-            courseAreaListBox.addItem(courseArea.getName(), courseArea.id.toString());
+            courseAreaSelection.addCourseArea(courseArea);
         }
-        courseAreaListBox.setEnabled(true);
+        courseAreaSelection.setEnabled(true);
     }
 
     public EventDTO getSelectedEvent() {
         EventDTO result = null;
         int selIndex = sailingEventsListBox.getSelectedIndex();
-        if(selIndex > 0) { // the zero index represents the 'no selection' text
+        if (selIndex > 0) { // the zero index represents the 'no selection' text
             String itemText = sailingEventsListBox.getItemText(selIndex);
-            for(EventDTO eventDTO: existingEvents) {
-                if(eventDTO.getName().equals(itemText)) {
+            for (EventDTO eventDTO : existingEvents) {
+                if (eventDTO.getName().equals(itemText)) {
                     result = eventDTO;
                     break;
                 }
@@ -153,19 +151,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         return result;
     }
 
-    public CourseAreaDTO getSelectedCourseArea() {
-        CourseAreaDTO result = null;
-        EventDTO event = getSelectedEvent();
-        int selIndex = courseAreaListBox.getSelectedIndex();
-        if (selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
-            String selectedCourseAreaId = courseAreaListBox.getValue(selIndex);
-            for (CourseAreaDTO courseAreaDTO : event.venue.getCourseAreas()) {
-                if (courseAreaDTO.id.toString().equals(selectedCourseAreaId)) {
-                    result = courseAreaDTO;
-                    break;
-                }
-            }
-        }
-        return result;
+    public Iterable<CourseAreaDTO> getSelectedCourseAreas() {
+        return courseAreaSelection.getSelectedCourseAreas();
     }
 }

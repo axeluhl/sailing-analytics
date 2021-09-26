@@ -158,6 +158,10 @@ public class DetailTypeFormatter {
             return stringMessages.averageAbsoluteCrossTrackErrorInMeters();
         case LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageSignedCrossTrackErrorInMeters();
+        case LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.currentSignedCrossTrackErrorInMeters();
+        case LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.currentAbsoluteCrossTrackErrorInMeters();
         case OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.maximumSpeedOverGroundInKnots();
         case OVERALL_TOTAL_DISTANCE_TRAVELED:
@@ -419,6 +423,8 @@ public class DetailTypeFormatter {
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
         case LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
         case LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+        case LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+        case LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
         case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
         case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
         case DISTANCE_TO_START_AT_RACE_START:
@@ -467,7 +473,6 @@ public class DetailTypeFormatter {
         case LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case LEG_ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
-        case LEG_CORRECTED_TIME_TRAVELED:
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
         case EXPEDITION_RACE_TIME_TO_BURN_TO_LINE:
         case EXPEDITION_LEG_TIME_TO_BURN_TO_LINE:
@@ -489,6 +494,7 @@ public class DetailTypeFormatter {
         case RACE_CALCULATED_TIME_TRAVELED:
         case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
         case LEG_TIME_TRAVELED:
+        case LEG_CORRECTED_TIME_TRAVELED:
         case BRAVOEXTENDED_LEG_CURRENT_DURATION_FOILED_IN_SECONDS:
         case RACE_CURRENT_DURATION_FOILED_IN_SECONDS:
         case OVERALL_TOTAL_DURATION_FOILED_IN_SECONDS:
@@ -611,6 +617,10 @@ public class DetailTypeFormatter {
             return stringMessages.averageAbsoluteCrossTrackErrorInMetersTooltip();
         case LEG_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageSignedCrossTrackErrorInMetersTooltip();
+        case LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.currentAbsoluteCrossTrackErrorInMetersTooltip();
+        case LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.currentSignedCrossTrackErrorInMetersTooltip();
         case LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
             return stringMessages.gapChangeSinceLegStartInSecondsTooltip();
         case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:

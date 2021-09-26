@@ -133,6 +133,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         jsonLeaderboard.put("name", leaderboard.getName());
         final String displayName = leaderboard.getDisplayName();
         jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
+        jsonLeaderboard.put("boatClass", leaderboard.getBoatClass() == null ? null : leaderboard.getBoatClass().getName());
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.getTime() : null);
         jsonLeaderboard.put("delayToLiveInMillis", leaderboard.getDelayToLiveInMillis());
         jsonLeaderboard.put("resultState", resultState.name());
@@ -178,6 +179,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 final JSONObject fleetJson = new JSONObject();
                 fleetsJson.add(fleetJson);
                 fleetJson.put("name", fleet.getName());
+                fleetJson.put("resultsAreOfficial", leaderboard.isResultsAreOfficial(raceColumn, fleet));
                 final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 final JSONObject trackedRaceInfo;
                 if (trackedRace == null) {
@@ -253,18 +255,20 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
     protected abstract JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
             ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
             List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
-            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret, boolean showOnlyCompetitorsWithIdsProvided)
             throws NoWindException, InterruptedException, ExecutionException;
 
     protected JSONObject getLeaderboardJson(ResultStates resultState, Integer maxCompetitorsCount,
             TimePoint requestTimePoint, Leaderboard leaderboard, TimePoint timePoint, List<String> raceColumnNames,
             List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
-            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret,
+            boolean showOnlyCompetitorsWithIdsProvided)
             throws NoWindException, InterruptedException, ExecutionException {
         final JSONObject jsonLeaderboard;
         if (timePoint != null || resultState == ResultStates.Live) {
             jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
-                    raceColumnNames, raceDetailNames, competitorAndBoatIdsOnly, showOnlyActiveRacesForCompetitorIds, userPresentedValidRegattaSecret);
+                    raceColumnNames, raceDetailNames, competitorAndBoatIdsOnly, showOnlyActiveRacesForCompetitorIds,
+                    userPresentedValidRegattaSecret, showOnlyCompetitorsWithIdsProvided);
         } else {
             jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount, userPresentedValidRegattaSecret);
         }

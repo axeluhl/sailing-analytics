@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.tracking.MappedTrack;
 import com.sap.sse.common.Timed;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
  * Default implementation of {@link MappedTrack} interface. 

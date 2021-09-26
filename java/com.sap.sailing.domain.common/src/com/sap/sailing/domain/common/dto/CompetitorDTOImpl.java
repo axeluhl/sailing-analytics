@@ -34,7 +34,9 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
     private Double timeOnTimeFactor;
     private Duration timeOnDistanceAllowancePerNauticalMile;
     
-    public CompetitorDTOImpl() {}
+    protected CompetitorDTOImpl() {
+        super("");
+    }
     
     public CompetitorDTOImpl(String name, String shortName, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String idAsString, String imageURL, String flagImageURL, 

@@ -57,7 +57,7 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
             windImportResult.error = e.toString();
         }
         response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().append(windImportResult.json().toJSONString());
+        windImportResult.json().writeJSONString(response.getWriter());
     }
 
     private UploadRequest readRequest(HttpServletRequest req) throws FileUploadException, ParseException {

@@ -32,7 +32,7 @@ import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.racemap.DefaultQuickRanksDTOProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.DefaultQuickFlagDataProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
@@ -184,7 +184,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 sailingServiceAsync,
                 asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
-                startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true, new DefaultQuickRanksDTOProvider());
+                startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true, new DefaultQuickFlagDataProvider());
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);

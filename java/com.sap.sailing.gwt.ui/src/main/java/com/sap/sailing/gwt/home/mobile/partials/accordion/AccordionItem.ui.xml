@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.accordion.AccordionResources" />
-    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
     <g:HTMLPanel addStyleNames="{local_res.css.accordion_item} {res.mediaCss.small12} {res.mediaCss.columns}">
         <div ui:field="headerUi" class="{local_res.css.accordion_item_header}">
             <h2 ui:field="titleUi" class="{local_res.css.accordion_item_header_title}"></h2>

@@ -9,6 +9,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
@@ -70,6 +71,11 @@ public class DummyTrackedRegattaRegistry implements TrackedRegattaRegistry {
 
     @Override
     public Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id) {
+        return null;
+    }
+
+    @Override
+    public RaceHandle updateRaceCompetitors(Regatta regatta, RaceDefinition race) throws Exception {
         return null;
     }
 }

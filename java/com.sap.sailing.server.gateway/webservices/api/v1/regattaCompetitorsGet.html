@@ -15,6 +15,9 @@
 <p>Obtains the competitors registered for a regatta. The competitor list is combined from the
 tracked races currently attached to the regatta and the competitors registered in the regatta log..<br/>
 All slashes contained within the {name} parameter must be replaced by "__" (double underscore).</p>
+Note that the timeOnTimeFactor and timeOnDistanceAllowanceInSecondsPerNauticalMile values may be a
+regatta-specific override that deviates from what you may see when looking at the pure competitor data
+as provided, e.g., by /api/v1/competitors/{competitorId}.<p>
 <br/>
 <table>
 	<tr>

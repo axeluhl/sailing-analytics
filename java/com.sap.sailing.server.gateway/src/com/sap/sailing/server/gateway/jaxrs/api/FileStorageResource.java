@@ -14,7 +14,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -71,17 +70,16 @@ public class FileStorageResource extends AbstractSailingServerResource {
         final JSONObject result = new JSONObject();
         Response response;
         try {
-            getService().getFileStorageManagementService().getActiveFileStorageService()
-                    .removeFile(new URI(uri));
+            getService().getFileStorageManagementService().getActiveFileStorageService().removeFile(new URI(uri));
             result.put("status", Status.OK.name());
-            response = Response.ok().entity(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(streamingOutput(result)).build();
         } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
                 | URISyntaxException | IOException e) {
             final String errorMessage = "Could not delete file with URI "+uri+": "+e.getMessage();
             logger.log(Level.WARNING, "Could not delete file with URI "+uri, e);
             result.put("status", Status.BAD_REQUEST.name());
             result.put("message", errorMessage);
-            response = Response.status(Status.BAD_REQUEST).entity(result.toJSONString()).build();
+            response = Response.status(Status.BAD_REQUEST).entity(streamingOutput(result)).build();
         }
         catch (UnauthorizedException e) {
             response = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();            

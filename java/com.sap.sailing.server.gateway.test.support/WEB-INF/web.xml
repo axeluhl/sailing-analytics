@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    version="3.1">
 
   <!-- Apache Shiro -->
   <context-param>
@@ -41,5 +42,13 @@
   <servlet-mapping>
     <servlet-name>CreateSessionServlet</servlet-name>
     <url-pattern>/createSession</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>WhitelabelSwitchServlet</servlet-name>
+    <servlet-class>com.sap.sailing.server.gateway.test.support.WhitelabelSwitchServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>WhitelabelSwitchServlet</servlet-name>
+    <url-pattern>/switch/whitelabel/*</url-pattern>
   </servlet-mapping>
 </web-app>

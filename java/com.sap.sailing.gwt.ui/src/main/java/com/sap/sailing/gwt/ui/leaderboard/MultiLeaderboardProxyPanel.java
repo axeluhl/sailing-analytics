@@ -243,7 +243,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
                     sailingServiceFactory.apply(newSelectedLeaderboardName),
                     asyncActionsExecutor, toMerge, isEmbedded,
                     new CompetitorSelectionModel(true), timer,
-                    null, newSelectedLeaderboardName, errorReporter, stringMessages, 
+                    newSelectedLeaderboardName, errorReporter, stringMessages, 
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),

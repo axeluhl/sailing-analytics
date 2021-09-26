@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:parentTag="android.widget.RelativeLayout">
 
     <ImageView
         android:id="@+id/nav_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/nav_drawer_header"/>
+        android:src="@drawable/nav_drawer_header" />
 
     <ImageView
         android:id="@+id/nav_gradient"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/gradient"/>
+        android:src="@drawable/gradient" />
 
     <ImageView
         android:id="@+id/nav_button"
@@ -26,7 +27,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/default_margin"
-        android:src="@drawable/ic_refresh_48dp"/>
+        android:src="@drawable/ic_refresh_48dp" />
 
     <TextView
         android:id="@+id/regatta_data"
@@ -39,7 +40,7 @@
         android:paddingRight="@dimen/default_padding_half"
         android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_32"
-        tools:text="Marina Bay / Viewer"/>
+        tools:text="Marina Bay / Viewer" />
 
     <TextView
         android:id="@+id/regatta_course"
@@ -53,6 +54,5 @@
         android:singleLine="true"
         android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_32"
-        tools:text="Extreme Sailing Series 2015 Act 1 Singapore"/>
-
+        tools:text="Extreme Sailing Series 2015 Act 1 Singapore" />
 </merge>

@@ -3,8 +3,7 @@
   height: 3.333333333333333em;
   position: relative;
   padding: 0;
-  background: #333;
-  border-bottom: 0.2em solid #efaa00;
+  background: #000;
   z-index: 3;
 }
 .header_logo {
@@ -20,8 +19,6 @@ img.header_logo_image {
   height: 1.666666666666667em;
 }
 .header_title {
-  font-size: 0.933333333333333em;
-  font-weight: 600;
   color: #fff;
   text-transform: uppercase;
   line-height: 3.357142857142857em;
@@ -117,7 +114,6 @@ img.header_logo_image {
   color: #fff;
 }
 .header_navigation_nav_list_item {
-  font-weight: 600;
   text-transform: uppercase;
   padding: 1.333333333333333em 1em;
 }

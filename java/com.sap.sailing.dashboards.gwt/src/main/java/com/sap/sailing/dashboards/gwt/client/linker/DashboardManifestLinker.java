@@ -16,7 +16,8 @@ public class DashboardManifestLinker extends ManifestLinker {
                 return new String[] { "/dashboards/RibDashboard.html",
                                       "/dashboards/RibDashboard.css",
                                       "/dashboards/images/dashboardicon.png",
-                                      "/dashboards/js/jquery-3.3.1.min.js",
+                                      "/dashboards/images/dashboardicon-whitelabeled.png",
+                                      "/dashboards/js/jquery-3.6.0.min.js",
                                       "/sailing-fontface-1.0.cache.css"};
         }
 }

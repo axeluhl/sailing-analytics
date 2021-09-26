@@ -346,6 +346,8 @@ public interface TrackedRace
     /**
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
+     * 
+     * @return {@code null} in case no position is found for any of the waypoint's marks
      */
     default Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
         return getApproximatePosition(waypoint, timePoint, new NonCachingMarkPositionAtTimePointCache(this, timePoint));
@@ -359,6 +361,7 @@ public interface TrackedRace
      * @param markPositionCache
      *            a cache for this {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
      *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     * @return {@code null} in case no position is found for any of the waypoint's marks
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint,
             MarkPositionAtTimePointCache markPositionCache);
@@ -739,31 +742,28 @@ public interface TrackedRace
      *            if <code>true</code> and any cache update is currently going on, wait for the update to complete and
      *            then fetch the updated value; otherwise, serve this requests from whatever is currently in the cache
      */
-    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
-            throws NoWindException;
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis);
 
     /**
      * Same as {@link #getAverageAbsoluteCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
      * wind on leg and leg bearing is provided.
      */
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
-    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatestAnalyses) throws NoWindException;
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses);
 
-    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
-            throws NoWindException;
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis);
 
     /**
      * Same as {@link #getAverageSignedCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
      * wind direction and leg bearing is provided.
      */
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatestAnalysis) throws NoWindException;
+            boolean waitForLatestAnalysis);
 
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint);
 
@@ -975,7 +975,7 @@ public interface TrackedRace
     /**
      * The average wind speed with confidence for this race.
      */
-    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint formTimePoint, TimePoint toTimePoint, int numberOfSamples);
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint fromTimePoint, TimePoint toTimePoint, int numberOfSamples);
     
     /**
      * Computes the center point of the course's marks at the given time point.
@@ -1253,4 +1253,28 @@ public interface TrackedRace
      * may be {@code null}, particularly in test set-ups
      */
     TrackingConnectorInfo getTrackingConnectorInfo();
+
+    /**
+     * Under synchronization with the {@link #getStatus() race status} checks if the race {@link #hasFinishedLoading()
+     * has already finished loading}. If so, {@code runnable} is invoked. Otherwise, a {@link RaceChangeListener} is
+     * {@link #addListener(RaceChangeListener) added} to this race, observing the race status and calling
+     * {@code runnable} when the race has finished loading.
+     * <p>
+     * 
+     * A race is considered to have finished loading when it is not in either of the states
+     * {@link TrackedRaceStatusEnum#PREPARED}, {@link TrackedRaceStatusEnum#LOADING}, or
+     * {@link TrackedRaceStatusEnum#ERROR}.
+     * 
+     * @param runnable
+     *            must not be {@code null}
+     */
+    void runWhenDoneLoading(Runnable runnable);
+
+    /**
+     * Executes the {@code callable} under synchronization with the {@link #getStatus() race status}; in other words,
+     * while the callable executes, the race status of this race cannot be updated.
+     */
+    void runSynchronizedOnStatus(Runnable runnable);
+
+    boolean hasFinishedLoading();
 }

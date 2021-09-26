@@ -3,6 +3,7 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -11,6 +12,7 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.operationaltransformation.AllowBoatResetToDefaults;
@@ -39,9 +41,13 @@ public class PostingOperationFromReplicaToMasterTest extends AbstractServerRepli
     @Test
     public void testPostOperationToMaster() throws InterruptedException, URISyntaxException {
         final String leaderboardName = "My Leaderboard";
+        final CourseArea courseArea = replica.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Course Area");
+        // in production, backward replication of a course area would happen by a backward
+        // replication of an event with that course area; here, we have to "emulate" this explicitly
+        master.getBaseDomainFactory().getOrCreateCourseArea(courseArea.getId(), courseArea.getName());
         final CreateFlexibleLeaderboard operation = new CreateFlexibleLeaderboard(/* leaderboardName */ leaderboardName,
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0], /* scoringScheme */ new LowPoint(),
-                /* courseAreaId */ UUID.randomUUID());
+                /* courseAreaId */ Collections.singleton(courseArea.getId()));
         replica.apply(operation);
         Thread.sleep(1000);
         assertTrue(master.getLeaderboards().containsKey(leaderboardName));

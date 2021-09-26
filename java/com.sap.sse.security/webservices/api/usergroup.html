@@ -30,14 +30,15 @@
     <tr>
         <td>Parameter:</td>
         <td>
-            <div>groupId: Unique ID of the UserGroup.</div>
-            <div>name: Unique name of the UserGroup.</div>
+            <div>groupId: Unique ID of the UserGroup, provided as a path parameter.</div>
+            <div>groupName: Unique name of the UserGroup.</div>
             At least the ID or the name of the group needs to be provided to get detailed information about the UserGroup.
         </td>
     </tr>
     <tr>
         <td>Example:</td>
-        <td><code>curl "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/usergroup?groupId=31333349-caf7-4c03-ad34-f90e07ad5434"</code><br>
+        <td><code>curl "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/usergroup/31333349-caf7-4c03-ad34-f90e07ad5434"</code><br>
+            <code>curl "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/usergroup?groupName=My%20Test%20Group"</code><br>
                 Will provide a JSON document as explained above.</td>
     </tr>
 </table>

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.BaseChart;
@@ -94,6 +95,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private boolean compactChart;
     private final boolean allowTimeAdjust;
     private final String leaderboardGroupName;
+    private final UUID leaderboardGroupId;
     private final String leaderboardName;
     private long stepSizeInMillis = DEFAULT_STEPSIZE;
     private final Map<Pair<CompetitorDTO, DetailType>, Series> dataSeriesForDetailTypeAndCompetitor = new HashMap<>();
@@ -118,8 +120,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType firstDetailType, DetailType secondDetailType, boolean compactChart,
-            boolean allowTimeAdjust,
-            String leaderboardGroupName, String leaderboardName) {
+            boolean allowTimeAdjust, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
         
@@ -127,6 +128,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         this.leaderboardName = leaderboardName;
         
         setSize("100%", "100%");
@@ -271,7 +273,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         long effectiveStepSize = getEffectiveStepSize(from, to);
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, effectiveStepSize, selectedDataTypeToRetrieve,
-                leaderboardGroupName, leaderboardName);
+                leaderboardGroupName, leaderboardGroupId, leaderboardName);
         AsyncCallback<CompetitorsRaceDataDTO> dataLoadedCallback = new AsyncCallback<CompetitorsRaceDataDTO>() {
             @Override
             public void onSuccess(final CompetitorsRaceDataDTO result) {

@@ -17,6 +17,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
@@ -26,14 +27,15 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.BasicUserStore;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
-import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -46,6 +48,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -73,24 +76,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
-    OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject);
-
     Iterable<AccessControlListAnnotation> getAccessControlLists();
 
     AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
-
-    /**
-     * @param idOfAccessControlledObject Has to be globally unique
-     */
-    SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
-
-    /**
-     * @param id Has to be globally unique
-     */
-    SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
-
-    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            Map<UserGroup, Set<String>> permissionMap);
 
     AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap);
@@ -139,6 +127,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     Iterable<UserGroup> getUserGroupList();
 
+    /**
+     * @see BasicUserStore#getUserGroupsWithRoleDefinition(RoleDefinition)
+     */
+    Iterable<UserGroup> getUserGroupsWithRoleDefinition(RoleDefinition roleDefinition);
+    
     UserGroup getUserGroup(UUID id);
 
     UserGroup getUserGroupByName(String name);
@@ -162,6 +155,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     User getUserByName(String username);
 
     User getUserByEmail(String email);
+    
+    /**
+     * Finds all users that have the {@code permission}. This doesn't have to be an explicit permission assignment on
+     * the {@link User} object (see {@link User#getPermissions()}) but can also be implied, e.g., by a
+     * {@link User#getRoles() role assignment} that the user has, or by a group membership of the user where the group
+     * {@link UserGroup#getRoleDefinitionMap() has roles assigned for members of the group}.
+     */
+    Iterable<User> getUsersWithPermissions(WildcardPermission permission);
 
     User getCurrentUser();
 
@@ -192,16 +193,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
-    User createSocialUser(String username, SocialUserAccount socialUserAccount)
-            throws UserManagementException, UserGroupManagementException;
-
     void deleteUser(String username) throws UserManagementException;
 
     /**
      * Creates a new role with initially empty {@link RoleDefinition#getPermissions() permissions}.
      */
     RoleDefinition createRoleDefinition(UUID id, String name);
-    
+
     /**
      * Deletes the {@code roleDefinition} from this service persistently.
      */
@@ -228,8 +226,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void removeRoleFromUser(String username, Role role);
 
-    Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException;
-    
     void removePermissionFromUser(String username, WildcardPermission permissionToRemove);
 
     void addPermissionForUser(String username, WildcardPermission permissionToAdd);
@@ -258,8 +254,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * <code>setting</code> object does not conform to the type used in {@link #addSetting(String, Class)}
      */
     boolean setSetting(String key, Object setting);
-
-    <T> T getSetting(String key, Class<T> clazz);
 
     Map<String, Object> getAllSettings();
 
@@ -313,15 +307,21 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     /**
      * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
-     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     * {@link UserStore#registerPreferenceConverter(String, PreferenceConverter)}.
      */
     <T> T getPreferenceObject(String username, String key);
+    
+    /**
+     * Gets all preference objects resolving to a certain key. Always returns a valid map. May be empty.
+     * {@link UserStore#registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> Map<String, T> getPreferenceObjectsByKey(String key);
 
     /**
      * @return all preferences of the given user
      */
     Map<String, String> getAllPreferences(String username);
-
+    
     /**
      * Issues a new access token and remembers it so that later the user identified by <code>username</code> can be
      * authenticated using the token. Any access token previously created for same user will be invalidated by this
@@ -352,8 +352,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     User getUserByAccessToken(String accessToken);
 
     void removeAccessToken(String username);
-
-    User loginByAccessToken(String accessToken);
 
     /**
      * Returns the group owning this server/replicaset {@link UserStore#getServerGroup()}. This group is used as default
@@ -412,10 +410,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer);
 
-    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
-            com.sap.sse.security.shared.HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
-            Consumer<T> filteredObjectsConsumer);
-
     /**
      * Filters objects with any of the given permissions for the current user.
      */
@@ -425,10 +419,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(
             Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper);
-
-    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
-            Function<T, R> filteredObjectsMapper);
 
     /**
      * Maps and filters by any of the given permissions for the current user.
@@ -526,9 +516,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void assumeOwnershipMigrated(String typeName);
 
-    void migrateOwnership(WithQualifiedObjectIdentifier object);
+    /**
+     * 
+     * @param object
+     * @return {@code true} if the object required ownership migration
+     */
+    boolean migrateOwnership(WithQualifiedObjectIdentifier object);
 
-    void migrateOwnership(QualifiedObjectIdentifier object, String displayName);
+    /**
+     * @return {@code true} if the object required ownership migration
+     */
+    boolean migrateOwnership(QualifiedObjectIdentifier object, String displayName);
 
     void migrateUser(User user);
 
@@ -542,10 +540,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void migrateServerObject();
     
-    void checkMigration(Iterable<HasPermissions> allInstances);
-
-    <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
-            RoleDefinition roleToCheck);
+    void checkMigration(Iterable<? extends HasPermissions> allInstances);
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
     
@@ -554,6 +549,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User userOwner, UserGroup defaultTenant);
 
     UserGroup getDefaultTenantForCurrentUser();
+
+    public void setTemporaryDefaultTenant(final UUID tenantGroupId);
 
     /**
      * When a user adds permissions to a role, he needs to hold the permissions for all existing qualifications. This
@@ -684,4 +681,50 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void registerCustomizer(SecurityInitializationCustomizer customizer);
 
+    /**
+     * Persist user subscription data
+     */
+    void updateUserSubscription(String username, Subscription subscription) throws UserManagementException;
+    
+    /**
+     * Adds a listener that will be invoked each time the set of users having {@code permission} may have changed. When
+     * the {@code listener}'s
+     * {@link PermissionChangeListener#setOfUsersWithPermissionChanged(WildcardPermission, Iterable)
+     * setOfUsersWithPermissionChanged} is called, the listener can invoke
+     * {@link #getUsersWithPermissions(WildcardPermission)} to check whether there actually was a change relevant to the
+     * listener. There is a possibility of "false positive" listener invocations, but each time the set of users having
+     * {@code permission} changes, the listener <em>will</em> be notified.
+     * 
+     * @param permission
+     *            must have a valid, non-empty {@link WildcardPermission#getQualifiedObjectIdentifiers() set of object
+     *            identifiers}, therefore identifying one or more permissions on a non-empty list of specific objects.
+     *            No {@link WildcardPermission#WILDCARD_TOKEN wildcards} are allowed in any part of the permission.
+     */
+    void addPermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener);
+    
+    /**
+     * Removes the {@code listener} from this service if it was registered for a permission equal to {@code permission}
+     * before with the {@link #addPermissionChangeListener(WildcardPermission, PermissionChangeListener)} method. Otherwise,
+     * invoking the method has no effect.
+     */
+    void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener);
+
+    /**
+     * Obtains all {@link HasPermissions} secured types managed by this security service. In an OSGi environment, those
+     * are obtained from all {@link HasPermissionsProvider}s registered as an OSGi service by any active bundle.
+     */
+    Iterable<? extends HasPermissions> getAllHasPermissions();
+    
+    /**
+     * Tries to find a {@link HasPermissions secured type} in the {@link #getAllHasPermissions() set of secured types
+     * known by this security service} based on its name, like it is used in the first
+     * {@link WildcardPermission#getParts() part} of a permission specification, as in {@code USER:READ:*}.
+     * 
+     * @param securedTypeName
+     *            must not be {@code null}
+     * @return may be {@code null} in case a secured type by that {@link HasPermissions#getName() name} is not found
+     */
+    default HasPermissions getHasPermissionsByName(String securedTypeName) {
+        return Util.first(Util.filter(getAllHasPermissions(), hp->hp.getName().equals(securedTypeName)));
+    }
 }

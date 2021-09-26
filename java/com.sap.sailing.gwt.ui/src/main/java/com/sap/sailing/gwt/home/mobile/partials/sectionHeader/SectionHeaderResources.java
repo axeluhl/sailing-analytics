@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.mobile.partials.sectionHeader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 
 public interface SectionHeaderResources extends SharedHomeResources {
     public static final SectionHeaderResources INSTANCE = GWT.create(SectionHeaderResources.class);
@@ -20,6 +20,7 @@ public interface SectionHeaderResources extends SharedHomeResources {
         String sectionheader_item_image_seperator();
         String sectionheader_item_title();
         String sectionheader_item_label();
+        String sectionheader_item_title_label();
         String sectionheader_item_subtitle();
         String sectionheader_itemright_container();
         String sectionheader_item_infotext();

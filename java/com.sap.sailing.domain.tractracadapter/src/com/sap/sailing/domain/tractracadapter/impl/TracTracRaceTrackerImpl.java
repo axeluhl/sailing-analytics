@@ -56,21 +56,23 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.DataSource;
-import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
-import com.tractrac.subscription.lib.api.competitor.ICompetitorsListener;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
+import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
 import com.tractrac.subscription.lib.api.race.IRacesListener;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         implements IConnectionStatusListener, TracTracRaceTracker, DynamicRaceDefinitionSet, TrackingDataLoader {
@@ -197,7 +199,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     private final IEventSubscriber eventSubscriber;
     private final IRaceSubscriber raceSubscriber;
     private final IRacesListener racesListener;
-    private final ICompetitorsListener competitorsListener;
+    private final IRaceCompetitorListener competitorsListener;
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
@@ -270,11 +272,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      *            you expect things to have loaded; see also
      *            {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS}.
      */
-    TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
-            RaceTrackingHandler raceTrackingHandler)
-            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
+    TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
+            RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws URISyntaxException, SubscriberInitializationException,
+            IOException, InterruptedException, CreateModelException, TimeOutException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
                 raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds,
                 raceTrackingHandler);
@@ -299,7 +302,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
             RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler)
-            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
+            throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException, CreateModelException, TimeOutException {
         super(connectivityParams);
         final URL paramURL = connectivityParams.getParamURL();
         final URI liveURI = connectivityParams.getLiveURI();
@@ -314,6 +317,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         final String tracTracPassword = connectivityParams.getTracTracPassword();
         final String raceStatus = connectivityParams.getRaceStatus();
         final String raceVisibility = connectivityParams.getRaceVisibility();
+        final boolean useOfficialEventsToUpdateRaceLog = connectivityParams.isUseOfficialEventsToUpdateRaceLog();
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracRace = connectivityParams.getTractracRace();
         this.tractracEvent = tractracRace.getEvent();
@@ -347,26 +351,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         // Initialize data controller using live and stored data sources
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
         eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, effectiveStoredURI);
-        competitorsListener = new ICompetitorsListener() {
-            @Override
-            public void updateCompetitor(ICompetitor competitor) {
-            	if (!competitor.isNonCompeting()) {
-                    TracTracRaceTrackerImpl.this.domainFactory.updateCompetitor(competitor, raceTrackingHandler);
-            	}
-            }
-            
-            @Override
-            public void deleteCompetitor(UUID competitorId) {
-            }
-            
-            @Override
-            public void addCompetitor(ICompetitor competitor) {
-            }
-        };
-        eventSubscriber.subscribeCompetitors(competitorsListener);
-        reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, raceLogResolver, tractracRace);
+        if (useOfficialEventsToUpdateRaceLog) {
+            reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, raceLogResolver, tractracRace);
+        } else {
+            reconciler = null;
+        }
         racesListener = new IRacesListener() {
-            @Override public void abandonRace(UUID raceId) {
+            @Override public void abandonRace(long timestamp, UUID raceId) {
                 if (raceId.equals(tractracRace.getId())) {
                     try {
                         onStop(/* stopReceiversPreemtively */ false, /* willBeRemoved */ false);
@@ -376,25 +367,29 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                     }
                 }
             }
-            @Override public void addRace(IRace race) {}
-            @Override public void deleteRace(UUID raceId) {}
-            @Override public void reloadRace(UUID raceId) {
+            @Override public void addRace(long timestamp, IRace race) {}
+            @Override public void deleteRace(long timestamp, UUID raceId) {}
+            @Override public void reloadRace(long timestamp, UUID raceId) {
                 if (raceId.equals(tractracRace.getId())) {
                     logger.warning("reloadRace("+raceId+") for race "+tractracRace+
                             " in event "+tractracEvent+" not supported yet. Consider re-loading the race manually");
                 }
             }
-            @Override public void startTracking(UUID raceId) {}
-            @Override public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
+            @Override public void startTracking(long timestamp, UUID raceId) {}
+            @Override public void dataSourceChanged(long timestamp, IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
             @Override
-            public void updateRace(IRace race) {
-                if (Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
+            public void updateRace(long timestamp, IRace race) {
+                if (Util.equalsWithNull(race.getId(), TracTracRaceTrackerImpl.this.tractracRace.getId())) {
                     int delayToLiveInMillis = race.getLiveDelay()*1000;
                     if (getRace() != null) {
                         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(getRace());
                         if (trackedRace != null) {
-                            // in case a race status change was the reason for this update, reconcile with the race log(s)
-                            reconciler.reconcileRaceStatus(race, trackedRace);
+                            if (reconciler != null) {
+                                logger.info("Handling a race status update for race "+race.getName()+" with status "+race.getStatus()+
+                                        " and status time "+race.getStatusLastChangedTime());
+                                // in case a race status change was the reason for this update, reconcile with the race log(s)
+                                reconciler.reconcileRaceStatus(race, trackedRace);
+                            }
                             logger.info("Setting delay to live for race "+trackedRace.getRace().getName()+" to "+delayToLiveInMillis+"ms");
                             trackedRace.setDelayToLiveInMillis(delayToLiveInMillis);
                         }
@@ -417,16 +412,20 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
         // found;
         // in this case, create a default regatta based on the TracTrac event data
-        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(
+        final Regatta regattaInWhichToTryToRemoveExistingRace = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(
                 raceLogStore, regattaLogStore, tractracRace, trackedRegattaRegistry) : effectiveRegatta;
-        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         // removeRace may detach the domain regatta from the domain factory if that
         // removed the last race; therefore, it's important to getOrCreate the
         // domain regatta *after* calling removeRace
-        final RaceDefinition raceDefinition = domainFactory.removeRace(tractracRace.getEvent(), tractracRace, this.regatta, trackedRegattaRegistry);
+        final RaceDefinition raceDefinition = domainFactory.removeRace(tractracRace.getEvent(), tractracRace, regattaInWhichToTryToRemoveExistingRace, trackedRegattaRegistry);
         if (raceDefinition != null) {
-            trackedRegattaRegistry.removeRace(this.regatta, raceDefinition);
+            trackedRegattaRegistry.removeRace(regattaInWhichToTryToRemoveExistingRace, raceDefinition);
         }
+        // Look up / create the Regatta and TrackedRegatta after they may potentially have been removed by the
+        // removeRace statements above:
+        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(
+                raceLogStore, regattaLogStore, tractracRace, trackedRegattaRegistry) : effectiveRegatta;
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
                 simulator, windStore, this, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, tractracRace,
@@ -434,6 +433,37 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, reconciler)) {
             receivers.add(receiver);
         }
+        competitorsListener = new IRaceCompetitorListener() {
+            @Override
+            public void addRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
+                try {
+                    trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void updateRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
+                if (!raceCompetitor.getCompetitor().isNonCompeting()) {
+                    TracTracRaceTrackerImpl.this.domainFactory.updateCompetitor(raceCompetitor.getCompetitor(), raceTrackingHandler);
+                }
+            }
+
+            @Override
+            public void deleteRaceCompetitor(long timestamp, UUID competitorId) {
+                try {
+                    trackedRegattaRegistry.updateRaceCompetitors(getRegatta(), getRace());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void removeOffsetPositions(long timestamp, UUID competitorId, int offset) {
+            }
+        };
+        raceSubscriber.subscribeRaceCompetitor(competitorsListener);
         addListenersForStoredDataAndStartController(receivers);
     }
 
@@ -492,8 +522,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     public static Object createID(URL paramURL, final URI liveURI, final URI storedURI) {
-        URL paramURLStrippedOfRandomParam = getParamURLStrippedOfRandomParam(paramURL);
-        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
+        // see also bug5380: no longer use liveURI and storedURI as part of the ID; the paramURL
+        // is sufficient for identifying the race, and differences in live/stored URI can be caused
+        // by TracTrac providing the same race through several load-balanced server instances that
+        // serve through different ports.
+        return getParamURLStrippedOfRandomParam(paramURL);
     }
 
     public static URL getParamURLStrippedOfRandomParam(URL paramURL) {
@@ -573,7 +606,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         if (!stopped) {
             stopped = true;
             eventSubscriber.unsubscribeRaces(racesListener);
-            eventSubscriber.unsubscribeCompetitors(competitorsListener);
+            raceSubscriber.unsubscribeRaceCompetitor(competitorsListener);
             raceSubscriber.stop();
             eventSubscriber.stop();
             raceSubscriber.unsubscribeConnectionStatus(this);
@@ -703,19 +736,21 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * to all those race logs for events that may require reconciliation of results, race and competitor statuses.
      */
     private void registerRaceAndCompetitorStatusWithRaceLogReconciler(final DynamicTrackedRace trackedRace) {
-        trackedRace.addListener(new AbstractRaceChangeListener() {
-            @Override
-            public void raceLogAttached(RaceLog raceLog) {
-                reconciler.raceLogAttached(trackedRace, raceLog);
+        if (reconciler != null) {
+            trackedRace.addListener(new AbstractRaceChangeListener() {
+                @Override
+                public void raceLogAttached(RaceLog raceLog) {
+                    reconciler.raceLogAttached(trackedRace, raceLog);
+                }
+    
+                @Override
+                public void raceLogDetached(RaceLog raceLog) {
+                    reconciler.raceLogDetached(trackedRace, raceLog);
+                }
+            });
+            for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
+                reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
             }
-
-            @Override
-            public void raceLogDetached(RaceLog raceLog) {
-                reconciler.raceLogDetached(trackedRace, raceLog);
-            }
-        });
-        for (final RaceLog alreadyAttachedRaceLog : trackedRace.getAttachedRaceLogs()) {
-            reconciler.raceLogAttached(trackedRace, alreadyAttachedRaceLog);
         }
     }
 

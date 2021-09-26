@@ -16,7 +16,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -28,7 +29,6 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -36,8 +36,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LocalServerManagementPanel extends SimplePanel {
-
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
@@ -55,11 +54,10 @@ public class LocalServerManagementPanel extends SimplePanel {
         }
     };
 
-    public LocalServerManagementPanel(final SailingServiceAsync sailingService, final UserService userService,
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        this.sailingService = sailingService;
-        this.userService = userService;
-        this.errorReporter = errorReporter;
+    public LocalServerManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this.sailingService = presenter.getSailingService();
+        this.userService = presenter.getUserService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
         final Panel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
@@ -86,16 +84,14 @@ public class LocalServerManagementPanel extends SimplePanel {
         final HasPermissions type = SecuredSecurityTypes.SERVER;
         final Consumer<ServerInfoDTO> updateCallback = event -> userService.updateUser(false);
         final EditOwnershipDialog.DialogConfig<ServerInfoDTO> configOwner = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
+                .create(userService.getUserManagementWriteService(), type, updateCallback, stringMessages);
         final EditACLDialog.DialogConfig<ServerInfoDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
-
+                .create(userService.getUserManagementWriteService(), type, updateCallback, stringMessages);
         final Predicate<DefaultActions> permissionCheck = action -> currentServerInfo != null
                 && userService.hasPermission(type.getPermission(action), currentServerInfo.getOwnership());
-
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, type);
         buttonPanel.addAction(stringMessages.actionChangeOwnership(), () -> permissionCheck.test(CHANGE_OWNERSHIP),
-                () -> configOwner.openDialog(currentServerInfo));
+                () -> configOwner.openOwnershipDialog(currentServerInfo));
         buttonPanel.addAction(stringMessages.actionChangeACL(), () -> permissionCheck.test(CHANGE_ACL),
                 () -> configACL.openDialog(currentServerInfo));
         return buttonPanel;
@@ -114,7 +110,9 @@ public class LocalServerManagementPanel extends SimplePanel {
         final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.serverConfiguration(), 3);
         final Command callback = this::serverConfigurationChanged;
         isStandaloneServerCheckbox = captionPanel.addChekBox(stringMessages.standaloneServer() + ":", callback);
+        isStandaloneServerCheckbox.ensureDebugId("isStandaloneServerCheckbox");
         isPublicServerCheckbox = captionPanel.addChekBox(stringMessages.publicServer() + ":", callback);
+        isPublicServerCheckbox.ensureDebugId("isPublicServerCheckbox");
         isSelfServiceServerCheckbox = captionPanel.addChekBox(stringMessages.selfServiceServer() + ":", callback);
         isSelfServiceServerCheckbox.ensureDebugId("isSelfServiceServerCheckbox");
         return captionPanel;
@@ -128,7 +126,6 @@ public class LocalServerManagementPanel extends SimplePanel {
         final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
                 publicServer, selfServiceServer, null);
         isSelfServiceServerCheckbox.getElement().setAttribute("updating", "true");
-
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -147,7 +144,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     }
 
-    void refreshServerConfiguration() {
+    public void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
 
@@ -162,8 +159,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
         // Update changeability
-        isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(
-                serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
+        isSelfServiceServerCheckbox.setEnabled(userService.hasServerPermission(DefaultActions.CHANGE_ACL));
         // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
         isPublicServerCheckbox.setEnabled(true);
     }

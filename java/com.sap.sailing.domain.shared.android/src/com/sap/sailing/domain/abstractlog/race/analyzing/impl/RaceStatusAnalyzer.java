@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
  * Returns the status and the clock {@link TimePoint} at which it was calculated. That time point is obtained
@@ -59,7 +59,7 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<Pair<RaceLogRaceStatus, 
     protected Pair<RaceLogRaceStatus, TimePoint> performAnalysis() {
         ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(
                 RaceLogRaceStatusEventComparator.INSTANCE);
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassUnrevokedEvents()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 statusEvents.add((RaceLogRaceStatusEvent) event);
             }

@@ -43,9 +43,9 @@ public class WindHelper {
                         @Override
                         public void performAction(JSONObject response) {
                             Intent notifyTrackedIntent = new Intent();
-                            notifyTrackedIntent.putExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA,
+                            notifyTrackedIntent.putExtra(AppConstants.EXTRA_IS_TRACKING,
                                     checkResponseForTracking(response, race));
-                            notifyTrackedIntent.setAction(AppConstants.INTENT_ACTION_IS_TRACKING);
+                            notifyTrackedIntent.setAction(AppConstants.ACTION_IS_TRACKING);
                             BroadcastManager.getInstance(context).addIntent(notifyTrackedIntent);
                         }
                     }, new NetworkHelper.NetworkHelperFailureListener() {

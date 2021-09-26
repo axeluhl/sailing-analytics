@@ -59,22 +59,20 @@ public class Activator implements BundleActivator {
                 final com.sap.sailing.domain.tractracadapter.DomainFactory domainFactory = tractracAdapterFactory
                         .getOrCreateTracTracAdapter(domainObjectFactory.getBaseDomainFactory())
                         .getTracTracDomainFactory();
-                final TracTracConnectivityParamsHandler paramsHandler = new TracTracConnectivityParamsHandler(
-                        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
-                        MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory,
-                                domainObjectFactory),
-                        domainFactory);
-
                 com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
                         .createDomainObjectFactory(mongoObjectFactory.getDatabase(), domainFactory);
                 com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
                         .createMongoObjectFactory(mongoObjectFactory.getDatabase());
+                final TracTracConnectivityParamsHandler paramsHandler = new TracTracConnectivityParamsHandler(
+                        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
+                        MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory,
+                                domainObjectFactory),
+                        domainFactory, tractracMongoObjectFactory, securityService);
                 for (TracTracConfiguration trackTrackConfig : tractracDomainObjectFactory.getTracTracConfigurations()) {
                     securityService.migrateOwnership(trackTrackConfig);
                 }
-                // we do not necessarily have tractrac configs, so ensure that migration is marked as done
+                // we do not necessarily have TracTrac configurations, so ensure that migration is marked as done
                 securityService.assumeOwnershipMigrated(SecuredDomainType.TRACTRAC_ACCOUNT.getName());
-
                 properties.put(TypeBasedServiceFinder.TYPE, RaceTrackingConnectivityParametersImpl.TYPE);
                 context.registerService(RaceTrackingConnectivityParametersHandler.class, paramsHandler, properties);
                 context.registerService(ClearStateTestSupport.class.getName(), new ClearStateTestSupport() {

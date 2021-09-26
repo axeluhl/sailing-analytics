@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
@@ -30,11 +31,11 @@ public class RaceBoatCertificatesPanel extends AbstractBoatCertificatesPanel {
     private final String raceColumnName;
     private final String fleetName;
 
-    public RaceBoatCertificatesPanel(final SailingServiceAsync sailingService, final UserService userService,
+    public RaceBoatCertificatesPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final StrippedLeaderboardDTOWithSecurity leaderboard, final RaceColumnDTO raceColumn, final FleetDTO fleet,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         // TODO problem: what is the secured object here? What is it for other RaceLog updates?
-        super(sailingService, userService, leaderboard, stringMessages, errorReporter,
+        super(sailingServiceWrite, userService, leaderboard, stringMessages, errorReporter,
                 /* context update permission check: */ () -> userService.hasPermission(leaderboard,
                         DefaultActions.UPDATE),
                 leaderboard.getName() + "/" + raceColumn.getName() + "/" + fleet.getName());
@@ -45,10 +46,10 @@ public class RaceBoatCertificatesPanel extends AbstractBoatCertificatesPanel {
     }
 
     @Override
-    protected void assignCertificates(SailingServiceAsync sailingService,
+    protected void assignCertificates(SailingServiceWriteAsync sailingServiceWrite,
             Map<String, ORCCertificate> certificatesByBoatIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback) {
-        sailingService.assignORCPerformanceCurveCertificates(leaderboardName, raceColumnName, fleetName,
+        sailingServiceWrite.assignORCPerformanceCurveCertificates(leaderboardName, raceColumnName, fleetName,
                 certificatesByBoatIdAsString, callback);
     }
 

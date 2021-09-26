@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -12,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -26,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ResultsAreOfficialFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TagFinder;
@@ -51,7 +54,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.util.WeakIdentityHashMap;
+import com.sap.sse.shared.util.WeakIdentityHashMap;
 
 /**
  * Implementation of {@link ReadonlyRaceState}. Use the static factory methods to instantiate your race state.
@@ -164,6 +167,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private final FinishingTimeFinder finishingTimeAnalyzer;
     private final FinishedTimeFinder finishedTimeAnalyzer;
     private final ProtestTimeFinder protestTimeAnalyzer;
+    private final ResultsAreOfficialFinder resultsAreOfficialAnalyzer;
 
     private final FinishPositioningListFinder finishPositioningListAnalyzer;
     private final ConfirmedFinishPositioningListFinder confirmedFinishPositioningListAnalyzer;
@@ -203,6 +207,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private Iterable<TimePoint> timePointsWhenRaceStatusMayChange;
     
     private Iterable<RaceLogTagEvent> cachedTagEvents;
+    
+    private boolean cachedResultsAreOfficial;
     
     private int cachedPassId;
     private StartTimeFinderResult cachedStartTimeFinderResult;
@@ -249,19 +255,18 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.finishingTimeAnalyzer = new FinishingTimeFinder(raceLog);
         this.finishedTimeAnalyzer = new FinishedTimeFinder(raceLog);
         this.protestTimeAnalyzer = new ProtestTimeFinder(raceLog);
+        this.resultsAreOfficialAnalyzer = new ResultsAreOfficialFinder(raceLog);
         this.finishPositioningListAnalyzer = new FinishPositioningListFinder(raceLog);
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
         this.tagAnalyzer = new TagFinder(raceLog);
-
         this.raceStateToObserveListener = new BaseRaceStateChangedListener() {
             @Override
             public void onStartTimeChanged(ReadonlyRaceState state) {
                 update();
             }
         };
-
         this.cachedRacingProcedureTypeNoFallback = determineInitialProcedureType();
         if (this.cachedRacingProcedureTypeNoFallback == null
                 || this.cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
@@ -365,6 +370,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             analyzeAndUpdateCachedRaceStatus();
         }
         return cachedRaceStatus;
+    }
+
+    @Override
+    public boolean isResultsAreOfficial() {
+        return cachedResultsAreOfficial;
     }
 
     /**
@@ -556,7 +566,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         CompetitorResults positionedCompetitors = finishPositioningListAnalyzer.analyze().getCompetitorResults();
         if (!Util.equalsWithNull(cachedPositionedCompetitors, positionedCompetitors)) {
             cachedPositionedCompetitors = positionedCompetitors;
-            changedListeners.onFinishingPositioningsChanged(this);
+            changedListeners.onFinishingPositionsChanged(this);
         }
         CompetitorResultsAndTheirCreationTimePoints confirmedPositionedCompetitors = confirmedFinishPositioningListAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedConfirmedPositionedCompetitors, confirmedPositionedCompetitors)) {
@@ -579,6 +589,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         if (!Util.equalsWithNull(cachedTagEvents, tagEvents)) {
             cachedTagEvents = tagEvents;
             changedListeners.onTagEventsChanged(this);
+        }
+        final RaceLogResultsAreOfficialEvent resultsAreOfficialEvent = resultsAreOfficialAnalyzer.analyze();
+        if ((resultsAreOfficialEvent != null) != cachedResultsAreOfficial) {
+            cachedResultsAreOfficial = resultsAreOfficialEvent != null;
+            changedListeners.onResultsAreOfficialChanged(this);
         }
     }
 
@@ -633,5 +648,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         statusAnalyzer = new RaceStatusAnalyzer(raceLogResolver, raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
         update(dependentRaceStates);
+    }
+
+    @Override
+    public UUID getCourseAreaId() {
+        return cachedStartTimeFinderResult == null ? null : cachedStartTimeFinderResult.getCourseAreaId();
     }
 }

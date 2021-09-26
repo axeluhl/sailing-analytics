@@ -36,7 +36,6 @@ public class QueryManagerMemoryMonitor implements MemoryMonitor {
         this.actions = new ArrayList<>();
         Util.addAll(actions, this.actions);
         Collections.sort(this.actions);
-        
         isPaused = false;
         periodInMs = unit.toMillis(memoryCheckPeriod);
         timer = new Timer(this.getClass().getSimpleName() + " Daemon", true);
@@ -58,11 +57,9 @@ public class QueryManagerMemoryMonitor implements MemoryMonitor {
         final long totalMemory = infoProvider.totalMemory();
         final double freeMemoryRatio = (double) freeMemory / totalMemory;
         final int numberOfRunningQueries = queryManager.getNumberOfRunningQueries();
-        
         if (numberOfRunningQueries > 0) {
             logStatus(freeMemory, totalMemory, freeMemoryRatio, numberOfRunningQueries);
         }
-        
         boolean actionHasBeenPerformed = false;
         final Iterator<MemoryMonitorAction> actionsIterator = actions.iterator();
         while (!actionHasBeenPerformed && actionsIterator.hasNext()) {

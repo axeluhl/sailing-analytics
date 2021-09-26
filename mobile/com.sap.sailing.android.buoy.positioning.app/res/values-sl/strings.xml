@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"Tip kurza"</string>
+    <string name="marks">"Oznake"</string>
+    <string name="set_position">"Nastavitev položaja"</string>
+    <string name="set_position_disabled_gps">"Omogočenje GPS-a\nza nastavitev položaja"</string>
+    <string name="set_position_no_gps_yet">"Čakanje na GPS-povezavo"</string>
+    <string name="reset_position">"Ponastavitev položaja"</string>
+    <string name="getting_marks">"Pridobivanje oznak plova ..."</string>
+    <string name="set">"Nastavljeno"</string>
+    <string name="unknown">"Ni na voljo"</string>
+    <string name="not_set">"Ni nastavljeno"</string>
+    <string name="mark_list_accuracy">"(Natančnost pribl. %1$sm)"</string>
+    <string name="accuracy_detail">"GPS-položaja"</string>
+    <string name="distance_detail">"do prejšnje boje"</string>
+    
+    
+    <string name="accuracy">"Natančnost GPS-a"</string>
+    <string name="distance">"Oddaljenost od prejšnje boje"</string>
+    <string name="position_set">"Položaj je nastavljen"</string>
+    <string name="no_information">"Ni informacij"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"Za nastavitev položaja oznak približajte napravo oznaki in pritisnite \'Nastavi položaj\'. Z indikatorjem natančnosti se odločite, ali je prikazani položaj dovolj dober. Aktivirajte GPS ali počakajte, da bo na voljo."</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"Nastavitve"</string>
+
+    <string name="server">"Pozivanje"</string>
+    <string name="server_sync_settings">"Interval pozivanja (sekunde)"</string>
+
+    <string name="options_menu_checkout">"Odjava"</string>
+    <string name="checkout_warning_message">"Ali se RES želite odjaviti? Za dostop do svojih oznak se boste morali znova prijaviti s prejeto QR-kodo."</string>
+
+    <string name="no_marks_message">"Ni oznak"</string>
+
+</resources>

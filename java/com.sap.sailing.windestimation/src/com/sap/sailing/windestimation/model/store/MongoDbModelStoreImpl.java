@@ -7,10 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 
 import com.mongodb.MongoException;
+import com.mongodb.MongoGridFSException;
+import com.mongodb.MongoQueryException;
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
@@ -31,7 +36,7 @@ import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
  *
  */
 public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
-
+    private static final Logger logger = Logger.getLogger(MongoDbModelStoreImpl.class.getName());
     private final MongoDatabase db;
 
     /**
@@ -50,7 +55,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
         ModelSerializationStrategy serializationStrategy = checkAndGetModelSerializationStrategy(newModel);
         String fileName = getPersistenceKey(newModel);
         String bucketName = getCollectionName(newModel.getModelContext().getDomainType());
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withReadConcern(ReadConcern.MAJORITY);
         try (GridFSDownloadStream inputStream = gridFs.openDownloadStream(fileName)) {
             ModelContext<?> requestedModelContext = newModel.getModelContext();
             @SuppressWarnings("unchecked")
@@ -68,7 +73,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
         ModelSerializationStrategy serializationStrategy = checkAndGetModelSerializationStrategy(trainedModel);
         String newFileName = getPersistenceKey(trainedModel);
         String bucketName = getCollectionName(trainedModel.getModelContext().getDomainType());
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withWriteConcern(WriteConcern.MAJORITY);
         try {
             try (OutputStream outputStream = gridFs.openUploadStream(newFileName)) {
                 serializationStrategy.serializeToStream(trainedModel, outputStream);
@@ -81,7 +86,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     @Override
     public void deleteAll(ModelDomainType domainType) throws ModelPersistenceException {
         try {
-            GridFSBuckets.create(db, getCollectionName(domainType)).drop();
+            GridFSBuckets.create(db, getCollectionName(domainType)).withWriteConcern(WriteConcern.MAJORITY).drop();
         } catch (Exception e) {
             throw new ModelPersistenceException(e);
         }
@@ -95,7 +100,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     public Map<String, byte[]> exportAllPersistedModels(ModelDomainType domainType) throws ModelPersistenceException {
         Map<String, byte[]> exportedModels = new HashMap<>();
         String bucketName = getCollectionName(domainType);
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withReadConcern(ReadConcern.MAJORITY);
         for (GridFSFile gridFSFile : gridFs.find()) {
             String fileName = gridFSFile.getFilename();
             byte[] exportedModel;
@@ -113,7 +118,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType domainType)
             throws ModelPersistenceException {
         String bucketName = getCollectionName(domainType);
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withWriteConcern(WriteConcern.MAJORITY);
         for (Entry<String, byte[]> entry : exportedPersistedModels.entrySet()) {
             String fileName = entry.getKey();
             byte[] exportedModel = entry.getValue();
@@ -131,23 +136,34 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType domainType) {
         List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
         String bucketName = getCollectionName(domainType);
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
-        for (GridFSFile gridFSFile : gridFs.find()) {
-            String fileName = gridFSFile.getFilename();
-            ModelSerializationStrategy serializationStrategy = getModelSerializationStrategyFromPersistenceKey(
-                    fileName);
-            if (serializationStrategy == null) {
-                throw new ModelLoadingException(
-                        "Persistence support could not be determined due to invalid filename pattern: \"" + fileName
-                                + "\"");
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withReadConcern(ReadConcern.MAJORITY);
+        try {
+            for (GridFSFile gridFSFile : gridFs.find()) {
+                String fileName = gridFSFile.getFilename();
+                ModelSerializationStrategy serializationStrategy = getModelSerializationStrategyFromPersistenceKey(fileName);
+                if (serializationStrategy == null) {
+                    throw new ModelLoadingException(
+                            "Persistence support could not be determined due to invalid filename pattern: \"" + fileName + "\"");
+                }
+                try {
+                    PersistableModel<?, ?> loadedModel;
+                    try (GridFSDownloadStream downloadStream = gridFs.openDownloadStream(fileName)) {
+                        loadedModel = serializationStrategy.deserializeFromStream(downloadStream);
+                    } catch (IOException e) {
+                        throw new ModelLoadingException("Could not read model \"" + fileName + "\" from MongoDB", e);
+                    }
+                    loadedModels.add(loadedModel);
+                } catch (MongoGridFSException e) {
+                    logger.severe("Couldn't load file "+fileName+" while loading persistent models of type "+domainType+
+                            " although the directory listing of bucket "+bucketName+
+                            " said it should be there. Ignoring. Model may be incomplete."+
+                            " If this happens while launching a replica, don't worry... the initial load from the master will fix this.");
+                }
             }
-            PersistableModel<?, ?> loadedModel;
-            try (GridFSDownloadStream downloadStream = gridFs.openDownloadStream(fileName)) {
-                loadedModel = serializationStrategy.deserializeFromStream(downloadStream);
-            } catch (IOException e) {
-                throw new ModelLoadingException("Could not read model \"" + fileName + "\" from MongoDB", e);
-            }
-            loadedModels.add(loadedModel);
+        } catch (MongoQueryException mqe) {
+            logger.severe("Couldn't list next file of bucket "+bucketName+
+                    " while loading persistent models of type "+domainType+". Ignoring. Model may be incomplete."+
+                    " If this happens while launching a replica, don't worry... the initial load from the master will fix this.");
         }
         return loadedModels;
     }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="UTF-8"?><resources>
 
     
     
@@ -19,7 +19,6 @@
     
 
     <!-- Generic -->
-    
     <string name="generic_error">"Ошибка"</string>
     <string name="about">"Инфо"</string>
 
@@ -73,6 +72,7 @@
     <string name="enable_gps">"Служба GPS выключена. Этому приложению требуются позиции GPS. Включить GPS в настройках геолокации?"</string>
 
     <!-- Message Sending -->
+    <string name="connected_to_wp">"Подключено к: %1$s\n%2$s\nBoundService:%3$s"</string>
     <string name="sending_waiting">"Ожидающих отправки событий: %1$d.\nПоследняя успешная отправка: %2$s"</string>
     <string name="sending_no_waiting">"Нет ожидающих отправки событий."</string>
 
@@ -87,5 +87,4 @@
     
 
     
-
 </resources>

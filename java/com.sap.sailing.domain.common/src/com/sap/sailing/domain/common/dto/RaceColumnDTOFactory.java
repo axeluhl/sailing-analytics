@@ -15,16 +15,15 @@ public class RaceColumnDTOFactory {
             String regattaName, String seriesName, boolean isMetaLeaderboardColumn) {
         final RaceColumnDTO raceColumnDTO;
         if (seriesName != null) {
-            raceColumnDTO = new RaceColumnInSeriesDTO(seriesName, regattaName);
+            raceColumnDTO = new RaceColumnInSeriesDTO(columnName, seriesName, regattaName);
         } else {
-            raceColumnDTO = isMetaLeaderboardColumn ? new MetaLeaderboardRaceColumnDTO() : new RaceColumnDTO();
+            raceColumnDTO = isMetaLeaderboardColumn ? new MetaLeaderboardRaceColumnDTO(columnName) : new RaceColumnDTO(columnName);
         }
-        fillRaceColumnDTO(raceColumnDTO, columnName, isMedal, explicitFactor);
+        fillRaceColumnDTO(raceColumnDTO, isMedal, explicitFactor);
         return raceColumnDTO;
     }
     
-    private void fillRaceColumnDTO(RaceColumnDTO raceColumnDTO, String columnName, boolean isMedal, Double explicitFactor) {
-        raceColumnDTO.setName(columnName);
+    private void fillRaceColumnDTO(RaceColumnDTO raceColumnDTO, boolean isMedal, Double explicitFactor) {
         raceColumnDTO.setMedalRace(isMedal);
         raceColumnDTO.setExplicitFactor(explicitFactor);
     }

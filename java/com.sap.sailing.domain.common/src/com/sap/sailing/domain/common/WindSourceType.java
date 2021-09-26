@@ -26,13 +26,13 @@ public enum WindSourceType {
      * because at a given time point all boats may sail on the same tack and hence no averaging between the
      * two tacks is possible. This is the more likely to happen the smaller the fleet tracked is.
      */
-    TRACK_BASED_ESTIMATION(false, 0.5, /* useSpeed */ false),
+    TRACK_BASED_ESTIMATION(false, 0.1, /* useSpeed */ false),
     
     /**
      * Estimates wind conditions by analyzing the maneuvers of all boat tracks closely interoperating with incremental
      * maneuver detector.
      */
-    MANEUVER_BASED_ESTIMATION(false, 0.1, /* useSpeed */ false),
+    MANEUVER_BASED_ESTIMATION(false, 0.001, /* useSpeed */ false),
 
     /**
      * Inferred from the race course layout if the course is known to have its first leg be an upwind leg. This

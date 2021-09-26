@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +26,6 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
@@ -51,6 +51,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.TransformationException;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -107,13 +108,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String pattern = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name());
         final String shape = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name());
         final String type = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_TYPE.name());
-        final MarkType markType = MarkType.valueOf(type);
+        final MarkType markType = type == null ? null : MarkType.valueOf(type);
         final String storedColor = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name());
         final Color color = AbstractColor.getCssColor(storedColor);
         final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(), Document.class);
         final Position fixedPosition = positionDocument == null ? null : loadPosition(positionDocument);
         final ArrayList<?> tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), ArrayList.class);
-        final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
+        final Collection<String> tags = tagsList == null ? Collections.emptyList() : tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
         // all mandatory data are loaded -> create builder 
         final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern, markType).withTags(tags);
         if (fixedPosition != null) {
@@ -123,7 +124,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             try {
                 final Document deviceIdDocument = dbObject.get(FieldNames.MARK_PROPERTIES_TRACKING_DEVICE_IDENTIFIER.name(), Document.class);
                 final DeviceIdentifier deviceIdentifier = deviceIdDocument == null ? null : loadDeviceId(deviceIdentifierServiceFinder, deviceIdDocument);
-                builder.withDeviceId(deviceIdentifier);
+                if (deviceIdentifier != null) {
+                    builder.withDeviceId(deviceIdentifier);
+                }
             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Could not load deviceId for MarkProperties", e);
             }
@@ -333,7 +336,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 final Document bdo = (Document) o;
                 waypointTemplates.add(loadWaypointTemplate(bdo, markRoleResolver, markRolePairFactory));
             } else {
-                logger.warning(String.format("Could not load document  for CourseTemplate %s.", id));
+                logger.warning(String.format("Could not load document for CourseTemplate %s.", id));
             }
         }
         // load repeatable parts
@@ -367,31 +370,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String shortName = bdo.getString(FieldNames.WAYPOINT_TEMPLATE_CONTROL_POINT_SHORT_NAME.name());
         // load mark roles for control point
         final ArrayList<?> markRoleUUIDsDbList = bdo.get(FieldNames.WAYPOINT_TEMPLATE_MARK_ROLES.name(), ArrayList.class);
-        boolean hasParsingError = false;
         final List<MarkRole> markRoles = new ArrayList<>();
         for (Object obj : markRoleUUIDsDbList) {
             final MarkRole markRole = markRoleResolver.apply(UUID.fromString(obj.toString()));
             if (markRole == null) {
                 logger.warning(String.format("Could not resolve MarkRole with id %s for WaypointTemplate.", obj.toString()));
-                hasParsingError = true;
-                break;
             } else {
                 markRoles.add(markRole);
             }
         }
-        final WaypointTemplate result;
-        if (hasParsingError) {
-            result = null;
+        // create MarkTemplate or MarkTemplatePairImpl
+        final ControlPointTemplate controlPointTemplate;
+        if (markRoles.size() == 2) {
+            controlPointTemplate = markRolePairResolver.create(name, shortName, markRoles.get(0), markRoles.get(1));
         } else {
-            // create MarkTemplate or MarkTemplatePairImpl
-            final ControlPointTemplate controlPointTemplate;
-            if (markRoles.size() == 2) {
-                controlPointTemplate = markRolePairResolver.create(name, shortName, markRoles.get(0), markRoles.get(1));
-            } else {
-                controlPointTemplate = markRoles.get(0);
-            }
-            result = new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
+            controlPointTemplate = markRoles.get(0);
         }
-        return result;
+        return new WaypointTemplateImpl(controlPointTemplate, passingInstruction);
     }
 }

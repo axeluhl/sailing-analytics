@@ -96,7 +96,8 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
                 return resolvingUsername ? stringMessages.pleaseWaitUntilUsernameIsResolved()
                         : (usernameUnavailable ? stringMessages.userAlreadyExists(nameBox.getText())
                                 : validator.validateUsernameAndPassword(valueToValidate.getUsername(),
-                                        valueToValidate.getPassword(), valueToValidate.getPasswordRepeat()));
+                                        valueToValidate.getPassword(), valueToValidate.getPasswordRepeat(),
+                                        /* reallyUseLeadingOrTrailingSpacesInUsername */ true));
             }
         });
     }
@@ -119,7 +120,9 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
                 validator, callback);
         nameBox = createTextBox("", 30);
         nameBox.setName("username");
+        nameBox.ensureDebugId("username");
         emailBox = createTextBox("", 30);
+        emailBox.ensureDebugId("eMail");
         oldPwBox = createPasswordTextBox("", 30);
         pwBox = createPasswordTextBox("", 30);
         pwBox.ensureDebugId("pw");

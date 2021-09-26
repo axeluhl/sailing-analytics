@@ -65,7 +65,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public DummyTrackedRace(final Map<Competitor, Boat> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
             RaceDefinition race) {
        this(competitors, regatta, trackedRegatta, race, EmptyWindStore.INSTANCE);
-        
     }
 
     public DummyTrackedRace(final String raceName, final Serializable raceId) {
@@ -394,7 +393,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalysis) throws NoWindException {
+            boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -406,7 +405,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalysis) throws NoWindException {
+            boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -418,7 +417,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
+            boolean upwindOnly, boolean waitForLatestAnalysis) {
         return null;
     }
 
@@ -439,7 +438,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException {
+            boolean upwindOnly, boolean waitForLatestAnalyses) {
         return null;
     }
 
@@ -750,5 +749,17 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
-    
+
+    @Override
+    public void runWhenDoneLoading(Runnable runnable) {
+    }
+
+    @Override
+    public void runSynchronizedOnStatus(Runnable runnable) {
+    }
+
+    @Override
+    public boolean hasFinishedLoading() {
+        return false;
+    }
 }

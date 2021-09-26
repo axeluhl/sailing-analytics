@@ -49,7 +49,6 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
@@ -72,6 +71,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -101,9 +101,10 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */null, /* endDate */null, UUID.randomUUID(),
-                Collections.<Series> singletonList(series), /* persistent */ true, new HighPoint(), UUID.randomUUID(),
+                Collections.<Series> singletonList(series), /* persistent */ true, new HighPoint(),
+                service.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Default").getId(),
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */true,
-                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         series.addRaceColumn(columnName, /* trackedRegattaRegistry */null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(DomainFactory.INSTANCE);
@@ -141,8 +142,11 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
 
     private void testSize(Track<?> track, int expected) {
         track.lockForRead();
-        assertEquals(expected, size(track.getRawFixes()));
-        track.unlockAfterRead();
+        try {
+            assertEquals(expected, size(track.getRawFixes()));
+        } finally {
+            track.unlockAfterRead();
+        }
     }
 
     private void addFixes0(DeviceIdentifier dev1) throws TransformationException,

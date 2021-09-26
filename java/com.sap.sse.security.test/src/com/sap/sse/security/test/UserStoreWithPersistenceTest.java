@@ -28,6 +28,7 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SecurityUser;
@@ -55,10 +56,8 @@ public class UserStoreWithPersistenceTest {
 
     private final UUID userGroupId = UUID.randomUUID();
     private final String userGroupName = "usergroup";
-    private UserGroupImpl defaultTenant;
 
     private UserStoreImpl store;
-    private HashMap<String, UserGroup> defaultTenantForServers;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException {
@@ -73,9 +72,10 @@ public class UserStoreWithPersistenceTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         newStore();
-        defaultTenant = store.createUserGroup(userGroupId, userGroupName);
-        defaultTenantForServers = new HashMap<>();
-        defaultTenantForServers.put(serverName, defaultTenant);
+    }
+
+    private UserGroupImpl createUserGroup() throws UserGroupManagementException {
+        return store.createUserGroup(userGroupId, userGroupName);
     }
 
     private void newStore() {
@@ -84,7 +84,7 @@ public class UserStoreWithPersistenceTest {
             store.ensureDefaultRolesExist();
             store.ensureServerGroupExists();
             store.loadAndMigrateUsers();
-        } catch (UserGroupManagementException | UserManagementException e) {
+        } catch (UserStoreManagementException e) {
             throw new RuntimeException(e);
         }
     }
@@ -101,8 +101,11 @@ public class UserStoreWithPersistenceTest {
     }
 
     @Test
-    public void testMasterdataIsSaved() throws UserManagementException {
+    public void testMasterdataIsSaved() throws UserStoreManagementException {
         store.createUser(username, email);
+        UserGroupImpl defaultTenant = createUserGroup();
+        HashMap<String, UserGroup> defaultTenantForServers = new HashMap<>();
+        defaultTenantForServers.put(serverName, defaultTenant);
         store.updateUser(new UserImpl(username, email, fullName, company, Locale.GERMAN, false, null, null,
                 defaultTenantForServers, Collections.emptySet(), /* userGroupProvider */ null));
         newStore();
@@ -163,11 +166,10 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testCreateUserGroup() throws UserGroupManagementException, UserManagementException {
-        store.deleteUserGroup(defaultTenant);
         final User user = store.createUser(username, email);
-        final UserGroupImpl group = store.createUserGroup(userGroupId, userGroupName);
-        group.add(user);
-        store.updateUserGroup(group);
+        UserGroupImpl createUserGroup = createUserGroup();
+        createUserGroup.add(user);
+        store.updateUserGroup(createUserGroup);
         assertNotNull(store.getUserGroup(userGroupId));
         assertNotNull(store.getUserGroupByName(userGroupName));
 
@@ -180,8 +182,8 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testDeleteUserGroup() throws UserGroupManagementException {
-        UserGroupImpl userGroup = store.createUserGroup(userGroupId, userGroupName);
-        store.deleteUserGroup(userGroup);
+        UserGroupImpl createUserGroup = createUserGroup();
+        store.deleteUserGroup(createUserGroup);
         assertNull(store.getUserGroup(userGroupId));
         assertNull(store.getUserGroupByName(userGroupName));
 
@@ -192,6 +194,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testTenantUsers() throws UserManagementException, UserGroupManagementException {
+        UserGroupImpl defaultTenant = createUserGroup();
         final User user = store.createUser(username, email);
         defaultTenant.add(user);
         store.updateUserGroup(defaultTenant);
@@ -259,7 +262,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with both tenant and user null. */
     private void testWithTenantAndUserNull(User user, RoleDefinitionImpl roleDefinition)
             throws UserManagementException {
-        Role role = new Role(roleDefinition, null, null);
+        Role role = new Role(roleDefinition, null, null, true);
         store.addRoleForUser(user.getName(), role);
 
         Iterable<Role> rolesFromUser = store.getRolesFromUser(user.getName());
@@ -275,7 +278,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with both tenant and user not null. */
     private void testWithTenantAndUserNotNull(User user, RoleDefinitionImpl roleDefinition, UserGroupImpl userGroup)
             throws UserManagementException {
-        Role role = new Role(roleDefinition, userGroup, user);
+        Role role = new Role(roleDefinition, userGroup, user, true);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
@@ -284,7 +287,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with user null. */
     private void testWithUserNull(User user, RoleDefinitionImpl roleDefinition, UserGroupImpl userGroup)
             throws UserManagementException {
-        Role role = new Role(roleDefinition, userGroup, null);
+        Role role = new Role(roleDefinition, userGroup, null, true);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
@@ -293,7 +296,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with tenant null. */
     private void testWithTenantNull(User user, RoleDefinitionImpl roleDefinition, UserGroupImpl userGroup)
             throws UserManagementException {
-        Role role = new Role(roleDefinition, null, user);
+        Role role = new Role(roleDefinition, null, user, true);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);

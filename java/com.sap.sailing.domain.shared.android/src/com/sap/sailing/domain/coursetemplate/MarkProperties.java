@@ -39,7 +39,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * @author Axel Uhl (d043530)
  *
  */
-public interface MarkProperties extends CommonMarkProperties, NamedWithUUID, HasTags, WithQualifiedObjectIdentifier {
+public interface MarkProperties extends FreestyleMarkProperties, NamedWithUUID, WithQualifiedObjectIdentifier {
     void setColor(Color color);
 
     void setShape(String shape);

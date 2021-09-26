@@ -162,7 +162,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 JSONArray resultAsJson = new JSONArray();
                 WindJsonSerializer serializer = new WindJsonSerializer(new PositionJsonSerializer());
                 PolarDataService service = getService().getPolarDataService();
-                ManeuverBasedWindEstimationTrack maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
+                final ManeuverBasedWindEstimationTrack maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
                         service, trackedRace, /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ false);
                 maneuverBasedWindEstimationTrackImpl.initialize();
                 maneuverBasedWindEstimationTrackImpl.lockForRead();
@@ -173,7 +173,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 } finally {
                     maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
                 }
-                response = Response.ok(resultAsJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(resultAsJson)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;

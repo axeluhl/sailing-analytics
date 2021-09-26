@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -150,12 +152,9 @@ public class SensorFixStoreAndLoadTest {
         raceLog = new RaceLogImpl("racelog");
         raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(START_OF_TRACKING), author, 0));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(END_OF_TRACKING), author, 0));
-        
         regattaLog = new RegattaLogImpl("regattalog");
-
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory);
-
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author,
                 new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author,
@@ -171,6 +170,7 @@ public class SensorFixStoreAndLoadTest {
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* startDate */ null, /* endDate */null, null, null, "a", null,
                 /* registrationLinkSecret */ UUID.randomUUID().toString()));
+        regatta.getRegatta().setControlTrackingFromStartAndFinishTimes(true);
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
@@ -453,7 +453,7 @@ public class SensorFixStoreAndLoadTest {
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
         if (expected == 0) {
             if (track != null) {
-        track.lockForRead();
+                track.lockForRead();
                 try {
                     assertTrue(size(track.getRawFixes()) == 0);
                 } finally {
@@ -463,10 +463,10 @@ public class SensorFixStoreAndLoadTest {
         } else {
             track.lockForRead();
             try {
-        assertEquals(expected, size(track.getRawFixes()));
+                assertEquals(expected, size(track.getRawFixes()));
             } finally {
-        track.unlockAfterRead();
-    }
+                track.unlockAfterRead();
+            }
         }
     }
 
@@ -741,7 +741,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRegattaLog(regattaLog);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);
         raceLog.add(new RaceLogStartTimeEventImpl(new MillisecondsTimePoint(START_OF_TRACKING), author, 0, 
-                new MillisecondsTimePoint(START_OF_TRACKING)));
+                new MillisecondsTimePoint(START_OF_TRACKING), /* courseAreaId */ null));
         assertNotNull(trackedRace.getStartOfTracking());
         trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
@@ -804,7 +804,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
 
     @Test
@@ -820,7 +820,7 @@ public class SensorFixStoreAndLoadTest {
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         trackedRace.waitForLoadingToFinish();
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
 
     @Test
@@ -837,7 +837,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
     
     @Test
@@ -856,7 +856,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
-        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
 
     private class StatusTransitionListener extends AbstractRaceChangeListener {

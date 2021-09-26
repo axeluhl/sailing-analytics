@@ -476,6 +476,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns, Supplier<Double> totalPointsProvider) {
         Double result;
+        // TODO bug5612: split up into discarding and applying the score factor
         if (isDiscarded(competitor, raceColumn, timePoint, discardedRaceColumns)) {
             result = 0.0;
         } else {
@@ -937,7 +938,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     public String toString() {
         return getName() + " "
-                + (getDefaultCourseArea() != null ? getDefaultCourseArea().getName() : "<No course area defined>") + " "
+                + Util.join(", ", getCourseAreas()) + " "
                 + (getScoringScheme() != null ? getScoringScheme().getType().name() : "<No scoring scheme set>");
     }
 

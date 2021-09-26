@@ -42,7 +42,6 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
         this.infoText = infoText;
         canvasWidth = 100;
         canvasHeight = 100;
-
         setCanvasSize(canvasWidth, canvasHeight);
         canvas.addStyleName("competitorInfo-Canvas");
     }
@@ -53,7 +52,6 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             LatLng latLngPosition = coordinateSystem.toLatLng(position);
             Context2d ctx = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
-
             ctx.setFont("12px bold Verdana sans-serif");
             String[] textLines = infoText.split("\n");
             TextMetrics measureText = ctx.measureText(findLargestLine(textLines));
@@ -61,10 +59,8 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             infoBoxHeight = defaultInfoBoxHeight + textLines.length * 10;
             canvasWidth = (int)largestLineWidth + infoBoxHeight;
             setCanvasSize(canvasWidth, canvasHeight);
-
             ctx.save();
             ctx.clearRect(0,  0,  canvasWidth, canvasHeight);
-
             ctx.setLineWidth(1.0);
             ctx.setFillStyle(grayTransparentColor);
             if (competitorColor != null) {
@@ -72,12 +68,10 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             } else {
                 ctx.setStrokeStyle("#888888");
             }
-
             ctx.beginPath();
             ctx.moveTo(0,0);
             ctx.lineTo(0,101);
             ctx.stroke();
-            
             ctx.beginPath();
             ctx.moveTo(1.0,1.0);
             ctx.lineTo(canvasWidth,1.0);
@@ -88,14 +82,11 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
-            
             ctx.beginPath();
             ctx.setFillStyle("black");
             drawText(textLines, ctx);
             ctx.stroke();
-
             ctx.restore();
-            
             Point objectPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             setCanvasPosition(objectPositionInPx.getX(), objectPositionInPx.getY() - canvasHeight);
         }

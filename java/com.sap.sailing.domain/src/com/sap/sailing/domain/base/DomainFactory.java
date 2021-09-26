@@ -34,7 +34,6 @@ import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
 import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
 
@@ -107,12 +106,8 @@ public interface DomainFactory extends SharedDomainFactory<RaceLogAndTrackedRace
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
-    List<CompetitorAndBoatDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors);
-
     List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors);
 
-    List<CompetitorAndBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors);
-    
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 
     TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard, RaceColumn raceColumn,

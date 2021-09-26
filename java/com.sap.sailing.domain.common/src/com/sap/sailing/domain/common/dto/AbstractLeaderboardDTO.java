@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -29,8 +28,7 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
      */
     public String regattaName;
     public String displayName;
-    public UUID defaultCourseAreaId;
-    public String defaultCourseAreaName;
+    public List<CourseAreaDTO> courseAreas;
     public ScoringSchemeType scoringScheme;
     public LeaderboardType type;
     public boolean canBoatsOfCompetitorsChangePerRace;
@@ -41,9 +39,14 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
     @Deprecated
     protected AbstractLeaderboardDTO() {} // for GWT serialization only
 
-    public AbstractLeaderboardDTO(BoatClassDTO boatClass) {
+    public AbstractLeaderboardDTO(String name, BoatClassDTO boatClass) {
+        super(name);
         this.boatClass = boatClass;
         races = new ArrayList<RaceColumnDTO>();
+    }
+    
+    public AbstractLeaderboardDTO(BoatClassDTO boatClass) {
+        this(/* name */ "", boatClass);
     }
     
     public BoatClassDTO getBoatClass() {

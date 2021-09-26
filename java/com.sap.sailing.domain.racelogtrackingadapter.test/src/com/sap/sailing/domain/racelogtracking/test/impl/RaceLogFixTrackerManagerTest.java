@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -90,12 +92,9 @@ public class RaceLogFixTrackerManagerTest {
     public void setUp() throws UnknownHostException, MongoException {
         raceLog = new RaceLogImpl("racelog");
         raceLog2 = new RaceLogImpl("racelog2");
-
         regattaLog = new RegattaLogImpl("regattalog");
-
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory);
-
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
         Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { new WaypointImpl(mark), new WaypointImpl(mark2) }));
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();

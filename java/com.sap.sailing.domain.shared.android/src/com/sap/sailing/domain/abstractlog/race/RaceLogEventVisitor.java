@@ -66,4 +66,8 @@ public interface RaceLogEventVisitor {
     void visit(RaceLogORCScratchBoatEvent event);
 
     void visit(RaceLogORCImpliedWindSourceEvent event);
+    
+    void visit(RaceLogResultsAreOfficialEvent event);
+    
+    void visit(RaceLogExcludeWindSourcesEvent event);
 }

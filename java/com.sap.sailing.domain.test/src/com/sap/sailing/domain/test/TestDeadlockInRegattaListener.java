@@ -39,7 +39,7 @@ import com.sap.sse.util.ThreadLocalTransporter;
 
 public class TestDeadlockInRegattaListener {
     @Rule
-    public Timeout globalTimeout = Timeout.millis(5000); // fail after 1s
+    public Timeout globalTimeout = Timeout.millis(100000); // fail after 1s
 
     @Test
     public void testDeadlockInRegattaListener() throws InterruptedException, BrokenBarrierException, MalformedURLException, IOException {
@@ -55,7 +55,7 @@ public class TestDeadlockInRegattaListener {
                 /* startDate */ null, /* endDate */ null,
                 /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(),
                 /* courseArea */ null, /* controlTrackingFromStartAndFinishTimes */ true,
-                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
+                /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta) {
             private static final long serialVersionUID = -3599667964201700780L;
 

@@ -9,6 +9,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -26,10 +28,11 @@ public class SignInViewImpl extends Composite implements SignInView {
     @UiField TextBox loginNameUi;
     @UiField PasswordTextBox passwordUi;
     @UiField Anchor forgotPasswordUi;
-    @UiField Anchor createAccountUi;
-    @UiField Anchor signInUi;
+    @UiField Button createAccountUi;
+    @UiField Button signInUi;
     @UiField Anchor loginFacebookUi;
     @UiField Anchor loginGoogleUi;
+    @UiField CheckBox reallyUseLeadingOrTrailingSpacesInUsernameUi;
     
     @UiField DivElement formErrorUi;
     @UiField DivElement socialLoginUi;
@@ -46,6 +49,15 @@ public class SignInViewImpl extends Composite implements SignInView {
         this.ensureDebugIds();
         // TODO implement social login functionality
         socialLoginUi.removeFromParent();
+        loginNameUi.addKeyUpHandler(e->validate());
+        reallyUseLeadingOrTrailingSpacesInUsernameUi.addValueChangeHandler(e->validate());
+    }
+    
+    private void validate() {
+        final String username = loginNameUi.getValue();
+        boolean usernameStartsOrEndsWithSpace = username.startsWith(" ") || username.endsWith(" ");
+        reallyUseLeadingOrTrailingSpacesInUsernameUi.setVisible(usernameStartsOrEndsWithSpace);
+        signInUi.setEnabled(!usernameStartsOrEndsWithSpace || reallyUseLeadingOrTrailingSpacesInUsernameUi.getValue());
     }
     
     @Override

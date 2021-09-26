@@ -25,7 +25,7 @@ import com.sap.sse.common.Util;
 
 public class WindFinderReportParserTest {
     private final String TEST_MESSAGE = "[{\"wg\":16,\"wd\":331,\"dtl\":\"2017-11-13T15:16:00+01:00\",\"dtl_s\":\"2017-11-13T15:15:30+01:00\",\"ws\":12,\"at\":7.0},{\"wg\":14,\"wd\":333,\"dtl\":\"2017-11-13T15:32:00+01:00\",\"dtl_s\":\"2017-11-13T15:31:30+01:00\",\"ws\":12,\"at\":7.0},{\"wg\":16,\"wd\":332,\"dtl\":\"2017-11-13T15:40:00+01:00\",\"dtl_s\":\"2017-11-13T15:39:30+01:00\",\"ws\":12,\"at\":7.0}]";
-
+    
     @Test
     public void testReadingOneFix() throws ParseException, NumberFormatException, java.text.ParseException {
         final JSONArray fullJson = (JSONArray) new JSONParser().parse(TEST_MESSAGE);
@@ -49,7 +49,7 @@ public class WindFinderReportParserTest {
 
     @Test
     public void testOtherSpots() throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
-        assertEquals(4, Util.size(new ReviewedSpotsCollectionImpl("kielerfoerde").getSpots(/* cached */ false)));
+        assertEquals(3, Util.size(new ReviewedSpotsCollectionImpl("kielerfoerde").getSpots(/* cached */ false)));
         assertEquals(3, Util.size(new ReviewedSpotsCollectionImpl("chiemsee").getSpots(/* cached */ false)));
         assertEquals(1, Util.size(new ReviewedSpotsCollectionImpl("starnbergersee").getSpots(/* cached */ false)));
         assertEquals(1, Util.size(new ReviewedSpotsCollectionImpl("wannsee").getSpots(/* cached */ false)));

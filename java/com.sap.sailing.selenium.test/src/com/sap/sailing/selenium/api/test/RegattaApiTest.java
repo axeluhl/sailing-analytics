@@ -70,28 +70,24 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     @Test
     public void testGetRegattaForCreatedEvent() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
         JSONArray series = (JSONArray) regatta.get("series");
         JSONObject serie = (JSONObject) series.get(0);
         JSONArray fleets = (JSONArray) serie.get("fleets");
         JSONObject trackedRaces = (JSONObject) serie.get("trackedRaces");
-
         assertEquals("read: regatta.name is different", EVENT_NAME, regatta.getName());
         assertNull("read: regatta.startDate should be null", regatta.getStartDate());
         assertNull("read: regatta.endDate should be null", regatta.getEndDate());
         assertEquals("read: regatta.scoringSystem is different", "LOW_POINT", regatta.getScoringSystem());
         assertEquals("read: regatta.boeatclass is different", BOAT_CLASS, regatta.getBoatClass());
-        assertNotNull("read: regatta.courseAreaId is missing", regatta.getCourseAreaId());
+        assertFalse("read: regatta.courseAreaId is missing", regatta.getCourseAreaId().isEmpty());
         assertEquals("read: regatta.canBoatsOfCompetitorsChangePerRace should be false", false,
                 regatta.canBoatsOfCompetitorsChangePerRace());
         assertEquals("read: regatta.competitorRegistrationType is different", CLOSED,
                 regatta.getCompetitorRegistrationType());
-
         assertTrue(regatta.isUseStartTimeInference());
         assertFalse(regatta.isControlTrackingFromStartAndFinishTimes());
-
         assertEquals("read: reagtta.series should have 1 entry", 1, series.size());
         assertEquals("read: reagtta.fleets should have 1 entry", 1, fleets.size());
         assertNotNull("read: reagtta.trackedRaces is missing", trackedRaces);
@@ -261,7 +257,6 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     @Test
     public void testTrackingDeviceStatus() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-
         Event event = eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, OPEN_UNMODERATED, "default");
         final UUID competitor1DeviceID = UUID.randomUUID();
         final Competitor competitor1 = regattaApi.createAndAddCompetitorWithSecret(ctx, EVENT_NAME, BOAT_CLASS, "test@de", "Max",
@@ -274,16 +269,13 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         gpsFixApi.postGpsFix(ctx, competitor1DeviceID, createFix(49.121, 8.5987, timeMillisCompetitor1, 10.0, 180.0));
         final long timeMillisCompetitor2 = System.currentTimeMillis() - 50;
         gpsFixApi.postGpsFix(ctx, competitor2DeviceID, createFix(49.120, 8.5988, timeMillisCompetitor2, 10.0, 180.0));
-
         final RegattaDeviceStatus trackingDeviceStatus = regattaApi.getTrackingDeviceStatus(ctx, EVENT_NAME);
-
         final List<CompetitorDeviceStatus> competitorsTrackingDeviceStatus = trackingDeviceStatus.getCompetitors();
         assertEquals(2, competitorsTrackingDeviceStatus.size());
         final Map<UUID, List<DeviceStatus>> statusByCompetitorUUID = competitorsTrackingDeviceStatus.stream()
                 .collect(Collectors.toMap(c -> UUID.fromString(c.getCompetitorId()), c -> c.getDeviceStatuses()));
         assertTrue(statusByCompetitorUUID.containsKey(competitor1.getId()));
         assertTrue(statusByCompetitorUUID.containsKey(competitor2.getId()));
-
         List<DeviceStatus> competitor1DeviceStatuses = statusByCompetitorUUID.get(competitor1.getId());
         assertEquals(1, competitor1DeviceStatuses.size());
         DeviceStatus competitor1DeviceStatus = competitor1DeviceStatuses.iterator().next();

@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -50,31 +51,28 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
     
     public TabletAndDesktopWhatsNewView(WhatsNewNavigationTabs navigationTab, DesktopPlacesNavigator placesNavigator) {
         super();
-    
         WhatsNewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-    
+        // set notes texts
         sailingAnalyticsNotes.setHTML(WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml().getText());
         sailingSimulatorNotes.setHTML(WhatsNewResources.INSTANCE.getSailingSimulatorNotesHtml().getText());
         raceCommitteeAppNotes.setHTML(WhatsNewResources.INSTANCE.getRaceCommitteeAppNotesHtml().getText());
         inSightAppNotes.setHTML(WhatsNewResources.INSTANCE.getInSightAppNotesHtml().getText());
         buoyPingerAppNotes.setHTML(WhatsNewResources.INSTANCE.getBuoyPingerAppNotesHtml().getText());
-
+        // set notes navigation
         sailingAnalyticNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics); 
         sailingSimulatorNoteNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator); 
         raceCommitteeAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
         inSightAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.InSightApp);
         buoyPingerAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.BuoyPingerApp);
-
+        // set notes URLs
         sailingAnalyticsNotesAnchor.setHref(sailingAnalyticNotesNavigation.getTargetUrl());
         sailingSimulatorNotesAnchor.setHref(sailingSimulatorNoteNavigation.getTargetUrl());
         raceCommitteeAppNotesAnchor.setHref(raceCommitteeAppNotesNavigation.getTargetUrl());
         inSightAppNotesAnchor.setHref(inSightAppNotesNavigation.getTargetUrl());
         buoyPingerAppNotesAnchor.setHref(buoyPingerAppNotesNavigation.getTargetUrl());
-
         links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, sailingSimulatorNotesAnchor, raceCommitteeAppNotesAnchor, inSightAppNotesAnchor, buoyPingerAppNotesAnchor });
         contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, sailingSimulatorNotes, raceCommitteeAppNotes, inSightAppNotes, buoyPingerAppNotes });
-
         switch(navigationTab) {
             case BuoyPingerApp:
                 setActiveContent(buoyPingerAppNotes, buoyPingerAppNotesAnchor);
@@ -113,9 +111,21 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
         setActiveContent(raceCommitteeAppNotes, raceCommitteeAppNotesAnchor);
         handleClickEventWithLocalNavigation(event, raceCommitteeAppNotesNavigation);
     }
-    
+
+    @UiHandler("buoyPingerAppNotesAnchor")
+    void buoyPingerClicked(ClickEvent event) {
+        setActiveContent(buoyPingerAppNotes, buoyPingerAppNotesAnchor);
+        handleClickEventWithLocalNavigation(event, buoyPingerAppNotesNavigation);
+    }
+
+    @UiHandler("inSightAppNotesAnchor")
+    void inSightAppClicked(ClickEvent event) {
+        setActiveContent(inSightAppNotes, inSightAppNotesAnchor);
+        handleClickEventWithLocalNavigation(event, inSightAppNotesNavigation);
+    }
+
     private void setActiveContent(HTML activeHTML, Anchor activeLink) {
-        for (HTML html: contentWidgets) {
+        for (HTML html : contentWidgets) {
             html.setVisible(html == activeHTML);
         }
         for (Anchor link : links) {
@@ -125,8 +135,9 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
                 link.removeStyleName(WhatsNewResources.INSTANCE.css().whatsnew_nav_linkactive());
             }
         }
+        Window.scrollTo (0 ,0);
     }
-    
+
     private void handleClickEventWithLocalNavigation(ClickEvent e, PlaceNavigation<?> placeNavigation) {
         if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
             // don't use the placecontroller for navigation here as we want to avoid a page reload

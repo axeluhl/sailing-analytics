@@ -11,14 +11,17 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
 
 public class StatusServlet extends HttpServlet {
+    private static final String WAIT_UNTIL_RACES_LOADED = "waitUntilRacesLoaded";
     private static final long serialVersionUID = -8896724182560416457L;
 
     protected <T> T getService(Class<T> clazz) {
@@ -43,20 +46,39 @@ public class StatusServlet extends HttpServlet {
         final ServletContext servletContext = req.getServletContext();
         final JSONObject result = new JSONObject();
         final RacingEventService service = getService(servletContext);
-        result.put("numberofracestorestore", service.getNumberOfTrackedRacesToRestore());
-        result.put("numberofracesrestored", service.getNumberOfTrackedRacesRestored());
-        final ReplicationService replicationService = getReplicationService(servletContext);
-        final ReplicationStatus replicationStatus = replicationService == null ? null : replicationService.getStatus();
-        if (replicationStatus != null) {
-            result.put("replication", replicationStatus.toJSONObject());
+        final String waitUntilRacesLoadedString = req.getParameter(WAIT_UNTIL_RACES_LOADED);
+        boolean waitUntilRacesLoaded = Boolean.valueOf(waitUntilRacesLoadedString);
+        result.put("servername", ServerInfo.getName());
+        result.put("buildversion", ServerInfo.getBuildVersion());
+        try {
+            final JSONObject versionAsJson = ServerInfo.getBuildVersionJson();
+            result.putAll(versionAsJson);
+            final long numberOfTrackedRacesToRestore = service.getNumberOfTrackedRacesToRestore();
+            result.put("numberofracestorestore", numberOfTrackedRacesToRestore);
+            final int numberOfTrackedRacesRestored = service.getNumberOfTrackedRacesRestored();
+            result.put("numberofracesrestored", numberOfTrackedRacesRestored);
+            final int numberOfTrackedRacesRestoredDoneLoading = service.getNumberOfTrackedRacesRestoredDoneLoading();
+            result.put("numberofracesrestoreddoneloading", numberOfTrackedRacesRestoredDoneLoading);
+            final int numberOfTrackedRacesStillLoading = service.getNumberOfTrackedRacesStillLoading();
+            result.put("numberofracesstillloading", numberOfTrackedRacesStillLoading);
+            final ReplicationService replicationService = getReplicationService(servletContext);
+            final ReplicationStatus replicationStatus = replicationService == null ? null : replicationService.getStatus();
+            if (replicationStatus != null) {
+                result.put("replication", replicationStatus.toJSONObject());
+            }
+            boolean available = numberOfTrackedRacesRestored >= numberOfTrackedRacesToRestore
+                    && (replicationStatus == null || replicationStatus.isAvailable());
+            if (waitUntilRacesLoaded) {
+                available = available && numberOfTrackedRacesRestoredDoneLoading == numberOfTrackedRacesToRestore;
+            }
+            result.put("available", available);
+            resp.setStatus(available ? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            resp.setContentType(MediaType.APPLICATION_JSON + ";charset=UTF-8");
+            OutputStreamWriter out = new OutputStreamWriter(resp.getOutputStream());
+            result.writeJSONString(out);
+            out.close();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
-        final boolean available = service.getNumberOfTrackedRacesRestored() >= service.getNumberOfTrackedRacesToRestore() &&
-                (replicationStatus == null || replicationStatus.isAvailable());
-        result.put("available", available);
-        resp.setStatus(available ? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-        resp.setContentType(MediaType.APPLICATION_JSON + ";charset=UTF-8");
-        OutputStreamWriter out = new OutputStreamWriter(resp.getOutputStream());
-        result.writeJSONString(out);
-        out.close();
     }
 }
