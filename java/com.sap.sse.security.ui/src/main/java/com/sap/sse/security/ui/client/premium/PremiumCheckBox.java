@@ -94,7 +94,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
     protected void onUserPermissionUpdate(final boolean isPermitted) {
         checkBox.setValue(getValue());
         checkBox.setEnabled(isEnabled() && isPermitted);
-        checkBox.setStyleName(style.premiumPermitted(), isPermitted);
+        container.setStyleName(style.premiumPermitted(), isPermitted);
     }
 
     @Override

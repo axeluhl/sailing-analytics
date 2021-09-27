@@ -6,7 +6,11 @@
         .premium-container .premium-check-box input:disabled + label {
             cursor: pointer;
         }
-        .premium-container .premium-check-box.premium-permitted input {
+        .premium-permitted .premium-container, 
+        .premium-permitted .premium-container .premium-check-box input:disabled + label {
+            cursor: default;
+        }
+        .premium-permitted .premium-container .premium-check-box input {
             box-shadow: -3px 0 #ffffff, -6px 0 #d2af25;
         }
         .premium-container .premium-icon {
