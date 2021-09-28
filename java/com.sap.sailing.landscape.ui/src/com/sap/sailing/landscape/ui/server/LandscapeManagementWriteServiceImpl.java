@@ -161,6 +161,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
      */
     private static final Optional<Duration> MDI_TIMEOUT = Optional.of(Duration.ONE_HOUR.times(6));
     
+    /**
+     * time to wait between checks whether the master-data import has finished
+     */
+    private static final Duration TIME_TO_WAIT_BETWEEN_MDI_COMPLETION_CHECKS = Duration.ONE_SECOND.times(15);
+
     private static final String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
@@ -728,7 +733,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final DataImportProgress mdiProgress = waitForMDICompletionOrError(archive, idForProgressTracking, durationToWaitBeforeCompareServers,
                 /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
         if (mdiProgress != null && !mdiProgress.failed() && mdiProgress.getResult() != null) {
-            logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Comparing server contents now...");
+            logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Waiting "+durationToWaitBeforeCompareServers+" before starting to compare content...");
+            Thread.sleep(durationToWaitBeforeCompareServers.asMillis());
+            logger.info("Comparing contents now...");
             final CompareServersResult compareServersResult = Wait.wait(()->from.compareServers(Optional.empty(), archive, Optional.of(from.getLeaderboardGroupIds())),
                     csr->!csr.hasDiffs(), /* retryOnException */ true, Optional.of(durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)),
                     durationToWaitBeforeCompareServers, Level.INFO, "Comparing leaderboard groups with IDs "+Util.joinStrings(", ", from.getLeaderboardGroupIds())+
@@ -740,8 +747,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
                         Util.addAll(eids, eventIDs);
                     }
-                    logger.info("Removing remote sailing server references to events on "+from+" with IDs "+eventIDs+" from archive server "+archive);
-                    archive.removeRemoteServerEventReferences(from, eventIDs);
                     final AwsRegion region = new AwsRegion(regionId);
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
                             getLandscape().getCentralReverseProxy(region);
@@ -751,6 +756,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     defaultRedirect.accept(new ALBToReverseProxyArchiveRedirectMapper<>(
                             centralReverseProxy, hostnameFromWhichToArchive, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
                     if (removeApplicationReplicaSet) {
+                        logger.info("Removing remote sailing server references to "+from+" from archive server "+archive);
+                        archive.removeRemoteServerReference(from);
                         logger.info("Removing the application replica set archived ("+from+") was requested");
                         final SailingAnalyticsProcess<String> fromMaster = getSailingAnalyticsProcessFromDTO(applicationReplicaSetToArchive.getMaster());
                         final Database fromDatabase = fromMaster.getDatabaseConfiguration(region, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
@@ -762,6 +769,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         } else {
                             logger.info("No archiving of database content was requested. Leaving "+fromDatabase.getConnectionURI()+" untouched.");
                         }
+                    } else {
+                        logger.info("Removing remote sailing server references to events on "+from+" with IDs "+eventIDs+" from archive server "+archive);
+                        archive.removeRemoteServerEventReferences(from, eventIDs);
                     }
                 } else {
                     logger.severe("Even after "+maxNumberOfCompareServerAttempts+" attempts and waiting a total of "+
@@ -801,7 +811,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private DataImportProgress waitForMDICompletionOrError(SailingServer archive,
             UUID idForProgressTracking, Duration durationToWaitBeforeCompareServers, String logMessage) throws Exception {
         return Wait.wait(()->archive.getMasterDataImportProgress(idForProgressTracking), progress->progress.failed() || progress.getResult() != null,
-                /* retryOnException */ false, MDI_TIMEOUT, /* time to wait between attempts */ Duration.ONE_SECOND.times(15),
+                /* retryOnException */ false, MDI_TIMEOUT, TIME_TO_WAIT_BETWEEN_MDI_COMPLETION_CHECKS,
                 Level.INFO, logMessage);
     }
 

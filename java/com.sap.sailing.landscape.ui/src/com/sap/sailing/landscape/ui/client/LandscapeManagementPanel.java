@@ -112,7 +112,7 @@ public class LandscapeManagementPanel extends SimplePanel {
      * archived. This waiting period is owed to the process of loading the race content which is an asynchronous
      * process running mainly in the "background" and after the master data import has reported "completion."
      */
-    private static final Duration DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS = Duration.ONE_MINUTE.times(5);
+    private static final Duration DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS = Duration.ONE_MINUTE.times(1);
     private static final int DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS = 3;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
