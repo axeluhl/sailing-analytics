@@ -826,7 +826,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         autoScalingGroupRemoval.thenAccept(v->
             applicationReplicaSet.getMaster().stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
         autoScalingGroupRemoval.thenAccept(v->{
-            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
+            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) { // FIXME bug5311: auto-scaling replicas will terminate by deleting the auto-scaling group...
                 replica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
             }
         });
