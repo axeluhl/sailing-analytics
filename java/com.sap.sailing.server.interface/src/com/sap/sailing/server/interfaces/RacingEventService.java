@@ -766,6 +766,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName);
 
+    /**
+     * @return {@code null} if no remote server reference with that URL specified exists
+     */
+    RemoteSailingServerReference getRemoteServerReferenceByUrl(URL remoteServerReferenceUrl);
+
     void addRegattaWithoutReplication(Regatta regatta);
 
     void addEventWithoutReplication(Event event);

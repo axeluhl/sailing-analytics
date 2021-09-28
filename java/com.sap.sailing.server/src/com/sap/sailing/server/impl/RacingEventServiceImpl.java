@@ -1649,6 +1649,11 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
+    public RemoteSailingServerReference getRemoteServerReferenceByUrl(URL remoteServerReferenceUrl) {
+        return remoteSailingServerSet.getServerReferenceByUrl(remoteServerReferenceUrl);
+    }
+
+    @Override
     public com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
             RemoteSailingServerReference ref, boolean forceUpdate) {
         return remoteSailingServerSet.getEventsOrException(ref, forceUpdate);

@@ -211,7 +211,7 @@ public class SailingServerImpl implements SailingServer {
                 new URL(baseUrl, GATEWAY_URL_PREFIX + RemoteServerReferenceResource.V1_REMOTESERVERREFERENCE
                         + RemoteServerReferenceResource.REMOVE).toString());
         final List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_NAME, referencedServer.getBaseUrl().toString()));
+        params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_URL, referencedServer.getBaseUrl().toString()));
         removeRequest.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED)
                 .setParameters(params).build());
         return new RemoteSailingServerReferenceJsonDeserializer().deserialize((JSONObject) getJsonParsedResponse(removeRequest).getA());

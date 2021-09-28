@@ -826,20 +826,20 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         final CompletableFuture<Void> autoScalingGroupRemoval;
         if (autoScalingGroup != null) {
-            // remove the launch configuration used by the auto scaling group and the auto scaling group itself:
+            // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
+            // this will also terminate all replicas spun up by the auto-scaling group
             autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
         } else {
+            // no auto-scaling group; terminate replicas explicitly
+            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
+                replica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+            }
             autoScalingGroupRemoval = new CompletableFuture<>();
             autoScalingGroupRemoval.complete(null);
         }
         // terminate the instances
         autoScalingGroupRemoval.thenAccept(v->
             applicationReplicaSet.getMaster().stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
-        autoScalingGroupRemoval.thenAccept(v->{
-            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) { // FIXME bug5311: auto-scaling replicas will terminate by deleting the auto-scaling group...
-                replica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-            }
-        });
         // remove the load balancer rules
         getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(applicationReplicaSet.getLoadBalancerRules(), new Rule[0]));
         // remove the target groups

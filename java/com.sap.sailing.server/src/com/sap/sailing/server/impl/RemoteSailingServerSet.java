@@ -161,6 +161,14 @@ public class RemoteSailingServerSet {
     }
     
     /**
+     * If this set has a {@link RemoteSailingServerReference} whose {@link RemoteSailingServerReference#getURL() url}
+     * equals <code>url</code>, it is returned. Otherwise, <code>null</code> is returned.
+     */
+    public RemoteSailingServerReference getServerReferenceByUrl(URL url) {
+        return remoteSailingServers.values().stream().filter(r->r.getURL().equals(url)).findAny().orElse(null);
+    }
+    
+    /**
      * @return a snapshot copy of the internal map with all remote sailing server references currently known, regardless
      *         of whether or not they are {@link #getLiveRemoteServerReferences() live}.
      */

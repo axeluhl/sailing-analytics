@@ -152,17 +152,24 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path(REMOVE)
-    public Response removeRemoteServerReference(@FormParam(REMOTE_SERVER_NAME) String remoteServerName) {
+    public Response removeRemoteServerReference(@FormParam(REMOTE_SERVER_NAME) String remoteServerName, @FormParam(REMOTE_SERVER_URL) String remoteServerUrlAsString) {
         Response response = null;
-        if (!Util.hasLength(remoteServerName)) {
-            response = badRequest("No remote server name provided in form parameter "+REMOTE_SERVER_NAME);
+        if (!Util.hasLength(remoteServerName) && !Util.hasLength(remoteServerUrlAsString)) {
+            response = badRequest("No remote server name provided in form parameter "+REMOTE_SERVER_NAME+
+                    " nore any remote server URL provided in form parameter "+REMOTE_SERVER_URL);
         } else {
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
-                final RemoteSailingServerReference serverRef = getService().getRemoteServerReferenceByName(remoteServerName);
+                final RemoteSailingServerReference serverRef;
+                if (remoteServerName != null) {
+                    serverRef = getService().getRemoteServerReferenceByName(remoteServerName);
+                } else {
+                    serverRef = getService().getRemoteServerReferenceByUrl(new URL(remoteServerUrlAsString));
+                }
                 if (serverRef == null) {
                     response = Response.status(Status.NOT_FOUND)
-                            .entity("remoteServerName: \"" + remoteServerName + "\" doesn't exist on this server.")
+                            .entity("\"remoteServerName: \\\"" + remoteServerName +
+                                    "\\\", remoteServerUrl: \\\""+remoteServerUrlAsString+"\\\" doesn't exist on this server.\"")
                             .build();
                 } else {
                     getService().apply(new RemoveRemoteSailingServerReference(remoteServerName));
