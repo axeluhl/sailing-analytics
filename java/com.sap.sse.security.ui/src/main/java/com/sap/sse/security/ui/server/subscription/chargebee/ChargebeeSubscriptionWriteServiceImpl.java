@@ -58,6 +58,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             }
             final Timestamp trialStart = content.subscription().trialStart();
             final Timestamp trialEnd = content.subscription().trialEnd();
+            //TODO: Convert to a Product Catalogue 2.0 compatible model.
             final Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
                     content.subscription().subscriptionItems().get(0).itemPriceId(), content.customer().id(),
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),

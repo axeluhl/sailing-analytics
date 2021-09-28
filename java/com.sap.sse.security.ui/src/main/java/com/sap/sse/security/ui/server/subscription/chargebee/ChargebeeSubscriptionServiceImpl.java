@@ -55,6 +55,7 @@ public class ChargebeeSubscriptionServiceImpl extends
                         || isSubscriptionCancelled(user.getSubscriptionByPlan(planId))) {
                     Pair<String, String> usernames = getUserFirstAndLastName(user);
                     String locale = user.getLocaleOrDefault().getLanguage();
+                    //TODO: Convert to a Product Catalogue 2.0 compatible model.
                     Result result = HostedPage.checkoutNewForItems()
                             .subscriptionItemItemPriceId(0, planId)
                             .subscriptionItemQuantity(0,1)
