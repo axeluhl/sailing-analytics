@@ -39,7 +39,7 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
     public MongoDatabase importDatabase(MongoDatabase from) throws URISyntaxException {
         final int BATCH_SIZE = 100;
         final MongoDatabase targetDatabase = getMongoDatabase(from.getName());
-        logger.info("Importing database "+from+" into "+targetDatabase);
+        logger.info("Importing database "+from.getName()+" into "+targetDatabase.getName()+" on "+this);
         for (final String collectionName : from.listCollectionNames()) {
             final MongoCollection<Document> sourceCollection = from.getCollection(collectionName);
             targetDatabase.createCollection(collectionName); // if we found it on the exporting side and it's empty it's important still to create it for equal hashes
