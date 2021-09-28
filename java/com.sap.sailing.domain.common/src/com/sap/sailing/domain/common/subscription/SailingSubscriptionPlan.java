@@ -20,6 +20,9 @@ import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
  */
 public class SailingSubscriptionPlan extends SubscriptionPlan {
     private static final long serialVersionUID = 2563619370274543312L;
+    private static final String BASIC_PLAN_ID = "basic";
+    private static final String ADVANCED_PLAN_ID = "cbdemo_advanced-USD-monthly";
+    private static final String AAAS_PLAN_ID = "aaas";
     private static final String BASIC_PLAN_NAME_KEY = "basic_plan_name";
     private static final String ADVANCED_PLAN_NAME_KEY = "advanced_plan_name";
     private static final String AAAS_PLAN_NAME_KEY = "aaas_plan_name";
@@ -34,17 +37,17 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
         plansById.put(id, this);
     }
 
-    public static final SubscriptionPlan Basic = new SailingSubscriptionPlan("basic",
+    public static final SubscriptionPlan Basic = new SailingSubscriptionPlan(BASIC_PLAN_ID,
             new StringMessagesKey(BASIC_PLAN_NAME_KEY), new StringMessagesKey(BASIC_PLAN_DESC_KEY), new BigDecimal(100),
             new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
                     new StringMessagesKey(StreamletViewerRole.getMessageKey())));
     
-    public static final SubscriptionPlan Advanced = new SailingSubscriptionPlan("advanced",
+    public static final SubscriptionPlan Advanced = new SailingSubscriptionPlan(ADVANCED_PLAN_ID,
             new StringMessagesKey(ADVANCED_PLAN_NAME_KEY), new StringMessagesKey(ADVANCED_PLAN_DESC_KEY), new BigDecimal(100),
             new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
                     new StringMessagesKey(StreamletViewerRole.getMessageKey())));
     
-    public static final SubscriptionPlan AAAS = new SailingSubscriptionPlan("aaas",
+    public static final SubscriptionPlan AAAS = new SailingSubscriptionPlan(AAAS_PLAN_ID,
             new StringMessagesKey(AAAS_PLAN_NAME_KEY), new StringMessagesKey(AAAS_PLAN_DESC_KEY), new BigDecimal(100),
             new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
                     new StringMessagesKey(StreamletViewerRole.getMessageKey())));

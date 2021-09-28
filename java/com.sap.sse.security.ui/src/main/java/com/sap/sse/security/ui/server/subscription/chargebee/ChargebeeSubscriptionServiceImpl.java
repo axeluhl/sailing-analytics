@@ -55,9 +55,12 @@ public class ChargebeeSubscriptionServiceImpl extends
                         || isSubscriptionCancelled(user.getSubscriptionByPlan(planId))) {
                     Pair<String, String> usernames = getUserFirstAndLastName(user);
                     String locale = user.getLocaleOrDefault().getLanguage();
-                    Result result = HostedPage.checkoutNew().customerId(user.getName()).customerEmail(user.getEmail())
+                    Result result = HostedPage.checkoutNewForItems()
+                            .subscriptionItemItemPriceId(0, planId)
+                            .subscriptionItemQuantity(0,1)
+                            .customerId(user.getName()).customerEmail(user.getEmail())
                             .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
-                            .customerLocale(locale).subscriptionPlanId(planId).billingAddressFirstName(usernames.getA())
+                            .customerLocale(locale).billingAddressFirstName(usernames.getA())
                             .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
                     response.setHostedPageJSONString(result.hostedPage().toJson());
                 } else {
