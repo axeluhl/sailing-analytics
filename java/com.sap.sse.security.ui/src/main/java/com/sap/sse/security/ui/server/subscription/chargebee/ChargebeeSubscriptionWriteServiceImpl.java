@@ -59,7 +59,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             final Timestamp trialStart = content.subscription().trialStart();
             final Timestamp trialEnd = content.subscription().trialEnd();
             final Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
-                    content.subscription().planId(), content.customer().id(),
+                    content.subscription().subscriptionItems().get(0).itemPriceId(), content.customer().id(),
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialEnd),
                     content.subscription().status().name().toLowerCase(), null, transactionType, transactionStatus,
