@@ -68,8 +68,9 @@ public class InsertRaceStatsStatement extends AbstractPreparedInsertStatement<Tr
         setDouble(7, metersOr0ForNull(trackedRace.getAverageSignedCrossTrackError(competitor, now, /* waitForLatest */ false)));
         setDouble(8, metersOr0ForNull(trackedRace.getAverageAbsoluteCrossTrackError(competitor, now, /* waitForLatest */ false)));
         final TimePoint startOfRace = trackedRace.getStartOfRace();
-        final double startDelay;
+        final double startDelayInSeconds;
         Tack startTack;
+        final boolean didCompetitorStart;
         if (raceColumnFleetAndTrackedRace.getStartWaypoint() != null && startOfRace != null) {
             NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
             trackedRace.lockForRead(competitorMarkPassings);
@@ -77,25 +78,28 @@ public class InsertRaceStatsStatement extends AbstractPreparedInsertStatement<Tr
                 if (!Util.isEmpty(competitorMarkPassings)) {
                     final MarkPassing competitorStartMarkPassing = competitorMarkPassings.iterator().next();
                     final TimePoint competitorStartTime = competitorStartMarkPassing.getTimePoint();
-                    startDelay = secondsOr0ForNull(startOfRace.until(competitorStartTime));
+                    didCompetitorStart = competitorStartTime != null;
+                    startDelayInSeconds = secondsOr0ForNull(startOfRace.until(competitorStartTime));
                     try {
                         startTack = trackedRace.getTack(competitor, competitorStartTime);
                     } catch (NoWindException e) {
                         startTack = null;
                     }
                 } else {
-                    startDelay = 0;
+                    startDelayInSeconds = 0;
                     startTack = null;
+                    didCompetitorStart = false;
                 }
             } finally {
                 trackedRace.unlockAfterRead(competitorMarkPassings);
             }
         } else {
-            startDelay = 0;
+            startDelayInSeconds = 0;
             startTack = null;
+            didCompetitorStart = false;
         }
-        setDouble(9, startDelay);
-        if (startOfRace != null) {
+        setDouble(9, startDelayInSeconds);
+        if (startOfRace != null && didCompetitorStart) {
             setDouble(10, metersOr0ForNull(trackedRace.getDistanceToStartLine(competitor, startOfRace)));
             final Speed speedWhenCrossingStartLine = trackedRace.getSpeedWhenCrossingStartLine(competitor);
             setDouble(11, speedWhenCrossingStartLine==null?0:speedWhenCrossingStartLine.getKnots());
