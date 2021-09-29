@@ -50,8 +50,8 @@ public class InsertRaceStatsStatement extends AbstractPreparedInsertStatement<Tr
         super(connection.prepareStatement(
                 "INSERT INTO SAILING.\"RaceStats\" (\"race\", \"regatta\", \"competitorId\", \"rankOneBased\", \"distanceSailedInMeters\", \"elapsedTimeInSeconds\", "+
                         "\"avgCrossTrackErrorInMeters\", \"absoluteAvgCrossTrackErrorInMeters\", \"startDelayInSeconds\", \"distanceFromStartLineInMetersAtStart\", "+
-                        "\"speedWhenCrossingStartLineInKnots\", \"startTack\", \"rank90sAfterStart\") "+
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"));
+                        "\"windwardDistanceFromStartLineInMetersAtStart\", \"speedWhenCrossingStartLineInKnots\", \"startTack\", \"rank90sAfterStart\") "+
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"));
     }
 
     @Override
@@ -101,13 +101,15 @@ public class InsertRaceStatsStatement extends AbstractPreparedInsertStatement<Tr
         setDouble(9, startDelayInSeconds);
         if (startOfRace != null && didCompetitorStart) {
             setDouble(10, metersOr0ForNull(trackedRace.getDistanceToStartLine(competitor, startOfRace)));
+            setDouble(11, metersOr0ForNull(trackedRace.getWindwardDistanceToFavoredSideOfStartLine(competitor, startOfRace)));
             final Speed speedWhenCrossingStartLine = trackedRace.getSpeedWhenCrossingStartLine(competitor);
-            setDouble(11, speedWhenCrossingStartLine==null?0:speedWhenCrossingStartLine.getKnots());
+            setDouble(12, speedWhenCrossingStartLine==null?0:speedWhenCrossingStartLine.getKnots());
             getPreparedStatement().setString(12, startTack==null?null:startTack.name());
             getPreparedStatement().setInt(13, trackedRace.getRank(competitor, startOfRace.plus(DURATION_AFTER_START_TO_DECIDE_START_WINNER)));
         } else {
             setDouble(10, 0);
             setDouble(11, 0);
+            setDouble(12, 0);
         }
     }
 }

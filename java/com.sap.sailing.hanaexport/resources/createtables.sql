@@ -78,7 +78,7 @@ CREATE TABLE SAILING."RaceResult" (
 CREATE TABLE SAILING."RaceStats" (
         "race"          NVARCHAR(255)    NOT NULL,
         "regatta"       NVARCHAR(255)    NOT NULL,
-        "competitorId"  NVARCHAR(255)     NOT NULL,
+        "competitorId"  NVARCHAR(255)    NOT NULL,
         "rankOneBased"  INTEGER,
         "distanceSailedInMeters"                DOUBLE,
         "elapsedTimeInSeconds"                  DOUBLE,
@@ -86,6 +86,7 @@ CREATE TABLE SAILING."RaceStats" (
         "absoluteAvgCrossTrackErrorInMeters"    DOUBLE,
         "startDelayInSeconds"                   DOUBLE,
         "distanceFromStartLineInMetersAtStart"  DOUBLE,
+        "windwardDistanceFromStartLineInMetersAtStart" DOUBLE,
         "speedWhenCrossingStartLineInKnots"     DOUBLE,
         "startTack"     NVARCHAR(20),
         "rank90sAfterStart" INTEGER,
