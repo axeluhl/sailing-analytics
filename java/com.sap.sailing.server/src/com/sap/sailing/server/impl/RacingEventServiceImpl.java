@@ -3672,7 +3672,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     public void removeEvent(UUID id) {
         removeEventFromEventsById(id);
         mongoObjectFactory.removeEvent(id);
-        replicate(new RemoveEvent(id));
     }
 
     protected void removeEventFromEventsById(Serializable id) {
