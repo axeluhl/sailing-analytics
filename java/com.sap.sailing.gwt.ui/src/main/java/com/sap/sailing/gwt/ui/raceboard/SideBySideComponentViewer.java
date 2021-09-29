@@ -28,6 +28,8 @@ import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardWithSecurityFetcher;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTablePanel;
 import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -65,7 +67,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     }
 
     private Component<?> leftComponent;
-    private final Component<?> centerComponent;
+    /* the race map */
+    private final RaceMap centerComponent;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
@@ -83,11 +86,11 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private final UserService userService;
     private final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher;
 
-    public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> centerComponentP,
+    public SideBySideComponentViewer(final Component<?> leftComponentP, final RaceMap centerComponentP,
             final Component<?> rightComponentP, final MediaPlayerManagerComponent mediaPlayerManagerComponent,
             List<Component<?>> components, final StringMessages stringMessages, UserService userService,
             EditMarkPassingsPanel markPassingsPanel, EditMarkPositionPanel markPositionPanel,
-            final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher) {
+            ManeuverTablePanel maneuverTablePanel, final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -134,8 +137,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 }
                 mediaSelectionButton.setText(caption);
                 mediaSelectionButton.setTitle(tooltip);
-                mediaManagementButton.setVisible(
-                        isMediaManagementVisible(mediaPlayerManagerComponent));
+                mediaManagementButton.setVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
+                centerComponent.setAddVideoToRaceButtonVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
             }
         });
         this.leftScrollPanel = new ScrollPanel();
@@ -160,6 +163,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, MIN_LEADERBOARD_WIDTH);
         
         // initialize the tagging component
+        rightPanel.getElement().setId("rightPanel-TAGS");
+        rightComponent.getEntryWidget().getElement().setId("rightComponent-TAGS");
         splitLayoutPanel.insert(rightPanel, rightComponent, Direction.EAST, MIN_TAGGING_WIDTH);
 
         // create a panel that will contain the horizontal toggle buttons
@@ -282,7 +287,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
             splitLayoutPanel.setWidgetVisibility(rightPanel, rightComponent, /* hidden */false, MIN_TAGGING_WIDTH);
         } else if (!rightComponent.isVisible() && !centerComponent.isVisible()) {
         }
-
         for (Component<?> component : components) {
             final boolean isComponentVisible = component.isVisible();
             splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible,
@@ -345,6 +349,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 forceLayout();
             }
             mediaManagementButton.setVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
+            centerComponent.setAddVideoToRaceButtonVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
         });
     }
     

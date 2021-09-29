@@ -44,7 +44,6 @@ public class NotificationPanel {
         panel.getElement().getStyle().setColor(type.getColor());
         panel.getElement().getStyle().setBackgroundColor(type.getBackgroundColor());
         panel.getElement().setInnerText(type.getDecorator() + " " + message);
-
         // ensure notifications work if a dataentry dialog is open!
         registration = Event.addNativePreviewHandler(new NativePreviewHandler() {
             @Override

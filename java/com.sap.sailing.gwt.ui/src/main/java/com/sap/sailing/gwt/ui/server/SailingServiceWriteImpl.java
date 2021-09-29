@@ -1374,6 +1374,27 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
+    public EventDTO updateEvent(EventDTO eventDTO) throws MalformedURLException, UnauthorizedException {
+        UUID eventId = eventDTO.id;
+        String eventName = eventDTO.getName();
+        String eventDescription = eventDTO.getDescription();
+        Date startDate = eventDTO.startDate;
+        Date endDate = eventDTO.endDate;
+        VenueDTO venue = eventDTO.venue;
+        boolean isPublic = eventDTO.isPublic;
+        List<UUID> leaderboardGroupIds = eventDTO.getLeaderboardGroupIds();
+        String officialWebsiteURLString = eventDTO.getOfficialWebsiteURL();
+        String baseURLAsString = eventDTO.getBaseURL();
+        Map<String, String> sailorsInfoWebsiteURLsByLocaleName = eventDTO.getSailorsInfoWebsiteURLs();
+        List<ImageDTO> images = eventDTO.getImages();
+        List<VideoDTO> videos = eventDTO.getVideos();
+        List<String> windFinderReviewedSpotCollectionIds = eventDTO.getWindFinderReviewedSpotsCollectionIds();
+        return updateEvent(eventId, eventName, eventDescription, startDate, endDate, venue, isPublic,
+                leaderboardGroupIds, officialWebsiteURLString, baseURLAsString, sailorsInfoWebsiteURLsByLocaleName,
+                images, videos, windFinderReviewedSpotCollectionIds);
+    }
+
+    @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURLString,
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,

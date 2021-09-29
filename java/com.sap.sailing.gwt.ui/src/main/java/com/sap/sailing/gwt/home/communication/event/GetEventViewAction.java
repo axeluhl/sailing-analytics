@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
+import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.shared.media.ImageDescriptor;
 
 /**
@@ -79,6 +80,8 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         }
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(HomeServiceUtil.calculateEventState(event));
+        // after extending EventViewDTO with SecureDTO a name is needed.
+        dto.setName(event.getName());
         // bug2982: always show leaderboard and competitor analytics 
         dto.setHasAnalytics(true);
         
@@ -114,7 +117,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                         .getEventAndLeaderboardReferencesForSeriesOrdered(singleLeaderboardGroup,
                                 context.getRacingEventService());
                 Collections.reverse(eventAndLeaderboardReferencesForSeriesOrdered);
-
                 dto.setSeriesData(new SeriesReferenceWithEventsDTO(
                         HomeServiceUtil.getLeaderboardDisplayName(singleLeaderboardGroup),
                         singleLeaderboardGroup.getId(), eventAndLeaderboardReferencesForSeriesOrdered));
@@ -124,6 +126,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos().stream()
                 .map(TrackingConnectorInfoDTO::new).collect(Collectors.toSet());
         dto.setTrackingConnectorInfos(trackingConnectorInfos);
+        SecurityDTOUtil.addSecurityInformation(context.getSecurityService(), dto);
         return dto;
     }
 

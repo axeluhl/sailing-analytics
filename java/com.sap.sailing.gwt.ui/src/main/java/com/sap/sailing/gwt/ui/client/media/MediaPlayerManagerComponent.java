@@ -45,7 +45,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -469,6 +472,24 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         }
     }
 
+    private TimePoint getTrackingEndTime() {
+        Date endOfTracking = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).endOfTracking;
+        if (endOfTracking != null) {
+            return new MillisecondsTimePoint(endOfTracking);
+        } else {
+            return null;
+        }
+    }
+
+    private TimePoint getCurrentCursorTime() {
+        Date raceTimerTime = raceTimer.getTime();
+        if (raceTimerTime != null) {
+            return new MillisecondsTimePoint(raceTimerTime);
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public void closeFloatingPlayer(MediaTrackWithSecurityDTO videoTrack) {
         MediaPlayerContainer removedVideoContainer = activePlayerContainers.remove(videoTrack);
@@ -526,40 +547,47 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void addMediaTrack() {
-        TimePoint defaultStartTime = getRaceStartTime();
-        if (defaultStartTime == null) {
+        final TimePoint currentCursorTime = getCurrentCursorTime();
+        final TimePoint defaultStartTime;
+        if (getTrackingEndTime() == null) {
+            defaultStartTime = TimePoint.now();
+        } else if (currentCursorTime != null) {
+            defaultStartTime = currentCursorTime;
+        } else {
             defaultStartTime = getTrackingStartTime();
         }
         NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
-                MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
-                storageServiceAvailable, new DialogCallback<MediaTrack>() {
-
+                MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(), storageServiceAvailable,
+                new DialogCallback<MediaTrack>() {
                     @Override
                     public void cancel() {
                         // no op
                     }
-
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
                         MediaPlayerManagerComponent.this.mediaServiceWrite.addMediaTrack(mediaTrack,
                                 new AsyncCallback<MediaTrackWithSecurityDTO>() {
-
-                                @Override
-                                public void onFailure(Throwable t) {
-                                    errorReporter.reportError(t.toString());
-                                }
-
-                                @Override
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        errorReporter.reportError(t.toString());
+                                    }
+                                    @Override
                                     public void onSuccess(MediaTrackWithSecurityDTO mediaTrack) {
-                                    assignedMediaTracks.add(mediaTrack);
-                                    playFloatingVideo(mediaTrack);
-                                    notifyStateChange();
-                                }
-                        });
-
+                                        assignedMediaTracks.add(mediaTrack);
+                                        if (!DeviceDetector.isMobile()) {
+                                            playFloatingVideo(mediaTrack);
+                                        }
+                                        Notification.notify(stringMessages.uploadSuccessful(),
+                                                NotificationType.SUCCESS);
+                                        notifyStateChange();
+                                    }
+                                });
                     }
                 });
         dialog.show();
+        if (!DeviceDetector.isDesktop()) {
+            dialog.openFileChooserDialog();
+        }
     }
 
     @Override

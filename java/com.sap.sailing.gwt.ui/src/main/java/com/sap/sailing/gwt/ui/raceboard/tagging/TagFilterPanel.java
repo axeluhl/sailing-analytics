@@ -40,7 +40,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
 
     private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     private final StringMessages stringMessages;
     private final UserService userService;
     private final TagListProvider tagListProvider;
@@ -56,14 +56,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
     /**
      * Creates panel which allows filtering of tags and shows current selected filter.
      * 
-     * @param taggingPanel
+     * @param taggingComponent
      *            provides reference {@link TagListProvider}.
      */
-    protected TagFilterPanel(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService) {
-        this.taggingPanel = taggingPanel;
+    protected TagFilterPanel(TaggingComponent taggingComponent, StringMessages stringMessages, UserService userService) {
+        this.taggingComponent = taggingComponent;
         this.stringMessages = stringMessages;
         this.userService = userService;
-        this.tagListProvider = taggingPanel.getTagListProvider();
+        this.tagListProvider = taggingComponent.getTagListProvider();
 
         tagFilterSets = new TagFilterSets();
         setStyleName(style.tagFilterPanel());
@@ -72,7 +72,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         clearTextBoxButton = new Button();
         filterSettingsButton = new Button();
         refreshTagsButton = new Button();
-        currentFilter = new TagFilterLabel(taggingPanel, stringMessages);
+        currentFilter = new TagFilterLabel(taggingComponent, stringMessages);
 
         loadTagFilterSets();
         filter = new AbstractListFilter<TagDTO>() {
@@ -124,7 +124,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         refreshTagsButton.addStyleName("gwt-Button");
         refreshTagsButton.setTitle(stringMessages.refresh());
         refreshTagsButton.addClickHandler(event -> {
-            taggingPanel.clearCache();
+            taggingComponent.clearCache();
         });
 
         Panel searchBoxPanel = new FlowPanel();
@@ -161,7 +161,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
                         if (userService.getCurrentUser() != null) {
                             storeTagFilterSets(newTagFilterSets);
                         }
-                        taggingPanel.updateContent();
+                        taggingComponent.updateContent();
                     }
                 }, userService);
 

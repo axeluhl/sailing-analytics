@@ -24,6 +24,7 @@ import com.google.gwt.ajaxloader.client.ArrayHelper;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.controls.FullscreenControlOptions;
 import com.google.gwt.maps.client.controls.MapTypeControlOptions;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.OverviewMapControlOptions;
@@ -107,6 +108,7 @@ public class MapOptions extends JavaScriptObject {
     options.setPanControl(true);
     options.setZoomControl(true);
     options.setMapMaker(false);
+    options.setFullscreenControlOptions(null);
     // Max/Min zoom not set with default here because it depends on the map type in use
     // We don't want to risk overriding that
   }
@@ -740,6 +742,40 @@ public class MapOptions extends JavaScriptObject {
    */
   public final native ZoomControlOptions getZoomControlOptions() /*-{
     return this.zoomControlOptions;
+  }-*/;
+
+  /**
+   * The enabled/disabled state of the Fullscreen control.
+   * 
+   * @param zoom
+   */
+  public final native void setFullscreenControl(boolean fullscreenControl) /*-{
+    this.fullscreenControl = fullscreenControl;
+  }-*/;
+
+  /**
+   * get the Fullscreen control value.
+   * 
+   * @return boolean
+   */
+  public final native boolean getFullscreenControl() /*-{
+    return this.fullscreenControl;
+  }-*/;
+
+  /**
+   * sets The display options for the Fullscreen control.
+   * 
+   * @param fullscreenControlOptions
+   */
+  public final native void setFullscreenControlOptions(FullscreenControlOptions fullscreenControlOptions) /*-{
+    this.fullscreenControlOptions = fullscreenControlOptions;
+  }-*/;
+
+  /**
+   * gets The display options for the Fullscreen control.
+   */
+  public final native FullscreenControlOptions getFullscreenControlOptions() /*-{
+    return this.fullscreenControlOptions;
   }-*/;
 
 }

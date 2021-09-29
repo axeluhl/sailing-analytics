@@ -298,6 +298,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             List<VideoDTO> videos, List<UUID> leaderboardGroupIds)
             throws UnauthorizedException;
 
+    EventDTO updateEvent(EventDTO eventDTO) throws UnauthorizedException, IOException;
+
     EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURLString,
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,

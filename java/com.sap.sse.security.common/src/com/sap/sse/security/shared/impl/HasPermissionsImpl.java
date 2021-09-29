@@ -12,7 +12,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     private static final long serialVersionUID = -7901836864741040400L;
-    private final Action[] availableActions;
+    /* #gwtnofinal */ private Action[] availableActions;
 
     /**
      * By default, all actions as provided by {@link DefaultActions} are supported by logical types with permissions
