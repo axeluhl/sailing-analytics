@@ -929,6 +929,12 @@ public interface TrackedRace
     Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart);
 
     /**
+     * Like {@link #getWindwardDistanceToFavoredSideOfStartLine(Competitor, long)}, but with a cache to accelerate
+     * repetitive requests for wind and leg types.
+     */
+    Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    
+    /**
      * Tells how far, projected onto the wind for upwind/downwind and projected onto the course middle line for reaching
      * starts, the given <code>competitor</code> was from the favored end of the start line at the given
      * <code>timePoint</code>. Using the {@link #getStartOfRace() race start time} for <code>timePoint</code>, this
@@ -939,7 +945,16 @@ public interface TrackedRace
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
      * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
      */
-    Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint);
+    default Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        return getWindwardDistanceToFavoredSideOfStartLine(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Like {@link #getWindwardDistanceToFavoredSideOfStartLine(Competitor, TimePoint)}, but with a cache to accelerate
+     * repetitive requests for wind and leg types.
+     */
+    Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * When the <code>competitor</code> has started, this method returns the distance to the starboard end of the start line

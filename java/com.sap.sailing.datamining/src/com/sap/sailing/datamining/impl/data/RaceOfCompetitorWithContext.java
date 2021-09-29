@@ -94,6 +94,11 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLineAtStart() {
+        return getTrackedRace().getWindwardDistanceToFavoredSideOfStartLine(getCompetitor(), 0);
+    }
+    
+    @Override
     public Double getNormalizedDistanceToStarboardSideAtStartOfCompetitor() {
         TrackedRace trackedRace = getTrackedRace();
         TrackedLegOfCompetitor firstTrackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, trackedRace.getRace().getCourse().getFirstLeg());
@@ -424,16 +429,6 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return getTrackedRace().getAverageWindSpeedWithConfidence(5000).getObject();
     }
 
-    @Override
-    public Double getBiasAtStartOfRace() {
-        return getBiasAtTimePoint(getStartOfRace());
-    }
-
-    @Override
-    public Double getBias30SecondsAfterRaceStart() {
-        return getBiasAtTimePoint(getStartOfRace().plus(TimeUnit.SECONDS.toMillis(30)));
-    }
-    
     private GPSFixTrack<Competitor, GPSFixMoving> getTrackOfCompetitor() {
         return getTrackedRace().getTrack(getCompetitor());
     }
@@ -464,16 +459,4 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Integer rank = getTrackedRace().getRank(getCompetitor(), timePoint);
         return rank == 0 ? null : rank;
     }
-    
-    public Double getBiasAtTimePoint(TimePoint timePoint) {
-        LineDetails startLine = getTrackedRace().getStartLine(timePoint);
-        switch (startLine.getAdvantageousSideWhileApproachingLine()) {
-        case PORT:
-            return startLine.getAdvantage().getMeters() * -1;
-        case STARBOARD:
-            return startLine.getAdvantage().getMeters();
-        }
-        return null;
-    }
-
 }
