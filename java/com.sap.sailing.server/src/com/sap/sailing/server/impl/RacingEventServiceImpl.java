@@ -278,7 +278,6 @@ import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForExist
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForNewMarkTrack;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
-import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroupFromEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
