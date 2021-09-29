@@ -101,6 +101,7 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -456,6 +457,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void renameEvent(UUID id, String newEventName);
 
+    /**
+     * Does not replicate automatically; see {@link RemoveEvent} for the replicable operation that calls this method.
+     */
     void removeEvent(UUID id);
 
     
