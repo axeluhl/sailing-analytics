@@ -214,7 +214,12 @@ public class SailingServerImpl implements SailingServer {
         params.add(new BasicNameValuePair(RemoteServerReferenceResource.REMOTE_SERVER_URL, referencedServer.getBaseUrl().toString()));
         removeRequest.setEntity(EntityBuilder.create().setContentType(ContentType.APPLICATION_FORM_URLENCODED)
                 .setParameters(params).build());
-        return new RemoteSailingServerReferenceJsonDeserializer().deserialize((JSONObject) getJsonParsedResponse(removeRequest).getA());
+        final Pair<Object, Integer> responseAndStatus = getJsonParsedResponse(removeRequest);
+        if (responseAndStatus.getB() >= 200 && responseAndStatus.getB() < 300) {
+            return new RemoteSailingServerReferenceJsonDeserializer().deserialize((JSONObject) responseAndStatus.getA());
+        } else {
+            throw new IllegalArgumentException("Received "+responseAndStatus.getA()+" from server with status code "+responseAndStatus.getB());
+        }
     }
 
     @Override

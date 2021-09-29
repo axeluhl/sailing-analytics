@@ -757,7 +757,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                             centralReverseProxy, hostnameFromWhichToArchive, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
                     if (removeApplicationReplicaSet) {
                         logger.info("Removing remote sailing server references to "+from+" from archive server "+archive);
-                        archive.removeRemoteServerReference(from);
+                        try {
+                            archive.removeRemoteServerReference(from);
+                        } catch (Exception e) {
+                            logger.log(Level.INFO, "Exception trying to remove remote server reference to "+from+
+                                    "; probably such a reference didn't exist", e);
+                        }
                         logger.info("Removing the application replica set archived ("+from+") was requested");
                         final SailingAnalyticsProcess<String> fromMaster = getSailingAnalyticsProcessFromDTO(applicationReplicaSetToArchive.getMaster());
                         final Database fromDatabase = fromMaster.getDatabaseConfiguration(region, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);

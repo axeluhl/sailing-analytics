@@ -519,6 +519,17 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor,
+            long millisecondsBeforeRaceStart) {
+        return null;
+    }
+
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
         return null;
     }

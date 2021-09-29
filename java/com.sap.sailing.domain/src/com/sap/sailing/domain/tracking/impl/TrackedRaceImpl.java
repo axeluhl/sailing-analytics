@@ -3236,6 +3236,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor,
+            long millisecondsBeforeRaceStart) {
+        // TODO Implement TrackedRaceImpl.getWindwardDistanceToFavoredSideOfStartLine(...)
+        return null;
+    }
+
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        // TODO Implement TrackedRaceImpl.getWindwardDistanceToFavoredSideOfStartLine(...)
+        return null;
+    }
+
+    @Override
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         final Speed result;
         if (getStartOfRace() == null) {

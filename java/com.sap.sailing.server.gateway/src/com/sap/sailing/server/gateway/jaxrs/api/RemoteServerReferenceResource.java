@@ -172,7 +172,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
                                     "\\\", remoteServerUrl: \\\""+remoteServerUrlAsString+"\\\" doesn't exist on this server.\"")
                             .build();
                 } else {
-                    getService().apply(new RemoveRemoteSailingServerReference(remoteServerName));
+                    getService().apply(new RemoveRemoteSailingServerReference(serverRef.getName()));
                     final JSONObject jsonResponse = serializeRemoteServerReference(serverRef);
                     response = Response.ok(streamingOutput(jsonResponse))
                             .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

@@ -165,9 +165,15 @@ public class RemoteSailingServerSet {
      * equals <code>url</code>, it is returned. Otherwise, <code>null</code> is returned.
      */
     public RemoteSailingServerReference getServerReferenceByUrl(URL url) {
-        return remoteSailingServers.values().stream().filter(r->r.getURL().equals(url)).findAny().orElse(null);
+        return remoteSailingServers.values().stream().filter(r->equalIgnoringTrailingSlash(r.getURL(), url)).findAny().orElse(null);
     }
     
+    private boolean equalIgnoringTrailingSlash(URL url1, URL url2) {
+        final String url1AsString = url1.toString() + (url1.toString().endsWith("/") ? "" : "/");
+        final String url2AsString = url2.toString() + (url2.toString().endsWith("/") ? "" : "/");
+        return url1AsString.equals(url2AsString);
+    }
+
     /**
      * @return a snapshot copy of the internal map with all remote sailing server references currently known, regardless
      *         of whether or not they are {@link #getLiveRemoteServerReferences() live}.
