@@ -28,6 +28,9 @@ import com.sap.sse.shared.json.JsonDeserializationException;
  * <p>
  */
 public interface SailingServer {
+    /**
+     * The server's base URL, ending with a slash "/" character
+     */
     URL getBaseUrl();
     
     Iterable<UUID> getLeaderboardGroupIds() throws Exception;
