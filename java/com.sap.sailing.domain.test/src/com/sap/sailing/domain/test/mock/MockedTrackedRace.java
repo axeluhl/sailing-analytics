@@ -977,7 +977,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return null;
+    }
+
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
