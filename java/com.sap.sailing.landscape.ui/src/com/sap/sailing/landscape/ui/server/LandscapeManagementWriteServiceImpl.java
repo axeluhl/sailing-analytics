@@ -761,7 +761,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                             archive.removeRemoteServerReference(from);
                         } catch (Exception e) {
                             logger.log(Level.INFO, "Exception trying to remove remote server reference to "+from+
-                                    "; probably such a reference didn't exist", e);
+                                    "; probably such a reference didn't exist");
                         }
                         logger.info("Removing the application replica set archived ("+from+") was requested");
                         final SailingAnalyticsProcess<String> fromMaster = getSailingAnalyticsProcessFromDTO(applicationReplicaSetToArchive.getMaster());
