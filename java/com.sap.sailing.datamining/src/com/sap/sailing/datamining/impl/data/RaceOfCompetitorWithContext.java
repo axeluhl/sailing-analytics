@@ -94,11 +94,6 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Distance getWindwardDistanceToFavoredSideOfStartLineAtStart() {
-        return getTrackedRace().getWindwardDistanceToFavoredSideOfStartLine(getCompetitor(), 0);
-    }
-    
-    @Override
     public Double getNormalizedDistanceToStarboardSideAtStartOfCompetitor() {
         TrackedRace trackedRace = getTrackedRace();
         TrackedLegOfCompetitor firstTrackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, trackedRace.getRace().getCourse().getFirstLeg());
@@ -116,64 +111,51 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return new Pair<>(getNormalizedDistanceToStarboardSideAtStartOfCompetitor(), getRankAtFirstMark());
     }
     
-    public Distance getWindwardDistanceToAdvantageousLineEndAtStartOf(TimePoint timepoint) {
-        if(timepoint == null) {
-            return null;
-        }
-        TrackedRace trackedRace = getTrackedRace();
-        LineDetails startLine = trackedRace.getStartLine(timepoint);
-        Mark advantageousMark = null;
-        switch (startLine.getAdvantageousSideWhileApproachingLine()) {
-        case PORT:
-            advantageousMark = startLine.getPortMarkWhileApproachingLine();
-            break;
-        case STARBOARD:
-            advantageousMark = startLine.getStarboardMarkWhileApproachingLine();
-            break;
-        }
-        if (advantageousMark == null) {
-            return null;
-        }
-        GPSFixTrack<Mark, GPSFix> advantageousMarkTrack = trackedRace.getOrCreateTrack(advantageousMark);
-        Position advantageousMarkPosition = advantageousMarkTrack.getEstimatedPosition(timepoint, false);
-        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(getCompetitor());
-        Position competitorPosition = competitorTrack.getEstimatedPosition(timepoint, false);
-        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(trackedRace.getRace().getCourse().getFirstLeg());
-        Distance distance = trackedLeg.getWindwardDistance(competitorPosition, advantageousMarkPosition, timepoint, WindPositionMode.LEG_MIDDLE);
-        return distance;
-    }
-    
     @Override
     public Distance getWindwardDistanceToAdvantageousLineEndAtStartofRace() {
-        return getWindwardDistanceToAdvantageousLineEndAtStartOf(getTrackedRace().getStartOfRace());
+        return getTrackedRace().getWindwardDistanceToFavoredSideOfStartLine(getCompetitor(), 0);
     }
     
     @Override
     public Distance getWindwardDistanceToAdvantageousLineEndAtStartofCompetitor() {
-        return getWindwardDistanceToAdvantageousLineEndAtStartOf(getTrackedRace().getTrackedLeg(getCompetitor(), getTrackedRace().getRace().getCourse().getFirstLeg()).getStartTime());
+        final Distance result;
+        TimePoint competitorStartTime = getCompetitorStartTime();
+        if (competitorStartTime == null) {
+            result = null;
+        } else {
+            result = getTrackedRace().getWindwardDistanceToFavoredSideOfStartLine(getCompetitor(), competitorStartTime);
+        }
+        return result;
+    }
+
+    private TimePoint getCompetitorStartTime() {
+        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = getFirstLegOfCompetitor();
+        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
+        return competitorStartTime;
     }
     
     @Override
     public Distance getAbsoluteWindwardDistanceToStarboardSideAtStartOfCompetitor() {
-        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = getFirstLegOfCompetitor();
-        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
-        if(competitorStartTime == null) {
-            return null;
+        final Distance result;
+        final TimePoint competitorStartTime = getCompetitorStartTime();
+        if (competitorStartTime == null) {
+            result = null;
+        } else {
+            TrackedRace trackedRace = getTrackedRace();
+            TimePoint startOfRace = trackedRace.getStartOfRace();
+            LineDetails startLine = trackedRace.getStartLine(startOfRace);
+            Mark starboardMark = startLine.getStarboardMarkWhileApproachingLine();
+            if (starboardMark == null) {
+                return null;
+            }
+            GPSFixTrack<Mark, GPSFix> starboardMarkTrack = trackedRace.getOrCreateTrack(starboardMark);
+            Position starboardMarkPosition = starboardMarkTrack.getEstimatedPosition(startOfRace, false);
+            GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(getCompetitor());
+            Position competitorPosition = competitorTrack.getEstimatedPosition(startOfRace, false);
+            TrackedLeg trackedLeg = trackedRace.getTrackedLeg(trackedRace.getRace().getCourse().getFirstLeg());
+            result = trackedLeg.getAbsoluteWindwardDistance(competitorPosition, starboardMarkPosition, startOfRace, WindPositionMode.LEG_MIDDLE);
         }
-        TrackedRace trackedRace = getTrackedRace();
-        TimePoint startOfRace = trackedRace.getStartOfRace();
-        LineDetails startLine = trackedRace.getStartLine(startOfRace);
-        Mark starboardMark = startLine.getStarboardMarkWhileApproachingLine();
-        if (starboardMark == null) {
-            return null;
-        }
-        GPSFixTrack<Mark, GPSFix> starboardMarkTrack = trackedRace.getOrCreateTrack(starboardMark);
-        Position starboardMarkPosition = starboardMarkTrack.getEstimatedPosition(startOfRace, false);
-        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(getCompetitor());
-        Position competitorPosition = competitorTrack.getEstimatedPosition(startOfRace, false);
-        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(trackedRace.getRace().getCourse().getFirstLeg());
-        Distance distance = trackedLeg.getAbsoluteWindwardDistance(competitorPosition, starboardMarkPosition, startOfRace, WindPositionMode.LEG_MIDDLE);
-        return distance;
+        return result;
     }
     
     @Override
