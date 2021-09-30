@@ -193,6 +193,7 @@
         <setEntry value="com.sap.sailing.domain.tractracadapter.persistence@4:true"/>
         <setEntry value="com.sap.sailing.domain.tractracadapter@5:true"/>
         <setEntry value="com.sap.sailing.domain.windfinderadapter@4:true"/>
+        <setEntry value="com.sap.sailing.domain.yellowbrickadapter@5:true"/>
         <setEntry value="com.sap.sailing.domain@default:default"/>
         <setEntry value="com.sap.sailing.ess40.resultimport@4:true"/>
         <setEntry value="com.sap.sailing.expeditionconnector.common@default:default"/>
