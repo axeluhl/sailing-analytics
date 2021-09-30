@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" id="sailing-race-stat-ranks" applyPrivilegeType="NONE" dataCategory="CUBE" schemaVersion="3.0" outputViewType="Aggregation" cacheInvalidationPeriod="NONE" enforceSqlExecution="true">
+<descriptions defaultDescription="Competitor ranking on various race stats"/>
+<localVariables/>
+<variableMappings/>
+<dataSources>
+  <DataSource id="RaceStats">
+    <resourceUri>RaceStats</resourceUri>
+  </DataSource>
+  <DataSource id="StartlineDistanceRanking$$$$RaceStats$$">
+    <resourceUri>RaceStats</resourceUri>
+  </DataSource>
+  <DataSource id="StartlineSpeedRanking$$$$RaceStats$$">
+    <resourceUri>RaceStats</resourceUri>
+  </DataSource>
+  <DataSource id="Competitor">
+    <resourceUri>Competitor</resourceUri>
+  </DataSource>
+</dataSources>
+<calculationViews>
+  <calculationView xsi:type="Calculation:RankView" id="StartDelayRanking">
+    <viewAttributes>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="competitorId"/>
+      <viewAttribute id="startDelayInSeconds" aggregationType="sum"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="RaceStats">
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="race"/>
+    </input>
+    <rankingFilter type="RANK" offset="0" offsetReference="FRONT" dynamicPartitionAttributes="false">
+      <partitionViewAttributeName id="regatta"/>
+      <partitionViewAttributeName id="raceName"/>
+      <order byViewAttributeName="startDelayInSeconds" direction="ASC"/>
+      <rankThreshold>
+        <value>3</value>
+      </rankThreshold>
+      <rankViewAttributeName>startDelayRank</rankViewAttributeName>
+    </rankingFilter>
+  </calculationView>
+  <calculationView xsi:type="Calculation:RankView" id="StartlineDistanceRanking">
+    <viewAttributes>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="competitorId"/>
+      <viewAttribute id="distanceFromStartLineInMetersAtStart" aggregationType="sum"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="StartlineDistanceRanking$$$$RaceStats$$">
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="race"/>
+    </input>
+    <rankingFilter type="RANK" offset="0" offsetReference="FRONT" dynamicPartitionAttributes="false">
+      <partitionViewAttributeName id="regatta"/>
+      <partitionViewAttributeName id="raceName"/>
+      <order byViewAttributeName="distanceFromStartLineInMetersAtStart" direction="ASC"/>
+      <rankThreshold>
+        <value>3</value>
+      </rankThreshold>
+      <rankViewAttributeName>StartlineDistanceRank</rankViewAttributeName>
+    </rankingFilter>
+  </calculationView>
+  <calculationView xsi:type="Calculation:RankView" id="StartlineSpeedRanking">
+    <viewAttributes>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="competitorId"/>
+      <viewAttribute id="speedWhenCrossingStartLineInKnots" aggregationType="sum"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="StartlineSpeedRanking$$$$RaceStats$$">
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="race"/>
+    </input>
+    <rankingFilter type="RANK" offset="0" offsetReference="FRONT" dynamicPartitionAttributes="false">
+      <partitionViewAttributeName id="regatta"/>
+      <partitionViewAttributeName id="raceName"/>
+      <order byViewAttributeName="speedWhenCrossingStartLineInKnots" direction="DESC"/>
+      <rankThreshold>
+        <value>3</value>
+      </rankThreshold>
+      <rankViewAttributeName>StartlineSpeedRank</rankViewAttributeName>
+    </rankingFilter>
+  </calculationView>
+  <calculationView xsi:type="Calculation:UnionView" id="Union_1">
+    <viewAttributes>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="competitorId"/>
+    
+      <viewAttribute id="startDelayRank" aggregationType="sum"/>
+      <viewAttribute id="StartlineDistanceRank" aggregationType="sum"/>
+      <viewAttribute id="StartlineSpeedRank" aggregationType="sum"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="StartDelayRanking" emptyUnionBehavior="NO_ROW">
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="raceName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
+    
+      <mapping xsi:type="Calculation:AttributeMapping" target="startDelayRank" source="startDelayRank"/>
+      <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineDistanceRank" null="true" value=""/>
+      <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineSpeedRank" null="true" value=""/>
+    </input>
+  
+    <input node="StartlineDistanceRanking" emptyUnionBehavior="NO_ROW">
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="raceName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
+    
+  
+      <mapping xsi:type="Calculation:ConstantAttributeMapping" target="startDelayRank" null="true" value=""/>
+  
+      <mapping xsi:type="Calculation:AttributeMapping" target="StartlineDistanceRank" source="StartlineDistanceRank"/>
+  
+      <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineSpeedRank" null="true" value=""/>
+  
+    </input>
+    <input node="StartlineSpeedRanking" emptyUnionBehavior="NO_ROW">
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="raceName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
+    
+      <mapping xsi:type="Calculation:ConstantAttributeMapping" target="startDelayRank" null="true" value=""/>
+      <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineDistanceRank" null="true" value=""/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="StartlineSpeedRank" source="StartlineSpeedRank"/>
+    </input>
+  </calculationView>
+  <calculationView xsi:type="Calculation:JoinView" id="Join_1" cardinality="C1_1" joinType="leftOuter">
+    <viewAttributes>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="competitorId"/>
+      <viewAttribute id="startDelayRank" aggregationType="sum"/>
+      <viewAttribute id="StartlineDistanceRank" aggregationType="sum"/>
+      <viewAttribute id="StartlineSpeedRank" aggregationType="sum"/>
+      <viewAttribute id="name"/>
+      <viewAttribute id="shortName"/>
+      <viewAttribute id="nationality"/>
+      <viewAttribute id="sailNumber"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="Union_1">
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="raceName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startDelayRank" source="startDelayRank"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="StartlineDistanceRank" source="StartlineDistanceRank"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="StartlineSpeedRank" source="StartlineSpeedRank"/>
+    </input>
+    <input node="Competitor">
+      <mapping xsi:type="Calculation:AttributeMapping" target="name" source="name"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="shortName" source="shortName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="nationality" source="nationality"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="sailNumber" source="sailNumber"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="id"/>
+    </input>
+    <joinAttribute name="competitorId"/>
+  </calculationView>
+</calculationViews>
+
+<logicalModel id="Join_1">
+  <attributes>
+    <attribute id="regatta" key="true" order="1" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="regatta"/>
+      <keyMapping columnObjectName="Join_1" columnName="regatta"/>
+    </attribute>
+    <attribute id="raceName" key="true" order="2" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="raceName"/>
+      <keyMapping columnObjectName="Join_1" columnName="raceName"/>
+    </attribute>
+    <attribute id="competitorId" key="true" order="3" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="competitorId"/>
+      <keyMapping columnObjectName="Join_1" columnName="competitorId"/>
+    </attribute>
+  
+    <attribute id="name" order="7" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="name"/>
+  
+      <keyMapping columnObjectName="Join_1" columnName="name"/>
+  
+    </attribute>
+    <attribute id="shortName" order="8" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="shortName"/>
+      <keyMapping columnObjectName="Join_1" columnName="shortName"/>
+    </attribute>
+    <attribute id="nationality" order="9" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="nationality"/>
+      <keyMapping columnObjectName="Join_1" columnName="nationality"/>
+    </attribute>
+    <attribute id="sailNumber" order="10" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="sailNumber"/>
+      <keyMapping columnObjectName="Join_1" columnName="sailNumber"/>
+    </attribute>
+  </attributes>
+  <calculatedAttributes/>
+  <baseMeasures>
+    <measure id="startDelayRank" order="4" aggregationType="sum" measureType="simple">
+      <descriptions defaultDescription="startDelayRank"/>
+      <measureMapping columnObjectName="Join_1" columnName="startDelayRank"/>
+    </measure>
+    <measure id="StartlineDistanceRank" order="5" aggregationType="sum" measureType="simple">
+      <descriptions defaultDescription="StartlineDistanceRank"/>
+      <measureMapping columnObjectName="Join_1" columnName="StartlineDistanceRank"/>
+    </measure>
+    <measure id="StartlineSpeedRank" order="6" aggregationType="sum" measureType="simple">
+      <descriptions defaultDescription="StartlineSpeedRank"/>
+      <measureMapping columnObjectName="Join_1" columnName="StartlineSpeedRank"/>
+    </measure>
+  </baseMeasures>
+  <calculatedMeasures/>
+  <restrictedMeasures/>
+  <localDimensions/>
+</logicalModel>
+<layout>
+  <shapes>
+    <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+      <upperLeftCorner x="405" y="112"/>
+    
+      <rectangleSize width="160"/>
+    </shape>
+    
+  
+    <shape expanded="true" modelObjectName="StartDelayRanking" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="92" y="531"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape expanded="true" modelObjectName="StartlineDistanceRanking" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="512" y="531"/>
+      <rectangleSize height="30" width="215"/>
+    </shape>
+    <shape expanded="true" modelObjectName="StartlineSpeedRanking" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="302" y="531"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+  
+    <shape expanded="true" modelObjectName="Union_1" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="302" y="376"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+  
+    <shape expanded="true" modelObjectName="Join_1" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="405" y="217"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+    <shape modelObjectName="Union_1" modelObjectNameSpace="Join_1" modelObjectType="JoinNodeInput">
+      <upperLeftCorner x="593" y="30"/>
+      <rectangleSize width="141"/>
+    </shape>
+    <shape modelObjectName="Competitor" modelObjectNameSpace="Join_1" modelObjectType="JoinNodeInput">
+      <upperLeftCorner x="320" y="30"/>
+      <rectangleSize width="194"/>
+    </shape>
+  </shapes>
+</layout>
+</Calculation:scenario>
