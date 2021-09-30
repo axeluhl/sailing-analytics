@@ -112,7 +112,9 @@ import com.sap.sse.util.ThreadPoolUtil;
  * There is a corner case that is assumed to be acceptable for the specific semantic of a {@link Mark}'s fixes:<br>
  * If a Marks is tracked and not pinged, any new fix transferred from the tracking device is treated as being better
  * than the one before. So all fixes are being recorded starting at the time point when the operator starts tracking for
- * a race and startOfTracking is in the future.<br>
+ * a race and startOfTracking is in the future.<p>
+ * Loading jobs are scheduled with a dedicated thread pool {@link #executor} that has "foreground" priority. With this, the number
+ * of concurrently executing loading jobs is restricted to approximately the number of CPUs on the executing host.<p>
  * Some related classes:
  * <ul>
  * <li>{@link RaceChangeListener}</li>
