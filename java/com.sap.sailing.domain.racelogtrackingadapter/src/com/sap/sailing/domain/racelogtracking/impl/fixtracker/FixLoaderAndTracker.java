@@ -75,7 +75,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * This class listens to RaceLog Events, changes to the race and fix loading events and properly handles mappings and
  * fix loading.<br>
  * The two main responsibility are to 1. load fixes already available in the DB when a race is tracked and 2. add fixes
- * newly send by trackers to {@link Track}s of a {@link TrackedRace} if the fix is relevant for the race. In order to
+ * newly sent by trackers to {@link Track}s of a {@link TrackedRace} if the fix is relevant for the race. In order to
  * save memory we try to keep the set of loaded fixes as constrained as possible. In general the following rules apply:
  * <ul>
  * <li>The fixes loaded to a track for a specific item (Mark, Competitor) are associated to a device that needs to be
