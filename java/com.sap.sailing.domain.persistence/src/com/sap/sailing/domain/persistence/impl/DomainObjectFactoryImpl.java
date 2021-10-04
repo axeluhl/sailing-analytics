@@ -383,10 +383,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public RaceIdentifier loadRaceIdentifier(Document dbObject) {
         RaceIdentifier result = null;
-        String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
-        String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
-        if (regattaName != null && raceName != null) {
-            result = new RegattaNameAndRaceName(regattaName, raceName);
+        if (dbObject != null) {
+            String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
+            String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
+            if (regattaName != null && raceName != null) {
+                result = new RegattaNameAndRaceName(regattaName, raceName);
+            }
         }
         return result;
     }
