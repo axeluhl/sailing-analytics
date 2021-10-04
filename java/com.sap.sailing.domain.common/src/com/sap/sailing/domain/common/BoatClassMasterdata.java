@@ -40,6 +40,7 @@ public enum BoatClassMasterdata {
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, true, "Drachen", "Dragon"),
     DELPHIA_24 ("Delphia 24", true, 7.70, 2.50, BoatHullType.MONOHULL, true, "Delphia 24 One Design", "Delphia 24 OD"),
     DYAS("Dyas", true, 7.15, 1.95, BoatHullType.MONOHULL, true),
+    ELAN350("Elan 350", true, 10.6, 3.5, BoatHullType.MONOHULL, true, "Elan 350 Performance"),
     EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, true, "Extreme-40", "Extreme40", "ESS40", "ess"),
     D_35 ("D35", false, 10.81, 6.89, BoatHullType.CATAMARAN, false),
     ELLIOTT_6M ("Elliott 6m", true, 6.0, 2.35, BoatHullType.MONOHULL, true, "Elliott6m"),

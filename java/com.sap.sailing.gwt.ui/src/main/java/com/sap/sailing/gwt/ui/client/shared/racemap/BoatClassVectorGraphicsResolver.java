@@ -43,7 +43,8 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.NACRA_17_FOIL, BoatClassMasterdata.F_16, BoatClassMasterdata.F_18,
                 BoatClassMasterdata.HOBIE_WILD_CAT, BoatClassMasterdata.HOBIE_16, BoatClassMasterdata.HOBIE_TIGER,
                 BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO, BoatClassMasterdata.FLYING_PHANTOM);
-        BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.FIRST_CLASS_7_5,
+        BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.ELAN350,
+                BoatClassMasterdata.FIRST_CLASS_7_5,
                 BoatClassMasterdata.J70, BoatClassMasterdata.J80, BoatClassMasterdata.J92, BoatClassMasterdata.J92S,
                 BoatClassMasterdata.B_ONE, BoatClassMasterdata.LASER_SB3, BoatClassMasterdata.LONGTZE,
                 BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS_TERA, BoatClassMasterdata.RS100, BoatClassMasterdata.RS21, BoatClassMasterdata.TP52,
