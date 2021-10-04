@@ -797,7 +797,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (raceIdentifiersPerFleet != null) {
             for (String escapedFleetName : raceIdentifiersPerFleet.keySet()) {
                 String fleetName = MongoUtils.unescapeDollarAndDot(escapedFleetName);
-                result.put(fleetName, loadRaceIdentifier((Document) raceIdentifiersPerFleet.get(fleetName)));
+                result.put(fleetName, loadRaceIdentifier((Document) raceIdentifiersPerFleet.get(escapedFleetName)));
             }
         }
         return result;
