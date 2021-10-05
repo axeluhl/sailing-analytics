@@ -45,7 +45,6 @@
 <setEntry value="com.sun.jersey.contribs.jersey-multipart@default:default"/>
 <setEntry value="javax.validation@default:default"/>
 <setEntry value="org.apache.commons.fileupload@default:default"/>
-<setEntry value="org.jdom@default:default"/>
 <setEntry value="org.jvnet.mimepull@default:default"/>
 <setEntry value="org.apache.commons.math3@default:default"/>
 <setEntry value="org.mongodb.driver-core@default:default"/>
@@ -180,7 +179,6 @@
 <setEntry value="com.sap.sailing.domain.tractracadapter.persistence@4:true"/>
 <setEntry value="com.sap.sailing.gwt.ui@6:true"/>
 <setEntry value="com.sap.sailing.udpconnector@default:default"/>
-<setEntry value="com.sap.sailing.xmlexport@5:true"/>
 <setEntry value="com.sap.sailing.simulator@default:default"/>
 <setEntry value="com.sap.sailing.www@5:true"/>
 <setEntry value="com.sap.sailing.resultimport@4:true"/>
