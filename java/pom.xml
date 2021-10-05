@@ -156,7 +156,6 @@
         <module>com.sap.sailing.shared.server</module>
         <module>com.sap.sailing.shared.server.gateway</module>
         <module>com.sap.sailing.www</module>
-        <module>com.sap.sailing.xmlexport</module>
         <module>com.sap.sailing.hanaexport</module>
         <module>com.google.gwt.user</module>
         <module>com.google.gwt.dev</module>
@@ -205,7 +204,6 @@
         <module>com.sap.sailing.domain.deckmanadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter.test</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
-        <module>com.sap.sailing.xmlexport.test</module>
         <module>com.sap.sailing.xrr.resultimport.test</module>
         <module>com.sap.sailing.domain.shared.android.test</module>
         <module>com.sap.sailing.geocoding.test</module>
