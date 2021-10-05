@@ -139,7 +139,7 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
         }
         Bson query = Filters.and(filters);
         FindIterable<Document> result = fixesCollection.find(query);
-        result.sort(new Document(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
+        result.batchSize(100000).sort(new Document(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
         if (onlyOneResult) {
             result.limit(1);
         }
