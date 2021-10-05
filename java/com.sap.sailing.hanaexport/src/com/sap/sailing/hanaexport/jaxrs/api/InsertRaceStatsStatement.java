@@ -104,12 +104,14 @@ public class InsertRaceStatsStatement extends AbstractPreparedInsertStatement<Tr
             setDouble(11, metersOr0ForNull(trackedRace.getWindwardDistanceToFavoredSideOfStartLine(competitor, startOfRace)));
             final Speed speedWhenCrossingStartLine = trackedRace.getSpeedWhenCrossingStartLine(competitor);
             setDouble(12, speedWhenCrossingStartLine==null?0:speedWhenCrossingStartLine.getKnots());
-            getPreparedStatement().setString(12, startTack==null?null:startTack.name());
-            getPreparedStatement().setInt(13, trackedRace.getRank(competitor, startOfRace.plus(DURATION_AFTER_START_TO_DECIDE_START_WINNER)));
+            getPreparedStatement().setString(13, startTack==null?null:startTack.name());
+            getPreparedStatement().setInt(14, trackedRace.getRank(competitor, startOfRace.plus(DURATION_AFTER_START_TO_DECIDE_START_WINNER)));
         } else {
             setDouble(10, 0);
             setDouble(11, 0);
             setDouble(12, 0);
+            getPreparedStatement().setString(13, null);
+            getPreparedStatement().setInt(14, 0);
         }
     }
 }
