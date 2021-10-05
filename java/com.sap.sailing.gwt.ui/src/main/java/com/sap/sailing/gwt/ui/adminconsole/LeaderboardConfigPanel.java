@@ -339,10 +339,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         }
                     });
         });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML, READ,
-                leaderboardDTO -> Window.open(UriUtils
-                        .fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.getName()).asString(), "",
-                        null));
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD, READ,
                 leaderboardDTO -> {
                     Map<String, String> dashboardURLParameters = new HashMap<String, String>();
