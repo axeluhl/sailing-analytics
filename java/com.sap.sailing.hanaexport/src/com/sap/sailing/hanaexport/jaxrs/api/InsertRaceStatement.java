@@ -37,7 +37,7 @@ public class InsertRaceStatement extends AbstractPreparedInsertStatement<Tracked
     protected InsertRaceStatement(Connection connection) throws SQLException {
         super(connection.prepareStatement(
                 "INSERT INTO SAILING.\"Race\" (\"name\", \"regatta\", \"raceColumn\", \"fleet\", \"startOfTracking\", "+
-                        "\"startOfRace\", \"endOfTracking\", \"endOfRace\", \"avgWindSpeedInKnots\", \"raceColumnIndexZeroBased\""+
+                        "\"startOfRace\", \"endOfTracking\", \"endOfRace\", \"avgWindSpeedInKnots\", \"raceColumnIndexZeroBased\", "+
                         "\"gateStart\") "+
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"));
     }
