@@ -76,6 +76,7 @@ public class InsertRaceStatement extends AbstractPreparedInsertStatement<Tracked
             setDouble(9, 0.0);
         }
         getPreparedStatement().setInt(10, Util.indexOf(trackedRace.getTrackedRegatta().getRegatta().getRaceColumns(), raceColumnFleetAndTrackedRace.getRaceColumn()));
-        getPreparedStatement().setBoolean(11, trackedRace.isGateStart());
+        final Boolean gateStart = trackedRace.isGateStart();
+        getPreparedStatement().setBoolean(11, gateStart==null ? false : gateStart);
     }
 }
