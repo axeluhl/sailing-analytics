@@ -1006,7 +1006,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (constrainToWindSource != null) {
                 queryByName.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
             }
-            final FindIterable<Document> windFixesFoundByName = windTracks.find(queryByName);
+            final FindIterable<Document> windFixesFoundByName = windTracks.find(queryByName).batchSize(100000);
             if (windFixesFoundByName.iterator().hasNext()) {
                 List<Document> windFixesToMigrate = new ArrayList<>();
                 for (Document dbWind : windFixesFoundByName) {
