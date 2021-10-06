@@ -17,6 +17,8 @@ else
   fi
   if [ \! -e $PARTITION ]; then
     echo "Neither /dev/nvme0n1 nor /dev/xvdb partition found; not formatting/mounting ephemeral volume"
+  elif cat /proc/mounts | awk '{print $1;}' | grep "${PARTITION}"; then
+    echo "Partition ${PARTITION} already mounted; not formatting/mounting ephemeral volume"
   else
     FSTYPE=$(blkid -p $PARTITION -s TYPE -o value)
     if [ "$FSTYPE" != "xfs" ]; then
