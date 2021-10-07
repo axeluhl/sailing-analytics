@@ -124,13 +124,11 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
             boolean ascending, boolean onlyOneResult)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         progressConsumer.accept(0d);
-
         final TimePoint loadFixesFrom = from == null ? TimePoint.BeginningOfTime : from;
         final TimePoint loadFixesTo = to == null ? TimePoint.EndOfTime : to;
-
-        Document dbDeviceId = storeDeviceId(deviceServiceFinder, device);
+        Bson dbDeviceId = com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, device);
         final List<Bson> filters = new ArrayList<>();
-        filters.add(Filters.eq(FieldNames.DEVICE_ID.name(), dbDeviceId));
+        filters.add(dbDeviceId);
         filters.add(Filters.gte(FieldNames.TIME_AS_MILLIS.name(), loadFixesFrom.asMillis()));
         if (inclusive) {
             filters.add(Filters.lte(FieldNames.TIME_AS_MILLIS.name(), loadFixesTo.asMillis()));
