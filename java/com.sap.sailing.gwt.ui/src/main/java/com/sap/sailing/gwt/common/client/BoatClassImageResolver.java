@@ -53,6 +53,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.DELPHIA_24.getDisplayName(), imageResources.Delphia24Icon());
         boatClassIconsMap.put(BoatClassMasterdata.DRAGON_INT.getDisplayName(), imageResources.DragonIcon());
         boatClassIconsMap.put(BoatClassMasterdata.DYAS.getDisplayName(), imageResources.DyasIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.ELAN350.getDisplayName(), imageResources.Elan350Icon());
         boatClassIconsMap.put(BoatClassMasterdata.ELLIOTT_6M.getDisplayName(), imageResources.Elliott6mIcon());
         boatClassIconsMap.put(BoatClassMasterdata.EUROPE_INT.getDisplayName(), imageResources.EuropeIcon());
         boatClassIconsMap.put(BoatClassMasterdata.EXTREME_40.getDisplayName(), imageResources.Extreme40Icon());

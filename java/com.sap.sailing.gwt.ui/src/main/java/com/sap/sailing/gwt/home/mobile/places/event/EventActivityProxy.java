@@ -6,6 +6,7 @@ import java.util.function.Function;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
@@ -28,10 +29,10 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplicationClientFactory> {
 
-    public EventActivityProxy(AbstractEventPlace place, MobileApplicationClientFactory clientFactory) {
+    public EventActivityProxy(AbstractEventPlace place, MobileApplicationClientFactory clientFactory, EventBus eventBus) {
         super(clientFactory, place);
     }
-    
+
     @Override
     protected void afterEventLoad(final MobileApplicationClientFactory clientFactory, final EventViewDTO event,
             final AbstractEventPlace place) {
@@ -52,7 +53,7 @@ public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplica
                     super.onSuccess(new MediaActivity(place, event, getNavigationPathDisplay(), clientFactory));
                 }
             }
-            
+
             private void withFlagImageResolver(final Function<FlagImageResolver, Activity> activityFactory) {
                 final Consumer<Activity> onSuccess = super::onSuccess;
                 final Consumer<Throwable> onFailure = super::onFailure;

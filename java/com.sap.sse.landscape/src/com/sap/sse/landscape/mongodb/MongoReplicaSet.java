@@ -33,7 +33,7 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
         for (final MongoProcess mongoProcess : getInstances()) {
             final InetAddress address = addressSupplier.apply(mongoProcess);
             if (address != null) {
-                logger.info("Adding MongoDB process running on "+address+" to replica set "+this.getName());
+                logger.fine("Adding MongoDB process running on "+address+" to replica set "+this.getName());
                 final StringBuilder hostSpec = new StringBuilder();
                 hostSpec.append(address.getHostAddress());
                 if (mongoProcess.getPort() != MongoDBConstants.DEFAULT_PORT) {
@@ -42,7 +42,7 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
                 }
                 hostSpecs.add(hostSpec.toString());
             } else {
-                logger.info("Not adding MongoDB process running on instance "+mongoProcess.getHost()+" to replica set "+this.getName()+
+                logger.warning("Not adding MongoDB process running on instance "+mongoProcess.getHost()+" to replica set "+this.getName()+
                         " because its IP address cannot be determined. Probably it is not running.");
             }
         }

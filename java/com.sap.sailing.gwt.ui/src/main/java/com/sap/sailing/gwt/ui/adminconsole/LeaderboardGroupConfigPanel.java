@@ -601,7 +601,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         return t.getId().hashCode();
                     }
                 }, groupsFilterablePanel.getAllListDataProvider(), groupsTable);
-        
         groupsTable.setWidth("100%");
         groupsTable.addColumn(leaderboardTableSelectionColumn, leaderboardTableSelectionColumn.getHeader());
         groupsTable.addColumn(groupNameColumn, stringMessages.name());

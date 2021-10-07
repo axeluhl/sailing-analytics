@@ -101,9 +101,8 @@ public class ImportMasterDataOperation extends
     private final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
     
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
+            User user, UserGroup tenant) {
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
-        this.creationCount.add(existingCreationCount);
         this.masterData = topLevelMasterData;
         this.override = override;
         this.importOperationId = importOperationId;
@@ -127,7 +126,6 @@ public class ImportMasterDataOperation extends
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        // TODO Implement ImportMasterDataOperation.clone(...)
         return super.clone();
     }
 
@@ -184,6 +182,7 @@ public class ImportMasterDataOperation extends
             progress.setCurrentSubProgressPct(0);
             importTrackedRaces(toState, securityService);            
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
+            progress.setOverAllProgressPct(1.0);
             return creationCount;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error during execution of ImportMasterDataOperation", e);

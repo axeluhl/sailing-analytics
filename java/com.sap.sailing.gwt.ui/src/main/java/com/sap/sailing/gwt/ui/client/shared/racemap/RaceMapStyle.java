@@ -21,4 +21,17 @@ public interface RaceMapStyle extends CssResource {
     public String estimatedDuration();
     public String estimatedDurationWithHeader();
     public String raceMapShareLinkButton();
+    public String raceMapVideoUploadButton();
+    public String zoomOutButton();
+    public String zoomInButton();
+    public String fullScreenButton();
+    public String exitFullScreenButton();
+    public String trueNorthIndicatorButton();
+    public String tagsButton();
+    public String moreOptionsButton();
+    public String moreOptions();
+    public String settingsButton();
+    public String advancedFunctionsPopup();
+    public String underHeaderPosition();
+    public String topLeftControlsWrapperPanel();
 }

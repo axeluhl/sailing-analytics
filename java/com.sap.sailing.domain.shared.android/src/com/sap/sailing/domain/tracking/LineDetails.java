@@ -38,4 +38,12 @@ public interface LineDetails {
     Position getPortMarkPosition();
 
     Position getStarboardMarkPosition();
+    
+    default Mark getAdvantageousMark() {
+        return getAdvantageousSideWhileApproachingLine() == NauticalSide.PORT ? getPortMarkWhileApproachingLine() : getStarboardMarkWhileApproachingLine();
+    }
+    
+    default Position getAdvantageousMarkPosition() {
+        return getAdvantageousSideWhileApproachingLine() == NauticalSide.PORT ? getPortMarkPosition() : getStarboardMarkPosition();
+    }
 }

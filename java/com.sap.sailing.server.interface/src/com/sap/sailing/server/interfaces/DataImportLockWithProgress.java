@@ -28,16 +28,14 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * server reached with the initial import request. The {@link SetDataImportDeleteProgressFromMapTimer} operation is
  * replicated so that the map entry is also deleted on the other servers.
  * 
- * 
- * 
  * @author Frederik Petersen (D054528)
  * 
  */
 public class DataImportLockWithProgress extends NamedReentrantReadWriteLock {
     /**
-     * Defaults to 60s (60000ms).
+     * Defaults to 60 minutes
      */
-    private static final int TIME_TO_DELETE_PROGRESS_ENTRY_AFTER_OPERATION_FINISHED_IN_MILLIS = 60000;
+    private static final int TIME_TO_DELETE_PROGRESS_ENTRY_AFTER_OPERATION_FINISHED_IN_MILLIS = 60 * 60000;
 
     private static final long serialVersionUID = -3527221613483691340L;
 

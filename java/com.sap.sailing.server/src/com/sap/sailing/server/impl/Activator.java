@@ -142,7 +142,6 @@ public class Activator implements BundleActivator {
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         sharedSailingDataTracker = FullyInitializedReplicableTracker.createAndOpen(context, SharedSailingData.class);
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
-        securityServiceTracker.open();
         new Thread(""+this+" initializing RacingEventService in the background") {
             public void run() {
                 try {

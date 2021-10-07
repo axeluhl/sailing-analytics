@@ -25,7 +25,7 @@ import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.security.ui.client.UserService;
@@ -134,7 +134,7 @@ public class TagCell extends AbstractCell<TagDTO> {
     private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
 
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     private final StringMessages stringMessages;
     private final UserService userService;
     private final boolean isPreviewCell;
@@ -142,15 +142,15 @@ public class TagCell extends AbstractCell<TagDTO> {
     /**
      * Displays the content of a {@link TagDTO tag} by using {@link SafeHtmlTemplates}.
      * 
-     * @param taggingPanel
-     *            instance of {@link TaggingPanel}
+     * @param taggingComponent
+     *            instance of {@link TaggingComponent}
      * @param isPreviewCell
      *            should be <code>true</code> if {@link TagCell cell} is used as {@link TagPreviewPanel preview cell},
      *            otherwise <code>false</code>
      */
-    TagCell(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService, boolean isPreviewCell) {
+    TagCell(TaggingComponent taggingComponent, StringMessages stringMessages, UserService userService, boolean isPreviewCell) {
         super("click");
-        this.taggingPanel = taggingPanel;
+        this.taggingComponent = taggingComponent;
         this.stringMessages = stringMessages;
         this.userService = userService;
         this.isPreviewCell = isPreviewCell;
@@ -227,7 +227,7 @@ public class TagCell extends AbstractCell<TagDTO> {
                 deleteButton);
 
         String cellStyle = style.tagCell();
-        if (tag.equals(taggingPanel.getSelectedTag())) {
+        if (tag.equals(taggingComponent.getSelectedTag())) {
             cellStyle = style.tagCell() + " " + style.tagCellActive();
         }
         SafeHtml cell = tagCellTemplate.cell(cellStyle, style.tagCellHeading(), style.tagCellCreated(), icon,
@@ -237,10 +237,10 @@ public class TagCell extends AbstractCell<TagDTO> {
 
     /**
      * Asks user for confirmation if user presses the delete button on the {@link TagCell}. If user confirms deletion,
-     * {@link TagDTO tag} will be deleted from {@link TaggingPanel} including
+     * {@link TagDTO tag} will be deleted from {@link TaggingComponent} including
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} or {@link com.sap.sse.security.interfaces.UserStore
      * UserStore}, depending on where the tag is saved. Also allows users to edit {@link TagDTO tags}, by putting
-     * {@link TaggingPanel} into state {@link TaggingPanel.State#EDIT_TAG edit} when user presses the edit button.
+     * {@link TaggingComponent} into state {@link TaggingComponent.State#EDIT_TAG edit} when user presses the edit button.
      */
     @Override
     public void onBrowserEvent(Context context, Element parent, TagDTO tag, NativeEvent event,
@@ -248,7 +248,7 @@ public class TagCell extends AbstractCell<TagDTO> {
         super.onBrowserEvent(context, parent, tag, event, valueUpdater);
         // Ignore browser events when tagging panel is in "Edit-Tag" mode so selection can't change during editing of
         // tags.
-        if (!taggingPanel.getCurrentState().equals(State.EDIT_TAG)) {
+        if (!taggingComponent.getCurrentState().equals(State.EDIT_TAG)) {
             if ("click".equals(event.getType())) {
                 EventTarget eventTarget = event.getEventTarget();
                 if (!Element.is(eventTarget)) {
@@ -263,9 +263,9 @@ public class TagCell extends AbstractCell<TagDTO> {
                     } else if (button.hasClassName(style.tagDeleteButton())) {
                         ConfirmationDialog.create(stringMessages.tagConfirmDeletionHeading(),
                                 stringMessages.tagConfirmDeletion(tag.getTag()), stringMessages.confirm(),
-                                stringMessages.cancel(), () -> taggingPanel.removeTag(tag)).center();
+                                stringMessages.cancel(), () -> taggingComponent.removeTag(tag)).center();
                     } else if (button.hasClassName(style.tagEditButton())) {
-                        taggingPanel.setCurrentState(State.EDIT_TAG);
+                        taggingComponent.setCurrentState(State.EDIT_TAG);
                     } else if (button.hasClassName(style.tagShareButton())) {
                         StringBuilder builder = new StringBuilder();
                         builder.append(Window.Location.getHref().split("\\?")[0]);

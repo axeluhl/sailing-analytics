@@ -84,7 +84,7 @@ public class TagButtonDialog extends DialogBox {
 
     private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     private final StringMessages stringMessages;
     private final TagInputPanel inputPanel;
     private final TagPreviewPanel tagPreviewPanel;
@@ -105,24 +105,24 @@ public class TagButtonDialog extends DialogBox {
     /**
      * Centered dialog which allows users to edit their personal {@link TagButton tag-buttons}.
      * 
-     * @param taggingPanel
-     *            {@link TaggingPanel} which creates this {@link TagButtonDialog}.
+     * @param taggingComponent
+     *            {@link TaggingComponent} which creates this {@link TagButtonDialog}.
      * @param footerPanel
-     *            footer panel of {@link TaggingPanel}
+     *            footer panel of {@link TaggingComponent}
      * @param sailingServiceWrite
-     *            Sailing Service of {@link TaggingPanel}
+     *            Sailing Service of {@link TaggingComponent}
      * @param stringMessages
-     *            string messages of {@link TaggingPanel}
+     *            string messages of {@link TaggingComponent}
      */
-    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, SailingServiceAsync sailingService,
+    public TagButtonDialog(TaggingComponent taggingComponent, TagFooterPanel footerPanel, SailingServiceAsync sailingService,
             StringMessages stringMessages, UserService userService) {
-        this.taggingPanel = taggingPanel;
+        this.taggingComponent = taggingComponent;
         this.stringMessages = stringMessages;
         this.footerPanel = footerPanel;
         setGlassEnabled(true);
         setText(stringMessages.tagEditCustomTagButtons());
         addStyleName(style.tagButtonDialog());
-        inputPanel = new TagInputPanel(taggingPanel, sailingService, stringMessages, new DialogCallback<TagDTO>() {
+        inputPanel = new TagInputPanel(taggingComponent, sailingService, stringMessages, new DialogCallback<TagDTO>() {
             @Override
             public void ok(TagDTO editedObject) {
                 if (updateTagMode) {
@@ -141,7 +141,7 @@ public class TagButtonDialog extends DialogBox {
                 }
             }
         });
-        tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel, stringMessages, userService);
+        tagPreviewPanel = new TagPreviewPanel(taggingComponent, inputPanel, stringMessages, userService);
         tagButtonTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
         tagButtonTable.addRedrawHandler(() -> {
             // center dialog when content of tagButtonTable changes (table needs to be redrawn)
@@ -168,7 +168,7 @@ public class TagButtonDialog extends DialogBox {
      * Creates table which shows tag buttons as a compact overview in form of a table.
      * 
      * @param footerPanel
-     *            footer panel of {@link TaggingPanel}
+     *            footer panel of {@link TaggingComponent}
      * @param inputPanel
      *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
      *            tag-buttons}
@@ -211,9 +211,9 @@ public class TagButtonDialog extends DialogBox {
                             stringMessages.tagButtonConfirmDeletion(button.getTag()), 
                             stringMessages.confirm(), stringMessages.cancel(), confirmed -> {
                                 if (confirmed) {
-                                    taggingPanel.getTagButtons().remove(button);
+                                    taggingComponent.getTagButtons().remove(button);
                                     footerPanel.storeAllTagButtons();
-                                    setRowData(tagButtonTable, taggingPanel.getTagButtons());
+                                    setRowData(tagButtonTable, taggingComponent.getTagButtons());
                                     footerPanel.recalculateHeight();
                                 }
                                 center();
@@ -241,7 +241,7 @@ public class TagButtonDialog extends DialogBox {
         tagButtonTable.setColumnWidth(imageURLColumn, "20%");
         tagButtonTable.setColumnWidth(commentColumn, "40%");
         tagButtonTable.setColumnWidth(actionsColumn, "15%");
-        setRowData(tagButtonTable, taggingPanel.getTagButtons());
+        setRowData(tagButtonTable, taggingComponent.getTagButtons());
         return tagButtonTable;
     }
 
@@ -258,7 +258,7 @@ public class TagButtonDialog extends DialogBox {
      * @param tagPreviewPanel
      *            renders {@link TagPreviewPanel} preview of current input fields
      * @param footerPanel
-     *            footer panel of {@link TaggingPanel}
+     *            footer panel of {@link TaggingComponent}
      * @return {@link Panel} containing all action buttons
      */
     private Panel createButtonPanel(CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
@@ -307,7 +307,7 @@ public class TagButtonDialog extends DialogBox {
         tagButtonTable.redraw();
         setButtonMode(false);
         selectedTagButton = null;
-        setRowData(tagButtonTable, taggingPanel.getTagButtons());
+        setRowData(tagButtonTable, taggingComponent.getTagButtons());
         center();
     }
 
@@ -346,10 +346,10 @@ public class TagButtonDialog extends DialogBox {
                     inputPanel.getComment(), inputPanel.isVisibleForPublic());
             inputPanel.clearAllValues();
             tagPreviewPanel.renderPreview(inputPanel);
-            taggingPanel.addTagButton(tagButton);
+            taggingComponent.addTagButton(tagButton);
             footerPanel.storeAllTagButtons();
             footerPanel.recalculateHeight();
-            setRowData(tagButtonTable, taggingPanel.getTagButtons());
+            setRowData(tagButtonTable, taggingComponent.getTagButtons());
         }
         center();
     }

@@ -24,8 +24,8 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         
         public CreateApplicationReplicaSetInstructions(String name, String instanceType,
                 String releaseNameOrNullForLatestMaster, boolean dynamicLoadBalancerMapping,
-                String securityReplicationBearerToken, String optionalDomainName) {
-            super(releaseNameOrNullForLatestMaster, securityReplicationBearerToken);
+                String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName) {
+            super(releaseNameOrNullForLatestMaster, masterReplicationBearerToken, replicaReplicationBearerToken);
             this.name = name;
             this.dynamicLoadBalancerMapping = dynamicLoadBalancerMapping;
             this.optionalDomainName = Util.hasLength(optionalDomainName) ? optionalDomainName : null;
@@ -57,7 +57,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
             final String result;
             if (!Util.hasLength(valueToValidate.getInstanceType())) {
                 result = stringMessages.pleaseSelectInstanceTypeForNewMaster();
-            } else if (!Util.hasLength(valueToValidate.getReplicationBearerToken())) {
+            } else if (!Util.hasLength(valueToValidate.getMasterReplicationBearerToken())) {
                 result = stringMessages.pleaseProvideBearerTokenForSecurityReplication();
             } else if (!Util.hasLength(valueToValidate.getName())) {
                 result = stringMessages.pleaseProvideApplicationReplicaSetName();
@@ -90,7 +90,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(6, 2);
+        final Grid result = new Grid(7, 2);
         int row=0;
         result.setWidget(row, 0, new Label(stringMessages.name()));
         result.setWidget(row++, 1, nameBox);
@@ -101,7 +101,9 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         result.setWidget(row, 0, new Label(stringMessages.useDynamicLoadBalancer()));
         result.setWidget(row++, 1, dynamicLoadBalancerCheckBox);
         result.setWidget(row, 0, new Label(stringMessages.bearerTokenForSecurityReplication()));
-        result.setWidget(row++, 1, getReplicationBearerTokenBox());
+        result.setWidget(row++, 1, getMasterReplicationBearerTokenBox());
+        result.setWidget(row, 0, new Label(stringMessages.replicaReplicationBearerToken()));
+        result.setWidget(row++, 1, getReplicaReplicationBearerTokenBox());
         result.setWidget(row, 0, new Label(stringMessages.domainName()));
         result.setWidget(row++, 1, domainNameBox);
         return result;
@@ -114,7 +116,9 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
     
     @Override
     protected CreateApplicationReplicaSetInstructions getResult() {
-        return new CreateApplicationReplicaSetInstructions(nameBox.getValue(), getInstanceTypeListBox().getSelectedValue(),
-                getReleaseNameBoxValue(), dynamicLoadBalancerCheckBox.getValue(), getReplicationBearerTokenBox().getValue(), domainNameBox.getValue());
+        return new CreateApplicationReplicaSetInstructions(nameBox.getValue(),
+                getInstanceTypeListBox().getSelectedValue(), getReleaseNameBoxValue(),
+                dynamicLoadBalancerCheckBox.getValue(), getMasterReplicationBearerTokenBox().getValue(),
+                getReplicaReplicationBearerTokenBox().getValue(), domainNameBox.getValue());
     }
 }

@@ -134,10 +134,4 @@ public interface HasRaceOfCompetitorContext {
     
     @Statistic(messageKey="AverageRaceWindSpeed")
     Speed getAverageRaceWindSpeed();
-    
-    @Statistic(messageKey="BiasAtStartOfRace", resultDecimals=2)
-    Double getBiasAtStartOfRace();
-    
-    @Statistic(messageKey="Bias30SecondsAfterRaceStart", resultDecimals=2)
-    Double getBias30SecondsAfterRaceStart();
 }

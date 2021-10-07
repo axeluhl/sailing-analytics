@@ -63,7 +63,7 @@ public class MobileActivityMapper implements ActivityMapper {
         } else if (place instanceof EventsPlace) {
             return new EventsActivity((EventsPlace) place, clientFactory);
         } else if (place instanceof AbstractEventPlace) {
-            return new EventActivityProxy((AbstractEventPlace) place, clientFactory);
+            return new EventActivityProxy((AbstractEventPlace) place, clientFactory, clientFactory.getEventBus());
         } else if (place instanceof SeriesMiniOverallLeaderboardPlace) {
             return new SeriesMiniOverallLeaderboardActivityProxy((SeriesMiniOverallLeaderboardPlace) place, clientFactory);
         } else if (place instanceof AbstractSeriesPlace) {

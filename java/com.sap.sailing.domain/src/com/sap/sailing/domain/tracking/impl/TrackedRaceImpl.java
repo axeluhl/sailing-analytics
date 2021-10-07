@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -3168,14 +3169,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
-        final Distance result;
-        if (getStartOfRace() == null) {
-            result = null;
-        } else {
-            TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
-            result = getDistanceToStartLine(competitor, beforeStart);
-        }
-        return result;
+        return getSomethingMillisecondsBeforeRaceStart(competitor, millisecondsBeforeRaceStart, this::getDistanceToStartLine);
     }
 
     @Override
@@ -3234,7 +3228,75 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return result;
     }
+
+    private TimePoint getTimePointMillisecondsBeforeStart(long millisecondsBeforeRaceStart) {
+        final TimePoint result;
+        if (getStartOfRace() == null) {
+            result = null;
+        } else {
+            result = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
+        }
+        return result;
+    }
     
+    private <T> T getSomethingMillisecondsBeforeRaceStart(Competitor competitor, long millisecondsBeforeRaceStart, BiFunction<Competitor, TimePoint, T> dataSupplier) {
+        final TimePoint timePoint = getTimePointMillisecondsBeforeStart(millisecondsBeforeRaceStart);
+        final T result = timePoint == null ? null : dataSupplier.apply(competitor, timePoint);
+        return result;
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
+        return getSomethingMillisecondsBeforeRaceStart(competitor, millisecondsBeforeRaceStart, this::getWindwardDistanceToFavoredSideOfStartLine);
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getSomethingMillisecondsBeforeRaceStart(competitor, millisecondsBeforeRaceStart, (c, t)->getWindwardDistanceToFavoredSideOfStartLine(c, t, cache));
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        return getWindwardDistanceToFavoredSideOfStartLine(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Waypoint startWaypoint = getRace().getCourse().getFirstWaypoint();
+        final Distance result;
+        if (startWaypoint == null) {
+            result = null;
+        } else {
+            final Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            final Position referenceStartPosition;
+            if (Util.size(startWaypoint.getControlPoint().getMarks()) == 1) {
+                referenceStartPosition = getApproximatePosition(startWaypoint, timePoint);
+            } else {
+                final LineDetails startLine = getStartLine(timePoint);
+                if (startLine == null) {
+                    referenceStartPosition = null;
+                } else {
+                    referenceStartPosition = startLine.getAdvantageousMarkPosition();
+                }
+            }
+            if (competitorPosition == null) {
+                result = null;
+            } else {
+                if (referenceStartPosition == null) {
+                    result = null;
+                } else {
+                    final TrackedLeg firstLeg = getTrackedLegStartingAt(startWaypoint);
+                    if (firstLeg == null) {
+                        result = null;
+                    } else {
+                        result = firstLeg.getWindwardDistance(competitorPosition, referenceStartPosition, timePoint, WindPositionMode.LEG_MIDDLE, cache);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     @Override
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         final Speed result;
