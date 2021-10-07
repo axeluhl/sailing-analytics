@@ -35,6 +35,9 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.AuthenticationViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
@@ -42,6 +45,9 @@ import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementContr
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> {
@@ -118,8 +124,28 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         return new SubscriptionViewImpl(new SubscriptionView.Presenter() {
             @Override
             public void startSubscription(String planId) {
-                // TODO: implement logic
-                GWT.log("start subscription with ID: " + planId);
+                try {
+                    getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
+                            .startCheckout(planId, new BaseUserSubscriptionView() {
+                                
+                                @Override
+                                public void updateView(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
+                                    // TODO Auto-generated method stub
+                                }
+                                
+                                @Override
+                                public void onOpenCheckoutError(String error) {
+                                    Notification.notify(error, NotificationType.ERROR);
+                                }
+                                
+                                @Override
+                                public void onCloseCheckoutModal() {
+                                    // TODO Auto-generated method stub
+                                }
+                            }, () -> getUserService().updateUser(true));
+                } catch (InvalidSubscriptionProviderException e) {
+                    Notification.notify(e.toString(), NotificationType.ERROR);
+                }
             }
             @Override
             public void manageSubscriptions() {
