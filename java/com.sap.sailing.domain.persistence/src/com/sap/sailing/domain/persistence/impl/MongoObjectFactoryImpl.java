@@ -266,12 +266,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         // Removes old indexes not needed anymore
         dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
         dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
+        dropIndexSafe(gpsFixCollection, "fixbytimeanddev");
         Document index = new Document();
+        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_STRING_REPRESENTATION.name(), "hashed");
         index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
         index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE.name(), 1);
         index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
-        index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_STRING_REPRESENTATION.name(), 1);
-        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbytimeanddev").background(false));
+        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbydevandtime").background(false));
         return gpsFixCollection;
     }
     

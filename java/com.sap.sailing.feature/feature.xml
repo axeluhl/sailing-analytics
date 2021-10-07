@@ -159,13 +159,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
-         id="com.sap.sailing.xmlexport"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.sap.sailing.simulator"
          download-size="0"
          install-size="0"
@@ -285,6 +278,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.domain.oceanraceadapter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.domain.yellowbrickadapter"
          download-size="0"
          install-size="0"
          version="0.0.0"

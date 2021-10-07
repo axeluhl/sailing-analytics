@@ -8,12 +8,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -134,6 +136,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
+    public static Bson getDeviceQuery(
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
+                            throws TransformationException, NoCorrespondingServiceRegisteredException {
+        final Bson result;
+        if (device == null) {
+            result = null;
+        } else {
+            String type = device.getIdentifierType();
+            DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
+            com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
+            type = pair.getA();
+            Object deviceTypeSpecificId = pair.getB();
+            result = Filters.and(Filters.eq(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation()),
+                                 Filters.eq(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId),
+                                 Filters.eq(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE.name(), type));
+        }
+        return result;
+    }
+    
     private Document storePosition(Position position) {
         final Document result;
         if (position == null) {
