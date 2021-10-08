@@ -1078,6 +1078,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor,
+            TimePoint timePoint) {
+        return null;
+    }
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,

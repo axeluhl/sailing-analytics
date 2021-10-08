@@ -46,4 +46,12 @@ public interface LineDetails {
     default Position getAdvantageousMarkPosition() {
         return getAdvantageousSideWhileApproachingLine() == NauticalSide.PORT ? getPortMarkPosition() : getStarboardMarkPosition();
     }
+
+    default Bearing getBearingFromStarboardToPortWhenApproachingLine() {
+        return getStarboardMarkPosition().getBearingGreatCircle(getPortMarkPosition());
+    }
+
+    default Bearing getBearingFromPortToStarboardWhenApproachingLine() {
+        return getPortMarkPosition().getBearingGreatCircle(getStarboardMarkPosition());
+    }
 }

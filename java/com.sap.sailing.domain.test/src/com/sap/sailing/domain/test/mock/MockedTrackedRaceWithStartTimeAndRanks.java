@@ -615,6 +615,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor,
+            TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) {
         return null;
     }

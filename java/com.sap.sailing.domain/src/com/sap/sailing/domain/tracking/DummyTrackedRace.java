@@ -577,6 +577,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor,
+            TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
     }
 

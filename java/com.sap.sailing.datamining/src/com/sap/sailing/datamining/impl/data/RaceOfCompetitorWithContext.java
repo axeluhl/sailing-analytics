@@ -433,6 +433,23 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return distance / length;
     }
     
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLineAtStartOfRace() {
+        return getTrackedRace().getDistanceFromStarboardSideOfStartLineProjectedOntoLine(getCompetitor(), getStartOfRace());
+    }
+    
+    @Override
+    public Double getNormalizedDistanceFromStarboardSideOfStartLineProjectedOntoLineAtStartOfRace() {
+        final Double result;
+        final LineDetails startLine = getTrackedRace().getStartLine(getStartOfRace());
+        if (startLine == null) {
+            result = null;
+        } else {
+            result = getTrackedRace().getDistanceFromStarboardSideOfStartLineProjectedOntoLine(getCompetitor(), getStartOfRace()).divide(startLine.getLength());
+        }
+        return result;
+    }
+    
     private Integer getRankAt(TimePoint timePoint) {
         TimePoint startOfRace = getStartOfRace();
         if (startOfRace == null) {

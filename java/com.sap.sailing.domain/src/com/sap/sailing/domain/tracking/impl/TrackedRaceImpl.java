@@ -165,6 +165,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -3347,6 +3348,47 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
     
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        final LineDetails startLine = getStartLine(timePoint);
+        final Bearing lineBearing;
+        final Position starboardMarkPosition;
+        if (startLine == null) { // single mark?
+            starboardMarkPosition = getStarboardMarkOfStartlinePosition(timePoint);
+            if (starboardMarkPosition == null) {
+                lineBearing = null;
+            } else {
+                final Iterable<TrackedLeg> trackedLegs = getTrackedLegs();
+                if (trackedLegs == null || !trackedLegs.iterator().hasNext()) {
+                    lineBearing = null;
+                } else {
+                    final Bearing bearingFirstLeg = trackedLegs.iterator().next().getLegBearing(timePoint);
+                    if (bearingFirstLeg == null) {
+                        lineBearing = null;
+                    } else {
+                        lineBearing = bearingFirstLeg.add(new DegreeBearingImpl(270));
+                    }
+                }
+            }
+        } else {
+            lineBearing = startLine.getBearingFromStarboardToPortWhenApproachingLine();
+            starboardMarkPosition = startLine.getStarboardMarkPosition();
+        }
+        if (lineBearing == null || starboardMarkPosition == null) {
+            result = null;
+        } else {
+            final Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
+            if (competitorPosition == null) {
+                result = null;
+            } else {
+                final Position competitorPositionProjectedOntoLine = competitorPosition.projectToLineThrough(starboardMarkPosition, lineBearing);
+                result = competitorPositionProjectedOntoLine.getDistance(starboardMarkPosition);
+            }
+        }
+        return result;
+    }
+
     /**
      * Based on the bearing from the start waypoint to the next mark, identifies which of the two marks of the start
      * line is on starboard. If the start waypoint has only one mark, that mark is returned. If the start line has two

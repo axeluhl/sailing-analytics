@@ -971,6 +971,15 @@ public interface TrackedRace
     Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint);
     
     /**
+     * At the given timepoint and for the competitor, this method returns the distance between the starboard end of the
+     * start line and the competitor position projected perpendicularly onto the line. If the start waypoint was a
+     * single mark, the distance between the start waypoint and the competitor position projected onto the hypothetical
+     * "start line" perpendicular to the bearing of the first leg at the timepoint is calculated. If the competitor
+     * hasn't started yet, <code>null</code> is returned.
+     */
+    Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor, TimePoint timePoint);
+    
+    /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
      */
     Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart);
