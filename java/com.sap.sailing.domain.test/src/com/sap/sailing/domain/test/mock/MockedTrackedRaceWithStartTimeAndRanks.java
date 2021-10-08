@@ -75,6 +75,7 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Simple mock for {@link TrackedRace} for leaderboard testing; the leaderboard only requests {@link #hasStarted(TimePoint)} and
@@ -576,6 +577,21 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public LineDetails getStartLine(TimePoint at) {
+        return null;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint) {
         return null;
     }
 

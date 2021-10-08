@@ -36,28 +36,40 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     Distance getDistanceToStartLineAtStart();
 
-    @Statistic(messageKey="DistanceToStarboardSideOfStartLineProjectedOntoLineAtStart", resultDecimals=2, ordinal=0)
+    @Statistic(messageKey="DistanceToStarboardSideOfStartLineProjectedOntoLineAtStart", resultDecimals=1)
     Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLineAtStartOfRace();
 
-    @Statistic(messageKey="DistanceToNextBoatToPortProjectedToStartLineAtStartOfRace", resultDecimals=2, ordinal=0)
+    @Statistic(messageKey="DistanceToNextBoatToPortProjectedToStartLineAtStartOfRace", resultDecimals=1)
     Distance getDistanceToNextBoatToPortProjectedToStartLineAtStartOfRace();
 
-    @Statistic(messageKey="DistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace", resultDecimals=2, ordinal=0)
+    @Statistic(messageKey="DistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace", resultDecimals=1)
     Distance getDistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace();
 
-    @Statistic(messageKey="NormalizedDistanceToStarboardSideOfStartLineProjectedOntoLineAtStart", resultDecimals=2, ordinal=0)
+    @Statistic(messageKey="WindwardDistanceToNextBoatToPortAtStartOfRace", resultDecimals=1)
+    Distance getWindwardDistanceToNextBoatToPortAtStartOfRace();
+
+    @Statistic(messageKey="WindwardDistanceToNextBoatToStarboardAtStartOfRace", resultDecimals=1)
+    Distance getWindwardDistanceToNextBoatToStarboardAtStartOfRace();
+
+    @Statistic(messageKey="DistanceToNextBoatToPortAtStartOfRacePerpendicularToStartLine", resultDecimals=1)
+    Distance getDistanceToNextBoatToPortAtStartOfRacePerpendicularToStartLine();
+
+    @Statistic(messageKey="DistanceToNextBoatToStarboardAtStartOfRacePerpendicularToStartLine", resultDecimals=1)
+    Distance getDistanceToNextBoatToStarboardAtStartOfRacePerpendicularToStartLine();
+
+    @Statistic(messageKey="NormalizedDistanceToStarboardSideOfStartLineProjectedOntoLineAtStart", resultDecimals=2)
     Double getNormalizedDistanceFromStarboardSideOfStartLineProjectedOntoLineAtStartOfRace();
 
-    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitor", resultDecimals=2, ordinal=1)
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitor", resultDecimals=2)
     Double getNormalizedDistanceToStarboardSideAtStartOfCompetitor();
     
-    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitorVsRankAtFirstMark", resultDecimals=2, ordinal=1)
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitorVsRankAtFirstMark", resultDecimals=1)
     Pair<Double, Integer> getNormalizedDistanceToStarboardSideAtStartOfCompetitorVsRankAtFirstMark();
     
-    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfRace", resultDecimals=2, ordinal=2)
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfRace", resultDecimals=1, ordinal=1)
     Distance getWindwardDistanceToAdvantageousLineEndAtStartofRace();
     
-    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfCompetitor", resultDecimals=2, ordinal=2)
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfCompetitor", resultDecimals=1, ordinal=2)
     Distance getWindwardDistanceToAdvantageousLineEndAtStartofCompetitor();
 
     @Connector(messageKey="SpeedWhenStarting", ordinal=3)

@@ -1044,6 +1044,21 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
     public LineDetails getFinishLine(TimePoint at) {
         return null;
     }

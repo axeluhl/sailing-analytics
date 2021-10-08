@@ -3375,6 +3375,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor, TimePoint timePoint) {
         final Distance result;
+        final Pair<Bearing, Position> startLineBearingAndStarboardMarkPosition = getStartLineBearingAndStarboardMarkPosition(timePoint);
+        if (startLineBearingAndStarboardMarkPosition.getA() == null || startLineBearingAndStarboardMarkPosition.getB() == null) {
+            result = null;
+        } else {
+            final Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
+            if (competitorPosition == null) {
+                result = null;
+            } else {
+                final Position competitorPositionProjectedOntoLine = competitorPosition.projectToLineThrough(startLineBearingAndStarboardMarkPosition.getB(), startLineBearingAndStarboardMarkPosition.getA());
+                result = competitorPositionProjectedOntoLine.getDistance(startLineBearingAndStarboardMarkPosition.getB());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint) {
         final LineDetails startLine = getStartLine(timePoint);
         final Bearing lineBearing;
         final Position starboardMarkPosition;
@@ -3399,18 +3416,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             lineBearing = startLine.getBearingFromStarboardToPortWhenApproachingLine();
             starboardMarkPosition = startLine.getStarboardMarkPosition();
         }
-        if (lineBearing == null || starboardMarkPosition == null) {
-            result = null;
-        } else {
-            final Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
-            if (competitorPosition == null) {
-                result = null;
-            } else {
-                final Position competitorPositionProjectedOntoLine = competitorPosition.projectToLineThrough(starboardMarkPosition, lineBearing);
-                result = competitorPositionProjectedOntoLine.getDistance(starboardMarkPosition);
-            }
-        }
-        return result;
+        final Pair<Bearing, Position> startLineBearingAndStarboardMarkPosition = new Pair<>(lineBearing, starboardMarkPosition);
+        return startLineBearingAndStarboardMarkPosition;
     }
 
     @Override
@@ -3432,6 +3439,47 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.remove(keyLeastRecentlyAccessed);
         }
         return result;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+        final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
+                getDistancesFromStarboardSideOfStartLineProjectedOntoLine(timePoint);
+        final Competitor competitorImmediatelyToPort;
+        final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(relativeTo);
+        if (competitorDistance == null) {
+            competitorImmediatelyToPort = null;
+        } else {
+            final SortedMap<Competitor, Distance> competitorsFurtherToPortIncludingSelf = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.tailMap(relativeTo);
+            final Iterator<Entry<Competitor, Distance>> iterator = competitorsFurtherToPortIncludingSelf.entrySet().iterator();
+            iterator.next(); // skip the "own" competitor ("self" / getCompetitor())
+            if (iterator.hasNext()) {
+                competitorImmediatelyToPort = iterator.next().getKey();
+            } else {
+                competitorImmediatelyToPort = null;
+            }
+        }
+        return competitorImmediatelyToPort;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+        final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
+                getDistancesFromStarboardSideOfStartLineProjectedOntoLine(timePoint);
+        final Competitor competitorImmediatelyToStarboard;
+        final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(relativeTo);
+        if (competitorDistance == null) {
+            competitorImmediatelyToStarboard = null;
+        } else {
+            final SortedMap<Competitor, Distance> competitorsFurtherToStarboard = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.headMap(relativeTo);
+            if (competitorsFurtherToStarboard != null && !competitorsFurtherToStarboard.isEmpty()) {
+                competitorImmediatelyToStarboard = competitorsFurtherToStarboard.lastKey();
+            } else {
+                competitorImmediatelyToStarboard = null;
+            }
+        }
+        return competitorImmediatelyToStarboard;
+
     }
 
     /**

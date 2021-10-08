@@ -998,6 +998,20 @@ public interface TrackedRace
     SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint);
     
     /**
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint)}, finds the
+     * next competitor to port regarding their start line projection at {@code timePoint}. Returns {@code null} if
+     * the start line cannot be determined or if there is no competitor further to port.
+     */
+    Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint);
+    
+    /**
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint)}, finds the
+     * next competitor to starboard regarding their start line projection at {@code timePoint}. Returns {@code null} if
+     * the start line cannot be determined or if there is no competitor further to starboard.
+     */
+    Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint);
+    
+    /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
      */
     Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart);
@@ -1343,4 +1357,11 @@ public interface TrackedRace
     void runSynchronizedOnStatus(Runnable runnable);
 
     boolean hasFinishedLoading();
+
+    /**
+     * Obtains the start line bearing and starboard mark position either from {@link #getStartLine(TimePoint)} if there
+     * is a real line configured, or for a start waypoint consisting of only a single mark trying to construct a
+     * hypothetical "line" perpendicular to the first leg's bearing.
+     */
+    Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
 }

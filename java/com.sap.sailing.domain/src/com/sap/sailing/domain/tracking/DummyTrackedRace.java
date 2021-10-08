@@ -47,6 +47,7 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
@@ -538,6 +539,21 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public LineDetails getStartLine(TimePoint at) {
+        return null;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint) {
         return null;
     }
 
