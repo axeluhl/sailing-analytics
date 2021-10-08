@@ -39,6 +39,12 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="DistanceToStarboardSideOfStartLineProjectedOntoLineAtStart", resultDecimals=2, ordinal=0)
     Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLineAtStartOfRace();
 
+    @Statistic(messageKey="DistanceToNextBoatToPortProjectedToStartLineAtStartOfRace", resultDecimals=2, ordinal=0)
+    Distance getDistanceToNextBoatToPortProjectedToStartLineAtStartOfRace();
+
+    @Statistic(messageKey="DistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace", resultDecimals=2, ordinal=0)
+    Distance getDistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace();
+
     @Statistic(messageKey="NormalizedDistanceToStarboardSideOfStartLineProjectedOntoLineAtStart", resultDecimals=2, ordinal=0)
     Double getNormalizedDistanceFromStarboardSideOfStartLineProjectedOntoLineAtStartOfRace();
 

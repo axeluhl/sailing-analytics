@@ -22,8 +22,10 @@ import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -162,6 +164,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -169,6 +172,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 import com.sap.sse.util.IdentityWrapper;
 import com.sap.sse.util.SmartFutureCache;
@@ -434,6 +438,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private final NamedReentrantReadWriteLock sensorTracksLock;
     
+    private static final int MAX_DISTANCES_FROM_STARBOARD_SIDE_OF_START_LINE_PROJECTED_ONTO_LINE_CACHE_SIZE = 10;
+    private transient ConcurrentMap<TimePoint, SortedMap<Competitor, Distance>> distancesFromStarboardSideOfStartLineProjectedOntoLineCache;
+    private transient ConcurrentMap<TimePoint, TimePoint> distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes;
+    
     /**
      * When a regatta's {@link Regatta#useStartTimeInference()} or {@link Regatta#isControlTrackingFromStartAndFinishTimes()}
      * changes, the tracking start/end times need to be recalculated. This regatta listener handles this. It has to be
@@ -481,6 +489,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
             RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCache = new ConcurrentHashMap<>();
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes = new ConcurrentHashMap<>();
         registerRegattaListener();
         this.raceLogResolver = raceLogResolver;
         this.trackingConnectorInfo = trackingConnectorInfo;
@@ -620,6 +630,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         rankingMetric = rankingMetricConstructor.apply(this);
     }
     
+    protected void invalidateDistancesFromStarboardSideOfStartLineProjectedOntoLineCache(TimeRange timeRangeToInvalidate) {
+        if (!distancesFromStarboardSideOfStartLineProjectedOntoLineCache.isEmpty()) {
+            for (final Iterator<Entry<TimePoint, SortedMap<Competitor, Distance>>> i=distancesFromStarboardSideOfStartLineProjectedOntoLineCache.entrySet().iterator(); i.hasNext(); ) {
+                final Entry<TimePoint, SortedMap<Competitor, Distance>> next = i.next();
+                if (timeRangeToInvalidate.includes(next.getKey())) {
+                    i.remove();
+                    distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.remove(next.getKey());
+                }
+            }
+        }
+    }
+
     @Override
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         final boolean result;
@@ -712,6 +734,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCache = new ConcurrentHashMap<>();
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes = new ConcurrentHashMap<>();
         getRace().getCourse().addCourseListener(this);
         for (DynamicSensorFixTrack<Competitor, ?> sensorTrack : sensorTracks.values()) {
             sensorTrack.addedToTrackedRace(this);
@@ -3385,6 +3409,27 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 final Position competitorPositionProjectedOntoLine = competitorPosition.projectToLineThrough(starboardMarkPosition, lineBearing);
                 result = competitorPositionProjectedOntoLine.getDistance(starboardMarkPosition);
             }
+        }
+        return result;
+    }
+
+    @Override
+    public SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint) {
+        final SortedMap<Competitor, Distance> result = distancesFromStarboardSideOfStartLineProjectedOntoLineCache.computeIfAbsent(timePoint, tp->{
+            final Map<Competitor, Distance> distances = new HashMap<>();
+            for (final Competitor competitor : getRace().getCompetitors()) {
+                distances.put(competitor, getDistanceFromStarboardSideOfStartLineProjectedOntoLine(competitor, tp));
+            }
+            final TreeMap<Competitor, Distance> map = new TreeMap<>((c1, c2)->distances.get(c1).compareTo(distances.get(c2)));
+            map.putAll(distances);
+            return map;
+        });
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.put(timePoint, ApproximateTime.approximateNow());
+        if (distancesFromStarboardSideOfStartLineProjectedOntoLineCache.size() > MAX_DISTANCES_FROM_STARBOARD_SIDE_OF_START_LINE_PROJECTED_ONTO_LINE_CACHE_SIZE) {
+            final TimePoint keyLeastRecentlyAccessed = distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.entrySet().stream()
+                    .max((e1, e2)->e1.getValue().compareTo(e2.getValue())).get().getKey();
+            distancesFromStarboardSideOfStartLineProjectedOntoLineCache.remove(keyLeastRecentlyAccessed);
+            distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.remove(keyLeastRecentlyAccessed);
         }
         return result;
     }

@@ -2,8 +2,11 @@ package com.sap.sailing.datamining.impl.data;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.datamining.Activator;
@@ -436,6 +439,52 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     @Override
     public Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLineAtStartOfRace() {
         return getTrackedRace().getDistanceFromStarboardSideOfStartLineProjectedOntoLine(getCompetitor(), getStartOfRace());
+    }
+
+    @Override
+    public Distance getDistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace() {
+        final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
+                getTrackedRace().getDistancesFromStarboardSideOfStartLineProjectedOntoLine(getStartOfRace());
+        final Distance result;
+        final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(getCompetitor());
+        if (competitorDistance == null) {
+            result = null;
+        } else {
+            final SortedMap<Competitor, Distance> competitorsFurtherToStarboard = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.headMap(getCompetitor());
+            if (competitorsFurtherToStarboard != null && !competitorsFurtherToStarboard.isEmpty()) {
+                final Competitor competitorImmediatelyToStarboard = competitorsFurtherToStarboard.lastKey();
+                final Distance distanceToStarboardEndOfLineProjectedOntoLineOfCompetitorImmediatelyToStarboard =
+                        competitorsFurtherToStarboard.get(competitorImmediatelyToStarboard);
+                result = competitorDistance.add(distanceToStarboardEndOfLineProjectedOntoLineOfCompetitorImmediatelyToStarboard.scale(-1));
+            } else {
+                result = null;
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public Distance getDistanceToNextBoatToPortProjectedToStartLineAtStartOfRace() {
+        final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
+                getTrackedRace().getDistancesFromStarboardSideOfStartLineProjectedOntoLine(getStartOfRace());
+        final Distance result;
+        final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(getCompetitor());
+        if (competitorDistance == null) {
+            result = null;
+        } else {
+            final SortedMap<Competitor, Distance> competitorsFurtherToPortIncludingSelf = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.tailMap(getCompetitor());
+            final Iterator<Entry<Competitor, Distance>> iterator = competitorsFurtherToPortIncludingSelf.entrySet().iterator();
+            iterator.next(); // skip the "own" competitor ("self" / getCompetitor())
+            if (iterator.hasNext()) {
+                final Entry<Competitor, Distance> competitorImmediatelyToPort = iterator.next();
+                final Distance distanceToStarboardEndOfLineProjectedOntoLineOfCompetitorImmediatelyToPort =
+                        competitorImmediatelyToPort.getValue();
+                result = distanceToStarboardEndOfLineProjectedOntoLineOfCompetitorImmediatelyToPort.add(competitorDistance.scale(-1));
+            } else {
+                result = null;
+            }
+        }
+        return result;
     }
     
     @Override

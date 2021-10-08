@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
@@ -978,6 +979,23 @@ public interface TrackedRace
      * hasn't started yet, <code>null</code> is returned.
      */
     Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * For all competitors in this race computes their
+     * {@link #getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor, TimePoint)} and puts the results in
+     * a {@link SortedMap}, sorted by ascending values, that can be used for quick competitor look-up and for quickly
+     * finding adjacent records, using {@link SortedMap#headMap(Object)} and {@link SortedMap#tailMap(Object)}.
+     * <p>
+     * 
+     * Competitors who are part of this race but for which no such {@link Distance} can be calculated, a record is
+     * put to the resulting map with a {@code null} value associated. Those entries are sorted to the end of the map,
+     * meaning that "{@code null} is greater" than other values.</p>
+     * 
+     * Results are cached in a fixed-size LRU cache which is invalidated by competitor or mark positions within the
+     * averaging time range of {@code timePoint}. With this, repeated requests for equal {@code timePoint}s have a good
+     * chance of being fulfilled from a previous computation result.
+     */
+    SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint);
     
     /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
