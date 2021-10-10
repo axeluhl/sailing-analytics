@@ -221,6 +221,8 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 			 * that time. It may, though, have pending tasks in its updatePeers that can
 			 * continue to run. This may include updates for this peer which would be received
 			 * by this peer's apply(...) method.
+			 * 
+			 * FIXME since this Runnable is not synchronized, this could lead to the numberOfMergedOpsForPeer to change before this is executed...
 			 */
 			peer.apply(PeerImpl.this, operation, numberOfMergedOpsForPeer);
 			// TODO what to do if apply throws a RuntimeException?

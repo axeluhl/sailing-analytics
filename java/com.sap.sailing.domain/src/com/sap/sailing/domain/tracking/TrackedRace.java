@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
@@ -971,6 +972,46 @@ public interface TrackedRace
     Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint);
     
     /**
+     * At the given timepoint and for the competitor, this method returns the distance between the starboard end of the
+     * start line and the competitor position projected perpendicularly onto the line. If the start waypoint was a
+     * single mark, the distance between the start waypoint and the competitor position projected onto the hypothetical
+     * "start line" perpendicular to the bearing of the first leg at the timepoint is calculated. If the competitor
+     * hasn't started yet, <code>null</code> is returned.
+     */
+    Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * For all competitors in this race computes their
+     * {@link #getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor, TimePoint)} and puts the results in
+     * a {@link SortedMap}, sorted by ascending values, that can be used for quick competitor look-up and for quickly
+     * finding adjacent records, using {@link SortedMap#headMap(Object)} and {@link SortedMap#tailMap(Object)}.
+     * <p>
+     * 
+     * Competitors who are part of this race but for which no such {@link Distance} can be calculated, a record is
+     * put to the resulting map with a {@code null} value associated. Those entries are sorted to the end of the map,
+     * meaning that "{@code null} is greater" than other values.</p>
+     * 
+     * Results are cached in a fixed-size LRU cache which is invalidated by competitor or mark positions within the
+     * averaging time range of {@code timePoint}. With this, repeated requests for equal {@code timePoint}s have a good
+     * chance of being fulfilled from a previous computation result.
+     */
+    SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint);
+    
+    /**
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint)}, finds the
+     * next competitor to port regarding their start line projection at {@code timePoint}. Returns {@code null} if
+     * the start line cannot be determined or if there is no competitor further to port.
+     */
+    Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint);
+    
+    /**
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint)}, finds the
+     * next competitor to starboard regarding their start line projection at {@code timePoint}. Returns {@code null} if
+     * the start line cannot be determined or if there is no competitor further to starboard.
+     */
+    Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint);
+    
+    /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
      */
     Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart);
@@ -1316,4 +1357,11 @@ public interface TrackedRace
     void runSynchronizedOnStatus(Runnable runnable);
 
     boolean hasFinishedLoading();
+
+    /**
+     * Obtains the start line bearing and starboard mark position either from {@link #getStartLine(TimePoint)} if there
+     * is a real line configured, or for a start waypoint consisting of only a single mark trying to construct a
+     * hypothetical "line" perpendicular to the first leg's bearing.
+     */
+    Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
 }
