@@ -68,7 +68,7 @@ public class Subscription extends Composite {
         switch (type) {
         case HIGHLIGHT:
             addStyleName(HIGHLIGHT_STYLE);
-            highlightHeader.add(new Label(i18n.subscriptionHighlightText())); // TODO: translate
+            highlightHeader.add(new Label(i18n.subscriptionHighlightText()));
             button.setText(i18n.subscribe());
             break;
         case DEFAULT:
@@ -76,7 +76,7 @@ public class Subscription extends Composite {
             break;
         case OWNER:
             addStyleName(OWNED_STYLE);
-            highlightHeader.add(new Label(i18n.subscriptionOwnerHeaderText())); // TODO: translate
+            highlightHeader.add(new Label(i18n.subscriptionOwnerHeaderText()));
             button.setText(i18n.userManagement());
             break;
         case INDIVIDUAL:

@@ -1,17 +1,35 @@
-.feature {
+.feature:before {
+  content: "";
+  position: absolute;
   background-image: resourceUrl("greenCheck");
   background-repeat: no-repeat;
   background-size: contain;
-  padding-left: 30px;
+  background-position: top left;
+  margin-left: -25px;
+  height: 20px;
+  width: 20px;
+}
+.feature {
+  padding-left: 25px;
+}
+.features {
+  margin: 30px;
+  text-align: left;
 }
 .highlight {
 }
 .owned {
 }
 .subscription {
-  order: 2;
+  order: 20;
   text-align: center;
   width: 390px;
+}
+/* Small screens */
+@media (max-width: 390px) {
+  .subscription {
+    width: auto;
+  }
 }
 .subscription.individual {
   order: 999;
@@ -79,10 +97,6 @@
 .price {
   margin: 20px;
 }
-.features {
-  margin: 30px;
-  text-align: left;
-}
 .subscribe {
   margin-left: auto;
   margin-right: auto;
@@ -94,11 +108,5 @@
   flex-flow: row wrap;
   gap: 1em;
   margin-bottom: 1em;
-}
-/* Small screens */
-@media (max-width: 500px) {
-  .container {
-    /* On small screens, we are no longer using row direction but column */
-    flex-direction: column;
-  }
+  justify-content: center;
 }
