@@ -61,7 +61,7 @@ public class InsertRaceResultStatement extends AbstractPreparedInsertStatement<R
     public void parameterizeStatement(RaceResult raceResult) throws SQLException {
         getPreparedStatement().setString(1, raceResult.getRegatta().getName());
         getPreparedStatement().setString(2, raceResult.getRaceColumn().getName());
-        getPreparedStatement().setString(3, raceResult.getFleet().getName());
+        getPreparedStatement().setString(3, raceResult.getFleet() == null ? null : raceResult.getFleet().getName());
         getPreparedStatement().setString(4, raceResult.getCompetitor().getId().toString());
         final Double totalPoints = raceResult.getLeaderboard().getTotalPoints(raceResult.getCompetitor(), raceResult.getRaceColumn(), raceResult.getNow());
         setDouble(5, totalPoints == null ? 0 : totalPoints);
