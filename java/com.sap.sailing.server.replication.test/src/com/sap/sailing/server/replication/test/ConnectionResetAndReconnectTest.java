@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import org.junit.Test;
@@ -26,6 +27,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
@@ -66,8 +68,8 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         }
         
         @Override
-        public QueueingConsumer getConsumer() throws IOException {
-            ConnectionFactory connectionFactory = new ConnectionFactory();
+        public QueueingConsumer getConsumer() throws IOException, TimeoutException {
+            final ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
             connectionFactory.setHost(getMessagingHostname());
             int port = getMessagingPort();
             if (port != 0) {

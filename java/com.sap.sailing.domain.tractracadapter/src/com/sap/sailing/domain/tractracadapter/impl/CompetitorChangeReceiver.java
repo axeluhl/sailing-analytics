@@ -65,7 +65,7 @@ implements OfficialCompetitorUpdateProvider {
             public void deleteRaceCompetitor(long timestamp, UUID competitorId) {
                 // can't handle competitor list changes once the RaceDefinition exists
                 logger.warning("The competitor with ID "+competitorId+" was removed from a race "+
-                        " but we don't know how to handle this. Ignoring.");
+                        "but we don't know how to handle this. Ignoring.");
             }
 
             @Override
@@ -94,15 +94,20 @@ implements OfficialCompetitorUpdateProvider {
     @Override
     protected void handleEvent(Triple<IRaceCompetitor, Void, Void> event) {
         final IRace race = event.getA().getRace();
-        final DynamicTrackedRace trackedRace = getTrackedRace(race);
-        if (trackedRace != null) {
-            final IRaceCompetitor raceCompetitor = event.getA();
-            if (reconciler != null && raceCompetitor != null) {
-                reconciler.reconcileCompetitorStatus(raceCompetitor, trackedRace);
-            }
+        if (race == null) {
+            logger.warning("Received a competitor update for a null race for competitor "+event.getA().getCompetitor().getName()+
+                    " in "+this+". Ignoring.");
         } else {
-            logger.warning("Couldn't find tracked race for race " + race.getName()
-                    + ". Dropping competitor change event " + event);
+            final DynamicTrackedRace trackedRace = getTrackedRace(race);
+            if (trackedRace != null) {
+                final IRaceCompetitor raceCompetitor = event.getA();
+                if (reconciler != null && raceCompetitor != null) {
+                    reconciler.reconcileCompetitorStatus(raceCompetitor, trackedRace);
+                }
+            } else {
+                logger.warning("Couldn't find tracked race for race " + race.getName()
+                        + ". Dropping competitor change event " + event);
+            }
         }
     }
 

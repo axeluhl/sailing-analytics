@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.impl.data;
 
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -377,4 +378,24 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         return result;
     }
 
+    @Override
+    public Double getStartLineBiasInMetersAtStartOfRace() {
+        return getStartLineBiasInMetersAtTimePoint(getTrackedRace().getStartOfRace());
+    }
+
+    @Override
+    public Double getStartLineBiasInMeters30SecondsAfterRaceStart() {
+        return getStartLineBiasInMetersAtTimePoint(getTrackedRace().getStartOfRace().plus(TimeUnit.SECONDS.toMillis(30)));
+    }
+    
+    private Double getStartLineBiasInMetersAtTimePoint(TimePoint timePoint) {
+        LineDetails startLine = getTrackedRace().getStartLine(timePoint);
+        switch (startLine.getAdvantageousSideWhileApproachingLine()) {
+        case PORT:
+            return startLine.getAdvantage().getMeters() * -1;
+        case STARBOARD:
+            return startLine.getAdvantage().getMeters();
+        }
+        return null;
+    }
 }

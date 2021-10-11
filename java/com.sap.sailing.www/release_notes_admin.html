@@ -23,6 +23,57 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">October 2021</h2>
+                    <ul class="bulletList">
+			<li>Added "Elan 350" boat class</li>
+                    </ul>
+          <h2 class="articleSubheadline">September 2021</h2>
+          <ul class="bulletList">
+			<li>Let Igtimi connections that search devices while holding locks time out after 10s.
+			    This avoids rare deadlock issues in case the Igtimi servers may not deliver an answer.</li>
+			<li>Landscape management now offers an implementation for archiving an application replica set.</li>
+          </ul>
+          <h2 class="articleSubheadline">August 2021</h2>
+          <ul class="bulletList">
+			<li>Added boat classes iQFOil Men/Women/Youth</li>
+          </ul>
+          <h2 class="articleSubheadline">July 2021</h2>
+          <ul class="bulletList">
+			<li>Creating and editing a Regatta object now uses the already loaded Events with their course areas
+			    to offer the event and course area selection in the Regatta dialog. This accelerates opening
+			    the dialog significantly, especially when used on a server with many events, such as the archive
+			    server or any public server such as my.sapsailing.com.</li>
+			<li>Fixed a problem with Manage2Sail competitor import which had been introduced when the YachtScoring
+			    competitor import had been added.</li>
+			<li>In order to restrict an overwhelming and uselessly long list of objects to select from, object lists
+			    are now reduced in several more places, based on permissions. For example, a user will only be offered
+			    those Leaderboard Groups for selection in the Event create/edit dialog that the user has the
+			    <tt>UPDATE</tt> permission for. Likewise, the events providing the course areas to select from
+			    are restricted when creating/editing a Regatta or a Flexible Leaderboard and when setting up a
+			    Race Manager App device configuration. The same applies to the
+			    list of events shown in the select box in the Manage2Sail Regatta Structure Import panel. Also,
+			    the leaderboards table in the "Leaderboards / Leaderboard groups" panel now has a filter checkbox
+			    that by default displays only those leaderboards that the user has the <tt>UPDATE</tt> permission
+			    for.</li>
+			<li>A problem with uninitialized race timings may have led to endless loops trying to identify a valid
+			    time range for wind sampling. This has been fixed now.</li>
+			<li>A Slovenian translation of the user interface has been added.</li>
+		        <li>The IOC code for "Russian Olympic Committee" is now available under the "ROC" abbreviation.</li>
+		        <li>Empty Igtimi WindBot messages, such as a COG message with no payload, no longer causes an uncaught
+		            exception but is now handled properly and logged accordingly. Other fixes in the same message now
+		            are processed as they should.</li>
+		        <li>After Igtimi changed their WebSocket implementation, we had to lower the heartbeat sending interval
+		            from 120s to 15s which now avoids connection interrupts.</li>
+		        <li>The <tt>/sailingserver/api/v2/leaderboards/{leaderboard-name}</tt> API now also delivers the
+		            <tt>currentSpeedOverGround-kts</tt> field if the competitor is not yet in the race.</li>
+		        <li>The <tt>/sailingserver/api/v1/regattas/{regattaName}/races/{raceName}/markpassings</tt> API method
+		            has been extended to also deliver the "raw" passing order (which can vary from the tracked rank, e.g.,
+		            because a handicap ranking metric is in use), as well as a hypothetical score that one gets by passing
+		            the passing order through the scoring scheme and applying penalties or score corrections. Furthermore,
+		            the IRM/MaxPointsReason is output. See
+		            <a href="/sailingserver/webservices/api/v1/raceMarkPassingsGetDoc.html">/sailingserver/webservices/api/v1/raceMarkPassingsGetDoc.html</a>
+		            for more details.</li>
+                    </ul>
                     <h2 class="articleSubheadline">June 2021</h2>
                     <ul class="bulletList">
                         <li>Infer a tracking start/end time from race start/end time only if the regatta is marked accordingly.</li>

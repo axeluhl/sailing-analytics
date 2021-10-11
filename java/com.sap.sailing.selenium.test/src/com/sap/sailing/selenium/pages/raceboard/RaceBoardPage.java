@@ -3,11 +3,9 @@ package com.sap.sailing.selenium.pages.raceboard;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -20,6 +18,9 @@ import com.sap.sailing.selenium.pages.timeslider.TimeSliderPO;
  * {@link PageObject} representing the SAP Sailing home page.
  */
 public class RaceBoardPage extends HostPageWithAuthentication {
+    
+    @FindBy(how = BySeleniumId.class, using = "moreOptionsButton")
+    private WebElement moreOptionsButton;
     
     @FindBy(how = BySeleniumId.class, using = "raceMapSettingsButton")
     private WebElement raceMapSettingsButton;
@@ -64,34 +65,13 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     protected void initElements() {
         super.initElements();
         doneInit = true;
-
-        // wait untill initial rendering of racemap & compilation ect, as default ajax based wait won't work here
-        WebDriverWait webDriverWait = new WebDriverWait(driver, 300);
-        webDriverWait.until(new Function<WebDriver, Boolean>() {
-            @Override
-            public Boolean apply(WebDriver t) {
-                try {
-                    return raceMapSettingsButton.isDisplayed() && raceMapSettingsButton.getLocation().y > 100;
-                } catch (Exception e) {
-                    // RaceMap cause multiple reflows and the element may temporarily not be in the viewport
-                    return false;
-                }
-            }
-        });
+        waitUntil(() -> moreOptionsButton.isDisplayed());
     }
 
     public MapSettingsPO openMapSettings() {
-        waitUntil(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                try {
-                    return raceMapSettingsButton.isDisplayed() && raceMapSettingsButton.getLocation().y > 100;
-                } catch (Exception e) {
-                    // RaceMap cause multiple reflows and the element may temporarily not be in the viewport
-                    return false;
-                }
-            }
-        });
+        waitUntil(() -> moreOptionsButton.isDisplayed());
+        moreOptionsButton.click();
+        waitUntil(() -> raceMapSettingsButton.isDisplayed() && raceMapSettingsButton.getLocation().y > 100);
         raceMapSettingsButton.click();
         waitUntil(new BooleanSupplier() {
             @Override
@@ -111,6 +91,8 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     }
     
     public LeaderboardSettingsDialogPO openLeaderboardSettingsDialog() {
+        waitUntil(() -> moreOptionsButton.isDisplayed());
+        moreOptionsButton.click();
         WebElement leaderboardSettingsButton = null;
         try {
             leaderboardSettingsButton = findElementBySeleniumId("leaderboardSettingsButton");

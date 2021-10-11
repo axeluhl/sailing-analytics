@@ -61,4 +61,20 @@ public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSe
     public String getDefaultRedirectPath() {
         return defaultRedirectPath;
     }
+
+    /**
+     * From the {@link #getDefaultRedirectPath() defaultRedirectPath} infers a {@link RedirectDTO} describing
+     * the default redirection used by this replica set.
+     */
+    public RedirectDTO getDefaultRedirect() {
+        return RedirectDTO.from(getDefaultRedirectPath());
+    }
+
+    @Override
+    public String toString() {
+        return "SailingApplicationReplicaSetDTO [replicaSetName=" + replicaSetName + ", master=" + master
+                + ", replicas=" + replicas + ", version=" + version + ", hostname=" + hostname
+                + ", defaultRedirectPath=" + defaultRedirectPath + ", default redirect type="
+                + getDefaultRedirect().getType() + "]";
+    }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.mongodb.MongoException;
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
@@ -36,7 +37,7 @@ public abstract class RacingEventServiceImplMock extends RacingEventServiceImpl 
         super(null, MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
                 PersistenceFactory.INSTANCE
                 .getDefaultMongoObjectFactory(serviceFinderFactory), PersistenceFactory.INSTANCE
-                .getDefaultDomainObjectFactory(), serviceFinderFactory, WriteConcern.MAJORITY), serviceFinderFactory);
+                .getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY), serviceFinderFactory);
         lock = new DataImportLockWithProgress();
         lock.addProgress(dataImportProgressImpl.getOperationId(), dataImportProgressImpl);
     }

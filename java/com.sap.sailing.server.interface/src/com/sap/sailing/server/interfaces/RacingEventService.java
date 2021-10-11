@@ -54,7 +54,6 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -64,6 +63,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
@@ -101,6 +101,7 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -456,6 +457,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void renameEvent(UUID id, String newEventName);
 
+    /**
+     * Does not replicate automatically; see {@link RemoveEvent} for the replicable operation that calls this method.
+     */
     void removeEvent(UUID id);
 
     
@@ -525,7 +529,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * overwritten with the values from the track to be imported.
      * @param mediaTrack
      */
-    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creatingCount, boolean override) throws Exception;
+    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCountImpl creatingCount, boolean override) throws Exception;
     
     Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
     
@@ -720,8 +724,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * For the reference to a remote sailing server, updates its events cache and returns the event list or, if fetching
-     * the event list from the remote server did fail, the exception for which it failed. If {@link forceUpdate}
-     * parameter is <code>true</code> then remote server will be replaced in cache
+     * the event list from the remote server did fail, the exception for which it failed. If the {@link forceUpdate}
+     * parameter is <code>true</code> then the remote server will be replaced in cache
      */
     Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
             RemoteSailingServerReference ref, boolean forceUpdate);
@@ -756,7 +760,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences();
 
+    /**
+     * Obtains all remote sailing server references, regardless their "live" state
+     */
+    Map<String, RemoteSailingServerReference> getAllRemoteServerReferences();
+
+    /**
+     * @return {@code null} if no remote server reference by the name specified exists
+     */
     RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName);
+
+    /**
+     * @return {@code null} if no remote server reference with that URL specified exists
+     */
+    RemoteSailingServerReference getRemoteServerReferenceByUrl(URL remoteServerReferenceUrl);
 
     void addRegattaWithoutReplication(Regatta regatta);
 
@@ -995,11 +1012,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Import MasterData from a remote server URL. A caller might provide either targetServerUsername and
      * targetServerPassword or targetServerBearerToken. If neither of those are provided the method will try to create
      * or get the bearer token for the current user.
+     * 
+     * @return the leaderboard groups imported as the keys, and the events belonging to those leaderboard groups as
+     *         values
      */
-    void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
-            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
-            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
+    Map<LeaderboardGroup, ? extends Iterable<Event>> importMasterData(final String urlAsString,
+            final UUID[] leaderboardGroupIds, final boolean override, final boolean compress, final boolean exportWind,
+            final boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
+            String targetServerBearerToken, final boolean exportTrackedRacesAndStartTracking,
+            final UUID importOperationId) throws IllegalArgumentException;
 
     void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
 
@@ -1008,7 +1029,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
      * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
-     * only username and password or bearer token, not the three of them.
+     * only username and password or bearer token, not the three of them. If none is provided but there is no user
+     * currently authenticated, {@code null} will be returned.<p>
      */
     String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
             String targetServerPassword, String targetServerBearerToken);

@@ -197,9 +197,9 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());
         TimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());
         logger.info("Done running testRaceTimeReplication()");
     }

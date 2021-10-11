@@ -159,7 +159,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         eventsById.clear();
         eventListBox.addItem(stringMessages.selectSailingEvent(), "");
         final List<EventDTO> eventsSortedByName = new ArrayList<>();
-        Util.addAll(events, eventsSortedByName);
+        Util.addAll(Util.filter(events, e->userService.hasPermission(e, DefaultActions.UPDATE)), eventsSortedByName);
         Collections.sort(eventsSortedByName, (e1, e2)->{
             int result = e1.getName().compareTo(e2.getName());
             if (result == 0) {

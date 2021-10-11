@@ -6,6 +6,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -25,6 +26,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.security.ui.client.UserService;
 
 public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventView.Presenter> extends IsWidget {
 
@@ -68,6 +70,10 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         String getRegattaId();
         
         EventViewDTO getEventDTO();
+        
+        EventBus getEventBus();
+        
+        UserService getUserService();
 
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 

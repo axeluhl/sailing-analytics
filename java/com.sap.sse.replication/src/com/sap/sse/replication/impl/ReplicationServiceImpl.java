@@ -27,6 +27,7 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +47,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.OperationsToMasterSendingQueue;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
@@ -351,21 +353,21 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      */
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort,
             final ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider)
-            throws IOException {
+            throws Exception {
         this(/* defaultMongoObjectFactory */ Optional.empty(), exchangeName, exchangeHost, exchangePort,
                 replicationInstancesManager, replicablesProvider);
     }
 
     public ReplicationServiceImpl(Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName,
             String exchangeHost, int exchangePort, ReplicationInstancesManager replicationInstancesManager,
-            ReplicablesProvider replicablesProvider) throws IOException {
+            ReplicablesProvider replicablesProvider) throws Exception {
         this(/* replicasToAssumeConnectedToThisMaster */ null, optionalMongoObjectFactory,
                 exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
     }
 
     public ReplicationServiceImpl(Iterable<ReplicaDescriptor> replicasToAssumeConnectedToThisMaster,
             Optional<MongoObjectFactory> optionalMongoObjectFactory, String exchangeName, String exchangeHost, int exchangePort,
-            ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws IOException {
+            ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws Exception {
         this.sendJobQueue = new LinkedBlockingDeque<>();
         this.totalSendJobsSize = new AtomicLong(0);
         createSendJob().start();
@@ -412,7 +414,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         return replicator;
     }
 
-    private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
+    private Channel createMasterChannelAndDeclareFanoutExchange() throws Exception {
         Channel result = createMasterChannel();
         if (!Util.hasLength(exchangeName)) {
             logger.severe("Replica seems registering at this master, but this master's exchange name is \""+exchangeName+
@@ -426,8 +428,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     }
 
     @Override
-    public Channel createMasterChannel() throws IOException, ConnectException {
-        final ConnectionFactory connectionFactory = new ConnectionFactory();
+    public Channel createMasterChannel() throws Exception {
+        final ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         connectionFactory.setHost(exchangeHost);
         if (exchangePort != 0) {
             connectionFactory.setPort(exchangePort);
@@ -436,7 +438,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             final Channel result = connectionFactory.newConnection().createChannel();
             logger.info("Connected to " + connectionFactory.getHost() + ":" + connectionFactory.getPort());
             return result;
-        } catch (ConnectException ex) {
+        } catch (ConnectException | TimeoutException ex) {
             // make sure to log something meaningful
             logger.severe("Could not connect to messaging queue on " + connectionFactory.getHost() + ":"
                     + connectionFactory.getPort() + "/" + exchangeName);
@@ -453,7 +455,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     }
     
     @Override
-    public void registerReplica(ReplicaDescriptor replica) throws IOException {
+    public void registerReplica(ReplicaDescriptor replica) throws Exception {
         // due to different replicables to be replicated for replica, ensure that all
         // replicables to be replicated to replica are actually observed:
         addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
@@ -708,7 +710,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                                 try {
                                     masterChannel = createMasterChannelAndDeclareFanoutExchange();
                                     logger.info("Channel established; retrying now.");
-                                } catch (IOException e) {
+                                } catch (Exception e) {
                                     logger.log(Level.SEVERE, "Re-establishing a connection to the fan-out exchange at "+
                                             exchangeHost+":"+exchangePort+"/"+exchangeName+
                                             " didn't work. Will try to send again through old channel which will probably fail, then sleep and try again.",
