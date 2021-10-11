@@ -26,12 +26,16 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     private final Database sourceDatabase;
     private final Database targetDatabase;
     private final Iterable<Database> additionalDatabasesToDelete;
+    private final boolean dropTargetFirst;
+    private final boolean dropSourceAfterSuccessfulCopy;
 
     public static interface Builder<BuilderT extends AbstractAwsProcedureImpl.Builder<BuilderT, CopyAndCompareMongoDatabase<ShardingKey>, ShardingKey>, ShardingKey>
     extends AbstractAwsProcedureImpl.Builder<BuilderT, CopyAndCompareMongoDatabase<ShardingKey>, ShardingKey> {
         BuilderT setSourceDatabase(Database sourceDatabase);
         BuilderT setTargetDatabase(Database targetDatabase);
         BuilderT setAdditionalDatabasesToDelete(Iterable<Database> additionalDatabasesToDelete);
+        BuilderT dropTargetFirst(boolean dropTargetFirst);
+        BuilderT dropSourceAfterSuccessfulCopy(boolean dropSourceAfterSuccessfulCopy);
     }
     
     public static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
@@ -40,6 +44,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         private Database sourceDatabase;
         private Database targetDatabase;
         private Iterable<Database> additionalDatabasesToDelete;
+        private boolean dropTargetFirst;
+        private boolean dropSourceAfterSuccessfulCopy;
         
         @Override
         public CopyAndCompareMongoDatabase<ShardingKey> build() throws Exception {
@@ -64,6 +70,18 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             return self();
         }
 
+        @Override
+        public BuilderT dropTargetFirst(boolean dropTargetFirst) {
+            this.dropTargetFirst = dropTargetFirst;
+            return self();
+        }
+
+        @Override
+        public BuilderT dropSourceAfterSuccessfulCopy(boolean dropSourceAfterSuccessfulCopy) {
+            this.dropSourceAfterSuccessfulCopy = dropSourceAfterSuccessfulCopy;
+            return self();
+        }
+
         protected Database getSourceDatabase() {
             return sourceDatabase;
         }
@@ -74,6 +92,14 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
 
         protected Iterable<Database> getAdditionalDatabasesToDelete() {
             return additionalDatabasesToDelete;
+        }
+        
+        protected boolean isDropTargetFirst() {
+            return dropTargetFirst;
+        }
+        
+        protected boolean isDropSourceAfterSuccessfulCopy() {
+            return dropSourceAfterSuccessfulCopy;
         }
     }
     
@@ -87,12 +113,18 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         this.sourceDatabase = builder.getSourceDatabase();
         this.targetDatabase = builder.getTargetDatabase();
         this.additionalDatabasesToDelete = builder.getAdditionalDatabasesToDelete() == null ? Collections.emptySet() : builder.getAdditionalDatabasesToDelete();
+        this.dropTargetFirst = builder.isDropTargetFirst();
+        this.dropSourceAfterSuccessfulCopy = builder.isDropSourceAfterSuccessfulCopy();
     }
 
     @Override
     public void run() throws Exception {
         if (targetDatabase.equals(sourceDatabase)) {
             throw new IllegalArgumentException("Source and target database must be different: "+sourceDatabase);
+        }
+        if (dropTargetFirst) {
+            logger.info("Dropping target database "+targetDatabase+" before importing from "+sourceDatabase);
+            targetDatabase.drop();
         }
         final MongoDatabase result = targetDatabase.getEndpoint().importDatabase(sourceDatabase.getMongoDatabase());
         if (result == null) {
@@ -103,10 +135,13 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         final Future<String> targetMd5 = executor.submit(()->targetDatabase.getMD5Hash());
         executor.shutdown();
         if (sourceMd5.get().equals(targetMd5.get())) {
-            logger.info("Databases "+sourceDatabase+" and "+targetDatabase+" have equal MD5 hash "+sourceMd5.get()+". Removing "+sourceDatabase+" and "+Util.joinStrings(", ", additionalDatabasesToDelete));
-            sourceDatabase.drop();
-            for (final Database additionalDatabaseToDelete : additionalDatabasesToDelete) {
-                additionalDatabaseToDelete.drop();
+            logger.info("Databases "+sourceDatabase+" and "+targetDatabase+" have equal MD5 hash "+sourceMd5.get()+".");
+            if (dropSourceAfterSuccessfulCopy) {
+                logger.info("Removing "+sourceDatabase+" and "+Util.joinStrings(", ", additionalDatabasesToDelete));
+                sourceDatabase.drop();
+                for (final Database additionalDatabaseToDelete : additionalDatabasesToDelete) {
+                    additionalDatabaseToDelete.drop();
+                }
             }
         } else {
             throw new IllegalStateException("Import failed; hashes are different. "+sourceDatabase+" has "+sourceMd5.get()+

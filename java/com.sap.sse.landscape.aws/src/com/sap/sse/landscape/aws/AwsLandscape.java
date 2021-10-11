@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -250,6 +251,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTag(Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier);
     
+    <HostT extends AwsInstance<ShardingKey>> HostT getHostByInstanceId(com.sap.sse.landscape.Region region, final String instanceId, HostSupplier<ShardingKey, HostT> hostSupplier);
+
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
      * instances returned have been in state RUNNING at the time of the request.
@@ -600,6 +603,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName);
 
+    MongoReplicaSet getDatabaseConfigurationForReplicaSet(String mongoReplicaSetName, Iterable<Pair<AwsInstance<ShardingKey>, Integer>> hostsAndPortsOfNodes);
+    
+    MongoProcessImpl getDatabaseConfigurationForSingleNode(AwsInstance<ShardingKey> host, int port);
+
     Iterable<MongoEndpoint> getMongoEndpoints(Region region);
 
     /**
@@ -648,6 +655,18 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, HostSupplier<ShardingKey, HostT> hostSupplier,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    /**
+     * Like {@link #getApplicationReplicaSetsByTag(Region, String, HostSupplier, Optional, Optional, byte[])}, only that the tag's
+     * value can also be constrained using this method. This way, callers can, e.g., search for a specific replica set as long as
+     * the master runs on a dedicated host with only this replica set name in the {@code sailing-analytics-server} tag.
+     */
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
+    AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSetByTagValue(
+            Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier,
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
 
     /**
      * Obtains session credentials using an MFA token code valid for the user for which this landscape object was authenticated

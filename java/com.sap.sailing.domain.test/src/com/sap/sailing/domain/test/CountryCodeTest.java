@@ -24,7 +24,7 @@ import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.common.Util;
 
 public class CountryCodeTest {
-    private static final int NUMBER_OF_COUNTRY_CODES = 259;
+    private static final int NUMBER_OF_COUNTRY_CODES = 260;
 
     @Ignore
     @Test

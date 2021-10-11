@@ -159,6 +159,28 @@ public class RemoteSailingServerSet {
     public RemoteSailingServerReference getServerReferenceByName(String name) {
         return remoteSailingServers.get(name);
     }
+    
+    /**
+     * If this set has a {@link RemoteSailingServerReference} whose {@link RemoteSailingServerReference#getURL() url}
+     * equals <code>url</code>, it is returned. Otherwise, <code>null</code> is returned.
+     */
+    public RemoteSailingServerReference getServerReferenceByUrl(URL url) {
+        return remoteSailingServers.values().stream().filter(r->equalIgnoringTrailingSlash(r.getURL(), url)).findAny().orElse(null);
+    }
+    
+    private boolean equalIgnoringTrailingSlash(URL url1, URL url2) {
+        final String url1AsString = url1.toString() + (url1.toString().endsWith("/") ? "" : "/");
+        final String url2AsString = url2.toString() + (url2.toString().endsWith("/") ? "" : "/");
+        return url1AsString.equals(url2AsString);
+    }
+
+    /**
+     * @return a snapshot copy of the internal map with all remote sailing server references currently known, regardless
+     *         of whether or not they are {@link #getLiveRemoteServerReferences() live}.
+     */
+    public Map<String, RemoteSailingServerReference> getAllRemoteServerReferences() {
+        return new HashMap<>(remoteSailingServers);
+    }
 
     private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
         final Future<?> lastJobForRef = runningUpdateTasksPerServerReference.get(ref);
@@ -370,7 +392,8 @@ public class RemoteSailingServerSet {
                 Duration.ONE_SECOND.times(1000), "POST", (connection) -> {
                     connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     connection.setRequestProperty(HEADER_FORWARD_TO_REPLICA.getA(), HEADER_FORWARD_TO_REPLICA.getB());
-                }, Optional.of(outputStream -> {
+                }, /* post-connect modifier */ null,
+                Optional.of(outputStream -> {
                     try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, "utf-8")) {
                         writer.write(formParams.toString());
                     }

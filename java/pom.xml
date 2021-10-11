@@ -126,6 +126,7 @@
         <module>com.sap.sailing.domain.persistence</module>
         <module>com.sap.sailing.domain.deckmanadapter</module>
         <module>com.sap.sailing.domain.oceanraceadapter</module>
+        <module>com.sap.sailing.domain.yellowbrickadapter</module>
         <module>com.sap.sailing.domain.bravoadapter</module>
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>
@@ -148,13 +149,13 @@
         <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
         <module>com.sap.sailing.server.interface</module>
+        <module>com.sap.sailing.server.gateway.interfaces</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
         <module>com.sap.sailing.shared.persistence</module>
         <module>com.sap.sailing.shared.server</module>
         <module>com.sap.sailing.shared.server.gateway</module>
         <module>com.sap.sailing.www</module>
-        <module>com.sap.sailing.xmlexport</module>
         <module>com.sap.sailing.hanaexport</module>
         <module>com.google.gwt.user</module>
         <module>com.google.gwt.dev</module>
@@ -203,7 +204,6 @@
         <module>com.sap.sailing.domain.deckmanadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter.test</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
-        <module>com.sap.sailing.xmlexport.test</module>
         <module>com.sap.sailing.xrr.resultimport.test</module>
         <module>com.sap.sailing.domain.shared.android.test</module>
         <module>com.sap.sailing.geocoding.test</module>
@@ -536,7 +536,7 @@
         <!-- GWT version detected from dependencyManagement -->
         <execution>
           <configuration>
-            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP} -Dgwt.watchFileChanges=false</extraJvmArgs>
+            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx4g -Djava.io.tmpdir=${env.TMP} -Dgwt.watchFileChanges=false</extraJvmArgs>
              <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>

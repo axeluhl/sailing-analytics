@@ -383,10 +383,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public RaceIdentifier loadRaceIdentifier(Document dbObject) {
         RaceIdentifier result = null;
-        String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
-        String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
-        if (regattaName != null && raceName != null) {
-            result = new RegattaNameAndRaceName(regattaName, raceName);
+        if (dbObject != null) {
+            String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
+            String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
+            if (regattaName != null && raceName != null) {
+                result = new RegattaNameAndRaceName(regattaName, raceName);
+            }
         }
         return result;
     }
@@ -795,7 +797,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (raceIdentifiersPerFleet != null) {
             for (String escapedFleetName : raceIdentifiersPerFleet.keySet()) {
                 String fleetName = MongoUtils.unescapeDollarAndDot(escapedFleetName);
-                result.put(fleetName, loadRaceIdentifier((Document) raceIdentifiersPerFleet.get(fleetName)));
+                result.put(fleetName, loadRaceIdentifier((Document) raceIdentifiersPerFleet.get(escapedFleetName)));
             }
         }
         return result;
@@ -1004,7 +1006,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (constrainToWindSource != null) {
                 queryByName.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
             }
-            final FindIterable<Document> windFixesFoundByName = windTracks.find(queryByName);
+            final FindIterable<Document> windFixesFoundByName = windTracks.find(queryByName).batchSize(100000);
             if (windFixesFoundByName.iterator().hasNext()) {
                 List<Document> windFixesToMigrate = new ArrayList<>();
                 for (Document dbWind : windFixesFoundByName) {
@@ -1013,7 +1015,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     windFixesToMigrate.add(new MongoObjectFactoryImpl(database).storeWindTrackEntry(race, regattaName,
                             wind.getB(), wind.getA()));
                 }
-                final long size = windTracks.count(queryByName);
+                final long size = windTracks.countDocuments(queryByName);
                 logger.info("Migrating " + size + " wind fixes of regatta " + regattaName
                         + " and race " + race.getName() + " to ID-based keys");
                 windTracks.insertMany(windFixesToMigrate);
@@ -2719,7 +2721,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // there is a corner case where tests can create just one competitor without boat
         // before we migrate we need to check if this case
         if (competitorsCollectionExist && !boatsCollectionCollectionExist) {
-            long competitorCount = orginalCompetitorCollection.count();
+            long competitorCount = orginalCompetitorCollection.countDocuments();
             if (competitorCount > 0) {
                 Document oneCompetitorDbObject = orginalCompetitorCollection.find().first();
                 Object boatObject = oneCompetitorDbObject.get(CompetitorJsonConstants.FIELD_BOAT);
@@ -3016,7 +3018,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final MongoCollection<Document> collection = database
                 .getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
         final FindIterable<Document> cursor = collection.find();
-        final long count = collection.count();
+        final long count = collection.countDocuments();
         logger.info("Restoring " + count + " races");
         final List<Document> restoreParameters = new ArrayList<>();
         // consume all elements quickly to avoid cursor/DB timeouts while restoring many races;

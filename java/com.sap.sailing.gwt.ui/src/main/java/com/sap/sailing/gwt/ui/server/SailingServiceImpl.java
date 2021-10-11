@@ -1997,7 +1997,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) {
         RaceTimesInfoDTO raceTimesInfo = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
             raceTimesInfo = new RaceTimesInfoDTO(raceIdentifier);
@@ -2005,7 +2004,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             raceTimesInfo.setLegInfos(legInfos);
             List<MarkPassingTimesDTO> markPassingTimesDTOs = new ArrayList<MarkPassingTimesDTO>();
             raceTimesInfo.setMarkPassingTimes(markPassingTimesDTOs);
-
             raceTimesInfo.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
             raceTimesInfo.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
             raceTimesInfo.newestTrackingEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
@@ -2014,7 +2012,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             raceTimesInfo.raceFinishingTime = trackedRace.getFinishingTime() == null ? null : trackedRace.getFinishingTime().asDate();
             raceTimesInfo.raceFinishedTime = trackedRace.getFinishedTime() == null ? null : trackedRace.getFinishedTime().asDate();
             raceTimesInfo.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
-
             Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
             synchronized (markPassingsTimes) {
                 int numberOfWaypoints = Util.size(markPassingsTimes);
@@ -2388,30 +2385,36 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public StrippedLeaderboardDTOWithSecurity getLeaderboardWithSecurity(String leaderboardName) {
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        StrippedLeaderboardDTOWithSecurity result = null;
-        Leaderboard leaderboard = leaderboards.get(leaderboardName);
+        Leaderboard leaderboard = getLeaderboardAndCheckReadPermission(leaderboardName);
+        final StrippedLeaderboardDTOWithSecurity result;
         if (leaderboard != null) {
-            if (leaderboard instanceof RegattaLeaderboard) {
-                getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta());
-            }
-            getSecurityService().checkCurrentUserReadPermission(leaderboard);
             result = createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false);
+        } else {
+            result = null;
         }
         return result;
     }
 
-    @Override
-    public StrippedLeaderboardDTO getLeaderboard(String leaderboardName) {
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        StrippedLeaderboardDTO result = null;
-        Leaderboard leaderboard = leaderboards.get(leaderboardName);
+    private Leaderboard getLeaderboardAndCheckReadPermission(String leaderboardName) {
+        final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        final Leaderboard leaderboard = leaderboards.get(leaderboardName);
         if (leaderboard != null) {
             if (leaderboard instanceof RegattaLeaderboard) {
                 getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta());
             }
             getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        }
+        return leaderboard;
+    }
+    
+    @Override
+    public StrippedLeaderboardDTO getLeaderboard(String leaderboardName) {
+        Leaderboard leaderboard = getLeaderboardAndCheckReadPermission(leaderboardName);
+        final StrippedLeaderboardDTO result;
+        if (leaderboard != null) {
             result = createStrippedLeaderboardDTO(leaderboard, false, false);
+        } else {
+            result = null;
         }
         return result;
     }
@@ -3476,7 +3479,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
         for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             try {
-                groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData));
+                groupDTO.leaderboards.add(createStrippedLeaderboardDTOWithSecurity(leaderboard, withGeoLocationData, withStatisticalData));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }
@@ -4450,8 +4453,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitors(boolean ignoreCompetitorsWithBoat,
-            boolean ignoreCompetitorsWithoutBoat) {
+    public Iterable<CompetitorDTO> getCompetitors(boolean ignoreCompetitorsWithBoat, boolean ignoreCompetitorsWithoutBoat) {
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
         final Iterable<? extends Competitor> filteredCompetitors;

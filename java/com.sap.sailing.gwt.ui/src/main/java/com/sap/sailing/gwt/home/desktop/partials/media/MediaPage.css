@@ -1,3 +1,4 @@
+@external table;
 .media {
   font-size: 15px;
   font-size: 1rem;
@@ -15,8 +16,123 @@
 
 .imggalleryitem {
 	border: 1em solid transparent;
-	
 	box-sizing: border-box;
-	
 }
 
+.media_settings {
+  display: inline-block;
+  text-align: right;
+  font-size: 0;
+}
+
+.media_settings * {
+  font-size: 1rem;
+}
+
+.thumbnail_edit_button {
+    right: 60px;
+    top:10px;
+    z-index: 1;
+}
+
+.thumbnail_delete_button {
+    right: 10px;
+    top: 10px;
+    z-index: 1;
+}
+
+.thumbnail_edit_button:after {
+    background-image: resourceUrl("editWhite");
+}
+
+.thumbnail_delete_button:after {
+    background-image: resourceUrl("trash");
+}
+
+.button, .button:focus  {
+    width: 2.666666666666667em;
+    height: 2.666666666666667em;
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    margin: 0;
+    background-color: #2b2a2a;
+    position: absolute;
+    outline: none;
+}
+
+.button:after {
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 66.6%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.manageMedia, .manageMedia:focus {
+    background-color: white;
+    top: 23px;
+    margin-left: 15px;
+    border: 1px solid #dedede;
+}
+
+.manageMedia:after {
+    background-image: resourceUrl("editBlack");
+}
+
+.manageMedia.active, .manageMedia.active:focus {
+    background-color: #008fcc;
+}
+
+.manageMedia.active:after {
+    background-image: resourceUrl("editWhite");
+}
+
+.manageMedia:hover {
+    background-color: #d79900;
+}
+
+.addButton, .addButton:focus {
+    top: -15px;
+    right: 15px;
+    background-color: #efaa00;
+    color: #2b2a2a;
+    width: 2.666666666666667em;
+    height: 2.666666666666667em;
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    outline: none;
+}
+
+.addButton:after {
+    background-image: resourceUrl("plus");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 66.6%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.popup {
+    position: fixed!important;
+    z-index: 1000;
+    width: auto;
+    height: auto;
+    background-color: #ffffff;
+}
+
+.popup table {
+    width: auto;
+    min-width: 600px;
+}

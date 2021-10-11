@@ -2,6 +2,8 @@ package com.sap.sse.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.impl.TimeRangeImpl;
+
 /**
  * A range between two {@link TimePoint}s, including the {@link #from()} time point and excluding the {@link #to} time
  * point. A time range is {@link #isEmpty()} if its {@link #from()} and {@link #to()} are equal.
@@ -11,6 +13,20 @@ import java.io.Serializable;
  *
  */
 public interface TimeRange extends Comparable<TimeRange>, Serializable {
+    /**
+     * @param from
+     *            if {@code null}, the time range is considered open on its "left" end, and all {@link TimePoint}s at or
+     *            after {@link TimePoint#BeginningOfTime} and at or before {@code to} are considered {@link #includes
+     *            included} in this time range.
+     * @param toExclusive
+     *            if {@code null}, the time range is considered open on its "right" end, and all {@link TimePoint}s at
+     *            or before {@link TimePoint#EndOfTime} and at or after {@code from} are considered {@link #includes
+     *            included} in this time range.
+     */
+    static TimeRange create(TimePoint from, TimePoint toExclusive) {
+        return new TimeRangeImpl(from, toExclusive);
+    }
+    
     /**
      * @return a valid, non-{@code null} time point marking the inclusive beginning of this time range.
      * {@link #includes(TimePoint) includes(from())} always returns {@code true}.
@@ -145,4 +161,5 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * {@code other}, {@code this} time range is returned.
      */
     TimeRange extend(TimeRange other);
+
 }

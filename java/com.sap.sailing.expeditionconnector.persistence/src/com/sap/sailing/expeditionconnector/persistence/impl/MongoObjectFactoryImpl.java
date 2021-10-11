@@ -11,7 +11,7 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 
@@ -43,7 +43,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Exception lastException = null;
         while (attempt < 5 && !success) {
             try {
-                expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, expeditionDeviceConfigurationDBObject, new UpdateOptions().upsert(true));
+                expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, expeditionDeviceConfigurationDBObject, new ReplaceOptions().upsert(true));
                 success = true;
                 attempt++;
             } catch (Exception e) {

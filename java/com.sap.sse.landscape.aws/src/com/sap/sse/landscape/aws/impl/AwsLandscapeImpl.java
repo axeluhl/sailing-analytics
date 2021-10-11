@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -705,22 +706,28 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier) {
-        Filter filter = getHostWithTagValueFilter(tagName, tagValue).build();
+        final Filter filter = getHostsWithTagValueFilter(Filter.builder(), tagName, tagValue).build();
         return getHostsWithFilters(region, hostSupplier, filter);
     }
 
-    private Filter.Builder getHostWithTagValueFilter(String tagName, String tagValue) {
-        return Filter.builder().name("tag:"+tagName).values(tagValue);
+    private Filter.Builder getHostsWithTagValueFilter(Filter.Builder builder, String tagName, String tagValue) {
+        return builder.name("tag:"+tagName).values(tagValue);
     }
 
     @Override
     public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier) {
-        return getHostsWithFilters(region, hostSupplier, getRunningHostFilter());
+        final Filter tagFilter = getHostsWithTagValueFilter(Filter.builder(), tagName, tagValue).build();
+        final Filter runningFilter = getRunningHostsFilter();
+        return getHostsWithFilters(region, hostSupplier, tagFilter, runningFilter);
     }
     
-    private Filter getRunningHostFilter() {
-        return Filter.builder().name("instance-state-name").values("running").build();
+    private Filter getRunningHostsFilter() {
+        return getRunningHostsFilter(Filter.builder()).build();
+    }
+
+    private Filter.Builder getRunningHostsFilter(Filter.Builder builder) {
+        return builder.name("instance-state-name").values("running");
     }
 
     private <HostT extends AwsInstance<ShardingKey>>
@@ -754,8 +761,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public <HostT extends AwsInstance<ShardingKey>>
+    HostT getHostByInstanceId(com.sap.sse.landscape.Region region, final String instanceId, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, instanceId,hostSupplier);
+    }
+    
+    @Override
+    public <HostT extends AwsInstance<ShardingKey>>
     Iterable<HostT> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier) {
-        return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
+        return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostsFilter());
     }
     
     @Override
@@ -1198,15 +1211,29 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName) {
-        final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
+        final Set<Pair<AwsInstance<ShardingKey>, Integer>> nodes = new HashSet<>();
         for (final AwsInstance<ShardingKey> host : getMongoDBHosts(region)) {
             for (final Pair<String, Integer> replicaSetNameAndPort : getMongoEndpointSpecificationsAsReplicaSetNameAndPort(host)) {
                 if (replicaSetNameAndPort.getA().equals(mongoReplicaSetName)) {
-                    result.addReplica(new MongoProcessInReplicaSetImpl(result, replicaSetNameAndPort.getB(), host));
+                    nodes.add(new Pair<>(host, replicaSetNameAndPort.getB()));
                 }
             }
         }
+        return getDatabaseConfigurationForReplicaSet(mongoReplicaSetName, nodes);
+    }
+    
+    @Override
+    public MongoReplicaSet getDatabaseConfigurationForReplicaSet(String mongoReplicaSetName, Iterable<Pair<AwsInstance<ShardingKey>, Integer>> hostsAndPortsOfNodes) {
+        final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
+        for (final Pair<AwsInstance<ShardingKey>, Integer> hostAndPort : hostsAndPortsOfNodes) {
+            result.addReplica(new MongoProcessInReplicaSetImpl(result, hostAndPort.getB(), hostAndPort.getA()));
+        }
         return result;
+    }
+    
+    @Override
+    public MongoProcessImpl getDatabaseConfigurationForSingleNode(AwsInstance<ShardingKey> host, int port) {
+        return new MongoProcessImpl(host, port);
     }
 
     private Iterable<AwsInstance<ShardingKey>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
@@ -1265,7 +1292,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
                 @Override
                 public String getNodeName() {
-                    return anyRabbitMQHost.getPrivateAddress().getCanonicalHostName();
+                    return anyRabbitMQHost.getPrivateAddress().getHostAddress();
                 }
             };
         } else {
@@ -1295,27 +1322,40 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<HostT> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
             HostSupplier<ShardingKey, HostT> hostSupplier) {
-        final List<HostT> result = new ArrayList<>();
-        for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName, hostSupplier)) {
-            final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(),
-                    host.getAvailabilityZone(), host.getPrivateAddress(), host.getLaunchTimePoint(), this);
-            result.add(applicationProcessHost);
-        }
-        return result;
+        return getRunningHostsWithTag(region, tagName, hostSupplier);
     }
-    
+
+    @Override
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
+    AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSetByTagValue(
+            com.sap.sse.landscape.Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier,
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return Util.first(getApplicationReplicaSets(region, ()->getRunningHostsWithTagValue(region, tagName, tagValue, hostSupplier),
+                optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
+    }
+
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(
             com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getApplicationReplicaSets(region, ()->getRunningHostsWithTag(region, tagName, hostSupplier),
+                optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+    }
+    
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
+    Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSets(
+            com.sap.sse.landscape.Region region, Supplier<Iterable<HostT>> hostsSupplier,
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups = getAutoScalingGroupsAsync(region);
         final CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations = getLaunchConfigurationsAsync(region);
-        final Iterable<HostT> hosts = getApplicationProcessHostsByTag(region, tagName, hostSupplier);
+        final Iterable<HostT> hosts = hostsSupplier.get();
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
         final ConcurrentLinkedQueue<Future<?>> tasksToWaitFor = new ConcurrentLinkedQueue<>();

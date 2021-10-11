@@ -11,11 +11,11 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 public class MongoClientURITest {
     @Test
     public void testDefaultConnectionOptions() {
-        MongoDBConfiguration config = new MongoDBConfiguration("mongodb://humba:12345/mydb");
+        MongoDBConfiguration config = new MongoDBConfiguration("mongodb://humba:12345/mydb?readPreference=primaryPreferred");
         assertEquals("humba", config.getHostname());
         assertEquals(12345, config.getPort());
         assertEquals("mydb", config.getDatabaseName());
-        assertSame(ReadPreference.primaryPreferred(), config.getMongoClientURI().getOptions().getReadPreference()); 
+        assertSame(ReadPreference.primaryPreferred(), config.getMongoClientURI().getReadPreference()); 
     }
 
     @Test
@@ -24,7 +24,7 @@ public class MongoClientURITest {
         assertEquals("humba", config.getHostname());
         assertEquals(12345, config.getPort());
         assertEquals("mydb", config.getDatabaseName());
-        assertSame(ReadPreference.primary(), config.getMongoClientURI().getOptions().getReadPreference()); 
-        assertEquals("rs0", config.getMongoClientURI().getOptions().getRequiredReplicaSetName());
+        assertSame(ReadPreference.primary(), config.getMongoClientURI().getReadPreference()); 
+        assertEquals("rs0", config.getMongoClientURI().getRequiredReplicaSetName());
     }
 }

@@ -138,7 +138,6 @@ import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -157,6 +156,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
+import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -278,7 +278,6 @@ import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForExist
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForNewMarkTrack;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
-import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroupFromEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
@@ -1639,8 +1638,18 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
+    public Map<String, RemoteSailingServerReference> getAllRemoteServerReferences() {
+        return remoteSailingServerSet.getAllRemoteServerReferences();
+    }
+
+    @Override
     public RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName) {
         return remoteSailingServerSet.getServerReferenceByName(remoteServerReferenceName);
+    }
+
+    @Override
+    public RemoteSailingServerReference getRemoteServerReferenceByUrl(URL remoteServerReferenceUrl) {
+        return remoteSailingServerSet.getServerReferenceByUrl(remoteServerReferenceUrl);
     }
 
     @Override
@@ -3351,6 +3360,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 .getCachedEventsForRemoteSailingServers().keySet());
         oos.writeObject(remoteServerReferences);
         logoutput.append("Serialized " + remoteServerReferences.size() + " remote sailing server references\n");
+        logger.info("Serializing server configuration (e.g., \"local server\" state)...");
+        oos.writeObject(sailingServerConfiguration);
         logger.info(logoutput.toString());
     }
 
@@ -3475,6 +3486,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             remoteSailingServerSet.add(remoteSailingServerReference);
             logoutput.append("Received remote sailing server reference " + remoteSailingServerReference);
         }
+        logger.info("Reading sailing server configuration (e.g., \"local server\" state)...");
+        this.sailingServerConfiguration = (SailingServerConfiguration) ois.readObject();
         // make sure to initialize listeners correctly
         for (Regatta regatta : regattasByName.values()) {
             RegattaImpl regattaImpl = (RegattaImpl) regatta;
@@ -3658,7 +3671,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     public void removeEvent(UUID id) {
         removeEventFromEventsById(id);
         mongoObjectFactory.removeEvent(id);
-        replicate(new RemoveEvent(id));
     }
 
     protected void removeEventFromEventsById(Serializable id) {
@@ -3790,7 +3802,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
-    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creationCount, boolean override) throws Exception {
+    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCountImpl creationCount, boolean override) throws Exception {
     	Exception firstException = null;
         for (MediaTrack trackToImport : mediaTracksToImport) {
         	try {
@@ -4975,10 +4987,12 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
-    public void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
-            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            final String targetServerUsername, final String targetServerPassword, final String targetServerBearerToken,
-            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException {
+    public Map<LeaderboardGroup, ? extends Iterable<Event>> importMasterData(final String urlAsString,
+            final UUID[] leaderboardGroupIds, final boolean override, final boolean compress, final boolean exportWind,
+            final boolean exportDeviceConfigurations, final String targetServerUsername,
+            final String targetServerPassword, final String targetServerBearerToken,
+            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId)
+            throws IllegalArgumentException {
         if (dataImportLock.getProgress(importOperationId) != null) {
             IllegalArgumentException e = new IllegalArgumentException(
                     "The UUID for the importOperationId already exists.");
@@ -5022,7 +5036,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
             }
             final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, this, user, tenant);
-            importer.importFromStream(inputStream, importOperationId, override);
+            return importer.importFromStream(inputStream, importOperationId, override);
         } catch (Throwable e) {
             // do not assume that RuntimeException is logged properly
             String message = e.getMessage();
@@ -5107,7 +5121,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     @Override
     public String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
             String targetServerPassword, String targetServerBearerToken) {
-        if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
+        if ((Util.hasLength(targetServerUsername) || Util.hasLength(targetServerPassword))
                 && Util.hasLength(targetServerBearerToken)) {
             IllegalArgumentException e = new IllegalArgumentException(
                     "Please use either username/password or bearer token, not both.");
@@ -5117,15 +5131,15 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         final User user = getSecurityService().getCurrentUser();
         // Default to current user's token
         final String effectiveTargetServerBearerToken;
-        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword)
-                && !Util.hasLength(targetServerBearerToken)) {
-            effectiveTargetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
+        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword) && !Util.hasLength(targetServerBearerToken)) {
+            effectiveTargetServerBearerToken = user == null ? null : getSecurityService().getOrCreateAccessToken(user.getName());
         } else {
             effectiveTargetServerBearerToken = targetServerBearerToken;
         }
         final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
-                ? RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername,
-                        targetServerPassword)
+                ? targetServerUsername != null ?
+                        RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername, targetServerPassword) :
+                        null // in case no effective bearer token has been provided but no user name either
                 : effectiveTargetServerBearerToken);
         return token;
     }

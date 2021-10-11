@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.adminconsole.places;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.Refresher;
@@ -35,5 +37,7 @@ public interface AdminConsoleView extends IsWidget {
         Refresher<RegattaDTO> getRegattasRefresher();
         Refresher<EventDTO> getEventsRefresher();
         Refresher<MediaTrackWithSecurityDTO> getMediaTracksRefresher();
+        Refresher<CompetitorDTO> getCompetitorsRefresher();
+        Refresher<BoatDTO> getBoatsRefresher();
     }
 }

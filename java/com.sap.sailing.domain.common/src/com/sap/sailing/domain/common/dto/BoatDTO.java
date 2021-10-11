@@ -123,7 +123,8 @@ public class BoatDTO extends NamedSecuredObjectDTO implements WithID, Serializab
     
     @Override
     public String toString() {
-        return getName() == null ? (getBoatClass().getName() + " / " + getSailId()) : getName();
+        return "BoatDTO [idAsString=" + idAsString + ", boatClass=" + boatClass + ", sailId=" + sailId + ", color="
+                + color + "]";
     }
     
     @Override
