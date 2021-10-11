@@ -463,6 +463,27 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
+    public Distance getTotalDistanceToNeighboursProjectedToStartLineAtStartOfRace() {
+        final Distance toPort = getDistanceToNextBoatToPortProjectedToStartLineAtStartOfRace();
+        final Distance toStarboard = getDistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace();
+        return toPort==null || toStarboard==null ? null : toPort.add(toStarboard);
+    }
+    
+    @Override
+    public Distance getTotalWindwardDistanceToNeighboursAtStartOfRace() {
+        final Distance toPort = getWindwardDistanceToNextBoatToPortAtStartOfRace();
+        final Distance toStarboard = getWindwardDistanceToNextBoatToStarboardAtStartOfRace();
+        return toPort==null || toStarboard==null ? null : toPort.abs().add(toStarboard.abs());
+    }
+    
+    @Override
+    public Distance getTotalDistanceToNeighboursPerpendicularToStarLineAtStartOfRace() {
+        final Distance toPort = getDistanceToNextBoatToPortPerpendicularToStartLineAtStartOfRace();
+        final Distance toStarboard = getDistanceToNextBoatToStarboardPerpendicularToStartLineAtStartOfRace();
+        return toPort==null || toStarboard==null ? null : toPort.abs().add(toStarboard.abs());
+    }
+    
+    @Override
     public Distance getDistanceToNextBoatToPortProjectedToStartLineAtStartOfRace() {
         final Distance result;
         final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
@@ -549,7 +570,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Distance getDistanceToNextBoatToPortAtStartOfRacePerpendicularToStartLine() {
+    public Distance getDistanceToNextBoatToPortPerpendicularToStartLineAtStartOfRace() {
         final Distance result;
         final Competitor competitorImmediatelyToPort = getTrackedRace().getNextCompetitorToPortOnStartLine(getCompetitor(), getStartOfRace());
         if (competitorImmediatelyToPort == null) {
@@ -561,7 +582,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
 
     @Override
-    public Distance getDistanceToNextBoatToStarboardAtStartOfRacePerpendicularToStartLine() {
+    public Distance getDistanceToNextBoatToStarboardPerpendicularToStartLineAtStartOfRace() {
         final Distance result;
         final Competitor competitorImmediatelyToStarboard = getTrackedRace().getNextCompetitorToStarboardOnStartLine(getCompetitor(), getStartOfRace());
         if (competitorImmediatelyToStarboard == null) {
