@@ -121,6 +121,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     
     @Override
     public SubscriptionView createSubscriptionsView() {
+        getSubscriptionServiceFactory().initializeProviders();
         return new SubscriptionViewImpl(new SubscriptionView.Presenter() {
             @Override
             public void startSubscription(String planId) {
