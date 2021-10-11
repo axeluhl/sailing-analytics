@@ -93,7 +93,6 @@
       <viewAttribute id="startDelayRank" aggregationType="sum"/>
       <viewAttribute id="StartlineDistanceRank" aggregationType="sum"/>
       <viewAttribute id="StartlineSpeedRank" aggregationType="sum"/>
-    
       <viewAttribute id="distanceSailedRank" aggregationType="sum"/>
     </viewAttributes>
     <calculatedViewAttributes/>
@@ -105,7 +104,6 @@
       <mapping xsi:type="Calculation:AttributeMapping" target="startDelayRank" source="startDelayRank"/>
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineDistanceRank" null="true" value=""/>
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineSpeedRank" null="true" value=""/>
-    
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="distanceSailedRank" null="true" value=""/>
     </input>
   
@@ -121,8 +119,6 @@
   
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineSpeedRank" null="true" value=""/>
   
-    
-  
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="distanceSailedRank" null="true" value=""/>
   
     </input>
@@ -134,54 +130,20 @@
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="startDelayRank" null="true" value=""/>
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineDistanceRank" null="true" value=""/>
       <mapping xsi:type="Calculation:AttributeMapping" target="StartlineSpeedRank" source="StartlineSpeedRank"/>
-    
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="distanceSailedRank" null="true" value=""/>
     </input>
   
-    <input node="DistSailedRanking">
+    <input node="DistSailedRanking" emptyUnionBehavior="NO_ROW">
       <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
       <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="raceName"/>
       <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="startDelayRank" null="true" value=""/>
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineDistanceRank" null="true" value=""/>
       <mapping xsi:type="Calculation:ConstantAttributeMapping" target="StartlineSpeedRank" null="true" value=""/>
+  
       <mapping xsi:type="Calculation:AttributeMapping" target="distanceSailedRank" source="distanceSailedRank"/>
+  
     </input>
-  </calculationView>
-  <calculationView xsi:type="Calculation:JoinView" id="Join_1" cardinality="C1_1" joinType="leftOuter">
-    <viewAttributes>
-      <viewAttribute id="regatta"/>
-      <viewAttribute id="raceName"/>
-      <viewAttribute id="competitorId"/>
-      <viewAttribute id="startDelayRank" aggregationType="sum"/>
-      <viewAttribute id="StartlineDistanceRank" aggregationType="sum"/>
-      <viewAttribute id="StartlineSpeedRank" aggregationType="sum"/>
-      <viewAttribute id="name"/>
-      <viewAttribute id="shortName"/>
-      <viewAttribute id="nationality"/>
-      <viewAttribute id="sailNumber"/>
-    
-      <viewAttribute id="distanceSailedRank" aggregationType="sum"/>
-    </viewAttributes>
-    <calculatedViewAttributes/>
-    <input node="Union_1">
-      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="raceName"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="startDelayRank" source="startDelayRank"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="StartlineDistanceRank" source="StartlineDistanceRank"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="StartlineSpeedRank" source="StartlineSpeedRank"/>
-    
-      <mapping xsi:type="Calculation:AttributeMapping" target="distanceSailedRank" source="distanceSailedRank"/>
-    </input>
-    <input node="Competitor">
-      <mapping xsi:type="Calculation:AttributeMapping" target="name" source="name"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="shortName" source="shortName"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="nationality" source="nationality"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="sailNumber" source="sailNumber"/>
-      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="id"/>
-    </input>
-    <joinAttribute name="competitorId"/>
   </calculationView>
   <calculationView xsi:type="Calculation:RankView" id="DistSailedRanking">
     <viewAttributes>
@@ -201,6 +163,39 @@
       </rankThreshold>
       <rankViewAttributeName>distanceSailedRank</rankViewAttributeName>
     </rankingFilter>
+  </calculationView>
+  <calculationView xsi:type="Calculation:JoinView" id="Join_1" cardinality="C1_1" joinType="leftOuter">
+    <viewAttributes>
+      <viewAttribute id="regatta"/>
+      <viewAttribute id="raceName"/>
+      <viewAttribute id="competitorId"/>
+      <viewAttribute id="startDelayRank" aggregationType="sum"/>
+      <viewAttribute id="StartlineDistanceRank" aggregationType="sum"/>
+      <viewAttribute id="StartlineSpeedRank" aggregationType="sum"/>
+      <viewAttribute id="name"/>
+      <viewAttribute id="shortName"/>
+      <viewAttribute id="nationality"/>
+      <viewAttribute id="sailNumber"/>
+      <viewAttribute id="distanceSailedRank" aggregationType="sum"/>
+    </viewAttributes>
+    <calculatedViewAttributes/>
+    <input node="Union_1">
+      <mapping xsi:type="Calculation:AttributeMapping" target="regatta" source="regatta"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="raceName" source="raceName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="competitorId"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="startDelayRank" source="startDelayRank"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="StartlineDistanceRank" source="StartlineDistanceRank"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="StartlineSpeedRank" source="StartlineSpeedRank"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="distanceSailedRank" source="distanceSailedRank"/>
+    </input>
+    <input node="Competitor">
+      <mapping xsi:type="Calculation:AttributeMapping" target="name" source="name"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="shortName" source="shortName"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="nationality" source="nationality"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="sailNumber" source="sailNumber"/>
+      <mapping xsi:type="Calculation:AttributeMapping" target="competitorId" source="id"/>
+    </input>
+    <joinAttribute name="competitorId"/>
   </calculationView>
   <calculationView xsi:type="Calculation:AggregationView" id="RaceDistanceSailed">
     <viewAttributes>
@@ -253,21 +248,22 @@
   </attributes>
   <calculatedAttributes/>
   <baseMeasures>
-    <measure id="distanceSailedRank" order="8" aggregationType="sum" measureType="simple">
-      <descriptions defaultDescription="distanceSailedRank"/>
-      <measureMapping columnObjectName="Join_1" columnName="distanceSailedRank"/>
-    </measure>
-    <measure id="startDelayRank" order="9" aggregationType="sum" measureType="simple">
+    <measure id="startDelayRank" order="8" aggregationType="sum" measureType="simple">
       <descriptions defaultDescription="startDelayRank"/>
       <measureMapping columnObjectName="Join_1" columnName="startDelayRank"/>
     </measure>
-    <measure id="StartlineDistanceRank" order="10" aggregationType="sum" measureType="simple">
+    <measure id="StartlineDistanceRank" order="9" aggregationType="sum" measureType="simple">
       <descriptions defaultDescription="StartlineDistanceRank"/>
       <measureMapping columnObjectName="Join_1" columnName="StartlineDistanceRank"/>
     </measure>
-    <measure id="StartlineSpeedRank" order="11" aggregationType="sum" measureType="simple">
+    <measure id="StartlineSpeedRank" order="10" aggregationType="sum" measureType="simple">
       <descriptions defaultDescription="StartlineSpeedRank"/>
       <measureMapping columnObjectName="Join_1" columnName="StartlineSpeedRank"/>
+    </measure>
+  
+    <measure id="distanceSailedRank" order="11" aggregationType="sum" measureType="simple">
+      <descriptions defaultDescription="distanceSailedRank"/>
+      <measureMapping columnObjectName="Join_1" columnName="distanceSailedRank"/>
     </measure>
   </baseMeasures>
   <calculatedMeasures/>
@@ -277,32 +273,37 @@
 <layout>
   <shapes>
     <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
-      <upperLeftCorner x="504.28437919115527" y="112"/>
+      <upperLeftCorner x="504" y="112"/>
     
       <rectangleSize width="160"/>
     </shape>
     
   
     <shape expanded="true" modelObjectName="StartDelayRanking" modelObjectNameSpace="CalculationView">
-      <upperLeftCorner x="785.5" y="566.9999976158142"/>
+      <upperLeftCorner x="785" y="566"/>
       <rectangleSize height="30" width="160"/>
     </shape>
     <shape expanded="true" modelObjectName="StartlineDistanceRanking" modelObjectNameSpace="CalculationView">
-      <upperLeftCorner x="520.5" y="566.9999976158142"/>
+      <upperLeftCorner x="520" y="566"/>
       <rectangleSize height="30" width="215"/>
     </shape>
     <shape expanded="true" modelObjectName="StartlineSpeedRanking" modelObjectNameSpace="CalculationView">
-      <upperLeftCorner x="310.50000000000006" y="566.9999976158142"/>
+      <upperLeftCorner x="310" y="566"/>
       <rectangleSize height="30" width="160"/>
     </shape>
   
     <shape expanded="true" modelObjectName="Union_1" modelObjectNameSpace="CalculationView">
-      <upperLeftCorner x="486.45507679489947" y="376.9999988079071"/>
+      <upperLeftCorner x="486" y="376"/>
+      <rectangleSize height="30" width="160"/>
+    </shape>
+  
+    <shape expanded="true" modelObjectName="DistSailedRanking" modelObjectNameSpace="CalculationView">
+      <upperLeftCorner x="102" y="556"/>
       <rectangleSize height="30" width="160"/>
     </shape>
   
     <shape expanded="true" modelObjectName="Join_1" modelObjectNameSpace="CalculationView">
-      <upperLeftCorner x="486.45507679489947" y="237"/>
+      <upperLeftCorner x="486" y="237"/>
       <rectangleSize height="30" width="160"/>
     </shape>
     <shape modelObjectName="Union_1" modelObjectNameSpace="Join_1" modelObjectType="JoinNodeInput">
@@ -313,13 +314,8 @@
       <upperLeftCorner x="320" y="30"/>
       <rectangleSize width="194"/>
     </shape>
-  
-    <shape expanded="true" modelObjectName="DistSailedRanking" modelObjectNameSpace="CalculationView">
-      <upperLeftCorner x="100.5" y="566.9999976158142"/>
-      <rectangleSize height="30" width="160"/>
-    </shape>
     <shape expanded="true" modelObjectName="RaceDistanceSailed" modelObjectNameSpace="CalculationView">
-      <upperLeftCorner x="92" y="671.9999976158142"/>
+      <upperLeftCorner x="92" y="671"/>
       <rectangleSize height="30" width="177"/>
     </shape>
   </shapes>

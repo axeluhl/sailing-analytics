@@ -1096,7 +1096,7 @@
       <rectangleSize height="30" width="184"/>
     </shape>
     <shape expanded="true" modelObjectName="RaceEventView" modelObjectNameSpace="CalculationView">
-      <upperLeftCorner x="334" y="406"/>
+      <upperLeftCorner x="305" y="580"/>
       <rectangleSize height="30" width="160"/>
     </shape>
     <shape expanded="true" modelObjectName="RaceStatsProj2" modelObjectNameSpace="CalculationView">
@@ -1145,8 +1145,8 @@
       <rectangleSize width="205"/>
     </shape>
     <shape modelObjectName="RaceStatAverages" modelObjectNameSpace="Join_1" modelObjectType="JoinNodeInput" multiJoinViewNodeName="Join_1">
-      <upperLeftCorner x="1039" y="54"/>
-      <rectangleSize width="315"/>
+      <upperLeftCorner x="10" y="15"/>
+      <rectangleSize width="363"/>
     </shape></shapes>
 </layout>
 </Calculation:scenario>

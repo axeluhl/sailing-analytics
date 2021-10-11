@@ -1,3 +1,5 @@
+#This is required for the SAC sailing analytics showcase
+#(presumably in the root folder, see bug5451)
 _schema-version: "2.1"
 ID: Sailing-Analytics
 version: 0.0.1

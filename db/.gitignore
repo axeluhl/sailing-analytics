@@ -1,3 +1,4 @@
 **/node_modules/**
 .env*
 race-stats-with-param.hdbcalculationview
+.vscode/settings.json
