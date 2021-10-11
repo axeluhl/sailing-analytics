@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.common.Distance;
@@ -32,6 +33,9 @@ public interface HasRaceOfCompetitorContext {
     
     @Dimension(messageKey="RelativeScoreInPercent", ordinal=14)
     ClusterDTO getPercentageClusterForRelativeScore();
+    
+    @Dimension(messageKey="IRM")
+    MaxPointsReason getMaxPointsReason();
     
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     Distance getDistanceToStartLineAtStart();

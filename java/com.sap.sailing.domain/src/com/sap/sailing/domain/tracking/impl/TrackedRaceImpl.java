@@ -78,6 +78,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -3421,11 +3422,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint) {
+    public SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier) {
         final SortedMap<Competitor, Distance> result = distancesFromStarboardSideOfStartLineProjectedOntoLineCache.computeIfAbsent(timePoint, tp->{
             final Map<Competitor, Distance> distances = new HashMap<>();
             for (final Competitor competitor : getRace().getCompetitors()) {
-                distances.put(competitor, getDistanceFromStarboardSideOfStartLineProjectedOntoLine(competitor, tp));
+                final MaxPointsReason penaltyCode = maxPointsReasonSupplier.apply(competitor, timePoint);
+                if (penaltyCode != MaxPointsReason.DNC && penaltyCode != MaxPointsReason.DNS) {
+                    distances.put(competitor, getDistanceFromStarboardSideOfStartLineProjectedOntoLine(competitor, tp));
+                }
             }
             final TreeMap<Competitor, Distance> map = new TreeMap<>((c1, c2)->distances.get(c1).compareTo(distances.get(c2)));
             map.putAll(distances);
@@ -3442,9 +3447,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+    public Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier) {
         final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
-                getDistancesFromStarboardSideOfStartLineProjectedOntoLine(timePoint);
+                getDistancesFromStarboardSideOfStartLineProjectedOntoLine(timePoint, maxPointsReasonSupplier);
         final Competitor competitorImmediatelyToPort;
         final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(relativeTo);
         if (competitorDistance == null) {
@@ -3463,9 +3469,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint) {
+    public Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier) {
         final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
-                getDistancesFromStarboardSideOfStartLineProjectedOntoLine(timePoint);
+                getDistancesFromStarboardSideOfStartLineProjectedOntoLine(timePoint, maxPointsReasonSupplier);
         final Competitor competitorImmediatelyToStarboard;
         final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(relativeTo);
         if (competitorDistance == null) {

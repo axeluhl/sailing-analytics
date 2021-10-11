@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -993,23 +995,35 @@ public interface TrackedRace
      * 
      * Results are cached in a fixed-size LRU cache which is invalidated by competitor or mark positions within the
      * averaging time range of {@code timePoint}. With this, repeated requests for equal {@code timePoint}s have a good
-     * chance of being fulfilled from a previous computation result.
+     * chance of being fulfilled from a previous computation result.<p>
+     * 
+     * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
+     * which both suggest the boat may not have made a serious attempt to start.
      */
-    SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint);
+    SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
     
     /**
-     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint)}, finds the
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint, Function<Triple<Competitor, RaceColumn, TimePoint>, MaxPointsReason>)}, finds the
      * next competitor to port regarding their start line projection at {@code timePoint}. Returns {@code null} if
-     * the start line cannot be determined or if there is no competitor further to port.
+     * the start line cannot be determined or if there is no competitor further to port.<p>
+     * 
+     * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
+     * which both suggest the boat may not have made a serious attempt to start.
+     * @param maxPointsReasonSupplier TODO
      */
-    Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint);
+    Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint, BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
     
     /**
-     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint)}, finds the
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint, Function<Triple<Competitor, RaceColumn, TimePoint>, MaxPointsReason>)}, finds the
      * next competitor to starboard regarding their start line projection at {@code timePoint}. Returns {@code null} if
-     * the start line cannot be determined or if there is no competitor further to starboard.
+     * the start line cannot be determined or if there is no competitor further to starboard.<p>
+     * 
+     * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
+     * which both suggest the boat may not have made a serious attempt to start.
+     * @param maxPointsReasonSupplier TODO
      */
-    Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint);
+    Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint, BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
     
     /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 
 import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
@@ -17,11 +18,13 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -171,6 +174,12 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
     }
     
+    @Override
+    public MaxPointsReason getMaxPointsReason() {
+        return getTrackedRaceContext().getLeaderboardContext().getLeaderboard().getMaxPointsReason(competitor,
+                getTrackedRaceContext().getRaceColumn(), MillisecondsTimePoint.now());
+    }
+
     @Override
     public Speed getSpeedWhenStarting() {
         return getTrackedRace().getSpeedWhenCrossingStartLine(getCompetitor());
@@ -444,8 +453,8 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     public Distance getDistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace() {
         final Distance result;
         final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
-                getTrackedRace().getDistancesFromStarboardSideOfStartLineProjectedOntoLine(getStartOfRace());
-        final Competitor competitorImmediatelyToStarboard = getTrackedRace().getNextCompetitorToStarboardOnStartLine(getCompetitor(), getStartOfRace());
+                getTrackedRace().getDistancesFromStarboardSideOfStartLineProjectedOntoLine(getStartOfRace(), getMaxPointsReasonSupplier());
+        final Competitor competitorImmediatelyToStarboard = getTrackedRace().getNextCompetitorToStarboardOnStartLine(getCompetitor(), getStartOfRace(), getMaxPointsReasonSupplier());
         if (competitorImmediatelyToStarboard == null) {
             // use distance to starboard side of line for boat farthest to starboard
             result = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(getCompetitor());
@@ -487,9 +496,9 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     public Distance getDistanceToNextBoatToPortProjectedToStartLineAtStartOfRace() {
         final Distance result;
         final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
-                getTrackedRace().getDistancesFromStarboardSideOfStartLineProjectedOntoLine(getStartOfRace());
+                getTrackedRace().getDistancesFromStarboardSideOfStartLineProjectedOntoLine(getStartOfRace(), getMaxPointsReasonSupplier());
         final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(getCompetitor());
-        final Competitor competitorImmediatelyToPort = getTrackedRace().getNextCompetitorToPortOnStartLine(getCompetitor(), getStartOfRace());
+        final Competitor competitorImmediatelyToPort = getTrackedRace().getNextCompetitorToPortOnStartLine(getCompetitor(), getStartOfRace(), getMaxPointsReasonSupplier());
         if (competitorImmediatelyToPort == null) {
             final LineDetails startLine = getTrackedRace().getStartLine(getStartOfRace());
             if (competitorDistance == null || startLine == null) {
@@ -531,7 +540,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     @Override
     public Distance getWindwardDistanceToNextBoatToPortAtStartOfRace() {
         final Distance result;
-        final Competitor competitorImmediatelyToPort = getTrackedRace().getNextCompetitorToPortOnStartLine(getCompetitor(), getStartOfRace());
+        final Competitor competitorImmediatelyToPort = getTrackedRace().getNextCompetitorToPortOnStartLine(getCompetitor(), getStartOfRace(), getMaxPointsReasonSupplier());
         if (competitorImmediatelyToPort == null) {
             result = null;
         } else {
@@ -543,7 +552,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     @Override
     public Distance getWindwardDistanceToNextBoatToStarboardAtStartOfRace() {
         final Distance result;
-        final Competitor competitorImmediatelyToStarboard = getTrackedRace().getNextCompetitorToStarboardOnStartLine(getCompetitor(), getStartOfRace());
+        final Competitor competitorImmediatelyToStarboard = getTrackedRace().getNextCompetitorToStarboardOnStartLine(getCompetitor(), getStartOfRace(), getMaxPointsReasonSupplier());
         if (competitorImmediatelyToStarboard == null) {
             result = null;
         } else {
@@ -569,10 +578,15 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return result;
     }
     
+    private BiFunction<Competitor, TimePoint, MaxPointsReason> getMaxPointsReasonSupplier() {
+        final Leaderboard leaderboard = getTrackedRaceContext().getLeaderboardContext().getLeaderboard();
+        return (competitor, timePoint)->leaderboard.getMaxPointsReason(competitor, getTrackedRaceContext().getRaceColumn(), timePoint);
+    }
+    
     @Override
     public Distance getDistanceToNextBoatToPortPerpendicularToStartLineAtStartOfRace() {
         final Distance result;
-        final Competitor competitorImmediatelyToPort = getTrackedRace().getNextCompetitorToPortOnStartLine(getCompetitor(), getStartOfRace());
+        final Competitor competitorImmediatelyToPort = getTrackedRace().getNextCompetitorToPortOnStartLine(getCompetitor(), getStartOfRace(), getMaxPointsReasonSupplier());
         if (competitorImmediatelyToPort == null) {
             result = null;
         } else {
@@ -584,7 +598,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     @Override
     public Distance getDistanceToNextBoatToStarboardPerpendicularToStartLineAtStartOfRace() {
         final Distance result;
-        final Competitor competitorImmediatelyToStarboard = getTrackedRace().getNextCompetitorToStarboardOnStartLine(getCompetitor(), getStartOfRace());
+        final Competitor competitorImmediatelyToStarboard = getTrackedRace().getNextCompetitorToStarboardOnStartLine(getCompetitor(), getStartOfRace(), getMaxPointsReasonSupplier());
         if (competitorImmediatelyToStarboard == null) {
             result = null;
         } else {
