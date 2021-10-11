@@ -217,7 +217,8 @@ public class HanaCloudSacExportResource extends SharedAbstractSailingServerResou
                         for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                             for (final Competitor competitor : raceColumn.getAllCompetitors()) {
                                 alreadyInsertedContent.ensureCompetitorIsInserted(competitor);
-                                insertRaceResults.insertBatch(new InsertRaceResultStatement.RaceResult(regatta, leaderboard, competitor, raceColumn, now));
+                                final Fleet fleet = raceColumn.getFleetOfCompetitor(competitor);
+                                insertRaceResults.insertBatch(new InsertRaceResultStatement.RaceResult(regatta, leaderboard, competitor, raceColumn, fleet, now));
                             }
                             insertRaceResults.executeBatch();
                             for (final Fleet fleet : raceColumn.getFleets()) {
