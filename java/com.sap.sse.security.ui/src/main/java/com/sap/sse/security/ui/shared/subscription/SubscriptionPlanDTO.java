@@ -31,7 +31,7 @@ public class SubscriptionPlanDTO implements IsSerializable {
             Set<StringMessagesKey> features, Set<SubscriptionPrice> prices, String error) {
         this.id = id;
         this.nameMessageKey = nameMessageKey;
-        this.setDescMessageKey(descMessageKey);
+        this.descMessageKey = descMessageKey;
         this.featureIds = new HashSet<StringMessagesKey>(features);
         this.prices = new HashSet<SubscriptionPrice>(prices);
         this.error = error;
@@ -76,6 +76,10 @@ public class SubscriptionPlanDTO implements IsSerializable {
 
     public void setPrices(HashSet<SubscriptionPrice> prices) {
         this.prices = prices;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 
 }

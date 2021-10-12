@@ -2,16 +2,23 @@ package com.sap.sse.security.ui.server.subscription.chargebee;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import com.chargebee.ListResult;
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
+import com.chargebee.models.ItemPrice;
+import com.chargebee.models.ItemPrice.Status;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
@@ -38,8 +45,39 @@ public class ChargebeeSubscriptionServiceImpl extends
 
     @Override
     public ArrayList<SubscriptionPlanDTO> getAllSubscriptionPlans() {
+        ArrayList<SubscriptionPlanDTO> result = new ArrayList<>();
         final Collection<SubscriptionPlan> plans = getSecurityService().getAllSubscriptionPlans().values();
-        return (convertToDtos(plans));
+        Set<ItemPrice> itemPrices = retrieveItemPrices();
+        plans.forEach(plan -> {
+            final SubscriptionPlanDTO dto = convertToDto(plan);
+            final Set<SubscriptionPrice> matchingPrices = itemPrices.stream()
+                .filter(price -> price.itemId().equals(plan.getId()))
+                .map(price -> convertToSubcriptionPrice(price))
+                .collect(Collectors.toSet());
+            if(!matchingPrices.isEmpty()) {
+                dto.getPrices().addAll(matchingPrices);
+                result.add(dto);
+            }
+        });
+        return result;
+    }
+    
+    private SubscriptionPrice convertToSubcriptionPrice(ItemPrice price) {
+        return new SubscriptionPrice(price.priceInDecimal(),
+                SubscriptionPrice.PaymentInterval.valueOf(price.periodUnit().name()));
+    }
+
+    private Set<ItemPrice> retrieveItemPrices() {
+        final HashSet<ItemPrice> result = new HashSet<>();
+        try {
+            final ListResult allActiveItemPrices = ItemPrice.list().status().is(Status.ACTIVE).request();
+            for (ListResult.Entry entry : allActiveItemPrices) {
+                result.add(entry.itemPrice());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
     
     @Override
