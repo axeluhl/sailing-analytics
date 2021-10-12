@@ -22,9 +22,9 @@ import com.sap.sse.security.shared.subscription.SubscriptionPrice;
  */
 public class SailingSubscriptionPlan extends SubscriptionPlan {
     private static final long serialVersionUID = 2563619370274543312L;
-    private static final String BASIC_PLAN_ID = "basic";
-    private static final String ADVANCED_PLAN_ID = "cbdemo_advanced-USD-monthly";
-    private static final String AAAS_PLAN_ID = "aaas";
+    private static final String BASIC_PLAN_ID = "cbdemo_basic";
+    private static final String ADVANCED_PLAN_ID = "cbdemo_advanced";
+    private static final String AAAS_PLAN_ID = "Annual-all-access-subscription";
     private static final String BASIC_PLAN_NAME_KEY = "basic_plan_name";
     private static final String ADVANCED_PLAN_NAME_KEY = "advanced_plan_name";
     private static final String AAAS_PLAN_NAME_KEY = "aaas_plan_name";
