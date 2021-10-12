@@ -1,8 +1,8 @@
 package com.sap.sse.security.shared.subscription;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Set;
 
 import com.sap.sse.security.shared.StringMessagesKey;
 
@@ -20,19 +20,19 @@ public abstract class SubscriptionPlan implements Serializable{
     private final String id;
     private final StringMessagesKey messageKey;
     private final StringMessagesKey descMessagesKey;
-    private final BigDecimal price;
+    private final Set<SubscriptionPrice> prices;
     /**
      * Roles assigned for this plan, if user subscribe to the plan then the user will be assigned these roles
      */
     private final SubscriptionPlanRole[] roles;
     
     protected SubscriptionPlan(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
-            BigDecimal price, SubscriptionPlanRole[] roles) {
+            Set<SubscriptionPrice> prices, SubscriptionPlanRole[] roles) {
         this.messageKey = nameMessageKey;
         this.descMessagesKey = descMessageKey;
         this.id = id;
         this.roles = roles;
-        this.price = price;
+        this.prices = prices;
     }
 
     public String getId() {
@@ -43,8 +43,8 @@ public abstract class SubscriptionPlan implements Serializable{
         return messageKey;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public Set<SubscriptionPrice> getPrices() {
+        return prices;
     }
 
     public SubscriptionPlanRole[] getRoles() {

@@ -208,8 +208,8 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         Stream.of(plan.getRoles()).forEach((role) -> {
             featureKeys.add(role.getMessageKey());
         });
-        return new SubscriptionPlanDTO(plan.getId(), plan.getMessageKey(), plan.getDescMessagesKey(), plan.getPrice(),
-                featureKeys, null);
+        return new SubscriptionPlanDTO(plan.getId(), plan.getMessageKey(), plan.getDescMessagesKey(),
+                featureKeys, plan.getPrices(), null);
     }
     
     protected ArrayList<SubscriptionPlanDTO> convertToDtos(Collection<SubscriptionPlan> plans) {

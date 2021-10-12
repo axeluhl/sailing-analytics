@@ -1,9 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.partials.subscription;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -59,9 +60,9 @@ public class SubscriptionCard extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         addStyleName(SUBSCRIPTION_STYLE);
         final String priceText;
-        if (subscriptionPlanDTO.getPrice() != null) {
-            NumberFormat nf = NumberFormat.getCurrencyFormat("USD");
-            priceText = i18n.price() + ": " + nf.format(subscriptionPlanDTO.getPrice());
+        if (CollectionUtils.isNotEmpty(subscriptionPlanDTO.getPrices())) {
+            priceText = "TBD";
+            //TODO: Implement new Price handling
         } else {
             priceText = i18n.price() + ": " + i18n.individual();
         }

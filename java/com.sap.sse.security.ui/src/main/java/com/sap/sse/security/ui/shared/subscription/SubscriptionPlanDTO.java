@@ -1,11 +1,11 @@
 package com.sap.sse.security.ui.shared.subscription;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.StringMessagesKey;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 
 /**
@@ -17,7 +17,7 @@ public class SubscriptionPlanDTO implements IsSerializable {
     private StringMessagesKey nameMessageKey;
     private StringMessagesKey descMessageKey;
     private HashSet<StringMessagesKey> featureIds;
-    private BigDecimal price;
+    private HashSet<SubscriptionPrice> prices = new HashSet<SubscriptionPrice>();
     private String error;
 
     /**
@@ -28,12 +28,12 @@ public class SubscriptionPlanDTO implements IsSerializable {
     }
 
     public SubscriptionPlanDTO(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
-            BigDecimal price, Set<StringMessagesKey> features, String error) {
+            Set<StringMessagesKey> features, Set<SubscriptionPrice> prices, String error) {
         this.id = id;
         this.nameMessageKey = nameMessageKey;
         this.setDescMessageKey(descMessageKey);
         this.featureIds = new HashSet<StringMessagesKey>(features);
-        this.price = price;
+        this.prices = new HashSet<SubscriptionPrice>(prices);
         this.error = error;
     }
 
@@ -61,10 +61,6 @@ public class SubscriptionPlanDTO implements IsSerializable {
         return featureIds;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
-
     public String getError() {
         return error;
     }
@@ -72,6 +68,14 @@ public class SubscriptionPlanDTO implements IsSerializable {
     // TODO: Implement action information
     public boolean isCurrentUserSubscribed() {
         return false;
+    }
+
+    public HashSet<SubscriptionPrice> getPrices() {
+        return prices;
+    }
+
+    public void setPrices(HashSet<SubscriptionPrice> prices) {
+        this.prices = prices;
     }
 
 }

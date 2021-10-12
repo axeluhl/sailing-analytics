@@ -1,9 +1,9 @@
 package com.sap.sse.security.shared.subscription;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import com.sap.sse.security.shared.StringMessagesKey;
@@ -22,8 +22,8 @@ public class SSESubscriptionPlan extends SubscriptionPlan {
     private static final Map<String, SSESubscriptionPlan> plansById = new HashMap<String, SSESubscriptionPlan>();
 
     private SSESubscriptionPlan(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
-            BigDecimal price, SubscriptionPlanRole... roles) {
-        super(id, nameMessageKey, descMessageKey, price, roles);
+            HashSet<SubscriptionPrice> prices, SubscriptionPlanRole... roles) {
+        super(id, nameMessageKey, descMessageKey, prices, roles);
         plansById.put(id, this);
     }
     

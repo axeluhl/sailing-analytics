@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.subscription;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -46,8 +46,8 @@ public class SubscriptionActivity extends AbstractActivity {
                             final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO(null /* id */,
                                     new StringMessagesKey("individual_subscription_plan_name"),
                                     new StringMessagesKey("individual_subscription_plan_description"), 
-                                    null /* price */,
-                                    new HashSet<StringMessagesKey>() /* features */,
+                                    Collections.emptySet() /* features */,
+                                    Collections.emptySet() /* prices */,
                                     null /* error */);
                             view.addSubscriptionPlan(individualPlan, Type.INDIVIDUAL);
                         }
