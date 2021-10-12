@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.client.subscription;
 
-import java.io.Serializable;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -32,8 +30,6 @@ public interface SubscriptionService<C, P> extends RemoteService {
     
     public Iterable<SubscriptionPlanDTO> getAllSubscriptionPlans();
     
-    public Map<Serializable, SubscriptionPlanDTO> getAllSubscriptionPlansMappedById();
-
     public Set<SubscriptionPlanDTO> getUnlockingSubscriptionplans(WildcardPermission permission) throws UserManagementException;
 
 }

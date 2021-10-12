@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.client.subscription;
 
-import java.io.Serializable;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -17,8 +15,6 @@ public interface SubscriptionServiceAsync<C, P> {
     public void getConfiguration(AsyncCallback<C> callback);
     
     public void getAllSubscriptionPlans(AsyncCallback<Iterable<SubscriptionPlanDTO>> callback);
-    
-    public void getAllSubscriptionPlansMappedById(AsyncCallback<Map<Serializable, SubscriptionPlanDTO>> callback);
     
     public void getUnlockingSubscriptionplans(WildcardPermission permission, AsyncCallback<Set<SubscriptionPlanDTO>> callback);
 }

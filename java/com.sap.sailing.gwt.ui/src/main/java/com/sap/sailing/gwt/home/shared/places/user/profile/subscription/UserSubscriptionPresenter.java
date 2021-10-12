@@ -113,7 +113,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionServiceFactory()
                     .getDefaultAsyncService();
             
-            defaultAsyncService.getAllSubscriptionPlansMappedById(new AsyncCallback<Map<Serializable, SubscriptionPlanDTO>>() {
+            defaultAsyncService.getAllSubscriptionPlans(new AsyncCallback<Iterable<SubscriptionPlanDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     // This will simply not refresh the SubscriptionPlan list in the view.
@@ -122,9 +122,9 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                 }
 
                 @Override
-                public void onSuccess(Map<Serializable, SubscriptionPlanDTO> result) {
+                public void onSuccess(Iterable<SubscriptionPlanDTO> result) {
                     updateSubscriptionPlanMap(result);
-                    view.updateView(subscription, result.values());
+                    view.updateView(subscription, result);
                 }
             });
         } catch (InvalidSubscriptionProviderException e) {
@@ -132,9 +132,9 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         }
     }
     
-    private void updateSubscriptionPlanMap(Map<Serializable, SubscriptionPlanDTO> updatedPlans) {
+    private void updateSubscriptionPlanMap(Iterable<SubscriptionPlanDTO> updatedPlans) {
         subscriptionPlans.clear();
-        subscriptionPlans.putAll(updatedPlans);
+        updatedPlans.forEach(plan -> subscriptionPlans.put(plan.getId(), plan));
     }
     
     private void showError(String message) {
