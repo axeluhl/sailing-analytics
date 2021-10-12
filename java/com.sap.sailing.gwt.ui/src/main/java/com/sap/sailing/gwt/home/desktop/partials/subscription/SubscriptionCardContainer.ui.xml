@@ -3,7 +3,7 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="main" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  <ui:with field="local" type="com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionResources"></ui:with>
+  <ui:with field="local" type="com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardResources"></ui:with>
   <ui:style>
   </ui:style>
   <g:HTMLPanel styleName="{main.mediaCss.stackenblochen}">

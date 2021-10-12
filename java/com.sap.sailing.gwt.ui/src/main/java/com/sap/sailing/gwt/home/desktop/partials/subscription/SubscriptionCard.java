@@ -26,11 +26,11 @@ public class SubscriptionCard extends Composite {
     }
 
     private static SubscriptionUiBinder uiBinder = GWT.create(SubscriptionUiBinder.class);
-    private static final String FEATURE_STYLE = SubscriptionResources.INSTANCE.css().feature();
-    private static final String HIGHLIGHT_STYLE = SubscriptionResources.INSTANCE.css().highlight();
-    private static final String INDIVIDUAL_STYLE = SubscriptionResources.INSTANCE.css().individual();
-    private static final String OWNED_STYLE = SubscriptionResources.INSTANCE.css().owned();
-    private static final String SUBSCRIPTION_STYLE = SubscriptionResources.INSTANCE.css().subscription();
+    private static final String FEATURE_STYLE = SubscriptionCardResources.INSTANCE.css().feature();
+    private static final String HIGHLIGHT_STYLE = SubscriptionCardResources.INSTANCE.css().highlight();
+    private static final String INDIVIDUAL_STYLE = SubscriptionCardResources.INSTANCE.css().individual();
+    private static final String OWNED_STYLE = SubscriptionCardResources.INSTANCE.css().owned();
+    private static final String SUBSCRIPTION_STYLE = SubscriptionCardResources.INSTANCE.css().subscription();
 
     interface SubscriptionUiBinder extends UiBinder<Widget, SubscriptionCard> {
     }
@@ -55,7 +55,7 @@ public class SubscriptionCard extends Composite {
 
     public SubscriptionCard(SubscriptionPlanDTO subscriptionPlanDTO, Type type, Runnable subscriptionCallback) {
         this.subscriptionCallback = subscriptionCallback;
-        SubscriptionResources.INSTANCE.css().ensureInjected();
+        SubscriptionCardResources.INSTANCE.css().ensureInjected();
         SharedResources.INSTANCE.mediaCss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         addStyleName(SUBSCRIPTION_STYLE);

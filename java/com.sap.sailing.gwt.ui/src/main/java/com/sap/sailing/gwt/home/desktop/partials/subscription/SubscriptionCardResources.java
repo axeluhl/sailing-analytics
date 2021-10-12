@@ -4,11 +4,11 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 
-public interface SubscriptionResources extends SharedHomeResources {
+public interface SubscriptionCardResources extends SharedHomeResources {
 
-    public static final SubscriptionResources INSTANCE = GWT.create(SubscriptionResources.class);
+    public static final SubscriptionCardResources INSTANCE = GWT.create(SubscriptionCardResources.class);
 
-    @Source("Subscription.gss")
+    @Source("SubscriptionCard.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
