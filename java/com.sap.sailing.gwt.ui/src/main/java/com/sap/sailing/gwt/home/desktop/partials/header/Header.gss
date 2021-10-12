@@ -179,4 +179,21 @@
 .header_navigation_iconactive {
 /*   background-image: resourceUrl('navigation_hover'); */
 }
-
+.sitenavigation .subscriptions:before {
+  content: "";
+  position: absolute;
+  background: resourceUrl('crown');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center left;
+  -webkit-transform: rotate(-30deg);
+  -moz-transform: rotate(-30deg);
+  -ms-transform: rotate(-30deg);
+  -o-transform: rotate(-30deg);
+  transform: rotate(-30deg);
+  height: 37px;
+  width: 15px;
+  margin-left: -6px;
+}
+.sitenavigation .subscriptions {
+}

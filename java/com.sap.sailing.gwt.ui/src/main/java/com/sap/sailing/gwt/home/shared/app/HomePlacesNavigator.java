@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInfo
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
@@ -47,6 +48,10 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
         return createLocalPlaceNavigation(new SolutionsPlace(navigationTab));
+    }
+    
+    public PlaceNavigation<SubscriptionPlace> getSubscriptionsNavigation() {
+        return createLocalPlaceNavigation(new SubscriptionPlace());
     }
 
     public PlaceNavigation<WhatsNewPlace> getWhatsNewNavigation(WhatsNewNavigationTabs navigationTab) {
