@@ -218,9 +218,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 if (competitor != null) {
                                     recordSensorFixForCompetitor(competitor, event);
                                 } else {
-                                    logger.log(Level.FINE,
-                                            "Could not record fix for boat because no competitor could be determined. Boat: "
-                                                    + boat);
+                                    logger.log(Level.FINE, ()->"Could not record fix for boat because no competitor could be determined. Boat: " + boat);
                                 }
                             }
                             
@@ -253,8 +251,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 } else {
                                     // this is not necessarily something to warn of; while a boat tracker may continuously track
                                     logger.log(Level.FINE,
-                                            "Could not record fix for boat because no competitor could be determined. Boat: "
-                                                    + boat);
+                                            ()->"Could not record fix for boat because no competitor could be determined. Boat: " + boat);
                                 }
                             }
                             
