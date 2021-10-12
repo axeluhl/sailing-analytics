@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.yellowbrickadapter;
+package com.sap.sailing.domain.yellowbrickadapter.impl;
 
 import java.io.IOException;
 import java.io.InputStream;

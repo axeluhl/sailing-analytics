@@ -288,6 +288,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -585,6 +586,30 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
         }
+    }
+
+    @Override
+    public void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
+            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
+            String yellowBrickPassword) throws Exception {
+        logger.info(
+                "trackWithYellowBrick for regatta " + regattaToAddTo + " for race records " + rrs );
+        for (YellowBrickRaceRecordDTO rr : rrs) {
+            try {
+                getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.yellowBrickRaceUrl,
+                        getRaceLogStore(), getRegattaLogStore(), yellowBrickUsername, yellowBrickPassword, trackWind,
+                        correctWindByDeclination);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
+            }
+        }
+    }
+
+    @Override
+    public void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
+            String yellowBrickPassword) {
+        // TODO Implement SailingServiceWriteImpl.createYellowBrickConfiguration(...)
+        
     }
 
     @Override

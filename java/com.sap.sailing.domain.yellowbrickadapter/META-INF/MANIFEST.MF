@@ -13,4 +13,7 @@ Require-Bundle: com.sap.sailing.domain,
  org.json.simple,
  com.sap.sailing.domain.common,
  com.sap.sse.common,
- com.sap.sailing.server.trackfiles
+ com.sap.sailing.server.trackfiles,
+ com.sap.sailing.server.interface,
+ com.sap.sse.replication
+Export-Package: com.sap.sailing.domain.yellowbrickadapter

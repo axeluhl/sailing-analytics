@@ -84,6 +84,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -435,6 +436,13 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, boolean useOfficialEventsToUpdateRaceLog,
             String tracTracUsername, String tracTracPassword) throws UnauthorizedException, Exception;
+
+    void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
+            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
+            String yellowBrickPassword) throws Exception;
+
+    void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
+            String yellowBrickPassword);
 
     MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
             Position fixedPosition);

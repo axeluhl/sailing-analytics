@@ -314,6 +314,8 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.windfinder.Spot;
 import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapterFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
@@ -527,8 +529,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private final ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
     
-    private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
-    deviceIdentifierStringSerializationHandlerTracker;
+    private final ServiceTracker<YellowBrickTrackingAdapterFactory, YellowBrickTrackingAdapterFactory> yellowBrickTrackingAdapterTracker;
+    
+    private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler> deviceIdentifierStringSerializationHandlerTracker;
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
@@ -579,8 +582,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         swissTimingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
         tractracAdapterTracker = ServiceTrackerFactory.createAndOpen(context, TracTracAdapterFactory.class);
-        raceLogTrackingAdapterTracker = ServiceTrackerFactory.createAndOpen(context,
-                RaceLogTrackingAdapterFactory.class);
+        raceLogTrackingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, RaceLogTrackingAdapterFactory.class);
+        yellowBrickTrackingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, YellowBrickTrackingAdapterFactory.class);
         deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
                 DeviceIdentifierStringSerializationHandler.class);
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
@@ -4724,6 +4727,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
         return getRaceLogTrackingAdapterFactory().getAdapter(getBaseDomainFactory());
+    }
+    
+    protected YellowBrickTrackingAdapterFactory getYellowBrickTrackingAdapterFactory() {
+        return yellowBrickTrackingAdapterTracker.getService();
+    }
+    
+    protected YellowBrickTrackingAdapter getYellowBrickTrackingAdapter() {
+        return getYellowBrickTrackingAdapterFactory().getYellowBrickTrackingAdapter(getBaseDomainFactory());
     }
 
     @Override
