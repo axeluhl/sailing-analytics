@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public class Subscription extends Composite {
+public class SubscriptionCard extends Composite {
 
     public static enum Type {
         OWNER, HIGHLIGHT, INDIVIDUAL, DEFAULT
@@ -31,7 +31,7 @@ public class Subscription extends Composite {
     private static final String OWNED_STYLE = SubscriptionResources.INSTANCE.css().owned();
     private static final String SUBSCRIPTION_STYLE = SubscriptionResources.INSTANCE.css().subscription();
 
-    interface SubscriptionUiBinder extends UiBinder<Widget, Subscription> {
+    interface SubscriptionUiBinder extends UiBinder<Widget, SubscriptionCard> {
     }
 
     @UiField
@@ -52,7 +52,7 @@ public class Subscription extends Composite {
 
     private final Runnable subscriptionCallback;
 
-    public Subscription(SubscriptionPlanDTO subscriptionPlanDTO, Type type, Runnable subscriptionCallback) {
+    public SubscriptionCard(SubscriptionPlanDTO subscriptionPlanDTO, Type type, Runnable subscriptionCallback) {
         this.subscriptionCallback = subscriptionCallback;
         SubscriptionResources.INSTANCE.css().ensureInjected();
         SharedResources.INSTANCE.mediaCss().ensureInjected();

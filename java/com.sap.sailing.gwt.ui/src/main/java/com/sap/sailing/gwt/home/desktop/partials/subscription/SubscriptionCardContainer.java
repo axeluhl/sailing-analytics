@@ -7,21 +7,21 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SubscriptionContainer extends Composite {
+public class SubscriptionCardContainer extends Composite {
 
     private static SubscriptionContainerUiBinder uiBinder = GWT.create(SubscriptionContainerUiBinder.class);
 
-    interface SubscriptionContainerUiBinder extends UiBinder<Widget, SubscriptionContainer> {
+    interface SubscriptionContainerUiBinder extends UiBinder<Widget, SubscriptionCardContainer> {
     }
 
-    public SubscriptionContainer() {
+    public SubscriptionCardContainer() {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
     @UiField
     FlowPanel container;
     
-    public void addSubscription(Subscription subscription) {
+    public void addSubscription(SubscriptionCard subscription) {
         container.add(subscription);
     }
 
