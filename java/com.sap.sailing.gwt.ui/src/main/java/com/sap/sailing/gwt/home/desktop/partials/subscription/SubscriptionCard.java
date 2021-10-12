@@ -61,7 +61,7 @@ public class SubscriptionCard extends Composite {
         addStyleName(SUBSCRIPTION_STYLE);
         final String priceText;
         if (CollectionUtils.isNotEmpty(subscriptionPlanDTO.getPrices())) {
-            priceText = "TBD";
+            priceText = subscriptionPlanDTO.getPrices().toString();
             //TODO: Implement new Price handling
         } else {
             priceText = i18n.price() + ": " + i18n.individual();
