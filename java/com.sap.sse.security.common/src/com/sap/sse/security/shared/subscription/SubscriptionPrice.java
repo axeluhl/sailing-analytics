@@ -14,9 +14,9 @@ public class SubscriptionPrice implements Serializable{
     @Deprecated
     public SubscriptionPrice() {}
     
-    public SubscriptionPrice(String price, PaymentInterval paymentInterval) {
+    public SubscriptionPrice(BigDecimal price, PaymentInterval paymentInterval) {
         super();
-        this.price = new BigDecimal(price);
+        this.price = price;
         this.paymentInterval = paymentInterval;
     }
 

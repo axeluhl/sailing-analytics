@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.server.subscription.chargebee;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -63,7 +64,9 @@ public class ChargebeeSubscriptionServiceImpl extends
     }
     
     private SubscriptionPrice convertToSubcriptionPrice(ItemPrice price) {
-        return new SubscriptionPrice(price.priceInDecimal(),
+        BigDecimal decimalPrice = price.priceInDecimal() == null ? 
+                new BigDecimal(price.price()) : new BigDecimal(price.priceInDecimal());
+        return new SubscriptionPrice(decimalPrice,
                 SubscriptionPrice.PaymentInterval.valueOf(price.periodUnit().name()));
     }
 

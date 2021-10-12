@@ -26,7 +26,7 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
             break;
         case DEFAULT:
             container.addSubscription(new SubscriptionCard(plan, type, () -> {
-                presenter.manageSubscriptions();
+                presenter.startSubscription(plan.getId());
             }));
             break;
         case OWNER:

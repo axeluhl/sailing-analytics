@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.subscription;
 
-import org.apache.commons.collections.CollectionUtils;
+import java.util.HashSet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.HeadingElement;
@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.places.subscription.SailingSubscriptionStringConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.StringMessagesKey;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public class SubscriptionCard extends Composite {
@@ -60,7 +61,8 @@ public class SubscriptionCard extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         addStyleName(SUBSCRIPTION_STYLE);
         final String priceText;
-        if (CollectionUtils.isNotEmpty(subscriptionPlanDTO.getPrices())) {
+        final HashSet<SubscriptionPrice> prices = subscriptionPlanDTO.getPrices();
+        if (prices != null && !prices.isEmpty()) {
             priceText = subscriptionPlanDTO.getPrices().toString();
             //TODO: Implement new Price handling
         } else {
