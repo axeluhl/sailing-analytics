@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.client.subscription.chargebee;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -80,7 +82,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
     }
     
     private void updateView(SubscriptionDTO subscription, BaseUserSubscriptionView view) {
-        service.getAllSubscriptionPlans(new AsyncCallback<Iterable<SubscriptionPlanDTO>>() {
+        service.getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 // This will simply not refresh the SubscriptionPlan list in the view.
@@ -88,7 +90,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
                 view.updateView(subscription, null);
             }
             @Override
-            public void onSuccess(Iterable<SubscriptionPlanDTO> result) {
+            public void onSuccess(ArrayList<SubscriptionPlanDTO> result) {
                 view.updateView(subscription, result);
             }
         });

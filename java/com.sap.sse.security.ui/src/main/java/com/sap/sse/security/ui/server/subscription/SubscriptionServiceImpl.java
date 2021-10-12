@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.server.subscription;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Role;
@@ -63,15 +65,9 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     }
     
     @Override
-    public Iterable<SubscriptionPlanDTO> getAllSubscriptionPlans() {
-        return (convertToDtos(getSecurityService().getAllSubscriptionPlans().values()));
-    }
-    
-    @Override
-    public Set<SubscriptionPlanDTO> getUnlockingSubscriptionplans(WildcardPermission permission)
+    public ArrayList<String> getUnlockingSubscriptionplans(WildcardPermission permission)
             throws UserManagementException {
-        retrieveProviderSpecificInfo();
-        final HashSet<SubscriptionPlanDTO> result = new HashSet<SubscriptionPlanDTO>();
+        final ArrayList<String> result = new ArrayList<>();
         final User currentUser = getCurrentUser();
         final SecurityService securityServiceInstance = getSecurityService();
         User allUser = securityServiceInstance.getUserByName(SecurityService.ALL_USERNAME);
@@ -93,11 +89,11 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
                     }
                 }
                 if(allChecksPassed) {
-                    result.add(convertToDto(plan));
+                    result.add(plan.getId());
                 }
             } else {
                 if(PermissionChecker.isPermitted(permission, currentUser, allUser, null, null, subscriptionPlanUserRoles)) {
-                    result.add(convertToDto(plan));
+                    result.add(plan.getId());
                 }
             }
         });
@@ -207,14 +203,18 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         return null;
     }
     
-    protected abstract SubscriptionPlanDTO convertToDto(SubscriptionPlan plan);
+    protected SubscriptionPlanDTO convertToDto(SubscriptionPlan plan) {
+        HashSet<StringMessagesKey> featureKeys = new HashSet<StringMessagesKey>();
+        Stream.of(plan.getRoles()).forEach((role) -> {
+            featureKeys.add(role.getMessageKey());
+        });
+        return new SubscriptionPlanDTO(plan.getId(), plan.getMessageKey(), plan.getDescMessagesKey(), plan.getPrice(),
+                featureKeys, null);
+    }
     
-    protected abstract Iterable<SubscriptionPlanDTO> convertToDtos(Collection<SubscriptionPlan> plans);
+    protected ArrayList<SubscriptionPlanDTO> convertToDtos(Collection<SubscriptionPlan> plans) {
+        return plans.stream().map((plan) -> convertToDto(plan)).collect(Collectors.toCollection(ArrayList::new));
+    }
     
     protected abstract String getProviderName();
-
-    /*
-     * A method to ensure provider specific information may be loaded or updated.
-     */
-    protected abstract String retrieveProviderSpecificInfo();
 }

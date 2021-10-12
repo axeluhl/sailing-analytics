@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.subscription;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -30,9 +31,9 @@ public class SubscriptionActivity extends AbstractActivity {
 
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
-                    .getAllSubscriptionPlans(new AsyncCallback<Iterable<SubscriptionPlanDTO>>() {
+                    .getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
                         @Override
-                        public void onSuccess(final Iterable<SubscriptionPlanDTO> result) {
+                        public void onSuccess(final ArrayList<SubscriptionPlanDTO> result) {
                             result.forEach(plan -> {
                                 if (checkIfUserIsOwnerOfThePlan(plan)) {
                                     view.addSubscriptionPlan(plan, Type.OWNER);

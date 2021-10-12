@@ -3,12 +3,10 @@ package com.sap.sailing.gwt.ui.client;
 import static java.util.Collections.emptyMap;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.StringJoiner;
 
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     public static final String LEADERBOARD_PATH = "/gwt/Leaderboard.html";
@@ -49,9 +47,9 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
         return createEntryPointLink("/gwt/PairingList.html", parameters);
     }
 
-    public static String createSubscriptionPageLink(final Set<SubscriptionPlanDTO> highlightedPlans) {
+    public static String createSubscriptionPageLink(final Iterable<String> highlightedPlans) {
         final StringJoiner joiner = new StringJoiner("&", PlaceTokenPrefixes.Subscription + ":", "");
-        highlightedPlans.stream().map(SubscriptionPlanDTO::getId).forEach(id -> joiner.add("highlight=" + id));
+        highlightedPlans.forEach(id -> joiner.add("highlight=" + id));
         return createEntryPointLink(HOME_PATH, joiner.toString(), emptyMap());
     }
 }

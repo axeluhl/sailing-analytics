@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.client.subscription;
 
-import java.util.Set;
+import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.security.shared.UserManagementException;
@@ -28,8 +28,8 @@ public interface SubscriptionService<C, P> extends RemoteService {
      */
     public SubscriptionDTO getSubscription();
     
-    public Iterable<SubscriptionPlanDTO> getAllSubscriptionPlans();
+    public ArrayList<SubscriptionPlanDTO> getAllSubscriptionPlans();
     
-    public Set<SubscriptionPlanDTO> getUnlockingSubscriptionplans(WildcardPermission permission) throws UserManagementException;
+    public ArrayList<String> getUnlockingSubscriptionplans(WildcardPermission permission) throws UserManagementException;
 
 }

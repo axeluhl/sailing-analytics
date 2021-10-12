@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.client.premium;
 
-import java.util.Set;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
@@ -22,7 +20,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public abstract class PremiumCheckBox extends PremiumUiElement implements HasValue<Boolean>, HasAllKeyHandlers {
 
@@ -75,7 +72,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
         updateUserPermission();
     }
 
-    protected abstract void onSubscribeDialogConfirmation(Set<SubscriptionPlanDTO> unlockingPlans);
+    protected abstract void onSubscribeDialogConfirmation(Iterable<String> unlockingPlans);
 
     @Override
     protected void onEnsureDebugId(final String baseID) {

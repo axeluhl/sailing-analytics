@@ -1,7 +1,8 @@
 package com.sap.sse.security.ui.client.premium;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -16,7 +17,6 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.subscription.SubscriptionClientProvider;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public class PaywallResolver {
 
@@ -34,22 +34,22 @@ public class PaywallResolver {
         this.dtoContext = dtoContext;
     }
 
-    public void getUnlockingSubscriptionPlans(final Action action, final Consumer<Set<SubscriptionPlanDTO>> callback) {
+    public void getUnlockingSubscriptionPlans(final Action action, final Consumer<List<String>> callback) {
         final WildcardPermission permission = dtoContext == null
                 ? WildcardPermission.builder().withActions(action).build()
                 : dtoContext.getIdentifier().getPermission(action);
         getSubscriptionWriteService().getUnlockingSubscriptionplans(permission,
-                new AsyncCallback<Set<SubscriptionPlanDTO>>() {
+                new AsyncCallback<ArrayList<String>>() {
 
                     @Override
-                    public void onSuccess(final Set<SubscriptionPlanDTO> result) {
+                    public void onSuccess(final ArrayList<String> result) {
                         callback.accept(result);
                     }
 
                     @Override
                     public void onFailure(final Throwable caught) {
                         LOG.warning("Unable to determine subscription plans unlocking action " + action.name());
-                        callback.accept(Collections.emptySet());
+                        callback.accept(Collections.emptyList());
                     }
                 });
     }

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,7 +114,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionServiceFactory()
                     .getDefaultAsyncService();
             
-            defaultAsyncService.getAllSubscriptionPlans(new AsyncCallback<Iterable<SubscriptionPlanDTO>>() {
+            defaultAsyncService.getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     // This will simply not refresh the SubscriptionPlan list in the view.
@@ -122,7 +123,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                 }
 
                 @Override
-                public void onSuccess(Iterable<SubscriptionPlanDTO> result) {
+                public void onSuccess(ArrayList<SubscriptionPlanDTO> result) {
                     updateSubscriptionPlanMap(result);
                     view.updateView(subscription, result);
                 }

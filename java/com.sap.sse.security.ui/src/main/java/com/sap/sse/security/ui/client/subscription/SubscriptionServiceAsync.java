@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.client.subscription;
 
-import java.util.Set;
+import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -14,7 +14,7 @@ public interface SubscriptionServiceAsync<C, P> {
 
     public void getConfiguration(AsyncCallback<C> callback);
     
-    public void getAllSubscriptionPlans(AsyncCallback<Iterable<SubscriptionPlanDTO>> callback);
+    public void getAllSubscriptionPlans(AsyncCallback<ArrayList<SubscriptionPlanDTO>> callback);
     
-    public void getUnlockingSubscriptionplans(WildcardPermission permission, AsyncCallback<Set<SubscriptionPlanDTO>> callback);
+    public void getUnlockingSubscriptionplans(WildcardPermission permission, AsyncCallback<ArrayList<String>> callback);
 }

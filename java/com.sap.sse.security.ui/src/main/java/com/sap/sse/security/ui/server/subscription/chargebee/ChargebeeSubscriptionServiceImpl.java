@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.server.subscription.chargebee;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +11,7 @@ import com.chargebee.models.HostedPage;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
@@ -18,6 +20,7 @@ import com.sap.sse.security.ui.client.subscription.chargebee.ChargebeeSubscripti
 import com.sap.sse.security.ui.server.subscription.SubscriptionServiceImpl;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionItem;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sse.security.ui.shared.subscription.chargebee.ChargebeeConfigurationDTO;
 import com.sap.sse.security.ui.shared.subscription.chargebee.ChargebeeSubscriptionItem;
 import com.sap.sse.security.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
@@ -33,6 +36,12 @@ public class ChargebeeSubscriptionServiceImpl extends
 
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionServiceImpl.class.getName());
 
+    @Override
+    public ArrayList<SubscriptionPlanDTO> getAllSubscriptionPlans() {
+        final Collection<SubscriptionPlan> plans = getSecurityService().getAllSubscriptionPlans().values();
+        return (convertToDtos(plans));
+    }
+    
     @Override
     public ChargebeeConfigurationDTO getConfiguration() {
         final ChargebeeConfiguration configuration = ChargebeeConfiguration.getInstance();

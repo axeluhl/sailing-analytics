@@ -12,6 +12,7 @@ import com.chargebee.models.HostedPage.Content;
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Transaction;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
@@ -36,6 +37,9 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             final User user = getCurrentUser();
             final Result result = HostedPage.acknowledge(data.getHostedPageId()).request();
             final Content content = result.hostedPage().content();
+            if(content.customer().id() != user.getName()) {
+                throw new UserManagementException("User does not match!");
+            }
             final String transactionType;
             final String transactionStatus;
             final Transaction transaction = content.transaction();
