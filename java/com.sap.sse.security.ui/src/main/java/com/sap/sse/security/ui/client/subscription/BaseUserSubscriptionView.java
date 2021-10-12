@@ -1,6 +1,6 @@
 package com.sap.sse.security.ui.client.subscription;
 
-import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
@@ -13,7 +13,7 @@ public interface BaseUserSubscriptionView {
     /**
      * Update the view with subscription data returned from back-end
      */
-    public void updateView(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList);
+    public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList);
 
     /**
      * Called on checkout modal is closed

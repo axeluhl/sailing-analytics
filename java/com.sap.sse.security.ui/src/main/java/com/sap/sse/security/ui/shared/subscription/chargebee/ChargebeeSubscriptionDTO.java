@@ -2,19 +2,19 @@ package com.sap.sse.security.ui.shared.subscription.chargebee;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.ui.client.subscription.chargebee.ChargebeeSubscriptionClientProvider;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionItem;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 
-public class ChargebeeSubscriptionItem extends SubscriptionItem {
+public class ChargebeeSubscriptionDTO extends SubscriptionDTO {
     public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
 
     public static final String TRANSACTION_TYPE_REFUND = "refund";
 
-    public ChargebeeSubscriptionItem() {
+    public ChargebeeSubscriptionDTO() {
     }
 
-    public ChargebeeSubscriptionItem(String planId, TimePoint trialStart, TimePoint trialEnd, String subscriptionStatus,
+    public ChargebeeSubscriptionDTO(String planId, TimePoint trialStart, TimePoint trialEnd, String subscriptionStatus,
             String paymentStatus, String transactionType) {
         super(planId, trialStart, trialEnd, subscriptionStatus, paymentStatus, transactionType,
                 ChargebeeSubscriptionClientProvider.PROVIDER_NAME);

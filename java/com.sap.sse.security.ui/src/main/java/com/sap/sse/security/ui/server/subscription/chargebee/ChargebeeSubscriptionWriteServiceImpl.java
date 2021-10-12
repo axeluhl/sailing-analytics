@@ -19,7 +19,7 @@ import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
 import com.sap.sse.security.ui.client.subscription.chargebee.ChargebeeSubscriptionWriteService;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.chargebee.FinishCheckoutDTO;
 
 public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscriptionServiceImpl
@@ -30,9 +30,9 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionWriteServiceImpl.class.getName());
 
     @Override
-    public SubscriptionDTO finishCheckout(String planId, FinishCheckoutDTO data) {
+    public SubscriptionListDTO finishCheckout(String planId, FinishCheckoutDTO data) {
         logger.info("finishCheckout hostedPageId: " + data.getHostedPageId());
-        SubscriptionDTO subscriptionDto;
+        SubscriptionListDTO subscriptionDto;
         try {
             final User user = getCurrentUser();
             final Result result = HostedPage.acknowledge(data.getHostedPageId()).request();
@@ -74,7 +74,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             subscriptionDto = getSubscription();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in saving subscription", e);
-            subscriptionDto = new SubscriptionDTO(null, e.getMessage());
+            subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
         }
         return subscriptionDto;
     }

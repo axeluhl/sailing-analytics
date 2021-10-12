@@ -46,7 +46,7 @@ import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 
@@ -130,7 +130,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                             .startCheckout(planId, new BaseUserSubscriptionView() {
                                 
                                 @Override
-                                public void updateView(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
+                                public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
                                     // TODO Auto-generated method stub
                                 }
                                 

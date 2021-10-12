@@ -16,7 +16,7 @@ import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceAsync;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
@@ -89,9 +89,9 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     private void fetchSubscription() {
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
-                    .getSubscription(new AsyncCallback<SubscriptionDTO>() {
+                    .getSubscription(new AsyncCallback<SubscriptionListDTO>() {
                         @Override
-                        public void onSuccess(SubscriptionDTO result) {
+                        public void onSuccess(SubscriptionListDTO result) {
                             if (result != null && result.getError() != null && !result.getError().isEmpty()) {
                                 showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
                             } else {
@@ -109,7 +109,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         }
     }
     
-    private void updateView(SubscriptionDTO subscription) {
+    private void updateView(SubscriptionListDTO subscription) {
         try {
             final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionServiceFactory()
                     .getDefaultAsyncService();

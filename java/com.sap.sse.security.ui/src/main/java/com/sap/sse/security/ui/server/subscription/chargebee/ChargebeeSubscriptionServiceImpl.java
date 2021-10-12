@@ -18,11 +18,11 @@ import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 import com.sap.sse.security.ui.client.subscription.chargebee.ChargebeeSubscriptionService;
 import com.sap.sse.security.ui.server.subscription.SubscriptionServiceImpl;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionItem;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sse.security.ui.shared.subscription.chargebee.ChargebeeConfigurationDTO;
-import com.sap.sse.security.ui.shared.subscription.chargebee.ChargebeeSubscriptionItem;
+import com.sap.sse.security.ui.shared.subscription.chargebee.ChargebeeSubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 
 /**
@@ -88,28 +88,28 @@ public class ChargebeeSubscriptionServiceImpl extends
     }
 
     @Override
-    public SubscriptionDTO getSubscription() {
-        SubscriptionDTO subscriptionDto = null;
+    public SubscriptionListDTO getSubscription() {
+        SubscriptionListDTO subscriptionDto = null;
         try {
             final User user = getCurrentUser();
             final Iterable<Subscription> subscriptions = user.getSubscriptions();
             if (subscriptions != null) {
-                List<SubscriptionItem> itemList = new ArrayList<SubscriptionItem>();
+                List<SubscriptionDTO> itemList = new ArrayList<SubscriptionDTO>();
                 for (Subscription subscription : subscriptions) {
                     if (subscription.hasSubscriptionId() && !isSubscriptionCancelled(subscription)) {
                         itemList.add(
-                                new ChargebeeSubscriptionItem(subscription.getPlanId(), subscription.getTrialStart(),
+                                new ChargebeeSubscriptionDTO(subscription.getPlanId(), subscription.getTrialStart(),
                                         subscription.getTrialEnd(), subscription.getSubscriptionStatus(),
                                         subscription.getPaymentStatus(), subscription.getTransactionType()));
                     }
                 }
                 if (!itemList.isEmpty()) {
-                    subscriptionDto = new SubscriptionDTO(itemList.toArray(new SubscriptionItem[0]), null);
+                    subscriptionDto = new SubscriptionListDTO(itemList.toArray(new SubscriptionDTO[0]), null);
                 }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in getting subscription ", e);
-            subscriptionDto = new SubscriptionDTO(null, e.getMessage());
+            subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
         }
 
         return subscriptionDto;

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
@@ -26,7 +26,7 @@ public interface SubscriptionService<C, P> extends RemoteService {
     /**
      * Fetch user current subscription data from database
      */
-    public SubscriptionDTO getSubscription();
+    public SubscriptionListDTO getSubscription();
     
     public ArrayList<SubscriptionPlanDTO> getAllSubscriptionPlans();
     

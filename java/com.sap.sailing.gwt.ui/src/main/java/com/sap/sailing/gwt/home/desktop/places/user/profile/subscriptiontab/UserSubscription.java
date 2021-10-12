@@ -22,8 +22,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionItem;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
@@ -44,7 +44,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     @UiField
     ListBox planListUi;
     @UiField(provided = true)
-    CellList<SubscriptionItem> subscriptionListUi;
+    CellList<SubscriptionDTO> subscriptionListUi;
 
     private Presenter presenter;
     private final SubscriptionStringConstants stringConstants;
@@ -86,11 +86,11 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     @Override
-    public void updateView(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
+    public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
         updatePlanList(subscription, planList);
         subscribeButtonUi.setEnabled(true);
         if (subscription == null) {
-            subscriptionListUi.setRowData(new ArrayList<SubscriptionItem>());
+            subscriptionListUi.setRowData(new ArrayList<SubscriptionDTO>());
         } else {
             subscriptionListUi.setRowData(Arrays.asList(subscription.getSubscriptionItems()));
         }
@@ -99,14 +99,14 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     private void initSubscriptionCellList(Presenter presenter) {
-        subscriptionListUi = new CellList<SubscriptionItem>(new SubscriptionCell(presenter));
+        subscriptionListUi = new CellList<SubscriptionDTO>(new SubscriptionCell(presenter));
         Label emptyWidget = new Label(StringMessages.INSTANCE.noSubscriptions());
         emptyWidget.setStyleName(SubscriptionProfileDesktopResources.INSTANCE.css().emptySubscriptionsLabel());
         subscriptionListUi.setEmptyListWidget(emptyWidget);
         subscriptionListUi.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
     }
 
-    private void updatePlanList(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
+    private void updatePlanList(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
         if (planList != null) {
             planListUi.clear();
             if (subscription == null) {

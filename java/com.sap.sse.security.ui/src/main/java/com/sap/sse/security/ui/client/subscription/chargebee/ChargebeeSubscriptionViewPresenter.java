@@ -8,7 +8,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
 import com.sap.sse.security.ui.client.subscription.SubscriptionViewPresenter;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sse.security.ui.shared.subscription.chargebee.FinishCheckoutDTO;
 import com.sap.sse.security.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
@@ -65,9 +65,9 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
             Runnable fireUserUpdateEvent) {
         final FinishCheckoutDTO data = new FinishCheckoutDTO();
         data.setHostedPageId(hostedPageId);
-        writeService.finishCheckout(/* planId */ null, data, new AsyncCallback<SubscriptionDTO>() {
+        writeService.finishCheckout(/* planId */ null, data, new AsyncCallback<SubscriptionListDTO>() {
             @Override
-            public void onSuccess(SubscriptionDTO result) {
+            public void onSuccess(SubscriptionListDTO result) {
                 updateView(result, view);
                 fireUserUpdateEvent.run();
                 Chargebee.getInstance().closeAll();
@@ -81,7 +81,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
         });
     }
     
-    private void updateView(SubscriptionDTO subscription, BaseUserSubscriptionView view) {
+    private void updateView(SubscriptionListDTO subscription, BaseUserSubscriptionView view) {
         service.getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
             @Override
             public void onFailure(Throwable caught) {

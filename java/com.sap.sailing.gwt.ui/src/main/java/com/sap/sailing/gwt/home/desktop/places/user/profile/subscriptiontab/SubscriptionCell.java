@@ -16,10 +16,10 @@ import com.sap.sailing.gwt.home.shared.places.subscription.SailingSubscriptionSt
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionItem;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
+public class SubscriptionCell extends AbstractCell<SubscriptionDTO> {
     interface Style extends CssResource {
         String subscriptionContainer();
 
@@ -40,7 +40,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
         void render(SafeHtmlBuilder sb, String planName, String subscriptionStatus, String trial, String paymentStatus,
                 String subscriptionStatusCssClass, String paymentStatusCssClass, String trialCssClass);
 
-        void onBrowserEvent(SubscriptionCell cell, NativeEvent event, Element parent, SubscriptionItem value);
+        void onBrowserEvent(SubscriptionCell cell, NativeEvent event, Element parent, SubscriptionDTO value);
 
         Style getStyle();
 
@@ -60,7 +60,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     }
 
     @Override
-    public void render(Context context, SubscriptionItem subscription, SafeHtmlBuilder sb) {
+    public void render(Context context, SubscriptionDTO subscription, SafeHtmlBuilder sb) {
         SubscriptionPlanDTO plan = getSubscriptionPlan(subscription);
         if (plan != null) {
             String planName = stringConstants.getString(plan.getNameMessageKey());
@@ -90,27 +90,27 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     }
 
     @Override
-    public void onBrowserEvent(Context context, Element parent, SubscriptionItem value, NativeEvent event,
-            ValueUpdater<SubscriptionItem> valueUpdater) {
+    public void onBrowserEvent(Context context, Element parent, SubscriptionDTO value, NativeEvent event,
+            ValueUpdater<SubscriptionDTO> valueUpdater) {
         renderer.onBrowserEvent(this, event, parent, value);
     }
 
     @UiHandler({ "cancelButton" })
-    void onCancelButtonPressed(ClickEvent event, Element parent, SubscriptionItem subscription) {
+    void onCancelButtonPressed(ClickEvent event, Element parent, SubscriptionDTO subscription) {
         renderer.getCancelButton(parent).setDisabled(true);
         presenter.cancelSubscription(subscription.getPlanId(), subscription.getProvider());
     }
 
-    private SubscriptionPlanDTO getSubscriptionPlan(SubscriptionItem subscription) {
+    private SubscriptionPlanDTO getSubscriptionPlan(SubscriptionDTO subscription) {
         return subscription != null ? presenter.getPlanById(subscription.getPlanId()) : null;
     }
 
-    private String buildTrialText(SubscriptionItem subscription) {
+    private String buildTrialText(SubscriptionDTO subscription) {
         return StringMessages.INSTANCE.trialText(getTrialRemainingText(subscription),
                 DateTimeFormat.getFormat("yyyy-MM-dd HH:mm").format(subscription.getTrialEnd().asDate()));
     }
 
-    private String getTrialRemainingText(SubscriptionItem subscription) {
+    private String getTrialRemainingText(SubscriptionDTO subscription) {
         long remainingSecs = Math.round(TimePoint.now().until(subscription.getTrialEnd()).asSeconds());
         StringBuilder remainText = new StringBuilder();
         if (remainingSecs <= 0) {
@@ -147,7 +147,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
         return remainText.toString();
     }
 
-    public String getSubscriptionStatusLabel(SubscriptionItem subscription) {
+    public String getSubscriptionStatusLabel(SubscriptionDTO subscription) {
         final String label;
         if (subscription.isInTrial()) {
             label = StringMessages.INSTANCE.inTrial();
@@ -161,7 +161,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
         return label;
     }
 
-    public String getPaymentStatusLabel(SubscriptionItem subscription) {
+    public String getPaymentStatusLabel(SubscriptionDTO subscription) {
         final String label;
         final String paymentStatus = subscription.getPaymentStatus();
         if (paymentStatus != null) {

@@ -1,13 +1,13 @@
 package com.sap.sse.security.ui.client.subscription;
 
-import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 
 public interface SubscriptionWriteService<C, P, F> extends SubscriptionService<C, P> {
     /**
      * Finish checkout processing for a plan with success checkout data built from payment service provider. This is
      * place where we will setup subscription for user on payment service provider, and persist user subscription data
      */
-    public SubscriptionDTO finishCheckout(String planId, F checkoutData);
+    public SubscriptionListDTO finishCheckout(String planId, F checkoutData);
     
     /**
      * Cancel current user subscription
