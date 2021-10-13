@@ -1,5 +1,9 @@
 package com.sap.sailing.domain.yellowbrickadapter;
 
+import java.io.IOException;
+
+import org.json.simple.parser.ParseException;
+
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -9,4 +13,6 @@ public interface YellowBrickTrackingAdapter {
     void addYellowBrickRace(RacingEventService service, RegattaIdentifier regattaToAddTo, String yellowBrickRaceUrl,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String yellowBrickUsername,
             String yellowBrickPassword, boolean trackWind, boolean correctWindByDeclination) throws Exception;
+    
+    YellowBrickRace getYellowBrickRace(String raceUrl) throws IOException, ParseException;
 }
