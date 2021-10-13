@@ -93,7 +93,7 @@ import difflib.PatchFailedException;
  * 
  * @author Fredrik Teschke
  */
-public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
+public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl<RaceLogConnectivityParams> {
     
     private static final String LOGGER_AND_LOGAUTHOR_NAME = RaceLogRaceTracker.class.getName();
     private static final Logger logger = Logger.getLogger(LOGGER_AND_LOGAUTHOR_NAME);

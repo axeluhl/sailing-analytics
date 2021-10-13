@@ -5,11 +5,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRaceTrackingConnectivityParams;
 
-public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl {
-    public YellowBrickRaceTrackerImpl(RaceTrackingConnectivityParameters connectivityParams) {
+public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBrickRaceTrackingConnectivityParams> {
+    public YellowBrickRaceTrackerImpl(YellowBrickRaceTrackingConnectivityParams connectivityParams) {
         super(connectivityParams);
     }
 

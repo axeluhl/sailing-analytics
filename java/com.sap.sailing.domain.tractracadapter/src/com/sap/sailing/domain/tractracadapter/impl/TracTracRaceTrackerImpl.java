@@ -74,7 +74,7 @@ import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
 import com.tractrac.subscription.lib.api.race.IRacesListener;
 import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
-public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
+public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl<RaceTrackingConnectivityParametersImpl>
         implements IConnectionStatusListener, TracTracRaceTracker, DynamicRaceDefinitionSet, TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(TracTracRaceTrackerImpl.class.getName());
     

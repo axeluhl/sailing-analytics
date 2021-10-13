@@ -12,14 +12,14 @@ import com.sap.sailing.domain.base.RaceDefinition;
 /**
  * Base class for all {@link RaceTracker}s that must implement listener notifications
  */
-public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
+public abstract class AbstractRaceTrackerBaseImpl<RTCP extends RaceTrackingConnectivityParameters> implements RaceTracker {
     private final RaceTrackerListeners listeners = new RaceTrackerListeners();
     private final Set<RaceTracker.RaceCreationListener> raceCreationListeners = Collections
             .newSetFromMap(new ConcurrentHashMap<RaceTracker.RaceCreationListener, Boolean>());
     
-    private final RaceTrackingConnectivityParameters connectivityParams;
+    private final RTCP connectivityParams;
 
-    public AbstractRaceTrackerBaseImpl(RaceTrackingConnectivityParameters connectivityParams) {
+    public AbstractRaceTrackerBaseImpl(RTCP connectivityParams) {
         super();
         this.connectivityParams = connectivityParams;
     }
@@ -103,7 +103,7 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
     }
 
     @Override
-    public RaceTrackingConnectivityParameters getConnectivityParams() {
+    public RTCP getConnectivityParams() {
         return connectivityParams;
     }
 }
