@@ -6,7 +6,7 @@ import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapterFacto
 
 public class YellowBrickTrackingAdapterFactoryImpl implements YellowBrickTrackingAdapterFactory {
     @Override
-    public YellowBrickTrackingAdapter getYellowBrickTrackingAdapter(DomainFactory domainFactory) {
-        return new YellowBrickTrackingAdapterImpl(domainFactory);
+    public YellowBrickTrackingAdapter getYellowBrickTrackingAdapter(DomainFactory baseDomainFactory) {
+        return new YellowBrickTrackingAdapterImpl(baseDomainFactory);
     }
 }

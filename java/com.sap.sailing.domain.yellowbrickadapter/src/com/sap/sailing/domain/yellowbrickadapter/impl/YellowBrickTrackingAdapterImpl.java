@@ -24,7 +24,8 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
             throws Exception {
         service.addRace(regattaToAddTo,
                 new YellowBrickRaceTrackingConnectivityParams(yellowBrickRaceUrl, yellowBrickUsername,
-                        yellowBrickPassword, trackWind, correctWindByDeclination),
+                        yellowBrickPassword, trackWind, correctWindByDeclination, raceLogStore, regattaLogStore,
+                        baseDomainFactory),
                 /* timeout */ TIMEOUT_FOR_RACE_LOADING.asMillis());
     }
 }

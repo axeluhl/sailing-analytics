@@ -1,28 +1,43 @@
 package com.sap.sailing.domain.yellowbrickadapter;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.yellowbrickadapter.impl.YellowBrickRaceTrackerImpl;
+import com.sap.sse.common.Duration;
 
 public class YellowBrickRaceTrackingConnectivityParams extends AbstractRaceTrackingConnectivityParameters {
     private static final long serialVersionUID = -81948107186932864L;
-    
+    public static final String TYPE = "YELLOW_BRICK";
+    private static final Duration DEFAULT_DELAY_TO_LIVE = Duration.ONE_MINUTE;
+
     private final String raceUrl;
     private final String username;
     private final String password;
+    private final String trackerId;
+    private final transient RaceLogStore raceLogStore;
+    private final transient RegattaLogStore regattaLogStore;
+    private final transient DomainFactory baseDomainFactory;
 
     public YellowBrickRaceTrackingConnectivityParams(String raceUrl, String username, String password,
-            boolean trackWind, boolean correctWindDirectionByMagneticDeclination) {
+            boolean trackWind, boolean correctWindDirectionByMagneticDeclination, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore, DomainFactory baseDomainFactory) {
         super(trackWind, correctWindDirectionByMagneticDeclination);
         this.raceUrl = raceUrl;
         this.username = username;
         this.password = password;
+        this.trackerId = TYPE+"-"+raceUrl;
+        this.raceLogStore = raceLogStore;
+        this.regattaLogStore = regattaLogStore;
+        this.baseDomainFactory = baseDomainFactory;
     }
 
     @Override
@@ -37,26 +52,45 @@ public class YellowBrickRaceTrackingConnectivityParams extends AbstractRaceTrack
             WindStore windStore, RaceLogAndTrackedRaceResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler) throws Exception {
-        // TODO Implement YellowBrickRaceTrackingConnectivityParams.createRaceTracker(...)
-        return null;
+        return new YellowBrickRaceTrackerImpl(this);
     }
 
     @Override
-    public Object getTrackerID() {
-        // TODO Implement YellowBrickRaceTrackingConnectivityParams.getTrackerID(...)
-        return null;
+    public String getTrackerID() {
+        return trackerId;
     }
 
     @Override
     public long getDelayToLiveInMillis() {
-        // TODO Implement YellowBrickRaceTrackingConnectivityParams.getDelayToLiveInMillis(...)
-        return 0;
+        return DEFAULT_DELAY_TO_LIVE.asMillis();
     }
 
     @Override
     public String getTypeIdentifier() {
-        // TODO Implement YellowBrickRaceTrackingConnectivityParams.getTypeIdentifier(...)
-        return null;
+        return TYPE;
     }
 
+    public String getRaceUrl() {
+        return raceUrl;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public RaceLogStore getRaceLogStore() {
+        return raceLogStore;
+    }
+
+    public RegattaLogStore getRegattaLogStore() {
+        return regattaLogStore;
+    }
+
+    public DomainFactory getBaseDomainFactory() {
+        return baseDomainFactory;
+    }
 }
