@@ -2375,4 +2375,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noImageOrVideoDetected();
     String errorWhileUpdatingEvent();
     String updateEventSuccessfully();
+    String raceUrl();
+    String yellowBrickConfiguration();
 }

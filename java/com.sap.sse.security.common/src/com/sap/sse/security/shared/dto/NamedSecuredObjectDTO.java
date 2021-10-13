@@ -15,7 +15,16 @@ public abstract class NamedSecuredObjectDTO extends NamedDTO implements SecuredD
     protected NamedSecuredObjectDTO(String name) {
         super(name);
     }
+    
+    protected NamedSecuredObjectDTO(String name, SecurityInformationDTO securityInformation) {
+        this(name);
+        this.securityInformation = securityInformation;
+    }
 
+    protected SecurityInformationDTO getSecurityInformation() {
+        return securityInformation;
+    }
+    
     @Override
     public final AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();

@@ -7,12 +7,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 
-public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSupplier<TracTracEventManagementPanel> {
+public class YellowBrickEventManagementPanelSupplier extends AdminConsolePanelSupplier<YellowBrickEventManagementPanel> {
     private final StringMessages stringMessages;
     private final Presenter presenter;
     private final AdminConsoleTableResources tableResources;
 
-    public TracTracEventManagementPanelSupplier(final StringMessages stringMessages, final Presenter presenter,
+    public YellowBrickEventManagementPanelSupplier(final StringMessages stringMessages, final Presenter presenter,
             AdminConsoleTableResources tableResources) {
         super();
         this.stringMessages = stringMessages;
@@ -21,13 +21,13 @@ public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSuppl
     }
 
     @Override
-    public TracTracEventManagementPanel init() {
-        TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
+    public YellowBrickEventManagementPanel init() {
+        YellowBrickEventManagementPanel yellowBrickEventManagementPanel = new YellowBrickEventManagementPanel(
                 presenter, stringMessages, tableResources);
-        tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
-        tractracEventManagementPanel.refreshTracTracConnectors();
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(tractracEventManagementPanel.getRegattasDisplayer());
-        return tractracEventManagementPanel;
+        yellowBrickEventManagementPanel.ensureDebugId("YellowBrickEventManagement");
+        yellowBrickEventManagementPanel.refreshYellowBrickConnectors();
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(yellowBrickEventManagementPanel.getRegattasDisplayer());
+        return yellowBrickEventManagementPanel;
     }
 
     @Override
