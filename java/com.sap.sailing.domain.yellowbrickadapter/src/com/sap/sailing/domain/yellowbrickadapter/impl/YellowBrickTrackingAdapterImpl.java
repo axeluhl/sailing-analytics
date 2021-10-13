@@ -3,6 +3,7 @@ package com.sap.sailing.domain.yellowbrickadapter.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -61,12 +62,27 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
         return String.format(NUMBER_OF_POSITIONS_URL_TEMPLATE, raceUrl, 1);
     }
 
+    String getUrlForAllData(String raceUrl) {
+        return String.format(POSITIONS_SINCE_DATE_URL_TEMPLATE, raceUrl, /* since the beginning of the epoch */ 0l);
+    }
+
     @Override
-    public YellowBrickRace getYellowBrickRace(String raceUrl) throws IOException, ParseException {
+    public YellowBrickRace getRaceMetadata(String raceUrl) throws IOException, ParseException {
         final String url = getUrlForLatestFix(raceUrl);
+        final PositionsDocument doc = getPositionsDocumentForUrl(url);
+        return new YellowBrickRaceImpl(raceUrl, doc.getTimePointOfLastFix(), Util.size(doc.getTeams()));
+    }
+
+    private PositionsDocument getPositionsDocumentForUrl(final String url)
+            throws MalformedURLException, IOException, ParseException {
         final URLConnection result = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(new URL(url), TIMEOUT_FOR_RACE_LOADING, /* bearer token */ null);
         final InputStream inputStream = (InputStream) result.getContent();
-        final PositionsDocument doc = new GetPositionsParser().parse(new InputStreamReader(inputStream));
-        return new YellowBrickRaceImpl(raceUrl, doc.getTimePointOfLastFix(), Util.size(doc.getTeams()));
+        final PositionsDocument doc = new GetPositionsParser().parse(new InputStreamReader(inputStream), /* inferSpeedAndBearing */ true);
+        return doc;
+    }
+    
+    @Override
+    public PositionsDocument getStoredData(String raceUrl) throws MalformedURLException, IOException, ParseException {
+        return getPositionsDocumentForUrl(getUrlForAllData(raceUrl));
     }
 }

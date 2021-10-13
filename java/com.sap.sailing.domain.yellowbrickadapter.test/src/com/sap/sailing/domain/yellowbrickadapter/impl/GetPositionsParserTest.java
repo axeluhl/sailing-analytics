@@ -27,7 +27,7 @@ public class GetPositionsParserTest {
     @Test
     public void testParsingSimpleDocumentWithOneFixPerTeam() throws IOException, ParseException, java.text.ParseException {
         final Reader reader = new InputStreamReader(getClass().getResourceAsStream("/GetPositions.json"));
-        final PositionsDocument result = parser.parse(reader);
+        final PositionsDocument result = parser.parse(reader, /* inferSpeedAndBearing */ true);
         assertNotNull(result);
         assertEquals("rmsr2019", result.getRaceUrl());
         assertEquals(113, Util.size(result.getTeams()));

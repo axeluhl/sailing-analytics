@@ -3,6 +3,7 @@ package com.sap.sailing.domain.yellowbrickadapter.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 
 import org.json.simple.parser.ParseException;
@@ -11,6 +12,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class YellowBrickAdapterTest {
     private static final String RMSR2019 = "rmsr2019";
@@ -28,10 +30,18 @@ public class YellowBrickAdapterTest {
     }
     
     @Test
-    public void testGetRace() throws IOException, ParseException, java.text.ParseException {
-        final YellowBrickRace race = adapter.getYellowBrickRace(RMSR2019);
+    public void testGetRaceMetadata() throws IOException, ParseException, java.text.ParseException {
+        final YellowBrickRace race = adapter.getRaceMetadata(RMSR2019);
         assertEquals(RMSR2019, race.getRaceUrl());
         assertEquals(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2019-10-26T23:55:01Z")), race.getTimePointOfLastFix());
         assertEquals(113, race.getNumberOfCompetitors());
+    }
+    
+    @Test
+    public void testGetFullRaceData() throws MalformedURLException, IOException, ParseException, java.text.ParseException {
+        final PositionsDocument fullRace = adapter.getStoredData(RMSR2019);
+        assertEquals(113, Util.size(fullRace.getTeams()));
+        assertEquals(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2019-10-26T23:55:01Z")), fullRace.getTimePointOfLastFix());
+        assertEquals(2009, Util.size(Util.filter(fullRace.getTeams(), team->team.getCompetitorName().equals("JYS Jarhead")).iterator().next().getPositions()));
     }
 }
