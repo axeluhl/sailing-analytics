@@ -87,13 +87,11 @@ public class CompareServersTest {
     }
 
     /**
-     * A white-box test for something strange observed in the implementation for removing duplicate entries
-     * when comparing arrays. It seems that if no equal match for an object from the first array is found in the second,
-     * then all elements from the second array have duplicates with that element from the first array removed
-     * recursively.
+     * A white-box test that asserts that different names should always lead to the object comparison and field
+     * removal to be skipped, regardless of where in the order of keys "name" is found.
      */
     @Test
-    public void testStrangeArrayRecursion() {
+    public void testDifferentNameNotFirstField() {
         final JSONArray a = new JSONArray();
         final JSONArray b = new JSONArray();
         final JSONObject a1 = new JSONObject();
@@ -108,6 +106,44 @@ public class CompareServersTest {
         b2.put("isTracked", "jkl");
         b2.put("name", "b2");
         b.add(b2);
+        resource.removeDuplicateEntries(a, b);
+        assertNull(b2.containsKey("isTracked"));
+    }
+
+    /**
+     * A white-box test for something strange observed in the implementation for removing duplicate entries
+     * when comparing arrays. It seems that if no equal match for an object from the first array is found in the second
+     * then all elements from the second array will have their duplicates with that element from the first array removed
+     * recursively.
+     */
+    @Test
+    public void testAnotherStrangeArrayRecursion() {
+        final JSONArray a = new JSONArray();
+        final JSONArray b = new JSONArray();
+        final JSONObject a1 = new JSONObject();
+        a1.put("abc", "def");
+        a1.put("ghi", "jkl");
+        a1.put("isTracked", "jkl");
+        a1.put("hasWindData", "123");
+        a.add(a1);
+        final JSONObject a2 = new JSONObject();
+        a2.put("abc", "def");
+        a2.put("ghi", "jkl");
+        a2.put("isTracked", "vwx");
+        a2.put("hasWindData", "234");
+        a.add(a2);
+        final JSONObject b1 = new JSONObject();
+        b1.put("mno", "pqr");
+        b1.put("isTracked", "stu");
+        b.add(b1);
+        final JSONObject b2 = new JSONObject();
+        b2.put("isTracked", "jkl");
+        b2.put("hasWindData", "234");
+        b.add(b2);
+        final JSONObject b3 = new JSONObject();
+        b3.put("isTracked", "vwx");
+        b3.put("hasWindData", "123");
+        b.add(b3);
         resource.removeDuplicateEntries(a, b);
         assertNull(b2.containsKey("isTracked"));
     }
