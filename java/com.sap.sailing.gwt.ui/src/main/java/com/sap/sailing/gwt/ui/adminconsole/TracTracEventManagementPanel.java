@@ -454,8 +454,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
         final Set<TracTracConfigurationWithSecurityDTO> selectedConnections = connectionsTable.getSelectionModel()
                 .getSelectedSet();
         if (selectedConnections.size() == 1) {
-
-            TracTracConfigurationWithSecurityDTO selectedConnection = selectedConnections.iterator().next();            sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
+            TracTracConfigurationWithSecurityDTO selectedConnection = selectedConnections.iterator().next();
+            sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
                     new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
                 new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
                     @Override

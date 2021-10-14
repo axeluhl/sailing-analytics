@@ -69,6 +69,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
@@ -79,6 +80,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
@@ -631,4 +633,13 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
 
     void updateServerConfiguration(ServerConfigurationDTO serverConfiguration, AsyncCallback<Void> callback);
+
+    void deleteYellowBrickConfigurations(Set<YellowBrickConfigurationWithSecurityDTO> selectedSet,
+            AsyncCallback<Void> asyncCallback);
+
+    void deleteYellowBrickConfigurations(List<YellowBrickConfigurationWithSecurityDTO> singletonList,
+            AsyncCallback<Void> asyncCallback);
+
+    void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject,
+            MarkedAsyncCallback<Void> markedAsyncCallback);
 }
