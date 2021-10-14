@@ -73,7 +73,10 @@ public class ChargebeeSubscriptionServiceImpl extends
     private Set<ItemPrice> retrieveItemPrices() {
         final HashSet<ItemPrice> result = new HashSet<>();
         try {
-            final ListResult allActiveItemPrices = ItemPrice.list().status().is(Status.ACTIVE).request();
+            final ListResult allActiveItemPrices = ItemPrice.list()
+                    .status().is(Status.ACTIVE)
+                    .limit(100)
+                    .request();
             for (ListResult.Entry entry : allActiveItemPrices) {
                 result.add(entry.itemPrice());
             }
