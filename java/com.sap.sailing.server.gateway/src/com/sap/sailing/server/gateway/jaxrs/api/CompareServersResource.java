@@ -75,7 +75,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
     
     /**
      * The list of keys that are not compared. Represent as a path with ".{fieldname}" for field navigation and
-     * "[]" for array expansion. Example: "leaderboards[].series[].fleets[].races[].raceViewerUrls"
+     * "[]" for array expansion. Example: ".leaderboards[].series[].fleets[].races[].raceViewerUrls"
      */
     private static final String[] KEYSTOIGNORE = new String[] { "."+LeaderboardGroupConstants.TIMEPOINT,
             "."+LeaderboardGroupConstants.LEADERBOARDS+"[]."+LeaderboardNameConstants.SERIES+"[]."+LeaderboardNameConstants.FLEETS+"[]."+LeaderboardNameConstants.RACES+"[]."+LeaderboardNameConstants.RACEVIEWERURLS };
@@ -328,25 +328,25 @@ public class CompareServersResource extends AbstractSailingServerResource {
      * place, the keys by which they get compared are listed in {@link CompareServersResource#KEYLISTTOCOMPARE}.
      * 
      * @return the two (nested) {@link org.json.simple.JSONObject}'s, stripped by all fields and values that are equal
-     *         for both.
+     *         for both; {@code (null, null)} in case the two objects passed are equal.
      */
-    private Pair<Object, Object> removeDuplicateEntries(Object lg1, Object lg2) {
-        Pair<Object, Object> result = new Pair<Object, Object>(null, null);
+    Pair<Object, Object> removeDuplicateEntries(Object lg1, Object lg2) {
+        final Pair<Object, Object> result;
         if (lg1.equals(lg2)) {
-            return result;
+            result = new Pair<Object, Object>(null, null);
+        } else {
+            if (lg1 instanceof JSONObject && lg2 instanceof JSONObject) {
+                removeDuplicateEntries((JSONObject) lg1, (JSONObject) lg2);
+            } else if (lg1 instanceof JSONArray && lg2 instanceof JSONArray) {
+                removeDuplicateEntries((JSONArray) lg1, (JSONArray) lg2);
+            }
+            result = new Pair<Object, Object>(lg1, lg2);
         }
-        else if (lg1 instanceof JSONObject && lg2 instanceof JSONObject) {
-            removeDuplicateEntries((JSONObject) lg1, (JSONObject) lg2);
-        } else if (lg1 instanceof JSONArray && lg2 instanceof JSONArray) {
-            removeDuplicateEntries((JSONArray) lg1, (JSONArray) lg2);
-        }
-        result = new Pair<Object, Object>(lg1, lg2);
         return result;
     }
     
     
-    private Pair<Object, Object> removeDuplicateEntries(JSONObject lg1, JSONObject lg2) {
-        Pair<Object, Object> result = new Pair<Object, Object>(null, null);
+    private void removeDuplicateEntries(JSONObject lg1, JSONObject lg2) {
         final Iterator<Object> iter1 = lg1.keySet().iterator();
         while (iter1.hasNext()) {
             Object key = iter1.next();
@@ -354,10 +354,13 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 Object value1 = lg1.get(key);
                 Object value2 = lg2.get(key);
                 if (key.equals(LeaderboardGroupConstants.NAME) && !Util.equalsWithNull(value1, value2)) {
-                    break;
+                    break; // objects that have different values for the NAME key stop comparison here
+                    // FIXME when NAME is not the first field, other keys may already have been removed (recursively)
                 } else if (KEYSETTOPRINT.contains(key) && Util.equalsWithNull(value1, value2)) {
                     continue;
                 } else if (Util.equalsWithNull(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
+                    // keys which are to be compared and whose values are equal are removed from both sides;
+                    // in particular, this affects JSONArray values comparing equal; this requires equal element order, too
                     iter1.remove();
                     lg2.remove(key);
                 } else {
@@ -365,11 +368,9 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 }
             }
         }
-        return result;
     }
 
-    private Pair<Object, Object> removeDuplicateEntries(JSONArray json1, JSONArray json2) {
-        Pair<Object, Object> result = new Pair<Object, Object>(null, null);
+    private void removeDuplicateEntries(JSONArray json1, JSONArray json2) {
         if (json1.equals(json2)) {
             ((JSONArray) json1).clear();
             ((JSONArray) json2).clear();
@@ -378,16 +379,17 @@ public class CompareServersResource extends AbstractSailingServerResource {
             while (iter1.hasNext()) {
                 Object item = iter1.next();
                 if (((JSONArray) json2).contains(item)) {
+                    // if an equal element is found in json2, remove item from json1 and the first match from json2
                     ((JSONArray) json2).remove(item);
                     iter1.remove();
                 } else {
+                    // json2 does not contain any element that equals item; recursively remove anything from all elements in json2 that has a structural match in item (???)
                     final Iterator<Object> iter2 = ((JSONArray) json2).iterator();
-                    while (iter2.hasNext()) {
+                    while (iter2.hasNext()) { // FIXME this is "comparing" item from array json1 against all elements of json2 and removing duplicate entries; is this what we want?
                         removeDuplicateEntries(item, iter2.next());
                     }
                 }
             }
         }
-        return result;
     }
 }
