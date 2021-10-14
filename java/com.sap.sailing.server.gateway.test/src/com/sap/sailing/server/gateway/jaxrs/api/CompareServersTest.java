@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -82,6 +83,7 @@ public class CompareServersTest {
         b.put("array", bArr);
         bArr.add("123");
         bArr.add("234");
+        assertTrue(resource.equalsWithArrayOrderIgnored(a, b));
         final Pair<Object, Object> result = resource.removeDuplicateEntries(a, b);
         assertNull(result.getA());
         assertNull(result.getB());

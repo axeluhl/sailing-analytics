@@ -36,6 +36,7 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.concurrent.ConcurrentHashBag;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
@@ -332,7 +333,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
      */
     Pair<Object, Object> removeDuplicateEntries(Object lg1, Object lg2) {
         final Pair<Object, Object> result;
-        if (lg1.equals(lg2)) {
+        if (equalsWithArrayOrderIgnored(lg1, lg2)) {
             result = new Pair<Object, Object>(null, null);
         } else {
             if (lg1 instanceof JSONObject && lg2 instanceof JSONObject) {
@@ -345,8 +346,51 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return result;
     }
     
+    /**
+     * The two objects {@code a} and {@code b} are considered equal if they are the same, or if {@code a.equals(b)},
+     * or if {@code a} and {@code b} are both of type {@link JSONArray} and their elements, when thrown into a "Bag"
+     * (ignoring order but keeping track of the count of equal objects), lead to two bags comparing equals, or if
+     * {@code a} and {@code b} are both of type {@link JSONObject} and the values for all equal keys pass this test.<p>
+     * 
+     * Note that this works recursively along {@link JSONArray} and {@link JSONObject} hierarchies.
+     */
+    boolean equalsWithArrayOrderIgnored(Object a, Object b) {
+        final boolean result;
+        if (a == b || Util.equalsWithNull(a, b)) {
+            result = true;
+        } else {
+            if (a instanceof JSONArray && b instanceof JSONArray) {
+                final ConcurrentHashBag<Object> aBag = new ConcurrentHashBag<>();
+                for (final Object aObject : (JSONArray) a) {
+                    aBag.add(aObject);
+                }
+                final ConcurrentHashBag<Object> bBag = new ConcurrentHashBag<>();
+                for (final Object bObject : (JSONArray) b) {
+                    bBag.add(bObject);
+                }
+                result = aBag.equals(bBag);
+            } else if (a instanceof JSONObject && b instanceof JSONObject) {
+                if (((JSONObject) a).keySet().equals(((JSONObject) b).keySet())) {
+                    boolean allValuesRecursivelyEqual = true;
+                    for (final Object aKey : ((JSONObject) a).keySet()) {
+                        if (!equalsWithArrayOrderIgnored(((JSONObject) a).get(aKey), ((JSONObject) b).get(aKey))) {
+                            allValuesRecursivelyEqual = false;
+                            break;
+                        }
+                    }
+                    result = allValuesRecursivelyEqual;
+                } else {
+                    result = false;
+                }
+            } else {
+                result = false;
+            }
+        }
+        return result;
+    }
     
     private void removeDuplicateEntries(JSONObject lg1, JSONObject lg2) {
+        // TODO note that we assume that the LeaderboardGroupConstants.NAME attribute name is used throughout the hierarchy to identify object "names" which is used as key during object comparison
         if ((!lg1.containsKey(LeaderboardGroupConstants.NAME) && !lg2.containsKey(LeaderboardGroupConstants.NAME))
                 || Util.equalsWithNull(lg1.get(LeaderboardGroupConstants.NAME), lg2.get(LeaderboardGroupConstants.NAME))) {
             final Iterator<Object> iter1 = lg1.keySet().iterator();
@@ -355,9 +399,9 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 if (lg2.containsKey(key)) {
                     Object value1 = lg1.get(key);
                     Object value2 = lg2.get(key);
-                    if (KEYSETTOPRINT.contains(key) && Util.equalsWithNull(value1, value2)) {
+                    if (KEYSETTOPRINT.contains(key) && equalsWithArrayOrderIgnored(value1, value2)) {
                         continue;
-                    } else if (Util.equalsWithNull(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
+                    } else if (equalsWithArrayOrderIgnored(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
                         // keys which are to be compared and whose values are equal are removed from both sides;
                         // in particular, this affects JSONArray values comparing equal; this requires equal element order, too
                         iter1.remove();
@@ -371,25 +415,34 @@ public class CompareServersResource extends AbstractSailingServerResource {
     }
 
     private void removeDuplicateEntries(JSONArray json1, JSONArray json2) {
-        if (json1.equals(json2)) {
-            ((JSONArray) json1).clear();
-            ((JSONArray) json2).clear();
+        if (equalsWithArrayOrderIgnored(json1, json2)) {
+            json1.clear();
+            json2.clear();
         } else {
-            final Iterator<Object> iter1 = ((JSONArray) json1).iterator();
+            final Iterator<Object> iter1 = json1.iterator();
             while (iter1.hasNext()) {
                 Object item = iter1.next();
-                if (((JSONArray) json2).contains(item)) {
+                if (containsEqualWithArrayOrderIgnored(json2, item)) {
                     // if an equal element is found in json2, remove item from json1 and the first match from json2
-                    ((JSONArray) json2).remove(item);
+                    json2.remove(item);
                     iter1.remove();
                 } else {
                     // json2 does not contain any element that equals item; recursively remove anything from all elements in json2 that has a structural match in item (???)
-                    final Iterator<Object> iter2 = ((JSONArray) json2).iterator();
+                    final Iterator<Object> iter2 = json2.iterator();
                     while (iter2.hasNext()) { // FIXME this is "comparing" item from array json1 against all elements of json2 and removing duplicate entries; is this what we want?
                         removeDuplicateEntries(item, iter2.next());
                     }
                 }
             }
         }
+    }
+
+    private boolean containsEqualWithArrayOrderIgnored(JSONArray jsonArray, Object item) {
+        for (final Object o : jsonArray) {
+            if (equalsWithArrayOrderIgnored(o, item)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
