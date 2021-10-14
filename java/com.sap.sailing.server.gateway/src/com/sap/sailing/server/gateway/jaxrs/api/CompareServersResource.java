@@ -347,24 +347,24 @@ public class CompareServersResource extends AbstractSailingServerResource {
     
     
     private void removeDuplicateEntries(JSONObject lg1, JSONObject lg2) {
-        final Iterator<Object> iter1 = lg1.keySet().iterator();
-        while (iter1.hasNext()) {
-            Object key = iter1.next();
-            if (lg2.containsKey(key)) {
-                Object value1 = lg1.get(key);
-                Object value2 = lg2.get(key);
-                if (key.equals(LeaderboardGroupConstants.NAME) && !Util.equalsWithNull(value1, value2)) {
-                    break; // objects that have different values for the NAME key stop comparison here
-                    // FIXME when NAME is not the first field, other keys may already have been removed (recursively)
-                } else if (KEYSETTOPRINT.contains(key) && Util.equalsWithNull(value1, value2)) {
-                    continue;
-                } else if (Util.equalsWithNull(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
-                    // keys which are to be compared and whose values are equal are removed from both sides;
-                    // in particular, this affects JSONArray values comparing equal; this requires equal element order, too
-                    iter1.remove();
-                    lg2.remove(key);
-                } else {
-                    removeDuplicateEntries(value1, value2);
+        if ((!lg1.containsKey(LeaderboardGroupConstants.NAME) && !lg2.containsKey(LeaderboardGroupConstants.NAME))
+                || Util.equalsWithNull(lg1.get(LeaderboardGroupConstants.NAME), lg2.get(LeaderboardGroupConstants.NAME))) {
+            final Iterator<Object> iter1 = lg1.keySet().iterator();
+            while (iter1.hasNext()) {
+                Object key = iter1.next();
+                if (lg2.containsKey(key)) {
+                    Object value1 = lg1.get(key);
+                    Object value2 = lg2.get(key);
+                    if (KEYSETTOPRINT.contains(key) && Util.equalsWithNull(value1, value2)) {
+                        continue;
+                    } else if (Util.equalsWithNull(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
+                        // keys which are to be compared and whose values are equal are removed from both sides;
+                        // in particular, this affects JSONArray values comparing equal; this requires equal element order, too
+                        iter1.remove();
+                        lg2.remove(key);
+                    } else {
+                        removeDuplicateEntries(value1, value2);
+                    }
                 }
             }
         }

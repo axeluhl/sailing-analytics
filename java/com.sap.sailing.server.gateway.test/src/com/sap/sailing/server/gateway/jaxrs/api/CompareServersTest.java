@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
@@ -92,22 +93,30 @@ public class CompareServersTest {
      */
     @Test
     public void testDifferentNameNotFirstField() {
-        final JSONArray a = new JSONArray();
-        final JSONArray b = new JSONArray();
         final JSONObject a1 = new JSONObject();
         a1.put("abc", "def");
         a1.put("isTracked", "jkl");
         a1.put("name", "a1");
-        a.add(a1);
         final JSONObject b1 = new JSONObject();
         b1.put("name", "b1");
-        b.add(b1);
+        b1.put("abc", "ghi");
+        b1.put("isTracked", "jkl");
+        assertNotEquals(a1, b1);
+        final JSONObject a2 = new JSONObject();
+        a2.put("name", "a1");
+        a2.put("abc", "def");
+        a2.put("isTracked", "jkl");
+        assertEquals(a1, a2);
         final JSONObject b2 = new JSONObject();
+        b2.put("name", "b1");
+        b2.put("abc", "ghi");
         b2.put("isTracked", "jkl");
-        b2.put("name", "b2");
-        b.add(b2);
-        resource.removeDuplicateEntries(a, b);
-        assertNull(b2.containsKey("isTracked"));
+        assertEquals(b1, b2);
+        assertNotEquals(a2, b2);
+        resource.removeDuplicateEntries(a1, b1);
+        resource.removeDuplicateEntries(a2, b2);
+        assertEquals(a1, a2);
+        assertEquals(b1, b2);
     }
 
     /**
