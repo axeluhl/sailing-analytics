@@ -2379,4 +2379,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String yellowBrickConfiguration();
     String addYellowBrickConnection();
     String filterYellowBrickConnections();
+    String yellowBrickEvents();
 }
