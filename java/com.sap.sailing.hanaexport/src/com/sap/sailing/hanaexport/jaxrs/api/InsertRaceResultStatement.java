@@ -53,8 +53,8 @@ public class InsertRaceResultStatement extends AbstractPreparedInsertStatement<R
     protected InsertRaceResultStatement(Connection connection) throws SQLException {
         super(connection.prepareStatement(
                 "INSERT INTO SAILING.\"RaceResult\" (\"regatta\", \"raceColumn\", \"fleet\", \"competitorId\", \"points\", "+
-                        "\"discarded\", \"irm\") "+
-                        "VALUES (?, ?, ?, ?, ?, ?, ?);"));
+                        "\"discarded\", \"irm\", \"columnFactor\", \"netPoints\") "+
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"));
     }
 
     @Override
@@ -68,5 +68,7 @@ public class InsertRaceResultStatement extends AbstractPreparedInsertStatement<R
         getPreparedStatement().setBoolean(6, raceResult.getLeaderboard().isDiscarded(raceResult.getCompetitor(), raceResult.getRaceColumn(), raceResult.getNow()));
         final MaxPointsReason maxPointsReason = raceResult.getLeaderboard().getMaxPointsReason(raceResult.getCompetitor(), raceResult.getRaceColumn(), raceResult.getNow());
         getPreparedStatement().setString(7, (maxPointsReason == null ? MaxPointsReason.NONE : maxPointsReason).name());
+        setDouble(8, raceResult.getLeaderboard().getScoringScheme().getScoreFactor(raceResult.getRaceColumn()));
+        setDouble(9, raceResult.getLeaderboard().getNetPoints(raceResult.getCompetitor(), raceResult.getRaceColumn(), raceResult.getNow()));
     }
 }

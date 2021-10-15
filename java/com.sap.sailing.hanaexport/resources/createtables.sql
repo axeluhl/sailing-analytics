@@ -65,6 +65,8 @@ CREATE TABLE SAILING."RaceResult" (
         "points"        DOUBLE,
         "discarded"	BOOLEAN,
         "irm"           NVARCHAR(4),
+        "columnFactor"	DOUBLE,
+        "netPoints"	DOUBLE,
         PRIMARY KEY ("regatta", "raceColumn", "competitorId"),
         FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id")
 );

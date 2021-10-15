@@ -84,14 +84,14 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
         for (String locale : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
             localeListBox.addItem(GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(locale), locale == null ? "" : locale);
         }
-        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true);
+        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, "audio/*,video/*");
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 validateAndUpdate();
             }
         });
-        thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true);
+        thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, "audio/*,video/*");
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaTagConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
