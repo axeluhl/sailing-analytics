@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 
 public class SubscriptionPrice implements Serializable{
     private static final long serialVersionUID = -1448071130685381256L;
+    private String priceId;
     private BigDecimal price;
     private PaymentInterval paymentInterval;
     
@@ -14,8 +15,9 @@ public class SubscriptionPrice implements Serializable{
     @Deprecated
     public SubscriptionPrice() {}
     
-    public SubscriptionPrice(BigDecimal price, PaymentInterval paymentInterval) {
+    public SubscriptionPrice(String priceId, BigDecimal price, PaymentInterval paymentInterval) {
         super();
+        this.priceId = priceId;
         this.price = price;
         this.paymentInterval = paymentInterval;
     }
@@ -35,6 +37,14 @@ public class SubscriptionPrice implements Serializable{
     public void setPaymentInterval(PaymentInterval paymentInterval) {
         this.paymentInterval = paymentInterval;
     }
+    
+    public String getPriceId() {
+        return priceId;
+    }
+
+    public void setPriceId(String priceId) {
+        this.priceId = priceId;
+    }
 
     public enum PaymentInterval {
         YEAR, MONTH, WEEK, DAY
@@ -52,6 +62,7 @@ public class SubscriptionPrice implements Serializable{
         int result = 1;
         result = prime * result + ((paymentInterval == null) ? 0 : paymentInterval.hashCode());
         result = prime * result + ((price == null) ? 0 : price.hashCode());
+        result = prime * result + ((priceId == null) ? 0 : priceId.hashCode());
         return result;
     }
 
@@ -71,7 +82,12 @@ public class SubscriptionPrice implements Serializable{
                 return false;
         } else if (!price.equals(other.price))
             return false;
+        if (priceId == null) {
+            if (other.priceId != null)
+                return false;
+        } else if (!priceId.equals(other.priceId))
+            return false;
         return true;
     }
-    
+
 }
