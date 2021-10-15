@@ -71,7 +71,8 @@ public class CompareServersResource extends AbstractSailingServerResource {
             LeaderboardNameConstants.COLOR, LeaderboardNameConstants.ORDERING, LeaderboardNameConstants.RACES,
             LeaderboardNameConstants.ISMEDALRACE, LeaderboardNameConstants.ISTRACKED,
             LeaderboardNameConstants.REGATTANAME, LeaderboardNameConstants.TRACKEDRACENAME,
-            LeaderboardNameConstants.HASGPSDATA, LeaderboardNameConstants.HASWINDDATA };
+            LeaderboardNameConstants.HASGPSDATA, LeaderboardNameConstants.HASWINDDATA,
+            LeaderboardGroupConstants.NAME };
     private static final Set<String> KEYSETTOCOMPARE = new HashSet<>(Arrays.asList(KEYLISTTOCOMPARE));
     
     /**
@@ -243,9 +244,14 @@ public class CompareServersResource extends AbstractSailingServerResource {
     private Pair<Object, Object> fetchLeaderboardgroupDetailsAndRemoveDuplicates(String server1, String server2,
             String leaderboardgroupId, String bearer1, String bearer2) throws Exception {
         Object lgdetail1 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server1), bearer1);
-        lgdetail1 = removeUnnecessaryFields(lgdetail1);
         Object lgdetail2 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server2), bearer2);
-        lgdetail2 = removeUnnecessaryFields(lgdetail2);
+        Pair<Object, Object> result = removeUnnecessaryAndDuplicateFields(lgdetail1, lgdetail2);
+        return result;
+    }
+
+    Pair<Object, Object> removeUnnecessaryAndDuplicateFields(Object lgdetail1, Object lgdetail2) {
+        removeUnnecessaryFields(lgdetail1);
+        removeUnnecessaryFields(lgdetail2);
         Pair<Object, Object> result = removeDuplicateEntries(lgdetail1, lgdetail2);
         return result;
     }
@@ -286,15 +292,17 @@ public class CompareServersResource extends AbstractSailingServerResource {
     
     /**
      * Call this for the top-level object. It invokes {@link #removeUnnecessaryFields(Object, String)} with an
-     * empty path string to start with.
+     * empty path string to start with, removing fields to be ignored or not to be compared in-place, modifying
+     * the {@code json} object.
      */
-    private Object removeUnnecessaryFields(Object json) {
-        return removeUnnecessaryFields(json, "");
+    private void removeUnnecessaryFields(Object json) {
+        removeUnnecessaryFields(json, "");
     }
     
     /**
      * Strips a (nested) {@link org.json.simple.JSONObject} from the fields specified in
-     * {@link CompareServersResource#KEYSTOIGNORE}.
+     * {@link CompareServersResource#KEYSTOIGNORE}, removing fields to be ignored or not to be compared in-place,
+     * modifying the {@code json} object.
      * 
      * @param path
      *            the path leading to the {@code json} object; field access is represented by ".{fieldname}" whereas
@@ -302,13 +310,15 @@ public class CompareServersResource extends AbstractSailingServerResource {
      *
      * @return The modified {@link org.json.simple.JSONObject}.
      */
-    private Object removeUnnecessaryFields(Object json, String path) {
+    private void removeUnnecessaryFields(Object json, String path) {
         if (json instanceof JSONObject) {
             Iterator<Object> iter = ((JSONObject) json).keySet().iterator();
             while (iter.hasNext()) {
                 Object key = iter.next();
                 final String nextPath = path+"."+key;
-                if (KEYSETTOIGNORE.contains(nextPath)) {
+                // remove keys that are explicitly to be ignored based on their full path,
+                // as well as those that are not to be compared anywhere in the hierarchy
+                if (KEYSETTOIGNORE.contains(nextPath) || !KEYSETTOCOMPARE.contains(key)) {
                     iter.remove();
                 } else {
                     Object value = ((JSONObject) json).get(key);
@@ -321,7 +331,6 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 removeUnnecessaryFields(((JSONArray) json).get(i), nextPath);
             }
         }
-        return json;
     }
 
     /**
@@ -331,7 +340,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
      * @return the two (nested) {@link org.json.simple.JSONObject}'s, stripped by all fields and values that are equal
      *         for both; {@code (null, null)} in case the two objects passed are equal.
      */
-    Pair<Object, Object> removeDuplicateEntries(Object lg1, Object lg2) {
+    private Pair<Object, Object> removeDuplicateEntries(Object lg1, Object lg2) {
         final Pair<Object, Object> result;
         if (equalsWithArrayOrderIgnored(lg1, lg2)) {
             result = new Pair<Object, Object>(null, null);
@@ -389,23 +398,24 @@ public class CompareServersResource extends AbstractSailingServerResource {
         return result;
     }
     
-    private void removeDuplicateEntries(JSONObject lg1, JSONObject lg2) {
+    private void removeDuplicateEntries(JSONObject jsonObject1, JSONObject jsonObject2) {
         // TODO note that we assume that the LeaderboardGroupConstants.NAME attribute name is used throughout the hierarchy to identify object "names" which is used as key during object comparison
-        if ((!lg1.containsKey(LeaderboardGroupConstants.NAME) && !lg2.containsKey(LeaderboardGroupConstants.NAME))
-                || Util.equalsWithNull(lg1.get(LeaderboardGroupConstants.NAME), lg2.get(LeaderboardGroupConstants.NAME))) {
-            final Iterator<Object> iter1 = lg1.keySet().iterator();
+        if ((!jsonObject1.containsKey(LeaderboardGroupConstants.NAME) && !jsonObject2.containsKey(LeaderboardGroupConstants.NAME))
+                || Util.equalsWithNull(jsonObject1.get(LeaderboardGroupConstants.NAME), jsonObject2.get(LeaderboardGroupConstants.NAME))) {
+            final Iterator<Object> iter1 = jsonObject1.keySet().iterator();
             while (iter1.hasNext()) {
                 Object key = iter1.next();
-                if (lg2.containsKey(key)) {
-                    Object value1 = lg1.get(key);
-                    Object value2 = lg2.get(key);
+                if (jsonObject2.containsKey(key)) {
+                    Object value1 = jsonObject1.get(key);
+                    Object value2 = jsonObject2.get(key);
                     if (KEYSETTOPRINT.contains(key) && equalsWithArrayOrderIgnored(value1, value2)) {
                         continue;
-                    } else if (equalsWithArrayOrderIgnored(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
+                    } else if (!key.equals(LeaderboardGroupConstants.NAME) &&
+                            equalsWithArrayOrderIgnored(value1, value2) && KEYSETTOCOMPARE.contains(key)) {
                         // keys which are to be compared and whose values are equal are removed from both sides;
-                        // in particular, this affects JSONArray values comparing equal; this requires equal element order, too
+                        // never remove the "name" key if present because it helps identifying the differing objects
                         iter1.remove();
-                        lg2.remove(key);
+                        jsonObject2.remove(key);
                     } else {
                         removeDuplicateEntries(value1, value2);
                     }
@@ -419,30 +429,52 @@ public class CompareServersResource extends AbstractSailingServerResource {
             json1.clear();
             json2.clear();
         } else {
-            final Iterator<Object> iter1 = json1.iterator();
-            while (iter1.hasNext()) {
-                Object item = iter1.next();
-                if (containsEqualWithArrayOrderIgnored(json2, item)) {
-                    // if an equal element is found in json2, remove item from json1 and the first match from json2
-                    json2.remove(item);
-                    iter1.remove();
+            final Map<String, JSONObject> jsonObjects1KeyedByName = getJsonObjectsByName(json1);
+            final Map<String, JSONObject> jsonObjects2KeyedByName = getJsonObjectsByName(json2);
+            int i = 0;
+            while (i < json1.size()) {
+                if (jsonObjects1KeyedByName == null || jsonObjects2KeyedByName == null) {
+                    // no consistent "name" field for all objects, or no JSONObject content; compare positionally
+                    if (i < json2.size()) {
+                        if (equalsWithArrayOrderIgnored(json1.get(i), json2.get(i))) {
+                            json1.remove(i);
+                            json2.remove(i);
+                        } else {
+                            removeDuplicateEntries(json1.get(i), json2.get(i));
+                            i++;
+                        }
+                    } else {
+                        i++; // could also use break, but break is so unstructured...
+                    }
                 } else {
-                    // json2 does not contain any element that equals item; recursively remove anything from all elements in json2 that has a structural match in item (???)
-                    final Iterator<Object> iter2 = json2.iterator();
-                    while (iter2.hasNext()) { // FIXME this is "comparing" item from array json1 against all elements of json2 and removing duplicate entries; is this what we want?
-                        removeDuplicateEntries(item, iter2.next());
+                    // content is JSONObject only, consistently providing a "name" field for all objects; compare by name:
+                    final JSONObject item1 = (JSONObject) json1.get(i);
+                    final String name = item1.get(LeaderboardGroupConstants.NAME).toString();
+                    final JSONObject item2 = jsonObjects2KeyedByName.get(name);
+                    if (equalsWithArrayOrderIgnored(item1, item2)) {
+                        // if an equal element is found in json2, remove item from both arrays
+                        json1.remove(i);
+                        json2.remove(item2);
+                    } else {
+                        removeDuplicateEntries(item1, item2);
+                        i++;
                     }
                 }
             }
         }
     }
 
-    private boolean containsEqualWithArrayOrderIgnored(JSONArray jsonArray, Object item) {
+    /**
+     * @return a map in case {@code jsonArray} contains only {@link JSONObject}s that all have a {@code "name"}
+     * field, mapping the {@link JSONObject}s by the value of that {@code "name"} field; {@code null} otherwise.
+     */
+    private Map<String, JSONObject> getJsonObjectsByName(JSONArray jsonArray) {
+        final Map<String, JSONObject> result = new HashMap<>();
         for (final Object o : jsonArray) {
-            if (equalsWithArrayOrderIgnored(o, item)) {
-                return true;
+            if (o instanceof JSONObject && ((JSONObject) o).containsKey(LeaderboardGroupConstants.NAME)) {
+                result.put(((JSONObject) o).get(LeaderboardGroupConstants.NAME).toString(), ((JSONObject) o));
             }
         }
-        return false;
+        return result.size() == jsonArray.size() ? result : null;
     }
 }
