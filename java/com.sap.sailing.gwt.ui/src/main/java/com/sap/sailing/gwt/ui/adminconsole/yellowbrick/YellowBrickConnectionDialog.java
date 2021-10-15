@@ -73,13 +73,10 @@ public class YellowBrickConnectionDialog extends DataEntryDialog<YellowBrickConf
 
     @Override
     protected YellowBrickConfigurationWithSecurityDTO getResult() {
-        final String jsonURL = raceURLTextBox.getValue();
-        final String liveDataURI = liveURITextBox.getValue();
-        final String storedDataURI = storedURITextBox.getValue();
-        final String courseDesignUpdateURI = tracTracUpdateURITextBox.getValue();
+        final String raceURL = raceURLTextBox.getValue();
         final String username = usernameTextBox.getValue();
         final String password = passwordTextBox.getValue();
-        return new YellowBrickConfigurationWithSecurityDTO(/* security information */ null, name, username, password, creatorName);
+        return new YellowBrickConfigurationWithSecurityDTO(/* security information */ null, name, raceURL, username, password, creatorName);
     }
 
     @Override

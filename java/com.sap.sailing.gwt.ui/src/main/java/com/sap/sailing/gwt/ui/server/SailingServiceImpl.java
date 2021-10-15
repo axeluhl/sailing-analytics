@@ -314,6 +314,8 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.windfinder.Spot;
 import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickConfiguration;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRace;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapterFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
@@ -398,6 +400,8 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CommonMarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
@@ -6288,5 +6292,27 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             logger.log(Level.WARNING, "Unable to determine admin change log size", e);
             return 0;
         }
+    }
+
+    @Override
+    public List<YellowBrickConfigurationWithSecurityDTO> getPreviousYellowBrickConfigurations() {
+        final Iterable<YellowBrickConfiguration> configs = getYellowBrickTrackingAdapter().getYellowBrickConfigurations();
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                configs,
+                ybConfig -> {
+                    final YellowBrickConfigurationWithSecurityDTO config = new YellowBrickConfigurationWithSecurityDTO(/* security info */ null,
+                        ybConfig.getName(), ybConfig.getRaceUrl(),
+                        ybConfig.getUsername(), ybConfig.getPassword(), ybConfig.getCreatorName());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);
+                    return config;
+                });
+    }
+
+    @Override
+    public Pair<String, List<YellowBrickRaceRecordDTO>> listYellowBrickRacesInEvent(String raceUrl) throws Exception {
+        final YellowBrickRace raceMetadata = getYellowBrickTrackingAdapter().getRaceMetadata(raceUrl);
+        return new Pair<>(raceMetadata.getRaceUrl(),
+                Collections.singletonList(new YellowBrickRaceRecordDTO(raceMetadata.getRaceUrl(), // TODO can we obtain a clear-text name?
+                        raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId())))); // TODO also copy number of competitors and information about last fix time point
     }
 }

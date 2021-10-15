@@ -88,6 +88,8 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -577,4 +579,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             throws UnauthorizedException, NotFoundException;
     
     Integer getAdminConsoleChangeLogSize();
+
+    List<YellowBrickConfigurationWithSecurityDTO> getPreviousYellowBrickConfigurations();
+
+    Pair<String, List<YellowBrickRaceRecordDTO>> listYellowBrickRacesInEvent(String raceUrl) throws Exception;
 }

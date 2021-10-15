@@ -288,6 +288,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
@@ -3888,5 +3889,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
             }
         }
+    }
+
+    @Override
+    public void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> singletonList) {
+        // TODO Implement SailingServiceWriteImpl.deleteYellowBrickConfigurations(...)
+    }
+
+    @Override
+    public void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject) {
+        // TODO Implement SailingServiceWriteImpl.updateYellowBrickConfiguration(...)
     }
 }

@@ -11,6 +11,16 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public interface YellowBrickRace {
+    static String YELLOW_BRICK_RACE_ID_PREFIX = "YellowBrick-";
+    
+    /**
+     * Obtains a race ID that is intended to be globally unique; this is supported by prefixing the {@link #getRaceUrl() race URL}
+     * with the "YellowBrick-" prefix.
+     */
+    default String getRaceId() {
+        return YELLOW_BRICK_RACE_ID_PREFIX + getRaceUrl();
+    }
+    
     String getRaceUrl();
 
     /**

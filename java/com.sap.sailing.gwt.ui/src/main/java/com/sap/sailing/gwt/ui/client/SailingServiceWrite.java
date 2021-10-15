@@ -84,6 +84,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
@@ -706,4 +707,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             throws UnauthorizedException, DoesNotHaveRegattaLogException, TransformationException, NotFoundException;
 
     void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) throws UnauthorizedException;
+
+    void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> singletonList);
+
+    void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject);
 }

@@ -80,7 +80,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
@@ -630,16 +629,11 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, 
             AsyncCallback<MarkTrackDTO> callback);
 
-    void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
+    void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> callback);
 
     void updateServerConfiguration(ServerConfigurationDTO serverConfiguration, AsyncCallback<Void> callback);
 
-    void deleteYellowBrickConfigurations(Set<YellowBrickConfigurationWithSecurityDTO> selectedSet,
-            AsyncCallback<Void> asyncCallback);
+    void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> selectedSet, AsyncCallback<Void> callback);
 
-    void deleteYellowBrickConfigurations(List<YellowBrickConfigurationWithSecurityDTO> singletonList,
-            AsyncCallback<Void> asyncCallback);
-
-    void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject,
-            MarkedAsyncCallback<Void> markedAsyncCallback);
+    void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
 }

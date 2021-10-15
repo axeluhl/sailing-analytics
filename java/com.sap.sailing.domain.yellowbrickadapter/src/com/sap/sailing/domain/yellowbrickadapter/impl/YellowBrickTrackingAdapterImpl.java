@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickConfiguration;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRace;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRaceTrackingConnectivityParams;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
@@ -84,5 +85,11 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     @Override
     public PositionsDocument getStoredData(String raceUrl) throws MalformedURLException, IOException, ParseException {
         return getPositionsDocumentForUrl(getUrlForAllData(raceUrl));
+    }
+
+    @Override
+    public Iterable<YellowBrickConfiguration> getYellowBrickConfigurations() {
+        // TODO
+        return null;
     }
 }

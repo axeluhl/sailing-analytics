@@ -1,16 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -25,7 +22,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -36,23 +32,19 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.FlushableCellTable;
-import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
-import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
@@ -67,16 +59,13 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 public class YellowBrickEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<YellowBrickConfigurationWithSecurityDTO> {
     private final ErrorReporter errorReporter;
     
-    private final List<YellowBrickRaceRecordDTO> availableYellowBrickRaces;
-    
     private final ListDataProvider<YellowBrickRaceRecordDTO> raceList;
     
     private YellowBrickConnectionTableWrapper connectionsTable;
 
     private Label loadingMessageLabel;
 
-    private LabeledAbstractFilterablePanel<YellowBrickRaceRecordDTO> racesFilterablePanel;
-    private FlushableCellTable<YellowBrickRaceRecordDTO> racesTable;
+    private TableWrapperWithMultiSelectionAndFilter<YellowBrickRaceRecordDTO, StringMessages, AdminConsoleTableResources> racesTableWrapper;
 
     private final UserService userService;
     private final CellTableWithCheckboxResources tableResources;
@@ -89,7 +78,6 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         this.errorReporter = presenter.getErrorReporter();
         this.sailingServiceWrite = presenter.getSailingService();
         this.tableResources = tableResources;
-        this.availableYellowBrickRaces = new ArrayList<>();
         this.raceList = new ListDataProvider<>();
         this.setWidget(createContent());
     }
@@ -126,11 +114,9 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
                         new DialogCallback<YellowBrickConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(YellowBrickConfigurationWithSecurityDTO editedConnection) {
-                                sailingServiceWrite.createTracTracConfiguration(editedConnection.getName(),
-                                        editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
-                                        editedConnection.getStoredDataURI(),
-                                        editedConnection.getCourseDesignUpdateURI(),
-                                        editedConnection.getTracTracUsername(), editedConnection.getTracTracPassword(),
+                                sailingServiceWrite.createYellowBrickConfiguration(editedConnection.getName(),
+                                        editedConnection.getRaceUrl(),
+                                        editedConnection.getUsername(), editedConnection.getPassword(),
                                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                             @Override
                                             public void onFailure(Throwable caught) {
@@ -247,106 +233,38 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         layoutTable.setWidget(++row, 1, ignoreTracTracMarkPassingsCheckbox);
         layoutTable.setWidget(++row, 1, useOfficialResultsToUpdateRaceLogsCheckbox);
         
-        // Filter
-        Label racesFilterLabel = new Label(stringMessages.filterRaces() + ":");
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-        racesTable = new FlushableCellTable<YellowBrickRaceRecordDTO>(10000, tableResources);
-        racesTable.ensureDebugId("TrackableRacesCellTable");
-        this.racesFilterablePanel = new LabeledAbstractFilterablePanel<YellowBrickRaceRecordDTO>(racesFilterLabel,
-                availableYellowBrickRaces, raceList, stringMessages) {
-            @Override
-            public List<String> getSearchableStrings(YellowBrickRaceRecordDTO t) {
-                List<String> strings = new ArrayList<String>();
-                strings.add(t.getName());
-                strings.add(t.regattaName);
-                if (t.boatClassNames != null) {
-                    for (String boatClassName : t.boatClassNames) {
-                        strings.add(boatClassName);
-                    }
-                }
-                return strings;
-            }
-
-            @Override
-            public AbstractCellTable<YellowBrickRaceRecordDTO> getCellTable() {
-                return racesTable;
-            }
-        };
-        racesFilterablePanel.getTextBox().ensureDebugId("TrackableRacesFilterTextBox");
-        layoutTable.setWidget(++row, 0, racesFilterLabel);
-        layoutTable.setWidget(row, 1, racesFilterablePanel);
-
-        // Races
-        TextColumn<YellowBrickRaceRecordDTO> regattaNameColumn = new TextColumn<YellowBrickRaceRecordDTO>() {
-            @Override
-            public String getValue(YellowBrickRaceRecordDTO object) {
-                return object.regattaName;
-            }
-        };
-        regattaNameColumn.setSortable(false);
-        TextColumn<YellowBrickRaceRecordDTO> boatClassColumn = new TextColumn<YellowBrickRaceRecordDTO>() {
-            @Override
-            public String getValue(YellowBrickRaceRecordDTO object) {
-                return getBoatClassNamesAsString(object);
-            }
-        };
-        boatClassColumn.setSortable(true);
-        TextColumn<YellowBrickRaceRecordDTO> raceNameColumn = new TextColumn<YellowBrickRaceRecordDTO>() {
-            @Override
-            public String getValue(YellowBrickRaceRecordDTO object) {
-                return object.getName();
-            }
-        };
-        raceNameColumn.setSortable(true);
-        TextColumn<YellowBrickRaceRecordDTO> raceStartTrackingColumn = new TextColumn<YellowBrickRaceRecordDTO>() {
-            @Override
-            public String getValue(YellowBrickRaceRecordDTO object) {
-                return object.trackingStartTime == null ? "" : dateFormatter.render(object.trackingStartTime) + " "
-                        + timeFormatter.render(object.trackingStartTime);
-            }
-        };
-        raceStartTrackingColumn.setSortable(true);
-        TextColumn<YellowBrickRaceRecordDTO> raceStatusColumn = new TextColumn<YellowBrickRaceRecordDTO>() {
-            @Override
-            public String getValue(YellowBrickRaceRecordDTO object) {
-                return object.raceStatus;
-            }
-        };
-        raceStatusColumn.setSortable(true);
-        TextColumn<YellowBrickRaceRecordDTO> raceVisibilityColumn = new TextColumn<YellowBrickRaceRecordDTO>() {
-            @Override
-            public String getValue(YellowBrickRaceRecordDTO object) {
-                return object.raceVisibility;
-            }
-        };
-        raceVisibilityColumn.setSortable(true);
-        SelectionCheckboxColumn<YellowBrickRaceRecordDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<YellowBrickRaceRecordDTO>(
-                tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
-                tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                new EntityIdentityComparator<YellowBrickRaceRecordDTO>() {
+        racesTableWrapper = new TableWrapperWithMultiSelectionAndFilter<YellowBrickRaceRecordDTO, StringMessages, AdminConsoleTableResources>(
+                stringMessages, errorReporter, /* enablePager */ false,
+                Optional.of(new EntityIdentityComparator<YellowBrickRaceRecordDTO>() {
                     @Override
                     public boolean representSameEntity(YellowBrickRaceRecordDTO dto1, YellowBrickRaceRecordDTO dto2) {
-                        return dto1.id.equals(dto2.id);
+                        return dto1.raceUrl.equals(dto2.raceUrl);
                     }
                     @Override
                     public int hashCode(YellowBrickRaceRecordDTO t) {
-                        return t.id.hashCode();
+                        return t.raceUrl.hashCode();
                     }
-                }, racesFilterablePanel.getAllListDataProvider(), racesTable);
-        racesTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
-        racesTable.addColumn(regattaNameColumn, stringMessages.event());
-        racesTable.addColumn(raceNameColumn, stringMessages.race());
-        racesTable.addColumn(boatClassColumn, stringMessages.boatClass());
-        racesTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
-        racesTable.addColumn(raceStatusColumn, stringMessages.raceStatusColumn());
-        racesTable.addColumn(raceVisibilityColumn, stringMessages.raceVisibilityColumn());
-        racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(selectionCheckboxColumn, this.raceList.getList(),
-                raceNameColumn, boatClassColumn, raceStartTrackingColumn, raceStatusColumn, raceVisibilityColumn));
-        racesTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
-        racesTable.setWidth("100%");
-        raceList.addDataDisplay(racesTable);
-        layoutTable.setWidget(++row, 0, racesTable);
+                }), tableResources, Optional.empty(), Optional.empty(), /* filter checkbox label */ stringMessages.filterRaces()) {
+                @Override
+                public List<String> getSearchableStrings(YellowBrickRaceRecordDTO t) {
+                    List<String> strings = new ArrayList<String>();
+                    strings.add(t.getName());
+                    strings.add(t.regattaName);
+                    strings.add(t.raceUrl);
+                    return strings;
+                }
+            };
+        racesTableWrapper.getTable().ensureDebugId("YellowBrickTrackableRacesCellTable");
+
+        // Races
+        TextColumn<YellowBrickRaceRecordDTO> regattaNameColumn = new AbstractSortableTextColumn<>(o->o.regattaName, racesTableWrapper.getColumnSortHandler());
+        TextColumn<YellowBrickRaceRecordDTO> raceNameColumn = new AbstractSortableTextColumn<>(o->o.getName(), racesTableWrapper.getColumnSortHandler());
+        TextColumn<YellowBrickRaceRecordDTO> raceUrlColumn = new AbstractSortableTextColumn<>(o->o.raceUrl, racesTableWrapper.getColumnSortHandler());
+        racesTableWrapper.addColumn(regattaNameColumn, stringMessages.event());
+        racesTableWrapper.addColumn(raceNameColumn, stringMessages.race());
+        racesTableWrapper.addColumn(raceUrlColumn, stringMessages.raceUrl());
+        layoutTable.setWidget(++row, 0, racesTableWrapper);
         cellFormatter.setColSpan(row, 0, 2);
         final Button startTrackingButton = new Button(stringMessages.startTracking());
         startTrackingButton.setEnabled(false);
@@ -356,10 +274,6 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         startTrackingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Duration offsetToStartTimeOfSimulatedRace = null;
-                if (simulationPanel.isSimulate()) {
-                    offsetToStartTimeOfSimulatedRace = getMillisecondsDurationFromMinutesAsString(simulationPanel.getOffsetToStartTimeInMinutes());
-                }
                 trackSelectedRaces(trackWindCheckBox.getValue(), correctWindCheckBox.getValue());
             }
         });
@@ -372,9 +286,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         CaptionPanel trackedRacesPanel = new CaptionPanel(stringMessages.trackedRaces());
         trackedRacesPanel.ensureDebugId("TrackedRacesSection");
         trackedRacesPanel.setStyleName("bold");
-        
         trackedRacesPanel.setContentWidget(this.trackedRacesListComposite);
-
         return trackedRacesPanel;
     }
     
@@ -382,72 +294,10 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         this.errorReporter.reportError(message);
     }
     
-    private ListHandler<YellowBrickRaceRecordDTO> getRaceTableColumnSortHandler(SelectionCheckboxColumn<YellowBrickRaceRecordDTO> selectionCheckboxColumn,
-            List<YellowBrickRaceRecordDTO> raceRecords, Column<YellowBrickRaceRecordDTO, ?> nameColumn,
-            Column<YellowBrickRaceRecordDTO, ?> boatClassColumn, Column<YellowBrickRaceRecordDTO, ?> trackingStartColumn, Column<YellowBrickRaceRecordDTO, ?> raceStatusColumn,
-            Column<YellowBrickRaceRecordDTO, ?> raceVisibilityColumn) {
-        ListHandler<YellowBrickRaceRecordDTO> result = new ListHandler<YellowBrickRaceRecordDTO>(raceRecords);
-        result.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
-        result.setComparator(nameColumn, new Comparator<YellowBrickRaceRecordDTO>() {
-            @Override
-            public int compare(YellowBrickRaceRecordDTO o1, YellowBrickRaceRecordDTO o2) {
-                return new NaturalComparator().compare(o1.getName(), o2.getName());
-            }
-        });
-        result.setComparator(boatClassColumn, new Comparator<YellowBrickRaceRecordDTO>() {
-            @Override
-            public int compare(YellowBrickRaceRecordDTO o1, YellowBrickRaceRecordDTO o2) {
-                return new NaturalComparator(false).compare(getBoatClassNamesAsString(o1), getBoatClassNamesAsString(o2));
-            }
-        });
-        result.setComparator(trackingStartColumn, new Comparator<YellowBrickRaceRecordDTO>() {
-            @Override
-            public int compare(YellowBrickRaceRecordDTO o1, YellowBrickRaceRecordDTO o2) {
-                return o1.trackingStartTime == null ? -1 : o2.trackingStartTime == null ? 1 : o1.trackingStartTime
-                        .compareTo(o2.trackingStartTime);
-            }
-        });
-        result.setComparator(raceStatusColumn, new Comparator<YellowBrickRaceRecordDTO>() {
-            @Override
-            public int compare(YellowBrickRaceRecordDTO o1, YellowBrickRaceRecordDTO o2) {
-                return o1.raceStatus == null ? -1 : o2.raceStatus == null ? 1 : o1.raceStatus
-                        .compareTo(o2.raceStatus);
-            }
-        });
-        result.setComparator(raceVisibilityColumn, new Comparator<YellowBrickRaceRecordDTO>() {
-            @Override
-            public int compare(YellowBrickRaceRecordDTO o1, YellowBrickRaceRecordDTO o2) {
-                return o1.raceVisibility == null ? -1 : o2.raceVisibility == null ? 1 : o1.raceVisibility
-                        .compareTo(o2.raceVisibility);
-            }
-        });
-        return result;
-    }
-    
-    private String getBoatClassNamesAsString(YellowBrickRaceRecordDTO object) {
-        StringBuilder boatClassNames = new StringBuilder();
-        for (String boatClassName : object.boatClassNames) {
-            boatClassNames.append(boatClassName);
-            boatClassNames.append(", ");
-        }
-        return boatClassNames.substring(0, boatClassNames.length() - 2);
-    }
-    
-    private Duration getMillisecondsDurationFromMinutesAsString(String minutesAsString) {
-        Duration result = null;
-        if (minutesAsString != null) {
-            Double minutesAsDouble = Double.parseDouble(minutesAsString);
-            if (minutesAsDouble != null) {
-                result = Duration.ONE_MINUTE.times(minutesAsDouble.longValue());
-            }
-        }
-        return result;
-    }
-
     private void fillRaces(final SailingServiceAsync sailingService) {
         final Set<YellowBrickConfigurationWithSecurityDTO> selectedConnections = connectionsTable.getSelectionModel()
                 .getSelectedSet();
-        if (selectedConnections.size() == 1) {
+        if (!selectedConnections.isEmpty()) {
             YellowBrickConfigurationWithSecurityDTO selectedConnection = selectedConnections.iterator().next();
             sailingService.listYellowBrickRacesInEvent(selectedConnection.getRaceUrl(),
                     new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<YellowBrickRaceRecordDTO>>>(
@@ -460,22 +310,10 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
 
                     @Override
                     public void onSuccess(final com.sap.sse.common.Util.Pair<String, List<YellowBrickRaceRecordDTO>> result) {
-                        loadingMessageLabel.setText("Building resultset and saving configuration...");
-                        YellowBrickEventManagementPanel.this.availableYellowBrickRaces.clear();
-                                    final YellowBrickConfigurationWithSecurityDTO updatedConnection = new YellowBrickConfigurationWithSecurityDTO(
-                                            selectedConnection,
-                                            result.getA());
-                        final List<YellowBrickRaceRecordDTO> eventRaces = result.getB();
-                        if (eventRaces != null) {
-                            YellowBrickEventManagementPanel.this.availableYellowBrickRaces.addAll(eventRaces);
-                            racesFilterablePanel.updateAll(availableYellowBrickRaces);
-                        }
-                        List<YellowBrickRaceRecordDTO> races = YellowBrickEventManagementPanel.this.raceList.getList();
-                        races.clear();
-                        races.addAll(YellowBrickEventManagementPanel.this.availableYellowBrickRaces);
-                        YellowBrickEventManagementPanel.this.racesFilterablePanel.getTextBox().setText("");
-                        YellowBrickEventManagementPanel.this.racesTable.setPageSize(races.size());
-                        loadingMessageLabel.setText("");
+                        racesTableWrapper.refresh(result.getB());
+                        final YellowBrickConfigurationWithSecurityDTO updatedConnection = new YellowBrickConfigurationWithSecurityDTO(
+                                selectedConnection,
+                                result.getA());
                         // store a successful configuration in the database for later retrieval
                         sailingServiceWrite.updateYellowBrickConfiguration(updatedConnection,
                                 new MarkedAsyncCallback<Void>(
@@ -511,27 +349,25 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         //                                otherwise, warn user if a "persistent" regatta with the same boat class already exists
         //                                because it may be an accidental omission to select that regatta for loading
         List<YellowBrickRaceRecordDTO> allRaces = raceList.getList();
-        SelectionModel<? super YellowBrickRaceRecordDTO> selectionModel = racesTable.getSelectionModel();
+        final RefreshableMultiSelectionModel<YellowBrickRaceRecordDTO> selectionModel = racesTableWrapper.getSelectionModel();
         final List<YellowBrickRaceRecordDTO> selectedRaces = new ArrayList<>();
         for (YellowBrickRaceRecordDTO race : allRaces) {
             if (selectionModel.isSelected(race)) {
                 selectedRaces.add(race);
             }
         }
-        if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingServiceWrite.trackWithYellowBrick(regattaIdentifier, selectedRaces, trackWind, correctWind,
-                    username, password, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            reportError(stringMessages.errorTryingToRegisterRacesForTracking(selectedRaces.toString(), caught.getMessage()));
-                        }
+        sailingServiceWrite.trackWithYellowBrick(regattaIdentifier, selectedRaces, trackWind, correctWind,
+                username, password, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        reportError(stringMessages.errorTryingToRegisterRacesForTracking(selectedRaces.toString(), caught.getMessage()));
+                    }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            YellowBrickEventManagementPanel.this.presenter.getRegattasRefresher().reloadAndCallFillAll();
-                        }
-                    }));
-        }
+                    @Override
+                    public void onSuccess(Void result) {
+                        YellowBrickEventManagementPanel.this.presenter.getRegattasRefresher().reloadAndCallFillAll();
+                    }
+                }));
     }
     
     public void refreshYellowBrickConnectors() {

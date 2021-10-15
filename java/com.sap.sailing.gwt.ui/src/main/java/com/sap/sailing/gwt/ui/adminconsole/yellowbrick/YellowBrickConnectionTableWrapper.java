@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -40,7 +39,9 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * A wrapper for a CellTable displaying an overview over the existing YellowBrick configurations. It shows the name, the
  * race URL, the user name, the presence of a password, the name of the creator, the group and user each user group is
  * owned by. There are options edit or to delete the configuration, change the ownership or edit the associated ACL.
- * Editing the connection will open a new instance of {@link YellowBrickConnectionDialog}.
+ * Editing the connection will open a new instance of {@link YellowBrickConnectionDialog}.<p>
+ * 
+ * TODO make into a TableWrapperWithSingleSelectionAndFilter
  */
 public class YellowBrickConnectionTableWrapper extends
         TableWrapper<YellowBrickConfigurationWithSecurityDTO, RefreshableMultiSelectionModel<YellowBrickConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
@@ -69,21 +70,15 @@ public class YellowBrickConnectionTableWrapper extends
         final ListHandler<YellowBrickConfigurationWithSecurityDTO> yellowBrickAccountColumnListHandler = getColumnSortHandler();
 
         // table
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountNameColumn = new AbstractSortableTextColumn<YellowBrickConfigurationWithSecurityDTO>(
+        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountNameColumn = new AbstractSortableTextColumn<>(
                 dto -> dto.getName(), yellowBrickAccountColumnListHandler);
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountLiveUriColumn = new AbstractSortableTextColumn<YellowBrickConfigurationWithSecurityDTO>(
-                dto -> dto.getLiveDataURI()==null?"":dto.getLiveDataURI(), yellowBrickAccountColumnListHandler);
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountStoredUriColumn = new AbstractSortableTextColumn<YellowBrickConfigurationWithSecurityDTO>(
-                dto -> dto.getStoredDataURI()==null?"":dto.getStoredDataURI(), yellowBrickAccountColumnListHandler);
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountJsonUrlColumn = new AbstractSortableTextColumn<YellowBrickConfigurationWithSecurityDTO>(
-                dto -> dto.getJsonUrl(), yellowBrickAccountColumnListHandler);
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountTracTracServerUpdateUriColumn = new AbstractSortableTextColumn<YellowBrickConfigurationWithSecurityDTO>(
-                dto -> dto.getCourseDesignUpdateURI()==null?"":dto.getCourseDesignUpdateURI(), yellowBrickAccountColumnListHandler);
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountUsernameColumn = new AbstractSortableTextColumn<YellowBrickConfigurationWithSecurityDTO>(
-                dto -> dto.getTracTracUsername(), yellowBrickAccountColumnListHandler);
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountCreatorNameColumn = new AbstractSortableTextColumn<YellowBrickConfigurationWithSecurityDTO>(
+        final TextColumn<YellowBrickConfigurationWithSecurityDTO> yellowBrickAccountRaceUrlColumn = new AbstractSortableTextColumn<>(
+                dto -> dto.getRaceUrl(), yellowBrickAccountColumnListHandler);
+        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountUsernameColumn = new AbstractSortableTextColumn<>(
+                dto -> dto.getUsername(), yellowBrickAccountColumnListHandler);
+        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountCreatorNameColumn = new AbstractSortableTextColumn<>(
                 dto -> dto.getCreatorName(), yellowBrickAccountColumnListHandler);
-        final HasPermissions type = SecuredDomainType.TRACTRAC_ACCOUNT;
+        final HasPermissions type = SecuredDomainType.YELLOWBRICK_ACCOUNT;
         final AccessControlledActionsColumn<YellowBrickConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_UPDATE, DefaultActions.UPDATE, dto -> {
@@ -156,10 +151,7 @@ public class YellowBrickConnectionTableWrapper extends
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(yellowBrickAccountColumnListHandler);
         table.addColumn(tracTracAccountNameColumn, getStringMessages().name());
-        table.addColumn(tracTracAccountLiveUriColumn, stringMessagesClient.liveUri());
-        table.addColumn(tracTracAccountStoredUriColumn, stringMessagesClient.storedUri());
-        table.addColumn(tracTracAccountJsonUrlColumn, stringMessagesClient.jsonUrl());
-        table.addColumn(tracTracAccountTracTracServerUpdateUriColumn, stringMessagesClient.tracTracUpdateUrl());
+        table.addColumn(yellowBrickAccountRaceUrlColumn, stringMessagesClient.jsonUrl());
         table.addColumn(tracTracAccountUsernameColumn, stringMessagesClient.tractracUsername());
         table.addColumn(tracTracAccountCreatorNameColumn, stringMessagesClient.creatorName());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, yellowBrickAccountColumnListHandler, stringMessages);
