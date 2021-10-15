@@ -152,7 +152,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         this.assignedRaces.add(raceIdentifier);
         this.mediaService = mediaService;
 
-        urlBox = new URLFieldWithFileUpload(stringMessages, true, false);
+        urlBox = new URLFieldWithFileUpload(stringMessages, true, false, "audio/*,video/*");
         urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
