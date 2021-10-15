@@ -127,13 +127,6 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     }
 
     /**
-     * Check if planId is valid
-     */
-    protected boolean isValidPlan(String planId) {
-        return !(planId == null || planId.length() == 0) && getSecurityService().getSubscriptionPlanById(planId) != null;
-    }
-    
-    /**
      * Return true if user already subscribed to plan
      */
     protected boolean isUserSubscribedToPlan(User user, String planId) {

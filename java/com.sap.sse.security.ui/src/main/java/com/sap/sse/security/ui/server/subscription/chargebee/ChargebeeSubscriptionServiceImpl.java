@@ -101,7 +101,7 @@ public class ChargebeeSubscriptionServiceImpl extends
     @Override
     public PrepareCheckoutDTO prepareCheckout(String planId) {
         PrepareCheckoutDTO response = new PrepareCheckoutDTO();
-        if (isValidPlan(planId)) {
+        if (isValidPrice(planId)) {
             try {
                 User user = getCurrentUser();
                 if (!isUserSubscribedToPlan(user, planId)
@@ -129,6 +129,14 @@ public class ChargebeeSubscriptionServiceImpl extends
             response.setError("Invalid plan: " + planId);
         }
         return response;
+    }
+    
+    public boolean isValidPrice(String priceId) {
+            try {
+                return ItemPrice.retrieve(priceId).request().itemPrice() != null;
+            } catch (Exception e) {
+                return false;
+            }
     }
 
     @Override
