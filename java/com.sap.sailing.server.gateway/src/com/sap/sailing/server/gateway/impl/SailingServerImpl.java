@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -57,6 +58,7 @@ import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class SailingServerImpl implements SailingServer {
+    private static final Logger logger = Logger.getLogger(SailingServerImpl.class.getName());
     private final String GATEWAY_URL_PREFIX = "sailingserver/api";
     private final String bearerToken;
     private final URL baseUrl;
@@ -138,9 +140,11 @@ public class SailingServerImpl implements SailingServer {
         final Pair<Object, Integer> responseAndStatus = getJsonParsedResponse(importMasterData);
         final MasterDataImportResult result;
         if (responseAndStatus.getB() >= 200 && responseAndStatus.getB() < 300) {
+            logger.info("Received an OK status "+responseAndStatus.getB()+" for MDI from "+from);
             final JSONObject jsonResponse = (JSONObject) responseAndStatus.getA();
             result = new MasterDataImportResultJsonDeserializer().deserialize(jsonResponse);
         } else {
+            logger.warning("Received a non-OK status "+responseAndStatus.getB()+" for MDI from "+from);
             result = null;
         }
         return result;
