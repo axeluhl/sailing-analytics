@@ -12,6 +12,7 @@ public interface SubscriptionCardResources extends SharedHomeResources {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
+        String free();
         String feature();
         String highlight();
         String owned();
@@ -20,6 +21,8 @@ public interface SubscriptionCardResources extends SharedHomeResources {
         String title();
         String description();
         String price();
+        String selected();
+        String prices();
         String features();
         String subscribe();
         String container();

@@ -11,6 +11,7 @@
 }
 .feature {
   padding-left: 25px;
+  margin-bottom: 1em;
 }
 .features {
   margin: 30px;
@@ -19,6 +20,8 @@
 .highlight {
 }
 .owned {
+}
+.free {
 }
 .subscription {
   order: 20;
@@ -95,7 +98,23 @@
   margin: 20px;
 }
 .price {
-  margin: 20px;
+  width: 100%;
+  border: solid;
+  border-width: 1px;
+  border-radius: .333333333333333em;
+  border-color: #ddd;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  font-size: 24px;
+  font-weight: 700;
+}
+.price.selected {
+  border-color: #8ab54e;
+  border-width: 2px;
+}
+.prices {
+  padding: 1em;
+  width: 100%;
 }
 .subscribe {
   margin-left: auto;
