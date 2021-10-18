@@ -69,7 +69,7 @@ public class SubscriptionCard extends Composite {
     private final Consumer<SubscriptionPrice> subscriptionCallback;
     private SubscriptionPrice currentPrice;
 
-    public <T> SubscriptionCard(SubscriptionPlanDTO subscriptionPlanDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus) {
+    public <T> SubscriptionCard(SubscriptionPlanDTO subscriptionPlanDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
         this.subscriptionCallback = subscriptionCallback;
         SubscriptionCardResources.INSTANCE.css().ensureInjected();
         SharedResources.INSTANCE.mediaCss().ensureInjected();
@@ -145,8 +145,12 @@ public class SubscriptionCard extends Composite {
             break;
         case FREE:
             addStyleName(FREE_STYLE);
-            button.setText(i18n.signUp());
-            button.getElement().getStyle().setDisplay(Display.BLOCK);
+            button.setText(i18n.signInOrUp());
+            if (loggedIn) {
+                button.getElement().getStyle().setDisplay(Display.NONE);
+            } else {
+                button.getElement().getStyle().setDisplay(Display.BLOCK);
+            }
             eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
                 AuthenticationContext authContext = event.getCtx();
                 // make it point to the current server if the user has CREATE_OBJECT permission there

@@ -25,29 +25,29 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
                 if (price != null) {
                     presenter.startSubscription(price.getPriceId());
                 }
-            }, eventBus));
+            }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case DEFAULT:
             container.addSubscription(new SubscriptionCard(plan, type, (price) -> {
                 if (price != null) {
                     presenter.startSubscription(price.getPriceId());
                 }
-            }, eventBus));
+            }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case OWNER:
             container.addSubscription(new SubscriptionCard(plan, type, (price) -> {
                 presenter.manageSubscriptions();
-            }, eventBus));
+            }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case INDIVIDUAL:
             container.addSubscription(new SubscriptionCard(plan, type, (price) -> {
                 Window.Location.assign("mailto:info@sapsailing.com");
-            }, eventBus));
+            }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case FREE:
             container.addSubscription(new SubscriptionCard(plan, type, (price) -> {
                 presenter.toggleAuthenticationFlyout();
-            }, eventBus));
+            }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         default:
             break;

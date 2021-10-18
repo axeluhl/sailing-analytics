@@ -42,6 +42,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -157,6 +158,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             @Override
             public void toggleAuthenticationFlyout() {
                 flyoutAuthenticationPresenter.toggleFlyout();
+            }
+            @Override
+            public AuthenticationContext getAuthenticationContext() {
+                return authenticationManager.getAuthenticationContext();
             }
         });
     }

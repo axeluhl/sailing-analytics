@@ -108,11 +108,25 @@
   font-size: 24px;
   font-weight: 700;
 }
-.price.selected {
+.price:hover {
+  border-color: #d79900;
+  background-color: #8ab54e;
+  color: #fff;
+}
+.free .price, .individual .price {
   border-color: #f0ab00;
-  border-width: 1px;
   background-color: #f0ab00;
   color: #fff;
+}
+.price.selected {
+  background-color: #f0ab00;
+  color: #fff;
+}
+.free .price:hover, .individual .price:hover {
+  border-color: #d79900;
+}
+.price.selected:hover {
+  border-color: #d79900;
 }
 .prices {
   padding: 1em;

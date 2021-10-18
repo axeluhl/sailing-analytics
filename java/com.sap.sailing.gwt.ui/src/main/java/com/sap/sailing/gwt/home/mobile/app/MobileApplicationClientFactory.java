@@ -38,6 +38,7 @@ import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderExcep
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.login.LoginHintContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -166,6 +167,10 @@ public class MobileApplicationClientFactory extends
                 // TODO Auto-generated method stub
                 GWT.log("toggle authentication flyout");
                 navigator.goToPlace(navigator.getSignInNavigation());
+            }
+            @Override
+            public AuthenticationContext getAuthenticationContext() {
+                return authenticationManager.getAuthenticationContext();
             }
         });
     }
