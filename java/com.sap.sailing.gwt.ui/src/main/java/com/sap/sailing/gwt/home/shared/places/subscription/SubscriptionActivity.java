@@ -7,7 +7,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -38,7 +37,35 @@ public class SubscriptionActivity extends AbstractActivity {
                     .getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
                         @Override
                         public void onSuccess(final ArrayList<SubscriptionPlanDTO> result) {
-                            GWT.log("onSuccess");
+                            addFreePlan(view);
+                            result.forEach(plan -> {
+                                if (checkIfUserIsOwnerOfThePlan(plan)) {
+                                    view.addSubscriptionPlan(plan, Type.OWNER, eventBus);
+                                } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getId())) {
+                                    view.addSubscriptionPlan(plan, Type.HIGHLIGHT, eventBus);
+                                } else {
+                                    view.addSubscriptionPlan(plan, Type.DEFAULT, eventBus);
+                                }
+                            });
+                            addIndividual(eventBus, view);
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable caught) {
+                            clientFactory.createErrorView("TODO Failed to load subscription plans", caught);
+                        }
+
+                        private void addIndividual(final EventBus eventBus, final SubscriptionView view) {
+                            final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO(null /* id */,
+                                    new StringMessagesKey("individual_subscription_plan_name"),
+                                    new StringMessagesKey("individual_subscription_plan_description"), 
+                                    Collections.emptySet() /* features */,
+                                    Collections.emptySet() /* prices */,
+                                    null /* error */);
+                            view.addSubscriptionPlan(individualPlan, Type.INDIVIDUAL, eventBus);
+                        }
+
+                        private void addFreePlan(final SubscriptionView view) {
                             Set<StringMessagesKey> freeFeatures = new LinkedHashSet<StringMessagesKey>(
                                     Arrays.asList(new StringMessagesKey("free_feature_1"),
                                             new StringMessagesKey("free_feature_2"),
@@ -52,35 +79,12 @@ public class SubscriptionActivity extends AbstractActivity {
                                     freeFeatures,
                                     Collections.emptySet() /* prices */,
                                     null /* error */);
-                            view.addSubscriptionPlan(freePlan, Type.FREE);
-                            result.forEach(plan -> {
-                                if (checkIfUserIsOwnerOfThePlan(plan)) {
-                                    view.addSubscriptionPlan(plan, Type.OWNER);
-                                } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getId())) {
-                                    view.addSubscriptionPlan(plan, Type.HIGHLIGHT);
-                                } else {
-                                    view.addSubscriptionPlan(plan, Type.DEFAULT);
-                                }
-                            });
-                            final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO(null /* id */,
-                                    new StringMessagesKey("individual_subscription_plan_name"),
-                                    new StringMessagesKey("individual_subscription_plan_description"), 
-                                    Collections.emptySet() /* features */,
-                                    Collections.emptySet() /* prices */,
-                                    null /* error */);
-                            view.addSubscriptionPlan(individualPlan, Type.INDIVIDUAL);
+                            view.addSubscriptionPlan(freePlan, Type.FREE, eventBus);
                         }
-
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            clientFactory.createErrorView("TODO Failed to load subscription plans", caught);
-                        }
-
                     });
         } catch (final InvalidSubscriptionProviderException exc) {
             onInvalidSubscriptionProviderError(exc);
         }
-
         panel.setWidget(view);
     }
 

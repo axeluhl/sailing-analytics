@@ -109,8 +109,10 @@
   font-weight: 700;
 }
 .price.selected {
-  border-color: #8ab54e;
-  border-width: 2px;
+  border-color: #f0ab00;
+  border-width: 1px;
+  background-color: #f0ab00;
+  color: #fff;
 }
 .prices {
   padding: 1em;

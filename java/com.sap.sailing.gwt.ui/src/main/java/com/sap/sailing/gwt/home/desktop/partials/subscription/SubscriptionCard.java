@@ -7,8 +7,10 @@ import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.HeadingElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,6 +26,8 @@ import com.sap.sailing.gwt.home.shared.places.subscription.SailingSubscriptionSt
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
@@ -65,7 +69,7 @@ public class SubscriptionCard extends Composite {
     private final Consumer<SubscriptionPrice> subscriptionCallback;
     private SubscriptionPrice currentPrice;
 
-    public <T> SubscriptionCard(SubscriptionPlanDTO subscriptionPlanDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback) {
+    public <T> SubscriptionCard(SubscriptionPlanDTO subscriptionPlanDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus) {
         this.subscriptionCallback = subscriptionCallback;
         SubscriptionCardResources.INSTANCE.css().ensureInjected();
         SharedResources.INSTANCE.mediaCss().ensureInjected();
@@ -142,6 +146,16 @@ public class SubscriptionCard extends Composite {
         case FREE:
             addStyleName(FREE_STYLE);
             button.setText(i18n.signUp());
+            button.getElement().getStyle().setDisplay(Display.BLOCK);
+            eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
+                AuthenticationContext authContext = event.getCtx();
+                // make it point to the current server if the user has CREATE_OBJECT permission there
+                if (authContext.isLoggedIn()) {
+                    button.getElement().getStyle().setDisplay(Display.NONE);
+                } else {
+                    button.getElement().getStyle().setDisplay(Display.BLOCK);
+                }
+            });
         default:
             break;
         }
