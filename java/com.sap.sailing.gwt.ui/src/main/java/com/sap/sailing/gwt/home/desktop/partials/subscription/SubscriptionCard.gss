@@ -27,11 +27,14 @@
   order: 20;
   text-align: center;
   width: 390px;
+  margin-bottom: 30px;
 }
 /* Small screens */
-@media (max-width: 390px) {
+@media (max-width: 400px) {
   .subscription {
-    width: auto;
+    width: 100%;
+    margin-right: 5px;
+    margin-left: 5px;
   }
 }
 .subscription.individual {
@@ -48,6 +51,8 @@
   border-width: 1px;
   border-color: #ddd;
   border-radius: .333333333333333em;
+  margin-bottom: -50px;
+  height: 100%;
 }
 .highlight .subscriptionBody {
   border-top-left-radius: 0;
@@ -62,6 +67,8 @@
   border-bottom-left-radius: .333333333333333em;
   border-bottom-right-radius: .333333333333333em;
   border-color: #ddd;
+}
+.subscriptionFooter {
 }
 .highlightHeader {
   visibility: hidden;

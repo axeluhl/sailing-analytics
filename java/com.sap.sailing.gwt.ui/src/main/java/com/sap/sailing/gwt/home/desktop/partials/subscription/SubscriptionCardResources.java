@@ -28,5 +28,6 @@ public interface SubscriptionCardResources extends SharedHomeResources {
         String container();
         String highlightHeader();
         String subscriptionBody();
+        String subscriptionFooter();
     }
 }
