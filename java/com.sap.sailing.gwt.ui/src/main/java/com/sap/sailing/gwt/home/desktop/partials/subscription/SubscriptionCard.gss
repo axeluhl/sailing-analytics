@@ -11,6 +11,7 @@
 }
 .feature {
   padding-left: 25px;
+  margin-bottom: 1em;
 }
 .features {
   margin: 30px;
@@ -19,6 +20,8 @@
 .highlight {
 }
 .owned {
+}
+.free {
 }
 .subscription {
   order: 20;
@@ -95,7 +98,39 @@
   margin: 20px;
 }
 .price {
-  margin: 20px;
+  width: 100%;
+  border: solid;
+  border-width: 1px;
+  border-radius: .333333333333333em;
+  border-color: #ddd;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  font-size: 24px;
+  font-weight: 700;
+}
+.price:hover {
+  border-color: #d79900;
+  background-color: #8ab54e;
+  color: #fff;
+}
+.free .price, .individual .price {
+  border-color: #f0ab00;
+  background-color: #f0ab00;
+  color: #fff;
+}
+.price.selected {
+  background-color: #f0ab00;
+  color: #fff;
+}
+.free .price:hover, .individual .price:hover {
+  border-color: #d79900;
+}
+.price.selected:hover {
+  border-color: #d79900;
+}
+.prices {
+  padding: 1em;
+  width: 100%;
 }
 .subscribe {
   margin-left: auto;

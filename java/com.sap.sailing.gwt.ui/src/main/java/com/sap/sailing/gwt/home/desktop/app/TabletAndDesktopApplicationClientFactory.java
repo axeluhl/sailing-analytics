@@ -42,6 +42,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -54,6 +55,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
+    private final FlyoutAuthenticationPresenter flyoutAuthenticationPresenter;
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -84,7 +86,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE),
                 new AuthenticationCallbackImpl(getHomePlacesNavigator().getUserProfileNavigation(),
                         signInSuccesfulNavigation), userManagementDisplay, getEventBus());
-        new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
+        this.flyoutAuthenticationPresenter = new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
         new DesktopLoginHintPopup(authenticationManager, placesNavigator);
     }
@@ -124,10 +126,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         getSubscriptionServiceFactory().initializeProviders();
         return new SubscriptionViewImpl(new SubscriptionView.Presenter() {
             @Override
-            public void startSubscription(String planId) {
+            public void startSubscription(String priceId) {
                 try {
                     getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
-                            .startCheckout(planId, new BaseUserSubscriptionView() {
+                            .startCheckout(priceId, new BaseUserSubscriptionView() {
                                 
                                 @Override
                                 public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
@@ -152,6 +154,14 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             public void manageSubscriptions() {
                 // TODO: implement logic
                 GWT.log("manage subscriptions");
+            }
+            @Override
+            public void toggleAuthenticationFlyout() {
+                flyoutAuthenticationPresenter.toggleFlyout();
+            }
+            @Override
+            public AuthenticationContext getAuthenticationContext() {
+                return authenticationManager.getAuthenticationContext();
             }
         });
     }

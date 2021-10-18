@@ -17,6 +17,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String signIn();
     String invalidUsername();
     String signUp();
+    String signInOrUp();
     String signOut();
     String couldNotSignOut(String message);
     String createUser();

@@ -31,13 +31,20 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.mvp.ErrorView;
+import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.login.LoginHintContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * 
@@ -123,16 +130,47 @@ public class MobileApplicationClientFactory extends
     
     @Override
     public SubscriptionView createSubscriptionsView() {
+        getSubscriptionServiceFactory().initializeProviders();
         return new SubscriptionViewImpl(new SubscriptionView.Presenter() {
             @Override
-            public void startSubscription(String planId) {
-                // TODO: implement logic
-                GWT.log("start subscription with ID: " + planId);
+            public void startSubscription(String priceId) {
+                try {
+                    getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
+                            .startCheckout(priceId, new BaseUserSubscriptionView() {
+                                
+                                @Override
+                                public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
+                                    // TODO Auto-generated method stub
+                                }
+                                
+                                @Override
+                                public void onOpenCheckoutError(String error) {
+                                    Notification.notify(error, NotificationType.ERROR);
+                                }
+                                
+                                @Override
+                                public void onCloseCheckoutModal() {
+                                    // TODO Auto-generated method stub
+                                }
+                            }, () -> getUserService().updateUser(true));
+                } catch (InvalidSubscriptionProviderException e) {
+                    Notification.notify(e.toString(), NotificationType.ERROR);
+                }
             }
             @Override
             public void manageSubscriptions() {
                 // TODO: implement logic
                 GWT.log("manage subscriptions");
+            }
+            @Override
+            public void toggleAuthenticationFlyout() {
+                // TODO Auto-generated method stub
+                GWT.log("toggle authentication flyout");
+                navigator.goToPlace(navigator.getSignInNavigation());
+            }
+            @Override
+            public AuthenticationContext getAuthenticationContext() {
+                return authenticationManager.getAuthenticationContext();
             }
         });
     }

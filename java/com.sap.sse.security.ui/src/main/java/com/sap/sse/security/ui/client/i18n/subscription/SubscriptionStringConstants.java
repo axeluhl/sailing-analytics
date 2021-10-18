@@ -20,6 +20,16 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
         }
     }
 
+    String free_subscription_plan_name();
+    String free_subscription_plan_description();
+    String free_feature_1();
+    String free_feature_2();
+    String free_feature_3();
+    String free_feature_4();
+    String payment_interval_YEAR();
+    String payment_interval_MONTH();
+    String payment_interval_WEEK();
+    String payment_interval_DAY();
     String individual_subscription_plan_name();
     String individual_subscription_plan_description();
     String basic_plan_name();
