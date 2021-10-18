@@ -14,6 +14,8 @@
       <g:FlowPanel ui:field="prices" styleName="{local.css.prices}"></g:FlowPanel>
       <h4 ui:field="description" class="{local.css.description}"></h4>
       <g:FlowPanel ui:field="features" styleName="{local.css.features}"></g:FlowPanel>
+    </div>
+    <div class="{local.css.subscriptionFooter}">
       <g:Button styleName="{main.mainCss.button} {main.mainCss.buttonstrong} {main.mainCss.buttonprimary} {main.mainCss.buttonarrowrightwhite} {local.css.subscribe}" ui:field="button" text=""/>
     </div>
   </g:HTMLPanel>
