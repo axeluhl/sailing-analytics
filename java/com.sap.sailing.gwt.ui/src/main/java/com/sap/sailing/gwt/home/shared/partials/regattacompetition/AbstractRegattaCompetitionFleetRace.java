@@ -24,11 +24,11 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
     protected final Element mainElement;
     private final SimpleRaceMetadataDTO race;
 
-    protected AbstractRegattaCompetitionFleetRace(final SimpleRaceMetadataDTO race,
+    protected AbstractRegattaCompetitionFleetRace(final SimpleRaceMetadataDTO race, String fleetName,
             RegattaCompetitionPresenter presenter) {
         this.race = race;
         this.launchPadController = new RaceviewerLaunchPadController<>(presenter::getRaceViewerURL,
-                r -> presenter.getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), "TODO")); // FIXME
+                r -> presenter.getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), fleetName));
         this.mainElement = getMainUiElement();
         setupRaceState(race);
         getRaceNameUiElement().setInnerText(race.getRaceName());

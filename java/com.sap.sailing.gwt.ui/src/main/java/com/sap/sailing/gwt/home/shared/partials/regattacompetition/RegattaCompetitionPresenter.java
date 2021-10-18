@@ -48,7 +48,7 @@ public abstract class RegattaCompetitionPresenter
                 Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO> raceMap = new HashMap<>();
                 fleetMap.put(fleetView, raceMap);
                 for (SimpleRaceMetadataDTO race : fleet.getRaces()) {
-                    RegattaCompetitionRaceView raceView = fleetView.addRaceView(race, this);
+                    RegattaCompetitionRaceView raceView = fleetView.addRaceView(race, fleet.getFleet().getFleetName(), this);
                     raceMap.put(raceView, race);
                 }
             }
