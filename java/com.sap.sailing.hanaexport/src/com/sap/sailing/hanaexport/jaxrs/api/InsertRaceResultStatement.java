@@ -69,6 +69,7 @@ public class InsertRaceResultStatement extends AbstractPreparedInsertStatement<R
         final MaxPointsReason maxPointsReason = raceResult.getLeaderboard().getMaxPointsReason(raceResult.getCompetitor(), raceResult.getRaceColumn(), raceResult.getNow());
         getPreparedStatement().setString(7, (maxPointsReason == null ? MaxPointsReason.NONE : maxPointsReason).name());
         setDouble(8, raceResult.getLeaderboard().getScoringScheme().getScoreFactor(raceResult.getRaceColumn()));
-        setDouble(9, raceResult.getLeaderboard().getNetPoints(raceResult.getCompetitor(), raceResult.getRaceColumn(), raceResult.getNow()));
+        final Double netPoints = raceResult.getLeaderboard().getNetPoints(raceResult.getCompetitor(), raceResult.getRaceColumn(), raceResult.getNow());
+        setDouble(9, netPoints == null ? 0.0 : netPoints);
     }
 }

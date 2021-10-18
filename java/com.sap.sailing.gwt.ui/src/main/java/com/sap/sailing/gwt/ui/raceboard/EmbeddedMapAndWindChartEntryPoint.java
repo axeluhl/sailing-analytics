@@ -98,7 +98,6 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ true,
                 /* defaultForMapOrientationWindUp */ true, /* defaultForViewShowStreamlets */ false,
                 /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false);
-        
         settings = SERIALIZER.deserializeFromCurrentLocation(new EmbeddedMapAndWindChartSettings());
         
         RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false);
@@ -108,7 +107,6 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
             helpLineTypes.add(HelpLineTypes.COURSEGEOMETRY);
         }
         RaceMapHelpLinesSettings raceMapHelpLinesSettings = new RaceMapHelpLinesSettings(helpLineTypes);
-
         final RaceMapSettings raceMapSettings = new RaceMapSettings(raceMapZoomSettings, raceMapHelpLinesSettings,
                 defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
                 defaultRaceMapSettings.getTailLengthInMilliseconds(), settings.isWindUp(),
@@ -120,7 +118,6 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                 defaultRaceMapSettings.getStartCountDownFontSizeScaling(),
                 defaultRaceMapSettings.isShowManeuverLossVisualization(),
                 defaultRaceMapSettings.isShowSatelliteLayer());
-        
         final String regattaLikeName = contextDefinition.getRegattaLikeName();
         final String raceColumnName = contextDefinition.getRaceColumnName();
         final String fleetName = contextDefinition.getFleetName();
