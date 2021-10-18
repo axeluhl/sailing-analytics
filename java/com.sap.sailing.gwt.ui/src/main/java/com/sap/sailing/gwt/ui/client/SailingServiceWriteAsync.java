@@ -447,6 +447,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             List<VideoDTO> videos, List<UUID> leaderboardGroupIDs,
             AsyncCallback<EventDTO> callback);
 
+    void updateEvent(EventDTO eventDTO, AsyncCallback<EventDTO> callback);
+
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURL,
             String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,

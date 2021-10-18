@@ -14,6 +14,7 @@ public abstract class AbstractRegattaPanel extends FormPanel {
     protected DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     protected DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     protected final Presenter presenter;
+    private final Displayer<RegattaDTO> regattasDisplayer;
     protected ErrorReporter errorReporter;
     protected StringMessages stringMessages;
     
@@ -23,16 +24,13 @@ public abstract class AbstractRegattaPanel extends FormPanel {
         this.presenter = presenter;
         this.errorReporter  = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
+        this.regattasDisplayer = new Displayer<RegattaDTO>() {
+            @Override
+            public void fill(Iterable<RegattaDTO> result) {
+                fillRegattas(result);
+            }
+        };
     }
-    
-    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
-
-        @Override
-        public void fill(Iterable<RegattaDTO> result) {
-            fillRegattas(result);
-        }
-        
-    };
     
     public Displayer<RegattaDTO> getRegattasDisplayer() {
         return regattasDisplayer;

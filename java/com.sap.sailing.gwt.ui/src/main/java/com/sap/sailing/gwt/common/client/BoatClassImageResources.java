@@ -112,6 +112,14 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource DragonIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/DYAS.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource DyasIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ELAN350.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Elan350Icon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/EUROPE_INT.png")
     @ImageOptions(preventInlining = true)
     ImageResource EuropeIcon();
@@ -388,13 +396,21 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource TornadoIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/DYAS.png")
-    @ImageOptions(preventInlining = true)
-    ImageResource DyasIcon();
-
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/INTERNATIONAL_14.png")
     @ImageOptions(preventInlining = true)
     ImageResource International14Icon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IQFOIL_MEN.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource IQFOilMenIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IQFOIL_WOMEN.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource IQFOilWoenIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IQFOIL_YOUTH.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource IQFOilYouthIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/OPEN_BIC.png")
     @ImageOptions(preventInlining = true)

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvide
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sse.security.ui.client.UserService;
 
 public interface EventViewBase extends IsWidget {
 
@@ -64,5 +66,9 @@ public interface EventViewBase extends IsWidget {
         EventViewDTO getEventDTO();
 
         boolean isMultiRegattaEvent();
+
+        EventBus getEventBus();
+
+        UserService getUserService();
     }
 }

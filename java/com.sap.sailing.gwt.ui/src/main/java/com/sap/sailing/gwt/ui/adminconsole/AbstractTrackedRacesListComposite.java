@@ -103,6 +103,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     private ListBox listBoxRegattas;
 
     protected final UserService userService;
+    
+    private final Displayer<RegattaDTO> regattasDisplayer;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -114,6 +116,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
             final Presenter presenter, final StringMessages stringMessages, boolean hasMultiSelection) {
         super(parent, context);
+        this.regattasDisplayer = result->fillRegattas(result);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.sailingService = presenter.getSailingService();
         this.errorReporter = presenter.getErrorReporter();
@@ -564,17 +567,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         refreshableSelectionModel.clear();
     }
     
-    private final Displayer<RegattaDTO> RegattasDisplayer = new Displayer<RegattaDTO>() {
-
-        @Override
-        public void fill(Iterable<RegattaDTO> result) {
-            fillRegattas(result);
-        }
-        
-    };
-    
     public Displayer<RegattaDTO> getRegattasDisplayer() {
-        return RegattasDisplayer;
+        return regattasDisplayer;
     }
 
     /**

@@ -59,6 +59,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
@@ -78,9 +80,20 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         final EventViewBase view = initView();
         panel.setWidget(view.asWidget());
     }
+
+    @Override
+    public com.google.web.bindery.event.shared.EventBus getEventBus() {
+        return clientFactory.getEventBus();
+    }
+
     
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
+    }
+
     protected abstract EventViewBase initView();
-    
+
     protected final void initSeriesNavigation(EventViewBase view) {
         final EventSeriesReferenceDTO seriesData;
         final RegattaMetadataDTO regatta = getRegatta();
@@ -95,7 +108,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             view.setSeriesNavigation(seriesData.getSeriesDisplayName(), navigation);
         }
     }
-    
+
     protected final void initSailorInfo(EventViewBase view) {
         String sailorInfoUrl = eventDTO.getSailorsInfoWebsiteURL();
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
@@ -161,7 +174,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     protected final void initMedia(final MediaCallback callback) {
-        if (eventDTO.isHasMedia()) {
+        if (eventDTO.isHasMedia() || 
+                this.getUserService().hasPermission(eventDTO, HasPermissions.DefaultActions.UPDATE)) {
             clientFactory.getDispatch().execute(new GetMediaForEventAction(eventDTO.getId()), 
                     new ActivityCallback<MediaDTO>(clientFactory, panel) {
                 @Override

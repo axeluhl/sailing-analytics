@@ -2364,4 +2364,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String alternateTextIfQRCodeTooBig();
     String pleaseUseHttpsForImageUrls();
     String windAndCourse();
+    String zoomIn();
+    String zoomOut();
+    String moreOptions();
+    String confirmDeleteImage();
+    String confirmDeleteVideo();
+    String fileUpload();
+    String or();
+    String noMediaSelected();
+    String fileTypeNotSupported();
+    String noImageOrVideoDetected();
+    String errorWhileUpdatingEvent();
+    String updateEventSuccessfully();
 }

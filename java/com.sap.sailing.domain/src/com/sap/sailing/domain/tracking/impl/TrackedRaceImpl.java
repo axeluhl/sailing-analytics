@@ -22,8 +22,10 @@ import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +34,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,6 +78,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -161,12 +165,15 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 import com.sap.sse.util.IdentityWrapper;
 import com.sap.sse.util.SmartFutureCache;
@@ -432,6 +439,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private final NamedReentrantReadWriteLock sensorTracksLock;
     
+    private static final int MAX_DISTANCES_FROM_STARBOARD_SIDE_OF_START_LINE_PROJECTED_ONTO_LINE_CACHE_SIZE = 10;
+    private transient ConcurrentMap<TimePoint, SortedMap<Competitor, Distance>> distancesFromStarboardSideOfStartLineProjectedOntoLineCache;
+    private transient ConcurrentMap<TimePoint, TimePoint> distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes;
+    
     /**
      * When a regatta's {@link Regatta#useStartTimeInference()} or {@link Regatta#isControlTrackingFromStartAndFinishTimes()}
      * changes, the tracking start/end times need to be recalculated. This regatta listener handles this. It has to be
@@ -479,6 +490,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
             RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCache = new ConcurrentHashMap<>();
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes = new ConcurrentHashMap<>();
         registerRegattaListener();
         this.raceLogResolver = raceLogResolver;
         this.trackingConnectorInfo = trackingConnectorInfo;
@@ -618,6 +631,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         rankingMetric = rankingMetricConstructor.apply(this);
     }
     
+    protected void invalidateDistancesFromStarboardSideOfStartLineProjectedOntoLineCache(TimeRange timeRangeToInvalidate) {
+        if (!distancesFromStarboardSideOfStartLineProjectedOntoLineCache.isEmpty()) {
+            for (final Iterator<Entry<TimePoint, SortedMap<Competitor, Distance>>> i=distancesFromStarboardSideOfStartLineProjectedOntoLineCache.entrySet().iterator(); i.hasNext(); ) {
+                final Entry<TimePoint, SortedMap<Competitor, Distance>> next = i.next();
+                if (timeRangeToInvalidate.includes(next.getKey())) {
+                    i.remove();
+                    distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.remove(next.getKey());
+                }
+            }
+        }
+    }
+
     @Override
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         final boolean result;
@@ -710,6 +735,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCache = new ConcurrentHashMap<>();
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes = new ConcurrentHashMap<>();
         getRace().getCourse().addCourseListener(this);
         for (DynamicSensorFixTrack<Competitor, ?> sensorTrack : sensorTracks.values()) {
             sensorTrack.addedToTrackedRace(this);
@@ -3168,14 +3195,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
-        final Distance result;
-        if (getStartOfRace() == null) {
-            result = null;
-        } else {
-            TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
-            result = getDistanceToStartLine(competitor, beforeStart);
-        }
-        return result;
+        return getSomethingMillisecondsBeforeRaceStart(competitor, millisecondsBeforeRaceStart, this::getDistanceToStartLine);
     }
 
     @Override
@@ -3234,7 +3254,75 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return result;
     }
+
+    private TimePoint getTimePointMillisecondsBeforeStart(long millisecondsBeforeRaceStart) {
+        final TimePoint result;
+        if (getStartOfRace() == null) {
+            result = null;
+        } else {
+            result = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
+        }
+        return result;
+    }
     
+    private <T> T getSomethingMillisecondsBeforeRaceStart(Competitor competitor, long millisecondsBeforeRaceStart, BiFunction<Competitor, TimePoint, T> dataSupplier) {
+        final TimePoint timePoint = getTimePointMillisecondsBeforeStart(millisecondsBeforeRaceStart);
+        final T result = timePoint == null ? null : dataSupplier.apply(competitor, timePoint);
+        return result;
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
+        return getSomethingMillisecondsBeforeRaceStart(competitor, millisecondsBeforeRaceStart, this::getWindwardDistanceToFavoredSideOfStartLine);
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getSomethingMillisecondsBeforeRaceStart(competitor, millisecondsBeforeRaceStart, (c, t)->getWindwardDistanceToFavoredSideOfStartLine(c, t, cache));
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        return getWindwardDistanceToFavoredSideOfStartLine(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Waypoint startWaypoint = getRace().getCourse().getFirstWaypoint();
+        final Distance result;
+        if (startWaypoint == null) {
+            result = null;
+        } else {
+            final Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            final Position referenceStartPosition;
+            if (Util.size(startWaypoint.getControlPoint().getMarks()) == 1) {
+                referenceStartPosition = getApproximatePosition(startWaypoint, timePoint);
+            } else {
+                final LineDetails startLine = getStartLine(timePoint);
+                if (startLine == null) {
+                    referenceStartPosition = null;
+                } else {
+                    referenceStartPosition = startLine.getAdvantageousMarkPosition();
+                }
+            }
+            if (competitorPosition == null) {
+                result = null;
+            } else {
+                if (referenceStartPosition == null) {
+                    result = null;
+                } else {
+                    final TrackedLeg firstLeg = getTrackedLegStartingAt(startWaypoint);
+                    if (firstLeg == null) {
+                        result = null;
+                    } else {
+                        result = firstLeg.getWindwardDistance(competitorPosition, referenceStartPosition, timePoint, WindPositionMode.LEG_MIDDLE, cache);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     @Override
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         final Speed result;
@@ -3285,6 +3373,122 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
     
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        final Pair<Bearing, Position> startLineBearingAndStarboardMarkPosition = getStartLineBearingAndStarboardMarkPosition(timePoint);
+        if (startLineBearingAndStarboardMarkPosition.getA() == null || startLineBearingAndStarboardMarkPosition.getB() == null) {
+            result = null;
+        } else {
+            final Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ true);
+            if (competitorPosition == null) {
+                result = null;
+            } else {
+                final Position competitorPositionProjectedOntoLine = competitorPosition.projectToLineThrough(startLineBearingAndStarboardMarkPosition.getB(), startLineBearingAndStarboardMarkPosition.getA());
+                result = competitorPositionProjectedOntoLine.getDistance(startLineBearingAndStarboardMarkPosition.getB());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint) {
+        final LineDetails startLine = getStartLine(timePoint);
+        final Bearing lineBearing;
+        final Position starboardMarkPosition;
+        if (startLine == null) { // single mark?
+            starboardMarkPosition = getStarboardMarkOfStartlinePosition(timePoint);
+            if (starboardMarkPosition == null) {
+                lineBearing = null;
+            } else {
+                final Iterable<TrackedLeg> trackedLegs = getTrackedLegs();
+                if (trackedLegs == null || !trackedLegs.iterator().hasNext()) {
+                    lineBearing = null;
+                } else {
+                    final Bearing bearingFirstLeg = trackedLegs.iterator().next().getLegBearing(timePoint);
+                    if (bearingFirstLeg == null) {
+                        lineBearing = null;
+                    } else {
+                        lineBearing = bearingFirstLeg.add(new DegreeBearingImpl(270));
+                    }
+                }
+            }
+        } else {
+            lineBearing = startLine.getBearingFromStarboardToPortWhenApproachingLine();
+            starboardMarkPosition = startLine.getStarboardMarkPosition();
+        }
+        final Pair<Bearing, Position> startLineBearingAndStarboardMarkPosition = new Pair<>(lineBearing, starboardMarkPosition);
+        return startLineBearingAndStarboardMarkPosition;
+    }
+
+    @Override
+    public SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier) {
+        final SortedMap<Competitor, Distance> result = distancesFromStarboardSideOfStartLineProjectedOntoLineCache.computeIfAbsent(timePoint, tp->{
+            final Map<Competitor, Distance> distances = new HashMap<>();
+            for (final Competitor competitor : getRace().getCompetitors()) {
+                final MaxPointsReason penaltyCode = maxPointsReasonSupplier.apply(competitor, timePoint);
+                if (penaltyCode != MaxPointsReason.DNC && penaltyCode != MaxPointsReason.DNS) {
+                    distances.put(competitor, getDistanceFromStarboardSideOfStartLineProjectedOntoLine(competitor, tp));
+                }
+            }
+            final TreeMap<Competitor, Distance> map = new TreeMap<>((c1, c2)->distances.get(c1).compareTo(distances.get(c2)));
+            map.putAll(distances);
+            return map;
+        });
+        distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.put(timePoint, ApproximateTime.approximateNow());
+        if (distancesFromStarboardSideOfStartLineProjectedOntoLineCache.size() > MAX_DISTANCES_FROM_STARBOARD_SIDE_OF_START_LINE_PROJECTED_ONTO_LINE_CACHE_SIZE) {
+            final TimePoint keyLeastRecentlyAccessed = distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.entrySet().stream()
+                    .max((e1, e2)->e1.getValue().compareTo(e2.getValue())).get().getKey();
+            distancesFromStarboardSideOfStartLineProjectedOntoLineCache.remove(keyLeastRecentlyAccessed);
+            distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes.remove(keyLeastRecentlyAccessed);
+        }
+        return result;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier) {
+        final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
+                getDistancesFromStarboardSideOfStartLineProjectedOntoLine(timePoint, maxPointsReasonSupplier);
+        final Competitor competitorImmediatelyToPort;
+        final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(relativeTo);
+        if (competitorDistance == null) {
+            competitorImmediatelyToPort = null;
+        } else {
+            final SortedMap<Competitor, Distance> competitorsFurtherToPortIncludingSelf = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.tailMap(relativeTo);
+            final Iterator<Entry<Competitor, Distance>> iterator = competitorsFurtherToPortIncludingSelf.entrySet().iterator();
+            iterator.next(); // skip the "own" competitor ("self" / getCompetitor())
+            if (iterator.hasNext()) {
+                competitorImmediatelyToPort = iterator.next().getKey();
+            } else {
+                competitorImmediatelyToPort = null;
+            }
+        }
+        return competitorImmediatelyToPort;
+    }
+
+    @Override
+    public Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier) {
+        final SortedMap<Competitor, Distance> competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine =
+                getDistancesFromStarboardSideOfStartLineProjectedOntoLine(timePoint, maxPointsReasonSupplier);
+        final Competitor competitorImmediatelyToStarboard;
+        final Distance competitorDistance = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.get(relativeTo);
+        if (competitorDistance == null) {
+            competitorImmediatelyToStarboard = null;
+        } else {
+            final SortedMap<Competitor, Distance> competitorsFurtherToStarboard = competitorsSortedByDistanceFromStarboardSideOfStartLineProjectedOntoLine.headMap(relativeTo);
+            if (competitorsFurtherToStarboard != null && !competitorsFurtherToStarboard.isEmpty()) {
+                competitorImmediatelyToStarboard = competitorsFurtherToStarboard.lastKey();
+            } else {
+                competitorImmediatelyToStarboard = null;
+            }
+        }
+        return competitorImmediatelyToStarboard;
+
+    }
+
     /**
      * Based on the bearing from the start waypoint to the next mark, identifies which of the two marks of the start
      * line is on starboard. If the start waypoint has only one mark, that mark is returned. If the start line has two

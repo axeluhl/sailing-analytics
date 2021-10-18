@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.bson.Document;
 import org.junit.After;
 
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -67,7 +67,7 @@ import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
  */
 public abstract class AbstractStoreMergeTest {
     private final static String importSourceMongoDbUri = MongoDBConfiguration.getDefaultTestConfiguration()
-            .getMongoClientURI().getURI()
+            .getMongoClientURI().getConnectionString()
             .replace(MongoDBConfiguration.getDefaultTestConfiguration().getMongoClientURI().getDatabase(),
                     UUID.randomUUID().toString());
     protected final static String defaultCreationGroupNameForSource = "dummy-default-creation-group-for-source";
@@ -83,7 +83,7 @@ public abstract class AbstractStoreMergeTest {
         cfgForTarget = MongoDBConfiguration.getDefaultTestConfiguration();
         targetDb = cfgForTarget.getService().getDB();
         fill(targetVariant, targetDb);
-        cfgForSource = new MongoDBConfiguration(new MongoClientURI(importSourceMongoDbUri));
+        cfgForSource = new MongoDBConfiguration(new ConnectionString(importSourceMongoDbUri));
         fill(sourceVariant, cfgForSource.getService().getDB());
         merger = new SecurityStoreMerger(cfgForTarget, defaultCreationGroupNameForTarget);
         targetUserStore = merger.getTargetUserStore();

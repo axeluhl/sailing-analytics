@@ -5,7 +5,7 @@ import org.bson.Document;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory;
 
@@ -40,7 +40,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 tracTracConfiguration.getJSONURL());
         updateQuery.put(FieldNames.TT_CONFIG_CREATOR_NAME.name(), tracTracConfiguration.getCreatorName());
         ttConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
-                new UpdateOptions().upsert(true));
+                new ReplaceOptions().upsert(true));
     }
 
     private Document storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {

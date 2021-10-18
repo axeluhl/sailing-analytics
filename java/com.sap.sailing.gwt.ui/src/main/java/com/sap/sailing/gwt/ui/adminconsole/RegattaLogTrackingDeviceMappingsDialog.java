@@ -186,7 +186,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             public Iterable<String> getSearchableStrings(DeviceMappingDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(MappableToDeviceFormatter.formatType(t.mappedTo, stringMessages));
-                strings.add(t.mappedTo.toString());
+                strings.add(MappableToDeviceFormatter.formatName(t.mappedTo));
                 strings.add(t.deviceIdentifier.deviceType);
                 strings.add(t.deviceIdentifier.deviceId);
                 return strings;

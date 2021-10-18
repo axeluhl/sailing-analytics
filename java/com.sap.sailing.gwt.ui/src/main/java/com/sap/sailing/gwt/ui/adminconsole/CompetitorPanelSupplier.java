@@ -21,7 +21,7 @@ public class CompetitorPanelSupplier extends AdminConsolePanelSupplier<Competito
     public CompetitorPanel init() {
         final CompetitorPanel competitorPanel = new CompetitorPanel(presenter, stringMessages);
         competitorPanel.ensureDebugId("CompetitorPanel");
-        competitorPanel.refreshCompetitorList();
+        presenter.getCompetitorsRefresher().addDisplayerAndCallFillOnInit(competitorPanel.getCompetitorsDisplayer());
         return competitorPanel;
     }
 
