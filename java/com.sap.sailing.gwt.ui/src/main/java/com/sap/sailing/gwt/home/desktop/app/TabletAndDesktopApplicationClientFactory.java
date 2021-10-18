@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.app;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -133,7 +132,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                                 
                                 @Override
                                 public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
-                                    // TODO Auto-generated method stub
                                 }
                                 
                                 @Override
@@ -143,7 +141,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                                 
                                 @Override
                                 public void onCloseCheckoutModal() {
-                                    // TODO Auto-generated method stub
                                 }
                             }, () -> getUserService().updateUser(true));
                 } catch (InvalidSubscriptionProviderException e) {
@@ -152,8 +149,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             }
             @Override
             public void manageSubscriptions() {
-                // TODO: implement logic
-                GWT.log("manage subscriptions");
+                getHomePlacesNavigator().goToPlace(getHomePlacesNavigator().getUserProfileSubscriptionPlace());
             }
             @Override
             public void toggleAuthenticationFlyout() {
