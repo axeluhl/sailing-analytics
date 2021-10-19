@@ -26,8 +26,8 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.adminconsole.yellowbrick.YellowBrickConnectionDialog;
-import com.sap.sailing.gwt.ui.adminconsole.yellowbrick.YellowBrickConnectionTableWrapper;
+import com.sap.sailing.gwt.ui.adminconsole.yellowbrick.YellowBrickConfigurationDialog;
+import com.sap.sailing.gwt.ui.adminconsole.yellowbrick.YellowBrickConfigurationTableWrapper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -61,7 +61,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
     
     private final ListDataProvider<YellowBrickRaceRecordDTO> raceList;
     
-    private YellowBrickConnectionTableWrapper connectionsTable;
+    private YellowBrickConfigurationTableWrapper connectionsTable;
 
     private Label loadingMessageLabel;
 
@@ -94,19 +94,19 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
     }
     
     protected CaptionPanel createConnectionsPanel() {
-        CaptionPanel connectionsPanel = new CaptionPanel("TracTrac " + stringMessages.connections());
-        connectionsPanel.ensureDebugId("ConnectionsSection");
+        CaptionPanel connectionsPanel = new CaptionPanel("YellowBrick " + stringMessages.connections());
+        connectionsPanel.ensureDebugId("YellowBrickConfigurationsSection");
         connectionsPanel.setStyleName("bold");
         VerticalPanel tableAndConfigurationPanel = new VerticalPanel();
-        connectionsTable = new YellowBrickConnectionTableWrapper(userService, sailingServiceWrite, stringMessages,
+        connectionsTable = new YellowBrickConfigurationTableWrapper(userService, sailingServiceWrite, stringMessages,
                 errorReporter, true, tableResources, () -> {});
-        connectionsTable.refreshYellowBrickConnectionList();
+        connectionsTable.refreshYellowBrickConfigurationList();
         final Grid grid = new Grid(1, 2);
-        // Add YellowBrick connections
+        // Add YellowBrick configurations
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredDomainType.TRACKED_RACE);
-        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshYellowBrickConnectionList());
-        Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addYellowBrickConnection(),
-                () -> new YellowBrickConnectionDialog(
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshYellowBrickConfigurationList());
+        Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addYellowBrickConfiguration(),
+                () -> new YellowBrickConfigurationDialog(
                         new DialogCallback<YellowBrickConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(YellowBrickConfigurationWithSecurityDTO editedConnection) {
@@ -143,7 +143,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
 
                         @Override
                         public void onSuccess(Void result) {
-                            connectionsTable.refreshYellowBrickConnectionList();
+                            connectionsTable.refreshYellowBrickConfigurationList();
                         }
                     });
         });
@@ -295,7 +295,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
                 .getSelectedSet();
         if (!selectedConnections.isEmpty()) {
             YellowBrickConfigurationWithSecurityDTO selectedConnection = selectedConnections.iterator().next();
-            sailingService.listYellowBrickRacesInEvent(selectedConnection.getRaceUrl(),
+            sailingService.listYellowBrickRacesInEvent(selectedConnection,
                     new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<YellowBrickRaceRecordDTO>>>(
                 new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<YellowBrickRaceRecordDTO>>>() {
                     @Override
@@ -321,7 +321,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
 
                                 @Override
                                 public void onSuccess(Void voidResult) {
-                                    connectionsTable.refreshYellowBrickConnectionList();
+                                    connectionsTable.refreshYellowBrickConfigurationList();
                                 }
                             }));
                     }
@@ -367,7 +367,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
     }
     
     public void refreshYellowBrickConnectors() {
-        connectionsTable.refreshYellowBrickConnectionList();
+        connectionsTable.refreshYellowBrickConfigurationList();
         raceList.getList().clear();
     }
     

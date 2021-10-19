@@ -14,6 +14,19 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 public interface YellowBrickTrackingAdapter {
     Iterable<YellowBrickConfiguration> getYellowBrickConfigurations();
     
+    YellowBrickConfiguration createYellowBrickConfiguration(String name, String raceUrl, String username,
+            String password, String creatorName);
+    
+    void addYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig);
+    
+    void removeYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig);
+
+    void updateYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig);
+    
+    void addYellowBrickConfigurationListener(YellowBrickConfigurationListener listener);
+
+    void removeYellowBrickConfigurationListener(YellowBrickConfigurationListener listener);
+    
     void addYellowBrickRace(RacingEventService service, RegattaIdentifier regattaToAddTo, String yellowBrickRaceUrl,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String yellowBrickUsername,
             String yellowBrickPassword, boolean trackWind, boolean correctWindByDeclination) throws Exception;

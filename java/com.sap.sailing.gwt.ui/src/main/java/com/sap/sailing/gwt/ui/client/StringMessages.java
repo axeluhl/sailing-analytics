@@ -2377,7 +2377,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String updateEventSuccessfully();
     String raceUrl();
     String yellowBrickConfiguration();
-    String addYellowBrickConnection();
-    String filterYellowBrickConnections();
+    String addYellowBrickConfiguration();
+    String filterYellowBrickConfigurations();
     String yellowBrickEvents();
 }

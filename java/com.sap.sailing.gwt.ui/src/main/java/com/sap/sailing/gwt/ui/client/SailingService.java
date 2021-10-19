@@ -582,5 +582,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     List<YellowBrickConfigurationWithSecurityDTO> getPreviousYellowBrickConfigurations();
 
-    Pair<String, List<YellowBrickRaceRecordDTO>> listYellowBrickRacesInEvent(String raceUrl) throws Exception;
+    Pair<String, List<YellowBrickRaceRecordDTO>> listYellowBrickRacesInEvent(
+            YellowBrickConfigurationWithSecurityDTO configuration) throws Exception;
 }

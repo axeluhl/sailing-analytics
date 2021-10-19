@@ -22,9 +22,9 @@ public interface MongoObjectFactory {
      * {@link DomainObjectFactory#getYellowBrickConfigurations()} called for the same <code>database</code> will return
      * an equal <code>tracTracConfiguration</code> in its results.
      */
-    void createYellowBrickConfiguration(YellowBrickConfiguration tracTracConfiguration);
+    void createYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfiguration);
 
-    void updateYellowBrickConfiguration(YellowBrickConfiguration tracTracConfiguration);
+    void updateYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfiguration);
 
     void deleteYellowBrickConfiguration(String creatorName, String raceUrl);
 

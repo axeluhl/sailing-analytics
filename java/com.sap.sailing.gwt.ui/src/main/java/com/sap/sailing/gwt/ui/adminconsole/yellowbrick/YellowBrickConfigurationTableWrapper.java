@@ -39,17 +39,17 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * A wrapper for a CellTable displaying an overview over the existing YellowBrick configurations. It shows the name, the
  * race URL, the user name, the presence of a password, the name of the creator, the group and user each user group is
  * owned by. There are options edit or to delete the configuration, change the ownership or edit the associated ACL.
- * Editing the connection will open a new instance of {@link YellowBrickConnectionDialog}.<p>
+ * Editing the connection will open a new instance of {@link YellowBrickConfigurationDialog}.<p>
  * 
  * TODO make into a TableWrapperWithSingleSelectionAndFilter
  */
-public class YellowBrickConnectionTableWrapper extends
+public class YellowBrickConfigurationTableWrapper extends
         TableWrapper<YellowBrickConfigurationWithSecurityDTO, RefreshableMultiSelectionModel<YellowBrickConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
     private final LabeledAbstractFilterablePanel<YellowBrickConfigurationWithSecurityDTO> filterField;
     private final SailingServiceAsync sailingServiceWriteAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
 
-    public YellowBrickConnectionTableWrapper(final UserService userService, final SailingServiceWriteAsync sailingServiceWriteAsync,
+    public YellowBrickConfigurationTableWrapper(final UserService userService, final SailingServiceWriteAsync sailingServiceWriteAsync,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
         super(stringMessages, errorReporter, true, enablePager,
@@ -82,7 +82,7 @@ public class YellowBrickConnectionTableWrapper extends
         final AccessControlledActionsColumn<YellowBrickConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_UPDATE, DefaultActions.UPDATE, dto -> {
-            new YellowBrickConnectionEditDialog(dto, new DialogCallback<YellowBrickConfigurationWithSecurityDTO>() {
+            new YellowBrickConfigurationEditDialog(dto, new DialogCallback<YellowBrickConfigurationWithSecurityDTO>() {
                 @Override
                 public void ok(final YellowBrickConfigurationWithSecurityDTO editedObject) {
                     sailingServiceWriteAsync.updateYellowBrickConfiguration(editedObject,
@@ -95,7 +95,7 @@ public class YellowBrickConnectionTableWrapper extends
 
                                 @Override
                                 public void onSuccess(Void voidResult) {
-                                    refreshYellowBrickConnectionList();
+                                    refreshYellowBrickConfigurationList();
                                 }
                             }));
                 }
@@ -115,12 +115,12 @@ public class YellowBrickConnectionTableWrapper extends
 
                 @Override
                 public void onSuccess(Void result) {
-                    refreshYellowBrickConnectionList();
+                    refreshYellowBrickConfigurationList();
                 }
             });
         });
         final EditOwnershipDialog.DialogConfig<YellowBrickConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementWriteService(), type, dto -> refreshYellowBrickConnectionList(),
+                .create(userService.getUserManagementWriteService(), type, dto -> refreshYellowBrickConfigurationList(),
                         stringMessages);
         final EditACLDialog.DialogConfig<YellowBrickConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type, dto -> dto.getAccessControlList(), stringMessages);
@@ -129,7 +129,7 @@ public class YellowBrickConnectionTableWrapper extends
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
         filterField = new LabeledAbstractFilterablePanel<YellowBrickConfigurationWithSecurityDTO>(
-                new Label(stringMessages.filterYellowBrickConnections()),
+                new Label(stringMessages.filterYellowBrickConfigurations()),
                 new ArrayList<YellowBrickConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(YellowBrickConfigurationWithSecurityDTO t) {
@@ -163,7 +163,7 @@ public class YellowBrickConnectionTableWrapper extends
         return filterField;
     }
 
-    public void refreshYellowBrickConnectionList() {
+    public void refreshYellowBrickConfigurationList() {
         refreshYellowBrickConnectionList(/* selectWhenDone */ null);
     }
     

@@ -255,6 +255,8 @@ import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickConfiguration;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
@@ -609,8 +611,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
             String yellowBrickPassword) {
-        // TODO Implement SailingServiceWriteImpl.createYellowBrickConfiguration(...)
-        
+        if (existsYellowBrickConfigurationForCurrentUser(yellowBrickRaceUrl)) {
+            throw new RuntimeException("A configuration for the current user with this race URL already exists.");
+        }
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        final TypeRelativeObjectIdentifier identifier = YellowBrickConfiguration.getTypeRelativeObjectIdentifier(yellowBrickRaceUrl, currentUserName);
+        final YellowBrickTrackingAdapter yellowBrickTrackingAdapter = getYellowBrickTrackingAdapterFactory().getYellowBrickTrackingAdapter(getBaseDomainFactory());
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.YELLOWBRICK_ACCOUNT,
+                identifier, name,
+                () -> yellowBrickTrackingAdapter.createYellowBrickConfiguration(name, yellowBrickRaceUrl, yellowBrickUsername, yellowBrickPassword, currentUserName));
     }
 
     @Override
@@ -3595,6 +3605,18 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         final String currentUserName = getSecurityService().getCurrentUser().getName();
         for (final SwissTimingArchiveConfigurationWithSecurityDTO dto : getPreviousSwissTimingArchiveConfigurations()) {
             if (dto.getJsonUrl().equals(jsonUrl) && currentUserName.equals(dto.getCreatorName())) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+    
+    private boolean existsYellowBrickConfigurationForCurrentUser(String raceUrl) {
+        boolean found = false;
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        for (final YellowBrickConfigurationWithSecurityDTO dto : getPreviousYellowBrickConfigurations()) {
+            if (dto.getRaceUrl().equals(raceUrl) && currentUserName.equals(dto.getCreatorName())) {
                 found = true;
                 break;
             }

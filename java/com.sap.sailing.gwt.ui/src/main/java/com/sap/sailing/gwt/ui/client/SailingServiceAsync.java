@@ -661,6 +661,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getPreviousYellowBrickConfigurations(
             AsyncCallback<List<YellowBrickConfigurationWithSecurityDTO>> callback);
 
-    void listYellowBrickRacesInEvent(String raceUrl,
+    void listYellowBrickRacesInEvent(YellowBrickConfigurationWithSecurityDTO configuration,
             AsyncCallback<Pair<String, List<YellowBrickRaceRecordDTO>>> callback);
 }

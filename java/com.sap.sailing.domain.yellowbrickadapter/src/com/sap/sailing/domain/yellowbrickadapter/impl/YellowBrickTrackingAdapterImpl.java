@@ -6,6 +6,11 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.json.simple.parser.ParseException;
 
@@ -14,12 +19,14 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickConfiguration;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickConfigurationListener;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRace;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRaceTrackingConnectivityParams;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapter {
@@ -43,8 +50,21 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     
     private final DomainFactory baseDomainFactory;
     
+    /**
+     * Keyed by pairs consisting of {@link YellowBrickConfiguration#getCreatorName() creator name} and
+     * {@link YellowBrickConfiguration#getRaceUrl() race URL}.
+     */
+    private final ConcurrentMap<Pair<String, String>, YellowBrickConfiguration> yellowBrickConfigurations;
+    
+    /**
+     * A {@link Collections#synchronizedSet(Set) synchronized set} for the listeners
+     */
+    private final Set<YellowBrickConfigurationListener> yellowBrickConfigurationListeners;
+    
     public YellowBrickTrackingAdapterImpl(DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
+        this.yellowBrickConfigurations = new ConcurrentHashMap<>();
+        this.yellowBrickConfigurationListeners = Collections.synchronizedSet(new HashSet<>());
     }
 
     @Override
@@ -88,8 +108,58 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     }
 
     @Override
+    public YellowBrickConfiguration createYellowBrickConfiguration(String name, String raceUrl, String username, String password, String creatorName) {
+        final YellowBrickConfiguration config = new YellowBrickConfigurationImpl(name, raceUrl, username, password, creatorName);
+        addYellowBrickConfiguration(config);
+        return config;
+    }
+    
+    @Override
+    public void addYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig) {
+        yellowBrickConfigurations.put(getConfigKey(yellowBrickConfig), yellowBrickConfig);
+        synchronized (yellowBrickConfigurationListeners) {
+            for (final YellowBrickConfigurationListener listener : yellowBrickConfigurationListeners) {
+                listener.yellowBrickConfigurationAdded(yellowBrickConfig);
+            }
+        }
+    }
+
+    @Override
+    public void removeYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig) {
+        yellowBrickConfigurations.remove(getConfigKey(yellowBrickConfig));
+        synchronized (yellowBrickConfigurationListeners) {
+            for (final YellowBrickConfigurationListener listener : yellowBrickConfigurationListeners) {
+                listener.yellowBrickConfigurationRemoved(yellowBrickConfig);
+            }
+        }
+    }
+    
+    private Pair<String, String> getConfigKey(YellowBrickConfiguration config) {
+        return new Pair<>(config.getCreatorName(), config.getRaceUrl());
+    }
+
+    @Override
+    public void updateYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig) {
+        yellowBrickConfigurations.put(getConfigKey(yellowBrickConfig), yellowBrickConfig);
+        synchronized (yellowBrickConfigurationListeners) {
+            for (final YellowBrickConfigurationListener listener : yellowBrickConfigurationListeners) {
+                listener.yellowBrickConfigurationUpdated(yellowBrickConfig);
+            }
+        }
+    }
+
+    @Override
+    public void addYellowBrickConfigurationListener(YellowBrickConfigurationListener listener) {
+        yellowBrickConfigurationListeners.add(listener);
+    }
+
+    @Override
+    public void removeYellowBrickConfigurationListener(YellowBrickConfigurationListener listener) {
+        yellowBrickConfigurationListeners.remove(listener);
+    }
+
+    @Override
     public Iterable<YellowBrickConfiguration> getYellowBrickConfigurations() {
-        // TODO
-        return null;
+        return yellowBrickConfigurations.values();
     }
 }

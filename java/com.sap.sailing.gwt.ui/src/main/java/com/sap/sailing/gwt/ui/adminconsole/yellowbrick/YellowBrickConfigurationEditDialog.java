@@ -6,16 +6,16 @@ import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Edits a {@link YellowBrickConfigurationWithSecurityDTO} object. Can be accessed from
- * {@link YellowBrickConnectionTableWrapper}
+ * {@link YellowBrickConfigurationTableWrapper}
  */
-public class YellowBrickConnectionEditDialog extends YellowBrickConnectionDialog {
+public class YellowBrickConfigurationEditDialog extends YellowBrickConfigurationDialog {
     /**
      * The class creates the UI-dialog to edit the selected {@link YellowBrickConfigurationWithSecurityDTO}.
      * 
      * @param dtoToEdit
      *            The 'dtoToEdit' parameter contains the {@link YellowBrickConfigurationWithSecurityDTO} which should be edited.
      */
-    public YellowBrickConnectionEditDialog(final YellowBrickConfigurationWithSecurityDTO dtoToEdit,
+    public YellowBrickConfigurationEditDialog(final YellowBrickConfigurationWithSecurityDTO dtoToEdit,
             final DialogCallback<YellowBrickConfigurationWithSecurityDTO> callback, final UserService userService,
             final ErrorReporter errorReporter) {
         super(callback, userService, errorReporter);

@@ -6309,10 +6309,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Pair<String, List<YellowBrickRaceRecordDTO>> listYellowBrickRacesInEvent(String raceUrl) throws Exception {
-        final YellowBrickRace raceMetadata = getYellowBrickTrackingAdapter().getRaceMetadata(raceUrl);
+    public Pair<String, List<YellowBrickRaceRecordDTO>> listYellowBrickRacesInEvent(YellowBrickConfigurationWithSecurityDTO config) throws Exception {
+        final YellowBrickRace raceMetadata = getYellowBrickTrackingAdapter().getRaceMetadata(config.getRaceUrl());
         return new Pair<>(raceMetadata.getRaceUrl(),
-                Collections.singletonList(new YellowBrickRaceRecordDTO(raceMetadata.getRaceUrl(), // TODO can we obtain a clear-text name?
+                Collections.singletonList(new YellowBrickRaceRecordDTO(config.getName(),
                         raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId())))); // TODO also copy number of competitors and information about last fix time point
     }
 }

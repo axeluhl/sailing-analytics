@@ -18,7 +18,7 @@ import com.sap.sse.security.ui.client.UserService;
  * Creates a {@link TracTracConfigurationWithSecurityDTO} object. Can be accessed from
  * {@link TracTracEventManagementPanel}
  */
-public class YellowBrickConnectionDialog extends DataEntryDialog<YellowBrickConfigurationWithSecurityDTO> {
+public class YellowBrickConfigurationDialog extends DataEntryDialog<YellowBrickConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
     private Grid grid;
 
@@ -31,7 +31,7 @@ public class YellowBrickConnectionDialog extends DataEntryDialog<YellowBrickConf
     /**
      * The class creates the UI-dialog to create a {@link TracTracConfigurationWithSecurityDTO}.
      */
-    public YellowBrickConnectionDialog(
+    public YellowBrickConfigurationDialog(
             final DialogCallback<YellowBrickConfigurationWithSecurityDTO> callback, final UserService userService,
             final ErrorReporter errorReporter) {
         super(stringMessages.yellowBrickConfiguration(), /* message */null, stringMessages.ok(), stringMessages.cancel(),
@@ -54,13 +54,13 @@ public class YellowBrickConnectionDialog extends DataEntryDialog<YellowBrickConf
         grid.setWidget(3, 1, raceURLTextBox);
         // TracTrac Username
         usernameTextBox = createTextBox("");
-        usernameTextBox.ensureDebugId("TracTracUsernameTextBox");
+        usernameTextBox.ensureDebugId("YellowBrickUsernameTextBox");
         usernameTextBox.setVisibleLength(40);
         grid.setWidget(5, 0, new Label(stringMessages.username() + ":"));
         grid.setWidget(5, 1, usernameTextBox);
         // TracTrac Password
         passwordTextBox = createPasswordTextBox("");
-        passwordTextBox.ensureDebugId("TracTracPasswordTextBox");
+        passwordTextBox.ensureDebugId("YellowBrickPasswordTextBox");
         passwordTextBox.setVisibleLength(40);
         grid.setWidget(6, 0, new Label(stringMessages.password() + ":"));
         grid.setWidget(6, 1, passwordTextBox);
