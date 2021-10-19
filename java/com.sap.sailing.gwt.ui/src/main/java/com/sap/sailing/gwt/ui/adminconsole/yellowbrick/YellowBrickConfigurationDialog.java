@@ -22,11 +22,11 @@ public class YellowBrickConfigurationDialog extends DataEntryDialog<YellowBrickC
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
     private Grid grid;
 
+    protected TextBox nameTextBox;
     protected TextBox raceURLTextBox;
     protected TextBox usernameTextBox;
     protected PasswordTextBox passwordTextBox;
     protected String creatorName;
-    protected String name;
 
     /**
      * The class creates the UI-dialog to create a {@link TracTracConfigurationWithSecurityDTO}.
@@ -43,6 +43,13 @@ public class YellowBrickConfigurationDialog extends DataEntryDialog<YellowBrickC
     private void createUi() {
         grid = new Grid(7, 2);
         grid.setWidget(0, 0, new Label(stringMessages.details() + ":"));
+        // Name
+        Label nameLabel = new Label(stringMessages.name() + ":");
+        nameTextBox = createTextBox("");
+        nameTextBox.ensureDebugId("NameTextBox");
+        nameTextBox.setVisibleLength(100);
+        grid.setWidget(2, 0, nameLabel);
+        grid.setWidget(2, 1, nameTextBox);
         // Race URL
         Label raceURLLabel = new Label(stringMessages.raceUrl() + ":");
         raceURLTextBox = createTextBox("");
@@ -73,10 +80,8 @@ public class YellowBrickConfigurationDialog extends DataEntryDialog<YellowBrickC
 
     @Override
     protected YellowBrickConfigurationWithSecurityDTO getResult() {
-        final String raceURL = raceURLTextBox.getValue();
-        final String username = usernameTextBox.getValue();
-        final String password = passwordTextBox.getValue();
-        return new YellowBrickConfigurationWithSecurityDTO(/* security information */ null, name, raceURL, username, password, creatorName);
+        return new YellowBrickConfigurationWithSecurityDTO(nameTextBox.getValue(),
+                raceURLTextBox.getValue(), usernameTextBox.getValue(), passwordTextBox.getValue(), creatorName);
     }
 
     @Override

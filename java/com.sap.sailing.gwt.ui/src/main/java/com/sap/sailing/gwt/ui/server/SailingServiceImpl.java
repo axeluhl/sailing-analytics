@@ -6300,7 +6300,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 configs,
                 ybConfig -> {
-                    final YellowBrickConfigurationWithSecurityDTO config = new YellowBrickConfigurationWithSecurityDTO(/* security info */ null,
+                    final YellowBrickConfigurationWithSecurityDTO config = new YellowBrickConfigurationWithSecurityDTO(
                         ybConfig.getName(), ybConfig.getRaceUrl(),
                         ybConfig.getUsername(), ybConfig.getPassword(), ybConfig.getCreatorName());
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);

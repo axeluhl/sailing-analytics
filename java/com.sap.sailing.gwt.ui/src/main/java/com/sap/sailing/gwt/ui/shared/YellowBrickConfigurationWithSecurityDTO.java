@@ -10,7 +10,6 @@ import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 public class YellowBrickConfigurationWithSecurityDTO extends NamedSecuredObjectDTO {
     private static final long serialVersionUID = -3567107321280535272L;
 
-    private String name;
     private String raceUrl;
     private String username;
     private String password;
@@ -34,9 +33,16 @@ public class YellowBrickConfigurationWithSecurityDTO extends NamedSecuredObjectD
         this(config.getSecurityInformation(), name, config.getRaceUrl(), config.getUsername(), config.getPassword(), config.getCreatorName());
     }
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * Creates an empty but valid {@link SecurityInformationDTO}
+     */
+    public YellowBrickConfigurationWithSecurityDTO(String name, String raceUrl, String username, String password, String creatorName) {
+        super(name);
+        this.raceUrl = raceUrl;
+        this.username = username;
+        this.password = password;
+        this.creatorName = creatorName;
+   }
 
     public String getRaceUrl() {
         return raceUrl;

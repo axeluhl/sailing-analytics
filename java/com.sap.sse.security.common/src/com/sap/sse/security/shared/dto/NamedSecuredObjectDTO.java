@@ -7,13 +7,14 @@ public abstract class NamedSecuredObjectDTO extends NamedDTO implements SecuredD
 
     private static final long serialVersionUID = 2642220699434177353L;
 
-    private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
+    private SecurityInformationDTO securityInformation;
 
     @Deprecated
     protected NamedSecuredObjectDTO() {} // for GWT RPC serialization only
 
     protected NamedSecuredObjectDTO(String name) {
         super(name);
+        securityInformation = new SecurityInformationDTO();
     }
     
     protected NamedSecuredObjectDTO(String name, SecurityInformationDTO securityInformation) {

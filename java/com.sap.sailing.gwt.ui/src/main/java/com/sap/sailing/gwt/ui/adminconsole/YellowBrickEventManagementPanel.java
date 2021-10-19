@@ -109,10 +109,10 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
                 () -> new YellowBrickConfigurationDialog(
                         new DialogCallback<YellowBrickConfigurationWithSecurityDTO>() {
                             @Override
-                            public void ok(YellowBrickConfigurationWithSecurityDTO editedConnection) {
-                                sailingServiceWrite.createYellowBrickConfiguration(editedConnection.getName(),
-                                        editedConnection.getRaceUrl(),
-                                        editedConnection.getUsername(), editedConnection.getPassword(),
+                            public void ok(YellowBrickConfigurationWithSecurityDTO editedConfiguration) {
+                                sailingServiceWrite.createYellowBrickConfiguration(editedConfiguration.getName(),
+                                        editedConfiguration.getRaceUrl(),
+                                        editedConfiguration.getUsername(), editedConfiguration.getPassword(),
                                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                             @Override
                                             public void onFailure(Throwable caught) {
@@ -122,7 +122,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
 
                                             @Override
                                             public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshYellowBrickConnectionList(/* selectWhenDone */ editedConnection);
+                                                connectionsTable.refreshYellowBrickConnectionList(/* selectWhenDone */ editedConfiguration);
                                             }
                                         }));
                             }

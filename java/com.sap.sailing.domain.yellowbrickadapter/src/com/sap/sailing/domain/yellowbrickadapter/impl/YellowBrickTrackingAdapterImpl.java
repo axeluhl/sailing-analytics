@@ -125,11 +125,13 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     }
 
     @Override
-    public void removeYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig) {
-        yellowBrickConfigurations.remove(getConfigKey(yellowBrickConfig));
-        synchronized (yellowBrickConfigurationListeners) {
-            for (final YellowBrickConfigurationListener listener : yellowBrickConfigurationListeners) {
-                listener.yellowBrickConfigurationRemoved(yellowBrickConfig);
+    public void removeYellowBrickConfiguration(String raceUrl, String creatorName) {
+        final YellowBrickConfiguration removedConfig = yellowBrickConfigurations.remove(getConfigKey(raceUrl, creatorName));
+        if (removedConfig != null) {
+            synchronized (yellowBrickConfigurationListeners) {
+                for (final YellowBrickConfigurationListener listener : yellowBrickConfigurationListeners) {
+                    listener.yellowBrickConfigurationRemoved(removedConfig);
+                }
             }
         }
     }
@@ -137,13 +139,19 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     private Pair<String, String> getConfigKey(YellowBrickConfiguration config) {
         return new Pair<>(config.getCreatorName(), config.getRaceUrl());
     }
+    
+    private Pair<String, String> getConfigKey(String raceUrl, String creatorName) {
+        return new Pair<>(creatorName, raceUrl);
+    }
 
     @Override
-    public void updateYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig) {
-        yellowBrickConfigurations.put(getConfigKey(yellowBrickConfig), yellowBrickConfig);
+    public void updateYellowBrickConfiguration(String name, String raceUrl, String username,
+            String password, String creatorName) {
+        final YellowBrickConfigurationImpl updatedConfig = new YellowBrickConfigurationImpl(name, raceUrl, username, password, creatorName);
+        yellowBrickConfigurations.put(getConfigKey(raceUrl, creatorName), updatedConfig);
         synchronized (yellowBrickConfigurationListeners) {
             for (final YellowBrickConfigurationListener listener : yellowBrickConfigurationListeners) {
-                listener.yellowBrickConfigurationUpdated(yellowBrickConfig);
+                listener.yellowBrickConfigurationUpdated(updatedConfig);
             }
         }
     }

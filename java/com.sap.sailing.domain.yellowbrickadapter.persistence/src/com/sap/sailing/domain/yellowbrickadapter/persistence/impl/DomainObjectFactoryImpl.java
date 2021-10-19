@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.yellowbrickadapter.persistence.impl;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,10 +41,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private YellowBrickConfiguration loadYellowBrickConfiguration(Document object) {
+        String name = (String) object.get(FieldNames.YB_CONFIG_NAME.name());
         Object usernameObject = object.get(FieldNames.YB_CONFIG_USERNAME.name());
         Object passwordObject = object.get(FieldNames.YB_CONFIG_PASSWORD.name());
         String username = usernameObject == null ? "" : (String) usernameObject;
-        String password = passwordObject == null ? "" : (String) passwordObject;
+        String password = passwordObject == null ? "" : new String(Base64.getDecoder().decode((String) passwordObject));
         String creatorName = (String) object.get(FieldNames.YB_CONFIG_CREATOR_NAME.name());
         String raceURL = (String) object.get(FieldNames.YB_CONFIG_RACE_URL.name());
         final boolean needsUpdate = (creatorName == null);
@@ -51,7 +53,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // No creator is set yet -> existing configurations are assumed to belong to the admin
             creatorName = "admin";
         }
-        final YellowBrickConfiguration loadedYellowBrickConfiguration = new YellowBrickConfigurationImpl(creatorName, raceURL, username, password, creatorName);
+        final YellowBrickConfiguration loadedYellowBrickConfiguration = new YellowBrickConfigurationImpl(name, raceURL, username, password, creatorName);
         if (needsUpdate) {
             // recreating the config on the DB because the composite key changed
             new MongoObjectFactoryImpl(database).deleteYellowBrickConfiguration(null, raceURL);

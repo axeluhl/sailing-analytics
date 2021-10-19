@@ -19,9 +19,10 @@ public interface YellowBrickTrackingAdapter {
     
     void addYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig);
     
-    void removeYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig);
+    void removeYellowBrickConfiguration(String raceUrl, String creatorName);
 
-    void updateYellowBrickConfiguration(YellowBrickConfiguration yellowBrickConfig);
+    void updateYellowBrickConfiguration(String name, String raceUrl, String username,
+            String password, String creatorName);
     
     void addYellowBrickConfigurationListener(YellowBrickConfigurationListener listener);
 

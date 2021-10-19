@@ -24,8 +24,8 @@ public class YellowBrickConfigurationEditDialog extends YellowBrickConfiguration
     }
 
     private void setData(final YellowBrickConfigurationWithSecurityDTO dtotoEdit) {
-        name = dtotoEdit.getName();
         creatorName = dtotoEdit.getCreatorName();
+        nameTextBox.setText(dtotoEdit.getName());
         raceURLTextBox.setText(dtotoEdit.getRaceUrl());
         usernameTextBox.setText(dtotoEdit.getUsername());
         passwordTextBox.setText(dtotoEdit.getPassword());

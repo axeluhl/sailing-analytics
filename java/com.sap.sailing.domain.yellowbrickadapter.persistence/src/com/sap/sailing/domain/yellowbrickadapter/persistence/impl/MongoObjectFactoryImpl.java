@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.yellowbrickadapter.persistence.impl;
 
+import java.util.Base64;
+
 import org.bson.Document;
 
 import com.mongodb.WriteConcern;
@@ -47,7 +49,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.YB_CONFIG_NAME.name(), yellowBrickConfiguration.getName());
         result.put(FieldNames.YB_CONFIG_RACE_URL.name(), yellowBrickConfiguration.getRaceUrl());
         result.put(FieldNames.YB_CONFIG_USERNAME.name(), yellowBrickConfiguration.getUsername());
-        result.put(FieldNames.YB_CONFIG_PASSWORD.name(), yellowBrickConfiguration.getPassword());
+        result.put(FieldNames.YB_CONFIG_PASSWORD.name(), Base64.getEncoder().encode(yellowBrickConfiguration.getPassword().getBytes()));
         return result;
     }
 

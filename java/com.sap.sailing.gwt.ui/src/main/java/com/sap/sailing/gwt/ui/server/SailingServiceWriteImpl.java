@@ -616,7 +616,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         }
         final String currentUserName = getSecurityService().getCurrentUser().getName();
         final TypeRelativeObjectIdentifier identifier = YellowBrickConfiguration.getTypeRelativeObjectIdentifier(yellowBrickRaceUrl, currentUserName);
-        final YellowBrickTrackingAdapter yellowBrickTrackingAdapter = getYellowBrickTrackingAdapterFactory().getYellowBrickTrackingAdapter(getBaseDomainFactory());
+        final YellowBrickTrackingAdapter yellowBrickTrackingAdapter = getYellowBrickTrackingAdapter();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.YELLOWBRICK_ACCOUNT,
                 identifier, name,
@@ -3914,12 +3914,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> singletonList) {
-        // TODO Implement SailingServiceWriteImpl.deleteYellowBrickConfigurations(...)
+    public void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> configs) {
+        for (final YellowBrickConfigurationWithSecurityDTO config : configs) {
+            getYellowBrickTrackingAdapter().removeYellowBrickConfiguration(config.getRaceUrl(), config.getCreatorName());
+        }
     }
 
     @Override
     public void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject) {
-        // TODO Implement SailingServiceWriteImpl.updateYellowBrickConfiguration(...)
+        getYellowBrickTrackingAdapter().updateYellowBrickConfiguration(editedObject.getName(),
+                editedObject.getRaceUrl(), editedObject.getUsername(), editedObject.getPassword(),
+                editedObject.getCreatorName());
     }
 }
