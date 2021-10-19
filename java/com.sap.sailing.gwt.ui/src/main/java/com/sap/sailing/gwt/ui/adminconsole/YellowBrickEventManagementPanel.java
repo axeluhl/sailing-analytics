@@ -159,7 +159,6 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
             final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedSet().size() == 1;
             listRacesButton.setEnabled(objectSelected);
         });
-
         tableAndConfigurationPanel.add(buttonPanel);
         tableAndConfigurationPanel.add(grid);
         tableAndConfigurationPanel.add(connectionsTable);

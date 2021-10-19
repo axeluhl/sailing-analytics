@@ -70,13 +70,13 @@ public class YellowBrickConfigurationTableWrapper extends
         final ListHandler<YellowBrickConfigurationWithSecurityDTO> yellowBrickAccountColumnListHandler = getColumnSortHandler();
 
         // table
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountNameColumn = new AbstractSortableTextColumn<>(
+        final TextColumn<YellowBrickConfigurationWithSecurityDTO> yellowBrickAccountNameColumn = new AbstractSortableTextColumn<>(
                 dto -> dto.getName(), yellowBrickAccountColumnListHandler);
         final TextColumn<YellowBrickConfigurationWithSecurityDTO> yellowBrickAccountRaceUrlColumn = new AbstractSortableTextColumn<>(
                 dto -> dto.getRaceUrl(), yellowBrickAccountColumnListHandler);
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountUsernameColumn = new AbstractSortableTextColumn<>(
+        final TextColumn<YellowBrickConfigurationWithSecurityDTO> yellowBrickAccountUsernameColumn = new AbstractSortableTextColumn<>(
                 dto -> dto.getUsername(), yellowBrickAccountColumnListHandler);
-        final TextColumn<YellowBrickConfigurationWithSecurityDTO> tracTracAccountCreatorNameColumn = new AbstractSortableTextColumn<>(
+        final TextColumn<YellowBrickConfigurationWithSecurityDTO> yellowBrickAccountCreatorNameColumn = new AbstractSortableTextColumn<>(
                 dto -> dto.getCreatorName(), yellowBrickAccountColumnListHandler);
         final HasPermissions type = SecuredDomainType.YELLOWBRICK_ACCOUNT;
         final AccessControlledActionsColumn<YellowBrickConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
@@ -150,10 +150,10 @@ public class YellowBrickConfigurationTableWrapper extends
                 .setUpdatePermissionFilterForCheckbox(connection -> userService.hasPermission(connection, DefaultActions.UPDATE));
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(yellowBrickAccountColumnListHandler);
-        table.addColumn(tracTracAccountNameColumn, getStringMessages().name());
-        table.addColumn(yellowBrickAccountRaceUrlColumn, stringMessagesClient.jsonUrl());
-        table.addColumn(tracTracAccountUsernameColumn, stringMessagesClient.tractracUsername());
-        table.addColumn(tracTracAccountCreatorNameColumn, stringMessagesClient.creatorName());
+        table.addColumn(yellowBrickAccountNameColumn, getStringMessages().name());
+        table.addColumn(yellowBrickAccountRaceUrlColumn, stringMessagesClient.raceUrl());
+        table.addColumn(yellowBrickAccountUsernameColumn, stringMessagesClient.username());
+        table.addColumn(yellowBrickAccountCreatorNameColumn, stringMessagesClient.creatorName());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, yellowBrickAccountColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());
         table.ensureDebugId("TracTracConfigurationWithSecurityDTOTable");
