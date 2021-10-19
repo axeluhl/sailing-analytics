@@ -116,7 +116,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
         connectionsTable = new TracTracConnectionTableWrapper(userService, sailingServiceWrite, stringMessages,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshTracTracConnectionList();
-
         final Grid grid = new Grid(1, 2);
         grid.setWidget(0, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
         final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
@@ -181,13 +180,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
             final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedSet().size() == 1;
             listRacesButton.setEnabled(objectSelected);
         });
-
         tableAndConfigurationPanel.add(buttonPanel);
         tableAndConfigurationPanel.add(grid);
         tableAndConfigurationPanel.add(connectionsTable);
-
         connectionsPanel.setContentWidget(tableAndConfigurationPanel);
-
         return connectionsPanel;
     }
     
@@ -378,9 +374,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
         CaptionPanel trackedRacesPanel = new CaptionPanel(stringMessages.trackedRaces());
         trackedRacesPanel.ensureDebugId("TrackedRacesSection");
         trackedRacesPanel.setStyleName("bold");
-        
         trackedRacesPanel.setContentWidget(this.trackedRacesListComposite);
-
         return trackedRacesPanel;
     }
     

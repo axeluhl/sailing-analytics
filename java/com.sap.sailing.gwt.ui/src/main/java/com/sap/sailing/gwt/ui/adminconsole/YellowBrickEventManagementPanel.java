@@ -102,11 +102,7 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshYellowBrickConnectionList();
         final Grid grid = new Grid(1, 2);
-        grid.setWidget(0, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
-        final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
-        showHiddenRacesCheckbox.ensureDebugId("ShowHiddenRacesCheckBox");
-        grid.setWidget(0, 1, showHiddenRacesCheckbox);
-        // Add TracTrac Connection
+        // Add YellowBrick connections
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredDomainType.TRACKED_RACE);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshYellowBrickConnectionList());
         Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addYellowBrickConnection(),

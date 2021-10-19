@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.yellowbrickadapter.YellowBrickConfiguration;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
@@ -59,9 +59,13 @@ public class YellowBrickConfigurationWithSecurityDTO extends NamedSecuredObjectD
         return SecuredDomainType.YELLOWBRICK_ACCOUNT;
     }
 
+    // TODO it would be nice to factor the redundancy with YellowBrickConfiguration.getTypeRelativeObjectIdentifier but it would require introducing a new .common bundle
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
+        String raceUrl = getRaceUrl();
+        String creatorName = getCreatorName();
         return getPermissionType().getQualifiedObjectIdentifier(
-                YellowBrickConfiguration.getTypeRelativeObjectIdentifier(getRaceUrl(), getCreatorName()));
+                creatorName == null ? new TypeRelativeObjectIdentifier(raceUrl)
+                : new TypeRelativeObjectIdentifier(raceUrl, creatorName));
     }
 }
