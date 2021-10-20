@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -181,38 +182,29 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
     
     protected CaptionPanel createTrackableRacesPanel() {
         CaptionPanel trackableRacesPanel = new CaptionPanel(stringMessages.trackableRaces());
-        trackableRacesPanel.ensureDebugId("TrackableRacesSection");
+        trackableRacesPanel.ensureDebugId("YellowBrickTrackableRacesSection");
         trackableRacesPanel.setStyleName("bold");
-        
         FlexTable layoutTable = new FlexTable();
         layoutTable.setWidth("100%");
-
         ColumnFormatter columnFormatter = layoutTable.getColumnFormatter();
         FlexCellFormatter cellFormatter = layoutTable.getFlexCellFormatter();
-
         columnFormatter.setWidth(0, "130px");
-        //columnFormatter.setWidth(1, "80%");
-
         // Regatta
         Label regattaForTrackingLabel = new Label(stringMessages.regattaUsedForTheTrackedRace());
         regattaForTrackingLabel.setWordWrap(false);
         int row = 0;
         layoutTable.setWidget(row, 0, regattaForTrackingLabel);
         layoutTable.setWidget(row, 1, getAvailableRegattasListBox());
-
         // Track settings (wind)
         Label trackSettingsLabel = new Label(stringMessages.trackSettings() + ":");
-
         final CheckBox trackWindCheckBox = new CheckBox(stringMessages.trackWind());
-        trackWindCheckBox.ensureDebugId("TrackWindCheckBox");
+        trackWindCheckBox.ensureDebugId("YellowBrickTrackWindCheckBox");
         trackWindCheckBox.setWordWrap(false);
         trackWindCheckBox.setValue(Boolean.TRUE);
-
         final CheckBox correctWindCheckBox = new CheckBox(stringMessages.declinationCheckbox());
-        correctWindCheckBox.ensureDebugId("CorrectWindCheckBox");
+        correctWindCheckBox.ensureDebugId("YellowBrickCorrectWindCheckBox");
         correctWindCheckBox.setWordWrap(false);
         correctWindCheckBox.setValue(Boolean.TRUE);
-
         final SimulationPanel simulationPanel = new SimulationPanel(stringMessages);
         final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
@@ -220,42 +212,47 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         final CheckBox useOfficialResultsToUpdateRaceLogsCheckbox = new CheckBox(stringMessages.useOfficialResultsForAutomaticUpdates());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
         ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
-        
         layoutTable.setWidget(++row, 0, trackSettingsLabel);
         layoutTable.setWidget(row, 1, trackWindCheckBox);
         layoutTable.setWidget(++row, 1, correctWindCheckBox);
         layoutTable.setWidget(++row, 1, simulationPanel);
         layoutTable.setWidget(++row, 1, ignoreTracTracMarkPassingsCheckbox);
         layoutTable.setWidget(++row, 1, useOfficialResultsToUpdateRaceLogsCheckbox);
-        
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTableWrapper = new TableWrapperWithMultiSelectionAndFilter<YellowBrickRaceRecordDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 Optional.of(new EntityIdentityComparator<YellowBrickRaceRecordDTO>() {
                     @Override
                     public boolean representSameEntity(YellowBrickRaceRecordDTO dto1, YellowBrickRaceRecordDTO dto2) {
-                        return dto1.raceUrl.equals(dto2.raceUrl);
+                        return dto1.getRaceUrl().equals(dto2.getRaceUrl());
                     }
                     @Override
                     public int hashCode(YellowBrickRaceRecordDTO t) {
-                        return t.raceUrl.hashCode();
+                        return t.getRaceUrl().hashCode();
                     }
                 }), tableResources, Optional.empty(), Optional.empty(), /* filter checkbox label */ stringMessages.filterRaces()) {
                 @Override
                 public List<String> getSearchableStrings(YellowBrickRaceRecordDTO t) {
                     List<String> strings = new ArrayList<String>();
                     strings.add(t.getName());
-                    strings.add(t.raceUrl);
+                    strings.add(t.getRaceUrl());
                     return strings;
                 }
             };
         racesTableWrapper.getTable().ensureDebugId("YellowBrickTrackableRacesCellTable");
-
         // Races
         TextColumn<YellowBrickRaceRecordDTO> raceNameColumn = new AbstractSortableTextColumn<>(o->o.getName(), racesTableWrapper.getColumnSortHandler());
-        TextColumn<YellowBrickRaceRecordDTO> raceUrlColumn = new AbstractSortableTextColumn<>(o->o.raceUrl, racesTableWrapper.getColumnSortHandler());
+        TextColumn<YellowBrickRaceRecordDTO> raceUrlColumn = new AbstractSortableTextColumn<>(o->o.getRaceUrl(), racesTableWrapper.getColumnSortHandler());
+        TextColumn<YellowBrickRaceRecordDTO> timePointOfLastFixColumn = new AbstractSortableTextColumn<>(
+                o -> "" + o.getTimePointOfLastFix(), racesTableWrapper.getColumnSortHandler(),
+                Comparator.comparing(o -> o.getTimePointOfLastFix()));
+        TextColumn<YellowBrickRaceRecordDTO> numberOfCompetitorsColumn = new AbstractSortableTextColumn<>(
+                o -> Integer.toString(o.getNumberOfCompetitors()), racesTableWrapper.getColumnSortHandler(),
+                Comparator.comparing(o -> o.getNumberOfCompetitors()));
         racesTableWrapper.addColumn(raceNameColumn, stringMessages.race());
         racesTableWrapper.addColumn(raceUrlColumn, stringMessages.raceUrl());
+        racesTableWrapper.addColumn(timePointOfLastFixColumn, stringMessages.timePointOfLastFix());
+        racesTableWrapper.addColumn(numberOfCompetitorsColumn, stringMessages.numberOfCompetitors());
         layoutTable.setWidget(++row, 0, racesTableWrapper);
         cellFormatter.setColSpan(row, 0, 2);
         final Button startTrackingButton = new Button(stringMessages.startTracking());

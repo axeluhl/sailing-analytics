@@ -474,12 +474,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             presenter.getLeaderboardGroupsRefresher().reloadAndCallFillAll();
         });
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
-        
         AnchorCell anchorCell = new AnchorCell();
-
         final TextColumn<LeaderboardGroupDTO> groupUUidColumn = new AbstractSortableTextColumn<LeaderboardGroupDTO>(
-                group -> group.getId() == null ? "<null>" : group.getId().toString());
-
+                group -> group.getId() == null ? "<null>" : group.getId().toString(), leaderboardGroupsListHandler);
         Column<LeaderboardGroupDTO, SafeHtml> groupNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
@@ -561,13 +558,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 group -> {}, stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 e -> config.openOwnershipDialog(e));
-        
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type,
                 group -> {}, stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openDialog(e));
-        
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
                     sailingServiceWrite.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
@@ -585,7 +580,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
                 e -> migrateDialogConfig.openDialog(e));
-
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
@@ -611,19 +605,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         groupsTable.addColumn(groupUUidColumn, stringMessages.id());
         groupsTable.addColumn(actionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
-
         refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
-
         removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableGroupsSelectionModel, true,
                 () -> removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()));
         removeButton.ensureDebugId("RemoveLeaderboardButton");
-
         refreshableGroupsSelectionModel.addSelectionChangeHandler(event -> groupSelectionChanged());
-
         groupsTable.setSelectionModel(refreshableGroupsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
         groupsProvider.addDataDisplay(groupsTable);
         leaderboardGroupsContentPanel.add(groupsTable);
-
         return leaderboardGroupsCaptionPanel;
     }
 

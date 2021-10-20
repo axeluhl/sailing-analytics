@@ -599,7 +599,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 "trackWithYellowBrick for regatta " + regattaToAddTo + " for race records " + rrs );
         for (YellowBrickRaceRecordDTO rr : rrs) {
             try {
-                getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.raceUrl,
+                getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.getRaceUrl(),
                         getRaceLogStore(), getRegattaLogStore(), yellowBrickUsername, yellowBrickPassword, trackWind,
                         correctWindByDeclination);
             } catch (Exception e) {

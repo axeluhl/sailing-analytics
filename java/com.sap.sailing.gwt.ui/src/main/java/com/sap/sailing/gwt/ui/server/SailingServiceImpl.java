@@ -6313,6 +6313,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final YellowBrickRace raceMetadata = getYellowBrickTrackingAdapter().getRaceMetadata(config.getRaceUrl());
         return new Pair<>(raceMetadata.getRaceUrl(),
                 Collections.singletonList(new YellowBrickRaceRecordDTO(config.getName(),
-                        raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId())))); // TODO also copy number of competitors and information about last fix time point
+                        raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId()),
+                        raceMetadata.getTimePointOfLastFix(), raceMetadata.getNumberOfCompetitors())));
     }
 }
