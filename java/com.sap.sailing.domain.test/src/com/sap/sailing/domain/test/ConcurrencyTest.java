@@ -4,9 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -24,7 +26,6 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -40,10 +41,10 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
     public void setUp() throws Exception {
         super.setUp();
         // load Race8 of RC44 Cup in Sweden
-        super.setUp("event_20110815_RCSwedenCu",
-        /* raceId */ "event_20110815_RCSwedenCu-Race8",
-        /* liveUri */ null,
-        /* storedUri */ new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401"),
+        URI storedUri = new URI("file:////"+new File("resources/event_20110815_RCSwedenCu-Race8.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:////"+new File("resources/event_20110815_RCSwedenCu-Race8.txt").getCanonicalPath()),
+                /* liveUri */ null,
+                /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS,
                 ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(

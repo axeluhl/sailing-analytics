@@ -467,7 +467,10 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(
             final EventView.Presenter presenter, final boolean showNotTracked) {
-        final RaceviewerLaunchPadController lpPresenter = new RaceviewerLaunchPadController(presenter::getRaceViewerURL);
+        final RaceviewerLaunchPadController<T> lpPresenter = new RaceviewerLaunchPadController<T>(
+                presenter::getRaceViewerURL, race -> {
+                   return presenter.getMapAndWindChartUrl(race);
+                });
         final RaceviewerLaunchPadCell<T> lpadCell = new RaceviewerLaunchPadCell<T>(lpPresenter, showNotTracked);
         DefaultRaceListColumnComparator<T> comparator = new DefaultRaceListColumnComparator<T>() {
             @Override
