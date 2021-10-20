@@ -174,14 +174,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return result;
     }
 
-    /**
-     * Computes the durations the boat to which this performance curve belongs is expected to sail to complete the {@code leg},
-     * considering the leg's {@link ORCPerformanceCurveLeg#getLength() length}.
-     */
-    private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg, ORCCertificate certificate) throws FunctionEvaluationException {
-        return createAllowancePerLeg(leg, certificate, new NoCachingWindLegTypeAndLegBearingCache());
-    }
-    
     private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg, ORCCertificate certificate,
             ORCPerformanceCurveCache cache) throws FunctionEvaluationException {
         Map<Speed, Map<Bearing, Speed>> twaAllowances = certificate.getVelocityPredictionPerTrueWindSpeedAndAngle();
