@@ -299,24 +299,8 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
 
                     @Override
                     public void onSuccess(final com.sap.sse.common.Util.Pair<String, List<YellowBrickRaceRecordDTO>> result) {
+                        loadingMessageLabel.setText("");
                         racesTableWrapper.refresh(result.getB());
-                        final YellowBrickConfigurationWithSecurityDTO updatedConnection = new YellowBrickConfigurationWithSecurityDTO(
-                                selectedConnection,
-                                result.getA());
-                        // store a successful configuration in the database for later retrieval
-                        sailingServiceWrite.updateYellowBrickConfiguration(updatedConnection,
-                                new MarkedAsyncCallback<Void>(
-                            new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Void voidResult) {
-                                    connectionsTable.refreshYellowBrickConfigurationList();
-                                }
-                            }));
                     }
                 }));
         }
