@@ -10,16 +10,15 @@ import java.util.Collections;
  *
  */
 public class YellowBrickRaceRecordDTO extends AbstractRaceRecordDTO {
-    public String regattaName;
     public String raceUrl;
 
     @Deprecated // GWT only
     YellowBrickRaceRecordDTO() {
     }
 
-    public YellowBrickRaceRecordDTO(String regattaName, String raceUrl, boolean hasRememberedRegatta) {
-        super(raceUrl, hasRememberedRegatta);
-        this.regattaName = regattaName;
+    public YellowBrickRaceRecordDTO(String name, String raceUrl, boolean hasRememberedRegatta) {
+        super(name, hasRememberedRegatta);
+        this.raceUrl = raceUrl;
     }
 
     @Override

@@ -245,7 +245,6 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
                 public List<String> getSearchableStrings(YellowBrickRaceRecordDTO t) {
                     List<String> strings = new ArrayList<String>();
                     strings.add(t.getName());
-                    strings.add(t.regattaName);
                     strings.add(t.raceUrl);
                     return strings;
                 }
@@ -253,10 +252,8 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         racesTableWrapper.getTable().ensureDebugId("YellowBrickTrackableRacesCellTable");
 
         // Races
-        TextColumn<YellowBrickRaceRecordDTO> regattaNameColumn = new AbstractSortableTextColumn<>(o->o.regattaName, racesTableWrapper.getColumnSortHandler());
         TextColumn<YellowBrickRaceRecordDTO> raceNameColumn = new AbstractSortableTextColumn<>(o->o.getName(), racesTableWrapper.getColumnSortHandler());
         TextColumn<YellowBrickRaceRecordDTO> raceUrlColumn = new AbstractSortableTextColumn<>(o->o.raceUrl, racesTableWrapper.getColumnSortHandler());
-        racesTableWrapper.addColumn(regattaNameColumn, stringMessages.event());
         racesTableWrapper.addColumn(raceNameColumn, stringMessages.race());
         racesTableWrapper.addColumn(raceUrlColumn, stringMessages.raceUrl());
         layoutTable.setWidget(++row, 0, racesTableWrapper);

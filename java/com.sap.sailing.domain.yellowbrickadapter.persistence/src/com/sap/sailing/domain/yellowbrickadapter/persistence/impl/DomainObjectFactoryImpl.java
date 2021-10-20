@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bson.Document;
+import org.bson.types.Binary;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -45,7 +46,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Object usernameObject = object.get(FieldNames.YB_CONFIG_USERNAME.name());
         Object passwordObject = object.get(FieldNames.YB_CONFIG_PASSWORD.name());
         String username = usernameObject == null ? "" : (String) usernameObject;
-        String password = passwordObject == null ? "" : new String(Base64.getDecoder().decode((String) passwordObject));
+        String password = passwordObject == null ? "" : new String(Base64.getDecoder().decode(((Binary) passwordObject).getData()));
         String creatorName = (String) object.get(FieldNames.YB_CONFIG_CREATOR_NAME.name());
         String raceURL = (String) object.get(FieldNames.YB_CONFIG_RACE_URL.name());
         final boolean needsUpdate = (creatorName == null);
