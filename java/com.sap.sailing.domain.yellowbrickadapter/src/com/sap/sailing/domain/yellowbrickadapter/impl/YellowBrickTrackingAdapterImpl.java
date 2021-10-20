@@ -3,11 +3,14 @@ package com.sap.sailing.domain.yellowbrickadapter.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -79,17 +82,37 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
                 /* timeout */ TIMEOUT_FOR_RACE_LOADING.asMillis());
     }
     
-    String getUrlForLatestFix(String raceUrl) {
-        return String.format(NUMBER_OF_POSITIONS_URL_TEMPLATE, raceUrl, 1);
+    String getUrlForLatestFix(String raceUrl, Optional<String> username, Optional<String> password) {
+        return appendUsernameAndPasswordParameters(String.format(NUMBER_OF_POSITIONS_URL_TEMPLATE, raceUrl, 1), username, password);
     }
 
-    String getUrlForAllData(String raceUrl) {
-        return String.format(POSITIONS_SINCE_DATE_URL_TEMPLATE, raceUrl, /* since the beginning of the epoch */ 0l);
+    private String appendUsernameAndPasswordParameters(String url, Optional<String> username, Optional<String> password) {
+        final StringBuilder sb = new StringBuilder(url);
+        appendOptionalParameter(sb, "username", username);
+        appendOptionalParameter(sb, "password", password);
+        return sb.toString();
+    }
+
+    private void appendOptionalParameter(StringBuilder urlBuilder, String parameterName, Optional<String> parameterValue) {
+        if (parameterValue.isPresent() && Util.hasLength(parameterValue.get())) {
+            urlBuilder.append("&");
+            urlBuilder.append(parameterName);
+            urlBuilder.append("=");
+            try {
+                urlBuilder.append(URLEncoder.encode(parameterValue.get(), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    
+    String getUrlForAllData(String raceUrl, Optional<String> username, Optional<String> password) {
+        return appendUsernameAndPasswordParameters(String.format(POSITIONS_SINCE_DATE_URL_TEMPLATE, raceUrl, /* since the beginning of the epoch */ 0l), username, password);
     }
 
     @Override
-    public YellowBrickRace getRaceMetadata(String raceUrl) throws IOException, ParseException {
-        final String url = getUrlForLatestFix(raceUrl);
+    public YellowBrickRace getRaceMetadata(String raceUrl, Optional<String> username, Optional<String> password) throws IOException, ParseException {
+        final String url = getUrlForLatestFix(raceUrl, username, password);
         final PositionsDocument doc = getPositionsDocumentForUrl(url);
         return new YellowBrickRaceImpl(raceUrl, doc.getTimePointOfLastFix(), Util.size(doc.getTeams()));
     }
@@ -103,8 +126,8 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     }
     
     @Override
-    public PositionsDocument getStoredData(String raceUrl) throws MalformedURLException, IOException, ParseException {
-        return getPositionsDocumentForUrl(getUrlForAllData(raceUrl));
+    public PositionsDocument getStoredData(String raceUrl, Optional<String> username, Optional<String> password) throws MalformedURLException, IOException, ParseException {
+        return getPositionsDocumentForUrl(getUrlForAllData(raceUrl, username, password));
     }
 
     @Override

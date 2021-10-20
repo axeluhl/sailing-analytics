@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.yellowbrickadapter.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
+import java.util.Optional;
 
 import org.json.simple.parser.ParseException;
 import org.junit.Before;
@@ -25,13 +27,15 @@ public class YellowBrickAdapterTest {
     
     @Test
     public void testSimpleUrlConstruction() {
-        final String rmsr2019Url = adapter.getUrlForLatestFix(RMSR2019);
-        assertEquals("https://yb.tl/API3/Race/rmsr2019/GetPositions?n=1", rmsr2019Url);
+        final String rmsr2019Url = adapter.getUrlForLatestFix(RMSR2019, /* username */ Optional.of("hello"), /* password */ Optional.of("world"));
+        assertTrue(rmsr2019Url.startsWith("https://yb.tl/API3/Race/rmsr2019/GetPositions?"));
+        assertTrue(rmsr2019Url.contains("username=hello"));
+        assertTrue(rmsr2019Url.contains("password=world"));
     }
     
     @Test
     public void testGetRaceMetadata() throws IOException, ParseException, java.text.ParseException {
-        final YellowBrickRace race = adapter.getRaceMetadata(RMSR2019);
+        final YellowBrickRace race = adapter.getRaceMetadata(RMSR2019, Optional.empty(), Optional.empty());
         assertEquals(RMSR2019, race.getRaceUrl());
         assertEquals(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2019-10-26T23:55:01Z")), race.getTimePointOfLastFix());
         assertEquals(113, race.getNumberOfCompetitors());
@@ -39,7 +43,7 @@ public class YellowBrickAdapterTest {
     
     @Test
     public void testGetFullRaceData() throws MalformedURLException, IOException, ParseException, java.text.ParseException {
-        final PositionsDocument fullRace = adapter.getStoredData(RMSR2019);
+        final PositionsDocument fullRace = adapter.getStoredData(RMSR2019, /* username */ Optional.empty(), /* password */ Optional.empty());
         assertEquals(113, Util.size(fullRace.getTeams()));
         assertEquals(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2019-10-26T23:55:01Z")), fullRace.getTimePointOfLastFix());
         assertEquals(2009, Util.size(Util.filter(fullRace.getTeams(), team->team.getCompetitorName().equals("JYS Jarhead")).iterator().next().getPositions()));

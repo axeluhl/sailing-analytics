@@ -2,6 +2,7 @@ package com.sap.sailing.domain.yellowbrickadapter;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Optional;
 
 import org.json.simple.parser.ParseException;
 
@@ -34,11 +35,15 @@ public interface YellowBrickTrackingAdapter {
 
     /**
      * Obtains the meta-data for the YellowBrick race identified by URL {@code raceUrl}
+     * @param username TODO
+     * @param password TODO
      */
-    YellowBrickRace getRaceMetadata(String raceUrl) throws IOException, ParseException;
+    YellowBrickRace getRaceMetadata(String raceUrl, Optional<String> username, Optional<String> password) throws IOException, ParseException;
 
     /**
      * Retrieves all data stored for the race with {@code raceUrl} so far.
+     * @param username TODO
+     * @param password TODO
      */
-    PositionsDocument getStoredData(String raceUrl) throws MalformedURLException, IOException, ParseException;
+    PositionsDocument getStoredData(String raceUrl, Optional<String> username, Optional<String> password) throws MalformedURLException, IOException, ParseException;
 }

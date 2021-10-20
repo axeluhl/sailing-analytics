@@ -6310,7 +6310,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public Pair<String, List<YellowBrickRaceRecordDTO>> listYellowBrickRacesInEvent(YellowBrickConfigurationWithSecurityDTO config) throws Exception {
-        final YellowBrickRace raceMetadata = getYellowBrickTrackingAdapter().getRaceMetadata(config.getRaceUrl());
+        final YellowBrickRace raceMetadata = getYellowBrickTrackingAdapter().getRaceMetadata(config.getRaceUrl(),
+                Optional.ofNullable(config.getUsername()), Optional.ofNullable(config.getPassword()));
         return new Pair<>(raceMetadata.getRaceUrl(),
                 Collections.singletonList(new YellowBrickRaceRecordDTO(config.getName(),
                         raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId()),
