@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.yellowbrickadapter.impl;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -17,7 +20,9 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
     public YellowBrickRaceTrackerImpl(YellowBrickRaceTrackingConnectivityParams connectivityParams, Regatta regatta,
             TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
-            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler, YellowBrickTrackingAdapter yellowBrickTrackingAdapter) {
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore, DomainFactory baseDomainFactory,
+            YellowBrickTrackingAdapter yellowBrickTrackingAdapter) {
         super(connectivityParams);
     }
 

@@ -47,7 +47,8 @@ public class YellowBrickRaceTrackingConnectivityParams extends AbstractRaceTrack
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
             long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {
         return new YellowBrickRaceTrackerImpl(this, /* regatta */ null, trackedRegattaRegistry, windStore,
-                raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds, raceTrackingHandler, yellowBrickTrackingAdapter);
+                raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds, raceTrackingHandler, raceLogStore,
+                regattaLogStore, baseDomainFactory, yellowBrickTrackingAdapter);
     }
 
     @Override
@@ -56,7 +57,8 @@ public class YellowBrickRaceTrackingConnectivityParams extends AbstractRaceTrack
             LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler) throws Exception {
         return new YellowBrickRaceTrackerImpl(this, regatta, trackedRegattaRegistry, windStore, raceLogResolver,
-                leaderboardGroupResolver, timeoutInMilliseconds, raceTrackingHandler, yellowBrickTrackingAdapter);
+                leaderboardGroupResolver, timeoutInMilliseconds, raceTrackingHandler, raceLogStore, regattaLogStore,
+                baseDomainFactory, yellowBrickTrackingAdapter);
     }
 
     @Override
