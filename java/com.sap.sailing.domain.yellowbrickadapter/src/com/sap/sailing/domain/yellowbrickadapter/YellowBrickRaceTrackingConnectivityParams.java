@@ -26,25 +26,28 @@ public class YellowBrickRaceTrackingConnectivityParams extends AbstractRaceTrack
     private final transient RaceLogStore raceLogStore;
     private final transient RegattaLogStore regattaLogStore;
     private final transient DomainFactory baseDomainFactory;
+    private final transient YellowBrickTrackingAdapter yellowBrickTrackingAdapter;
 
     public YellowBrickRaceTrackingConnectivityParams(String raceUrl, String username, String password,
             boolean trackWind, boolean correctWindDirectionByMagneticDeclination, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, DomainFactory baseDomainFactory) {
+            RegattaLogStore regattaLogStore, DomainFactory baseDomainFactory, YellowBrickTrackingAdapter yellowBrickTrackingAdapter) {
         super(trackWind, correctWindDirectionByMagneticDeclination);
         this.raceUrl = raceUrl;
         this.username = username;
         this.password = password;
-        this.trackerId = TYPE+"-"+raceUrl;
+        this.trackerId = TYPE + "-" + raceUrl;
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.baseDomainFactory = baseDomainFactory;
+        this.yellowBrickTrackingAdapter = yellowBrickTrackingAdapter;
     }
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
             long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) throws Exception {
-        return new YellowBrickRaceTrackerImpl(this);
+        return new YellowBrickRaceTrackerImpl(this, /* regatta */ null, trackedRegattaRegistry, windStore,
+                raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds, raceTrackingHandler, yellowBrickTrackingAdapter);
     }
 
     @Override
@@ -52,7 +55,8 @@ public class YellowBrickRaceTrackingConnectivityParams extends AbstractRaceTrack
             WindStore windStore, RaceLogAndTrackedRaceResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler) throws Exception {
-        return new YellowBrickRaceTrackerImpl(this);
+        return new YellowBrickRaceTrackerImpl(this, regatta, trackedRegattaRegistry, windStore, raceLogResolver,
+                leaderboardGroupResolver, timeoutInMilliseconds, raceTrackingHandler, yellowBrickTrackingAdapter);
     }
 
     @Override

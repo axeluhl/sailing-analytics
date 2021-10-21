@@ -70,12 +70,12 @@ public class Activator implements BundleActivator {
                         .createDomainObjectFactory(mongoObjectFactory.getDatabase());
                 com.sap.sailing.domain.yellowbrickadapter.persistence.MongoObjectFactory yellowBrickMongoObjectFactory = com.sap.sailing.domain.yellowbrickadapter.persistence.PersistenceFactory.INSTANCE
                         .createMongoObjectFactory(mongoObjectFactory.getDatabase());
+                final YellowBrickTrackingAdapter yellowBrickTrackingAdapter = yellowBrickTrackingAdapterFactory.getYellowBrickTrackingAdapter(baseDomainFactory);
                 final YellowBrickConnectivityParamsHandler paramsHandler = new YellowBrickConnectivityParamsHandler(
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                         MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory,
                                 domainObjectFactory),
-                        baseDomainFactory, yellowBrickMongoObjectFactory, securityService);
-                final YellowBrickTrackingAdapter yellowBrickTrackingAdapter = yellowBrickTrackingAdapterFactory.getYellowBrickTrackingAdapter(baseDomainFactory);
+                        baseDomainFactory, yellowBrickMongoObjectFactory, securityService, yellowBrickTrackingAdapter);
                 for (YellowBrickConfiguration yellowBrickConfig : yellowBrickDomainObjectFactory.getYellowBrickConfigurations()) {
                     securityService.migrateOwnership(yellowBrickConfig);
                     yellowBrickTrackingAdapter.addYellowBrickConfiguration(yellowBrickConfig);

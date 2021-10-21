@@ -13,6 +13,7 @@ import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRaceTrackingConnectivityParams;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sailing.domain.yellowbrickadapter.impl.YellowBrickConfigurationImpl;
 import com.sap.sailing.domain.yellowbrickadapter.persistence.MongoObjectFactory;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -36,16 +37,18 @@ public class YellowBrickConnectivityParamsHandler extends AbstractRaceTrackingCo
     private final DomainFactory baseDomainFactory;
     private final MongoObjectFactory yellowBrickMongoObjectFactory;
     private final SecurityService securityService;
+    private final YellowBrickTrackingAdapter yellowBrickTrackingAdapter;
 
     public YellowBrickConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             DomainFactory baseDomainFactory, MongoObjectFactory yellowBrickMongoObjectFactory,
-            SecurityService securityService) {
+            SecurityService securityService, YellowBrickTrackingAdapter yellowBrickTrackingAdapter) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.baseDomainFactory = baseDomainFactory;
         this.yellowBrickMongoObjectFactory = yellowBrickMongoObjectFactory;
         this.securityService = securityService;
+        this.yellowBrickTrackingAdapter = yellowBrickTrackingAdapter;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class YellowBrickConnectivityParamsHandler extends AbstractRaceTrackingCo
                 map.get(YELLOW_BRICK_USERNAME) == null ? null : map.get(YELLOW_BRICK_USERNAME).toString(),
                 map.get(YELLOW_BRICK_PASSWORD) == null ? null : map.get(YELLOW_BRICK_PASSWORD).toString(),
                 isTrackWind(map), isCorrectWindDirectionByMagneticDeclination(map), raceLogStore, regattaLogStore,
-                baseDomainFactory);
+                baseDomainFactory, yellowBrickTrackingAdapter);
     }
 
     @Override
@@ -86,7 +89,7 @@ public class YellowBrickConnectivityParamsHandler extends AbstractRaceTrackingCo
         YellowBrickRaceTrackingConnectivityParams result = new YellowBrickRaceTrackingConnectivityParams(
                 ybParams.getRaceUrl(), ybParams.getUsername(), ybParams.getPassword(), ybParams.isTrackWind(),
                 ybParams.isCorrectWindDirectionByMagneticDeclination(), raceLogStore, regattaLogStore,
-                baseDomainFactory);
+                baseDomainFactory, yellowBrickTrackingAdapter);
         updatePersistentYellowBrickConfiguration(result);
         return result;
     }
