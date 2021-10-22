@@ -81,6 +81,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.IQFOIL_MEN.getDisplayName(), imageResources.IQFOilMenIcon());
         boatClassIconsMap.put(BoatClassMasterdata.IQFOIL_WOMEN.getDisplayName(), imageResources.IQFOilWoenIcon());
         boatClassIconsMap.put(BoatClassMasterdata.IQFOIL_YOUTH.getDisplayName(), imageResources.IQFOilYouthIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.IRC.getDisplayName(), imageResources.IRCIcon());
         boatClassIconsMap.put(BoatClassMasterdata.J22.getDisplayName(), imageResources.J22Icon());
         boatClassIconsMap.put(BoatClassMasterdata.J24.getDisplayName(), imageResources.J24Icon());
         boatClassIconsMap.put(BoatClassMasterdata.J70.getDisplayName(), imageResources.J70Icon());
