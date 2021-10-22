@@ -1,8 +1,11 @@
 package com.sap.sailing.domain.yellowbrickadapter.impl;
 
+import java.util.UUID;
+
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -17,6 +20,9 @@ import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRaceTrackingConnecti
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 
 public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBrickRaceTrackingConnectivityParams> {
+    private final String DEFAULT_REGATTA_NAME_PREFIX = "YellowBrick ";
+    private final Regatta regatta;
+    
     public YellowBrickRaceTrackerImpl(YellowBrickRaceTrackingConnectivityParams connectivityParams, Regatta regatta,
             TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver,
@@ -24,12 +30,27 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
             RegattaLogStore regattaLogStore, DomainFactory baseDomainFactory,
             YellowBrickTrackingAdapter yellowBrickTrackingAdapter) {
         super(connectivityParams);
+        this.regatta = getOrCreateEffectiveRegatta(DEFAULT_REGATTA_NAME_PREFIX+connectivityParams.getRaceUrl(), trackedRegattaRegistry, regatta);
+    }
+
+    /**
+     * If {@code regatta} is set to a valid {@link Regatta}, it is returned unchanged. Otherwise, a default
+     * regatta is looked up in the {@link TrackedRegattaRegistry} passed, and if not found, it is created
+     * as a default regatta with a Time-on-Time/Time-on-Distance ranking metric.
+     */
+    private Regatta getOrCreateEffectiveRegatta(String name, TrackedRegattaRegistry trackedRegattaRegistry, Regatta regatta) {
+        final Regatta result;
+        if (regatta != null) {
+            result = regatta;
+        } else {
+            result = trackedRegattaRegistry.getOrCreateDefaultRegatta(name, BoatClassMasterdata.IRC.name(), UUID.randomUUID());
+        }
+        return result;
     }
 
     @Override
     public Regatta getRegatta() {
-        // TODO Implement YellowBrickRaceTrackerImpl.getRegatta(...)
-        return null;
+        return regatta;
     }
 
     @Override
