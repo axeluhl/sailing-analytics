@@ -205,19 +205,9 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         correctWindCheckBox.ensureDebugId("YellowBrickCorrectWindCheckBox");
         correctWindCheckBox.setWordWrap(false);
         correctWindCheckBox.setValue(Boolean.TRUE);
-        final SimulationPanel simulationPanel = new SimulationPanel(stringMessages);
-        final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
-        ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
-        ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
-        final CheckBox useOfficialResultsToUpdateRaceLogsCheckbox = new CheckBox(stringMessages.useOfficialResultsForAutomaticUpdates());
-        ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
-        ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
         layoutTable.setWidget(++row, 0, trackSettingsLabel);
         layoutTable.setWidget(row, 1, trackWindCheckBox);
         layoutTable.setWidget(++row, 1, correctWindCheckBox);
-        layoutTable.setWidget(++row, 1, simulationPanel);
-        layoutTable.setWidget(++row, 1, ignoreTracTracMarkPassingsCheckbox);
-        layoutTable.setWidget(++row, 1, useOfficialResultsToUpdateRaceLogsCheckbox);
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTableWrapper = new TableWrapperWithMultiSelectionAndFilter<YellowBrickRaceRecordDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,

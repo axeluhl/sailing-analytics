@@ -57,7 +57,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     public CompetitorImportProviderSelectionDialog(MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory,
             BusyDisplay busyDisplay, Iterable<String> competitorProviderNames, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(stringMessages.importCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), null,
+        super(stringMessages.importCompetitors(), /* message */ null, stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
                 new Callback(matchCompetitorsDialogFactory, sailingService, busyDisplay, errorReporter,
                         stringMessages));
         this.sailingService = sailingService;
