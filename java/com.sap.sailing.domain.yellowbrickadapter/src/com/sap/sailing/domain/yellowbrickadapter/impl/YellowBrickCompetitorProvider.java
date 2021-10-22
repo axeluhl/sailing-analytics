@@ -42,6 +42,11 @@ public class YellowBrickCompetitorProvider extends AbstractResultUrlProvider imp
     private final String IRC_TOT_HEADER = "IRC";
     private final String YELLOWBRICK_NAME_HEADER = "YellowBrick Name";
     private final String COMPETITOR_ID_HEADER = "Competitor ID";
+    private final String CATEGORY_IRC_HEADER = "cat-IRC";
+    // The following two header fields also exist but are not currently used for anything here:
+//    private final String MOCRA_HEADER = "MOCRA";
+//    private final String DH_HEADER = "DH";
+    private final String ORC_HEADER = "ORC only";
     
     public YellowBrickCompetitorProvider(ResultUrlRegistry resultUrlRegistry) {
         super(resultUrlRegistry);
@@ -90,8 +95,24 @@ public class YellowBrickCompetitorProvider extends AbstractResultUrlProvider imp
         final String boatClassName = getStringFromCsv(MODEL_HEADER, header, competitorLine);
         final String sailNumber = getStringFromCsv(SAIL_NUMBER_HEADER, header, competitorLine);
         final Iterable<PersonDTO> persons = Collections.singleton(new PersonDTO(fullName, /* dateOfBirth */ null, /* description */ null, countryCode));
-        return new CompetitorDescriptor(/* event */ "", /* regatta */ "", /* race */ "", /* fleet */ "", competitorId,
-                fullName, shortName, teamName, persons,
+        final String ircCategory = getStringFromCsv(CATEGORY_IRC_HEADER, header, competitorLine);
+        final String orcOnly = getStringFromCsv(ORC_HEADER, header, competitorLine);
+        final String race;
+        final String fleet;
+        if (Util.hasLength(orcOnly)) {
+            if (ircCategory.equals("undefined")) {
+                race = "ORC";
+                fleet = "ORC";
+            } else {
+                race = "ORC/IRC";
+                fleet = ircCategory;
+            }
+        } else {
+            race = "IRC";
+            fleet = ircCategory;
+        }
+        return new CompetitorDescriptor(/* event */ "", /* regatta */ "", race, fleet, competitorId,
+                Util.hasLength(fullName)?fullName:boatName, shortName, teamName, persons,
                 CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName(countryCode), timeOnTimeFactor,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, boatId, boatName, boatClassName, sailNumber);
     }
