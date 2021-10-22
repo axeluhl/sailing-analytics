@@ -4944,8 +4944,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
         DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
         BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
-        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorId, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
-        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatId,
+        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(boatId, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
+        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId,
                 competitorDescriptor.getName(), competitorDescriptor.getShortName(), /* color */ null, /* eMail */ null,
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat, /* storePersistently */ true);
