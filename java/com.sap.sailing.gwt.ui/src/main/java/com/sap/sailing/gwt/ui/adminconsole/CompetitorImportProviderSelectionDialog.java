@@ -149,8 +149,12 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     private List<Pair<String, String>> getEventAndRegattaNamesWhichHasCompetitors(CompetitorProviderDTO competitorProvider) {
         List<Pair<String, String>> eventAndRegattaNames = new ArrayList<>();
         for (Entry<String, Set<String>> entry : competitorProvider.getHasCompetitorsForRegattasInEvent().entrySet()) {
-            for (String ragattaName : entry.getValue()) {
-                eventAndRegattaNames.add(new Pair<>(entry.getKey(), ragattaName));
+            if (entry.getValue() == null) {
+                eventAndRegattaNames.add(new Pair<>(entry.getKey(), ""));
+            } else {
+                for (String ragattaName : entry.getValue()) {
+                    eventAndRegattaNames.add(new Pair<>(entry.getKey(), ragattaName));
+                }
             }
         }
         return eventAndRegattaNames;

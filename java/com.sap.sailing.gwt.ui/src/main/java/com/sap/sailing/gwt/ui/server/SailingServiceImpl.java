@@ -515,8 +515,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
-    private final ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker;
-    
     private final ServiceTracker<WindFinderTrackerFactory, WindFinderTrackerFactory> windFinderTrackerFactoryServiceTracker;
 
     private final MongoObjectFactory mongoObjectFactory;
@@ -603,7 +601,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         expeditionConnectorTracker = ServiceTrackerFactory.createAndOpen(context, ExpeditionTrackerFactory.class);
         scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
                 ScoreCorrectionProvider.class);
-        competitorProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context, CompetitorProvider.class);
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
                 .createDomainObjectFactory(mongoObjectFactory.getDatabase(), getTracTracAdapter()
                         .getTracTracDomainFactory());
@@ -720,14 +717,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private Iterable<CompetitorProvider> getAllCompetitorProviders() {
-        final CompetitorProvider[] services = competitorProviderServiceTracker.getServices(new CompetitorProvider[0]);
-        List<CompetitorProvider> result = new ArrayList<>();
-        if (services != null) {
-            for (final CompetitorProvider service : services) {
-                result.add(service);
-            }
-        }
-        return result;
+        return getService().getAllCompetitorProviders();
     }
 
     @Override
@@ -3954,13 +3944,24 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<Pair<String, String>> getUrlResultProviderNamesAndOptionalSampleURL() {
         List<Pair<String, String>> result = new ArrayList<>();
+        final Set<String> existingNames = new HashSet<>();
         // In case a user may not read any result import URL, just an empty result is returned because
         // selecting a type will never show an entry.
         if (getSecurityService()
                 .hasCurrentUserAnyPermission(SecuredDomainType.RESULT_IMPORT_URL.getPermission(DefaultActions.READ))) {
             for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
                 if (scp instanceof ResultUrlProvider) {
-                    result.add(new Pair<>(scp.getName(), ((ResultUrlProvider) scp).getOptionalSampleURL()));
+                    final String name = scp.getName();
+                    existingNames.add(name);
+                    result.add(new Pair<>(name, ((ResultUrlProvider) scp).getOptionalSampleURL()));
+                }
+            }
+            for (CompetitorProvider cp : getAllCompetitorProviders()) {
+                if (cp instanceof ResultUrlProvider) {
+                    final String name = cp.getName();
+                    if (!existingNames.contains(name)) {
+                        result.add(new Pair<>(name, ((ResultUrlProvider) cp).getOptionalSampleURL()));
+                    }
                 }
             }
         }
@@ -4014,11 +4015,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final List<UrlDTO> result = new ArrayList<>();
         SecurityService securityService = getSecurityService();
         Iterable<URL> allUrlsReadableBySubject = getService().getResultImportUrls(resultProviderName);
-            for (URL url : allUrlsReadableBySubject) {
-                UrlDTO urlDTO = new UrlDTO(resultProviderName, url.toString());
-                SecurityDTOUtil.addSecurityInformation(securityService, urlDTO);
-                result.add(urlDTO);
-            }
+        for (URL url : allUrlsReadableBySubject) {
+            UrlDTO urlDTO = new UrlDTO(resultProviderName, url.toString());
+            SecurityDTOUtil.addSecurityInformation(securityService, urlDTO);
+            result.add(urlDTO);
+        }
         return result;
     }
 

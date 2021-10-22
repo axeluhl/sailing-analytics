@@ -58,7 +58,8 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
                     /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false,
                     /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
-                    /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                    /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                    /* resultUrlRegistryServiceTracker */ null);
         }
 
         @Override
@@ -79,7 +80,8 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     EmptySensorFixStore.INSTANCE, /* serviceFinderFactory */ null, null,
                     /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
                     /* restoreTrackedRaces */ false, /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
-                    /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                    /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                    /* resultUrlRegistryServiceTracker */ null);
         }
     }
 }
