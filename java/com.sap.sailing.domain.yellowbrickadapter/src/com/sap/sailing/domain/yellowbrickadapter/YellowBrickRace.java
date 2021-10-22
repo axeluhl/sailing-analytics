@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.yellowbrickadapter;
 
+import com.sap.sailing.domain.yellowbrickadapter.impl.TeamPositions;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -25,8 +26,11 @@ public interface YellowBrickRace {
 
     /**
      * @return may return {@code null} if no fix exists yet or the race has no competitors assigned
-     */
+   @Override
+      */
     TimePoint getTimePointOfLastFix();
 
     int getNumberOfCompetitors();
+
+    Iterable<TeamPositions> getTeamsPositions();
 }

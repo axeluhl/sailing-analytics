@@ -13,6 +13,17 @@ import com.sap.sailing.domain.yellowbrickadapter.impl.PositionsDocument;
 import com.sap.sailing.server.interfaces.RacingEventService;
 
 public interface YellowBrickTrackingAdapter {
+    static String NAME = "YellowBrick";
+    static String BOAT_ID_PREFIX = "YB-";
+    
+    static String getBoatId(String ybBoatName) {
+        return BOAT_ID_PREFIX + ybBoatName;
+    }
+    
+    static String getCompetitorId(String ybBoatName, String raceUrl) {
+        return BOAT_ID_PREFIX+raceUrl+"-"+ybBoatName;
+    }
+
     Iterable<YellowBrickConfiguration> getYellowBrickConfigurations();
     
     YellowBrickConfiguration createYellowBrickConfiguration(String name, String raceUrl, String username,

@@ -20,6 +20,14 @@ public interface DataByLogoResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource tractracWhite();
 
+    @Source("tractrac-color.svg")
+    @MimeType("image/svg+xml")
+    DataResource yellowBrickColor();
+
+    @Source("tractrac-white.svg")
+    @MimeType("image/svg+xml")
+    DataResource yellowBrickWhite();
+
     public interface LocalCss extends CssResource {
         String databylogo_logo();
         String databylogo_subtlelink();
@@ -28,4 +36,5 @@ public interface DataByLogoResources extends ClientBundle {
         String databylogo_black_text();
         String databylogo_text();
     }
+
 }

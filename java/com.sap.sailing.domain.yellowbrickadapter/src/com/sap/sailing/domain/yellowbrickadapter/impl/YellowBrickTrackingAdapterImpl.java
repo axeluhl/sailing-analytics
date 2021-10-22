@@ -114,7 +114,7 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     public YellowBrickRace getRaceMetadata(String raceUrl, Optional<String> username, Optional<String> password) throws IOException, ParseException {
         final String url = getUrlForLatestFix(raceUrl, username, password);
         final PositionsDocument doc = getPositionsDocumentForUrl(url);
-        return new YellowBrickRaceImpl(raceUrl, doc.getTimePointOfLastFix(), Util.size(doc.getTeams()));
+        return new YellowBrickRaceImpl(raceUrl, doc.getTimePointOfLastFix(), doc.getTeams());
     }
 
     private PositionsDocument getPositionsDocumentForUrl(final String url)

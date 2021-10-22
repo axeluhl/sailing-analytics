@@ -17,7 +17,7 @@ import com.sap.sse.common.Duration;
 public class YellowBrickRaceTrackingConnectivityParams extends AbstractRaceTrackingConnectivityParameters {
     private static final long serialVersionUID = -81948107186932864L;
     public static final String TYPE = "YELLOW_BRICK";
-    private static final Duration DEFAULT_DELAY_TO_LIVE = Duration.ONE_MINUTE;
+    private static final Duration DEFAULT_DELAY_TO_LIVE = Duration.ONE_MINUTE.times(20);
 
     private final String raceUrl;
     private final String username;
