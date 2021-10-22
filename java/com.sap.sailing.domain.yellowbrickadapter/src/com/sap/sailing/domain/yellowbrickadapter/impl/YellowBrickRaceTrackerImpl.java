@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -67,7 +68,7 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
         this.windStore = windStore;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.regatta = getOrCreateEffectiveRegatta(DEFAULT_REGATTA_NAME_PREFIX+connectivityParams.getRaceUrl(), trackedRegattaRegistry, regatta);
-        this.race = createRaceDefinition(regatta, yellowBrickTrackingAdapter, raceTrackingHandler,
+        this.race = createRaceDefinition(this.regatta, yellowBrickTrackingAdapter, raceTrackingHandler,
                 baseDomainFactory.getCompetitorAndBoatStore());
         this.trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(), race, Collections.<Sideline> emptyList(), windStore,
                 getConnectivityParams().getDelayToLiveInMillis(),
@@ -116,11 +117,12 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
             final DynamicTeam team = new TeamImpl(teamPositions.getCompetitorName(), teamMembers, /* coach */ null);
             final DynamicBoat boat = raceTrackingHandler.getOrCreateBoat(competitorAndBoatStore, boatId,
                     teamPositions.getCompetitorName(), boatClass, competitorId, /* color */ null);
-            raceTrackingHandler.getOrCreateCompetitorWithBoat(competitorAndBoatStore,
+            final DynamicCompetitorWithBoat competitor = raceTrackingHandler.getOrCreateCompetitorWithBoat(competitorAndBoatStore,
                     competitorId, teamPositions.getCompetitorName(), /* shortName */ null,
                     /* displayColor */ null, /* email */ null, /* flagImageURL */ null,
                     team, /* timeOnTimeFactor */ 1.0, /* timeOnDistanceAllowancePerNauticalMile */ Duration.NULL,
                     /* searchTag */ null, boat);
+            result.put(competitor, competitor.getBoat());
         }
         return result;
     }

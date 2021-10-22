@@ -60,8 +60,6 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 public class YellowBrickEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<YellowBrickConfigurationWithSecurityDTO> {
     private final ErrorReporter errorReporter;
     
-    private final ListDataProvider<YellowBrickRaceRecordDTO> raceList;
-    
     private YellowBrickConfigurationTableWrapper connectionsTable;
 
     private Label loadingMessageLabel;
@@ -79,7 +77,6 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         this.errorReporter = presenter.getErrorReporter();
         this.sailingServiceWrite = presenter.getSailingService();
         this.tableResources = tableResources;
-        this.raceList = new ListDataProvider<>();
         this.setWidget(createContent());
     }
     
@@ -311,14 +308,8 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
         //  - "Default Regatta" selected: if race was assigned to a regatta before, use that without further checks;
         //                                otherwise, warn user if a "persistent" regatta with the same boat class already exists
         //                                because it may be an accidental omission to select that regatta for loading
-        List<YellowBrickRaceRecordDTO> allRaces = raceList.getList();
         final RefreshableMultiSelectionModel<YellowBrickRaceRecordDTO> selectionModel = racesTableWrapper.getSelectionModel();
-        final List<YellowBrickRaceRecordDTO> selectedRaces = new ArrayList<>();
-        for (YellowBrickRaceRecordDTO race : allRaces) {
-            if (selectionModel.isSelected(race)) {
-                selectedRaces.add(race);
-            }
-        }
+        final List<YellowBrickRaceRecordDTO> selectedRaces = new ArrayList<>(selectionModel.getSelectedSet());
         sailingServiceWrite.trackWithYellowBrick(regattaIdentifier, selectedRaces, trackWind, correctWind,
                 username, password, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
@@ -335,7 +326,6 @@ public class YellowBrickEventManagementPanel extends AbstractEventManagementPane
     
     public void refreshYellowBrickConnectors() {
         connectionsTable.refreshYellowBrickConfigurationList();
-        raceList.getList().clear();
     }
     
     @Override
