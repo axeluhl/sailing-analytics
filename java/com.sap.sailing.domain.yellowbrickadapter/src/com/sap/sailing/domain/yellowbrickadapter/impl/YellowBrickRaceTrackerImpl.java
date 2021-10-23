@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.yellowbrickadapter.impl;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +29,8 @@ import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -47,6 +50,7 @@ import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRace;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRaceTrackingConnectivityParams;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBrickRaceTrackingConnectivityParams> {
@@ -56,7 +60,15 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
     private final RaceDefinition race;
     private final WindStore windStore;
     private final TrackedRegattaRegistry trackedRegattaRegistry;
+    private final YellowBrickTrackingAdapter trackingAdapter;
     private final DynamicTrackedRace trackedRace; // TODO will be used once we start filling in the tracks
+    
+    /**
+     * Keys are from {@link TeamPositions#getDeviceSerialNumber()}.
+     */
+    private final Map<Integer, TimePoint> timePointOfLastFixPerDeviceSerialNumber;
+    
+    private final Map<Integer, Competitor> competitorByDeviceSerialNumber;
     
     public YellowBrickRaceTrackerImpl(YellowBrickRaceTrackingConnectivityParams connectivityParams, Regatta regatta,
             TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
@@ -65,6 +77,9 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
             RegattaLogStore regattaLogStore, DomainFactory baseDomainFactory,
             YellowBrickTrackingAdapter yellowBrickTrackingAdapter) throws IOException, ParseException {
         super(connectivityParams);
+        this.timePointOfLastFixPerDeviceSerialNumber = new HashMap<>();
+        this.competitorByDeviceSerialNumber = new HashMap<>();
+        this.trackingAdapter = yellowBrickTrackingAdapter;
         this.windStore = windStore;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.regatta = getOrCreateEffectiveRegatta(DEFAULT_REGATTA_NAME_PREFIX+connectivityParams.getRaceUrl(), trackedRegattaRegistry, regatta);
@@ -83,8 +98,40 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
                 }, /* useInternalMarkPassingAlgorithm */ true, raceLogResolver,
                 /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
                 new TrackingConnectorInfoImpl(YellowBrickTrackingAdapter.NAME, "https://www.ybtracking.com/", /* TODO any default YB tracker URL? */ null));
-        // TODO fetch positions document ("stored data") up to now (starting at the beginning of time) and add positions to TrackedRace
+        loadStoredData();
+        schedulePeriodicPollingTask();
+    }
+    
+    private void loadStoredData() throws MalformedURLException, IOException, ParseException {
+        final PositionsDocument storedData = trackingAdapter.getStoredData(getConnectivityParams().getRaceUrl(),
+                Optional.ofNullable(getConnectivityParams().getUsername()),
+                Optional.ofNullable(getConnectivityParams().getPassword()));
+        for (final TeamPositions teamPositions : storedData.getTeams()) {
+            for (final TeamPosition position : teamPositions.getPositions()) {
+                final GPSFixMoving fix = new GPSFixMovingImpl(position.getPosition(), position.getTimePoint(), position.getMotionVector());
+                final int deviceSerialNumber = teamPositions.getDeviceSerialNumber();
+                trackedRace.getTrack(competitorByDeviceSerialNumber.get(deviceSerialNumber)).add(fix);
+                updateTimePointOfLastFixPerDeviceSerialNumber(deviceSerialNumber, position.getTimePoint());
+                updateStartOfTrackingToEarliestTimePoint(position.getTimePoint());
+            }
+        }
+    }
+
+    private void updateStartOfTrackingToEarliestTimePoint(TimePoint timePoint) {
+        if (trackedRace.getStartOfTracking() == null || trackedRace.getStartOfTracking().after(timePoint)) {
+            trackedRace.setStartOfTrackingReceived(timePoint);
+        }
+    }
+
+    private void updateTimePointOfLastFixPerDeviceSerialNumber(int deviceSerialNumber, TimePoint timePoint) {
+        timePointOfLastFixPerDeviceSerialNumber.compute(deviceSerialNumber, (serial, oldLastFixTimePoint)->oldLastFixTimePoint==null?timePoint:
+            timePoint.after(oldLastFixTimePoint)?timePoint:oldLastFixTimePoint);
+    }
+
+    private void schedulePeriodicPollingTask() {
         // TODO schedule recurring task that keeps fetching based on the last fix known for each competitor, with a smart strategy for trackers dropping out...
+        // TODO Implement YellowBrickRaceTrackerImpl.schedulePeriodicPollingTask(...)
+        
     }
     
     private RaceDefinition createRaceDefinition(Regatta regatta, YellowBrickTrackingAdapter yellowBrickTrackingAdapter,
@@ -99,6 +146,9 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
         return result;
     }
 
+    /**
+     * As a side effect, fills {@link #competitorByDeviceSerialNumber}
+     */
     private Map<Competitor, Boat> createCompetitorsAndBoats(YellowBrickTrackingAdapter yellowBrickTrackingAdapter,
             BoatClass boatClass, RaceTrackingHandler raceTrackingHandler, CompetitorAndBoatStore competitorAndBoatStore)
                     throws IOException, ParseException {
@@ -123,6 +173,7 @@ public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBr
                     team, /* timeOnTimeFactor */ 1.0, /* timeOnDistanceAllowancePerNauticalMile */ Duration.NULL,
                     /* searchTag */ null, boat);
             result.put(competitor, competitor.getBoat());
+            competitorByDeviceSerialNumber.put(teamPositions.getDeviceSerialNumber(), competitor);
         }
         return result;
     }
