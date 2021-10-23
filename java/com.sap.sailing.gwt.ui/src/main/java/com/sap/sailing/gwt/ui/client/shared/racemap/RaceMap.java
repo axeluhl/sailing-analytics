@@ -2724,7 +2724,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType lastFix) {
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.getName()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorSelection.getBoat(competitorDTO).getSailId()));
+        final BoatDTO boat = competitorSelection.getBoat(competitorDTO);
+        if (Util.hasLength(boat.getName())) {
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.boat(), boat.getName()));
+        }
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), boat.getSailId()));
         final Integer rank = getRank(competitorDTO);
         if (rank != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
