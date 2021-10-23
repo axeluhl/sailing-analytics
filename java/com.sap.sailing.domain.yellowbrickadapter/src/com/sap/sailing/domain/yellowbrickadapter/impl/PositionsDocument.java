@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class PositionsDocument {
     private final String raceUrl;
@@ -23,6 +24,10 @@ public class PositionsDocument {
 
     public Iterable<TeamPositions> getTeams() {
         return teams;
+    }
+    
+    public int getNumberOfFixes() {
+        return Util.stream(teams).mapToInt(team->Util.size(team.getPositions())).sum();
     }
     
     /**

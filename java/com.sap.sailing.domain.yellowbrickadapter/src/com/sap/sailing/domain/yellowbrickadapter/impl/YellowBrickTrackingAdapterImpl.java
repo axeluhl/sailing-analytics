@@ -28,12 +28,14 @@ import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRaceTrackingConnecti
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapter {
     private final static Duration TIMEOUT_FOR_RACE_LOADING = Duration.ONE_MINUTE;
+    final static Duration DEFAULT_POLLING_INTERVAL = Duration.ONE_SECOND.times(7); // Duration.ONE_MINUTE.times(1); TODO reset to 1min or even more
     
     /**
      * The base URL template with a string parameter for the race URL
@@ -107,7 +109,12 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     }
     
     String getUrlForAllData(String raceUrl, Optional<String> username, Optional<String> password) {
-        return appendUsernameAndPasswordParameters(String.format(POSITIONS_SINCE_DATE_URL_TEMPLATE, raceUrl, /* since the beginning of the epoch */ 0l), username, password);
+        return getUrlForDataSinceTimePoint(raceUrl, TimePoint.BeginningOfTime, username, password);
+    }
+
+    private String getUrlForDataSinceTimePoint(String raceUrl, final TimePoint since, Optional<String> username,
+            Optional<String> password) {
+        return appendUsernameAndPasswordParameters(String.format(POSITIONS_SINCE_DATE_URL_TEMPLATE, raceUrl, since.asMillis()), username, password);
     }
 
     @Override
@@ -125,6 +132,11 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
         return doc;
     }
     
+    @Override
+    public PositionsDocument getPositionsSince(String raceUrl, TimePoint since, Optional<String> username, Optional<String> password) throws MalformedURLException, IOException, ParseException {
+        return getPositionsDocumentForUrl(getUrlForDataSinceTimePoint(raceUrl, since, username, password));
+    }
+
     @Override
     public PositionsDocument getStoredData(String raceUrl, Optional<String> username, Optional<String> password) throws MalformedURLException, IOException, ParseException {
         return getPositionsDocumentForUrl(getUrlForAllData(raceUrl, username, password));

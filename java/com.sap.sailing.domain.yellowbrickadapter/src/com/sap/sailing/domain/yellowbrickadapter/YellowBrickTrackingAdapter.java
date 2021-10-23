@@ -11,17 +11,18 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.yellowbrickadapter.impl.PositionsDocument;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.common.TimePoint;
 
 public interface YellowBrickTrackingAdapter {
     static String NAME = "YellowBrick";
-    static String BOAT_ID_PREFIX = "YB-";
+    static String YELLOWBRICK_PREFIX = "YB-";
     
     static String getBoatId(String ybBoatName) {
-        return BOAT_ID_PREFIX + ybBoatName;
+        return YELLOWBRICK_PREFIX + ybBoatName;
     }
     
     static String getCompetitorId(String ybBoatName, String raceUrl) {
-        return BOAT_ID_PREFIX+raceUrl+"-"+ybBoatName;
+        return YELLOWBRICK_PREFIX+raceUrl+"-"+ybBoatName;
     }
 
     Iterable<YellowBrickConfiguration> getYellowBrickConfigurations();
@@ -46,15 +47,14 @@ public interface YellowBrickTrackingAdapter {
 
     /**
      * Obtains the meta-data for the YellowBrick race identified by URL {@code raceUrl}
-     * @param username TODO
-     * @param password TODO
      */
     YellowBrickRace getRaceMetadata(String raceUrl, Optional<String> username, Optional<String> password) throws IOException, ParseException;
 
     /**
      * Retrieves all data stored for the race with {@code raceUrl} so far.
-     * @param username TODO
-     * @param password TODO
      */
     PositionsDocument getStoredData(String raceUrl, Optional<String> username, Optional<String> password) throws MalformedURLException, IOException, ParseException;
+
+    PositionsDocument getPositionsSince(String raceUrl, TimePoint since, Optional<String> username,
+            Optional<String> password) throws MalformedURLException, IOException, ParseException;
 }
