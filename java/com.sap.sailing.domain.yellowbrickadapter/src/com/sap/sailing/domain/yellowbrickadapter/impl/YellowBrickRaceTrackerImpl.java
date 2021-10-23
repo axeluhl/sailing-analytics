@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +18,12 @@ import java.util.logging.Logger;
 
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -51,6 +58,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRace;
@@ -62,6 +70,30 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.ThreadPoolUtil;
 
+/**
+ * Loads initial race data for a YellowBrick race and creates the tracked race. The competitors should ideally be
+ * imported beforehand, e.g., using the {@link YellowBrickCompetitorProvider}, so the handicap values, skipper names and
+ * nationalities don't need to be set manually.
+ * <p>
+ * 
+ * After reading the initial set of data already stored for the race, this tracker will continue to poll the YellowBrick
+ * API for new positions that have been recorded. The strategy for finding a good time point since when updates are
+ * queries is still under development. Currently, it's the average of the last time points across all teams when their
+ * last fix has been received. But this doesn't handle drop-outs too well.
+ * <p>
+ * 
+ * It is assumed that the user will denote the race for smartphone tracking in case course and mark position information
+ * is to be used to make this into a real race. As of now, YellowBrick isn't publishing any course information, so this
+ * needs to come from the {@link RegattaLog} and {@link RaceLog} entries as well as tracking data for marks.
+ * <p>
+ * 
+ * This tracker manages a listener on each {@link RaceLog} attached to the race. When a course design update event is
+ * seen in any of those race logs, the tracked race's course is updated accordingly. This includes replaying all
+ * existing race log events to the listener when the listener is attached.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBrickRaceTrackingConnectivityParams>
 implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(YellowBrickRaceTrackerImpl.class.getName());
@@ -72,6 +104,7 @@ implements TrackingDataLoader {
     private final TrackedRegattaRegistry trackedRegattaRegistry;
     private final YellowBrickTrackingAdapter trackingAdapter;
     private final DynamicTrackedRace trackedRace;
+    private final Map<RaceLog, RaceLogEventVisitor> visitors;
     
     /**
      * Whether the tracking process shall stop; this will terminate the periodic polling task by letting it throw an
@@ -93,6 +126,7 @@ implements TrackingDataLoader {
             RegattaLogStore regattaLogStore, DomainFactory baseDomainFactory,
             YellowBrickTrackingAdapter yellowBrickTrackingAdapter) throws IOException, ParseException {
         super(connectivityParams);
+        visitors = new HashMap<>();
         this.timePointOfLastFixPerDeviceSerialNumber = new HashMap<>();
         this.competitorByDeviceSerialNumber = new HashMap<>();
         this.trackingAdapter = yellowBrickTrackingAdapter;
@@ -114,10 +148,48 @@ implements TrackingDataLoader {
                 }, /* useInternalMarkPassingAlgorithm */ true, raceLogResolver,
                 /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
                 new TrackingConnectorInfoImpl(YellowBrickTrackingAdapter.NAME, "https://www.ybtracking.com/", /* TODO any default YB tracker URL? */ null));
+        addRaceLogListenerForCourseUpdates();
         loadStoredData();
         schedulePeriodicPollingTask();
     }
     
+    private void addRaceLogListenerForCourseUpdates() {
+        // add log listeners
+        for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+            createAndAddRaceLogListenerForCourseChanges(raceLog);
+        }
+        trackedRace.addListener(new AbstractRaceChangeListener() {
+            @Override
+            public void raceLogAttached(RaceLog raceLog) {
+                createAndAddRaceLogListenerForCourseChanges(raceLog);
+            }
+
+            @Override
+            public void raceLogDetached(RaceLog raceLog) {
+                raceLog.removeListener(visitors.remove(raceLog));
+            }
+        });
+    }
+
+    private void createAndAddRaceLogListenerForCourseChanges(final RaceLog raceLog) {
+        RaceLogEventVisitor visitor = new BaseRaceLogEventVisitor() {
+            @Override
+            public void visit(RaceLogCourseDesignChangedEvent event) {
+                YellowBrickRaceTrackerImpl.this.onCourseDesignChangedEvent(event, raceLog, getConnectivityParams().getBaseDomainFactory(), trackedRace);
+            }
+        };
+        visitors.put(raceLog, visitor);
+        raceLog.addListener(visitor);
+        raceLog.lockForRead();
+        try {
+            for (final RaceLogEvent e : raceLog.getFixes()) {
+                e.accept(visitor);
+            }
+        } finally {
+            raceLog.unlockAfterRead();
+        }
+    }
+
     private void loadStoredData() throws MalformedURLException, IOException, ParseException {
         trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0.0));
         final PositionsDocument storedData = trackingAdapter.getStoredData(getConnectivityParams().getRaceUrl(),
@@ -202,6 +274,9 @@ implements TrackingDataLoader {
         stop = true;
         final double oldLoadingProgress = trackedRace.getStatus().getLoadingProgress();
         trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, oldLoadingProgress));
+        for (final Entry<RaceLog, RaceLogEventVisitor> e : visitors.entrySet()) {
+            e.getKey().removeListener(e.getValue());
+        }
     }
 
     private RaceDefinition createRaceDefinition(Regatta regatta, YellowBrickTrackingAdapter yellowBrickTrackingAdapter,

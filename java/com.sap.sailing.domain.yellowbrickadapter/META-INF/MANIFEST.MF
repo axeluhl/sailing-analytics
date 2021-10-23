@@ -20,6 +20,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sse.security.common,
  com.sap.sailing.competitorimport,
- com.sap.sailing.resultimport
+ com.sap.sailing.resultimport,
+ com.sap.sailing.domain.shared.android
 Export-Package: com.sap.sailing.domain.yellowbrickadapter,
  com.sap.sailing.domain.yellowbrickadapter.impl;x-friends:="com.sap.sailing.domain.yellowbrickadapter.persistence"

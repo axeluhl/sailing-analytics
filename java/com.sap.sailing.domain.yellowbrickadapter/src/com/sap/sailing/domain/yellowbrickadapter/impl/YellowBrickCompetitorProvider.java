@@ -91,7 +91,7 @@ public class YellowBrickCompetitorProvider extends AbstractResultUrlProvider imp
         final String teamName = getStringFromCsv(RACE_NAME_HEADER, header, competitorLine);
         final String countryCode = getStringFromCsv(COUNTRY_HEADER, header, competitorLine);
         final String ircToTString = getStringFromCsv(IRC_TOT_HEADER, header, competitorLine);
-        final Double timeOnTimeFactor = Util.hasLength(ircToTString) ? Double.valueOf(ircToTString) : null;
+        final Double timeOnTimeFactor = Util.hasLength(ircToTString) ? Double.valueOf(ircToTString) : 1.0;
         final String ybName = getStringFromCsv(YELLOWBRICK_NAME_HEADER, header, competitorLine);
         final String boatId = YellowBrickTrackingAdapter.getBoatId(ybName);
         final String competitorIdString = getStringFromCsv(COMPETITOR_ID_HEADER, header, competitorLine);

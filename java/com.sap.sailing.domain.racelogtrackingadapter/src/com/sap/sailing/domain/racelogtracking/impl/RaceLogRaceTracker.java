@@ -2,10 +2,8 @@ package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -13,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -45,7 +44,6 @@ import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisito
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -53,11 +51,9 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
-import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
@@ -80,8 +76,6 @@ import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import difflib.PatchFailedException;
 
 /**
  * Track a race using the data defined in the {@link RaceLog} and possibly the Leaderboards
@@ -113,7 +107,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl<RaceLogConne
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
             RaceLogAndTrackedRaceResolver raceLogResolver, RaceLogConnectivityParams connectivityParams,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceTrackingHandler raceTrackingHandler) {
-        super(connectivityParams);
+        super(params);
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.params = params;
         this.windStore = windStore;
@@ -131,7 +125,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl<RaceLogConne
 
                     @Override
                     public void visit(RaceLogCourseDesignChangedEvent event) {
-                        RaceLogRaceTracker.this.onCourseDesignChangedEvent(event);
+                        RaceLogRaceTracker.this.onCourseDesignChangedEvent(event, (RaceLog) log, getConnectivityParams().getDomainFactory(), trackedRace);
                     }
                     @Override
                     public void visit(RaceLogStartOfTrackingEvent event) {
@@ -234,10 +228,18 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl<RaceLogConne
         }
         // remove listeners on logs
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
-            visitor.getKey().removeListener(visitor.getValue());
+            removeLogListener(visitor.getKey(), visitor.getValue());
         }
         logger.info(String.format("Stopped tracking race-log race %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));
+    }
+
+    private <EventT extends AbstractLogEvent<VisitorT>, VisitorT> void removeLogListener(AbstractLog<?, ?> log, Object visitor) {
+        @SuppressWarnings("unchecked")
+        final AbstractLog<EventT, VisitorT> abstractLog = (AbstractLog<EventT, VisitorT>) log;
+        @SuppressWarnings("unchecked")
+        final VisitorT castVisitor = (VisitorT) visitor;
+        abstractLog.removeListener(castVisitor);
     }
 
     @Override
@@ -302,26 +304,6 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl<RaceLogConne
     private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
         if (trackedRace != null) {
             trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
-        }
-    }
-
-    private void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event) {
-        if (trackedRace != null) {
-            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog(), /* onlyCoursesWithValidWaypointList */ true).analyze();
-            List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
-            for (Waypoint waypoint : base.getWaypoints()) {
-                update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
-            }
-            try {
-                final Course course = trackedRace.getRace().getCourse();
-                course.update(update, event.getCourseDesign().getAssociatedRoles(),
-                        event.getCourseDesign().getOriginatingCourseTemplateIdOrNull(), params.getDomainFactory());
-                if (base.getName() != null) {
-                    course.setName(base.getName());
-                }
-            } catch (PatchFailedException e) {
-                logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
-            }
         }
     }
 

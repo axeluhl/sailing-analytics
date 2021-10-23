@@ -2,17 +2,35 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sse.common.Util;
+
+import difflib.PatchFailedException;
 
 /**
  * Base class for all {@link RaceTracker}s that must implement listener notifications
  */
 public abstract class AbstractRaceTrackerBaseImpl<RTCP extends RaceTrackingConnectivityParameters> implements RaceTracker {
+    private static final Logger logger = Logger.getLogger(AbstractRaceTrackerBaseImpl.class.getName());
     private final RaceTrackerListeners listeners = new RaceTrackerListeners();
     private final Set<RaceTracker.RaceCreationListener> raceCreationListeners = Collections
             .newSetFromMap(new ConcurrentHashMap<RaceTracker.RaceCreationListener, Boolean>());
@@ -22,6 +40,31 @@ public abstract class AbstractRaceTrackerBaseImpl<RTCP extends RaceTrackingConne
     public AbstractRaceTrackerBaseImpl(RTCP connectivityParams) {
         super();
         this.connectivityParams = connectivityParams;
+    }
+    
+    /**
+     * Can be used to implement a {@link BaseRaceLogEventVisitor} regarding the handling of a
+     * {@link RaceLogCourseDesignChangedEvent}. The method will update the {@link #getTrackedRace() tracked race's}
+     * course from the course design change event.
+     */
+    protected void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event, RaceLog raceLog, DomainFactory baseDomainFactory, TrackedRace trackedRace) {
+        if (trackedRace != null) {
+            CourseBase base = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
+            List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
+            for (Waypoint waypoint : base.getWaypoints()) {
+                update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+            }
+            try {
+                final Course course = trackedRace.getRace().getCourse();
+                course.update(update, event.getCourseDesign().getAssociatedRoles(),
+                        event.getCourseDesign().getOriginatingCourseTemplateIdOrNull(), baseDomainFactory);
+                if (base.getName() != null) {
+                    course.setName(base.getName());
+                }
+            } catch (PatchFailedException e) {
+                logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
+            }
+        }
     }
 
     /**
