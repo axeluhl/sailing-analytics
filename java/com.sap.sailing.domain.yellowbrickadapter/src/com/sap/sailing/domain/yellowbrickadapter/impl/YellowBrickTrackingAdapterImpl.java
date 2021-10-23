@@ -48,8 +48,8 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
     private final static String NUMBER_OF_POSITIONS_URL_TEMPLATE = BASE_URL_TEMPLATE + "?n=%d";
     
     /**
-     * Template to construct the URL from the race URL parameter and the date (as Unix time stamp, milliseconds
-     * since the epoch, 1970-01-01T00:00:00Z) after which to fetch positions.
+     * Template to construct the URL from the race URL parameter and the date (as Unix time stamp, seconds
+     * since the epoch (not milliseconds!), 1970-01-01T00:00:00Z) after which to fetch positions.
      */
     private final static String POSITIONS_SINCE_DATE_URL_TEMPLATE = BASE_URL_TEMPLATE + "?t=%d";
     
@@ -114,7 +114,7 @@ public class YellowBrickTrackingAdapterImpl implements YellowBrickTrackingAdapte
 
     private String getUrlForDataSinceTimePoint(String raceUrl, final TimePoint since, Optional<String> username,
             Optional<String> password) {
-        return appendUsernameAndPasswordParameters(String.format(POSITIONS_SINCE_DATE_URL_TEMPLATE, raceUrl, since.asMillis()), username, password);
+        return appendUsernameAndPasswordParameters(String.format(POSITIONS_SINCE_DATE_URL_TEMPLATE, raceUrl, since.asMillis()/1000l), username, password);
     }
 
     @Override

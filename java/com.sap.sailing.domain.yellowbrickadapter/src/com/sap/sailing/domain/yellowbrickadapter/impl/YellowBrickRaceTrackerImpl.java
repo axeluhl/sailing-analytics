@@ -170,8 +170,7 @@ implements TrackingDataLoader {
             logger.info("Terminating polling for YB race "+getConnectivityParams().getRaceUrl());
             throw new RuntimeException("Terminated");
         }
-        // TODO be smart and find drop-outs, then ask since oldes time point excluding the drop-outs and only once in a while ask since including the drop-outs
-        final TimePoint timePointStartingFromWhichToPoll = Collections.min(timePointOfLastFixPerDeviceSerialNumber.values());
+        final TimePoint timePointStartingFromWhichToPoll = computeBestTimePointSinceWhichToPollForNewPositions();
         logger.info("Polling YB fixes for race "+getConnectivityParams().getRaceUrl()+" since "+timePointStartingFromWhichToPoll);
         try {
             final PositionsDocument storedData = trackingAdapter.getPositionsSince(getConnectivityParams().getRaceUrl(),
@@ -183,6 +182,17 @@ implements TrackingDataLoader {
         } catch (IOException | ParseException e) {
             logger.log(Level.SEVERE, "Fetching YB positions for race "+getConnectivityParams().getRaceUrl()+" failed. Keeping trying.", e);
         }
+    }
+
+    private TimePoint computeBestTimePointSinceWhichToPollForNewPositions() {
+        // TODO be smart and find drop-outs, then ask since oldest time point excluding the drop-outs and only once in a while ask since including the drop-outs
+        long sum = 0;
+        int count = 0;
+        for (final TimePoint lastTimePointOfTeam : timePointOfLastFixPerDeviceSerialNumber.values()) {
+            sum += lastTimePointOfTeam.asMillis();
+            count++;
+        }
+        return TimePoint.of(sum / count);
     }
     
     @Override
