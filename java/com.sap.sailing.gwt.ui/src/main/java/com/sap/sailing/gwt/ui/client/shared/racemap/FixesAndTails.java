@@ -535,7 +535,9 @@ public class FixesAndTails {
                         if (vertexCount-1 == 0 || (indexOfLastShownFix-1 >= 0 && !fixesForCompetitor.get(indexOfLastShownFix-1).timepoint.after(to))) {
                             // the loop will abort after this iteration
                         }
-                        tail.removeAt(--vertexCount);
+                        if (tail.getLength() > --vertexCount) {
+                            tail.removeAt(vertexCount);
+                        }
                         indexOfLastShownFix--;
                     }
                     // now the polyline contains no more vertices representing fixes after "to";
