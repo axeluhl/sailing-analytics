@@ -65,7 +65,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
             Runnable fireUserUpdateEvent) {
         final FinishCheckoutDTO data = new FinishCheckoutDTO();
         data.setHostedPageId(hostedPageId);
-        writeService.finishCheckout(/* planId */ null, data, new AsyncCallback<SubscriptionListDTO>() {
+        writeService.finishCheckout(data, new AsyncCallback<SubscriptionListDTO>() {
             @Override
             public void onSuccess(SubscriptionListDTO result) {
                 updateView(result, view);

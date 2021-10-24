@@ -103,8 +103,7 @@ public class ChargebeeSubscriptionServiceImpl extends
         PrepareCheckoutDTO response = new PrepareCheckoutDTO();
         try {
             User user = getCurrentUser();
-            final ItemPrice itemPrice = ItemPrice.retrieve(priceId).request().itemPrice();
-            final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanById(itemPrice.itemId());
+            final SubscriptionPlan planForPrice = getSubscriptionPlanForPrice(priceId);
             if (!isUserSubscribedToPlan(user, planForPrice.getId())
                     || isSubscriptionCancelled(user.getSubscriptionByPlan(planForPrice.getId()))) {
                 Pair<String, String> usernames = getUserFirstAndLastName(user);
@@ -126,6 +125,12 @@ public class ChargebeeSubscriptionServiceImpl extends
             response.setError("Error in generating Chargebee hosted page");
         }
         return response;
+    }
+
+    protected SubscriptionPlan getSubscriptionPlanForPrice(String priceId) throws Exception {
+        final ItemPrice itemPrice = ItemPrice.retrieve(priceId).request().itemPrice();
+        final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanById(itemPrice.itemId());
+        return planForPrice;
     }
 
     @Override

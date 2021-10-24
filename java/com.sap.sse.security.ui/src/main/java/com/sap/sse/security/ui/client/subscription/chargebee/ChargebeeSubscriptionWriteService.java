@@ -7,5 +7,4 @@ import com.sap.sse.security.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 
 public interface ChargebeeSubscriptionWriteService
         extends SubscriptionWriteService<ChargebeeConfigurationDTO, PrepareCheckoutDTO, FinishCheckoutDTO> {
-
 }

@@ -15,6 +15,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
@@ -30,7 +31,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionWriteServiceImpl.class.getName());
 
     @Override
-    public SubscriptionListDTO finishCheckout(String planId, FinishCheckoutDTO data) {
+    public SubscriptionListDTO finishCheckout(FinishCheckoutDTO data) {
         logger.info("finishCheckout hostedPageId: " + data.getHostedPageId());
         SubscriptionListDTO subscriptionDto;
         try {
@@ -64,8 +65,10 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             final Timestamp trialStart = content.subscription().trialStart();
             final Timestamp trialEnd = content.subscription().trialEnd();
             //TODO: Convert to a Product Catalogue 2.0 compatible model.
+            final String itemPriceId = content.subscription().subscriptionItems().get(0).itemPriceId();
+            final SubscriptionPlan plan = getSubscriptionPlanForPrice(itemPriceId);
             final Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
-                    content.subscription().subscriptionItems().get(0).itemPriceId(), customerId,
+                    plan.getId(), customerId,
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialEnd),
                     content.subscription().status().name().toLowerCase(), null, transactionType, transactionStatus,
