@@ -99,44 +99,33 @@ public class ChargebeeSubscriptionServiceImpl extends
     }
 
     @Override
-    public PrepareCheckoutDTO prepareCheckout(String planId) {
+    public PrepareCheckoutDTO prepareCheckout(String priceId) {
         PrepareCheckoutDTO response = new PrepareCheckoutDTO();
-        if (isValidPrice(planId)) {
-            try {
-                User user = getCurrentUser();
-                if (!isUserSubscribedToPlan(user, planId)
-                        || isSubscriptionCancelled(user.getSubscriptionByPlan(planId))) {
-                    Pair<String, String> usernames = getUserFirstAndLastName(user);
-                    String locale = user.getLocaleOrDefault().getLanguage();
-                    //TODO: Convert to a Product Catalogue 2.0 compatible model.
-                    Result result = HostedPage.checkoutNewForItems()
-                            .subscriptionItemItemPriceId(0, planId)
-                            .subscriptionItemQuantity(0,1)
-                            .customerId(user.getName()).customerEmail(user.getEmail())
-                            .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
-                            .customerLocale(locale).billingAddressFirstName(usernames.getA())
-                            .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
-                    response.setHostedPageJSONString(result.hostedPage().toJson());
-                } else {
-                    response.setError(
-                            "User has already subscribed to " + getSecurityService().getSubscriptionPlanById(planId).getId() + " plan");
-                }
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
-                response.setError("Error in generating Chargebee hosted page");
+        try {
+            User user = getCurrentUser();
+            final ItemPrice itemPrice = ItemPrice.retrieve(priceId).request().itemPrice();
+            final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanById(itemPrice.itemId());
+            if (!isUserSubscribedToPlan(user, planForPrice.getId())
+                    || isSubscriptionCancelled(user.getSubscriptionByPlan(planForPrice.getId()))) {
+                Pair<String, String> usernames = getUserFirstAndLastName(user);
+                String locale = user.getLocaleOrDefault().getLanguage();
+                Result result = HostedPage.checkoutNewForItems()
+                        .subscriptionItemItemPriceId(0, priceId)
+                        .subscriptionItemQuantity(0,1)
+                        .customerId(user.getName()).customerEmail(user.getEmail())
+                        .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
+                        .customerLocale(locale).billingAddressFirstName(usernames.getA())
+                        .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
+                response.setHostedPageJSONString(result.hostedPage().toJson());
+            } else {
+                response.setError(
+                        "User has already subscribed to " + planForPrice.getId() + " plan");
             }
-        } else {
-            response.setError("Invalid plan: " + planId);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
+            response.setError("Error in generating Chargebee hosted page");
         }
         return response;
-    }
-    
-    public boolean isValidPrice(String priceId) {
-            try {
-                return ItemPrice.retrieve(priceId).request().itemPrice() != null;
-            } catch (Exception e) {
-                return false;
-            }
     }
 
     @Override
