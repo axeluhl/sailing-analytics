@@ -20,11 +20,11 @@ public interface DataByLogoResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource tractracWhite();
 
-    @Source("tractrac-color.svg")
+    @Source("yellowbrick-color.svg")
     @MimeType("image/svg+xml")
     DataResource yellowBrickColor();
 
-    @Source("tractrac-white.svg")
+    @Source("yellowbrick-white.svg")
     @MimeType("image/svg+xml")
     DataResource yellowBrickWhite();
 
