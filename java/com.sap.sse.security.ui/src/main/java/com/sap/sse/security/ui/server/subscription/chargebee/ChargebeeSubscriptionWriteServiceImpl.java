@@ -37,7 +37,8 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             final User user = getCurrentUser();
             final Result result = HostedPage.acknowledge(data.getHostedPageId()).request();
             final Content content = result.hostedPage().content();
-            if(content.customer().id() != user.getName()) {
+            final String customerId = content.customer().id();
+            if (customerId != null && !customerId.equals(user.getName())) {
                 throw new UserManagementException("User does not match!");
             }
             final String transactionType;
@@ -64,7 +65,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             final Timestamp trialEnd = content.subscription().trialEnd();
             //TODO: Convert to a Product Catalogue 2.0 compatible model.
             final Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
-                    content.subscription().subscriptionItems().get(0).itemPriceId(), content.customer().id(),
+                    content.subscription().subscriptionItems().get(0).itemPriceId(), customerId,
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialEnd),
                     content.subscription().status().name().toLowerCase(), null, transactionType, transactionStatus,
