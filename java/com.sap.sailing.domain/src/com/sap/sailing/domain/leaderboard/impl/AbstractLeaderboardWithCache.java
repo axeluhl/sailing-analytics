@@ -511,14 +511,14 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
                 final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
                         namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName());
-                // if leg details are to be requested, the ranking info needs to be provided:
-                // TODO bug5143 (performance): shouldn't the rankingInfoCache be passed on because detail computations need them all?
-                final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
-                        raceColumnAndCompetitor->{
-                            final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
-                            return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
-                        }) : null;
                 Future<LeaderboardEntryDTO> future = executor.submit(() -> {
+                    // if leg details are to be requested, the ranking info needs to be provided:
+                    // TODO bug5143 (performance): shouldn't the rankingInfoCache be passed on because detail computations need them all?
+                    final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
+                            raceColumnAndCompetitor->{
+                                final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
+                                return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                            }) : null;
                     Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
                     return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint, computeLegDetails,
                             rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
