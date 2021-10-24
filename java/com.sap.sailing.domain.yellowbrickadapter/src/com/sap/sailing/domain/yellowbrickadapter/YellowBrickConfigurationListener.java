@@ -5,5 +5,5 @@ public interface YellowBrickConfigurationListener {
 
     void yellowBrickConfigurationRemoved(YellowBrickConfiguration configRemoved);
     
-   void yellowBrickConfigurationUpdated(YellowBrickConfiguration configUpdated);
+    void yellowBrickConfigurationUpdated(YellowBrickConfiguration configUpdated);
 }

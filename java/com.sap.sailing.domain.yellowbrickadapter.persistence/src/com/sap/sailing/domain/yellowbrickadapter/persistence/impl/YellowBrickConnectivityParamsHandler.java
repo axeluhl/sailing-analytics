@@ -15,7 +15,6 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityPara
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickRaceTrackingConnectivityParams;
 import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sailing.domain.yellowbrickadapter.impl.YellowBrickConfigurationImpl;
-import com.sap.sailing.domain.yellowbrickadapter.persistence.MongoObjectFactory;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
@@ -35,18 +34,16 @@ public class YellowBrickConnectivityParamsHandler extends AbstractRaceTrackingCo
     private final RaceLogStore raceLogStore;
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory baseDomainFactory;
-    private final MongoObjectFactory yellowBrickMongoObjectFactory;
     private final SecurityService securityService;
     private final YellowBrickTrackingAdapter yellowBrickTrackingAdapter;
 
     public YellowBrickConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            DomainFactory baseDomainFactory, MongoObjectFactory yellowBrickMongoObjectFactory,
-            SecurityService securityService, YellowBrickTrackingAdapter yellowBrickTrackingAdapter) {
+            DomainFactory baseDomainFactory, SecurityService securityService,
+            YellowBrickTrackingAdapter yellowBrickTrackingAdapter) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.baseDomainFactory = baseDomainFactory;
-        this.yellowBrickMongoObjectFactory = yellowBrickMongoObjectFactory;
         this.securityService = securityService;
         this.yellowBrickTrackingAdapter = yellowBrickTrackingAdapter;
     }
@@ -97,9 +94,9 @@ public class YellowBrickConnectivityParamsHandler extends AbstractRaceTrackingCo
     private void updatePersistentYellowBrickConfiguration(YellowBrickRaceTrackingConnectivityParams params)
             throws MalformedURLException, IOException, ParseException, URISyntaxException {
         final String creatorName = SessionUtils.getPrincipal().toString();
-        final YellowBrickConfigurationImpl tracTracConfiguration = new YellowBrickConfigurationImpl(params.getRaceUrl(),
+        final YellowBrickConfigurationImpl yellowBrickConfiguration = new YellowBrickConfigurationImpl(params.getRaceUrl(),
                 params.getRaceUrl(), params.getUsername(), params.getPassword(), creatorName);
-        yellowBrickMongoObjectFactory.updateYellowBrickConfiguration(tracTracConfiguration);
-        securityService.setDefaultOwnershipIfNotSet(tracTracConfiguration.getIdentifier());
+        yellowBrickTrackingAdapter.addYellowBrickConfiguration(yellowBrickConfiguration);
+        securityService.setDefaultOwnershipIfNotSet(yellowBrickConfiguration.getIdentifier());
     }
 }

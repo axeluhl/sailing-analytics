@@ -75,7 +75,7 @@ public class Activator implements BundleActivator {
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                         MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory,
                                 domainObjectFactory),
-                        baseDomainFactory, yellowBrickMongoObjectFactory, securityService, yellowBrickTrackingAdapter);
+                        baseDomainFactory, securityService, yellowBrickTrackingAdapter);
                 for (YellowBrickConfiguration yellowBrickConfig : yellowBrickDomainObjectFactory.getYellowBrickConfigurations()) {
                     securityService.migrateOwnership(yellowBrickConfig);
                     yellowBrickTrackingAdapter.addYellowBrickConfiguration(yellowBrickConfig);
