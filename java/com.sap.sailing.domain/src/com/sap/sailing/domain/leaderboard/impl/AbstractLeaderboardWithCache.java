@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -495,6 +497,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         final Map<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new HashMap<>();
+        final ConcurrentMap<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> futuresForCompetitorAndColumnName = new ConcurrentHashMap<>();
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
@@ -506,7 +509,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
             result.competitors.add(competitorDTO);
-            Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
             final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
                 final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
@@ -524,26 +526,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                             rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
                             fillTotalPointsUncorrected, cache);
                 });
-                futuresForColumnName.put(raceColumn.getName(), future);
-            }
-            for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
-                try {
-                    row.fieldsByRaceColumnName.put(raceColumnNameAndFuture.getKey(), raceColumnNameAndFuture.getValue().get());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
-                    // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
-                    // null values.
-                    // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
-                    // this helps robustness from a user's perspective.
-                    logger.log(
-                            Level.SEVERE,
-                            AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
-                                    + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
-                                    + "): exception during computing leaderboard entry for competitor "
-                                    + competitor.getName() + " in race column " + raceColumnNameAndFuture.getKey()
-                                    + ". Leaving empty.", e);
-                }
+                futuresForCompetitorAndColumnName.put(new Pair<>(competitor, raceColumn.getName()), new Pair<>(row, future));
             }
             if (addOverallDetails) {
                 //this reuses several prior calculated fields, so must be evaluated after them
@@ -570,6 +553,29 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 final Double regattaLevelTimeOnTimeFactor = regattaLikeLeaderboard.getRegattaLike().getTimeOnTimeFactor(competitor, Optional.empty());
                 row.effectiveTimeOnDistanceAllowancePerNauticalMile = regattaLevelTimeOnDistanceAllowancePerNauticalMile;
                 row.effectiveTimeOnTimeFactor = regattaLevelTimeOnTimeFactor;
+            }
+        } // competitors
+        for (java.util.Map.Entry<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> competitorAndRaceColumnNameAndRowAndFuture : futuresForCompetitorAndColumnName.entrySet()) {
+            try {
+                final LeaderboardRowDTO rowForCompetitor = competitorAndRaceColumnNameAndRowAndFuture.getValue().getA();
+                final String columnName = competitorAndRaceColumnNameAndRowAndFuture.getKey().getB();
+                final Future<LeaderboardEntryDTO> future = competitorAndRaceColumnNameAndRowAndFuture.getValue().getB();
+                rowForCompetitor.fieldsByRaceColumnName.put(columnName, future.get());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
+                // null values.
+                // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
+                // this helps robustness from a user's perspective.
+                final Competitor competitor = competitorAndRaceColumnNameAndRowAndFuture.getKey().getA();
+                logger.log(
+                        Level.SEVERE,
+                        AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
+                                + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
+                                + "): exception during computing leaderboard entry for competitor "
+                                + competitor.getName() + " in race column " + competitorAndRaceColumnNameAndRowAndFuture.getKey()
+                                + ". Leaving empty.", e);
             }
         }
         final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
