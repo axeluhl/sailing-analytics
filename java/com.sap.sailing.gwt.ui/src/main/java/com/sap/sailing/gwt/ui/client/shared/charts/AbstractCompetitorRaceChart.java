@@ -54,6 +54,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.Filter;
@@ -224,6 +226,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             for (CompetitorDTO competitorDTO : getSelectedCompetitors()) {
                 competitorsToLoad.add(competitorDTO);
             }
+            // TODO bug5647: use a TimeRangeActionsExecutor pattern here to avoid redundant overlapping requests, e.g., if initial request in playing state takes along time
             loadData(from, to, competitorsToLoad, append);
         } else {
             remove(chart);
@@ -340,17 +343,19 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             showLoading(stringMessages.loadingCompetitorData());
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<>();
             competitorsToLoad.add(competitor);
-            
-            {
-                Date fromDate = primary.timeOfEarliestRequestInMillis == null ? null : new Date(primary.timeOfEarliestRequestInMillis);
-                Date toDate = primary.timeOfLatestRequestInMillis == null ? null : new Date(primary.timeOfLatestRequestInMillis);
-                loadData(fromDate, toDate, competitorsToLoad, false);
+            final TimeRange timeRangeToLoadForFirstMetric = TimeRange.create(
+                    TimePoint.of(primary.timeOfEarliestRequestInMillis),
+                    TimePoint.of(primary.timeOfLatestRequestInMillis));
+            final TimeRange timeRangeToLoad;
+            if (getSelectedSecondDetailType() != null) {
+                final TimeRange timeRangeToLoadForSecondMetric = TimeRange.create(
+                        TimePoint.of(secondary.timeOfEarliestRequestInMillis),
+                        TimePoint.of(secondary.timeOfLatestRequestInMillis));
+                timeRangeToLoad = timeRangeToLoadForFirstMetric.extend(timeRangeToLoadForSecondMetric);
+            } else {
+                timeRangeToLoad = timeRangeToLoadForFirstMetric;
             }
-            {
-                Date fromDate = secondary.timeOfEarliestRequestInMillis == null ? null : new Date(secondary.timeOfEarliestRequestInMillis);
-                Date toDate = secondary.timeOfLatestRequestInMillis == null ? null : new Date(secondary.timeOfLatestRequestInMillis);
-                loadData(fromDate, toDate, competitorsToLoad, false);
-            }
+            loadData(timeRangeToLoad.from().asDate(), timeRangeToLoad.to().asDate(), competitorsToLoad, /* append */ false);
         }
     }
 

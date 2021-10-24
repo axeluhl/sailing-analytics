@@ -1387,6 +1387,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public WindInfoForRaceDTO getLastCombinedWindTrackInfoDTO() {
         return lastCombinedWindTrackInfoDTO;
     }
+    
     /**
      * Requests updates for map data and, when received, updates the map structures accordingly.
      * <p>
@@ -1435,7 +1436,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         for (CompetitorDTO competitor : competitorSelection.getAllCompetitors()) {
             competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
         }
-
         // only update the tails for these competitors
         // Note: the fromAndToAndOverlap.getC() map will be UPDATED by the call to updateBoatPositions happening inside
         // the callback provided by getRaceMapDataCallback(...) for those
