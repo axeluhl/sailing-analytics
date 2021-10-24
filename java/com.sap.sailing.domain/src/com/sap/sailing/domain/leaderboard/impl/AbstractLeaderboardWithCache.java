@@ -511,6 +511,12 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.competitors.add(competitorDTO);
             final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
+                // in case boats can't change set the also the boat on the row to simplify access
+                if (result.canBoatsOfCompetitorsChangePerRace == false && row.boat == null) {
+                    final Boat boatOfCompetitor = getBoatOfCompetitor(competitor, raceColumn);
+                    // find a raceColumn where a boat is available
+                    row.boat = boatOfCompetitor == null ? null : baseDomainFactory.convertToBoatDTO(boatOfCompetitor);
+                }
                 final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
                         namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName());
                 Future<LeaderboardEntryDTO> future = executor.submit(() -> {
@@ -536,16 +542,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             String displayName = this.getDisplayName(competitor);
             if (displayName != null) {
                 result.competitorDisplayNames.put(competitorDTO, displayName);
-            }
-            // in case boats can't change set the also the boat on the row to simplify access
-            if (result.canBoatsOfCompetitorsChangePerRace == false && !row.fieldsByRaceColumnName.isEmpty()) {
-                // find a raceColumn where a boat is available
-                for (LeaderboardEntryDTO leaderboardEntry : row.fieldsByRaceColumnName.values()) {
-                    if (leaderboardEntry != null && leaderboardEntry.boat != null) {
-                        row.boat = leaderboardEntry.boat;
-                        break;
-                    }
-                }
             }
             if (isLeaderboardThatHasRegattaLike) {
                 LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
@@ -663,23 +659,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
-        Boat boat;
-        if (trackedRace != null) {
-            boat = trackedRace.getBoatOfCompetitor(competitor);
-        } else {
-            // check if it's a CompetitorWithBoat:
-            if (competitor.hasBoat()) {
-                boat = ((CompetitorWithBoat) competitor).getBoat();
-            } else {
-                final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                if (fleetOfCompetitor != null) {
-                    final Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getCompetitorsRegisteredInRacelog(fleetOfCompetitor);
-                    boat = competitorsAndTheirBoats.get(competitor);
-                } else {
-                    boat = null;
-                }
-            }
-        }
+        Boat boat = getBoatOfCompetitor(competitor, raceColumn);
         entryDTO.boat = boat == null ? null : baseDomainFactory.convertToBoatDTO(boat);
         entryDTO.totalPoints = entry.getTotalPoints();
         if (fillTotalPointsUncorrected) {
@@ -814,6 +794,16 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         final Fleet fleet = entry.getFleet();
         entryDTO.fleet = fleet == null ? null : baseDomainFactory.convertToFleetDTO(fleet);
         return entryDTO;
+    }
+
+    private Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn) {
+        final Boat boat;
+        if (competitor.hasBoat()) {
+            boat = ((CompetitorWithBoat) competitor).getBoat();
+        } else {
+            boat = getBoatOfCompetitor(competitor, raceColumn, raceColumn.getFleetOfCompetitor(competitor));
+        }
+        return boat;
     }
 
     private void calculateRacesMetadata(MetaLeaderboardColumn metaLeaderboardColumn, MetaLeaderboardRaceColumnDTO columnDTO,
