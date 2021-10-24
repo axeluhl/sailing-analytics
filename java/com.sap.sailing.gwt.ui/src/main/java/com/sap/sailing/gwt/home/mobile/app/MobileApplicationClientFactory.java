@@ -140,7 +140,6 @@ public class MobileApplicationClientFactory extends
                                 
                                 @Override
                                 public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
-                                    // TODO Auto-generated method stub
                                 }
                                 
                                 @Override
@@ -150,7 +149,6 @@ public class MobileApplicationClientFactory extends
                                 
                                 @Override
                                 public void onCloseCheckoutModal() {
-                                    // TODO Auto-generated method stub
                                 }
                             }, () -> getUserService().updateUser(true));
                 } catch (InvalidSubscriptionProviderException e) {
@@ -159,12 +157,10 @@ public class MobileApplicationClientFactory extends
             }
             @Override
             public void manageSubscriptions() {
-                // TODO: implement logic
-                GWT.log("manage subscriptions");
+                navigator.goToPlace(navigator.getUserProfileSubscriptionPlace());
             }
             @Override
             public void toggleAuthenticationFlyout() {
-                // TODO Auto-generated method stub
                 GWT.log("toggle authentication flyout");
                 navigator.goToPlace(navigator.getSignInNavigation());
             }
