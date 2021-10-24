@@ -97,6 +97,7 @@ import com.sap.sse.util.ThreadPoolUtil;
 public class YellowBrickRaceTrackerImpl extends AbstractRaceTrackerImpl<YellowBrickRaceTrackingConnectivityParams>
 implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(YellowBrickRaceTrackerImpl.class.getName());
+    private static final Duration STOP_AFTER_NOT_RECEIVING_NEW_FIXES_FOR_THIS_LONG = Duration.ONE_DAY;
     private final String DEFAULT_REGATTA_NAME_PREFIX = "YellowBrick ";
     private final Regatta regatta;
     private final RaceDefinition race;
@@ -239,10 +240,14 @@ implements TrackingDataLoader {
      */
     private void pollNewPositions() {
         if (stop) {
-            logger.info("Terminating polling for YB race "+getConnectivityParams().getRaceUrl());
+            logger.info("Terminating polling for YB race "+getConnectivityParams().getRaceUrl()+" upon explicit request.");
             throw new RuntimeException("Terminated");
         }
         final TimePoint timePointStartingFromWhichToPoll = computeBestTimePointSinceWhichToPollForNewPositions();
+        if (timePointStartingFromWhichToPoll.plus(STOP_AFTER_NOT_RECEIVING_NEW_FIXES_FOR_THIS_LONG).before(TimePoint.now())) {
+            logger.info("Terminating polling for YB race "+getConnectivityParams().getRaceUrl()+" because we would ask for more than "+
+                    STOP_AFTER_NOT_RECEIVING_NEW_FIXES_FOR_THIS_LONG+" worth of data.");
+        }
         logger.info("Polling YB fixes for race "+getConnectivityParams().getRaceUrl()+" since "+timePointStartingFromWhichToPoll);
         try {
             final PositionsDocument storedData = trackingAdapter.getPositionsSince(getConnectivityParams().getRaceUrl(),

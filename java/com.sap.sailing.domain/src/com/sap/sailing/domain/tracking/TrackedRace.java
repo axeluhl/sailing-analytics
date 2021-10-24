@@ -418,7 +418,8 @@ public interface TrackedRace
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
-     * Callers can freely iterate because a copied collection is returned. The {@link WindSourceType#COMBINED} wind source
+     * Callers can freely iterate because the set returned is weakly-consistent and never throws a {@link ConcurrentModificationException}
+     * upon iteration. The {@link WindSourceType#COMBINED} wind source
      * as well as the {@link WindSourceType#LEG_MIDDLE} sources are never part of the result.
      */
     Set<WindSource> getWindSources();
