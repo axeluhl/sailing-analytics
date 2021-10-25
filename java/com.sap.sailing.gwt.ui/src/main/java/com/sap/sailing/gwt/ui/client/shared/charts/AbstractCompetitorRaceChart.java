@@ -58,10 +58,13 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
+import com.sap.sse.gwt.client.async.TimeRangeAsyncCallback;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -117,6 +120,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      */
     private long effectiveStepSize = -1;
     
+    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionsExecutorForCompetitorRaceData;
+    
     AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
             RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
@@ -125,7 +130,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             boolean allowTimeAdjust, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
-        
+        this.timeRangeActionsExecutorForCompetitorRaceData = new TimeRangeActionsExecutor<>();
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -226,7 +231,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             for (CompetitorDTO competitorDTO : getSelectedCompetitors()) {
                 competitorsToLoad.add(competitorDTO);
             }
-            // TODO bug5647: use a TimeRangeActionsExecutor pattern here to avoid redundant overlapping requests, e.g., if initial request in playing state takes along time
             loadData(from, to, competitorsToLoad, append);
         } else {
             remove(chart);
@@ -277,7 +281,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, effectiveStepSize, selectedDataTypeToRetrieve,
                 leaderboardGroupName, leaderboardGroupId, leaderboardName);
-        AsyncCallback<CompetitorsRaceDataDTO> dataLoadedCallback = new AsyncCallback<CompetitorsRaceDataDTO>() {
+        TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> dataLoadedCallback =
+                new TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO>() {
             @Override
             public void onSuccess(final CompetitorsRaceDataDTO result) {
                 hideLoading();
@@ -301,16 +306,63 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
                         timer.getPlayMode() == PlayModes.Live);
             }
+
+            @Override
+            public Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> unzipResult(CompetitorsRaceDataDTO result) {
+                final Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> unzipped = new HashMap<>();
+                for (final CompetitorRaceDataDTO competitorRaceData : result.getAllRaceData()) {
+                            unzipped.put(competitorRaceData.getCompetitor(), new Triple<>(competitorRaceData,
+                                    result.getRequestedFromTime(), result.getRequestedToTime()));
+                        }
+                return unzipped;
+            }
+
+            @Override
+            public CompetitorsRaceDataDTO zipSubResults(Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> subResultMap) {
+                final DetailType detailType = subResultMap.values().stream().findFirst()
+                        .map(competitorRaceDataWithDates -> competitorRaceDataWithDates.getA().getDetailType()).orElse(null);
+                final Date from = subResultMap.values().stream().findFirst()
+                        .map(competitorRaceDataWithDates -> competitorRaceDataWithDates.getB()).orElse(null);
+                final Date to = subResultMap.values().stream().findFirst()
+                        .map(competitorRaceDataWithDates -> competitorRaceDataWithDates.getC()).orElse(null);
+                final Map<CompetitorDTO, CompetitorRaceDataDTO> raceDataPerCompetitor = new HashMap<>();
+                for (final Entry<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> e : subResultMap.entrySet()) {
+                    raceDataPerCompetitor.put(e.getKey(), e.getValue().getA());
+                }
+                return new CompetitorsRaceDataDTO(detailType, from, to, raceDataPerCompetitor);
+            }
+
+            @Override
+            public Triple<CompetitorRaceDataDTO, Date, Date> joinSubResults(TimeRange timeRange,
+                    List<Pair<TimeRange, Triple<CompetitorRaceDataDTO, Date, Date>>> toJoin) {
+                CompetitorDTO competitor = null;
+                DetailType detailType = null;
+                CompetitorRaceDataDTO competitorRaceData = null;
+                for (final Pair<TimeRange, Triple<CompetitorRaceDataDTO, Date, Date>> timeRangeAndCompetitorRaceData : toJoin) {
+                    final TimeRange tr = timeRangeAndCompetitorRaceData.getA();
+                    final CompetitorRaceDataDTO crd = timeRangeAndCompetitorRaceData.getB().getA();
+                    assert timeRangeAndCompetitorRaceData.getB().getB().equals(tr.from().asDate());
+                    assert timeRangeAndCompetitorRaceData.getB().getC().equals(tr.to().asDate());
+                    if (competitor == null) {
+                        competitor = crd.getCompetitor();
+                    } else {
+                        assert competitor.equals(crd.getCompetitor());
+                    }
+                    if (detailType != null) {
+                        detailType = crd.getDetailType();
+                    } else {
+                        assert detailType == crd.getDetailType();
+                    }
+                    if (competitorRaceData == null) {
+                        competitorRaceData = new CompetitorRaceDataDTO(competitor, detailType, crd.getMarkPassingsData(), crd.getRaceData());
+                    } else {
+                        competitorRaceData.addAllData(crd);
+                    }
+                }
+                return new Triple<>(competitorRaceData, timeRange.from().asDate(), timeRange.to().asDate());
+            }
         };
-        if (append) {
-            // this call is repeated, allow it to be throttled and dropped
-            asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
-                    dataLoadedCallback);
-        } else {
-            // ensure that non appending only once loading is reliable and cannot be dropped by not using
-            // asyncActionExecutor
-            getCompetitorsRaceDataAction.execute(dataLoadedCallback);
-        }
+        timeRangeActionsExecutorForCompetitorRaceData.execute(getCompetitorsRaceDataAction, dataLoadedCallback);
     }
 
     /**
