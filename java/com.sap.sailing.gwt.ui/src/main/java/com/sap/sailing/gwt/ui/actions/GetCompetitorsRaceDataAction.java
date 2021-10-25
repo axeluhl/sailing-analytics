@@ -47,13 +47,15 @@ public class GetCompetitorsRaceDataAction implements TimeRangeAsyncAction<Compet
 
     @Override
     public void execute(Map<CompetitorDTO, TimeRange> timeRanges, AsyncCallback<CompetitorsRaceDataDTO> callback) {
-        TimeRange timeRange = null;
-        for (final Entry<CompetitorDTO, TimeRange> e : timeRanges.entrySet()) {
-            timeRange = timeRange == null ? e.getValue() : timeRange.extend(e.getValue());
+        if (timeRanges != null && !timeRanges.isEmpty()) {
+            TimeRange timeRange = null;
+            for (final Entry<CompetitorDTO, TimeRange> e : timeRanges.entrySet()) {
+                timeRange = timeRange == null ? e.getValue() : timeRange.extend(e.getValue());
+            }
+            sailingService.getCompetitorsRaceData(raceIdentifier, new ArrayList<>(timeRanges.keySet()), timeRange.from().asDate(),
+                    timeRange.to().asDate(), stepSizeInMs, detailType, leaderboarGroupName, leaderboarGroupId,
+                    leaderboardName, callback);
         }
-        sailingService.getCompetitorsRaceData(raceIdentifier, new ArrayList<>(timeRanges.keySet()), timeRange.from().asDate(),
-                timeRange.to().asDate(), stepSizeInMs, detailType, leaderboarGroupName, leaderboarGroupId,
-                leaderboardName, callback);
     }
 
     @Override

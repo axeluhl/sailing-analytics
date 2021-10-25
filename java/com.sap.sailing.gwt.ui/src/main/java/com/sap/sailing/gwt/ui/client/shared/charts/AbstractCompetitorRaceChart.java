@@ -339,16 +339,13 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 DetailType detailType = null;
                 CompetitorRaceDataDTO competitorRaceData = null;
                 for (final Pair<TimeRange, Triple<CompetitorRaceDataDTO, Date, Date>> timeRangeAndCompetitorRaceData : toJoin) {
-                    final TimeRange tr = timeRangeAndCompetitorRaceData.getA();
                     final CompetitorRaceDataDTO crd = timeRangeAndCompetitorRaceData.getB().getA();
-                    assert timeRangeAndCompetitorRaceData.getB().getB().equals(tr.from().asDate());
-                    assert timeRangeAndCompetitorRaceData.getB().getC().equals(tr.to().asDate());
                     if (competitor == null) {
                         competitor = crd.getCompetitor();
                     } else {
                         assert competitor.equals(crd.getCompetitor());
                     }
-                    if (detailType != null) {
+                    if (detailType == null) {
                         detailType = crd.getDetailType();
                     } else {
                         assert detailType == crd.getDetailType();
@@ -407,8 +404,14 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             } else {
                 timeRangeToLoad = timeRangeToLoadForFirstMetric;
             }
-            loadData(timeRangeToLoad.from().asDate(), timeRangeToLoad.to().asDate(), competitorsToLoad, /* append */ false);
+            loadData(getTimepointAsDateWhereBeginningAndEndOfTimeMeanNull(timeRangeToLoad.from()),
+                    getTimepointAsDateWhereBeginningAndEndOfTimeMeanNull(timeRangeToLoad.to()),
+                    competitorsToLoad, /* append */ false);
         }
+    }
+    
+    private Date getTimepointAsDateWhereBeginningAndEndOfTimeMeanNull(TimePoint timePoint) {
+        return timePoint == null ? null : timePoint.equals(TimePoint.BeginningOfTime) || timePoint.equals(TimePoint.EndOfTime) ? null : timePoint.asDate();
     }
 
     @Override
