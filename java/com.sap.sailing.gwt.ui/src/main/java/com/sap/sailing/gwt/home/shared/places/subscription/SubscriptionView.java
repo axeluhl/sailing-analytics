@@ -19,6 +19,8 @@ public interface SubscriptionView extends IsWidget {
         void toggleAuthenticationFlyout();
 
         AuthenticationContext getAuthenticationContext();
+        
+        SubscriptionClientFactory getClientFactory();
     }
 
 }

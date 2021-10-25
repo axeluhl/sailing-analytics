@@ -5,6 +5,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardContainer;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public class SubscriptionViewImpl extends Composite implements SubscriptionView {
@@ -21,16 +22,15 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
     public void addSubscriptionPlan(final SubscriptionPlanDTO plan, final SubscriptionCard.Type type, final EventBus eventBus) {
         switch (type) {
         case HIGHLIGHT:
-            container.addSubscription(new SubscriptionCard(plan, type, (price) -> {
-                if (price != null) {
-                    presenter.startSubscription(price.getPriceId());
-                }
-            }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
-            break;
         case DEFAULT:
             container.addSubscription(new SubscriptionCard(plan, type, (price) -> {
-                if (price != null) {
-                    presenter.startSubscription(price.getPriceId());
+                if (presenter.getAuthenticationContext().isLoggedIn()) {
+                    if (price != null) {
+                        presenter.startSubscription(price.getPriceId());
+                    }
+                } else {
+                    presenter.getClientFactory().createErrorView(StringMessages.INSTANCE.notLoggedIn(), new RuntimeException("User not logged in."));
+                    presenter.toggleAuthenticationFlyout();
                 }
             }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
