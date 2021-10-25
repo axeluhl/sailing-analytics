@@ -65,8 +65,8 @@ public class ChargebeeSubscriptionServiceImpl extends
     
     private SubscriptionPrice convertToSubcriptionPrice(ItemPrice price) {
         BigDecimal decimalPrice = price.priceInDecimal() == null ? 
-                new BigDecimal(price.price()) : new BigDecimal(price.priceInDecimal());
-        return new SubscriptionPrice(price.id(), decimalPrice,
+                new BigDecimal(price.price()/100) : new BigDecimal(price.priceInDecimal());
+        return new SubscriptionPrice(price.id(), decimalPrice, price.currencyCode(),
                 SubscriptionPrice.PaymentInterval.valueOf(price.periodUnit().name()));
     }
 
@@ -110,7 +110,7 @@ public class ChargebeeSubscriptionServiceImpl extends
                 String locale = user.getLocaleOrDefault().getLanguage();
                 Result result = HostedPage.checkoutNewForItems()
                         .subscriptionItemItemPriceId(0, priceId)
-                        .subscriptionItemQuantity(0,1)
+                        .subscriptionItemQuantity(0,2)
                         .customerId(user.getName()).customerEmail(user.getEmail())
                         .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
                         .customerLocale(locale).billingAddressFirstName(usernames.getA())

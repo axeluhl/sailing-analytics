@@ -8,18 +8,28 @@ public class SubscriptionPrice implements Serializable{
     private String priceId;
     private BigDecimal price;
     private PaymentInterval paymentInterval;
-    
+    private String currencyCode;
+
     /*
      * For GWT Serialization
      */
     @Deprecated
     public SubscriptionPrice() {}
     
-    public SubscriptionPrice(String priceId, BigDecimal price, PaymentInterval paymentInterval) {
+    public SubscriptionPrice(String priceId, BigDecimal price, String currencyCode, PaymentInterval paymentInterval) {
         super();
         this.priceId = priceId;
         this.price = price;
+        this.currencyCode = currencyCode;
         this.paymentInterval = paymentInterval;
+    }
+    
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+    
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
     public BigDecimal getPrice() {
