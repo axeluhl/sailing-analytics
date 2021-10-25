@@ -3552,12 +3552,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)) {
                 for (Polyline courseMiddleline : courseMiddleLines.values()) {
-                    courseMiddleline.setVisible(true);
+                    if (courseMiddleline != null) {
+                        courseMiddleline.setVisible(true);
+                    }
                 }
             }
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)) {
                 for (Polygon courseSideline : courseSidelines.values()) {
-                    courseSideline.setVisible(true);
+                    if (courseSideline != null) {
+                        courseSideline.setVisible(true);
+                    }
                 }
             }
         }
