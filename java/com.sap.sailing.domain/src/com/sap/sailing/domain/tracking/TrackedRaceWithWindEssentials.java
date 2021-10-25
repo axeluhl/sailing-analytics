@@ -153,7 +153,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
         return result;
     }
 
-    private void updateWindSourcesByType(WindSource windSource) {
+    protected void updateWindSourcesByType(WindSource windSource) {
         ConcurrentMap<WindSource, WindSource> windSourcesOfType = windSourcesByType.get(windSource.getType());
         if (windSourcesOfType == null) {
             windSourcesOfType = new ConcurrentHashMap<>();

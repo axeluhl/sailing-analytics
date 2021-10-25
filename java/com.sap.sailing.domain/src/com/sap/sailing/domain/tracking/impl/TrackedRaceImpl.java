@@ -578,6 +578,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta.getRegatta().getName(), TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
+                    for (final WindSource windSource : loadedWindTracks.keySet()) {
+                        updateWindSourcesByType(windSource);
+                    }
                     updateEventTimePoints(loadedWindTracks.values());
                     logger.info("Finished loading wind tracks for " + getRace().getName() + ". Found " + windTracks.size() + " wind tracks for this race.");
                 } finally {
