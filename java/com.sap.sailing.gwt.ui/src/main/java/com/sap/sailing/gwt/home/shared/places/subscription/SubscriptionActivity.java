@@ -85,8 +85,7 @@ public class SubscriptionActivity extends AbstractActivity {
     }
 
     private boolean checkIfUserIsOwnerOfThePlan(SubscriptionPlanDTO plan) {
-        // TODO: implement check
-        return false;
+        return plan.isUserSubscribedToPlan();
     }
 
     private void onInvalidSubscriptionProviderError(final InvalidSubscriptionProviderException exc) {
