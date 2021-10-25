@@ -201,8 +201,19 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         Stream.of(plan.getRoles()).forEach((role) -> {
             featureKeys.add(role.getMessageKey());
         });
-        return new SubscriptionPlanDTO(plan.getId(), plan.getMessageKey(), plan.getDescMessagesKey(),
+        final boolean isUserSubscribedToPlan = isUserSubscribedToPlan(plan.getId());
+        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getMessageKey(), plan.getDescMessagesKey(),
                 featureKeys, plan.getPrices(), null);
+    }
+
+    private boolean isUserSubscribedToPlan(String planId) {
+        try {
+            final User currentUser = getCurrentUser();
+            final Subscription subscriptionByPlan = currentUser.getSubscriptionByPlan(planId);
+            return subscriptionByPlan != null ? subscriptionByPlan.isActiveSubscription() : false;
+        } catch (UserManagementException e) {
+            return false;
+        }
     }
     
     protected ArrayList<SubscriptionPlanDTO> convertToDtos(Collection<SubscriptionPlan> plans) {

@@ -57,28 +57,24 @@ public class SubscriptionActivity extends AbstractActivity {
 
                         private void addIndividual(final EventBus eventBus, final SubscriptionView view) {
                             final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO(null /* id */,
+                                    /* isUserSubscribedToPlan */ false,
                                     new StringMessagesKey("individual_subscription_plan_name"),
-                                    new StringMessagesKey("individual_subscription_plan_description"), 
-                                    Collections.emptySet() /* features */,
-                                    Collections.emptySet() /* prices */,
+                                    new StringMessagesKey("individual_subscription_plan_description"),
+                                    Collections.emptySet() /* features */, Collections.emptySet() /* prices */,
                                     null /* error */);
                             view.addSubscriptionPlan(individualPlan, Type.INDIVIDUAL, eventBus);
                         }
 
                         private void addFreePlan(final SubscriptionView view) {
-                            Set<StringMessagesKey> freeFeatures = new LinkedHashSet<StringMessagesKey>(
-                                    Arrays.asList(new StringMessagesKey("free_feature_1"),
-                                            new StringMessagesKey("free_feature_2"),
-                                            new StringMessagesKey("free_feature_3"),
-                                            new StringMessagesKey("free_feature_4"))
-                                    );
-                            
+                            Set<StringMessagesKey> freeFeatures = new LinkedHashSet<StringMessagesKey>(Arrays.asList(
+                                    new StringMessagesKey("free_feature_1"), new StringMessagesKey("free_feature_2"),
+                                    new StringMessagesKey("free_feature_3"), new StringMessagesKey("free_feature_4")));
+
                             final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO(null /* id */,
+                                    /* isUserSubscribedToPlan */ false,
                                     new StringMessagesKey("free_subscription_plan_name"),
-                                    new StringMessagesKey("free_subscription_plan_description"), 
-                                    freeFeatures,
-                                    Collections.emptySet() /* prices */,
-                                    null /* error */);
+                                    new StringMessagesKey("free_subscription_plan_description"), freeFeatures,
+                                    Collections.emptySet() /* prices */, null /* error */);
                             view.addSubscriptionPlan(freePlan, Type.FREE, eventBus);
                         }
                     });

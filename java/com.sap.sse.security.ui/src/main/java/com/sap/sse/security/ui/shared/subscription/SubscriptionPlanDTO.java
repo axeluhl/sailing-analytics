@@ -19,6 +19,7 @@ public class SubscriptionPlanDTO implements IsSerializable {
     private HashSet<StringMessagesKey> featureIds;
     private HashSet<SubscriptionPrice> prices = new HashSet<SubscriptionPrice>();
     private String error;
+    private boolean isUserSubscribedToPlan;
 
     /**
      * For GWT Serialization only
@@ -27,9 +28,10 @@ public class SubscriptionPlanDTO implements IsSerializable {
     public SubscriptionPlanDTO() {
     }
 
-    public SubscriptionPlanDTO(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
+    public SubscriptionPlanDTO(String id, boolean isUserSubscribedToPlan, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
             Set<StringMessagesKey> features, Set<SubscriptionPrice> prices, String error) {
         this.id = id;
+        this.isUserSubscribedToPlan = isUserSubscribedToPlan;
         this.nameMessageKey = nameMessageKey;
         this.descMessageKey = descMessageKey;
         this.featureIds = new HashSet<StringMessagesKey>(features);
@@ -43,6 +45,14 @@ public class SubscriptionPlanDTO implements IsSerializable {
 
     public String getId() {
         return id;
+    }
+
+    public boolean isUserSubscribedToPlan() {
+        return isUserSubscribedToPlan;
+    }
+
+    public void setUserSubscribedToPlan(boolean isUserSubscribedToPlan) {
+        this.isUserSubscribedToPlan = isUserSubscribedToPlan;
     }
 
     public StringMessagesKey getNameMessageKey() {
