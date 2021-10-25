@@ -65,7 +65,7 @@ public class ChargebeeSubscriptionServiceImpl extends
     
     private SubscriptionPrice convertToSubcriptionPrice(ItemPrice price) {
         BigDecimal decimalPrice = price.priceInDecimal() == null ? 
-                new BigDecimal(price.price()/100) : new BigDecimal(price.priceInDecimal());
+                new BigDecimal(price.price()).divide(new BigDecimal(100)) : new BigDecimal(price.priceInDecimal());
         return new SubscriptionPrice(price.id(), decimalPrice, price.currencyCode(),
                 SubscriptionPrice.PaymentInterval.valueOf(price.periodUnit().name()));
     }
