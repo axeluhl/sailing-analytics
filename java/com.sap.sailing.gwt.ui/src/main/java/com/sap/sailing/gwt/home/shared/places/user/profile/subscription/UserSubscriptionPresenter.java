@@ -21,7 +21,7 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * Implementation presenter of {@link UserSubscriptionView.Presenter}
- * 
+ *
  * @author Tu Tran
  */
 public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSecurity>
@@ -29,7 +29,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
     private final C clientFactory;
     private UserSubscriptionView view;
-    private Map<Serializable, SubscriptionPlanDTO> subscriptionPlans = new HashMap<>();
+    private final Map<Serializable, SubscriptionPlanDTO> subscriptionPlans = new HashMap<>();
 
     public UserSubscriptionPresenter(C clientFactory) {
         this.clientFactory = clientFactory;
@@ -39,7 +39,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     public void init() {
         clientFactory.getSubscriptionServiceFactory().initializeProviders();
     }
-    
+
     @Override
     public void loadSubscription() {
         view.onStartLoadSubscription();
@@ -108,12 +108,12 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             onInvalidSubscriptionProviderError(e);
         }
     }
-    
+
     private void updateView(SubscriptionListDTO subscription) {
         try {
             final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionServiceFactory()
                     .getDefaultAsyncService();
-            
+
             defaultAsyncService.getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -132,12 +132,12 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             onInvalidSubscriptionProviderError(e);
         }
     }
-    
+
     private void updateSubscriptionPlanMap(Iterable<SubscriptionPlanDTO> updatedPlans) {
         subscriptionPlans.clear();
         updatedPlans.forEach(plan -> subscriptionPlans.put(plan.getId(), plan));
     }
-    
+
     private void showError(String message) {
         Notification.notify(message, NotificationType.ERROR);
     }

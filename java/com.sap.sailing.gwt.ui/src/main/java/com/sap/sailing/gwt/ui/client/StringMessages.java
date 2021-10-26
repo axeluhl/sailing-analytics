@@ -2341,6 +2341,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String numHours(int hours);
     String numDays(int days);
     String numMinutes(int minutes);
+    String paymentStatus();
     String paymentStatusSuccess();
     String paymentStatusNoSuccess();
     String refunded();

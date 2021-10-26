@@ -11,7 +11,7 @@ import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
  * Implementation view of {@link UserProfileSubscriptionView}
- * 
+ *
  * @author Tu Tran
  */
 public class UserProfileSubscriptionViewImpl extends Composite implements UserProfileSubscriptionView {
@@ -26,7 +26,7 @@ public class UserProfileSubscriptionViewImpl extends Composite implements UserPr
     UserSubscription userSubscriptionUi;
 
     @Override
-    public void setPresenter(Presenter presenter) {
+    public void setPresenter(final Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         userSubscriptionUi = new UserSubscription(presenter.getUserSubscriptionPresenter());
         initWidget(uiBinder.createAndBindUi(this));
