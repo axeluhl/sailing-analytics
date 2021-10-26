@@ -280,11 +280,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 return doesCourseExist(raceColumnAndFleetName) ? stringMessages.ok() : stringMessages.none();
             }
         };
-
         final AccessControlledActionsColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, RaceLogTrackingEventManagementRaceImagesBarCell> raceActionColumn = AccessControlledActionsColumn
                 .create(new RaceLogTrackingEventManagementRaceImagesBarCell(stringMessages, this), userService,
                         t -> t.getC());
-
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING,
                 DefaultActions.UPDATE, this::denoteForRaceLogTracking);
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_REMOVE_DENOTATION,

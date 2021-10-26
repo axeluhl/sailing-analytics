@@ -311,9 +311,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             public Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> unzipResult(CompetitorsRaceDataDTO result) {
                 final Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> unzipped = new HashMap<>();
                 for (final CompetitorRaceDataDTO competitorRaceData : result.getAllRaceData()) {
-                            unzipped.put(competitorRaceData.getCompetitor(), new Triple<>(competitorRaceData,
-                                    result.getRequestedFromTime(), result.getRequestedToTime()));
-                        }
+                    unzipped.put(competitorRaceData.getCompetitor(), new Triple<>(competitorRaceData,
+                            result.getRequestedFromTime(), result.getRequestedToTime()));
+                }
                 return unzipped;
             }
 
