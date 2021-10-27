@@ -336,8 +336,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         races.remove(t);
         Distance buoyZoneRadius = getSelectedRegatta() == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
                 : getSelectedRegatta().getCalculatedBuoyZoneRadius();
-        new CopyCourseAndCompetitorsDialog(sailingServiceWrite, errorReporter, stringMessages, races, leaderboardName,
-                buoyZoneRadius, new DialogCallback<CourseAndCompetitorCopyOperation>() {
+        new CopyCourseAndCompetitorsDialog(sailingServiceWrite, errorReporter, stringMessages, races, availableLeaderboardList,
+                leaderboardName, buoyZoneRadius, new DialogCallback<CourseAndCompetitorCopyOperation>() {
                     @Override
                     public void ok(CourseAndCompetitorCopyOperation operation) {
                         operation.perform(leaderboardName, t, /* onSuccessCallback */ new Runnable() {
@@ -508,7 +508,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 refreshTrackingActionButtons();
             }
         });
-        
         raceColumnTableSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

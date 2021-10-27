@@ -48,7 +48,7 @@ public class CourseAndCompetitorCopyOperation {
     private Set<Triple<String, String, String>> convertToRacelogs(String leaderboardName) {
         Set<Util.Triple<String, String, String>> toRaceLogs = new java.util.HashSet<>();
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : raceLogsToCopyTo) {
-            toRaceLogs.add(toTriple(leaderboardName, race));
+            toRaceLogs.add(toTriple(race.getC().getName(), race));
         }
         return toRaceLogs;
     }
@@ -59,11 +59,10 @@ public class CourseAndCompetitorCopyOperation {
     }
 
     public void perform(String leaderboardName,
-            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO,
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTOFromWhichToCopy,
             final Runnable onSuccessCallback) {
-        Triple<String, String, String> fromTriple = toTriple(leaderboardName, raceColumnDTOAndFleetDTO);
+        Triple<String, String, String> fromTriple = toTriple(leaderboardName, raceColumnDTOAndFleetDTOFromWhichToCopy);
         Set<Triple<String, String, String>> toRacelogs = convertToRacelogs(leaderboardName);
-
         if (copyCourse) {
             sailingServiceWrite.copyCourseToOtherRaceLogs(fromTriple, toRacelogs, getPriority(), new AsyncCallback<Void>() {
                 @Override

@@ -1,27 +1,35 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCompetitorCopyOperation> {
-    private final RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
-        racesTable;
+    private final ListBox leaderboardDropDown;
+    private final RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> racesTable;
     private final CheckBox courseCheckBox;
     private final CheckBox competitorCheckBox;
     private final IntegerBox priorityBox;
@@ -32,6 +40,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     
     public CopyCourseAndCompetitorsDialog(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
+            List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList,
             String leaderboardName, Distance buoyZoneRadius, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
         super(stringMessages.selectRaces(), stringMessages.selectRaces(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator<CourseAndCompetitorCopyOperation>() {
@@ -47,6 +56,11 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
                     }
         }, true, dialogCallback);
         this.stringMessages = stringMessages;
+        leaderboardDropDown = new ListBox();
+        final List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardsSortedByName = availableLeaderboardList.stream()
+                .sorted((lb1, lb2) -> new NaturalComparator().compare(lb1.getName(), lb2.getName()))
+                .collect(Collectors.toList());
+        fillLeaderboardDropDownAndSelect(availableLeaderboardsSortedByName, leaderboardName);
         racesTable = new RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ true);
         racesTable.setSelectedLeaderboardName(leaderboardName);
@@ -57,6 +71,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
                 validateAndUpdate();
             }
         });
+        leaderboardDropDown.addChangeHandler(e->updateRacesTable(leaderboardDropDown.getSelectedValue(), availableLeaderboardList));
         courseCheckBox = createCheckbox(stringMessages.copyCourse());
         courseCheckBox.setValue(true);
         competitorCheckBox = createCheckbox(stringMessages.copyCompetitors());
@@ -66,13 +81,40 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         this.errorReporter = errorReporter;
     }
     
+    private void updateRacesTable(String nameOfSelectedLeaderboard, List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList) {
+        if (!nameOfSelectedLeaderboard.equals(leaderboardDropDown.getSelectedValue())) {
+            racesTable.getDataProvider().getList().clear();
+            final List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> newRaces = new ArrayList<>();
+            for (final StrippedLeaderboardDTOWithSecurity leaderboard : availableLeaderboardList) {
+                if (leaderboard.getName().equals(nameOfSelectedLeaderboard)) {
+                    for (final RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+                        for (final FleetDTO fleet : raceColumn.getFleets()) {
+                            newRaces.add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, leaderboard));
+                        }
+                    }
+                }
+            }
+            racesTable.getDataProvider().getList().addAll(newRaces);
+        }
+    }
+
+    private void fillLeaderboardDropDownAndSelect(List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList, String leaderboardNameToSelect) {
+        int i=0;
+        for (final StrippedLeaderboardDTOWithSecurity leaderboard : availableLeaderboardList) {
+            leaderboardDropDown.addItem(leaderboard.getName(), leaderboard.getName());
+            if (leaderboard.getName().equals(leaderboardNameToSelect)) {
+                leaderboardDropDown.setSelectedIndex(i);
+            }
+            i++;
+        }
+    }
+
     @Override
     protected Widget getAdditionalWidget() {
         final FlowPanel mainPanel = new FlowPanel();
         HorizontalPanel checkBoxPanel = new HorizontalPanel();
         checkBoxPanel.add(courseCheckBox);
         checkBoxPanel.add(competitorCheckBox);
-
         mainPanel.add(checkBoxPanel);
         mainPanel.add(racesTable);
         final HorizontalPanel hp = new HorizontalPanel();
@@ -85,8 +127,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
 
     @Override
     protected CourseAndCompetitorCopyOperation getResult() {
-        Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo = racesTable
-                .getSelectionModel().getSelectedSet();
+        Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo = racesTable.getSelectionModel().getSelectedSet();
         return new CourseAndCompetitorCopyOperation(racesToCopyTo, courseCheckBox.getValue(), competitorCheckBox.getValue(),
                 priorityBox.getValue(), sailingServiceWrite, errorReporter);
     }
