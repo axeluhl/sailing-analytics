@@ -631,9 +631,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      */
     void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples) throws UnauthorizedException, NotFoundException;
+
     /**
-     * @param priority
-     *            TODO
      * @param raceLogFrom
      *            identifies the race log to copy from by its leaderboard name, race column name and fleet name
      * @param raceLogsTo
@@ -641,7 +640,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      * @throws NotFoundException
      */
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
-            Set<Triple<String, String, String>> toTriples, int priority)
+            Set<Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
             throws UnauthorizedException, NotFoundException;
     
     /**

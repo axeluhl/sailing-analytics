@@ -14,16 +14,18 @@ public class CourseAndCompetitorCopyOperation {
     final Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceLogsToCopyTo;
     final boolean copyCourse;
     final boolean copyCompetitors;
-    final Integer priority;
+    final private boolean copyMarkDeviceMappings;
+    final private Integer priority;
     final private ErrorReporter errorReporter;
     final private SailingServiceWriteAsync sailingServiceWrite;
 
     public CourseAndCompetitorCopyOperation(
             Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
-            boolean copyCourse, boolean copyCompetitors, Integer priority, SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter) {
+            boolean copyCourse, boolean copyCompetitors, boolean copyMarkDeviceMappings, Integer priority, SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter) {
         this.raceLogsToCopyTo = racesToCopyTo;
         this.copyCourse = copyCourse;
         this.copyCompetitors = copyCompetitors;
+        this.copyMarkDeviceMappings = copyMarkDeviceMappings;
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.priority = priority;
@@ -31,14 +33,6 @@ public class CourseAndCompetitorCopyOperation {
 
     public Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> getRaceLogsToCopyTo() {
         return raceLogsToCopyTo;
-    }
-
-    public boolean copyCourse() {
-        return copyCourse;
-    }
-
-    public boolean copyCompetitors() {
-        return copyCompetitors;
     }
 
     public Integer getPriority() {
@@ -64,7 +58,7 @@ public class CourseAndCompetitorCopyOperation {
         Triple<String, String, String> fromTriple = toTriple(leaderboardName, raceColumnDTOAndFleetDTOFromWhichToCopy);
         Set<Triple<String, String, String>> toRacelogs = convertToRacelogs(leaderboardName);
         if (copyCourse) {
-            sailingServiceWrite.copyCourseToOtherRaceLogs(fromTriple, toRacelogs, getPriority(), new AsyncCallback<Void>() {
+            sailingServiceWrite.copyCourseToOtherRaceLogs(fromTriple, toRacelogs, copyMarkDeviceMappings, getPriority(), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Could not copy course and competitors: " + caught.getMessage());

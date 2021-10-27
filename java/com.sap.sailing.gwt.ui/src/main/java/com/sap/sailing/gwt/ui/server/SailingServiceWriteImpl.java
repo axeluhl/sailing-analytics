@@ -2351,7 +2351,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples, int priority)
+            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
             throws NotFoundException {
         final LeaderboardThatHasRegattaLike fromLeaderboard = (LeaderboardThatHasRegattaLike) getLeaderboardByName(fromTriple.getA());
         getSecurityService().checkCurrentUserReadPermission(fromLeaderboard);
@@ -2365,7 +2365,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
-        getRaceLogTrackingAdapter().copyCourse(fromRaceLog, fromLeaderboard, toRaceLogs, toLeaderboard, baseDomainFactory, getService(), priority);
+        getRaceLogTrackingAdapter().copyCourse(fromRaceLog, fromLeaderboard, toRaceLogs, toLeaderboard,
+                copyMarkDeviceMappings, baseDomainFactory, getService(), priority);
     }
 
     @Override

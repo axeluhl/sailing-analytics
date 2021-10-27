@@ -3,8 +3,10 @@ package com.sap.sailing.domain.racelogtracking.impl;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -31,6 +33,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -57,6 +60,7 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -199,7 +203,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void copyCourse(RaceLog fromRaceLog, LeaderboardThatHasRegattaLike fromLeaderboard, Set<RaceLog> toRaceLogs,
-            LeaderboardThatHasRegattaLike toLeaderboard, SharedDomainFactory<?> baseDomainFactory, RacingEventService service, int priority) {
+            LeaderboardThatHasRegattaLike toLeaderboard, boolean copyMarkDeviceMappings,
+            SharedDomainFactory<?> baseDomainFactory, RacingEventService service, int priority) {
         CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog,
                 /* onlyCoursesWithValidWaypointList */ true).analyze();
         final Set<Mark> marks = new HashSet<>();
@@ -214,7 +219,14 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                         UUID.randomUUID(), mark));
             }
         }
-        // TODO ask for opt-in to allow for mark device mappings to be copied over to target RegattaLog
+        if (copyMarkDeviceMappings) {
+            for (final Entry<Mark, List<DeviceMappingWithRegattaLogEvent<Mark>>> markDeviceMapping : new RegattaLogDeviceMarkMappingFinder(
+                    fromLeaderboard.getRegattaLike().getRegattaLog()).analyze().entrySet()) {
+                for (final DeviceMappingWithRegattaLogEvent<Mark> markDeviceMappingWithRegattaLogEvent : markDeviceMapping.getValue()) {
+                    toLeaderboardRegattaLog.add(markDeviceMappingWithRegattaLogEvent.getRegattaLogEvent());
+                }
+            }
+        }
         for (RaceLog toRaceLog : toRaceLogs) {
             if (new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 if (course != null) {

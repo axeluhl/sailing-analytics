@@ -32,11 +32,11 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     private final RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> racesTable;
     private final CheckBox courseCheckBox;
     private final CheckBox competitorCheckBox;
+    private final CheckBox copyMarkDeviceMappingsCheckBox;
     private final IntegerBox priorityBox;
     private final StringMessages stringMessages;
     private SailingServiceWriteAsync sailingServiceWrite;
     private ErrorReporter errorReporter;
-    
     
     public CopyCourseAndCompetitorsDialog(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
@@ -56,7 +56,8 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
                     }
         }, true, dialogCallback);
         this.stringMessages = stringMessages;
-        leaderboardDropDown = new ListBox();
+        leaderboardDropDown = createListBox(/* multi-select */ false);
+        copyMarkDeviceMappingsCheckBox = createCheckbox(stringMessages.copyMarkDeviceMappings());
         final List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardsSortedByName = availableLeaderboardList.stream()
                 .sorted((lb1, lb2) -> new NaturalComparator().compare(lb1.getName(), lb2.getName()))
                 .collect(Collectors.toList());
@@ -71,7 +72,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
                 validateAndUpdate();
             }
         });
-        leaderboardDropDown.addChangeHandler(e->updateRacesTable(leaderboardDropDown.getSelectedValue(), availableLeaderboardList, raceToExclude));
+        leaderboardDropDown.addChangeHandler(e->updateRacesTable(leaderboardDropDown.getSelectedValue(), availableLeaderboardList, raceToExclude, leaderboardName));
         courseCheckBox = createCheckbox(stringMessages.copyCourse());
         courseCheckBox.setValue(true);
         competitorCheckBox = createCheckbox(stringMessages.copyCompetitors());
@@ -83,7 +84,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     
     private void updateRacesTable(String nameOfSelectedLeaderboard,
         List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList,
-        RaceColumnDTOAndFleetDTOWithNameBasedEquality raceToExclude) {
+        RaceColumnDTOAndFleetDTOWithNameBasedEquality raceToExclude, String fromLeaderboardName) {
         racesTable.getDataProvider().getList().clear();
         final List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> newRaces = new ArrayList<>();
         for (final StrippedLeaderboardDTOWithSecurity leaderboard : availableLeaderboardList) {
@@ -99,6 +100,8 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
             }
         }
         racesTable.refresh(newRaces);
+        // make "copy mark device mappings" checkbox visible if the target leaderboard differs from the source leaderboard
+        copyMarkDeviceMappingsCheckBox.setVisible(!nameOfSelectedLeaderboard.equals(fromLeaderboardName));
     }
 
     private void fillLeaderboardDropDownAndSelect(List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList, String leaderboardNameToSelect) {
@@ -118,6 +121,8 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         HorizontalPanel checkBoxPanel = new HorizontalPanel();
         checkBoxPanel.add(courseCheckBox);
         checkBoxPanel.add(competitorCheckBox);
+        checkBoxPanel.add(copyMarkDeviceMappingsCheckBox);
+        copyMarkDeviceMappingsCheckBox.setVisible(false); // initially the leaderboard drop-down has selected the "from" leaderboard
         mainPanel.add(checkBoxPanel);
         mainPanel.add(leaderboardDropDown);
         mainPanel.add(racesTable);
@@ -133,7 +138,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     protected CourseAndCompetitorCopyOperation getResult() {
         Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo = racesTable.getSelectionModel().getSelectedSet();
         return new CourseAndCompetitorCopyOperation(racesToCopyTo, courseCheckBox.getValue(), competitorCheckBox.getValue(),
-                priorityBox.getValue(), sailingServiceWrite, errorReporter);
+                copyMarkDeviceMappingsCheckBox.getValue(), priorityBox.getValue(), sailingServiceWrite, errorReporter);
     }
 
 }
