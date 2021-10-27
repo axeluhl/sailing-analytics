@@ -40,7 +40,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     
     public CopyCourseAndCompetitorsDialog(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
-            List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList,
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceToExclude, List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList,
             String leaderboardName, Distance buoyZoneRadius, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
         super(stringMessages.selectRaces(), stringMessages.selectRaces(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator<CourseAndCompetitorCopyOperation>() {
@@ -71,7 +71,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
                 validateAndUpdate();
             }
         });
-        leaderboardDropDown.addChangeHandler(e->updateRacesTable(leaderboardDropDown.getSelectedValue(), availableLeaderboardList));
+        leaderboardDropDown.addChangeHandler(e->updateRacesTable(leaderboardDropDown.getSelectedValue(), availableLeaderboardList, raceToExclude));
         courseCheckBox = createCheckbox(stringMessages.copyCourse());
         courseCheckBox.setValue(true);
         competitorCheckBox = createCheckbox(stringMessages.copyCompetitors());
@@ -81,21 +81,24 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         this.errorReporter = errorReporter;
     }
     
-    private void updateRacesTable(String nameOfSelectedLeaderboard, List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList) {
-        if (!nameOfSelectedLeaderboard.equals(leaderboardDropDown.getSelectedValue())) {
-            racesTable.getDataProvider().getList().clear();
-            final List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> newRaces = new ArrayList<>();
-            for (final StrippedLeaderboardDTOWithSecurity leaderboard : availableLeaderboardList) {
-                if (leaderboard.getName().equals(nameOfSelectedLeaderboard)) {
-                    for (final RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                        for (final FleetDTO fleet : raceColumn.getFleets()) {
+    private void updateRacesTable(String nameOfSelectedLeaderboard,
+        List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList,
+        RaceColumnDTOAndFleetDTOWithNameBasedEquality raceToExclude) {
+        racesTable.getDataProvider().getList().clear();
+        final List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> newRaces = new ArrayList<>();
+        for (final StrippedLeaderboardDTOWithSecurity leaderboard : availableLeaderboardList) {
+            if (leaderboard.getName().equals(nameOfSelectedLeaderboard)) {
+                for (final RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+                    for (final FleetDTO fleet : raceColumn.getFleets()) {
+                        if (!raceColumn.getName().equals(raceToExclude.getA().getName()) ||
+                                !fleet.getName().equals(raceToExclude.getB().getName())) {
                             newRaces.add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, leaderboard));
                         }
                     }
                 }
             }
-            racesTable.getDataProvider().getList().addAll(newRaces);
         }
+        racesTable.refresh(newRaces);
     }
 
     private void fillLeaderboardDropDownAndSelect(List<StrippedLeaderboardDTOWithSecurity> availableLeaderboardList, String leaderboardNameToSelect) {
@@ -116,6 +119,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         checkBoxPanel.add(courseCheckBox);
         checkBoxPanel.add(competitorCheckBox);
         mainPanel.add(checkBoxPanel);
+        mainPanel.add(leaderboardDropDown);
         mainPanel.add(racesTable);
         final HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(3);
