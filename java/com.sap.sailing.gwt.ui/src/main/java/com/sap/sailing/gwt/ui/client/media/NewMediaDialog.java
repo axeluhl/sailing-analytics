@@ -229,7 +229,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     @Override
     protected void validateAndUpdate() {
         super.validateAndUpdate();
-        if (urlBox.getURL() == null || urlBox.getURL().isEmpty()) {
+        if (urlBox.getUri() == null || urlBox.getUri().isEmpty()) {
             getOkButton().setEnabled(false);
         }
     }

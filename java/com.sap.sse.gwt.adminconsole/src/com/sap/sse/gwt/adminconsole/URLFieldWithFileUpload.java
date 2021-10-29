@@ -93,7 +93,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                setUriAndFireEvent(null);
+                setUri(null, true);
             }
         });
         removePanel.setMethod(FormPanel.METHOD_POST);
@@ -107,7 +107,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             public void onClick(ClickEvent event) {
                 removePanel.setAction("/sailingserver/api/v1/file?uri=" + uri);
                 removePanel.submit();
-                setUriAndFireEvent(null);
+                setUri(null, true);
                 urlTextBox.setEnabled(true);
             }
         });
@@ -116,7 +116,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         urlTextBox.getElement().addClassName("url-textbox");
         urlTextBox.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().urlTextboxClass());
         urlTextBox.addValueChangeHandler(valueChangedEvent->{
-            setUriAndFireEvent(valueChangedEvent.getValue());
+            setUri(valueChangedEvent.getValue(), true);
         });
         imageUrlPanel.add(urlTextBox);
         final Button selectUploadButton = new Button();
@@ -176,7 +176,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                 if (resultJson != null) {
                     if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
                         String uri = resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI).isString().stringValue();
-                        setUriAndFireEvent(uri);
+                        setUri(uri, true);
                         String fileName = resultJson.get(0).isObject().get(FileUploadConstants.FILE_NAME).isString().stringValue();
                         if (showUrlAfterUpload) {
                             urlTextBox.setValue(uri);
@@ -195,7 +195,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                         }
                         urlTextBox.setTitle(fileName);
                         name = getFileNameWithoutEnding(fileName);
-                        fireResultUri(uri);
+                        setUri(uri, true);
                         removeButton.setEnabled(true);
                     } else {
                         urlTextBox.setValue(stringMessages.error());
@@ -224,64 +224,50 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         result = result.replaceAll("(?=[-_][^\\\\S])(\\-)", " ");
         return result;
     }
-    
-    private void fireResultUri(String uri) {
-        this.uri = uri;
-        ValueChangeEvent.fire(this, uri);
-    }
-    
+
     public String getName() {
         return name;
     }
-    
+
     /**
-     * Returns <code>null</code> if the trimmed URL field contents are empty
+     * Returns <code>null</code> if the trimmed URI field contents are empty
      */
-    public String getURL() {
-        final String trimmedUrl = (uri != null ? uri : "").trim();
-        return trimmedUrl.isEmpty() ? null : trimmedUrl;
+    public String getUri() {
+        final String trimmedUri = (uri != null ? uri : "").trim();
+        return trimmedUri.isEmpty() ? null : trimmedUri;
     }
 
-    public void setURL(String imageURL) {
-        if (imageURL == null) {
-            urlTextBox.setValue("");
-            urlTextBox.setTitle("");
-            uri = null;
-            removeButton.setEnabled(false);
-        } else {
-            urlTextBox.setValue(imageURL);
-            uri = imageURL;
-            removeButton.setEnabled(true);
-        }
+    public void setUri(String uri) {
+        setUri(uri, false);
     }
-    
-    private void setUriAndFireEvent(String uri) {
+
+    public void setUri(String uri, boolean fireEvent) {
         this.uri = uri;
         if (uri == null) {
             urlTextBox.setValue("");
             urlTextBox.setTitle("");
+        } else {
+            urlTextBox.setValue(uri);
         }
         removeButton.setEnabled(uri != null);
-        ValueChangeEvent.fire(this, uri);
+        if (fireEvent) {
+            ValueChangeEvent.fire(this, uri);
+        }
     }
-    
+
     public FocusWidget getInitialFocusWidget() {
         return urlTextBox;
     }
 
-    private HandlerRegistration addChangeHandler(ChangeHandler handler) {
-        return addDomHandler(handler, ChangeEvent.getType());
-      }
-    
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
         if (!valueChangeHandlerInitialized) {
             valueChangeHandlerInitialized = true;
-            addChangeHandler(new ChangeHandler() {
+            addDomHandler(new ChangeHandler() {
                 public void onChange(ChangeEvent event) {
                     ValueChangeEvent.fire(URLFieldWithFileUpload.this, getValue());
                 }
-            });
+            }, ChangeEvent.getType());
         }
         return addHandler(handler, ValueChangeEvent.getType());
       }
@@ -293,7 +279,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
 
     @Override
     public void setValue(String value) {
-        setURL(value);
+        setUri(value);
     }
 
     @Override

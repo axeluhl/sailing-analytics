@@ -281,7 +281,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
                 resizingTask.add(MediaTagConstants.fromName(tags.get(i)));
             }
         }
-        final ImageDTO image = new ImageDTO(imageURLAndUploadComposite.getURL(), creationDate);
+        final ImageDTO image = new ImageDTO(imageURLAndUploadComposite.getUri(), creationDate);
         image.setTitle(titleTextBox.getValue());
         image.setSubtitle(subtitleTextBox.getValue());
         image.setCopyright(copyrightTextBox.getValue());

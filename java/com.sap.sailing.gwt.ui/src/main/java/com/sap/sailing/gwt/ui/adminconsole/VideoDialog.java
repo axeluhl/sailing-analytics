@@ -101,7 +101,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
 
     @Override
     protected VideoDTO getResult() {
-        VideoDTO result = new VideoDTO(videoURLAndUploadComposite.getURL(), getSelectedMimeType(), creationDate);
+        VideoDTO result = new VideoDTO(videoURLAndUploadComposite.getUri(), getSelectedMimeType(), creationDate);
         result.setTitle(titleTextBox.getValue());
         result.setSubtitle(subtitleTextBox.getValue());
         result.setCopyright(copyrightTextBox.getValue());
@@ -111,7 +111,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
             tags.add(tag);
         }
         result.setTags(tags);
-        result.setThumbnailRef(thumbnailURLAndUploadComposite.getURL());
+        result.setThumbnailRef(thumbnailURLAndUploadComposite.getUri());
         return result;
     }
 

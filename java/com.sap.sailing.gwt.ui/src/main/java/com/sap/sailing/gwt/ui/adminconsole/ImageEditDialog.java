@@ -13,7 +13,7 @@ public class ImageEditDialog extends ImageDialog {
     public ImageEditDialog(ImageDTO imageDTO, SailingServiceAsync sailingService, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<ImageResizingTaskDTO> dialogCallback) {
         super(imageDTO.getCreatedAtDate(), sailingService, stringMessages, storageServiceAvailable, dialogCallback);
         createdAtLabel = new Label(imageDTO.getCreatedAtDate().toString());
-        imageURLAndUploadComposite.setURL(imageDTO.getSourceRef());
+        imageURLAndUploadComposite.setUri(imageDTO.getSourceRef());
         titleTextBox = createTextBox(imageDTO.getTitle());
         titleTextBox.setVisibleLength(40);
         subtitleTextBox = createTextBox(imageDTO.getSubtitle());

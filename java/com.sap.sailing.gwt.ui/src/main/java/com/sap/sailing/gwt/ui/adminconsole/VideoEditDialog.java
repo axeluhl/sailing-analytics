@@ -11,7 +11,7 @@ public class VideoEditDialog extends VideoDialog {
     public VideoEditDialog(VideoDTO video, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<VideoDTO> callback) {
         super(video.getCreatedAtDate(), new VideoParameterValidator(stringMessages), stringMessages, storageServiceAvailable, callback);
         createdAtLabel = new Label(video.getCreatedAtDate().toString());
-        videoURLAndUploadComposite.setURL(video.getSourceRef());
+        videoURLAndUploadComposite.setUri(video.getSourceRef());
         titleTextBox = createTextBox(video.getTitle());
         titleTextBox.setVisibleLength(50);
         subtitleTextBox = createTextBox(video.getSubtitle());
@@ -24,6 +24,6 @@ public class VideoEditDialog extends VideoDialog {
         tagsListEditor.setValue(tags);
         setSelectedMimeType(video.getMimeType());
         setSelectedLocale(video.getLocale());
-        thumbnailURLAndUploadComposite.setURL(video.getThumbnailRef());
+        thumbnailURLAndUploadComposite.setUri(video.getThumbnailRef());
     }
 }
