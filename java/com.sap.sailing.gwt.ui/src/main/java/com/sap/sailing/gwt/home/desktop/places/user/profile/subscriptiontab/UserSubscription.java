@@ -205,7 +205,8 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         cancelColumn.setFieldUpdater(new FieldUpdater<SubscriptionDTO, String>() {
             @Override
             public void update(final int index, final SubscriptionDTO object, final String value) {
-                // FIXME: Implement "Cancel subscription" operation
+                // FIXME: Implement "Cancel subscription" operation abstracted for all Providers
+                presenter.cancelSubscription(object.getPlanId(), "chargebee");
                 Window.alert("[TODO] Cancelling ...");
             }
         });

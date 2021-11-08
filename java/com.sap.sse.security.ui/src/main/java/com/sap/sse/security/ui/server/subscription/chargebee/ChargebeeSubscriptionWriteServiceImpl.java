@@ -10,6 +10,8 @@ import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
 import com.chargebee.models.Invoice;
+import com.chargebee.models.Subscription.SubscriptionItem;
+import com.chargebee.models.Subscription.SubscriptionItem.ItemType;
 import com.chargebee.models.Transaction;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.UserManagementException;
@@ -64,9 +66,15 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             }
             final Timestamp trialStart = content.subscription().trialStart();
             final Timestamp trialEnd = content.subscription().trialEnd();
-            //TODO: Convert to a Product Catalogue 2.0 compatible model.
-            final String itemPriceId = content.subscription().subscriptionItems().get(0).itemPriceId();
-            final SubscriptionPlan plan = getSubscriptionPlanForPrice(itemPriceId);
+            //TODO: bug5510 this ignores potential Addons or Charges contained in the Subscription
+            SubscriptionPlan plan = null;
+            for(SubscriptionItem item : content.subscription().subscriptionItems()) {
+                if(item.itemType().equals(ItemType.PLAN)) {
+                    final String itemPriceId = item.itemPriceId();
+                    plan = getSubscriptionPlanForPrice(itemPriceId);
+                    break;
+                }
+            }
             final Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
                     plan.getId(), customerId,
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),

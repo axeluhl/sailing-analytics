@@ -3,7 +3,10 @@ package com.sap.sse.security.subscription.chargebee;
 import java.sql.Timestamp;
 
 import com.chargebee.models.Invoice;
+import com.chargebee.models.ItemPrice;
 import com.chargebee.models.Subscription;
+import com.chargebee.models.Subscription.SubscriptionItem;
+import com.chargebee.models.Subscription.SubscriptionItem.ItemType;
 import com.chargebee.models.Transaction;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
@@ -41,12 +44,30 @@ public class ChargebeeApiSubscriptionData {
                 invoiceStatus);
         final Timestamp trialStart = subscription.trialStart();
         final Timestamp trialEnd = subscription.trialEnd();
-        return new ChargebeeSubscription(subscription.id(), subscription.planId(), subscription.customerId(),
+         String planId = getPlanId();
+        return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
                 trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime() : TimePoint.of(trialStart),
                 trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime() : TimePoint.of(trialEnd), subscriptionStatus,
                 paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus,
                 TimePoint.of(subscription.createdAt()), TimePoint.of(subscription.updatedAt()), TimePoint.now(),
                 TimePoint.now());
+    }
+    
+    // TODO bug5510 Integrate this into the API Request / APIService Structure to ensure the API limits are kept
+    private String getPlanId() {
+        for(SubscriptionItem item : subscription.subscriptionItems()) {
+            if(item.itemType().equals(ItemType.PLAN)) {
+                final String itemPriceId = item.itemPriceId();
+                try {
+                    final ItemPrice itemPrice = ItemPrice.retrieve(itemPriceId).request().itemPrice();
+                    return itemPrice.itemId();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        }
+        return null;
     }
 
     private String stringToLowerCase(String str) {

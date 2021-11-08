@@ -110,7 +110,7 @@ public class ChargebeeSubscriptionServiceImpl extends
                 String locale = user.getLocaleOrDefault().getLanguage();
                 Result result = HostedPage.checkoutNewForItems()
                         .subscriptionItemItemPriceId(0, priceId)
-                        .subscriptionItemQuantity(0,2)
+                        .subscriptionItemQuantity(0,1)
                         .customerId(user.getName()).customerEmail(user.getEmail())
                         .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
                         .customerLocale(locale).billingAddressFirstName(usernames.getA())

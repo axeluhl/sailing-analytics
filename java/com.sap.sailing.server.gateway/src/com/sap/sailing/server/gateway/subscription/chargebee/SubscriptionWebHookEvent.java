@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.subscription.chargebee;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.common.TimePoint;
@@ -94,9 +95,21 @@ public class SubscriptionWebHookEvent {
     }
 
     public String getPlanId() {
-        return getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_PLAN_ID);
+        final String planId = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_PLAN_ID);
+        if(planId == null) {
+            final JSONArray subscriptionItems = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, "subscription_items");
+            if(subscriptionItems != null) {
+                for (int i = 0; i < subscriptionItems.size(); i++) {
+                    final String itemType = getJsonValue((JSONObject) subscriptionItems.get(i), "item_type");
+                    if("plan".equals(itemType)) {
+                        return getJsonValue((JSONObject) subscriptionItems.get(i), "item_id");
+                    }
+                }
+            }
+        }
+        return planId;
     }
-
+ 
     public String getSubscriptionId() {
         String subscriptionId = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_ID);
         if (StringUtils.isEmpty(subscriptionId)) {
@@ -110,11 +123,13 @@ public class SubscriptionWebHookEvent {
     }
 
     public TimePoint getSubscriptionTrialStart() {
-        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_TRIAL_START));
+        final Long jsonValue = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_TRIAL_START);
+        return jsonValue != null ? getTime(jsonValue) : null;
     }
 
     public TimePoint getSubscriptionTrialEnd() {
-        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_TRIAL_END));
+        final Long jsonValue = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_TRIAL_END);
+        return jsonValue != null ? getTime(jsonValue) : null;
     }
 
     public TimePoint getSubscriptionCreatedAt() {

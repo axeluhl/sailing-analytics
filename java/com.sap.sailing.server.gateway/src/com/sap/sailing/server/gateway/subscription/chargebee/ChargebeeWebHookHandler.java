@@ -33,6 +33,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         SubscriptionWebHookEvent event = null;
         try {
             event = (SubscriptionWebHookEvent) request.getAttribute("event");
+            logger.log(Level.INFO, "Handling Webhook Event of type:" + event.getEventType());
             final User user = getUser(event.getCustomerId());
             if (user != null && !isOutdatedEvent(event, user)) {
                 processEvent(event, user);
@@ -55,10 +56,10 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
      */
     private boolean isOutdatedEvent(SubscriptionWebHookEvent event, User user) {
         final TimePoint occuredAt = event.getEventOccurredAt();
-        final String planId = event.getPlanId();
+        final String subscriptionId = event.getSubscriptionId();
         boolean isOutdated = false;
-        if (StringUtils.isNotEmpty(planId)) {
-            Subscription subscription = user.getSubscriptionByPlan(planId);
+        if (StringUtils.isNotEmpty(subscriptionId)) {
+            Subscription subscription = user.getSubscriptionById(subscriptionId);
             if (subscription != null) {
                 isOutdated = isOutdatedEventTime(occuredAt, subscription);
             } else {
