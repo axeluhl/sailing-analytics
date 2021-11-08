@@ -10,6 +10,9 @@
         .premium-permitted .premium-container .premium-check-box input:disabled + label {
             cursor: default;
         }
+        .premium-container .premium-check-box input:disabled {
+	        pointer-events: none;
+	    }
         .premium-permitted .premium-container .premium-check-box input {
             box-shadow: -3px 0 #ffffff, -6px 0 #d2af25;
         }
