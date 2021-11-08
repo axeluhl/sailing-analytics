@@ -9,7 +9,6 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
-import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
