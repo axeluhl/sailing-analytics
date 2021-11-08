@@ -3207,7 +3207,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
             return newBounds;
         }
-        
     }
     
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
