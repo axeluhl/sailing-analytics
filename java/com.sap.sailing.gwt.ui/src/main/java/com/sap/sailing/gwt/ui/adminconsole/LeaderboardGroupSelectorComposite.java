@@ -17,6 +17,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -35,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -96,7 +98,6 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
         selectedEventLeaderboardGroupsTable.setSelectionModel(selectedEventLeaderboardGroupsSelectionModel);
         selectedEventLeaderboardGroupsProvider = new ListDataProvider<>();
         selectedEventLeaderboardGroupsProvider.addDataDisplay(selectedEventLeaderboardGroupsTable);
-
         TextColumn<LeaderboardGroupDTO> leaderboardGroupNameColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO event) {
@@ -115,7 +116,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
                     } else {
                         builder.appendHtmlConstant("<br>");
                     }
-                    builder.appendEscaped(leaderboard.name);
+                    builder.appendEscaped(leaderboard.getName());
                 }
                 return builder.toSafeHtml();
             }
@@ -141,19 +142,23 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
         availableLeaderboardGroupsProvider = new ListDataProvider<>();
         availableLeaderboardGroupsProvider.setList(availableLeaderboardGroups);
         availableLeaderboardGroupsProvider.addDataDisplay(availableLeaderboardGroupsTable);
-        availableLeaderboardGroupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(new Label(
-                stringMessages.filterLeaderboardGroupsByName()), Collections.<LeaderboardGroupDTO> emptyList(),
-                availableLeaderboardGroupsTable, availableLeaderboardGroupsProvider) {
+        availableLeaderboardGroupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(
+                new Label(stringMessages.filterLeaderboardGroupsByName()),
+                Collections.<LeaderboardGroupDTO> emptyList(), availableLeaderboardGroupsProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> result = new ArrayList<>();
                 result.add(t.getName());
                 return result;
             }
+
+            @Override
+            public AbstractCellTable<LeaderboardGroupDTO> getCellTable() {
+                return availableLeaderboardGroupsTable;
+            }
         };
         availableLeaderboardGroupsSelectionModel = new RefreshableMultiSelectionModel<>(
                 new EntityIdentityComparator<LeaderboardGroupDTO>() {
-
                     @Override
                     public boolean representSameEntity(LeaderboardGroupDTO dto1, LeaderboardGroupDTO dto2) {
                         return dto1.getName().equals(dto2.getName());
@@ -175,7 +180,6 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
         vp.add(availableLeaderboardGroupsFilterablePanel);
         vp.add(availableLeaderboardGroupsTable);
         result.add(vp);
-        
         TextColumn<LeaderboardGroupDTO> leaderboardGroupNameColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO event) {
@@ -194,7 +198,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
                     } else {
                         builder.appendHtmlConstant("<br>");
                     }
-                    builder.appendEscaped(leaderboard.name);
+                    builder.appendEscaped(leaderboard.getName());
                 }
                 return builder.toSafeHtml();
             }

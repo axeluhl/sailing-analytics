@@ -20,7 +20,7 @@ import com.sap.sailing.selenium.pages.leaderboard.PairinfListCreationDialogPO;
 import com.sap.sailing.selenium.pages.leaderboard.PairingListCreationSetupDialogPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class PairinglistTest extends AbstractSeleniumTest {
     private static final String EVENT = "TestEvent";
@@ -71,6 +71,7 @@ public class PairinglistTest extends AbstractSeleniumTest {
             editSeriesMedals.pressOk();
             LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsolePage
                     .goToLeaderboardConfiguration();
+            leaderboardConfigurationPanelPO.refreshLeaderboard();
             LeaderboardEntryPO leaderboardEntryPO = leaderboardConfigurationPanelPO.getLeaderboardTable()
                     .getEntry(REGATTA_49ER_WITH_SUFFIX);
             PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();
@@ -93,6 +94,7 @@ public class PairinglistTest extends AbstractSeleniumTest {
             AdminConsolePage adminConsolePage = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsolePage
                     .goToLeaderboardConfiguration();
+            leaderboardConfigurationPanelPO.refreshLeaderboard();
             LeaderboardEntryPO leaderboardEntryPO = leaderboardConfigurationPanelPO.getLeaderboardTable()
                     .getEntry(REGATTA_49ER_WITH_SUFFIX);
             PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();

@@ -35,4 +35,8 @@ public class LatestNewsActivity extends AbstractEventActivity<LatestNewsPlace> i
         return view;
     }
 
+    @Override
+    protected boolean isRegattaLevel() {
+        return !isMultiRegattaEvent();
+    }
 }

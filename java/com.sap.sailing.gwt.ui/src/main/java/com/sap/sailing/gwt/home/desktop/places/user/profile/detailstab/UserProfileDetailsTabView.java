@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.detailstab;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
@@ -23,11 +22,6 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     @Override
     public Class<UserProfileDetailsPlace> getPlaceClassForActivation() {
         return UserProfileDetailsPlace.class;
-    }
-
-    @Override
-    public TabView.State getState() {
-        return TabView.State.VISIBLE;
     }
 
     @Override

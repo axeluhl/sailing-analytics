@@ -107,8 +107,8 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
 
     @Override
-    public Distance getManeuverLoss() {
-        return getManeuver().getManeuverLoss();
+    public Distance getManeuverLossDistanceLost() {
+        return getManeuver().getManeuverLoss() == null ? null : getManeuver().getManeuverLoss().getProjectedDistanceLost();
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ManeuverWithContext implements HasManeuverContext {
 
     private Double getTWAAtTimepoint(TimePoint timepoint) {
         Wind wind = getTrackedLegOfCompetitorContext().getTrackedRace().getWind(maneuver.getPosition(), timepoint);
-        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
+        final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
         if (wind != null) {
             competitorTrack.lockForRead();
             try {
@@ -147,7 +147,7 @@ public class ManeuverWithContext implements HasManeuverContext {
     
     public Pair<Double, Double> getWindSpeedVsManeuverLoss(){
         Wind wind = getTrackedLegOfCompetitorContext().getTrackedRace().getWind(maneuver.getPosition(), getTimePointBeforeForAnalysis());
-        return new Pair<>(wind.getKnots(), getManeuverLoss().getMeters());
+        return new Pair<>(wind.getKnots(), getManeuverLossDistanceLost().getMeters());
     }
 
     @Override

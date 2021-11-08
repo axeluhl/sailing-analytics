@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="scan_qr">"Scan QR-kode"</string>
+    <string name="scan_hint">"QR-koden kan findes på din bekræftelse på deltagelse"</string>
+    <string name="no_qr_code">"Har du ikke en QR-kode?"</string>
+    <string name="start_tracking">"Start sporing"</string>
+    <string name="stop_tracking">"Stop sporing"</string>
+    <string name="tracking_gps_accuracy">"Nøjagtighed af GPS"</string>
+    <string name="tracking_mode">"Tilstand"</string>
+    <string name="tracking_mode_live">"Live"</string>
+    <string name="tracking_mode_battery_saving">"Strømbesparelse"</string>
+    <string name="tracking_unsent_fixes">"Ikkesendte meddelelser"</string>
+    <string name="tracking_mode_caching">"Offline"</string>
+    <string name="tracking_mode_api_error">"API-fejl"</string>
+    <string name="tracking_mode_no_attempt">"Initialiser"</string>
+    <string name="tracking_time">"Sporingstidspunkt"</string>
+    
+    <string name="tracking_status_tracking">"Sporing"</string>
+    <string name="tracking_status_no_gps_signal">"Ingen GPS-ændringer eller signal"</string>
+    <string name="desc_regatta_user_image">"Regatta-brugerbillede"</string>
+    <string name="desc_add_photo_button">"Tilføj fotoknap"</string>
+    <string name="tracking_status_gps_found">"GPS-signal fundet!"</string>
+</resources>

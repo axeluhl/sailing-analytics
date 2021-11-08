@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -32,12 +31,14 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -79,19 +80,19 @@ public class RemoveLeaderboardTest {
         for (final String leaderboardName : allLeaderboards.keySet()) {
             server.apply(new RemoveLeaderboard(leaderboardName));
         }
-        Map<String, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
-        for (final String leaderboardGroupName : allLeaderboardGroups.keySet()) {
-            server.apply(new RemoveLeaderboardGroup(leaderboardGroupName));
+        Map<UUID, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
+        for (final LeaderboardGroup leaderboardGroup : allLeaderboardGroups.values()) {
+            server.apply(new RemoveLeaderboardGroup(leaderboardGroup.getId()));
         }
         leaderboard = server.apply(
                 new CreateFlexibleLeaderboard(LEADERBOARD_NAME, /* display name */ null, new int[0], new LowPoint(), /* default course area ID */ null));
         leaderboard.addRaceColumn(R1, /* medalRace */ false);
-        
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /* canBoatsOfCompetitorsChangePerRace*/ true,
+                RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /* canBoatsOfCompetitorsChangePerRace*/ true,  CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */
-                null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null);
+                null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         TrackedRegatta trackedRegatta1 = server.getOrCreateTrackedRegatta(regatta);
         defaultFleet = new FleetImpl("Default");
         regatta.addSeries(new SeriesImpl(SERIES_NAME, /* is medal */ false, /* can fleets run in parallel */ true,
@@ -101,9 +102,9 @@ public class RemoveLeaderboardTest {
         regatta.addRace(raceDef1);
         trackedRace = trackedRegatta1.createTrackedRace(raceDef1, Collections.<Sideline> emptyList(),
                 /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
-                /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class),
-                Optional.empty());
+                /* millisecondsOverWhichToAverageWind */ 0l, /* millisecondsOverWhichToAverageSpeed */ 0l,
+                /* raceDefinitionSetToUpdate */ null, /* useMarkPassingCalculator */ false,
+                mock(RaceLogAndTrackedRaceResolver.class), Optional.empty(), /* trackingConnectorInfo */ null);
     }
     
     @Test

@@ -7,26 +7,28 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
-import com.sap.sailing.resultimport.ResultUrlProvider;
+import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
-public abstract class AbstractManage2SailResultDocumentProvider {
+public abstract class AbstractManage2SailResultDocumentProvider implements ResultDocumentProvider {
     private final ResultUrlProvider resultUrlProvider;
 
     public AbstractManage2SailResultDocumentProvider(final ResultUrlProvider resultUrlProvider) {
         this.resultUrlProvider = resultUrlProvider;
     }
 
+    @Override
     public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
         Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
-        for (URL url : resultUrlProvider.getUrls()) {
+        for (URL url : resultUrlProvider.getReadableUrls()) {
             URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
             EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
             addResultsForEvent(result, eventResult);

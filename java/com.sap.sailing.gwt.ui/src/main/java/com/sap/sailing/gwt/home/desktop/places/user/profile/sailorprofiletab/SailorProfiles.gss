@@ -1,0 +1,102 @@
+.showAndEditHeader {
+    font-size: 1.866666666666667em;
+    font-weight: bold;
+    color: #333;
+    margin-left: 1em;
+    margin-top: 0.7143em;
+}
+
+.eventsTable {
+    width: 100%;
+    border-radius: 0px;
+    border: none;
+}
+
+.eventsTable .eventsTableEmpty {
+    margin: 1.033333333333333em;
+    font-style: italic;
+    line-height: 2em;
+}
+
+.eventsTable td {
+    vertical-align: middle;
+    padding-top: 0.73333335em;
+}
+
+.eventsTableTitle {
+    background-color: #008FCC;
+    vertical-align: middle;
+    padding-top: 1.333em;
+    padding-bottom: 1.3333em;
+    padding-left: 1.333em;
+    color: white;
+    font-weight: bold;
+}
+
+.eventsTablePanel {
+    border: 1px solid #dedede;
+    border-radius: .333333333333333em;
+    overflow: hidden;
+}
+
+.marginLastTable:last-child {
+    margin-bottom: 1.333333333333333em;
+}
+
+.overviewTable {
+    width: 100%;
+}
+
+.overviewTable .overviewTableEmpty {
+    margin: 1.033333333333333em;
+    font-style: italic;
+    line-height: 2em;
+}
+
+.overviewTable td {
+    vertical-align: middle;
+    padding-top: 0.73333335em;
+}
+
+.overviewTableFooter {
+    padding-top: 1.333em;
+}
+
+.clickableColumn {
+    cursor: pointer;
+}
+
+.statisticsTableHeaderIcon {
+    width: 2em;
+    height: auto;
+    margin-right: 1em;
+    vertical-align: middle;
+}
+
+.statisticsTableHeader {
+    padding-left: 1em;
+    padding-bottom: 1em;
+    padding-top: 1em;
+}
+
+.statisticsTableHeaderRight {
+    display: inline-block;
+    right: 1em;
+    position: absolute;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+    -o-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    transform: rotate(270deg);
+}
+
+.addButton {
+    text-transform: uppercase;
+}
+
+.boatClassColumn {
+    min-width: 120px;
+}

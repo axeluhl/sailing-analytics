@@ -11,8 +11,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
+
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesDataSource;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesExportParameters;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
@@ -81,8 +84,12 @@ public class TrackFilesExportPostServlet extends SailingServerHttpServlet {
         resp.setHeader("Content-Disposition", "attachment; filename=\"tracked-races.zip\"");
         resp.setContentType("application/zip");
 
-        ZipOutputStream out = new ZipOutputStream(resp.getOutputStream());
         List<TrackedRace> trackedRaces = getTrackedRaces(regattaRaces);
+        for (TrackedRace trackedRace : trackedRaces) {
+            SecurityUtils.getSubject()
+                    .checkPermission(trackedRace.getIdentifier().getStringPermission(TrackedRaceActions.EXPORT));
+        }
+        ZipOutputStream out = new ZipOutputStream(resp.getOutputStream());
         boolean beforeAfter = beforeAfterString == null ? false : true;
         boolean rawFixes = rawFixesString == null ? false : true;
         TrackFilesFormat format = TrackFilesFormat.valueOf(formatString);

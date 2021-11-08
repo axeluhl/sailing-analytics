@@ -20,12 +20,12 @@ public class SailorInfo extends Composite {
         FlowPanel panel = new FlowPanel();
         Style panelStyle = panel.getElement().getStyle();
         panelStyle.setDisplay(Display.INLINE_BLOCK);
+        panelStyle.setVerticalAlign(VerticalAlign.BOTTOM);
         
         Label sailorInfoLabel = new Label();
         sailorInfoLabel.getElement().setInnerHTML(i18n.sailorInfoLongText().replace("\n", "<br />"));
         Style labelStyle = sailorInfoLabel.getElement().getStyle();
         labelStyle.setDisplay(Display.INLINE_BLOCK);
-        sailorInfoLabel.getElement().getStyle().setMarginTop(0.5, Unit.EM);
         sailorInfoLabel.getElement().getStyle().setMarginRight(0.5, Unit.EM);
         panel.add(sailorInfoLabel);
         

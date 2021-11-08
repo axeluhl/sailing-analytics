@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
@@ -61,7 +62,8 @@ public class NumberPairResultsPresenter extends AbstractSailingResultsPresenter<
                 .setBorderColor(new Color("#F0AB00"))
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(getDataMiningStringMessages().dataMiningResult()));
+                .setChartTitle(new ChartTitle().setText(""))
+                .setChartSubtitle(new ChartSubtitle().setText(""));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("");
@@ -84,22 +86,21 @@ public class NumberPairResultsPresenter extends AbstractSailingResultsPresenter<
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> res) {
+        chart.removeAllSeries(false);
+        seriesMappedByGroupKey.clear();
+        
         result = res;
         createAndAddSeriesToChart();
-        
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
             @SuppressWarnings("unchecked")
             PairWithStats<Number> value = (PairWithStats<Number>) resultEntry.getValue();
-            
-            if(value.getIndividualPairs() != null) {
-                for(Pair<Number, Number> pair : value.getIndividualPairs()) { 
+            if (value.getIndividualPairs() != null) {
+                for (Pair<Number, Number> pair : value.getIndividualPairs()) {
                     createAndAddPoint(resultEntry.getKey(), pair.getA(), pair.getB());
                 }
-            }
-            else {
+            } else {
                 createAndAddPoint(resultEntry.getKey(), value.getAverage().getA(), value.getAverage().getB());
             }
-
         }
         chart.getXAxis().setAxisTitleText(result.getResultSignifier());
     }

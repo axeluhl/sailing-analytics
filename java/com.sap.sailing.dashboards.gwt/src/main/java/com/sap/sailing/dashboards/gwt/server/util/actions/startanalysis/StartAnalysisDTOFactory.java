@@ -193,6 +193,8 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
         StartAnalysisCompetitorDTO startAnalysisCompetitorDTOsForRace = new StartAnalysisCompetitorDTO();
         startAnalysisCompetitorDTOsForRace.competitorDTO = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorAndBoatStore()
                 .convertToCompetitorDTO(competitor);
+        startAnalysisCompetitorDTOsForRace.boatDTO = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorAndBoatStore()
+                .convertToBoatDTO(trackedRace.getBoatOfCompetitor(competitor));
         startAnalysisCompetitorDTOsForRace.rankingTableEntryDTO = createRankTableEntry(trackedRace, rank, competitor);
         return startAnalysisCompetitorDTOsForRace;
     }

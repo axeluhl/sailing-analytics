@@ -3,9 +3,12 @@ package com.sap.sailing.selenium.pages.adminconsole.leaderboard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -94,6 +97,9 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesFilterTextBox")
     private WebElement trackedRacesFilterTextBox;
     
+    @FindBy(how = BySeleniumId.class, using = "RefreshButton")
+    private WebElement refreshButton;
+
     public LeaderboardDetailsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -166,13 +172,37 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     }
     
     public void linkRace(RaceDescriptor race, TrackedRaceDescriptor tracking) {
-        DataEntryPO raceRow = findRace(race);
-        DataEntryPO trackingRow = findTracking(tracking);
-        if(raceRow == null || trackingRow == null) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        DataEntryPO raceRow = webDriverWait.until(new Function<WebDriver, DataEntryPO>() {
+            @Override
+            public DataEntryPO apply(WebDriver t) {
+                return findRace(race);
+            }
+        });
+        DataEntryPO trackingRow;
+
+        try {
+            trackingRow = findTrackingRow(tracking, webDriverWait);
+        } catch (TimeoutException e) {
+            // click the refresh button to refresh the tracking grid
+            refreshButton.click();
+            trackingRow = findTrackingRow(tracking, webDriverWait);
         }
+
         raceRow.select();
         trackingRow.select();
-        waitForAjaxRequests(); // the selection will update elements of the cell table; wait until the callback has been received
+        waitForAjaxRequests(); // the selection will update elements of the cell table; wait until the callback has been
+                               // received
+    }
+
+    private DataEntryPO findTrackingRow(TrackedRaceDescriptor tracking, WebDriverWait webDriverWait)
+            throws TimeoutException {
+        return webDriverWait.until(new Function<WebDriver, DataEntryPO>() {
+            @Override
+            public DataEntryPO apply(WebDriver t) {
+                return findTracking(tracking);
+            }
+        });
     }
     
     private DataEntryPO findRace(RaceDescriptor race) {

@@ -84,24 +84,12 @@ public interface HasCompleteManeuverCurveWithEstimationDataContext {
     @Statistic(messageKey = "AbsoluteDirectionChange", resultDecimals = 2)
     Double getAbsoluteDirectionChangeInDegrees();
 
-    @Statistic(messageKey = "RatioBetweenDistanceSailedWithAndWithoutManeuver", resultDecimals = 4)
-    double getRatioBetweenDistanceSailedWithAndWithoutManeuver();
-
-    @Statistic(messageKey = "DurationLostByManeuver", resultDecimals = 4)
-    double getDurationLostByManeuver();
-
-    @Statistic(messageKey = "DurationLostByManeuverTowardMiddleAngleProjection", resultDecimals = 4)
-    double getDurationLostByManeuverTowardMiddleAngleProjection();
-
-    @Statistic(messageKey = "RatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver", resultDecimals = 4)
-    double getRatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver();
-
     @Statistic(messageKey = "RelativeBearingToNextMarkBeforeManeuver", resultDecimals = 1)
     Double getRelativeBearingToNextMarkBeforeManeuver();
 
     @Statistic(messageKey = "RelativeBearingToNextMarkAfterManeuver", resultDecimals = 1)
     Double getRelativeBearingToNextMarkAfterManeuver();
-    
+
     @Statistic(messageKey = "AbsRelativeBearingToNextMarkBeforeManeuver", resultDecimals = 1)
     Double getAbsRelativeBearingToNextMarkBeforeManeuver();
 

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class MarkPassingTimesDTO extends NamedDTO {
     private static final long serialVersionUID = 6582422144259670004L;
@@ -15,11 +15,11 @@ public class MarkPassingTimesDTO extends NamedDTO {
 
     public Date lastPassingDate;
 
-    public MarkPassingTimesDTO() {
-    }
+    @Deprecated
+    MarkPassingTimesDTO() {} // for GWT RPC serialization only
 
     public MarkPassingTimesDTO(String name) {
-        this.setName(name);
+        super(name);
     }
 
     @Override

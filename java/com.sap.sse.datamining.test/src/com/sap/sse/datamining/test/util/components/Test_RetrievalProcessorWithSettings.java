@@ -13,8 +13,8 @@ public class Test_RetrievalProcessorWithSettings extends AbstractRetrievalProces
     private Test_RetrievalProcessorSettings settings;
 
     public Test_RetrievalProcessorWithSettings(ExecutorService executor, Collection<Processor<Test_HasLegOfCompetitorContext, ?>> resultReceivers,
-            Test_RetrievalProcessorSettings settings, int retrievalLevel) {
-        super(Test_HasLegOfCompetitorContext.class, Test_HasLegOfCompetitorContext.class, executor, resultReceivers, retrievalLevel);
+            Test_RetrievalProcessorSettings settings, int retrievalLevel, String retrievedDataTypeMessageKey) {
+        super(Test_HasLegOfCompetitorContext.class, Test_HasLegOfCompetitorContext.class, executor, resultReceivers, retrievalLevel, retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 

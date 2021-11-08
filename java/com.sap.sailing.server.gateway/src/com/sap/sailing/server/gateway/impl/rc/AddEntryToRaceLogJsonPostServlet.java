@@ -2,13 +2,13 @@ package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,21 +23,21 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
-import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
@@ -71,7 +71,6 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
                     String.format("Missing parameter '%s'.", RaceLogServletConstants.PARAMS_LEADERBOARD_NAME));
             return;
         }
-        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Permission.Mode.UPDATE, leaderboardName));
 
         String raceColumnName = request.getParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
         if (raceColumnName == null) {
@@ -95,6 +94,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard "+StringEscapeUtils.escapeHtml(leaderboardName)+" not found.");
             return;
         }
+        SecurityUtils.getSubject()
+                .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.UPDATE));
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {
@@ -156,18 +157,18 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
             Iterable<RaceLogEvent> eventsToSendBackToClient) throws IOException {
         JsonSerializer<RaceLogEvent> serializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer(),
                 new DeviceIdentifierJsonSerializer(deviceJsonServiceFinder));
-        ServletOutputStream outputStream = response.getOutputStream();
+        final Writer writer = response.getWriter();
         boolean first = true;
-        outputStream.write('[');
+        writer.write('[');
         for (RaceLogEvent eventToSendBackToClient : eventsToSendBackToClient) {
             if (first) {
                 first = false;
             } else {
-                outputStream.write(',');
+                writer.write(',');
             }
-            outputStream.write(serializer.serialize(eventToSendBackToClient).toJSONString().getBytes());
+            serializer.serialize(eventToSendBackToClient).writeJSONString(writer);
         }
-        outputStream.write(']');
+        writer.write(']');
     }
 
 }

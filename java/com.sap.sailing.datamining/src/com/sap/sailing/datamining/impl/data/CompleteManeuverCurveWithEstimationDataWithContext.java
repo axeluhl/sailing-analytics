@@ -7,7 +7,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
-import com.sap.sailing.domain.maneuverdetection.HasDetailedManeuverLoss;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
@@ -209,30 +208,6 @@ public class CompleteManeuverCurveWithEstimationDataWithContext
     @Override
     public Double getAbsoluteDirectionChangeInDegrees() {
         return Math.abs(getManeuverCurveBoundariesForAnalysis().getDirectionChangeInDegrees());
-    }
-
-    @Override
-    public double getRatioBetweenDistanceSailedWithAndWithoutManeuver() {
-        return ((HasDetailedManeuverLoss) getManeuverCurveBoundariesForAnalysis())
-                .getRatioBetweenDistanceSailedWithAndWithoutManeuver();
-    }
-
-    @Override
-    public double getDurationLostByManeuver() {
-        return ((HasDetailedManeuverLoss) getManeuverCurveBoundariesForAnalysis()).getDurationLostByManeuver()
-                .asSeconds();
-    }
-
-    @Override
-    public double getDurationLostByManeuverTowardMiddleAngleProjection() {
-        return ((HasDetailedManeuverLoss) getManeuverCurveBoundariesForAnalysis())
-                .getDurationLostByManeuverTowardMiddleAngleProjection().asSeconds();
-    }
-
-    @Override
-    public double getRatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver() {
-        return ((HasDetailedManeuverLoss) getManeuverCurveBoundariesForAnalysis())
-                .getRatioBetweenDistanceSailedTowardMiddleAngleProjectionWithAndWithoutManeuver();
     }
 
     @Override

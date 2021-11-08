@@ -10,6 +10,10 @@ public class RankingMetricTypeFormatter {
             return stringMessages.oneDesignRankingMetric();
         case ORC_PERFORMANCE_CURVE:
             return stringMessages.orcPerformanceCurveRankingMetric();
+        case ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND:
+            return stringMessages.orcPerformanceCurveByImpliedWindRankingMetric();
+        case ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE:
+            return stringMessages.orcPerformanceCurveLeaderForBaselineRankingMetric();
         case TIME_ON_TIME_AND_DISTANCE:
             return stringMessages.timeOnTimeAndDistanceRankingMetric();
         }
@@ -22,6 +26,10 @@ public class RankingMetricTypeFormatter {
             return stringMessages.oneDesignRankingMetricDescription();
         case ORC_PERFORMANCE_CURVE:
             return stringMessages.orcPerformanceCurveRankingMetricDescription();
+        case ORC_PERFORMANCE_CURVE_BY_IMPLIED_WIND:
+            return stringMessages.orcPerformanceCurveByImpliedWindRankingMetricDescription();
+        case ORC_PERFORMANCE_CURVE_LEADER_FOR_BASELINE:
+            return stringMessages.orcPerformanceCurveLeaderForBaselineRankingMetricDescription();
         case TIME_ON_TIME_AND_DISTANCE:
             return stringMessages.timeOnTimeAndDistanceRankingMetricDescription();
         }

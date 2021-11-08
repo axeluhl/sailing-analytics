@@ -7,7 +7,7 @@ import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 /**
  * Defines the text strings for i18n that are used by the Datamining GWT bundle. 
  * 
- * @author Maximilian Groß (D064866)
+ * @author Maximilian Groï¿½ (D064866)
  */
 @DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
@@ -24,7 +24,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String useClassGetName();
     String useStringLiteralsTooltip();
     String queryDefinitionViewer();
-    String runAsSubstantive();
+    String run();
     String queryNotValidBecause();
     String queryRunner();
     String runAQuery();
@@ -46,6 +46,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String noDimensionToGroupBySelectedError();
     String noDataRetrieverChainDefinitonSelectedError();
     String noStatisticSelectedError();
+    String noAggregatorSelectedError();
     String calculateThe();
     String statisticProvider();
     String groupingProvider();    
@@ -58,4 +59,39 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String tabbedResultsPresenter();
     String useStringLiterals();
     String numberPairResultsPresenter();
+    String copiedToClipboard();
+    String csvExport();
+    String search();
+    String csvCopiedToClipboard();
+    String filter();
+    String filterShownDimensions();
+    String selectDimensionsToFilterBy();
+    String clear();
+    String changesWillBeLost();
+    String confirmQueryDefinitionChangeLoss();
+    String discardChanges();
+    String keepChanges();
+    String anErrorOccurredWhileApplyingTheQuery();
+    String queryBasedOnRetrieverChainCanNotBeApplied(String retrieverChainName);
+    String statisticNotAvailable(String statisticName);
+    String aggregatorNotAvailable(String aggregatorName);
+    String filterDimensionsAreNotAvailable(String listedDimensions);
+    String filterValuesOfDimensionAreNotAvailable(String dimensionName, String listedValues);
+    String groupingDimensionsAreNotAvailable(String listedDimensions);
+    String rememberDecisionCanBeChangedInSettings();
+    String changeLossStrategy();
+    String changeLossStrageyTooltip();
+    String askChangeLossStrategyName();
+    String askChangeLossStrategyTooltip();
+    String discardChangesChangeLossStrategyName();
+    String discardChangesChangeLossStrategyTooltip();
+    String keepChangesChangeLossStrategyName();
+    String keepChangesChangeLossStrategyTooltip();
+    String applyingQuery();
+    String searchAvailableStatistics();
+    String reloadComponents();
+    String any();
+    String and();
+    String followingStatisticsAreNotSupportedByAggregatorWarning();
+    
 }

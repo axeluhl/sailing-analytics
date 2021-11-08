@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.common.client.DateUtil;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -80,9 +80,9 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
         List<SafeUri> bigScreenImages = new ArrayList<>();
         for (ImageDTO imageDTO : getSlideCtx().getEvent().getImages()) {
             final List<String> tags = imageDTO.getTags();
-            if (tags.contains(MediaTagConstants.BIGSCREEN)) {
+            if (tags.contains(MediaTagConstants.BIGSCREEN.getName())) {
                 bigScreenImages.add(UriUtils.fromString(imageDTO.getSourceRef()));
-            } else if (tags.contains(MediaTagConstants.TEASER) || tags.contains(MediaTagConstants.HIGHLIGHT)) {
+            } else if (tags.contains(MediaTagConstants.TEASER.getName()) || tags.contains(MediaTagConstants.HIGHLIGHT.getName())) {
                 teaserHighlight.add(UriUtils.fromString(imageDTO.getSourceRef()));
             }
         }

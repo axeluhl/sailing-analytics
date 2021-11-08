@@ -1,11 +1,14 @@
 package com.sap.sailing.geocoding.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.json.simple.parser.ParseException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,8 +19,6 @@ import com.sap.sailing.domain.common.impl.PlacemarkImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.geocoding.impl.ReverseGeocoderImpl;
 
-import junit.framework.Assert;
-
 public class ReverseGeocoderTest {
     private ReverseGeocoder geocoder;
     private static final Placemark KIEL = new PlacemarkImpl("Kiel", "DE", new DegreePosition(54.32132926107913, 10.1348876953125), 232758);
@@ -26,6 +27,14 @@ public class ReverseGeocoderTest {
     @Before
     public void setUp() {
         geocoder = new ReverseGeocoderImpl(); // ensure we don't see any caching effects across test case executions
+    }
+    
+    @Test
+    public void getByNameTest() throws IOException, ParseException {
+        final Placemark kiel = geocoder.getPlacemark("Kiel", new Placemark.ByPopulation().reversed());
+        assertNotNull(kiel);
+        assertTrue(kiel.getPopulation() > 200000);
+        assertEquals("DE", kiel.getCountryCode());
     }
     
     @Test

@@ -8,10 +8,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 
 public class SeriesEventsPlace extends AbstractSeriesTabPlace implements HasMobileVersion {
-    public SeriesEventsPlace(String id) {
-        super(id);
-    }
-
     public SeriesEventsPlace(SeriesContext context) {
         super(context);
     }

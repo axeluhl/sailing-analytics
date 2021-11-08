@@ -1,14 +1,9 @@
 package com.sap.sailing.domain.test.markpassing;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 
 import org.junit.Test;
-
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class KW470MarkPassingTest extends AbstractMarkPassingTest {
 
@@ -17,20 +12,17 @@ public class KW470MarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace4() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace4() throws Exception {
         testRace("4");
     }
 
     @Test
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace5() throws Exception {
         testRace("5");
     }
 
     @Test
-    public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException,
-            SubscriberInitializationException, CreateModelException {
+    public void testRace6() throws Exception {
         testRace("6");
     }
 

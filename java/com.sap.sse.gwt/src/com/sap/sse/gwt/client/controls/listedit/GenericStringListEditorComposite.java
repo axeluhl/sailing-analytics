@@ -3,8 +3,12 @@ package com.sap.sse.gwt.client.controls.listedit;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -72,34 +76,45 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
 
         @Override
         protected String getCollapsedValueText(Iterable<ValueType> value) {
-            StringBuilder valuesText = new StringBuilder();
-            for (int i = 0; i < Util.size(value); i++) {
-                if (i > 0) {
-                    valuesText.append(',');
-                }
-                valuesText.append(Util.get(value, i));
-            }
-            String condensedValue = valuesText.toString();
-            return condensedValue;
+            return String.join(",", Util.map(value, v->v.toString()));
         }
     }
 
     public static class ExpandedUi<ValueType> extends ExpandedListEditorUi<ValueType> {
-
         protected final MultiWordSuggestOracle inputOracle;
         protected final String placeholderTextForAddTextbox;
-
+        protected final Integer inputBoxSize;
+        private Button addButton;
+        private SuggestBox suggestBox;
 
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues) {
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null);
         }
-        
+
         /**
          * @param suggestValues must not be null but may be empty
          * @param placeholderTextForAddTextbox may be null
          */
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues, String placeholderTextForAddTextbox) {
-            super(stringMessages, removeImage, /*canRemoveItems*/true);
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues,
+                String placeholderTextForAddTextbox) {
+            this(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, /* inputBoxSize */ null);
+            
+        }
+
+        public void setEnabled(boolean enabled) {
+            // #5059 only disabled mode, enabling of button will be handled by internal logic of this component
+            if (!enabled) { 
+                this.addButton.setEnabled(false);
+            }
+            this.suggestBox.setEnabled(enabled);
+        }
+
+        /**
+         * @param inputBoxSize The size of the input box in EM Unit.
+         */
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues,
+                String placeholderTextForAddTextbox, Integer inputBoxSize) {
+            super(stringMessages, removeImage, /* canRemoveItems */true);
             this.placeholderTextForAddTextbox = placeholderTextForAddTextbox;
             this.inputOracle = new MultiWordSuggestOracle();
             for (String suggestValue : suggestValues) {
@@ -108,8 +123,9 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             List<String> defaultSuggestions = new ArrayList<>();
             Util.addAll(suggestValues, defaultSuggestions);
             this.inputOracle.setDefaultSuggestionsFromText(defaultSuggestions);
+            this.inputBoxSize = inputBoxSize;
         }
-        
+               
         protected GenericStringListEditorComposite<ValueType> getContext() {
             return (GenericStringListEditorComposite<ValueType>) context;
         }
@@ -123,18 +139,21 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
         }
 
         protected SuggestBox createSuggestBox() {
-            final SuggestBox result = new SuggestBox(inputOracle);
+            suggestBox = new SuggestBox(inputOracle);
             if (placeholderTextForAddTextbox != null) {
-                result.getElement().setAttribute("placeholder", placeholderTextForAddTextbox);
+                suggestBox.getElement().setAttribute("placeholder", placeholderTextForAddTextbox);
             }
-            return result;
+            return suggestBox;
         }
 
         @Override
         protected Widget createAddWidget() {
             final SuggestBox inputBox = createSuggestBox();
             inputBox.ensureDebugId("InputSuggestBox");
-            final Button addButton = new Button(getStringMessages().add());
+            if (inputBoxSize != null) {
+                inputBox.setWidth(Integer.toString(inputBoxSize) + Unit.EM);
+            }
+            addButton = new Button(getStringMessages().add());
             addButton.ensureDebugId("AddButton");
             addButton.setEnabled(false);
             addButton.addClickHandler(new ClickHandler() {
@@ -142,12 +161,21 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
                 public void onClick(ClickEvent event) {
                     addValue(getContext().parse(inputBox.getValue()));
                     inputBox.setText("");
+                    inputBox.setFocus(true);
                 }
             });
             inputBox.addKeyUpHandler(new KeyUpHandler() {
                 @Override
                 public void onKeyUp(KeyUpEvent event) {
                     addButton.setEnabled(!inputBox.getValue().isEmpty());
+                }
+            });
+            inputBox.addKeyPressHandler(new KeyPressHandler() {
+                @Override
+                public void onKeyPress(KeyPressEvent event) {
+                    if (event.getUnicodeCharCode() == KeyCodes.KEY_ENTER) {
+                        addButton.click();
+                    }
                 }
             });
             // Add addition handler for selection because cannot use one handler for changed SuggestBox value by reason

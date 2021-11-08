@@ -1,5 +1,7 @@
 # User Management and Security
 
+This document describes the basics of how the Shiro framework has been selected and is being used to implement role-based access control. See [Permission Concept](/wiki/info/security/permission-concept) to understand how, based on Shiro, a security architecture with user groups, users, qualified roles, ownerships and access control lists works.
+
 As a feature of the Sports Sponsorships Engine (SSE) which underlies the SAP Sailing Analytics, our Tennis engagements, parts of the Equestrian contributions and in the future perhaps more, we are about to introduce user management to the platform. Based on [Benjamin Ebling's Bachelor thesis](/doc/theses/20140915_Ebling_Authentication_and_Authorization_for_SAP_Sailing_Analytics.pdf) we are introducing [Apache Shiro](http://shiro.apache.org) to the platform. Our Bugzilla has a separate [component for User and Account Management](http://bugzilla.sapsailing.com/bugzilla/buglist.cgi?query_format=advanced&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&component=User%20and%20Account%20Management&product=Sailing%20Race%20Analytics) that documents the open issues.
 
 [[_TOC_]]

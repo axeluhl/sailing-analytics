@@ -1,6 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.places.event;
 
+import static com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListDataUtil.getFleetName;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -10,14 +14,16 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
+import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceWithEventsDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
@@ -25,11 +31,13 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.Rega
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
@@ -37,7 +45,7 @@ import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSett
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
@@ -83,11 +91,24 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         this.timerForClientServerOffset = new Timer(PlayModes.Replay);
         this.clientFactory = clientFactory;
     }
-
-    public SailingServiceAsync getSailingService() {
-        return clientFactory.getSailingService();
-    }
     
+    /**
+     * Provides the navigation path to the {@link #getEventDTO() event}.
+     * 
+     * @return {@link List} of {@link NavigationItem} to the event level
+     */
+    protected final List<NavigationItem> getNavigationPathToEventLevel() {
+        final List<NavigationItem> navItems = new ArrayList<>();
+        navItems.add(new NavigationItem(StringMessages.INSTANCE.home(), getHomeNavigation()));
+        navItems.add(new NavigationItem(StringMessages.INSTANCE.events(), getEventsNavigation()));
+        final SeriesReferenceWithEventsDTO seriesData = getEventDTO().getSeriesData();
+        if (seriesData != null) {
+            navItems.add(new NavigationItem(seriesData.getSeriesDisplayName(), getCurrentEventSeriesNavigation()));
+        }
+        navItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getCurrentEventNavigation()));
+        return navItems;
+    }
+
     public SailingDispatchSystem getDispatch() {
         return clientFactory.getDispatch();
     }
@@ -149,24 +170,37 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
         return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
-                raceMetadata.getRegattaAndRaceIdentifier(), mode);
+                raceMetadata.getLeaderboardGroupId(), raceMetadata.getRegattaAndRaceIdentifier(), mode);
     }
     
     @Override
-    public String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, RegattaAndRaceIdentifier raceIdentifier) {
-        return getRaceViewerURL(leaderboardName, leaderboardGroupName, raceIdentifier, null);
+    public String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId,
+            RegattaAndRaceIdentifier raceIdentifier) {
+        return getRaceViewerURL(leaderboardName, leaderboardGroupName, leaderboardGroupId, raceIdentifier, null);
     }
     
-    private String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, RegattaAndRaceIdentifier raceIdentifier, String mode) {
+    private String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId,
+            RegattaAndRaceIdentifier raceIdentifier, String mode) {
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
-                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, UUID.fromString(ctx.getEventId()), mode);
+                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, leaderboardGroupId,
+                UUID.fromString(ctx.getEventId()), mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
-        
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                 perspectiveOwnSettings, innerSettings);
         return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
+    }
+    
+    @Override
+    public String getMapAndWindChartUrl(final String leaderboardName, final String raceName, final String fleetName) {
+        return EntryPointWithSettingsLinkFactory.createEmbeddedMapAndWindChartLink(leaderboardName, raceName, fleetName);
+    }
+    
+    @Override
+    public String getMapAndWindChartUrl(final RaceMetadataDTO<?> metadata) {
+        return EntryPointWithSettingsLinkFactory.createEmbeddedMapAndWindChartLink(metadata.getLeaderboardName(),
+                metadata.getRaceName(), getFleetName(metadata));
     }
 
     @Override
@@ -183,10 +217,13 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public PlaceNavigation<EventDefaultPlace> getCurrentEventNavigation() {
         return homePlacesNavigator.getEventNavigation(ctx.getEventId(), null, false);
     }
-
-    @Override
-    public PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation() {
-        return homePlacesNavigator.getEventSeriesNavigation(ctx.getEventId(), null, false);
+    
+    protected PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(final EventSeriesReferenceDTO seriesReference) {
+        if (seriesReference != null) {
+            final UUID seriesLeaderboardGroupId = seriesReference.getSeriesLeaderboardGroupId();
+            return homePlacesNavigator.getEventSeriesNavigation(SeriesContext.createWithLeaderboardGroupId(seriesLeaderboardGroupId), null, false);
+        }
+        return null;
     }
 
     @Override
@@ -222,10 +259,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         RegattaRaceStatesSettings regattaRaceStatesSettings = new RegattaRaceStatesSettings();
         regattaRaceStatesSettings.setShowOnlyCurrentlyRunningRaces(false);
         regattaRaceStatesSettings.setShowOnlyRaceOfSameDay(eventDTO.isRunning());
-        if(showRegattaMetadata()) {
-            if(getRegattaMetadata().isFlexibleLeaderboard()) {
-                String defaultCourseAreaId = getRegattaMetadata().getDefaultCourseAreaId();
-                if(defaultCourseAreaId != null && !defaultCourseAreaId.isEmpty()) {
+        if (showRegattaMetadata()) {
+            if (getRegattaMetadata().isFlexibleLeaderboard()) {
+                for (final String defaultCourseAreaId : getRegattaMetadata().getCourseAreaIdsAsStrings()) {
                     regattaRaceStatesSettings.getVisibleCourseAreaSettings().addValue(UUID.fromString(defaultCourseAreaId));
                 }
             } else {
@@ -246,7 +282,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if (regattaId != null) {
             return regattaId;
         }
-        if (!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES)) {
+        if (!eventDTO.getRegattas().isEmpty() && !eventDTO.isMultiRegatta()) {
             return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;

@@ -1,10 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.List;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -20,6 +15,11 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.ViewHolder> {
 
@@ -91,7 +91,8 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.View
 
         private final File file;
 
-        public DeleteListener(RecyclerView.Adapter<PhotoListAdapter.ViewHolder> adapter, Context context, List<Uri> uris, File file) {
+        public DeleteListener(RecyclerView.Adapter<PhotoListAdapter.ViewHolder> adapter, Context context,
+                List<Uri> uris, File file) {
             weakAdapter = new WeakReference<>(adapter);
             weakContext = new WeakReference<>(context);
             weakList = new WeakReference<>(uris);
@@ -102,7 +103,7 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.View
         public void onClick(View v) {
             Context context = weakContext.get();
             if (context != null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle(context.getString(R.string.delete_file_title));
                 builder.setMessage(context.getString(R.string.delete_file));
                 builder.setNegativeButton(android.R.string.no, null);

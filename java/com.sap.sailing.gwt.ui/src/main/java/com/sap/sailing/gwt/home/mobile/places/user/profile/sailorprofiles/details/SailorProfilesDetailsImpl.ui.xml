@@ -1,0 +1,66 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section"
+    xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+    xmlns:p2="urn:import:com.sap.sailing.gwt.home.shared.partials">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+        <g:SimplePanel addStyleNames="{spmr.css.inlineTitleUi}">
+            <p2:editable.InlineEditLabel ui:field="profileTitleUi" />
+        </g:SimplePanel>
+        <g:FlowPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12}" ui:field="contentUi">
+            <ms:MobileSection>
+                <ms:header>
+                    <p:sectionHeader.SectionHeaderContent ui:field="competitorsUi"
+                        sectionTitle="{i18n.competitors}" />
+                </ms:header>
+                <ms:content>
+                    <g:HTMLPanel ui:field="contentContainerCompetitorsUi"
+                        addStyleNames="{spmr.css.detailsCompetitorsContainer}">
+                    </g:HTMLPanel>
+                </ms:content>
+            </ms:MobileSection>
+
+            <ms:MobileSection>
+                <ms:header>
+                    <p:sectionHeader.SectionHeaderContent ui:field="boatclassesUi"
+                        sectionTitle="{i18n.boatClasses}" />
+                </ms:header>
+                <ms:content>
+                    <g:HTMLPanel ui:field="contentContainerBoatclassesUi"
+                        addStyleNames="{spmr.css.detailsBoatclassesSelectionPanel}">
+                    </g:HTMLPanel>
+                </ms:content>
+            </ms:MobileSection>
+
+            <ms:MobileSection>
+                <ms:header>
+                    <p:sectionHeader.SectionHeaderContent ui:field="eventsUi"
+                        sectionTitle="{i18n.events}" />
+                </ms:header>
+                <ms:content>
+                    <g:HTMLPanel ui:field="contentContainerEventsUi"
+                        addStyleNames="{spmr.css.detailsEventsContainer}">
+                    </g:HTMLPanel>
+                </ms:content>
+            </ms:MobileSection>
+
+            <ms:MobileSection>
+                <ms:header>
+                    <p:sectionHeader.SectionHeaderContent ui:field="statisticsUi"
+                        sectionTitle="{i18n.statistics}" />
+                </ms:header>
+                <ms:content>
+                    <g:HTMLPanel ui:field="contentContainerStatisticsUi"
+                        addStyleNames="{spmr.css.detailsEventsContainer}">
+                    </g:HTMLPanel>
+                </ms:content>
+            </ms:MobileSection>
+
+        </g:FlowPanel>
+    </g:HTMLPanel>
+</ui:UiBinder> 

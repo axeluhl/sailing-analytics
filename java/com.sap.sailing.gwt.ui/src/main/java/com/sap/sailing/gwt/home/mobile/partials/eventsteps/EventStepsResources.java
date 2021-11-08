@@ -16,6 +16,7 @@ public interface EventStepsResources extends ClientBundle {
         String eventsteps_phases();
         String eventsteps_phases_phase();
         String eventsteps_phases_phaseinactive();
+        String eventsteps_phases_phase_link();
         String eventsteps_phases_phase_name();
         String eventsteps_phases_phase_progressbar();
         String eventsteps_phases_phase_progressbar_fleet();

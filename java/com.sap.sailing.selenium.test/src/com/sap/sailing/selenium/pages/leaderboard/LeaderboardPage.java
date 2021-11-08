@@ -3,13 +3,14 @@ package com.sap.sailing.selenium.pages.leaderboard;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * <p>The page object representing the leaderboard.</p>
@@ -117,9 +118,10 @@ public class LeaderboardPage extends HostPage {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         Long finishedCalls = (Long) executor.executeScript(
                 "return window.PENDING_AJAX_CALLS.numberOfFinishedCalls(arguments[0])", "loadLeaderboardData");
-        this.playAndPauseAnchor.click();
+        // this.playAndPauseAnchor.click();
+        new Actions(driver).moveToElement(playAndPauseAnchor).click().build().perform();
         waitForAjaxRequestsExecuted("loadLeaderboardData", finishedCalls.intValue() + 1);
-        this.playAndPauseAnchor.click();
+        new Actions(driver).moveToElement(playAndPauseAnchor).click().build().perform();
     }
     
     public CompetitorChartsSettingsDialogPO getCompetitorChartsSettings() {
@@ -129,6 +131,7 @@ public class LeaderboardPage extends HostPage {
     }
     
     public LeaderboardSettingsDialogPO getLeaderboardSettings() {
+        scrollToTop();
         this.leaderboardSettingsButton.click();
         return new LeaderboardSettingsDialogPO(this.driver,
                 findElementBySeleniumId(this.driver, "LeaderboardSettingsDialog"));

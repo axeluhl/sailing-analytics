@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ExcludedWindSourcesFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
@@ -47,7 +49,7 @@ import com.sap.sse.common.Util.Triple;
  * Listens for changes on a {@link RaceLog} and forwards the relevant ones to a {@link TrackedRace}. Examples: start time changes;
  * fixed mark passings changes; course design changes; wind fixes entered by the race committee.<p>
  * 
- * For each {@link RaceLog} {@link #addTo(RaceLog) attached}, a {@link ReadonlyRaceState} is constructed that is used to observe
+ * For each {@link RaceLog} {@link #beforeAttaching(RaceLog) attached}, a {@link ReadonlyRaceState} is constructed that is used to observe
  * some properties in an easier to use form than observing the {@link RaceLog}s directly. For example, the {@link ReadonlyRaceState}
  * can tell the {@link ReadonlyRaceState#getFinishedTime() finished time} and it is possible to receive change notifications for
  * this value.
@@ -74,23 +76,46 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         raceCommitteeWindSource = new WindSourceImpl(WindSourceType.RACECOMMITTEE);
     }
 
-    public void addTo(RaceLog raceLog) {
+    public void beforeAttaching(RaceLog raceLog) {
         if (raceLog == null) {
             logger.severe("Trying to add " + this + " as listener to a null race log for tracked race " + trackedRace.getRace());
         } else {
             raceLog.addListener(this);
-            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.create(trackedRace.getRaceLogResolver(), raceLog);
+            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(trackedRace.getRaceLogResolver(), raceLog);
             raceLogs.put(raceLog, raceState);
             raceState.addChangedListener(new BaseRaceStateChangedListener() {
                 @Override
                 public void onFinishedTimeChanged(ReadonlyRaceState state) {
                     trackedRace.setFinishedTime(state.getFinishedTime());
                 }
+                @Override
+                public void onFinishingTimeChanged(ReadonlyRaceState state) {
+                    trackedRace.setFinishingTime(state.getFinishingTime());
+                }
             });
-            trackedRace.invalidateStartTime();
-            trackedRace.invalidateEndTime();
-            analyze(raceLog);
         }
+    }
+
+    public void afterAttaching(RaceLog raceLog) {
+        trackedRace.invalidateStartTime();
+        trackedRace.invalidateEndTime();
+        analyze(raceLog);
+    }
+
+    /**
+     * @return the first non-{@code null} {@link ReadonlyRaceState#getFinishingTime() finishing time} that is found in any
+     *         of the {@link RaceState}s constructed for all the {@link RaceLog}s observed by this listener, or {@code null}
+     *         if no {@link ReadonlyRaceState} exists that returns a non-{@code null} finishing time.
+     */
+    public TimePoint getFinishingTime() {
+        TimePoint result = null;
+        for (final ReadonlyRaceState raceState : raceLogs.values()) {
+            result = raceState.getFinishingTime();
+            if (result != null) {
+                break;
+            }
+        }
+        return result;
     }
 
     /**
@@ -139,7 +164,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         }
     }
 
-    public void removeFrom(RaceLog raceLog) {
+    public void beforeDetaching(RaceLog raceLog) {
         // Gets called whenever a RaceColumn was already linked to a TrackedRace on linkage.
         // Maybe we need to reset the status of the old race somehow? There might be no new
         // TrackedRace to be linked...
@@ -147,13 +172,19 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         // TODO:
         // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
         if (raceLog != null) {
-            trackedRace.invalidateStartTime();
-            removeAllWindFixesFromWindTrack(raceLog);
             raceLog.removeListener(this);
             raceLogs.remove(raceLog);
             if (markPassingUpdateListener != null) {
                 removeMarkPassingEvents();
             }
+        }
+    }
+
+
+    public void afterDetaching(RaceLog raceLog) {
+        if (raceLog != null) {
+            trackedRace.invalidateStartTime();
+            removeAllWindFixesFromWindTrack(raceLog);
             trackedRace.updateMarkPassingsAfterRaceLogChanges();
         }
     }
@@ -183,9 +214,11 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private void analyze(RaceLog raceLog) {
+        trackedRace.setFinishingTime(getFinishingTime());
         trackedRace.setFinishedTime(getFinishedTime());
         analyzeCourseDesign(null);
         initializeWindTrack(raceLog);
+        updateWindSourcesToExclude();
         if (markPassingUpdateListener != null) {
             markPassingDataFinder = new MarkPassingDataFinder(raceLog);
             analyzeMarkPassings();
@@ -313,7 +346,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     public void visit(RaceLogRevokeEvent event) {
         if (markPassingUpdateListener != null) {
             RaceLogEvent revokedEvent = null;
-            for (RaceLog log : raceLogs.keySet()) {
+            for (final RaceLog log : raceLogs.keySet()) {
                 try {
                     log.lockForRead();
                     revokedEvent = log.getEventById(event.getRevokedEventId());
@@ -323,12 +356,10 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                 } finally {
                     log.unlockAfterRead();
                 }
-
             }
             if (revokedEvent instanceof RaceLogSuppressedMarkPassingsEvent) {
                 markPassingUpdateListener.removeSuppressedPassing(revokedEvent.getInvolvedCompetitors().get(0));
-            }
-            if (revokedEvent instanceof RaceLogFixedMarkPassingEvent) {
+            } else if (revokedEvent instanceof RaceLogFixedMarkPassingEvent) {
                 markPassingUpdateListener.removeFixedPassing(revokedEvent.getInvolvedCompetitors().get(0),
                         ((RaceLogFixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
             }
@@ -357,4 +388,17 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         }
     }
 
+    @Override
+    public void visit(RaceLogExcludeWindSourcesEvent event) {
+        updateWindSourcesToExclude();
+    }
+
+    private void updateWindSourcesToExclude() {
+        for (RaceLog raceLog : raceLogs.keySet()) {
+            final Iterable<WindSource> windSourcesToExclude = new ExcludedWindSourcesFinder(raceLog).analyze();
+            if (windSourcesToExclude != null) {
+                trackedRace.setWindSourcesToExclude(windSourcesToExclude);
+            }
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package com.sap.sailing.server.impl.preferences.model;
 
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsList;
 
@@ -11,9 +10,9 @@ public class CompetitorNotificationPreferences extends AbstractGenericSerializab
 
     private transient SettingsList<CompetitorNotificationPreference> competitors;
 
-    public CompetitorNotificationPreferences(RacingEventService racingEventService) {
+    public CompetitorNotificationPreferences() {
         competitors = new SettingsList<>("competitors", this,
-                () -> new CompetitorNotificationPreference(racingEventService.getCompetitorAndBoatStore()));
+                () -> new CompetitorNotificationPreference());
     }
 
     @Override

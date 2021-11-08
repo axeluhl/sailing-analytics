@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.Arrays;
 
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -12,6 +11,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, Double>> {
     private final ListBox maxPointsBox;
@@ -26,13 +26,14 @@ public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, 
         this.stringMessages = stringMessages;
         maxPointsBox = createListBox(/* isMultipleSelect */ false);
         maxPointsBox.addItem("");
-        for (MaxPointsReason maxPointsReason : MaxPointsReason.values()) {
+        for (MaxPointsReason maxPointsReason : MaxPointsReason.getLexicographicalValues()) {
             maxPointsBox.addItem(maxPointsReason.name());
         }
         if (oldMaxPointsReason == null) {
             maxPointsBox.setSelectedIndex(0);
         } else {
-            maxPointsBox.setSelectedIndex(1+Arrays.asList(MaxPointsReason.values()).indexOf(oldMaxPointsReason));
+            maxPointsBox.setSelectedIndex(
+                    1 + Arrays.asList(MaxPointsReason.getLexicographicalValues()).indexOf(oldMaxPointsReason));
         }
         totalPointsBox = createDoubleBox(/* visibleLength */ 5);
         if (oldTotalPoints != null) {

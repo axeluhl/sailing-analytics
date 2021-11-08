@@ -64,7 +64,7 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
         contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
-            currentPresenter.getCtx().getAnalyticsManager().getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, new AsyncCallback<Iterable<DetailType>>() {
+            currentPresenter.getCtx().getAnalyticsManager().getAvailableDetailTypesForLeaderboard(leaderboardName, null, new AsyncCallback<Iterable<DetailType>>() {
                 
                 @Override
                 public void onSuccess(Iterable<DetailType> result) {

@@ -22,6 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/header_margin_top"
+            android:gravity="center_horizontal"
             android:textAppearance="?attr/textPanelHeader"
             android:visibility="visible"
             tools:text="@string/start_mode" />
@@ -33,6 +34,7 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="@dimen/header_margin_top"
+            android:gravity="center_horizontal"
             android:textAppearance="?attr/textPanelCaption"
             android:visibility="gone"
             tools:text="@string/start_mode" />

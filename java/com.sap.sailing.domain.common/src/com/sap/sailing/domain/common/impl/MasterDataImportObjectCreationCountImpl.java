@@ -23,13 +23,13 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     private int eventCount = 0;
     private int regattaCount = 0;
     private int mediaTrackCount = 0;
-    
-    private Set<String> createdLeaderboards = new HashSet<String>(); 
-    private Set<String> createdLeaderboardGroups = new HashSet<String>(); 
-    private Set<String> createdEvents = new HashSet<String>(); 
-    private Set<String> createdRegattas = new HashSet<String>(); 
-    
-    private Set<String> overwrittenRegattas = new HashSet<String>();
+    private int trackedRacesCount = 0;
+    private Set<String> createdLeaderboards = new HashSet<>(); 
+    private Set<String> createdLeaderboardGroups = new HashSet<>(); 
+    private Set<String> createdEvents = new HashSet<>(); 
+    private Set<String> createdRegattas = new HashSet<>(); 
+    private Set<String> createdTrackedRaces = new HashSet<>();
+    private Set<String> overwrittenRegattas = new HashSet<>();
 
     //For GWT serialization
     public MasterDataImportObjectCreationCountImpl() {};
@@ -44,17 +44,21 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
         leaderboardGroupCount++;
     }
     
-    public void addOneEvent(String id) {
-        createdEvents.add(id);
+    public void addOneEvent(String idAsString) {
+        createdEvents.add(idAsString);
         eventCount++;
     }
 
-    public void addOneRegatta(String id) {
-        createdRegattas.add(id);
+    public void addOneRegatta(String idAsString) {
+        createdRegattas.add(idAsString);
         regattaCount++;
     }
     
-    @Override
+    public void addOneTrackedRace(String idAsString) {
+        createdTrackedRaces.add(idAsString);
+        trackedRacesCount++;
+    }
+    
     public void addOneMediaTrack() {
     	mediaTrackCount++;
     }
@@ -64,10 +68,12 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
         leaderboardGroupCount = leaderboardGroupCount + toAdd.leaderboardGroupCount;
         eventCount = eventCount + toAdd.eventCount;
         regattaCount = regattaCount + toAdd.regattaCount;
+        trackedRacesCount = trackedRacesCount + toAdd.trackedRacesCount;
         createdEvents.addAll(toAdd.createdEvents);
         createdLeaderboardGroups.addAll(toAdd.createdLeaderboardGroups);
         createdLeaderboards.addAll(toAdd.createdLeaderboards);
         createdRegattas.addAll(toAdd.createdRegattas);
+        createdTrackedRaces.addAll(toAdd.createdTrackedRaces);
     }
     
     public boolean alreadyAddedLeaderboardWithName(String name) {
@@ -78,12 +84,16 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
         return createdLeaderboardGroups.contains(name);
     }
     
-    public boolean alreadyAddedEventWithId(String id) {
-        return createdEvents.contains(id);
+    public boolean alreadyAddedEventWithId(String idAsString) {
+        return createdEvents.contains(idAsString);
     }
     
-    public boolean alreadyAddedRegattaWithId(String id) {
-        return createdRegattas.contains(id);
+    public boolean alreadyAddedRegattaWithId(String idAsString) {
+        return createdRegattas.contains(idAsString);
+    }
+    
+    public boolean alreadyAddedTrackedRaceWithId(String idAsString) {
+        return createdTrackedRaces.contains(idAsString);
     }
 
     @Override
@@ -110,14 +120,18 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     public int getMediaTrackCount() {
     	return mediaTrackCount;
     }
+    
+    @Override
+    public int getTrackedRacesCount() {
+        return trackedRacesCount;
+    }
 
     @Override
-    public Set<String> getOverwrittenRegattaNames() {
+    public Iterable<String> getOverwrittenRegattaNames() {
         return overwrittenRegattas;
     }
 
     public void addOverwrittenRegattaName(String name) {
         overwrittenRegattas.add(name);
     }
-   
 }

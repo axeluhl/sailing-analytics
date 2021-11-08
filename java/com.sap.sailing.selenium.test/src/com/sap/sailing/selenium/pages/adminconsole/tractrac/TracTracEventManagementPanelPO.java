@@ -1,16 +1,17 @@
 package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
@@ -45,7 +46,7 @@ public class TracTracEventManagementPanelPO extends PageArea {
         
         @Override
         public int hashCode() {
-            return Objects.hash(this.boatClass, this.eventName, this.raceName);
+            return Objects.hash(BoatClassMasterdata.resolveBoatClass(this.boatClass), this.eventName, this.raceName);
         }
 
         @Override
@@ -72,16 +73,6 @@ public class TracTracEventManagementPanelPO extends PageArea {
             return true;
         }
     }
-    
-    // TODO [D049941]: Prefix the Ids with the component (e.g. "Button")
-    @FindBy(how = BySeleniumId.class, using = "LiveURITextBox")
-    private WebElement liveURITextBox;
-    
-    @FindBy(how = BySeleniumId.class, using = "StoredURITextBox")
-    private WebElement storedURITextBox;
-    
-    @FindBy(how = BySeleniumId.class, using = "JsonURLTextBox")
-    private WebElement jsonURLTextBox;
     
     @FindBy(how = BySeleniumId.class, using = "ListRacesButton")
     private WebElement listRacesButton;
@@ -110,6 +101,12 @@ public class TracTracEventManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesListComposite")
     private WebElement trackedRacesListComposite;
     
+    @FindBy(how = BySeleniumId.class, using = "AddConnectionButton")
+    private WebElement addConnectionButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "TracTracConfigurationWithSecurityDTOTable")
+    private WebElement configurationTable;
+    
     /**
      * <p></p>
      * 
@@ -122,38 +119,32 @@ public class TracTracEventManagementPanelPO extends PageArea {
         super(driver, element);
     }
     
-    
-    /**
-     * <p>Lists all available trackable races for the given URL. The list of the races can be obtained via
-     *   {@link #getTrackableRaces()}.</p>
-     * 
-     * @param url
-     *   The URL for which the races are to list.
-     */
-    public void listTrackableRaces(String url) {
-        listTrackableRaces("", "", url);  //$NON-NLS-1$//$NON-NLS-2$
+    public void addConnectionAndListTrackableRaces(String url) {
+        AddTracTracConnectionDialogPO dialog = addConnection();
+        dialog.setJsonUrl(url);
+        dialog.pressOk();
+        listRacesForExistingConnection(url);
     }
-    
-    /**
-     * <p>Lists all available trackable races for the given URL. The list of the races can be obtained via
-     *   {@link #getTrackableRaces()}.</p>
-     * 
-     * @param url
-     *   The URL for which the races are to list.
-     */
-    public void listTrackableRaces(String liveURI, String storedURI, String jsonURL) {
-        this.liveURITextBox.clear();
-        this.liveURITextBox.sendKeys(liveURI);
-        
-        this.storedURITextBox.clear();
-        this.storedURITextBox.sendKeys(storedURI);
-        
-        this.jsonURLTextBox.clear();
-        this.jsonURLTextBox.sendKeys(jsonURL);
+
+    public void listRacesForExistingConnection(String url) {
+        CellTablePO<DataEntryPO> tablePO = getConfigurationTable();
+        tablePO.waitForTableToShowData();
+        tablePO.selectEntries(entry -> {
+            return url.equals(entry.getColumnContent("JSON URL"));
+        }, () -> false);
         
         this.listRacesButton.click();
-        
         waitForAjaxRequests();
+    }
+    
+    public AddTracTracConnectionDialogPO addConnection() {
+        addConnectionButton.click();
+        final WebElement dialog = findElementBySeleniumId(this.driver, "TracTracConnectionDialog");
+        return new AddTracTracConnectionDialogPO(this.driver, dialog);
+    }
+
+    private CellTablePO<DataEntryPO> getConfigurationTable() {
+        return new GenericCellTablePO<>(this.driver, this.configurationTable, DataEntryPO.class);
     }
     
     /**
@@ -228,43 +219,52 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     public void startTrackingForRace(TrackableRaceDescriptor race) {
-        //startTrackingForRaces(Arrays.asList(race));
-        CellTablePO<DataEntryPO> table = getTrackableRacesTable();
-        DataEntryPO entryToSelect = null;
-        for (DataEntryPO entry : table.getEntries()) {
-            TrackableRaceDescriptor entryDiscribtor = new TrackableRaceDescriptor(entry.getColumnContent("Event"),
-                    entry.getColumnContent("Race"), entry.getColumnContent("Boat Class"));
-            if (race.equals(entryDiscribtor)) {
-                entryToSelect = entry;
-                break;
-            }
-        }
-        table.selectEntry(entryToSelect);
-        startTrackingAndWaitForAjaxRequests();
+        startTrackingForRacesInternal(Collections.singletonList(race), null, false);
     }
     
-    public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
-        List<TrackableRaceDescriptor> racesToProcess = new ArrayList<>(races);
-        CellTablePO<DataEntryPO> table = getTrackableRacesTable();
+    public void startTrackingForRacesAndAcceptDefaultRegattaWarning(TrackableRaceDescriptor race) {
+        startTrackingForRacesInternal(Collections.singletonList(race), null, true);
+    }
+    
+    public void startTrackingForRaceAndAwaitBoatClassError(TrackableRaceDescriptor race, String expectedBoatClass) {
+        startTrackingForRacesInternal(Collections.singletonList(race), expectedBoatClass, false);
+    }
+    
+    public void startTrackingForRaces(Collection<TrackableRaceDescriptor> races) {
+        startTrackingForRacesInternal(races, null, false);
+    }
+    
+    private void startTrackingForRacesInternal(Collection<TrackableRaceDescriptor> races,
+            String expectedBoatClassErrorOrNull, boolean awaitDefaultRegattaAlert) {
+        final Set<TrackableRaceDescriptor> racesToProcess = new HashSet<>(races);
+        final CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         table.selectEntries(e -> racesToProcess.remove(new TrackableRaceDescriptor(e.getColumnContent("Event"),
-                e.getColumnContent("Race"), e.getColumnContent("Boat Class"))));
-        if(!racesToProcess.isEmpty()) {
+                e.getColumnContent("Race"), e.getColumnContent("Boat Class"))), racesToProcess::isEmpty);
+        if (!racesToProcess.isEmpty()) {
             throw new IllegalStateException("Not all given races where selected");
         }
-        startTrackingAndWaitForAjaxRequests();
+        startTrackingForSelectedRaces(expectedBoatClassErrorOrNull, awaitDefaultRegattaAlert);
     }
     
     public void startTrackingForAllRaces() {
         getTrackableRacesTable().selectAllEntries();
-        startTrackingAndWaitForAjaxRequests();
+        startTrackingForSelectedRaces(null, false);
     }
     
-    private void startTrackingAndWaitForAjaxRequests() {
-        this.startTrackingButton.click();
-        ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
-        if (condition.apply(this.driver) == null) {
+    private void startTrackingForSelectedRaces(String expectedBoatClassErrorOrNull, boolean awaitDefaultRegattaAlert) {
+        this.startTracking();
+        
+        if (awaitDefaultRegattaAlert) {
+            waitForAlertAndAccept();
+        } else if (expectedBoatClassErrorOrNull == null) {
             waitForAjaxRequests();
+        } else {
+            waitForSelectedRacesContainDifferentBoatClassesError(expectedBoatClassErrorOrNull);
         }
+    }
+
+    private void startTracking() {
+        this.startTrackingButton.click();
     }
     
     public TrackedRacesListPO getTrackedRacesList() {
@@ -280,5 +280,11 @@ public class TracTracEventManagementPanelPO extends PageArea {
         
         if(input.isSelected() != selected)
             input.click();
+    }
+    
+    private void waitForSelectedRacesContainDifferentBoatClassesError(String boatClass) {
+        String message = String.format("(?s)The selected races contain boat classes which are not the same as "
+                + "the boat class '%s' of the selected regatta. Really load races\\?.*", boatClass);
+        waitForAlertAndAccept(message);
     }
 }

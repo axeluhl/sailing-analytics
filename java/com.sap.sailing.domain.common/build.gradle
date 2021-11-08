@@ -1,4 +1,4 @@
-apply plugin: "java"
+apply plugin: "java-library"
 
 sourceSets {
     main {
@@ -8,7 +8,7 @@ sourceSets {
 
 dependencies {
     /* local dependencies */
-    compile project(":java:com.sap.sse.common")
-    compile project(":java:com.sap.sse.security.common")
-    compile project(":java:com.sap.sse.datamining.annotations")
+    implementation project(":com.sap.sse.common")
+    implementation project(":com.sap.sse.security.common")
+    implementation project(":com.sap.sse.datamining.annotations")
 }

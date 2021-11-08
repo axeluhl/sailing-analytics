@@ -17,8 +17,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasMarkPassingContext> {
 
     public MarkPassingRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasMarkPassingContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedLegOfCompetitorContext.class, HasMarkPassingContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasMarkPassingContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedLegOfCompetitorContext.class, HasMarkPassingContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override
@@ -29,6 +31,9 @@ public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<Ha
             try {
                 Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
                 for (Maneuver maneuver : maneuvers) {
+                    if (isAborted()) {
+                        break;
+                    }
                     if (maneuver.isMarkPassing()) {
                         maneuversWithContext.add(new MarkPassingWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
                                 element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), maneuver.getTimePoint()), maneuver));

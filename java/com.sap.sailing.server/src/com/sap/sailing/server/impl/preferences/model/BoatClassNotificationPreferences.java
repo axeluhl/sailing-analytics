@@ -1,6 +1,6 @@
 package com.sap.sailing.server.impl.preferences.model;
 
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsList;
 

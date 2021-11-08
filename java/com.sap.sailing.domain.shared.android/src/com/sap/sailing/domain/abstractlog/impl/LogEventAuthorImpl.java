@@ -24,7 +24,7 @@ public class LogEventAuthorImpl extends NamedImpl implements AbstractLogEventAut
     @Override
     public int compareTo(AbstractLogEventAuthor other) {
         /** as '0' has a higher priority than '1' the compare method ranks a '0' priority higher than a '1' priority */
-        Integer result = new Integer(getPriority()).compareTo(other.getPriority());
+        Integer result = Integer.compare(getPriority(), other.getPriority());
         return -result;
     }
     

@@ -24,7 +24,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
     private final Competitor competitor = new CompetitorImpl("comp", "Comp", "KYC", null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);

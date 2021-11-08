@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.finished;
 
 import android.os.Bundle;
@@ -16,13 +13,11 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceF
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
 
 public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProcedure>
-    extends BaseRaceInfoRaceFragment<ProcedureType> {
+        extends BaseRaceInfoRaceFragment<ProcedureType> {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_finished, container, false);
-
-        return layout;
+        return inflater.inflate(R.layout.race_finished, container, false);
     }
 
     @Override
@@ -34,10 +29,5 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
             replaceFragment(FinishedSubmitFragment.newInstance(getArguments()), R.id.finished_panel_desc);
             replaceFragment(RaceSummaryFragment.newInstance(getArguments()), R.id.finished_content);
         }
-    }
-
-    @Override
-    protected void setupUi() {
-
     }
 }

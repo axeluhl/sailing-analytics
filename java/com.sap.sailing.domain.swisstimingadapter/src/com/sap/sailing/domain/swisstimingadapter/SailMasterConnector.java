@@ -45,7 +45,7 @@ public interface SailMasterConnector {
      * Adds the listener and ensures that the connector is actually connected, even if no request has explicitly
      * been sent, so that the connector will at least receive spontaneous events.
      */
-    void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException;
+    void addSailMasterListener(SailMasterListener listener);
     
     void removeSailMasterListener(SailMasterListener listener) throws IOException;
 

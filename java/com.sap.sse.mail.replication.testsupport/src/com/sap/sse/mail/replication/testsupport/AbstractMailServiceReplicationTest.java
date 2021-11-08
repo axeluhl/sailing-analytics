@@ -35,12 +35,22 @@ public class AbstractMailServiceReplicationTest extends AbstractServerWithSingle
         };
         mailService[0] = new MailServiceImpl(null, mailServiceResolver) {
             @Override
-            public Void internalSendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier)
+            protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter)
                     throws MailException {
+                countOneIfCanSendMail(canSendMail);
+            }
+
+            private void countOneIfCanSendMail(final boolean canSendMail) {
                 if (canSendMail) {
                     Integer old = numberOfMailsSent.get(this);
                     numberOfMailsSent.put(this, old == null ? 1 : old + 1);
                 }
+            }
+            
+            @Override
+            public Void internalSendMail(String toAddress, String subject,
+                    SerializableMultipartSupplier multipartSupplier) throws MailException {
+                countOneIfCanSendMail(canSendMail);
                 return null;
             }
         };

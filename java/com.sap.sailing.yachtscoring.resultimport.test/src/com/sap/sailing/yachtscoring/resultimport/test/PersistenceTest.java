@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 
@@ -13,8 +13,8 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.ResultUrlRegistryImpl;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 @SuppressWarnings("restriction")
 public class PersistenceTest {

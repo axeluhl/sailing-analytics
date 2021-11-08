@@ -6,12 +6,26 @@ import java.util.HashMap;
 
 import com.sap.sse.common.settings.SerializableSettings;
 
+/**
+ * A data mining retriever chain definition that can be shared between client and server. Instances are usually
+ * constructed by a DataMiningDTOFactory based on a given backend DataRetrieverChainDefinition. The corresponding
+ * backend instance can be determined using the DataMiningServer.
+ */
 public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable<DataRetrieverChainDefinitionDTO> {
     private static final long serialVersionUID = 7806173601799997214L;
     
+    /**
+     * The fully qualified name of the initial data source type.
+     */
     private String dataSourceTypeName;
+    /**
+     * The ordered list of retriever levels.
+     */
     private ArrayList<DataRetrieverLevelDTO> retrieverLevels;
 
+    /**
+     * A human readable string representation. Should be omitted when persisting a DataRetrieverChainDefinition.
+     */
     private String displayName;
 
     /**

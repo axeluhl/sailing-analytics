@@ -63,7 +63,7 @@ public class TestFunctionManagerAsFunctionRegistry {
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
         AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
         QueryDefinitionDTORegistry queryDefinitionRegistry = new QueryDefinitionDTOManager();
-        ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionManager,
+        ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getSharedExecutor(), functionManager,
                                                                      dataSourceProviderRegistry,
                                                                      dataRetrieverChainDefinitionRegistry,
                                                                      aggregationProcessorDefinitionRegistry,

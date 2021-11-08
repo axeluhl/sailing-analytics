@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE projectDescription>
 <projectDescription>
 	<name>com.sap.sse.datamining.ui</name>
 	<comment></comment>
@@ -21,12 +22,12 @@
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>com.google.gdt.eclipse.core.webAppProjectValidator</name>
+			<name>com.gwtplugins.gdt.eclipse.core.webAppProjectValidator</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>com.google.gwt.eclipse.core.gwtProjectValidator</name>
+			<name>com.gwtplugins.gwt.eclipse.core.gwtProjectValidator</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -34,6 +35,6 @@
 	<natures>
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>com.google.gwt.eclipse.core.gwtNature</nature>
+		<nature>com.gwtplugins.gwt.eclipse.core.gwtNature</nature>
 	</natures>
 </projectDescription>

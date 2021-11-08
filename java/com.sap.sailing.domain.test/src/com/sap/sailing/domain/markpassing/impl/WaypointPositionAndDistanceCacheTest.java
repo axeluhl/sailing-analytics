@@ -12,7 +12,6 @@ import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -30,6 +29,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.WaypointPositionAndDistanceCache;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -65,7 +65,8 @@ public class WaypointPositionAndDistanceCacheTest {
         pinEnd = new MarkImpl("Pin End");
         startBoat = new MarkImpl("Start Boat");
         windward = new MarkImpl("Windward");
-        startFinish = new ControlPointWithTwoMarksImpl(UUID.randomUUID(), pinEnd, startBoat, "Start/Finish");
+        startFinish = new ControlPointWithTwoMarksImpl(UUID.randomUUID(), pinEnd, startBoat, "Start/Finish",
+                "Start/Finish");
         start = new WaypointImpl(startFinish);
         windwardWaypoint = new WaypointImpl(windward);
         finish = new WaypointImpl(startFinish);
@@ -78,7 +79,7 @@ public class WaypointPositionAndDistanceCacheTest {
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.emptyList(), EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 8000, /* millisecondsOverWhichToAverageWind */ 30000,
                 /* millisecondsOverWhichToAverageSpeed */ 15000, /* delayForCacheInvalidationOfWindEstimation */ 10000,
-                /* useInternalMarkPassingAlgorithm */ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+                /* useInternalMarkPassingAlgorithm */ false, OneDesignRankingMetric::new, mock(RaceLogAndTrackedRaceResolver.class), null);
         timeRangeResolution = Duration.ONE_MINUTE;
         now = new MillisecondsTimePoint(MillisecondsTimePoint.now().asMillis() / timeRangeResolution.asMillis() * timeRangeResolution.asMillis());
         trackedRace.getOrCreateTrack(pinEnd).addGPSFix(new GPSFixImpl(new DegreePosition(0, -0.0000001), now));

@@ -1,26 +1,37 @@
 package com.sap.sailing.datamining.impl.data;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
@@ -33,9 +44,9 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     private final TrackedLegOfCompetitor trackedLegOfCompetitor;
     private final Competitor competitor;
 
-    private Double rankAtStart;
+    private Integer rankAtStart;
     private boolean isRankAtStartInitialized;
-    private Double rankAtFinish;
+    private Integer rankAtFinish;
     private boolean isRankAtFinishInitialized;
     private Wind wind;
 
@@ -61,15 +72,23 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     }
     
     @Override
+    public String getSailID() {
+        Boat boatOfCompetitor = getTrackedRace().getBoatOfCompetitor(getCompetitor());
+        return boatOfCompetitor != null ? boatOfCompetitor.getSailID() : null;
+    }
+    
+    @Override
     public ClusterDTO getPercentageClusterForRelativeScoreInRace() {
+        final ClusterDTO result;
         Double relativeScore = getTrackedLegContext().getTrackedRaceContext().getRelativeScoreForCompetitor(getCompetitor());
         if (relativeScore == null) {
-            return null;
+            result = null;
+        } else {
+            SailingClusterGroups clusterGroups = Activator.getClusterGroups();
+            Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(relativeScore);
+            result = new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
         }
-        
-        SailingClusterGroups clusterGroups = Activator.getClusterGroups();
-        Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(relativeScore);
-        return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
+        return result;
     }
     
     protected <R> R getSomethingForLegTrackingInterval(BiFunction<TimePoint, TimePoint, R> resultSupplier) {
@@ -110,8 +129,17 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
 
     @Override
     public Distance getDistanceTraveled() {
-        TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
-        return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
+        final Distance result;
+        final TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        if (trackedRace != null) {
+            final TimePoint now = TimePoint.now();
+            final TimePoint endTimePoint = trackedRace.getEndOfRace() != null ? trackedRace.getEndOfRace()
+                    : trackedRace.getEndOfTracking() != null ? trackedRace.getEndOfTracking() : now;
+            result = getTrackedLegOfCompetitor().getDistanceTraveled(endTimePoint.after(now) ? now : endTimePoint);
+        } else {
+            result = null;
+        }
+        return result;
     }
     
     @Override
@@ -130,47 +158,113 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         }
     }
     
-    @Override 
-    public Pair<Double, Double> getSpeedAverageVsDistanceTraveled(){
-        return new Pair<Double, Double>(getSpeedAverage(), getDistanceTraveled().getMeters());
-    }
-    
-    
     @Override
-    public Double getRankGainsOrLosses() {
-        Double rankAtStart = getRankAtStart();
-        Double rankAtFinish = getRankAtFinish();
+    public Integer getRankGainsOrLosses() {
+        Integer rankAtStart = getRankAtStart();
+        Integer rankAtFinish = getRankAtFinish();
         return rankAtStart != null && rankAtFinish != null ? rankAtStart - rankAtFinish : null;
     }
     
-    private Double getRankAtStart() {
-        if (!isRankAtStartInitialized) {
-            TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
-            rankAtStart = rank == 0 ? null : Double.valueOf(rank);
-            isRankAtStartInitialized = true;
+    private Integer getRankAtStart() {
+        final Integer result;
+        if (getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
+            if (!isRankAtStartInitialized) {
+                TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+                int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
+                rankAtStart = rank == 0 ? null : rank;
+                isRankAtStartInitialized = true;
+            }
+            result = rankAtStart;
+        } else {
+            result = null;
         }
-        return rankAtStart;
+        return result;
+    }
+
+    /**
+     * If the competitor hasn't started and finished the leg, {@code null} will be returned.
+     * 
+     * @param ratioOfLegTimeSpent
+     *            the ratio of the time the competitor has spent in the leg overall; 0=just starting the leg; 1=just
+     *            finished the leg
+     */
+    private Integer getRankAtTimePercent(double ratioOfLegTimeSpent) {
+        final Integer result;
+        final TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        if (trackedRace != null) {
+            final TimePoint startTime = getTrackedLegOfCompetitor().getStartTime();
+            final TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
+            if (startTime != null && finishTime != null) {
+                final TimePoint timePoint = startTime.plus(startTime.until(finishTime).times(ratioOfLegTimeSpent));
+                result = trackedRace.getRank(getCompetitor(), timePoint);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    /**
+     * A "non-official" hypothetical rank for upwind and downwind legs, pretending we didn't have wind information and
+     * hence couldn't compute a wind-based rank. This may be used, e.g., to compare the wind-based prediction to the rhumb
+     * line-based prediction. If the competitor hasn't started and finished the leg, {@code null} will be returned.
+     * 
+     * @param ratioOfLegTimeSpent
+     *            the ratio of the time the competitor has spent in the leg overall; 0=just starting the leg; 1=just
+     *            finished the leg
+     */
+    private Integer getRhumbLineBasedRankAtTimePercent(double ratioOfLegTimeSpent) {
+        final Integer result;
+        final TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        if (trackedRace != null) {
+            final TimePoint startTime = getTrackedLegOfCompetitor().getStartTime();
+            final TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
+            if (startTime != null && finishTime != null) {
+                final TimePoint timePoint = startTime.plus(startTime.until(finishTime).times(ratioOfLegTimeSpent));
+                final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache = new LeaderboardDTOCalculationReuseCache(timePoint) {
+                    /**
+                     * Always returns {@link LegType#REACHING} to force rhumb line-based calculation
+                     */
+                    @Override
+                    public LegType getLegType(TrackedLeg trackedLeg, TimePoint timePoint) throws NoWindException {
+                        return LegType.REACHING;
+                    }
+                };
+                // RaceRankComparator requires course read lock
+                trackedRace.getRace().getCourse().lockForRead();
+                final List<Competitor> rankedCompetitors = new ArrayList<>();
+                try {
+                    Comparator<Competitor> comparator = trackedRace.getRankingMetric().getRaceRankingComparator(timePoint, cache);
+                    Util.addAll(trackedRace.getRace().getCompetitors(), rankedCompetitors);
+                    Collections.sort(rankedCompetitors, comparator);
+                } finally {
+                    trackedRace.getRace().getCourse().unlockAfterRead();
+                }
+                result = rankedCompetitors.indexOf(getCompetitor()) + 1;
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
     public Double getRelativeRank() {
         Leaderboard leaderboard = getTrackedLegContext().getTrackedRaceContext().getLeaderboardContext().getLeaderboard();
         double competitorCount = Util.size(leaderboard.getCompetitors());
-        Double rankAtFinish = getRankAtFinish();
+        Integer rankAtFinish = getRankAtFinish();
         return rankAtFinish == null ? null : rankAtFinish / competitorCount;
     }
-
-    @Override
-    public Double getAbsoluteRank() {
-        return getRankAtFinish();
-    }
     
-    private Double getRankAtFinish() {
+    public Integer getRankAtFinish() {
         if (!isRankAtFinishInitialized) {
             TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
             int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getFinishTime());
-            rankAtFinish = rank == 0 ? null : Double.valueOf(rank);
+            rankAtFinish = rank == 0 ? null : rank;
             isRankAtFinishInitialized = true;
         }
         return rankAtFinish;
@@ -241,4 +335,150 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         return this;
     }
     
+    @Override
+    public Integer getNumberOfManeuvers() {
+        return getNumberOfJibes() + getNumberOfTacks();
+    }
+
+    @Override
+    public Integer getNumberOfJibes() {
+        return getSomethingForLegTrackingInterval((start, end) -> {
+            return getNumberOf(ManeuverType.JIBE, start, end);
+        });
+    }
+
+    @Override
+    public Integer getNumberOfTacks() {
+        return getSomethingForLegTrackingInterval((start, end) -> {
+            return getNumberOf(ManeuverType.TACK, start, end);
+        });
+    }
+    
+    private int getNumberOf(ManeuverType maneuverType, TimePoint start, TimePoint end) {
+        TrackedRace trackedRace = getTrackedRace();
+        int number = 0;
+        if (trackedRace != null) {
+            for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), start, end, false)) {
+                if (maneuver.getType() == maneuverType) {
+                    number++;
+                }
+            }
+        }
+        return number;
+    }
+
+    @Override
+    public Integer getRankAfterFirstQuarter() {
+        return getRankAtTimePercent(0.25);
+    }
+
+    @Override
+    public Integer getRankAfterSecondQuarter() {
+        return getRankAtTimePercent(0.5);
+    }
+
+    @Override
+    public Integer getRankAfterThirdQuarter() {
+        return getRankAtTimePercent(0.75);
+    }
+
+    @Override
+    public Double getRankAverageAcrossFirstThreeQuarters() {
+        return getRankAverageAcrossFirstThreeQuarters(this::getRankAtTimePercent);
+    }
+
+    private Double getRankAverageAcrossFirstThreeQuarters(final Function<Double, Integer> rankFunction) {
+        int rankSum = 0;
+        int count = 0;
+        for (double ratio=0.25; ratio<1.0; ratio+=0.25) {
+            final Integer rankAtRatio = rankFunction.apply(ratio);
+            if (rankAtRatio != null) {
+                rankSum += rankAtRatio;
+                count++;
+            }
+        }
+        return count == 0 ? null : (double) rankSum / (double) count;
+    }
+
+    @Override
+    public Integer getRankRhumbLineBasedAfterFirstQuarter() {
+        return getRhumbLineBasedRankAtTimePercent(0.25);
+    }
+
+    @Override
+    public Integer getRankRhumbLineBasedAfterSecondQuarter() {
+        return getRhumbLineBasedRankAtTimePercent(0.5);
+    }
+
+    @Override
+    public Integer getRankRhumbLineBasedAfterThirdQuarter() {
+        return getRhumbLineBasedRankAtTimePercent(0.75);
+    }
+
+    @Override
+    public Double getRankRhumbLineBasedAverageAcrossFirstThreeQuarters() {
+        return getRankAverageAcrossFirstThreeQuarters(this::getRhumbLineBasedRankAtTimePercent);
+    }
+
+    private Double getRankPredictionError(final Supplier<? extends Number> rankPredictor) {
+        final Integer rankAtFinish = getRankAtFinish();
+        final Double result;
+        if (rankAtFinish != null) {
+            final Number predictiveRank = rankPredictor.get();
+            if (predictiveRank != null) {
+                final int numberOfCompetitors = Util.size(getTrackedRace().getRace().getCompetitors());
+                if (numberOfCompetitors != 0) {
+                    result = Math.abs((double) rankAtFinish-predictiveRank.doubleValue()) / (double) numberOfCompetitors;
+                } else {
+                    // this is a bit strange because we obviously have a non-null getCompetitor() in the race...
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Double getRankPredictionErrorAfterFirstQuarter() {
+        return getRankPredictionError(this::getRankAfterFirstQuarter);
+    }
+    
+    @Override
+    public Double getRankPredictionErrorAfterSecondQuarter() {
+        return getRankPredictionError(this::getRankAfterSecondQuarter);
+    }
+
+    @Override
+    public Double getRankPredictionErrorAfterThirdQuarter() {
+        return getRankPredictionError(this::getRankAfterThirdQuarter);
+    }
+
+    @Override
+    public Double getRankPredictionErrorAcrossFirstThreeQuarters() {
+        return getRankPredictionError(this::getRankAverageAcrossFirstThreeQuarters);
+    }
+
+    @Override
+    public Double getRankPredictionErrorRhumbLineBasedAfterFirstQuarter() {
+        return getRankPredictionError(this::getRankRhumbLineBasedAfterFirstQuarter);
+    }
+
+    @Override
+    public Double getRankPredictionErrorRhumbLineBasedAfterSecondQuarter() {
+        return getRankPredictionError(this::getRankRhumbLineBasedAfterSecondQuarter);
+    }
+
+    @Override
+    public Double getRankPredictionErrorRhumbLineBasedAfterThirdQuarter() {
+        return getRankPredictionError(this::getRankRhumbLineBasedAfterThirdQuarter);
+    }
+
+    @Override
+    public Double getRankPredictionErrorRhumbLineBasedAcrossFirstThreeQuarters() {
+        return getRankPredictionError(this::getRankRhumbLineBasedAverageAcrossFirstThreeQuarters);
+    }
 }

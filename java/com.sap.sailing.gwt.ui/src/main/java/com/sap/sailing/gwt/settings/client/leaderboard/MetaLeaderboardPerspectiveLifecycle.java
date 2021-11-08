@@ -12,7 +12,7 @@ public class MetaLeaderboardPerspectiveLifecycle extends AbstractLeaderboardPers
     
     public MetaLeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, Iterable<DetailType> availableDetailTypes) {
         super(stringMessages, leaderboard, true, availableDetailTypes);
-        multiLeaderboardPanelLifecycle = new MultipleMultiLeaderboardPanelLifecycle(null, stringMessages, availableDetailTypes);
+        multiLeaderboardPanelLifecycle = new MultipleMultiLeaderboardPanelLifecycle(stringMessages, availableDetailTypes);
         addLifeCycle(multiLeaderboardPanelLifecycle);
     }
 

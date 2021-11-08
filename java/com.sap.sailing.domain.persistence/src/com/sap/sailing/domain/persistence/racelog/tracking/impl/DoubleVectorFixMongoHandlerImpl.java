@@ -2,9 +2,10 @@ package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
 import java.util.List;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.BsonArray;
+import org.bson.BsonDouble;
+import org.bson.Document;
+
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -25,28 +26,28 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
     }
 
     @Override
-    public DBObject transformForth(DoubleVectorFix fix) throws IllegalArgumentException {
-        DBObject result = new BasicDBObject();
+    public Document transformForth(DoubleVectorFix fix) throws IllegalArgumentException {
+        Document result = new Document();
         mof.storeTimed(fix, result);
         result.put(FieldNames.FIX.name(), toDBObject(fix.get()));
         return result;
     }
 
     @Override
-    public DoubleVectorFix transformBack(DBObject dbObject) {
+    public DoubleVectorFix transformBack(Document dbObject) {
         TimePoint timePoint = dof.loadTimePoint(dbObject);
-        return new DoubleVectorFixImpl(timePoint, fromDBObject((DBObject) dbObject.get(FieldNames.FIX.name())));
+        return new DoubleVectorFixImpl(timePoint, fromDBObject(dbObject.get(FieldNames.FIX.name())));
     }
     
-    private DBObject toDBObject(Double[] data) {
-        BasicDBList result = new BasicDBList();
+    private BsonArray toDBObject(Double[] data) {
+        BsonArray result = new BsonArray();
         for (Double value : data) {
-            result.add(value);
+            result.add(value==null?null:new BsonDouble(value));
         }
         return result;
     }
     
-    private Double[] fromDBObject(DBObject dbObject) {
+    private Double[] fromDBObject(Object dbObject) {
         @SuppressWarnings("unchecked")
         List<Number> dbValues = (List<Number>) dbObject;
         Double[] result = new Double[dbValues.size()];

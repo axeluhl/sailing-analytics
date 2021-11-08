@@ -60,8 +60,18 @@ public class LegEntryDTO implements Serializable {
     public boolean finished;
     public Map<ManeuverType, Integer> numberOfManeuvers;
     public Map<ManeuverType, Double> averageManeuverLossInMeters;
-    public Double averageAbsoluteCrossTrackErrorInMeters;
-    public Double averageSignedCrossTrackErrorInMeters;
+    
+    /**
+     * The absolute cross track error; averaged when asked for a time point after the competitor has finished the leg,
+     * or the current value when in the leg; {@code null} when not yet in the leg.
+     */
+    public Double currentOrAverageAbsoluteCrossTrackErrorInMeters;
+
+    /**
+     * The signed cross track error; averaged when asked for a time point after the competitor has finished the leg,
+     * or the current value when in the leg; {@code null} when not yet in the leg.
+     */
+    public Double currentOrAverageSignedCrossTrackErrorInMeters;
     
     /**
      * The corrected time spent since the start of the race up to the current time point or the finishing of
@@ -75,11 +85,11 @@ public class LegEntryDTO implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((averageAbsoluteCrossTrackErrorInMeters == null) ? 0
-                : averageAbsoluteCrossTrackErrorInMeters.hashCode());
+        result = prime * result + ((currentOrAverageAbsoluteCrossTrackErrorInMeters == null) ? 0
+                : currentOrAverageAbsoluteCrossTrackErrorInMeters.hashCode());
         result = prime * result + ((averageManeuverLossInMeters == null) ? 0 : averageManeuverLossInMeters.hashCode());
-        result = prime * result + ((averageSignedCrossTrackErrorInMeters == null) ? 0
-                : averageSignedCrossTrackErrorInMeters.hashCode());
+        result = prime * result + ((currentOrAverageSignedCrossTrackErrorInMeters == null) ? 0
+                : currentOrAverageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result
                 + ((averageSpeedOverGroundInKnots == null) ? 0 : averageSpeedOverGroundInKnots.hashCode());
         result = prime * result + ((correctedTotalTime == null) ? 0 : correctedTotalTime.hashCode());
@@ -124,20 +134,20 @@ public class LegEntryDTO implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         LegEntryDTO other = (LegEntryDTO) obj;
-        if (averageAbsoluteCrossTrackErrorInMeters == null) {
-            if (other.averageAbsoluteCrossTrackErrorInMeters != null)
+        if (currentOrAverageAbsoluteCrossTrackErrorInMeters == null) {
+            if (other.currentOrAverageAbsoluteCrossTrackErrorInMeters != null)
                 return false;
-        } else if (!averageAbsoluteCrossTrackErrorInMeters.equals(other.averageAbsoluteCrossTrackErrorInMeters))
+        } else if (!currentOrAverageAbsoluteCrossTrackErrorInMeters.equals(other.currentOrAverageAbsoluteCrossTrackErrorInMeters))
             return false;
         if (averageManeuverLossInMeters == null) {
             if (other.averageManeuverLossInMeters != null)
                 return false;
         } else if (!averageManeuverLossInMeters.equals(other.averageManeuverLossInMeters))
             return false;
-        if (averageSignedCrossTrackErrorInMeters == null) {
-            if (other.averageSignedCrossTrackErrorInMeters != null)
+        if (currentOrAverageSignedCrossTrackErrorInMeters == null) {
+            if (other.currentOrAverageSignedCrossTrackErrorInMeters != null)
                 return false;
-        } else if (!averageSignedCrossTrackErrorInMeters.equals(other.averageSignedCrossTrackErrorInMeters))
+        } else if (!currentOrAverageSignedCrossTrackErrorInMeters.equals(other.currentOrAverageSignedCrossTrackErrorInMeters))
             return false;
         if (averageSpeedOverGroundInKnots == null) {
             if (other.averageSpeedOverGroundInKnots != null)

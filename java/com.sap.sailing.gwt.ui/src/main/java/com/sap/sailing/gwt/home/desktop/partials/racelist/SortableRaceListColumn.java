@@ -6,12 +6,12 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.celltable.SortableColumn;
 
 public abstract class SortableRaceListColumn<T extends RaceMetadataDTO<?>, C> extends SortableColumn<T, C> {
     
@@ -98,8 +98,9 @@ public abstract class SortableRaceListColumn<T extends RaceMetadataDTO<?>, C> ex
     }
     
     private String getCurrentStyle(String baseStyle) {
-        return getStyleNamesString(baseStyle, isShowDetails() ? columnVisibility.getAdditionalStyle()
-                : RaceListResources.INSTANCE.css().racesListHideColumn());
+        return getStyleNamesString(baseStyle != null ? baseStyle : "",
+                isShowDetails() ? columnVisibility.getAdditionalStyle()
+                        : RaceListResources.INSTANCE.css().racesListHideColumn());
     }
         
     private static class WrappedTextHeader extends SafeHtmlHeader {

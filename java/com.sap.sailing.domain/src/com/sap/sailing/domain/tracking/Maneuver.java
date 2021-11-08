@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sse.common.Distance;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
@@ -57,12 +57,10 @@ public interface Maneuver extends GPSFix {
     Tack getNewTack();
 
     /**
-     * Gets the maneuver loss of this maneuver which is the distance projected onto the average course between entering
-     * and exiting the maneuver that the boat lost compared to not having maneuvered. The maneuver loss is calculated
-     * considering the maneuver curve, which was performed between {@link #getTimePointBefore()} and
-     * {@link #getTimePointAfter()}.
+     * Gets the ManeuverLoss Object of a maneuver, that is calculated in {@link ManeuverDetectorImpl#getManeuverLoss}
+     * 
      */
-    Distance getManeuverLoss();
+    ManeuverLoss getManeuverLoss();
 
     /**
      * Gets the time point of the corresponding maneuver. The time point refers to a point within the main curve of
@@ -174,5 +172,5 @@ public interface Maneuver extends GPSFix {
      */
     @Statistic(messageKey = "AvgTurningRateInDegreesPerSecond", resultDecimals = 4)
     double getAvgTurningRateInDegreesPerSecond();
-
+    
 }

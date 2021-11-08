@@ -1,11 +1,11 @@
 package com.sap.sse.gwt.client.panels;
 
-import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.gwt.client.StringMessages;
 
 /**
  * Customizable filter panel which allows to create a flexible filter panel with various number of filter inputs (e.g.
@@ -20,8 +20,8 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
      * Does not add the default filter text box yet; use {@link #addDefaultTextBox()} to do so; you may
      * add other widgets before the default text filter box.
      */
-    public CustomizableFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, ListDataProvider<T> filtered) {
-        super(all, display, filtered, /* show default filter text box */ false);
+    public CustomizableFilterablePanel(Iterable<T> all, ListDataProvider<T> filtered, StringMessages stringMessages) {
+        super(all, filtered, /* show default filter text box */ false, stringMessages);
     }
 
     public void add(Label label, Widget widget, Filter<T> filter) {

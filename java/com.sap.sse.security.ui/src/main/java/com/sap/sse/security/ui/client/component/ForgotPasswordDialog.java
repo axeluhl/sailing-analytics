@@ -2,46 +2,49 @@ package com.sap.sse.security.ui.client.component;
 
 import java.util.HashMap;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class ForgotPasswordDialog extends AbstractUserDialog {
-    public ForgotPasswordDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user,
+    private ForgotPasswordDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<UserData> callback) {
+        // using write service to enforce round trip going to master for consistency purposes
         super(stringMessages, stringMessages.forgotPassword(), stringMessages.enterUsernameOrEmail(),
                 userManagementService, user, /* validator */ null, callback);
     }
-    
+
     /**
-     * Uses a default callback handler that triggers {@link UserManagementServiceAsync#resetPassword(String, String, String, AsyncCallback)} when
+     * Uses a default callback handler that triggers {@link UserManagementWriteServiceAsync#resetPassword(String, String, String, AsyncCallback)} when
      * the user confirms the dialog.
      */
-    public ForgotPasswordDialog(final StringMessages stringMessages, final UserManagementServiceAsync userManagementService, UserDTO user) {
-        this(stringMessages, userManagementService, user, new DialogCallback<UserData>() {
+    public ForgotPasswordDialog(final StringMessages stringMessages, final UserManagementWriteServiceAsync userManagementWriteService, UserDTO user) {
+        this(stringMessages, userManagementWriteService, user, new DialogCallback<UserData>() {
             @Override
             public void ok(final UserData userData) {
-                userManagementService.resetPassword(userData.getUsername(), userData.getEmail(),
+                userManagementWriteService.resetPassword(userData.getUsername(), userData.getEmail(),
                         EntryPointLinkFactory.createPasswordResetLink(new HashMap<String, String>()),
                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         if (caught instanceof UserManagementException) {
                             if (UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL.equals(caught.getMessage())) {
-                                Window.alert(StringMessages.INSTANCE.cannotResetPasswordWithoutValidatedEmail(userData.getUsername()));
+                                Notification.notify(StringMessages.INSTANCE.cannotResetPasswordWithoutValidatedEmail(userData.getUsername()), NotificationType.ERROR);
                             } else {
-                                Window.alert(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()));
+                                Notification.notify(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()), NotificationType.ERROR);
                             }
                         } else {
-                            Window.alert(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()));
+                            Notification.notify(StringMessages.INSTANCE.errorDuringPasswordReset(caught.getMessage()), NotificationType.ERROR);
                         }
                     }
     
@@ -57,7 +60,7 @@ public class ForgotPasswordDialog extends AbstractUserDialog {
                             }
                             nameOrEmail.append(userData.getEmail());
                         }
-                        Window.alert(StringMessages.INSTANCE.passwordResetLinkSent(nameOrEmail.toString()));
+                        Notification.notify(StringMessages.INSTANCE.passwordResetLinkSent(nameOrEmail.toString()), NotificationType.INFO);
                     }
                 }));
             }

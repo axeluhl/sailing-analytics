@@ -11,7 +11,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
  * This cache looks "backwards." It contains pairs whose first component represents a <code>to</code> parameter used in
@@ -144,7 +144,7 @@ public class TimeRangeCache<T> {
             // no writer can be active because we're holding the read lock; read access on the lruCache is synchronized using
             // the lruCache's mutex; this is necessary because we're using access-based LRU pinging where even getting an entry
             // modifies the internal parts of the data structure which is not thread safe.
-            synchronized (lruCache) {
+            synchronized (lruCache) { // ping the "perfect match" although it may not even have existed in the cache
                 lruCache.get(new Util.Pair<TimePoint, TimePoint>(from, to));
             }
             return result;

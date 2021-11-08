@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class SeriesDTO extends NamedDTO {
     private static final long serialVersionUID = -3813445377426310687L;
@@ -18,8 +18,10 @@ public class SeriesDTO extends NamedDTO {
     private boolean firstColumnIsNonDiscardableCarryForward;
     private boolean hasSplitFleetContiguousScoring;
     private Integer maximumNumberOfDiscards;
-    
-    public SeriesDTO() {}
+
+    public SeriesDTO() {
+        super("");
+    }
     
     public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,

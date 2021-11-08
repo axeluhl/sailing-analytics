@@ -10,6 +10,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ResultsAreOfficialFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -114,7 +116,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
 
     @Override
     public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
-        return raceColumn.getAllCompetitorsAndTheirBoats(fleet).get(competitor);
+        return fleet == null ? null : raceColumn.getAllCompetitorsAndTheirBoats(fleet).get(competitor);
     }
 
     @Override
@@ -136,11 +138,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
         return trackedRace == null ? 0
                 : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race,
-                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint)) : 0;
+                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : 0;
     }
 
     /**
@@ -282,4 +284,9 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         deregisterer.deregister(deregisterer.analyze());
     }
 
+    @Override
+    public boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
+        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        return new ResultsAreOfficialFinder(raceLog).analyze() != null;
+    }
 }

@@ -25,8 +25,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.sf.marineapi.ais.message.AISMessage01;
 import net.sf.marineapi.ais.event.AbstractAISMessageListener;
+import net.sf.marineapi.ais.message.AISMessage01;
 import net.sf.marineapi.nmea.io.SentenceReader;
 
 /**

@@ -7,9 +7,11 @@ import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.interfaces.SimpleSaltedAuthenticationInfo;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
-public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
+public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
     
     public UsernamePasswordRealm() {
         super();
@@ -33,11 +35,9 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         UsernamePasswordToken userPassToken = (UsernamePasswordToken) token;
         final String username = userPassToken.getUsername();
-
         if (username == null) {
             return null;
         }
-
         // read password hash and salt from db
         String saltedPassword = null;
         byte[] salt = null;
@@ -57,7 +57,6 @@ public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
         if (salt == null) {
             return null;
         }
-        
         // return salted credentials
         SaltedAuthenticationInfo sai = new SimpleSaltedAuthenticationInfo(username, saltedPassword, salt);
         return sai;

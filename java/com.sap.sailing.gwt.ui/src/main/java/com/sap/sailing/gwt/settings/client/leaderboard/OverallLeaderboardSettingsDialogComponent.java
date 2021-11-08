@@ -9,8 +9,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class OverallLeaderboardSettingsDialogComponent extends MultiRaceLeaderboardSettingsDialogComponent {
 
-    public OverallLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
-        super(initialSettings, allRaceColumnNames, stringMessages, availableDetailTypes, false);
+    public OverallLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
+            List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
+        super(initialSettings, allRaceColumnNames, stringMessages, availableDetailTypes,
+                /* canBoatInfoBeShown */ false);
     }
 
     @Override

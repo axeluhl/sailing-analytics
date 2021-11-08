@@ -9,8 +9,9 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
+public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory<?>>, WithQualifiedObjectIdentifier {
     Team getTeam();
     
     /**
@@ -31,7 +32,7 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
      * Returns a derived short information about a competitor depending on the information available
      * If we have a short name set on the competitor this name will be returned.
      * If no short name exist but a boat the either the sailId or the boat name will returned.
-     * If all these attributes have no value null is returned.   
+     * If all these attributes have no value null is returned.
      */
     String getShortInfo();
 
@@ -53,6 +54,7 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
     /**
      * Adds a listener to this competitor. The listener is also added to the boat and the team for changes.
      * Adding a listener that is already part of this competitor's listeners set remains without effect.
+     * The listeners added here will not be serialized together with this {@link Competitor} instance.
      */
     void addCompetitorChangeListener(CompetitorChangeListener listener);
     
@@ -93,4 +95,5 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
      * @see #getTimeOnTimeFactor
      */
     Duration getTimeOnDistanceAllowancePerNauticalMile();
+
 }

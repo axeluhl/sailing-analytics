@@ -16,10 +16,11 @@ import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.desktop.utils.LongNamesUtil;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
 
 public class EventTeaser extends Composite {
@@ -56,8 +57,7 @@ public class EventTeaser extends Composite {
                     placeNavigation.goToPlace();
                 }
             }
-        });;
-
+        });
         updateUI();
     }
 
@@ -85,6 +85,9 @@ public class EventTeaser extends Composite {
     
     public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
         eventImage.appendChild(new EventTeaserSeriesInfoCorner(seriesNavigation, eventSeries).getElement());
+        eventName.setInnerSafeHtml(LongNamesUtil.breakLongName(eventSeries.getSeriesDisplayName()));
+        venue.setInnerText(StringMessages.INSTANCE.lastEvent(event.getLocationOrVenue()));
+        eventImage.setTitle(StringMessages.INSTANCE.teaserOverallLinkToolTip());
     }
     
     public void hideImage(boolean hide) {

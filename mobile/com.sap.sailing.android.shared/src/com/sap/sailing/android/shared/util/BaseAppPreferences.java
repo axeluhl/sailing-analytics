@@ -1,9 +1,9 @@
 package com.sap.sailing.android.shared.util;
 
+import com.sap.sailing.android.shared.R;
+
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import com.sap.sailing.android.shared.R;
 
 public class BaseAppPreferences {
     protected final Context context;
@@ -24,6 +24,6 @@ public class BaseAppPreferences {
     }
 
     public void setLastScannedQRCode(String lastQRCode) {
-        preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).commit();
+        preferences.edit().putString(context.getString(R.string.preference_last_scanned_qr_code), lastQRCode).apply();
     }
 }

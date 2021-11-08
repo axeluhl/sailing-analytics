@@ -12,15 +12,15 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDenoteForTrackingEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceLogDenoteForTrackingEventDeserializer extends BaseRaceLogEventDeserializer {	
-    private final SharedDomainFactory domainFactory;
+    private final SharedDomainFactory<?> domainFactory;
     public RaceLogDenoteForTrackingEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer,
-            SharedDomainFactory factory) {
+            SharedDomainFactory<?> factory) {
         super(competitorDeserializer);
         this.domainFactory = factory;
     }
@@ -32,7 +32,6 @@ public class RaceLogDenoteForTrackingEventDeserializer extends BaseRaceLogEventD
     	BoatClass boatClass = domainFactory.getOrCreateBoatClass(
     			(String) object.get(RaceLogDenoteForTrackingEventSerializer.FIELD_BOAT_CLASS));
     	Serializable raceId = (Serializable) object.get(RaceLogDenoteForTrackingEventSerializer.FIELD_RACE_ID);
-        
         return new RaceLogDenoteForTrackingEventImpl(createdAt, timePoint, author, id, passId, raceName, boatClass, raceId);
     }
 }

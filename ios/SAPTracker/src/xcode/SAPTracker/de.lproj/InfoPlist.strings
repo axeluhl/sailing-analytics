@@ -1,11 +1,12 @@
-//
-//  InfoPlist.strings
-//  SAPTracker
-//
-//  Created by Raimund Wege on 04.11.16.
-//  Copyright © 2016 com.sap.sailing. All rights reserved.
-//
+/*
+    InfoPlist.strings
+    SAPTracker
+  
+    Created by Raimund Wege on 04.11.16.
+    Copyright © 2016 com.sap.sailing. All rights reserved.
+*/
 
+"NSLocationAlwaysUsageDescription" = "Um das ganze Rennen mit Deinem Gerät zu tracken, muss das Tracking auch dann fortgesetzt werden, wenn der Bildschirm abgeschaltet oder gesperrt wird. Das hilft, die Batterielaufzeit zu verlängern und versehentlich das Tracking zu stoppen.";
 "NSLocationWhenInUseUsageDescription" = "Um das ganze Rennen mit Deinem Gerät zu tracken, muss das Tracking auch dann fortgesetzt werden, wenn der Bildschirm abgeschaltet oder gesperrt wird. Das hilft, die Batterielaufzeit zu verlängern und versehentlich das Tracking zu stoppen.";
 "NSLocationAlwaysAndWhenInUseUsageDescription" = "Um das ganze Rennen mit Deinem Gerät zu tracken, muss das Tracking auch dann fortgesetzt werden, wenn der Bildschirm abgeschaltet oder gesperrt wird. Das hilft, die Batterielaufzeit zu verlängern und versehentlich das Tracking zu stoppen.";
 "NSCameraUsageDescription" = "Die Kamera wird benötigt, um per QR-Code einen Check-In auszuführen.";

@@ -19,7 +19,9 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.Refresher;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -27,6 +29,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Shows two boat tables next to each other; the table on the left is that of the "registered" boats, the table
@@ -65,11 +68,11 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
      *            whether the pool of "all" boats is to be restricted to those obtained from the leaderboard, or
      *            to all boats in the server's boat store
      */
-    protected BoatRegistrationsPanel(final SailingServiceAsync sailingService,
+    protected BoatRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            Refresher<BoatDTO> boatsRefresher, Refresher<CompetitorDTO> competitorsRefresher,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
-            Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever,
-            boolean restrictPoolToLeaderboard) {
+            Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever, boolean restrictPoolToLeaderboard) {
         this.errorReporter = errorReporter;
         this.validator = validator;
          this.busyIndicator = new SimpleBusyIndicator();
@@ -87,10 +90,13 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
         final HorizontalPanel boatRegistrationPanel = new HorizontalPanel();
         final CaptionPanel allBoatsPanel = new CaptionPanel(stringMessages.boatPool());
         final CaptionPanel registeredBoatsPanel = new CaptionPanel(stringMessages.registeredBoats());
-        allBoatsTable = new BoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */true, 20, false);
-        registeredBoatsTable = new BoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */false,  20, false);
+        allBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, boatsRefresher, competitorsRefresher,
+                stringMessages, /* multiSelection */
+                errorReporter, true, /* enablePager */true, 20, false);
+        registeredBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService,
+                /* boatsRefresher not needed; boats fetched for registrations */ null,
+                /* competiorsRefresher not needed */ null, stringMessages, errorReporter, /* multiSelection */ true,
+                /* enablePager */ false, /* paging size */ 20, /* allowActions */ false);
         allBoatsPanel.add(allBoatsTable);
         registeredBoatsPanel.add(registeredBoatsTable);
         VerticalPanel movePanel = new VerticalPanel();
@@ -163,7 +169,7 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
     }
 
     private void setRegisterableBoatsAndRegisteredBoats() {
-        allBoatsTable.refreshBoatList(true, new Callback<Iterable<BoatDTO>, Throwable>() {
+        allBoatsTable.refreshBoatList(/* loadOnlyStandaloneBoats */ true, new Callback<Iterable<BoatDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<BoatDTO> result) {
                 registeredBoatsRetriever.accept(new AsyncCallback<Collection<BoatDTO>>() {

@@ -22,16 +22,18 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
+import com.sap.sailing.domain.common.windfinder.AvailableWindFinderSpotCollections;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
@@ -55,7 +57,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
-    
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
+
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -69,14 +72,18 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         @Override
         public String getErrorMessage(EventDTO eventToValidate) {
             String errorMessage = null;
-            boolean nameNotEmpty = eventToValidate.getName() != null && eventToValidate.getName().length() > 0;
-            boolean venueNotEmpty = eventToValidate.venue.getName() != null && eventToValidate.venue.getName().length() > 0;
-            boolean courseAreaNotEmpty = eventToValidate.venue.getCourseAreas() != null && eventToValidate.venue.getCourseAreas().size() > 0;
 
-            if (courseAreaNotEmpty) {
+            boolean emptyName = eventToValidate.getName() == null
+                    || eventToValidate.getName().isEmpty();
+            boolean emptyVenue = eventToValidate.venue.getName() == null
+                    || eventToValidate.venue.getName().isEmpty();
+            boolean emptyCourseArea = eventToValidate.venue.getCourseAreas() == null
+                    || eventToValidate.venue.getCourseAreas().isEmpty();
+
+            if (!emptyCourseArea) {
                 for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
-                    courseAreaNotEmpty = courseArea.getName() != null && courseArea.getName().length() > 0;
-                    if (!courseAreaNotEmpty) {
+                    emptyCourseArea = courseArea.getName() == null || courseArea.getName().isEmpty();
+                    if (emptyCourseArea) {
                         break;
                     }
                 }
@@ -96,37 +103,36 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             // remark: startDate == null and endDate == null is valid
             if (startDate != null && endDate != null) {
                 if (startDate.after(endDate)) {
-                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate(); 
+                    datesErrorMessage = stringMessages.startDateMustBeforeEndDate();
                 }
             } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
             }
-            
+
             if (datesErrorMessage != null) {
                 errorMessage = datesErrorMessage;
-            } else if (!nameNotEmpty) {
+            } else if (emptyName) {
                 errorMessage = stringMessages.pleaseEnterAName();
-            } else if (!venueNotEmpty) {
+            } else if (emptyVenue) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyVenue();
-            } else if (!courseAreaNotEmpty) {
+            } else if (emptyCourseArea) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyCourseArea();
             } else if (!unique) {
                 errorMessage = stringMessages.eventWithThisNameAlreadyExists();
             }
-
             return errorMessage;
         }
-
     }
 
     /**
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+    public EventDialog(EventParameterValidator validator, SailingServiceWriteAsync sailingServiceWrite,
+            StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
-        super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
-                callback);
+        super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         this.stringMessages = stringMessages;
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
@@ -145,7 +151,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 validateAndUpdate();
             }
         };
-
         courseAreaNameList = new CourseAreaListInlineEditorComposite(Collections.<CourseAreaDTO> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<CourseAreaDTO>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
@@ -158,26 +163,30 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        
-        imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
-        videosListComposite = new VideosListComposite(stringMessages);
+        imagesListComposite = new ImagesListComposite(sailingServiceWrite, stringMessages, storageServiceAvailable);
+        videosListComposite = new VideosListComposite(stringMessages, storageServiceAvailable);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
+        final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
+                .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()
+                        : AvailableWindFinderSpotCollections
+                                .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder();
         windFinderSpotCollectionIdsComposite = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        Collections.emptyList(), stringMessages.enterIdOfWindfinderReviewedSpotCollection(), 80));
+                new GenericStringListEditorComposite.ExpandedUi<String>(stringMessages,
+                        IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                        suggestedWindFinderSpotCollections, stringMessages.enterIdOfWindFinderReviewedSpotCollection(), 35));
     }
 
     @Override
     protected EventDTO getResult() {
-        EventDTO result = new EventDTO();
+        final List<LeaderboardGroupDTO> leaderboardGroups = new ArrayList<>();
         List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
         for (final String lgName : leaderboardGroupNames) {
             final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
             if (lgDTO != null) {
-                result.addLeaderboardGroup(lgDTO);
-            }                
+                leaderboardGroups.add(lgDTO);
+            }
         }
-        result.setName(nameEntryField.getText());
+        EventDTO result = new EventDTO(nameEntryField.getText(), leaderboardGroups);
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(externalLinksComposite.getOfficialWebsiteURLValue());
         result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());
@@ -220,7 +229,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         formGrid.setWidget(rowIndex++, 1, startDateBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.endDate() + ":"));
         formGrid.setWidget(rowIndex++, 1, endDateBox);
-        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isPublic() + ":"));
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isListedOnHomepage() + ":"));
         formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
         formGrid.setWidget(rowIndex++, 1, baseURLEntryField);

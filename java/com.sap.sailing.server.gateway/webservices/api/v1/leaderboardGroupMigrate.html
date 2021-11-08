@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/leaderboardgroups/{name}/migrate</h2>
+
+<b>Description:</b>
+<p>Migrates the given object to a new owner, it will also attempt to update the related structure of other domain objects, to ensure a consistent result</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>PUT</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>empty</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>migrateCompetitors should the competitors be migrated as well<br>
+        migrateBoats should the boats be migrated as well<br>
+        createNewGroup determines if the migration will happen into a group that will be created (also required for currently unowned objects)</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+        <td>existingGroupId group that should be changed, required for createNewGroup = false</td>
+        <td>newGroupName name of the new group, required for createNewGroup = true<br>
+        copyMembersAndRoles determines if the members and roles are copied (default: true)</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -X POST -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://127.0.0.1:8888/sailingserver/api/v1/leaderboardgroups/Extreme Sailing Series 2016/migrate?existingGroupId=4bc6747a-2975-42c8-a31b-365d0bca6197&createNewGroup=false&migrateCompetitors=false&migrateBoats=false"<br>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

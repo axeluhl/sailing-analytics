@@ -5,24 +5,25 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
+import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
@@ -30,26 +31,32 @@ import com.sap.sailing.gwt.ui.simulator.racemap.MovingCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
+import com.sap.sse.common.ColorMapperChangedListener;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.mutationobserver.ElementStyleMutationObserver;
+import com.sap.sse.gwt.client.mutationobserver.ElementStyleMutationObserver.DomStyleMutationCallback;
+import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 
 /**
- * A Google Maps overlay based on an HTML5 canvas for drawing a wind field. The {@link VectorField} implementation used is the
- * {@link WindInfoForRaceVectorField} which takes a {@link WindInfoForRaceDTO} as its basis.
+ * A Google Maps overlay based on an HTML5 canvas for drawing a wind field. The {@link VectorField} implementation used
+ * is the {@link WindInfoForRaceVectorField} which takes a {@link WindInfoForRaceDTO} as its basis.
  * 
  * @author Christopher Ronnewinkel (D036654)
  * @author Axel Uhl (D043530)
  * 
  */
-public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
+public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implements ColorMapperChangedListener, TimeListener {
     public static final String LOAD_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
     private static final int WIND_FETCH_INTERVAL_IN_MILLIS = 10000;
     private static final int CHECK_WIND_SOURCE_INTERVAL_IN_MILLIS = 60000;
-    
+
     private boolean visible = false;
     private final Timer timer;
     private Swarm swarm;
@@ -62,13 +69,17 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     private final Scheduler scheduler;
     private Canvas streamletLegend;
     private boolean firstColoring = true;
-    
-    private long latitudeCount;
-    private double latitudeSum;
+    private boolean colored;
+    private final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
+    private ElementStyleMutationObserver observer;
+    private boolean dragging = false;
+    private boolean isAttached = false, startObserverWhenAttached = false;
+    private boolean timeChangedSinceLastUpdate = true;
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
             RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, StringMessages stringMessages, CoordinateSystem coordinateSystem) {
+            AsyncActionsExecutor asyncActionsExecutor, StringMessages stringMessages,
+            CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
         this.scheduler = Scheduler.get();
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -79,47 +90,17 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         windInfoForRace.raceIsKnownToStartUpwind = true; // default
         windInfoForRace.windSourcesToExclude = new HashSet<>();
         windInfoForRace.windTrackInfoByWindSource = new HashMap<>();
-        updateAverageLatitudeDeg(windInfoForRace);
-        this.windField = new WindInfoForRaceVectorField(windInfoForRace, /* frames per second */ 1000.0/animationIntervalMillis, coordinateSystem);
+        this.windField = new WindInfoForRaceVectorField(windInfoForRace,
+                /* frames per second */ 1000.0 / animationIntervalMillis, coordinateSystem);
         this.timer = timer;
+        this.timer.addTimeListener(this);
         getCanvas().getElement().setId("swarm-display");
         createStreamletLegend(map);
     }
 
-    public double getAverageLatitudeDeg() {
-        return latitudeCount > 0 ? latitudeSum/latitudeCount : 0;
-    }
-    
-    private void updateAverageLatitudeDeg(WindInfoForRaceDTO windInfoForRace) {
-        for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
-            for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
-                if (wind.position != null) {
-                    latitudeSum += wind.position.getLatDeg();
-                    latitudeCount++;
-                }
-            }
-        }
-        if (latitudeCount > 0) {
-            windField.setAverageLatitudeDeg(latitudeSum/latitudeCount);
-        }
-    }
-    
     private void createStreamletLegend(MapWidget map) {
         streamletLegend = Canvas.createIfSupported();
         streamletLegend.addStyleName("MapStreamletLegend");
-        //streamletLegend.setTitle(stringMessages.simulationLegendTooltip());
-        /*streamletLegend.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                int clickPixelY = event.getRelativeY(streamletLegend.getElement());
-                int legendRow = clickPixelY / ((int) rectHeight);
-                int pathRow = legendRow - (racePath!=null ? 1 : 0);
-                //Window.alert("clickPixelY: " + clickPixelY + "\nlegendRow: " + legendRow);
-                visiblePaths[pathRow] = !visiblePaths[pathRow];
-                clearCanvas();
-                drawPaths();
-            }
-        });*/
         map.setControls(ControlPosition.LEFT_BOTTOM, streamletLegend);
         int canvasWidth = 500;
         int canvasHeight = 60;
@@ -127,47 +108,63 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         streamletLegend.setWidth(String.valueOf(canvasWidth));
         streamletLegend.setHeight(String.valueOf(canvasHeight));
         streamletLegend.setCoordinateSpaceWidth(canvasWidth);
-        streamletLegend.setCoordinateSpaceHeight(canvasHeight);    }
+        streamletLegend.setCoordinateSpaceHeight(canvasHeight);
+    }
 
-    private void drawLegend() {
-        double x, y;
-        x=100;
-        y=16;
-        double w = 1;
-        double h = 20;
-        int maxIdx = 300;
-        Context2d context2d = streamletLegend.getContext2d();
-        context2d.setFillStyle("rgba(0,0,0,.3)");
-        context2d.setLineWidth(1.0);
-        context2d.beginPath();
-        context2d.fillRect(x-7.0, y-16.0, w*maxIdx+15.0, 56.0);
-        context2d.closePath();
-        context2d.stroke();
-        context2d.setFillStyle("white");
-        String label = stringMessages.windSpeedInKnots();
-        TextMetrics txtmet;
-        txtmet = context2d.measureText(label);
-        context2d.fillText(label, x + (w*maxIdx - txtmet.getWidth())/2.0, y - 5.0);
-        for(int idx=0; idx <= maxIdx; idx++) {
-            //double speed = idx * 24.0 / maxIdx;
-            double speed = 4.0 + idx * 16.0 / maxIdx;
-            context2d.setFillStyle(windField.getColor(speed));
-            context2d.beginPath();
-            context2d.fillRect(x + idx*w, y, w, h);
-            context2d.closePath();
-            context2d.stroke();
-            if (Math.abs(speed % 2.0) < (12.0/maxIdx)) {
-                context2d.setStrokeStyle("white");
+    public void drawLegend() {
+        if (streamletLegend.isVisible()) {
+            streamletLegend.getContext2d().clearRect(0, 0, streamletLegend.getCoordinateSpaceWidth(),
+                    streamletLegend.getCoordinateSpaceHeight());
+            if (swarm != null && swarm.isColored()) {
+                final double x = 100;
+                final double y = 16;
+                final double w = 1;
+                final double h = 20;
+                final double speed_max = swarm.getValueRange().getMaxRight();
+                final double speed_min = swarm.getValueRange().getMinLeft();
+                final double speed_spread = speed_max - speed_min;
+                final int scale_spread;
+                if (speed_spread < 0.5) {
+                    scale_spread = 300;
+                } else if (speed_spread < 1) {
+                    scale_spread = 100;
+                } else {
+                    scale_spread = 50;
+                }
+                final int maxIdx = 300;
+                Context2d context2d = streamletLegend.getContext2d();
+                context2d.setFillStyle("rgba(0,0,0,.3)");
                 context2d.setLineWidth(1.0);
                 context2d.beginPath();
-                context2d.moveTo(x + idx*w, y + h);
-                context2d.lineTo(x + idx*w, y + h + 7.0);
+                context2d.fillRect(x - 10.0, y - 16.0, w * maxIdx + 20.0, 56.0);
                 context2d.closePath();
                 context2d.stroke();
                 context2d.setFillStyle("white");
-                label = ""+Math.round(speed);
+                String label = stringMessages.windSpeedInKnots();
+                TextMetrics txtmet;
                 txtmet = context2d.measureText(label);
-                context2d.fillText(label, x + idx*w - txtmet.getWidth()/2.0, y + h + 8.0 + 8.0);
+                context2d.fillText(label, x + (w * maxIdx - txtmet.getWidth()) / 2.0, y - 5.0);
+                for (int idx = 0; idx <= maxIdx; idx++) {
+                    final double speedSteps = speed_min + idx * (speed_spread) / maxIdx;
+                    context2d.setFillStyle(swarm.getColorMapper().getColor(speedSteps));
+                    context2d.beginPath();
+                    context2d.fillRect(x + idx * w, y, w, h);
+                    context2d.closePath();
+                    context2d.stroke();
+                    if (idx % scale_spread == 0) {
+                        context2d.setStrokeStyle("white");
+                        context2d.setLineWidth(1.0);
+                        context2d.beginPath();
+                        context2d.moveTo(x + idx * w, y + h);
+                        context2d.lineTo(x + idx * w, y + h + 7.0);
+                        context2d.closePath();
+                        context2d.stroke();
+                        context2d.setFillStyle("white");
+                        label = numberFormatOneDecimal.format(speedSteps);
+                        txtmet = context2d.measureText(label);
+                        context2d.fillText(label, x + idx * w - txtmet.getWidth() / 2.0, y + h + 8.0 + 8.0);
+                    }
+                }
             }
         }
     }
@@ -179,14 +176,24 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
             this.swarm = new Swarm(this, map, timer, windField, new StreamletParameters());
         }
         initCanvasOrigin();
+        this.swarm.setColors(colored);
         this.swarm.start(animationIntervalMillis);
+        this.swarm.getColorMapper().addListener(this);
+    }
+
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        timeChangedSinceLastUpdate = true;
     }
 
     private void scheduleWindDataRefresh() {
         scheduler.scheduleFixedPeriod(new RepeatingCommand() {
             @Override
             public boolean execute() {
-                updateWindField();
+                if (timeChangedSinceLastUpdate) {
+                    updateWindField();
+                    timeChangedSinceLastUpdate = false;
+                }
                 return visible;
             }
         }, WIND_FETCH_INTERVAL_IN_MILLIS);
@@ -197,88 +204,79 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                 return visible;
             }
         }, CHECK_WIND_SOURCE_INTERVAL_IN_MILLIS);
-        // Now run things once, first updating the wind sources, then grabbing the wind from those sources:
-        updateWindSourcesToObserve(new Runnable() { @Override public void run() { updateWindField(); } });
+        // Now run things once, first updating the wind sources so that when streamlets are enabled, wind can be queried quickly:
+        updateWindSourcesToObserve(new Runnable() {
+            @Override
+            public void run() {
+                updateWindField();
+            }
+        });
     }
 
     private void stopStreamlets() {
-        if (swarm != null) {
+        if (this.swarm != null) {
             this.swarm.stop();
+            this.swarm.getColorMapper().removeListener(this);
+            swarm = null;
         }
     }
-    
+
     /**
      * Check which wind sources are available for the race identified by {@link #raceIdentifier}. For any wind source
      * not yet observed (contained in the keys of {@link #windInfoForRace}'s
-     * {@link WindInfoForRaceDTO#windTrackInfoByWindSource windTrackInfoByWindSource} map, the wind source is added to that map
-     * unless it's the {@link WindSourceType#COMBINED} wind source or the wind source is marked as excluded.
+     * {@link WindInfoForRaceDTO#windTrackInfoByWindSource windTrackInfoByWindSource} map, the wind source is added to
+     * that map unless it's the {@link WindSourceType#COMBINED} wind source or the wind source is marked as excluded.
      */
     private void updateWindSourcesToObserve(final Runnable runWhenDone) {
-        sailingService.getWindSourcesInfo(raceIdentifier, new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(WindInfoForRaceDTO result) {
-                windInfoForRace.raceIsKnownToStartUpwind = result.raceIsKnownToStartUpwind;
-                windInfoForRace.windSourcesToExclude = result.windSourcesToExclude;
-                for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
-                    if (!windInfoForRace.windTrackInfoByWindSource.containsKey(e.getKey()) &&
-                            !Util.contains(result.windSourcesToExclude, e.getKey()) && e.getKey().getType() != WindSourceType.COMBINED) {
-                        windInfoForRace.windTrackInfoByWindSource.put(e.getKey(), e.getValue());
-                    }
-                }
-                if (runWhenDone != null) {
-                    runWhenDone.run();
-                }
-            }
-        }));
-    }
-    
-    private void updateWindField() {
-        Date timeOfLastFixOfSource = null;
-        Set<String> windSourceTypeNames = new HashSet<>();
-        for (final Entry<WindSource, WindTrackInfoDTO> e : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
-            if (!Util.contains(windInfoForRace.windSourcesToExclude, e.getKey())) {
-                windSourceTypeNames.add(e.getKey().getType().name());
-                if (e.getValue().windFixes != null && !e.getValue().windFixes.isEmpty()) {
-                    // TODO this should better be a per wind source time range; furthermore, only real fixes should be requested / transmitted
-                    timeOfLastFixOfSource = new Date(
-                            e.getValue().windFixes.get(e.getValue().windFixes.size() - 1).measureTimepoint + 1);
-                }
-            }
-        }
-        GetWindInfoAction getWind = new GetWindInfoAction(sailingService, raceIdentifier, timeOfLastFixOfSource,
-                /* endOfTime */ null, RESOLUTION_IN_MILLIS, windSourceTypeNames, /* onlyUpToNewestEvent */ true);
-        asyncActionsExecutor.execute(getWind, LOAD_WIND_STREAMLET_DATA_CATEGORY,
+        sailingService.getWindSourcesInfo(raceIdentifier,
                 new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                        Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()),
+                                NotificationType.WARNING);
                     }
 
                     @Override
                     public void onSuccess(WindInfoForRaceDTO result) {
-                        updateAverageLatitudeDeg(result);
-                        // merge the new wind fixes into the existing WindInfoForRaceDTO structure, updating min/max
-                        // confidences
+                        windInfoForRace.raceIsKnownToStartUpwind = result.raceIsKnownToStartUpwind;
+                        windInfoForRace.windSourcesToExclude = result.windSourcesToExclude;
                         for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
-                            WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource.get(e.getKey());
-                            final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource.get(e.getKey());
-                            windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
-                            if (windTrackForSource.windFixes == null) {
-                                windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
-                            } else {
-                                windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
+                            if (!windInfoForRace.windTrackInfoByWindSource.containsKey(e.getKey())
+                                    && !Util.contains(result.windSourcesToExclude, e.getKey())
+                                    && e.getKey().getType() != WindSourceType.COMBINED) {
+                                windInfoForRace.windTrackInfoByWindSource.put(e.getKey(), e.getValue());
                             }
-                            if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
-                                windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
-                            }
-                            if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
-                                windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
-                            }
+                        }
+                        if (runWhenDone != null) {
+                            runWhenDone.run();
+                        }
+                    }
+                }));
+    }
+
+    /**
+     * Fetches data for the {@link Timer#getTime() current time} set in the {@link #timer}. For each wind source to observe,
+     * a single averaged fix for the current time is requested which is then used to replace the vector field's contents.
+     * This way, the vector field has constant memory footprint, wind queries are fast and independent of race length,
+     * and wind track time resolution.
+     */
+    private void updateWindField() {
+        final Set<String> windSourceTypeNames = windInfoForRace.windTrackInfoByWindSource.keySet().stream().map(
+                windSource->windSource.getType().name()).collect(Collectors.toSet());
+        GetWindInfoAction getWind = new GetWindInfoAction(sailingService, raceIdentifier, timer.getTime(), RESOLUTION_IN_MILLIS,
+                /* number of fixes */ 1, windSourceTypeNames, /* onlyUpToNewestEvent */ true);
+        asyncActionsExecutor.execute(getWind, LOAD_WIND_STREAMLET_DATA_CATEGORY,
+                new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()),
+                                NotificationType.WARNING);
+                    }
+
+                    @Override
+                    public void onSuccess(WindInfoForRaceDTO result) {
+                        if (result != null) {
+                            windField.updateWindInfo(result);
                         }
                     }
                 }));
@@ -290,33 +288,52 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     }
 
     @Override
+    protected void onAttach() {
+        isAttached = true;
+        if (startObserverWhenAttached) {
+            Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
+        }
+    }
+
+    @Override
     public void setVisible(boolean isVisible) {
         if (getCanvas() != null) {
             if (isVisible) {
-                if (this.windField.getColors()) {
+                this.startStreamlets();
+                if (colored) {
                     this.streamletLegend.setVisible(true);
                 }
-                this.startStreamlets();
+                swarm.setColors(colored);
+                if (isAttached) {
+                    Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
+                } else {
+                    startObserverWhenAttached = true;
+                }
                 this.visible = isVisible;
             } else {
-                if (this.windField.getColors()) {
+                if (this.swarm.isColored()) {
                     this.streamletLegend.setVisible(false);
                 }
                 this.stopStreamlets();
+                removeObserverIfPresent();
                 this.visible = isVisible;
             }
         }
     }
 
     public void setColors(boolean isColored) {
-        this.windField.setColors(isColored);
+        this.colored = isColored;
         if ((isColored) && (firstColoring)) {
             firstColoring = false;
-            this.drawLegend();
         }
-        this.streamletLegend.setVisible(isColored);
+        if (visible) {
+            this.streamletLegend.setVisible(isColored);
+        }
+        if (swarm != null) {
+            swarm.setColors(isColored);
+        }
     }
-    
+
     @Override
     public void removeFromMap() {
         this.setVisible(false);
@@ -326,10 +343,55 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     protected void drawCenterChanged() {
     }
 
+    /** removes the mutation observer if one is present */
+    protected void removeObserverIfPresent() {
+        if (observer != null) {
+            observer.disconnect();
+            observer = null;
+        }
+    }
+
+    /**
+     * adds a mutation observer to the map canvas to react on style changes, if the transform property changes because
+     * the user pans the map around
+     */
+    private void addObserverIfNecessary() {
+        if (ElementStyleMutationObserver.isSupported() && observer == null) {
+            observer = new ElementStyleMutationObserver(new DomStyleMutationCallback() {
+
+                @Override
+                public void onStyleChanged() {
+                    if (isVisible()) {
+                        setCanvasSettings();
+                    }
+                }
+            });
+            observer.observe(super.canvas.getElement().getParentElement().getParentElement());
+        }
+    }
+
+    public void onDragStart() {
+        dragging = true;
+
+    }
+
+    public void onDragEnd() {
+        dragging = false;
+    }
+
     public void onBoundsChanged(boolean zoomChanged) {
         if (swarm != null) {
-            int swarmPause = (zoomChanged ? 5 : 1);
-            swarm.onBoundsChanged(zoomChanged, swarmPause);
+            if (dragging) {
+                swarm.pause(2);
+            } else {
+                int swarmPause = (zoomChanged ? 5 : 2);
+                swarm.onBoundsChanged(zoomChanged, swarmPause);
+            }
         }
+    }
+
+    @Override
+    public void onColorMappingChanged() {
+        drawLegend();
     }
 }

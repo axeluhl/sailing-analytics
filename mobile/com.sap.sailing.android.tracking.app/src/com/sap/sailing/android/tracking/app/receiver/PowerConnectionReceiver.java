@@ -1,12 +1,12 @@
 package com.sap.sailing.android.tracking.app.receiver;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 
 public class PowerConnectionReceiver extends BroadcastReceiver {
 

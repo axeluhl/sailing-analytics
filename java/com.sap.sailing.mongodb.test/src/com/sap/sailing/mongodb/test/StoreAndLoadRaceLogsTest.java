@@ -8,9 +8,9 @@ import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.UUID;
 
+import org.bson.Document;
 import org.junit.Test;
 
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -45,10 +45,10 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
 
         RaceLogFlagEvent event1 = createRaceLogFlagEvent(UUID.randomUUID());
         RaceLogFlagEvent event2 = createRaceLogFlagEvent(UUID.randomUUID());
-        DBObject dbEvent1 = mongoFactory.storeRaceLogEntry(identifier, event1);
-        mongoFactory.getRaceLogCollection().insert(dbEvent1);
-        DBObject dbEvent2 = mongoFactory.storeRaceLogEntry(identifier, event2);
-        mongoFactory.getRaceLogCollection().insert(dbEvent2);
+        Document dbEvent1 = mongoFactory.storeRaceLogEntry(identifier, event1);
+        mongoFactory.getRaceLogCollection().insertOne(dbEvent1);
+        Document dbEvent2 = mongoFactory.storeRaceLogEntry(identifier, event2);
+        mongoFactory.getRaceLogCollection().insertOne(dbEvent2);
 
         RaceLog raceLog = domainFactory.loadRaceLog(identifier);
         try {
@@ -66,17 +66,17 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
 
         RaceLogFlagEvent event1 = createRaceLogFlagEvent(UUID.randomUUID());
         RaceLogFlagEvent event2 = createRaceLogFlagEvent(UUID.randomUUID());
-        DBObject dbEvent1 = mongoFactory.storeRaceLogEntry(identifier, event1);
-        mongoFactory.getRaceLogCollection().insert(dbEvent1);
-        DBObject dbEvent2 = mongoFactory.storeRaceLogEntry(identifier, event2);
-        mongoFactory.getRaceLogCollection().insert(dbEvent2);
+        Document dbEvent1 = mongoFactory.storeRaceLogEntry(identifier, event1);
+        mongoFactory.getRaceLogCollection().insertOne(dbEvent1);
+        Document dbEvent2 = mongoFactory.storeRaceLogEntry(identifier, event2);
+        mongoFactory.getRaceLogCollection().insertOne(dbEvent2);
 
         // RaceLog A.A.B B.C C
         RaceLogIdentifier collidingIdentifier = createIdentifier("A.A.B", "B.C", "C");
 
         RaceLogFlagEvent event3 = createRaceLogFlagEvent(UUID.randomUUID());
-        DBObject dbEvent3 = mongoFactory.storeRaceLogEntry(collidingIdentifier, event3);
-        mongoFactory.getRaceLogCollection().insert(dbEvent3);
+        Document dbEvent3 = mongoFactory.storeRaceLogEntry(collidingIdentifier, event3);
+        mongoFactory.getRaceLogCollection().insertOne(dbEvent3);
 
         RaceLog raceLog = domainFactory.loadRaceLog(identifier);
         try {

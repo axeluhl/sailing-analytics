@@ -1,5 +1,8 @@
 package com.sap.sse.security.ui.editprofile;
 
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -23,27 +26,36 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteService;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.component.EditEmailDialogWithDefaultCallback;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class EditProfileEntryPoint implements EntryPoint {
-    private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     private final StringMessages stringMessages = GWT.create(StringMessages.class);
 
     @Override
     public void onModuleLoad() {
+        UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService,
-                RemoteServiceMappingConstants.userManagementServiceRemotePath);
-        final UserService userService = new UserService(userManagementService);
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
+                HEADER_FORWARD_TO_REPLICA);
+        UserManagementWriteServiceAsync userManagementWriteService = GWT.create(UserManagementWriteService.class);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementWriteService,
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
+                HEADER_FORWARD_TO_MASTER);
+        final UserService userService = new UserService(userManagementService, userManagementWriteService);
+        
         final NewAccountValidator validator = new NewAccountValidator(stringMessages);
         final String usernameFromURL = Window.Location.getParameter("u");
         final String emailFromURL = Window.Location.getParameter("e");
@@ -95,7 +107,7 @@ public class EditProfileEntryPoint implements EntryPoint {
         updateEmailButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new EditEmailDialogWithDefaultCallback(stringMessages, userManagementService, userService.getCurrentUser(),
+                new EditEmailDialogWithDefaultCallback(stringMessages, userManagementWriteService, userService.getCurrentUser(),
                         new AsyncCallback<UserData>() {
                             @Override
                             public void onSuccess(UserData result) {
@@ -136,7 +148,8 @@ public class EditProfileEntryPoint implements EntryPoint {
         KeyUpHandler keyUpHandler = new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                String errorMessage = validator.validateUsernameAndPassword(nameText.getText(), pwText.getText(), pw2Text.getText());
+                String errorMessage = validator.validateUsernameAndPassword(nameText.getText(), pwText.getText(),
+                        pw2Text.getText(), /* reallyUseLeadingOrTrailingSpacesInUsername */ true);
                 if (errorMessage == null) {
                     errorLabel.setText("");
                     submit.setEnabled(true);
@@ -154,7 +167,7 @@ public class EditProfileEntryPoint implements EntryPoint {
         formPanel.addSubmitHandler(new SubmitHandler() {
             @Override
             public void onSubmit(SubmitEvent event) {
-                userManagementService.updateSimpleUserPassword(nameText.getText(),
+                userManagementWriteService.updateSimpleUserPassword(nameText.getText(),
                         currentPasswordText==null?null:currentPasswordText.getText(),
                                 passwordResetSecret, pwText.getText(), new AsyncCallback<Void>() {
                     @Override
@@ -163,20 +176,20 @@ public class EditProfileEntryPoint implements EntryPoint {
                         if (caught instanceof UserManagementException) {
                             String message = ((UserManagementException) caught).getMessage();
                             if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
-                                Window.alert(stringMessages.passwordDoesNotMeetRequirements());
+                                Notification.notify(stringMessages.passwordDoesNotMeetRequirements(), NotificationType.ERROR);
                             } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
-                                Window.alert(stringMessages.invalidCredentials());
+                                Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                             } else {
-                                Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                                Notification.notify(stringMessages.errorChangingPassword(caught.getMessage()), NotificationType.ERROR);
                             }
                         } else {
-                            Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                            Notification.notify(stringMessages.errorChangingPassword(caught.getMessage()), NotificationType.ERROR);
                         }
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        Window.alert(stringMessages.passwordSuccessfullyChanged());
+                        Notification.notify(stringMessages.passwordSuccessfullyChanged(), NotificationType.SUCCESS);
                     }
                 });
             }

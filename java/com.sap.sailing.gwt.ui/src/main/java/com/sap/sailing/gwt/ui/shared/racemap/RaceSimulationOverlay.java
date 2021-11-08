@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
@@ -15,7 +17,6 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegIdentifierImpl;
@@ -31,6 +32,8 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
@@ -61,13 +64,18 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private int raceLeg = 0;
     private long requestedSimulationVersion = 0;
     private Canvas simulationLegend;
+    private final Runnable disableRaceSimulator;
     
-    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService, StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, CoordinateSystem coordinateSystem) {
+    public RaceSimulationOverlay(MapWidget map, int zIndex, RegattaAndRaceIdentifier raceIdentifier,
+            SailingServiceAsync sailingService, StringMessages stringMessages,
+            AsyncActionsExecutor asyncActionsExecutor, CoordinateSystem coordinateSystem,
+            Runnable disableRaceSimulator) {
         super(map, zIndex, coordinateSystem);
         this.raceIdentifier = raceIdentifier;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.asyncActionsExecutor = asyncActionsExecutor;
+        this.disableRaceSimulator = disableRaceSimulator;
         this.colors = new ColorPaletteGenerator();
         this.pathNameFormatter = new PathNameFormatter(stringMessages);
     }
@@ -109,12 +117,17 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     @Override
     protected void drawCenterChanged() {
+        draw();
     }
 
     @Override
     protected void draw() {
+        if (mapProjection != null) {
+            super.setCanvasSettings();
+            drawPaths();
+        }
     }    
-    
+
     private void createSimulationLegend(MapWidget map) {
         simulationLegend = Canvas.createIfSupported();
         simulationLegend.addStyleName("MapSimulationLegend");
@@ -133,13 +146,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         });
         map.setControls(ControlPosition.RIGHT_BOTTOM, simulationLegend);
         simulationLegend.getParent().addStyleName("MapSimulationLegendParentDiv");
-    }
-    
-    public void onBoundsChanged(boolean zoomChanged) {
-        // calibrate canvas
-        super.draw();
-        // draw simulation paths
-        this.drawPaths();
     }
     
     public void clearCanvas() {
@@ -172,7 +178,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         }
         drawLegend(simulationLegend);
         // calibrate canvas
-        super.draw();
+        super.setCanvasSettings();
         // draw paths
         Context2d ctxt = canvas.getContext2d();
         PathDTO[] paths = simulationResult.getPaths();
@@ -337,9 +343,11 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 new MarkedAsyncCallback<>(new AsyncCallback<SimulatorResultsDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        // TODO: add corresponding message to string-messages
-                        // Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-                        Window.setStatus(GET_SIMULATION_CATEGORY);
+                        Notification.notify(stringMessages.errorFetchingSimulationData(caught.getMessage()),
+                                NotificationType.ERROR);
+                        if (caught instanceof UnauthorizedException) {
+                            disableRaceSimulator.run();
+                        }
                     }
 
                     @Override
@@ -363,7 +371,9 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                                 visiblePaths[1] = Boolean.FALSE; // hide left-opportunist by default
                                 visiblePaths[2] = Boolean.FALSE; // hide right-opportunist by default
                                 clearCanvas();
-                                drawPaths();
+                                if (mapProjection != null) {
+                                    drawPaths();
+                                }
                             }
                         } else {
                             raceLeg = 0;

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator.AnniversaryChecker;
+import com.sap.sailing.server.interfaces.AnniversaryRaceDeterminator.AnniversaryChecker;
 
 /**
  * This {@link AnniversaryChecker} implementation determines race counts of 10000, 25000, 50000 and 75000 as well as all

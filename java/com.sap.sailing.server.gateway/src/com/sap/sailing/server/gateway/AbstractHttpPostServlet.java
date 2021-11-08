@@ -6,7 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 /**
  * Subclasses can be used to retrieve messages through an HTTP connection. The connection remains open until the client

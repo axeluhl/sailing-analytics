@@ -17,9 +17,12 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.ui.client.QueryDefinitionChangedListener;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionParser.TypeToCodeStrategy;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.shared.TextExporter;
 
 public class QueryDefinitionViewer extends ComponentWithoutSettings implements QueryDefinitionChangedListener {
     
@@ -34,8 +37,10 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     private final HTML codeHtml;
     private final RadioButton useClassGetNameRadioButton;
     private final RadioButton useStringLiteralsRadioButton;
+    private final Button copyToClipboardButton;
     
     private StatisticQueryDefinitionDTO currentDefinition;
+    private boolean active;
 
     public QueryDefinitionViewer(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context);
@@ -70,19 +75,22 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
         codeScrollPanel.getElement().addClassName("queryDefinitionViewerContent");
         codeDockPanel.add(codeScrollPanel);
         
-        Button copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
+        copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 switch (contentPanel.getSelectedIndex()) {
                 case 0:
-                    copyToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
+                    TextExporter.exportToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
+                    Notification.notify(stringMessages.copiedToClipboard(), NotificationType.INFO);
                     break;
                 case 1:
-                    copyToClipboard(queryDefinitionParser.parseToCodeAsText(currentDefinition, getTypeStrategy()));
+                    TextExporter.exportToClipboard(queryDefinitionParser.parseToCodeAsText(currentDefinition, getTypeStrategy()));
+                    Notification.notify(stringMessages.copiedToClipboard(), NotificationType.INFO);
                     break;
                 }
             }
         });
+        copyToClipboardButton.setEnabled(false);
 
         HorizontalPanel controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -99,15 +107,15 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
         dockPanel.add(contentPanel);
     }
     
-    public static native void copyToClipboard(String text) /*-{
-		window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-    }-*/;
     
     @Override
     public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
         currentDefinition = newQueryDefinition;
-        updateDetails();
-        updateCode();
+        copyToClipboardButton.setEnabled(currentDefinition != null);
+        if (active) {
+            updateDetails();
+            updateCode();
+        }
     }
 
     private void updateDetails() {
@@ -126,6 +134,18 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
             return TypeToCodeStrategy.STRING_LITERALS;
         }
         return TypeToCodeStrategy.CLASS_GET_NAME;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        boolean needsUpdate = !this.active && active;
+        this.active = active;
+        if (needsUpdate) {
+            queryDefinitionChanged(currentDefinition);
+        }
     }
 
     @Override

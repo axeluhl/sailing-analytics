@@ -1,6 +1,7 @@
 package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -8,15 +9,16 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -50,9 +52,9 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     public static Competitor createCompetitor(String competitorName, Serializable id) {
         return new CompetitorImpl(id, competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
-                        /* dateOfBirth */ null, "This is famous "+competitorName)),
+                        /* dateOfBirth */ new Date(), "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                        /* dateOfBirth */new Date(), "This is Rigo, the coach")),
                         /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 
@@ -69,17 +71,15 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     @Before
     public void setUp() {
         // clear the domainFactory competitor store for a clean start:
-        domainFactory = new DomainFactoryImpl((srlid)->null);
+        domainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
     }
     
     private void dropCompetitorAndBoatsCollection() {
-        DB db = getMongoService().getDB();
-        DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
-        competitorCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
-        competitorCollection.drop();
-        DBCollection boatsCollection = db.getCollection(CollectionNames.BOATS.name());
-        boatsCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
-        boatsCollection.drop();
+        MongoDatabase db = getMongoService().getDB();
+        MongoCollection<org.bson.Document> competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
+        competitorCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop();
+        MongoCollection<org.bson.Document> boatsCollection = db.getCollection(CollectionNames.BOATS.name());
+        boatsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop(); // ensure that the drop() has happened
     }
     
     @Test
@@ -106,6 +106,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         assertEquals(flagImageURI1, loadedCompetitor.getFlagImage());
         assertEquals(competitorName1, loadedCompetitor.getName());
         assertEquals(competitorShortName1, loadedCompetitor.getShortName());
+        assertEquals(c.getTeam().getCoach().getDateOfBirth(), loadedCompetitor.getTeam().getCoach().getDateOfBirth());
         
         loadedCompetitor.setName(competitorName2);
         loadedCompetitor.setShortName(competitorShortName2);
@@ -121,17 +122,28 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     }
 
     @Test
+    public void testCompetitorDoesNotAcceptInfiniteTimeOnTimeFactor() {
+        final DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso", UUID.randomUUID());
+        final double infinity = 100./0.;
+        try {
+            c.setTimeOnTimeFactor(infinity); // see how we handle a 0 Yardstick number; see bug 5297
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    @Test
     public void testStoreAndUpdateCompetitorWithUUIDAsId() {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorAndBoatsCollection();
-
         DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso", UUID.randomUUID());
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
         c.setName("Hasso Plattner");
-        mongoObjectFactory.storeCompetitor(c);
-        assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
+        final Collection<DynamicCompetitor> reloadedCompetitors = domainObjectFactory.loadAllCompetitors();
+        assertEquals(1, reloadedCompetitors.size());
     }
 
     @Test
@@ -139,11 +151,9 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorAndBoatsCollection();
-        
         DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso");
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
-
         mongoObjectFactory.removeCompetitor(c);
         assertEquals(0, Util.size(domainObjectFactory.loadAllCompetitors()));
     }

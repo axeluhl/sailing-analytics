@@ -5,12 +5,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -18,9 +21,14 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.windfinder.ReviewedSpotsCollection;
 import com.sap.sailing.domain.windfinder.Spot;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.util.BackoffTracker;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
+    private static final Logger logger = Logger.getLogger(ReviewedSpotsCollectionImpl.class.getName());
+    
     /**
      * What needs to be appended to the spot collection {@link #id} in order
      * to obtain the file name of the document that has the JSON array with
@@ -37,11 +45,14 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
      * map initialized with the result of calling {@link #loadSpots()}.
      */
     private Future<ConcurrentMap<String, Spot>> spotsByIdCache;
+
+    private BackoffTracker backoffTracker;
     
     public ReviewedSpotsCollectionImpl(String id) {
         this.id = id;
         this.parser = new WindFinderReportParser();
-        this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(()->{
+        this.backoffTracker = new BackoffTracker(Duration.ONE_SECOND.times(5), /* multiplier for each additional failure */ 2);
+        this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(() -> {
             final ConcurrentMap<String, Spot> result = new ConcurrentHashMap<>();
             for (final Spot spot : loadSpots()) {
                 result.put(spot.getId(), spot);
@@ -83,7 +94,7 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
     @Override
     public Iterable<Spot> getSpots(boolean cached) throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
         final Iterable<Spot> result;
-        if (cached) {
+        if (cached && !spotsByIdCache.get().isEmpty()) {
             result = new HashSet<>(spotsByIdCache.get().values());
         } else {
             result = loadSpots();
@@ -94,11 +105,21 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
         return result;
     }
     
-    private Iterable<Spot> loadSpots() throws IOException, ParseException, MalformedURLException {
-        final Iterable<Spot> result;
-        JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(new InputStreamReader(
-                            (InputStream) new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS+"/"+getId()+SPOT_LIST_DOCUMENT_SUFFIX).getContent()));
-                    result = parser.parseSpots(spotsAsJson, this);
+    private Iterable<Spot> loadSpots() {
+        Iterable<Spot> result = Collections.emptySet();
+        if (!backoffTracker.backOff()) {
+            try (InputStreamReader in = new InputStreamReader((InputStream) HttpUrlConnectionHelper
+                    .redirectConnection(
+                            new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS + "/" + getId() + SPOT_LIST_DOCUMENT_SUFFIX))
+                    .getContent())) {
+                JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
+                result = parser.parseSpots(spotsAsJson, this);
+                backoffTracker.clear();
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Problem loading spots for spot collection " + id, e);
+                backoffTracker.logFailure();
+            }
+        }
         return result;
     }
 

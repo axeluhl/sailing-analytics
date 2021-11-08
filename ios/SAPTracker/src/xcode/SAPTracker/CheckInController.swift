@@ -139,7 +139,8 @@ class CheckInController : NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         SVProgressHUD.show()
-        let checkInRequestManager = CheckInRequestManager(baseURLString: checkInData.serverURL)
+        let checkInRequestManager = CheckInRequestManager(baseURLString: checkInData.serverURL,
+                                                          secret: checkInData.secret)
         checkInRequestManager.postCheckIn(checkInData: checkInData, success: { [weak self] () in
             SVProgressHUD.popActivity()
             self?.postCheckInSuccess(checkInData: checkInData, success: success)

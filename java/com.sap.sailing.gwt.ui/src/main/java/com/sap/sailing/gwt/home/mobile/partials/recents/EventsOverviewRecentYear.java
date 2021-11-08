@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListYearDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.MobileStatisticsBo
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.statistics.YearStatisticsBox;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -42,10 +44,15 @@ public class EventsOverviewRecentYear extends Composite {
     
     private boolean isContentVisible;
     
+    private boolean isStageInitialized;
+    
     private final CollapseAnimation animation;
+
+    private final List<EventListEventDTO> events;
     
     public EventsOverviewRecentYear(EventListYearDTO yearDTO, MobilePlacesNavigator navigator, boolean showInitial) {
-        List<EventListEventDTO> events = yearDTO.getEvents();
+        isContentVisible = showInitial;
+        events = yearDTO.getEvents();
         eventStage = new Stage(navigator, false);
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -54,13 +61,17 @@ public class EventsOverviewRecentYear extends Composite {
         this.eventsCount.setInnerText(i18n.eventsCount(yearDTO.getEventCount()));
         boolean first = true;
         for (EventListEventDTO eventDTO : events) {
-            PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId()
-                    .toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
-            EventsOverviewRecentYearEvent recentEvent = new EventsOverviewRecentYearEvent(eventNavigation, eventDTO,
-                    eventDTO.getState().getListStateMarker(), first || eventDTO.isRunning());
-            if (eventDTO.getEventSeries() != null) {
-                String seriesId = eventDTO.getEventSeries().getId().toString(), baseUrl = eventDTO.getBaseURL();
-                PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(seriesId, baseUrl, eventDTO.isOnRemoteServer());
+            final PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(
+                    eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
+            final EventsOverviewRecentYearEvent recentEvent = new EventsOverviewRecentYearEvent(eventNavigation,
+                    eventDTO, eventDTO.getState().getListStateMarker(), first || eventDTO.isRunning());
+            final EventListEventSeriesDTO eventSeries = eventDTO.getEventSeries();
+            if (eventSeries != null) {
+                final String baseUrl = eventDTO.getBaseURL();
+                final SeriesContext ctx = SeriesContext
+                        .createWithLeaderboardGroupId(eventSeries.getSeriesLeaderboardGroupId());
+                final PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(ctx, baseUrl,
+                        eventDTO.isOnRemoteServer());
                 recentEvent.setSeriesInformation(seriesNavigation, eventDTO.getEventSeries());
             }
             recentEventsTeaserPanel.add(recentEvent);
@@ -74,8 +85,7 @@ public class EventsOverviewRecentYear extends Composite {
         statisticsBox.getElement().getStyle().setPaddingRight(1, Unit.EM);
         recentEventsTeaserPanel.add(statisticsBox);
         
-        eventStage.setFeaturedEvents(events);
-//        eventStage.removeFromParent();
+        initStageContents();
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -83,18 +93,25 @@ public class EventsOverviewRecentYear extends Composite {
             }
         }, ClickEvent.getType());
 
-        isContentVisible = showInitial;
         animation = new CollapseAnimation(contentDiv, showInitial);
         updateAccordionState();
     }
 
-    void onHeaderClicked() {
+    private void initStageContents() {
+        if (isContentVisible && !isStageInitialized) {
+            eventStage.setFeaturedEvents(events);
+            isStageInitialized = true;
+        }
+    }
+
+    private void onHeaderClicked() {
         isContentVisible = !isContentVisible;
         updateContentVisibility();
     }
     
     private void updateContentVisibility() {
         animation.animate(isContentVisible);
+        initStageContents();
         updateAccordionState();
     }
 

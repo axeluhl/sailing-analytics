@@ -58,11 +58,6 @@ public class LeaderboardCacheManager {
         }
 
         @Override
-        public void nameChanged(String oldName, String newName) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
         public void displayNameChanged(String oldDisplayName, String newDisplayName) {
             removeFromCache(leaderboard);
         }

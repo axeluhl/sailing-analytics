@@ -1,6 +1,16 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import org.json.JSONObject;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
@@ -16,17 +26,9 @@ import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.BoatInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import org.json.JSONObject;
 
 public class BuoyActivity extends AbstractBaseActivity {
 
@@ -36,6 +38,7 @@ public class BuoyActivity extends AbstractBaseActivity {
     private MarkInfo mark;
     private BoatInfo boat;
     private LeaderboardInfo leaderboard;
+    private CheckinUrlInfo checkinUrl;
     private String checkinDigest;
 
     private AppPreferences prefs;
@@ -51,6 +54,7 @@ public class BuoyActivity extends AbstractBaseActivity {
         boat = DatabaseHelper.getInstance().getBoatInfo(this, checkinDigest);
         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
         leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
+        checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
 
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -64,7 +68,8 @@ public class BuoyActivity extends AbstractBaseActivity {
                 toolbar.setPadding(sidePadding, 0, 0, 0);
                 getSupportActionBar().setTitle(leaderboard.displayName);
                 getSupportActionBar().setSubtitle(event.name);
-                ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+                ColorDrawable backgroundDrawable = new ColorDrawable(
+                        getResources().getColor(R.color.toolbar_background));
                 getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             }
         }
@@ -99,19 +104,19 @@ public class BuoyActivity extends AbstractBaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.options_menu_settings:
-                ExLog.i(this, TAG, "Clicked SETTINGS.");
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            case R.id.options_menu_checkout:
-                ExLog.i(this, TAG, "Clicked CHECKOUT.");
-                displayCheckoutConfirmationDialog();
-                return true;
-            case R.id.options_menu_info:
-                AboutHelper.showInfoActivity(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS.");
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        case R.id.options_menu_checkout:
+            ExLog.i(this, TAG, "Clicked CHECKOUT.");
+            displayCheckoutConfirmationDialog();
+            return true;
+        case R.id.options_menu_info:
+            AboutHelper.showInfoActivity(this);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -128,7 +133,7 @@ public class BuoyActivity extends AbstractBaseActivity {
     }
 
     private void displayCheckoutConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.warning);
         builder.setMessage(R.string.checkout_warning_message);
         builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -146,21 +151,23 @@ public class BuoyActivity extends AbstractBaseActivity {
      */
     public void checkout() {
         CheckoutHelper checkoutHelper = new CheckoutHelper();
+        String secret = Uri.parse(checkinUrl.urlString).getQueryParameter(DeviceMappingConstants.URL_SECRET);
         String id = TextUtils.isEmpty(mark.markId) ? boat.boatId : mark.markId;
         int type = TextUtils.isEmpty(mark.markId) ? CheckinUrlInfo.TYPE_BOAT : CheckinUrlInfo.TYPE_MARK;
-        checkoutHelper.checkoutMark(this, leaderboard.name, event.server, id, type, new NetworkHelper.NetworkHelperSuccessListener() {
-            @Override
-            public void performAction(JSONObject response) {
-                DatabaseHelper.getInstance().deleteRegattaFromDatabase(BuoyActivity.this, event.checkinDigest);
-                dismissProgressDialog();
-                finish();
-            }
-        }, new NetworkHelper.NetworkHelperFailureListener() {
-            @Override
-            public void performAction(NetworkHelper.NetworkHelperError e) {
-                dismissProgressDialog();
-                showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
-            }
-        });
+        checkoutHelper.checkoutMark(this, secret, leaderboard.name, event.server, id, type,
+                new NetworkHelper.NetworkHelperSuccessListener() {
+                    @Override
+                    public void performAction(JSONObject response) {
+                        DatabaseHelper.getInstance().deleteRegattaFromDatabase(BuoyActivity.this, event.checkinDigest);
+                        dismissProgressDialog();
+                        finish();
+                    }
+                }, new NetworkHelper.NetworkHelperFailureListener() {
+                    @Override
+                    public void performAction(NetworkHelper.NetworkHelperError e) {
+                        dismissProgressDialog();
+                        showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
+                    }
+                });
     }
 }

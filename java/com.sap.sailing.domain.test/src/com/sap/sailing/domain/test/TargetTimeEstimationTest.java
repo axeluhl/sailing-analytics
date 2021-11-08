@@ -47,7 +47,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TargetTimeEstimationTest {
-    
     @SuppressWarnings("unchecked") // the problem here is any(Set.class) which cannot infer the type arguments
     @Test
     public void simpleReachTargetTimeEstimation() throws NotEnoughDataHasBeenAddedException, NoWindException {
@@ -67,14 +66,12 @@ public class TargetTimeEstimationTest {
         WindSource source = mock(WindSource.class);
         Set<WindSource> sources = Collections.singleton(source);
         when(trackedRace.getWindSources(WindSourceType.TRACK_BASED_ESTIMATION)).thenReturn(sources);
+        when(trackedRace.getWindSources(WindSourceType.MANEUVER_BASED_ESTIMATION)).thenReturn(sources);
         when(trackedRace.getWind(any(Position.class), eq(timepoint))).thenReturn(wind);
         when(trackedRace.getWind(any(Position.class), eq(timepoint), any(Set.class))).thenReturn(wind);
-        
         RaceDefinition race = mock(RaceDefinition.class);
         when(race.getBoatClass()).thenReturn(mockedBoatClass);
-        
         when(trackedRace.getRace()).thenReturn(race);
-        
         Leg leg = mock(Leg.class);
         Waypoint from = mock(Waypoint.class);
         Waypoint to = mock(Waypoint.class);
@@ -82,16 +79,16 @@ public class TargetTimeEstimationTest {
         when(leg.getTo()).thenReturn(to);
         when(trackedRace.getApproximatePosition(from, timepoint)).thenReturn(startOfLeg);
         when(trackedRace.getApproximatePosition(to, timepoint)).thenReturn(endOfLeg);
-        
         when(trackedRace.getApproximatePosition(from, timepoint)).thenReturn(startOfLeg);
         when(trackedRace.getApproximatePosition(to, timepoint)).thenReturn(endOfLeg);
-        
+        when(trackedRace.getApproximatePosition(eq(from), eq(timepoint), any(MarkPositionAtTimePointCacheImpl.class))).thenReturn(startOfLeg);
+        when(trackedRace.getApproximatePosition(eq(to), eq(timepoint), any(MarkPositionAtTimePointCacheImpl.class))).thenReturn(endOfLeg);
+        when(trackedRace.getApproximatePosition(eq(from), eq(timepoint), any(MarkPositionAtTimePointCacheImpl.class))).thenReturn(startOfLeg);
+        when(trackedRace.getApproximatePosition(eq(to), eq(timepoint), any(MarkPositionAtTimePointCacheImpl.class))).thenReturn(endOfLeg);
         when(mockedPolars.getSpeed(mockedBoatClass, wind, legBearing.getDifferenceTo(windBearing.reverse()))).thenReturn(boatSpeedWithConfidence);
-        
         HashSet<Competitor> competitors = new HashSet<Competitor>();
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
-        
-        //Actual test of functionality
+        // Actual test of functionality
         Duration duration = trackedLeg.getEstimatedTimeAndDistanceToComplete(mockedPolars, timepoint,
                 new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint)).getExpectedDuration();
         assertEquals(75494, duration.asMillis(), 100);

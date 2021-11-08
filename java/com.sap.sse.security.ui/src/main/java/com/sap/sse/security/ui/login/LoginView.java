@@ -3,6 +3,8 @@ package com.sap.sse.security.ui.login;
 import java.util.Collections;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
@@ -17,11 +19,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.ForgotPasswordDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -34,7 +39,7 @@ public class LoginView extends Composite {
     interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
     }
 
-    private final UserManagementServiceAsync userManagementService;
+    private final UserManagementWriteServiceAsync userManagementWriteService;
     private final UserService userService;
     private final StringMessages stringMessages;
     
@@ -45,9 +50,10 @@ public class LoginView extends Composite {
     @UiField Button loginButton;
     @UiField Anchor signUpAnchor;
     @UiField HTMLPanel oAuthPanel;
+    @UiField ImageElement logoImage;
     
-    public LoginView(UserManagementServiceAsync userManagementService, UserService userService, StringMessages stringMessages, String appName) {
-        this.userManagementService = userManagementService;
+    public LoginView(UserManagementWriteServiceAsync userManagementWriteService, UserService userService, StringMessages stringMessages, String appName) {
+        this.userManagementWriteService = userManagementWriteService;
         this.userService = userService;
         this.stringMessages = stringMessages;
         LoginViewResources.INSTANCE.css().ensureInjected();
@@ -57,7 +63,7 @@ public class LoginView extends Composite {
         userNameTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().textInput_watermark());
         passwordTextBox.setWatermark(stringMessages.password());
         passwordTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().passwordTextInput_watermark());
-        oAuthPanel.add(new OAuthLogin(userManagementService));
+        oAuthPanel.add(new OAuthLogin(userManagementWriteService));
         userNameTextBox.setFocus(true);
         
         DialogUtils.linkEnterToButton(loginButton, userNameTextBox, passwordTextBox);
@@ -67,6 +73,10 @@ public class LoginView extends Composite {
                 userNameTextBox.setFocus(true);
             }
         });
+        
+        if (!ClientConfiguration.getInstance().isBrandingActive()) {
+            logoImage.getStyle().setDisplay(Display.NONE);
+        }
     }
     
     @UiHandler("loginButton")
@@ -83,13 +93,14 @@ public class LoginView extends Composite {
                     if (!result.getRedirectURL().equals("")) {
                         Window.Location.replace(result.getRedirectURL());
                     } else  {
-                        Window.alert(stringMessages.loggedIn(result.getUserDTO().getName()));
+                        Notification.notify(stringMessages.loggedIn(result.getUserDTO().getA().getName()),
+                                NotificationType.INFO);
                     }
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
-                        Window.alert(stringMessages.failedToSignIn());
+                        Notification.notify(stringMessages.failedToSignIn(), NotificationType.ERROR);
                     } else {
-                        Window.alert(result.getMessage());
+                        Notification.notify(result.getMessage(), NotificationType.ERROR);
                     }
                 }
             }
@@ -104,6 +115,6 @@ public class LoginView extends Composite {
     
     @UiHandler("forgotPasswordAnchor")
     void forgotPasswordClicked(ClickEvent e) {
-        new ForgotPasswordDialog(stringMessages, userManagementService, userService.getCurrentUser()).show();
+        new ForgotPasswordDialog(stringMessages, userManagementWriteService, userService.getCurrentUser()).show();
     }
 }

@@ -11,8 +11,8 @@ public class EventListEventSeriesDTO extends EventSeriesReferenceDTO {
     protected EventListEventSeriesDTO() {
     }
 
-    public EventListEventSeriesDTO(UUID id, String displayName) {
-        super(id, displayName);
+    public EventListEventSeriesDTO(String displayName, UUID seriesLeaderboardGroupId) {
+        super(displayName, seriesLeaderboardGroupId);
     }
 
     public int getEventsCount() {

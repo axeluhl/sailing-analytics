@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -19,7 +20,6 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultipleMultiLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -70,22 +70,24 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
     private MultiRaceLeaderboardSettings loadedSettings;
     private final FlagImageResolver flagImageResolver;
     private final Iterable<DetailType> availableDetailTypes;
+    private Function<String, SailingServiceAsync> sailingServiceFactory;
 
     public MultiLeaderboardProxyPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, String metaLeaderboardName,
+            Function<String, SailingServiceAsync> sailingServiceFactory, String metaLeaderboardName,
             AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName,  
             ErrorReporter errorReporter, StringMessages stringMessages,
             boolean showRaceDetails, boolean autoExpandLastRaceColumn,
             MultiRaceLeaderboardSettings settings, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
         super(parent, context);
+        this.sailingServiceFactory = sailingServiceFactory;
 
         loadedSettings = settings;
 
         this.availableDetailTypes = availableDetailTypes;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.sailingService = sailingService;
+        this.sailingService = sailingServiceFactory.apply(metaLeaderboardName);
         this.metaLeaderboardName = metaLeaderboardName;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.showRaceDetails = showRaceDetails;
@@ -232,16 +234,16 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
 
             MultiRaceLeaderboardSettings toMerge = contextStore.get(newSelectedLeaderboardName);
             if (toMerge != null) {
-                toMerge = mergeContext(loadedSettings, toMerge);
+                toMerge = loadedSettings.withRaceColumnSelectionValuesFrom(toMerge);
             } else {
                 toMerge = loadedSettings;
             }
-
+            
             MultiRaceLeaderboardPanel newSelectedLeaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(),
-                    sailingService,
+                    sailingServiceFactory.apply(newSelectedLeaderboardName),
                     asyncActionsExecutor, toMerge, isEmbedded,
                     new CompetitorSelectionModel(true), timer,
-                    null, newSelectedLeaderboardName, errorReporter, stringMessages, 
+                    newSelectedLeaderboardName, errorReporter, stringMessages, 
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle(),
@@ -260,10 +262,6 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
             }
         }
         this.selectedLeaderboardName = newSelectedLeaderboardName;
-    }
-
-    private MultiRaceLeaderboardSettings mergeContext(MultiRaceLeaderboardSettings settings, MultiRaceLeaderboardSettings toMerge) {
-        return LeaderboardSettingsFactory.getInstance().mergeLeaderboardSettings(toMerge, settings);
     }
 
     @Override

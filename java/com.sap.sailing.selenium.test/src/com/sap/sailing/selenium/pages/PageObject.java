@@ -1,18 +1,21 @@
 package com.sap.sailing.selenium.pages;
 
+import static org.junit.Assert.assertTrue;
+
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -21,8 +24,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
 import com.sap.sailing.selenium.core.AjaxCallsExecuted;
 import com.sap.sailing.selenium.core.BySeleniumId;
@@ -60,7 +61,7 @@ public class PageObject {
     
     public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 120;
     
-    public static final int DEFAULT_POLLING_INTERVAL = 5;
+    public static final int DEFAULT_POLLING_INTERVAL = 1;
     
     private static final MessageFormat TAB_PANEL_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-TabBarItem\")]/div[text()=\"{0}\"]/..");
@@ -132,15 +133,15 @@ public class PageObject {
      * 
      * @param input
      *   
-     * @param timeout
+     * @param timeoutInSeconds
      *   
-     * @param polling
+     * @param pollingEverySoManySeconds
      *   
      * @return
      *   
      */
-    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling) {
-        return createFluentWait(input, timeout, polling, Collections.<Class<? extends Throwable>>emptyList());
+    public static <T> FluentWait<T> createFluentWait(T input, int timeoutInSeconds, int pollingEverySoManySeconds) {
+        return createFluentWait(input, timeoutInSeconds, pollingEverySoManySeconds, Collections.<Class<? extends Throwable>>emptyList());
     }
     
     /**
@@ -168,20 +169,20 @@ public class PageObject {
      * 
      * @param input
      *   
-     * @param timeout
+     * @param timeoutInSeconds
      *   
-     * @param polling
+     * @param pollingEverySoManySeconds
      *   
      * @param exceptions
      *   
      * @return
      *   
      */
-    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling,
+    public static <T> FluentWait<T> createFluentWait(T input, int timeoutInSeconds, int pollingEverySoManySeconds,
             Collection<Class<? extends Throwable>> exceptions) {
         FluentWait<T> wait = new FluentWait<>(input);
-        wait.withTimeout(timeout, TimeUnit.SECONDS);
-        wait.pollingEvery(polling, TimeUnit.SECONDS);
+        wait.withTimeout(Duration.ofSeconds(timeoutInSeconds));
+        wait.pollingEvery(Duration.ofSeconds(pollingEverySoManySeconds));
         wait.ignoreAll(exceptions);
         
         return wait;
@@ -209,7 +210,6 @@ public class PageObject {
     public PageObject(WebDriver driver, SearchContext context) {
         this.driver = driver;
         this.context = context;
-        
         verify();
         initElements();
     }
@@ -223,7 +223,7 @@ public class PageObject {
     
     /**
      * <p>Initialize the page object. The default implementation use a factory to lazily initialize the elements
-     *   (annotated fields) of the page object using the timeout duration returned by {@link #getPageLoadTimeOut()}.
+     *   (annotated fields) of the page object using the timeout duration returned by {@link #getPageLoadTimeOutInSeconds()}.
      *   To get a field lazily initialized you have to annotate the field either with {@link FindBy} or with
      *   {@link FindBys}. If the element never changes (that is, that the same instance in the DOM can always be used)
      *   it is also possible to use a cache for the lookup by using the annotation {@code CacheLookup} in addition.</p>
@@ -303,8 +303,8 @@ public class PageObject {
      * @return
      *   The first matching element in the given context.
      */
-    protected WebElement waitForElementBySeleniumId(SearchContext context, String id, int timeout) {
-        FluentWait<SearchContext> wait = createFluentWait(context, timeout, DEFAULT_POLLING_INTERVAL);
+    protected WebElement waitForElementBySeleniumId(SearchContext context, String id, int timeoutInSeconds) {
+        FluentWait<SearchContext> wait = createFluentWait(context, timeoutInSeconds, DEFAULT_POLLING_INTERVAL);
         return (WebElement) wait.until(new Function<SearchContext, Object>() {
             @Override
             public Object apply(SearchContext context) {
@@ -315,6 +315,69 @@ public class PageObject {
                 }
             }
         });
+    }
+    
+    /**
+     * <p>
+     * Waits until an element with the specified selenium id cannot be found any more in the given search context.
+     * </p>
+     * 
+     * @param context
+     *            The search context to use for the search.
+     * @param id
+     *            The selenium id of the element.
+     */
+    protected void waitForElementNotExistsBySeleniumId(SearchContext context, String id) {
+        FluentWait<SearchContext> wait = createFluentWait(context, DEFAULT_WAIT_TIMEOUT_SECONDS, DEFAULT_POLLING_INTERVAL);
+        wait.until(new Function<SearchContext, Boolean>() {
+            @Override
+            public Boolean apply(SearchContext context) {
+                try {
+                    return context.findElement(new BySeleniumId(id)) == null;
+                } catch (Exception e) {
+                    return Boolean.TRUE;
+                }
+            }
+        });
+    }
+    
+    /**
+     * <p>
+     * Finds and returns the first element with the specified selenium id in the given search context. If multiple
+     * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
+     * returned.
+     * </p>
+     * 
+     * @param context
+     *            The search context to use for the search.
+     * @param id
+     *            The selenium id of the element.
+     * @return The first matching element in the given context.
+     */
+    protected WebElement findElementOrNullBySeleniumId(SearchContext context, String id) {
+        final List<WebElement> elements = context.findElements(new BySeleniumId(id));
+        WebElement result;
+        if (elements.isEmpty()) {
+            result = null;
+        } else {
+            result = elements.get(0);
+        }
+        return result;
+    }
+    
+    /**
+     * <p>
+     * Finds and returns the first element with the specified selenium id in the given search context. If multiple
+     * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
+     * returned.
+     * </p>
+     * 
+     * @param id
+     *            The selenium id of the element.
+     * @return The first matching element in the given context.
+     */
+    protected WebElement findElementOrNullBySeleniumId(String id) {
+        return findElementOrNullBySeleniumId(this.context, id);
     }
     
     /**
@@ -392,15 +455,15 @@ public class PageObject {
      *   and polling interval. In reality, the interval may be greater as the cost of actually evaluating the condition
      *   is not factored in.</p>
      * 
-     * @param timeout
-     *   The timeout duration for the waiting.
-     * @param polling
-     *   The interval in which the check should be performed.
+     * @param timeoutInSeconds
+     *   The timeout duration for the waiting in seconds.
+     * @param pollingEverySoManySeconds
+     *   The interval in seconds in which the check should be performed.
      * @throws org.openqa.selenium.TimeoutException
      *   if the timeout expires.
      */
-    protected void waitForAjaxRequests(int timeout, int polling) {
-        waitForAjaxRequests(AjaxCallsComplete.CATEGORY_GLOBAL, timeout, polling);
+    protected void waitForAjaxRequests(int timeoutInSeconds, int pollingEverySoManySeconds) {
+        waitForAjaxRequests(AjaxCallsComplete.CATEGORY_GLOBAL, timeoutInSeconds, pollingEverySoManySeconds);
     }
     
     /**
@@ -410,15 +473,15 @@ public class PageObject {
      * 
      * @param category
      *   The category of Ajax requests to wait for.
-     * @param timeout
-     *   The timeout duration for the waiting.
-     * @param polling
-     *   The interval in which the check should be performed.
+     * @param timeoutInSeconds
+     *   The timeout duration for the waiting in seconds.
+     * @param pollingEverySoManySeconds
+     *   The interval in seconds in which the check should be performed.
      * @throws org.openqa.selenium.TimeoutException
      *   if the timeout expires.
      */
-    protected void waitForAjaxRequests(String category, int timeout, int polling) {
-        FluentWait<WebDriver> wait = createFluentWait(this.driver, timeout, polling);
+    protected void waitForAjaxRequests(String category, int timeoutInSeconds, int pollingEverySoManySeconds) {
+        FluentWait<WebDriver> wait = createFluentWait(this.driver, timeoutInSeconds, pollingEverySoManySeconds);
         
         wait.until(new AjaxCallsComplete(category));
     }
@@ -445,13 +508,18 @@ public class PageObject {
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(new BySeleniumId(seleniumId)));
     }
     
-    protected void waitUntil(Predicate<WebDriver> predicate) {
+    protected void waitUntil(Function<WebDriver, Boolean> predicate) {
         WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
         webDriverWait.until(predicate);
     }
     
     protected void waitUntil(BooleanSupplier supplier) {
         waitUntil((driver) -> supplier.getAsBoolean());
+    }
+    
+    protected void waitUntilAlertIsPresent() {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(ExpectedConditions.alertIsPresent());
     }
     
     /**
@@ -474,13 +542,41 @@ public class PageObject {
      * 
      * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
      * @param seleniumId the selenium id of the desired element
-     * @param timeout the timeout in seconds to wait for the element
      * @return {@link PageArea} representing the first matching element
      * 
      * @see #findElementBySeleniumId(SearchContext, String)
      */
-    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId, int timeout) {
-        return supplier.get(driver, waitForElementBySeleniumId(driver, seleniumId, timeout));
+    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return waitForPO(supplier, seleniumId, DEFAULT_WAIT_TIMEOUT_SECONDS);
+    }
+    
+    /**
+     * Waits for the element with the given seleniumId and returns a {@link PageArea} instance representing the element. The 
+     * {@link WebDriver} is used as search context.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @param timeoutInSeconds the timeout in seconds to wait for the element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(SearchContext, String)
+     */
+    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId, int timeoutInSeconds) {
+        return supplier.get(driver, waitForElementBySeleniumId(driver, seleniumId, timeoutInSeconds));
+    }
+    
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id in the search
+     * context of this page area.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(String)
+     */
+    protected <T extends PageArea> T waitForChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return supplier.get(driver, waitForElementBySeleniumId(context, seleniumId, DEFAULT_WAIT_TIMEOUT_SECONDS));
     }
     
     /**
@@ -494,7 +590,7 @@ public class PageObject {
      * @see #findElementBySeleniumId(String)
      */
     protected <T extends PageArea> T getChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
-        return supplier.get(driver, findElementBySeleniumId(seleniumId));
+        return supplier.get(driver, findElementBySeleniumId(context, seleniumId));
     }
     
     protected interface PageAreaSupplier<T extends PageArea> {
@@ -521,9 +617,13 @@ public class PageObject {
         WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
         waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
         tab.click();
+        return waitForWebElement(tabPanel, id);      
+    }
+    
+    protected WebElement waitForWebElement (WebElement webElement, String seleniumId) {
         // Wait for the tab to become visible due to the used animations.
-        FluentWait<WebElement> wait = createFluentWait(tabPanel);
-        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
+        FluentWait<WebElement> wait = createFluentWait(webElement);
+        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(seleniumId)));
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -540,50 +640,147 @@ public class PageObject {
     /**
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
-    protected void waitForAlertAndAccept() throws InterruptedException {
-        waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    protected void waitForAlertAndAccept() {
+       waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
-
+     
     /**
      * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
      */
-    protected void waitForAlertAndAccept(int timeoutInSeconds) throws InterruptedException {
-        int i = 0;
-        while (i < timeoutInSeconds) {
-            i++;
-            try {
-                Alert alert = driver.switchTo().alert();
-                alert.accept();
-                return;
-            } catch (NoAlertPresentException e) {
-                Thread.sleep(1000);
-            }
-        }
-        throw new NoAlertPresentException();
+    protected void waitForAlertAndAccept(int timeoutInSeconds) {
+        waitForAlert(timeoutInSeconds).accept();
     }
     
     /**
-     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     * Waits for an alert box to appear and accepts the alert if the given message is contained in the alert box. If no
+     * alert shows up or the message does not match, an Exception is thrown.
      */
-    protected void waitForAlertAndDismiss() throws InterruptedException {
-        waitForAlertAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    protected void waitForAlertContainingMessageAndAccept(String message) {
+        waitForAlertContainingMessageAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS, message);
     }
     
     /**
-     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     * Waits for an alert box to appear and accepts the alert if the given message is contained in the alert box. If no
+     * alert shows up or the message does not match, an Exception is thrown.
      */
-    protected void waitForAlertAndDismiss(int timeoutInSeconds) throws InterruptedException {
-        int i = 0;
-        while (i < timeoutInSeconds) {
-            i++;
+    protected void waitForAlertContainingMessageAndAccept(int timeoutInSeconds, String message) {
+        Alert alert = waitForAlert(timeoutInSeconds);
+        if (!alert.getText().contains(message)) {
+            throw new RuntimeException("The expected message '" + message + "' does not math the actual message '"
+                    + alert.getText() + "' in the alert.");
+        }
+        alert.accept();
+    }
+    
+    /**
+     * Waits for an alert box to appear. If no alert shows up, an Exception is thrown.
+     */
+    protected Alert waitForAlert(int timeoutInSeconds) {
+        return new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
+    }
+    
+    protected void waitForAlertAndAccept(String expectedMessage) {
+        waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS, expectedMessage);
+    }
+
+    /**
+     * Waits for an alert box to appear and having the text expected, and accepts the alert. If no alert shows up, an
+     * Exception is thrown.
+     */
+    protected void waitForAlertAndAccept(int timeoutInSeconds, String expectedMessageRegexp) {
+        final Alert expectedAlert = new WebDriverWait(driver, timeoutInSeconds).until(ExpectedConditions.alertIsPresent());
+        assertTrue(expectedAlert.getText().matches(expectedMessageRegexp));
+        expectedAlert.accept();
+    }
+
+    /**
+     * Waits for a notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     */
+    protected void waitForNotificationAndDismiss() {
+        waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS, null);
+    }
+    
+    /**
+     * Waits for a specific notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     */
+    protected void waitForNotificationAndDismiss(String expectedNotificationMessage) {
+        waitForNotificationAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS, expectedNotificationMessage);
+    }
+
+    /**
+     * Waits for an notification to appear and dismisses the notification by clicking on it. If no notification shows up, an Exception is thrown.
+     */
+    protected void waitForNotificationAndDismiss(int timeoutInSeconds, String expectedNotificationMessage) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+        wait.until(new Function<WebDriver, Boolean>() {
+            @Override
+            public Boolean apply(WebDriver t) {
+                boolean clickedNotifications = false;
+                try {
+                    List<WebElement> notificationBar = driver.findElements(By.id("notificationBar"));
+                    if (!notificationBar.isEmpty()) {
+                        // we got the enclosing panel
+                        List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
+                        if (!notifications.isEmpty()) {
+                            for (WebElement messageElement : notifications) {
+                                if (expectedNotificationMessage == null
+                                        || messageElement.getText().contains(expectedNotificationMessage)) {
+                                    messageElement.click();
+                                    clickedNotifications = true;
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    // This call can fail temporarily while notifications are being updated
+                }
+                return clickedNotifications;
+            }
+        });
+    }
+    
+    protected void dismissAllExistingNotifications() {
+        boolean retryNecessary = true;
+        while (retryNecessary) {
+            retryNecessary = false;
             try {
-                Alert alert = driver.switchTo().alert();
-                alert.accept();
-                return;
-            } catch (NoAlertPresentException e) {
-                Thread.sleep(1000);
+                List<WebElement> notificationBar = driver.findElements(By.id("notificationBar"));
+                if (!notificationBar.isEmpty()) {
+                    // we got the enclosing panel
+                    List<WebElement> notifications = notificationBar.get(0).findElements(By.cssSelector("*"));
+                    if (!notifications.isEmpty()) {
+                        for (WebElement messageElement : notifications) {
+                            messageElement.click();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // This call can fail temporarily while notifications are being updated
+                retryNecessary = true;
             }
         }
-        throw new NoAlertPresentException();
+    }
+    
+    protected void scrollToView(WebElement webElement) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(false);", webElement);
+    }
+    
+    public boolean isElementEntirelyVisible(WebElement element) {
+        try {
+            if (element.isDisplayed()) {
+                final int windowWidth = driver.manage().window().getSize().getWidth();
+                if (windowWidth >= element.getLocation().x
+                        + element.getSize().width) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            // The element may currently only partially visible which makes some of the calls fail
+            return false;
+        }
     }
 }

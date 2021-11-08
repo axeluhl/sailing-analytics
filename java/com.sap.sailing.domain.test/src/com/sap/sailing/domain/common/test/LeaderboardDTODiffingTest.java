@@ -153,9 +153,57 @@ public class LeaderboardDTODiffingTest {
             assertNull(nullRaceColumn); // there were no changes to the columns; expect all of them to have been eliminiated
         }
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
-        assertEquals(rowsBeforeStripping, applied.rows);
+        assertFieldsOfLeaderboardRowDTO(rowsBeforeStripping, applied.rows);
         assertNotSame(raceListBeforeStripping, applied.getRaceList());
         assertEquals(raceListBeforeStripping, applied.getRaceList());
+    }
+
+    private void assertFieldsOfLeaderboardRowDTO(Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping,
+            Map<CompetitorDTO, LeaderboardRowDTO> rowsAfterApplication) {
+        assertEquals(rowsBeforeStripping.keySet(), rowsAfterApplication.keySet());
+        for (CompetitorDTO competitor : rowsBeforeStripping.keySet()) {
+            LeaderboardRowDTO leaderboardRowDTOBefore = rowsBeforeStripping.get(competitor);
+            LeaderboardRowDTO leaderboardRowDTOAfter = rowsAfterApplication.get(competitor);
+            assertEquals(leaderboardRowDTOBefore.boat, leaderboardRowDTOAfter.boat);
+            assertEquals(leaderboardRowDTOBefore.carriedPoints, leaderboardRowDTOAfter.carriedPoints);
+            assertEquals(leaderboardRowDTOBefore.competitor, leaderboardRowDTOAfter.competitor);
+            assertEquals(leaderboardRowDTOBefore.fieldsByRaceColumnName, leaderboardRowDTOAfter.fieldsByRaceColumnName);
+            assertEquals(leaderboardRowDTOBefore.maximumSpeedOverGroundInKnots,
+                    leaderboardRowDTOAfter.maximumSpeedOverGroundInKnots);
+            assertEquals(leaderboardRowDTOBefore.netPoints, leaderboardRowDTOAfter.netPoints);
+            assertEquals(leaderboardRowDTOBefore.totalDistanceFoiledInMeters,
+                    leaderboardRowDTOAfter.totalDistanceFoiledInMeters);
+            assertEquals(leaderboardRowDTOBefore.totalDistanceTraveledInMeters,
+                    leaderboardRowDTOAfter.totalDistanceTraveledInMeters);
+            assertEquals(leaderboardRowDTOBefore.totalDurationFoiledInSeconds,
+                    leaderboardRowDTOAfter.totalDurationFoiledInSeconds);
+            assertEquals(leaderboardRowDTOBefore.totalScoredRaces, leaderboardRowDTOAfter.totalScoredRaces);
+            assertEquals(leaderboardRowDTOBefore.totalTimeSailedDownwindInSeconds,
+                    leaderboardRowDTOAfter.totalTimeSailedDownwindInSeconds);
+            assertEquals(leaderboardRowDTOBefore.totalTimeSailedInSeconds,
+                    leaderboardRowDTOAfter.totalTimeSailedInSeconds);
+            assertEquals(leaderboardRowDTOBefore.totalTimeSailedReachingInSeconds,
+                    leaderboardRowDTOAfter.totalTimeSailedReachingInSeconds);
+            assertEquals(leaderboardRowDTOBefore.totalTimeSailedUpwindInSeconds,
+                    leaderboardRowDTOAfter.totalTimeSailedUpwindInSeconds);
+            assertEquals(leaderboardRowDTOBefore.whenMaximumSpeedOverGroundWasAchieved,
+                    leaderboardRowDTOAfter.whenMaximumSpeedOverGroundWasAchieved);
+            if (leaderboardRowDTOBefore.effectiveTimeOnDistanceAllowancePerNauticalMile == null
+                    && competitor.getTimeOnDistanceAllowancePerNauticalMile() != null) {
+                assertEquals(competitor.getTimeOnDistanceAllowancePerNauticalMile(),
+                        leaderboardRowDTOAfter.effectiveTimeOnDistanceAllowancePerNauticalMile);
+            } else {
+                assertEquals(leaderboardRowDTOBefore.effectiveTimeOnDistanceAllowancePerNauticalMile,
+                        leaderboardRowDTOAfter.effectiveTimeOnDistanceAllowancePerNauticalMile);
+            }
+            if (leaderboardRowDTOBefore.effectiveTimeOnTimeFactor == null
+                    && competitor.getTimeOnDistanceAllowancePerNauticalMile() != null) {
+                assertEquals(competitor.getTimeOnTimeFactor(), leaderboardRowDTOAfter.effectiveTimeOnTimeFactor);
+            } else {
+                assertEquals(leaderboardRowDTOBefore.effectiveTimeOnTimeFactor,
+                        leaderboardRowDTOAfter.effectiveTimeOnTimeFactor);
+            }
+        }
     }
 
     @Test
@@ -231,7 +279,7 @@ public class LeaderboardDTODiffingTest {
             }
         }
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
-        assertEquals(rowsBeforeStripping, applied.rows);
+        assertFieldsOfLeaderboardRowDTO(rowsBeforeStripping, applied.rows);
     }
     
     @Test
@@ -362,7 +410,7 @@ public class LeaderboardDTODiffingTest {
     public void testPartialRaceColumnDTOCompaction() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         // create a modified R9 RaceDTO clone in newVersion to make sure that even changing a property in the RaceDTO will keep the RaceColumnDTO from being omitted
         RaceColumnDTO r9 = newVersion.getRaceColumnByName("R9");
-        RaceColumnDTO clonedR9 = new RaceColumnDTO();
+        RaceColumnDTO clonedR9 = new RaceColumnDTO("R9");
         cloner.clone(r9, clonedR9);
         // also clone the racesPerFleet map, or else we'd be modifying the previous version's one too
         final Field racesPerFleetField = clonedR9.getClass().getDeclaredField("racesPerFleet");
@@ -372,6 +420,7 @@ public class LeaderboardDTODiffingTest {
         racesPerFleetField.set(clonedR9, new HashMap<FleetDTO, RaceDTO>(m));
         final FleetDTO defaultFleet = r9.getFleets().iterator().next();
         RaceDTO r9Race = r9.getRace(defaultFleet);
+        @SuppressWarnings("deprecation") // special test based on cloning another instance
         RaceDTO clonedR9Race = new RaceDTO();
         cloner.clone(r9Race, clonedR9Race);
         clonedR9.setRace(defaultFleet, clonedR9Race);

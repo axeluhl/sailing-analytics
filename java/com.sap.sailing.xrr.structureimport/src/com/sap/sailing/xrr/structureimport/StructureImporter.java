@@ -30,12 +30,13 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.impl.XRRParserUtil;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
 import com.sap.sailing.xrr.schema.Division;
@@ -55,6 +56,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractColor;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sapsailing.xrr.structureimport.eventimport.EventImport;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
@@ -64,6 +66,7 @@ public class StructureImporter {
     private LinkedHashMap<String, Boat> boatForPerson;
     private final DomainFactory baseDomainFactory;
     private final SetRacenumberStrategy setRacenumberStrategy;
+    private final static String UNKNOWN_BOATCLASS_NAME = "?";
 
     public StructureImporter(SetRacenumberStrategy setRacenumber, DomainFactory baseDomainFactory) {
         this.setRacenumberStrategy = setRacenumber;
@@ -98,11 +101,22 @@ public class StructureImporter {
             BuildStructure buildStructure = new BuildStructure(races);
             final TimePoint startDate = null; // TODO can regatta start time be inferred from XRR document?
             final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
-            RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
-                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
-                    baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), 
-                    /* canBoatsOfCompetitorsChangePerRace */ true, startDate, endDate, getSeries(buildStructure), false,
-                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null, OneDesignRankingMetric::new);
+            final String regattaName = RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
+                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle());
+            final String boatClassName;
+            if (result.getA().getBoatClass() != null) {
+                boatClassName = result.getA().getBoatClass();
+            } else {
+                // we need a boat class; use some default
+                logger.warning("No boat class set in regatta to import: "+regattaName+". Setting to \""+UNKNOWN_BOATCLASS_NAME+"\"");
+                boatClassName = UNKNOWN_BOATCLASS_NAME;
+            }
+            RegattaImpl regatta = new RegattaImpl(regattaName,
+                    baseDomainFactory.getOrCreateBoatClass(boatClassName), 
+                    /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                    startDate, endDate, getSeries(buildStructure), false,
+                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null,
+                    OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
             addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;
@@ -211,7 +225,7 @@ public class StructureImporter {
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
                             UUID.fromString(idAsString), name, shortName, color, email, flagImage, boatAndTeam.getTeam(),
-                            /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+                            /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true));
                 } else {
                     break;
                 }
@@ -288,7 +302,7 @@ public class StructureImporter {
     }
 
     private InputStream getInputStream(String url) throws FileNotFoundException, IOException {
-        URLConnection connection = new URL(url).openConnection();
+        URLConnection connection = HttpUrlConnectionHelper.redirectConnection(new URL(url));
         return connection.getInputStream();
     }
 }

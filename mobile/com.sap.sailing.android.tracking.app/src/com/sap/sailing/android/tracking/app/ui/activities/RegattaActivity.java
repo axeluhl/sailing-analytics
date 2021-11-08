@@ -1,17 +1,27 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Locale;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
@@ -39,36 +49,32 @@ import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Environment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.internal.view.ContextThemeWrapper;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewTreeObserver;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Locale;
+
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_LEADERBOARD_NAME;
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_LEADERBOARD_NAME_FOR_SECRET;
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_SECRET;
 
 public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         implements RegattaFragment.FragmentWatcher, UploadResponseHandler {
 
     private final static String TAG = RegattaActivity.class.getName();
     private final static String COMPETITOR_IMAGE_FILENAME_PREFIX = "competitor_";
+    private final static String COMPETITOR_IMAGE_FOLDER = "pictures";
     private final static String FLAG_IMAGE_FILENAME_PREFIX = "flag_";
 
     public EventInfo event;
@@ -154,26 +160,26 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.options_menu_settings:
-                ExLog.i(this, TAG, "Clicked SETTINGS.");
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            case R.id.options_menu_checkout:
-                ExLog.i(this, TAG, "Clicked CHECKOUT.");
-                displayCheckoutConfirmationDialog();
-                return true;
-            case R.id.options_menu_add_team_image:
-                ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
-                getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
-                return true;
-            case R.id.options_menu_refresh:
-                manager.callServerAndGenerateCheckinData();
-                return true;
-            case R.id.options_menu_info:
-                AboutHelper.showInfoActivity(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS.");
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        case R.id.options_menu_checkout:
+            ExLog.i(this, TAG, "Clicked CHECKOUT.");
+            displayCheckoutConfirmationDialog();
+            return true;
+        case R.id.options_menu_add_team_image:
+            ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
+            getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
+            return true;
+        case R.id.options_menu_refresh:
+            manager.callServerAndGenerateCheckinData();
+            return true;
+        case R.id.options_menu_info:
+            AboutHelper.showInfoActivity(this);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -264,46 +270,47 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     }
 
     private URL getTeamImageApiUrl(String competitorId) throws MalformedURLException {
-        URL url = new URL(checkinUrl.urlString);
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(url.getProtocol());
-        sb.append("://");
-        sb.append(url.getHost());
-        sb.append(":");
-        //get given port by check-in url or standard http(s) protocol port by defaultPort
-        sb.append((url.getPort() == -1) ? url.getDefaultPort() : url.getPort());
-        sb.append(prefs.getServerCompetitorTeamPath(competitorId));
-
-        return new URL(sb.toString());
+        Uri uri = Uri.parse(checkinUrl.urlString);
+        Uri.Builder builder = new Uri.Builder()
+                .scheme(uri.getScheme())
+                .authority(uri.getAuthority())
+                .appendEncodedPath(prefs.getServerCompetitorTeamPath(competitorId));
+        String secret = uri.getQueryParameter(URL_SECRET);
+        if (secret != null) {
+            builder.appendQueryParameter(URL_SECRET, secret);
+            builder.appendQueryParameter(URL_LEADERBOARD_NAME_FOR_SECRET, uri.getQueryParameter(URL_LEADERBOARD_NAME));
+        }
+        return new URL(builder.build().toString());
     }
 
     public void askServerAboutTeamImageUrl(final ImageView imageView) {
         try {
             HttpGetRequest getCompetitorTeamRequest = new HttpGetRequest(getTeamImageApiUrl(competitor.id), this);
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(getCompetitorTeamRequest, new NetworkHelperSuccessListener() {
-                @Override
-                public void performAction(JSONObject response) {
-                    try {
-                        String teamImageUri = response.getString("imageUri");
-                        if (teamImageUri != null) {
-                            new DownloadLeaderboardImageTask(imageView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, teamImageUri);
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(getCompetitorTeamRequest,
+                    new NetworkHelperSuccessListener() {
+                        @Override
+                        public void performAction(JSONObject response) {
+                            try {
+                                String teamImageUri = response.getString("imageUri");
+                                if (teamImageUri != null) {
+                                    new DownloadLeaderboardImageTask(imageView)
+                                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, teamImageUri);
+                                }
+                            } catch (JSONException e) {
+                                ExLog.e(getApplicationContext(), TAG,
+                                        "Error: Failed to get teamImageURL: " + e.getMessage());
+                            }
                         }
-                    } catch (JSONException e) {
-                        ExLog.e(getApplicationContext(), TAG, "Error: Failed to get teamImageURL: " + e.getMessage());
-                    }
-                }
-            }, new NetworkHelperFailureListener() {
-                @Override
-                public void performAction(NetworkHelperError e) {
-                    ExLog.e(getApplicationContext(), TAG,
-                            "Error: Failed to get teamImageURL: " + e.getMessage());
-                }
-            });
+                    }, new NetworkHelperFailureListener() {
+                        @Override
+                        public void performAction(NetworkHelperError e) {
+                            ExLog.e(getApplicationContext(), TAG,
+                                    "Error: Failed to get teamImageURL: " + e.getMessage());
+                        }
+                    });
 
         } catch (MalformedURLException e) {
-            ExLog.e(this, TAG,
-                    "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
+            ExLog.e(this, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
         }
     }
 
@@ -370,9 +377,21 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Sending imageFile to server: " + imageFile);
         }
-        final String uploadURLStr = event.server
-                + prefs.getServerUploadTeamImagePath().replace("{competitor_id}", competitor.id);
-        new UploadTeamImageTask(this, imageFile, this).execute(uploadURLStr);
+        try {
+            Uri uri = Uri.parse(checkinUrl.urlString);
+            Uri.Builder builder = new Uri.Builder()
+                    .scheme(uri.getScheme())
+                    .authority(uri.getAuthority())
+                    .appendEncodedPath(prefs.getServerUploadTeamImagePath(competitor.id));
+            String secret = uri.getQueryParameter(URL_SECRET);
+            if (secret != null) {
+                builder.appendQueryParameter(URL_SECRET, secret);
+                builder.appendQueryParameter(URL_LEADERBOARD_NAME_FOR_SECRET, uri.getQueryParameter(URL_LEADERBOARD_NAME));
+            }
+            new UploadTeamImageTask(this, imageFile, this).execute(builder.build().toString());
+        } catch (UnsupportedEncodingException e) {
+            ExLog.e(this, TAG, "Failed to encode competitor ID: " + e.getMessage());
+        }
     }
 
     /**
@@ -383,19 +402,13 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     public File getImageFile(String fileName) {
         File mediaStorageDir = getMediaStorageDir();
 
-        File mediaFile;
         String mImageName = fileName + ".png";
-        mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+        File mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
         return mediaFile;
     }
 
     public boolean deleteImageFile(String fileName) {
-        File mediaStorageDir = getMediaStorageDir();
-
-        File mediaFile;
-        String mImageName = fileName + ".png";
-        mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
-
+        File mediaFile = getImageFile(fileName);
         return mediaFile.delete();
     }
 
@@ -403,7 +416,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         File mediaStorageDir;
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            mediaStorageDir = getExternalFilesDir(null);
+            mediaStorageDir = new File(getExternalFilesDir(null), COMPETITOR_IMAGE_FOLDER);
         } else {
             mediaStorageDir = getApplicationContext().getCacheDir();
         }
@@ -455,7 +468,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     }
 
     private void displayCheckoutConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.warning);
         builder.setMessage(R.string.checkout_warning_message);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -477,34 +490,34 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         showProgressDialog(R.string.please_wait, R.string.checking_out);
         JSONObject checkoutData = new JSONObject();
         try {
-            checkoutData.put("competitorId", competitor.id);
-            checkoutData.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
-            checkoutData.put("toMillis", System.currentTimeMillis());
+            String secret = Uri.parse(checkinUrl.urlString).getQueryParameter(DeviceMappingConstants.URL_SECRET);
+            checkoutData.putOpt(DeviceMappingConstants.JSON_REGISTER_SECRET, secret);
+            checkoutData.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitor.id);
+            checkoutData.put(DeviceMappingConstants.JSON_DEVICE_UUID, UniqueDeviceUuid.getUniqueId(this));
+            checkoutData.put(DeviceMappingConstants.JSON_TO_MILLIS, System.currentTimeMillis());
         } catch (JSONException e) {
             showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
             ExLog.e(this, TAG, "Error populating checkout-data: " + e.getMessage());
             return;
         }
         try {
-            HttpJsonPostRequest request = new HttpJsonPostRequest(this, new URL(checkoutURLStr), checkoutData.toString());
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request,
-                    new NetworkHelperSuccessListener() {
-                        @Override
-                        public void performAction(JSONObject response) {
-                            DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this,
-                                    event.checkinDigest);
-                            deleteImageFile(getCompetitorImageFileName(competitor.id));
-                            dismissProgressDialog();
-                            finish();
-                        }
-                    }, new NetworkHelperFailureListener() {
-                        @Override
-                        public void performAction(NetworkHelperError e) {
-                            dismissProgressDialog();
-                            showErrorPopup(R.string.error,
-                                    R.string.error_could_not_complete_operation_on_server_try_again);
-                        }
-                    });
+            HttpJsonPostRequest request = new HttpJsonPostRequest(this, new URL(checkoutURLStr),
+                    checkoutData.toString());
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request, new NetworkHelperSuccessListener() {
+                @Override
+                public void performAction(JSONObject response) {
+                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this, event.checkinDigest);
+                    deleteImageFile(getCompetitorImageFileName(competitor.id));
+                    dismissProgressDialog();
+                    finish();
+                }
+            }, new NetworkHelperFailureListener() {
+                @Override
+                public void performAction(NetworkHelperError e) {
+                    dismissProgressDialog();
+                    showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
+                }
+            });
         } catch (MalformedURLException e) {
             ExLog.w(this, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
         }
@@ -600,7 +613,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            dialog = new ProgressDialog(new ContextThemeWrapper(RegattaActivity.this, R.style.AppTheme_AlertDialog));
+            dialog = new ProgressDialog(RegattaActivity.this);
             dialog.setCancelable(false);
             dialog.setMessage(getString(R.string.download_team_image_message));
             dialog.show();
@@ -641,7 +654,8 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
 
         protected void onPostExecute(File result) {
             if (result != null && result.exists()) {
-                bmImage.setImageBitmap(BitmapHelper.decodeSampleBitmapFromFile(result.getPath(), bmImage.getMeasuredWidth(), bmImage.getMeasuredHeight(), null));
+                bmImage.setImageBitmap(BitmapHelper.decodeSampleBitmapFromFile(result.getPath(),
+                        bmImage.getMeasuredWidth(), bmImage.getMeasuredHeight(), null));
                 userImageUpdated();
             } else {
                 ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);
@@ -670,7 +684,8 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
                 InputStream in = new java.net.URL(downloadUrl).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
-                ExLog.e(RegattaActivity.this, TAG, "Failed to download flat image at url " + downloadUrl + ": " + e.getMessage());
+                ExLog.e(RegattaActivity.this, TAG,
+                        "Failed to download flat image at url " + downloadUrl + ": " + e.getMessage());
             }
             return mIcon11;
         }

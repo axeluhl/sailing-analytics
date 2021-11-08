@@ -16,6 +16,9 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.xrr.schema.RegattaResults;
 
 public interface SwissTimingAdapter {
+    String NAME = "SwissTiming";
+    String DEFAULT_URL = null;
+
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     /**
@@ -26,12 +29,13 @@ public interface SwissTimingAdapter {
      *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark passing / split times
-     * @param trackWind TODO
-     * @param correctWindDirectionByMagneticDeclination TODO
      */
     RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
-            StartList startList, RaceLogStore logStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
+            StartList startList, RaceLogStore logStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds,
+            boolean useInternalMarkPassingAlgorithm, boolean trackWind,
+            boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername,
+            String updatePassword, String eventName, String manage2SailEventUrl)
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 
     StartList readStartListForRace(String raceId, RegattaResults regattaResults);
@@ -41,5 +45,5 @@ public interface SwissTimingAdapter {
     SwissTimingFactory getSwissTimingFactory();
 
     com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
-
+    
 }

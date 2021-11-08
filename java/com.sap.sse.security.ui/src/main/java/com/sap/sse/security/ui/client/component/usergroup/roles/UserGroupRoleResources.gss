@@ -1,0 +1,4 @@
+.roleDefinitionSuggest {
+    max-width: 8em;
+    margin-right: 5px;
+}

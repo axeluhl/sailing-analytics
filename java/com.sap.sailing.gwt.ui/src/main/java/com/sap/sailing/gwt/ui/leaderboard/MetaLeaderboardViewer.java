@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.function.Function;
+
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -37,13 +39,11 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             MetaLeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, String preselectedLeaderboardName,
-            String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
+            Function<String, SailingServiceAsync> sailingServiceFactory, AsyncActionsExecutor asyncActionsExecutor, 
+            Timer timer, String preselectedLeaderboardName, String metaLeaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
-                sailingService, asyncActionsExecutor, timer,
-                preselectedLeaderboardName, leaderboardGroupName, metaLeaderboardName,
+                sailingServiceFactory, asyncActionsExecutor, timer, preselectedLeaderboardName, metaLeaderboardName,
                 errorReporter, stringMessages, chartDetailType, availableDetailTypes);
     }
     
@@ -51,18 +51,17 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             MetaLeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
-            CompetitorSelectionModel competitorSelectionModel, SailingServiceAsync sailingService,
+            CompetitorSelectionModel competitorSelectionModel, Function<String, SailingServiceAsync> sailingServiceFactory,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
-            String preselectedLeaderboardName, String leaderboardGroupName,
-            String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
+            String preselectedLeaderboardName, String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
 
-        init(new MultiRaceLeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
+        final SailingServiceAsync sailingServiceForMetaLeaderboard = sailingServiceFactory.apply(metaLeaderboardName);
+        init(new MultiRaceLeaderboardPanel(this, componentContext, sailingServiceForMetaLeaderboard, asyncActionsExecutor,
                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), /* isEmbedded */ false,
-                        competitorSelectionModel, timer,
-                        leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages,
+                        competitorSelectionModel, timer, metaLeaderboardName, errorReporter, stringMessages,
                         settings.getPerspectiveOwnSettings().isShowRaceDetails(), /* competitorSearchTextBox */ null,
                         /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null,
                         settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
@@ -77,7 +76,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         initWidget(mainPanel);
         final Label overallStandingsLabel = new Label(stringMessages.overallStandings());
         overallStandingsLabel.setStyleName("leaderboardHeading");
-        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, componentContext, sailingService,
+        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, componentContext, sailingServiceForMetaLeaderboard,
                 asyncActionsExecutor,
                 metaLeaderboardName,
                 chartDetailType, competitorSelectionProvider, timer, stringMessages, true, errorReporter);
@@ -90,7 +89,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             leaderboardSettings = lifecycle.getMultiLeaderboardPanelLifecycle().createDefaultSettings();
         }
 
-        multiLeaderboardPanel = new MultiLeaderboardProxyPanel(this, componentContext, sailingService,
+        multiLeaderboardPanel = new MultiLeaderboardProxyPanel(this, componentContext, sailingServiceFactory,
                 metaLeaderboardName,
                 asyncActionsExecutor, timer, false /* isEmbedded */,
                 preselectedLeaderboardName,  errorReporter, stringMessages,

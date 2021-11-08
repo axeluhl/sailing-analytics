@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.sap.sailing.domain.common.PathType;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class PathDTO extends NamedDTO {
     private static final long serialVersionUID = 4926185583314563898L;
@@ -12,8 +12,8 @@ public class PathDTO extends NamedDTO {
     private boolean mixedLeg;
     private PathType pathType;
 
-    protected PathDTO() {
-    }
+    @Deprecated
+    PathDTO() {} // for GWT RPC serialization only
     
     public PathDTO(PathType pathType) {
         super(pathType.getTxtId());

@@ -46,6 +46,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnly();
         case LOW_POINT_WITH_AUTOMATIC_RDG:
             return stringMessages.scoringSchemeLowPointWithAutomaticRdg();
+        case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
+            return stringMessages.scoringSchemeLowPointSystemFirstTwoWins();
         }
         return null;
     }
@@ -72,6 +74,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointMatchRacingDescription();
         case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
             return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnlyDescription();
+        case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
+            return stringMessages.scoringSchemeLowPointSystemFirstTwoWinsDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }

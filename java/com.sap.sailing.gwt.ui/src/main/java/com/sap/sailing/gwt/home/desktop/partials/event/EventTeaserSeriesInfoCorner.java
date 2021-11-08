@@ -23,7 +23,7 @@ public class EventTeaserSeriesInfoCorner extends UIObject {
     public EventTeaserSeriesInfoCorner(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
         setElement(uiBinder.createAndBindUi(this));
         int eventCount = eventSeries.getEventsCount();
-        seriesInfoTextUi.setTitle(eventSeries.getDisplayName() + " - " + 
+        seriesInfoTextUi.setTitle(eventSeries.getSeriesDisplayName() + " - " + 
                 StringMessages.INSTANCE.eventsHaveTakenPlace(eventSeries.getEventsCount()));
         seriesNavigation.configureAnchorElement(seriesInfoTextUi);
         seriesEventsCountUi.setInnerText(String.valueOf(eventCount));

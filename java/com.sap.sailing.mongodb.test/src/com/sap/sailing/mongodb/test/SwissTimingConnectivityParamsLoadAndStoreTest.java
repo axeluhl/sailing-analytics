@@ -40,6 +40,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         final String raceID = "Race ID 123";
         final String raceName = "The Race";
         final String raceDescription = null;
+        final String eventName = "World Cup Series | Enoshima, Japan";
+        final String manage2SailEventUrl = "http://manage2sail.com/api/public/links/event/1ab2e511-333f-4dff-a347-21d30bfd0062?accesstoken=bDAv8CwsTM94ujZ&mediaType=json&includeRaces=true";
         final BoatClass boatClass = domainObjectFactory.getBaseDomainFactory().getOrCreateBoatClass("49er");
         final CrewMemberImpl c1c1 = new CrewMemberImpl("c1c1", "GER", "Helm");
         final CrewMemberImpl c1c2 = new CrewMemberImpl("c1c2", "POL", "Crew");
@@ -53,7 +55,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         final SwissTimingTrackingConnectivityParameters stParams = new SwissTimingTrackingConnectivityParameters(
                 hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis,
                 SwissTimingFactory.INSTANCE, new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory(),
-                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
+                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination,
+                /* updateURL */ null, /* updateUsername */ null, /* updatePassword */ null, eventName, manage2SailEventUrl);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
@@ -77,6 +80,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
         assertEquals(stParams.isTrackWind(), stParamsReadFromDB.isTrackWind());
         assertEquals(stParams.isCorrectWindDirectionByMagneticDeclination(), stParamsReadFromDB.isCorrectWindDirectionByMagneticDeclination());
+        assertEquals(stParams.getEventName(), stParamsReadFromDB.getEventName());
+        assertEquals(stParams.getManage2SailEventUrl(), stParamsReadFromDB.getManage2SailEventUrl());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
@@ -94,6 +99,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         final String raceID = "Race ID 123";
         final String raceName = "The Race";
         final String raceDescription = null;
+        final String eventName = "World Cup Series | Enoshima, Japan";
+        final String manage2SailEventUrl = "http://manage2sail.com/api/public/links/event/1ab2e511-333f-4dff-a347-21d30bfd0062?accesstoken=bDAv8CwsTM94ujZ&mediaType=json&includeRaces=true";
         final BoatClass boatClass = domainObjectFactory.getBaseDomainFactory().getOrCreateBoatClass("49er");
         final CompetitorWithoutID c1 = new CompetitorWithoutID("b1", "GER", "C1");
         final CompetitorWithoutID c2 = new CompetitorWithoutID("b2", "GER", "21");
@@ -103,7 +110,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         final SwissTimingTrackingConnectivityParameters stParams = new SwissTimingTrackingConnectivityParameters(
                 hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis,
                 SwissTimingFactory.INSTANCE, new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory(),
-                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
+                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination,
+                /* updateURL */ null, /* updateUsername */ null, /* updatePassword */ null, eventName, manage2SailEventUrl);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load

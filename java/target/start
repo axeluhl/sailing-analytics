@@ -23,7 +23,7 @@ if [[ ! -d "$JAVA_HOME" ]]; then
 fi
 # disable AWT requiring X11 and the correct DISPLAY variable setting; failing to do so
 # can result in trouble generating QR codes in the back-end
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true -Xms$MEMORY -Dosgi.debug=$PWD/configuration/debug.properties"
 PLATFORM=`uname`
 SED_ARGS="-i"
 if [[ $PLATFORM == "Darwin" ]]; then
@@ -69,22 +69,37 @@ sed $SED_ARGS "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./
 
 # Inject information for system
 HEAD_DATE=$(date "+%Y%m%d%H%M")
-sed $SED_ARGS "s/System:.*$/ System: $MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+if [ "${MONGODB_URI}" != "" ]; then
+  MONGODB_URI_FOR_SED=$( echo "$MONGODB_URI" | sed -e 's/^mongodb:\/\///' -e 's/^[^:]*:[^@]*@//' -e 's/\//\\\//g' -e 's/&/\\&/g' )
+else
+  MONGODB_URI_FOR_SED="$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME"
+fi
+sed $SED_ARGS "s/System:.*$/System: $MONGODB_URI_FOR_SED-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+VERSION_JSON_CONTENTS=$( cat ./configuration/jetty/version.json )
+echo "${VERSION_JSON_CONTENTS}" | jq --argjson start_time_millis $( date +%s )000 '. + {start_time_millis: $start_time_millis} + {port: '${SERVER_PORT}'}' >./configuration/jetty/version.json
 
 # Apply app parameters from env.sh
-APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dmongo.dbName=$MONGODB_NAME -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangePort=$REPLICATION_PORT -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+if [ "$MONGODB_URI" = "" ]; then
+  APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dmongo.dbName=$MONGODB_NAME"
+else
+  APP_PARAMETERS="-Dmongo.uri=$MONGODB_URI"
+fi
+APP_PARAMETERS="$APP_PARAMETERS -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangePort=$REPLICATION_PORT -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
 # Apply parameters for automatic replication start
-REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT -Dreplicate.master.exchange.name=$REPLICATE_MASTER_EXCHANGE_NAME"
+REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT -Dreplicate.master.exchange.name=$REPLICATE_MASTER_EXCHANGE_NAME -Dreplicate.master.username=$REPLICATE_MASTER_USERNAME -Dreplicate.master.password=$REPLICATE_MASTER_PASSWORD -Dreplicate.master.bearer_token=$REPLICATE_MASTER_BEARER_TOKEN"
 
+EQUINOX_LAUNCHER=$( find plugins -name 'org.eclipse.equinox.launcher_*.jar' )
+COMMON_JAVA_ARGS="-D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=$PWD/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dorg.eclipse.jetty.annotations.maxWait=120 -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Xmx$MEMORY -jar ${EQUINOX_LAUNCHER} -configuration ./ -clean -console ${TELNET_PORT}"
 if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
-    nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -configuration ./ -clean 2>/dev/null >/dev/null &
+    nohup "$JAVA_BINARY" ${COMMON_JAVA_ARGS} 2>/dev/null >/dev/null &
     JAVA_PID=$!
     echo "Starting server... (PID: $JAVA_PID)"
     echo "SERVER_NAME: $SERVER_NAME"
     echo "SERVER_PORT: $SERVER_PORT"
     echo "MEMORY: $MEMORY"
     echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_URI: $MONGODB_URI"
     echo "MONGODB_HOST: $MONGODB_HOST"
     echo "MONGODB_PORT: $MONGODB_PORT"
     echo "MONGODB_NAME: $MONGODB_NAME"
@@ -115,29 +130,26 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     if [[ $PLATFORM != "Darwin" ]]; then
         if [[ $SERVER_PORT == "" ]] || [[ $SERVER_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
-            if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-                echo "Startup of java server failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | mail -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
+            if [[ ${SERVER_STARTUP_NOTIFY} != "" ]]; then
+                echo "Startup of java server ${SERVER_NAME} on ${INSTANCE_ID} failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | mail -s "Server $INSTANCE_ID startup failed!" ${SERVER_STARTUP_NOTIFY}
             fi
             exit
         fi
     fi
-
     echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
-
-    if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
+    if [[ ${SERVER_STARTUP_NOTIFY} != "" ]]; then
         if [[ ! -z "$ON_AMAZON" ]]; then
-            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | mail -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | mail -s "Server $SERVER_NAME on $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
         else
-            echo "OK" | mail -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+            echo "OK" | mail -s "Server $SERVER_NAME on $INSTANCE_ID started up!" -a env.sh ${SERVER_STARTUP_NOTIFY}
         fi
     fi
 elif [[ $PARAM == "debug" ]]; then
     echo "Starting remote debugging session on port 8000 - make sure this port is open and reachable from the outside"
-    $JAVA_BINARY -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -console -configuration ./ -clean
-
+    JFR_OPTIONS="-XX:+FlightRecorder -Dcom.sun.management.jmxremote.port=7091 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=7091 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
+    "$JAVA_BINARY" -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=y $JFR_OPTIONS ${COMMON_JAVA_ARGS}
 elif [[ $PARAM == "fg" ]]; then
-    $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -console -configuration ./ -clean
-
+    exec "$JAVA_BINARY" ${COMMON_JAVA_ARGS}
 fi
 
 

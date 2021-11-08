@@ -8,11 +8,13 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.ResultsPresenter;
@@ -43,6 +45,7 @@ public class MultiResultsPresenter extends AbstractDataMiningComponent<Settings>
 
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
+        controlsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         controlsPanel.add(new Label(getDataMiningStringMessages().choosePresentation() + ":"));
         presentersListBox = new ValueListBox<>(new AbstractObjectRenderer<PresenterDescriptor<? extends Object>>() {
             @Override
@@ -84,14 +87,19 @@ public class MultiResultsPresenter extends AbstractDataMiningComponent<Settings>
     }
 
     @Override
-    public QueryResultDTO<? extends Object> getCurrentResult() {
+    public QueryResultDTO<?> getCurrentResult() {
         return currentPresenter.getCurrentResult();
+    }
+    
+    @Override
+    public StatisticQueryDefinitionDTO getCurrentQueryDefinition() {
+        return currentPresenter.getCurrentQueryDefinition();
     }
 
     @Override
-    public void showResult(QueryResultDTO<?> result) {
+    public void showResult(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         for (PresenterDescriptor<Object> descriptor : availablePresenters) {
-            descriptor.getPresenter().showResult(result);
+            descriptor.getPresenter().showResult(queryDefinition, result);
         }
     }
 

@@ -16,8 +16,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class PolarCompetitorRetrievalProcessor extends AbstractRetrievalProcessor<HasLegPolarContext, HasCompetitorPolarContext> {
 
     public PolarCompetitorRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasCompetitorPolarContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasLegPolarContext.class, HasCompetitorPolarContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasCompetitorPolarContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasLegPolarContext.class, HasCompetitorPolarContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override
@@ -25,6 +27,9 @@ public class PolarCompetitorRetrievalProcessor extends AbstractRetrievalProcesso
         TrackedRace trackedRace = element.getTrackedRace();
         Set<HasCompetitorPolarContext> competitorWithContext = new HashSet<>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            if (isAborted()) {
+                break;
+            }
             competitorWithContext.add(new CompetitorWithPolarContext(competitor, trackedRace, element.getLeg(), element));
         }
         return competitorWithContext;

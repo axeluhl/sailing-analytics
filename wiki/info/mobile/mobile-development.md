@@ -30,3 +30,7 @@ At the time of writing there is no way to develop in Eclipse and Android Studio 
 * Android Studio's build system Gradle is still in beta
 * OSGi support in the free version of Android Studio is far from completed
 * Android Studio is in Alpha (December 2013)
+
+## Release and Deploy
+
+See [https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances_app-build-process-for-ios-and-android](https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances_app-build-process-for-ios-and-android).

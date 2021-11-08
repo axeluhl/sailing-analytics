@@ -25,7 +25,7 @@ public class ParallelGroupedNumberPairAverageAggregationProcessor
     
     private static final AggregationProcessorDefinition<Pair, PairWithStats<Number>> DEFINITION =
             new SimpleAggregationProcessorDefinition<>(Pair.class,
-                    _cc, "PairAverage", ParallelGroupedNumberPairAverageAggregationProcessor.class);
+                    _cc, "Average", ParallelGroupedNumberPairAverageAggregationProcessor.class);
     
     public static AggregationProcessorDefinition<Pair, PairWithStats<Number>> getDefinition() {
         return DEFINITION;
@@ -90,6 +90,9 @@ public class ParallelGroupedNumberPairAverageAggregationProcessor
     protected Map<GroupKey, PairWithStats<Number>> aggregateResult() {
         Map<GroupKey, PairWithStats<Number>> result = new HashMap<>();
         for (Entry<GroupKey, Pair<Number, Number>> sumAggregationEntry : sumPerKey.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             GroupKey key = sumAggregationEntry.getKey();
             result.put(key, new PairWithStatsImpl<Number>(new Pair<>(sumAggregationEntry.getValue().getA() != null ? sumAggregationEntry.getValue().getA().doubleValue() / elementAmountPerKey.get(key).get() : null, sumAggregationEntry.getValue().getB() != null ? sumAggregationEntry.getValue().getB().doubleValue() / elementAmountPerKey.get(key).get() : null) ,
                     minPerKey.get(key), maxPerKey.get(key),

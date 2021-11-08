@@ -2,11 +2,14 @@ package com.sap.sailing.gwt.home.shared.places.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.AbstractMapTokenizer;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public abstract class AbstractEventPlace extends Place implements HasLocationTitle {
     private final EventContext ctx;
@@ -25,7 +28,8 @@ public abstract class AbstractEventPlace extends Place implements HasLocationTit
     }
 
     public String getTitle(String eventName) {
-        return StringMessages.INSTANCE.sapSailing() + " - " + eventName;
+        return (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
+                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
     }
 
     @Override
@@ -36,29 +40,40 @@ public abstract class AbstractEventPlace extends Place implements HasLocationTit
     public String getEventUuidAsString() {
         return ctx.getEventId();
     }
-    
+
     public String getRegattaId() {
         return ctx.getRegattaId();
     }
-    
+
     public static abstract class Tokenizer<PLACE extends AbstractEventPlace> extends AbstractMapTokenizer<PLACE> {
         private final static String PARAM_EVENTID = "eventId";
         private final static String PARAM_REGATTAID = "regattaId";
-        protected PLACE getPlaceFromParameters(Map<String, String> parameters) {
-            return getRealPlace(new EventContext().withId(parameters.get(PARAM_EVENTID)).withRegattaId(parameters.get(PARAM_REGATTAID)));
+
+        protected PLACE getPlaceFromParameters(Map<String, Set<String>> parameters) {
+            return getRealPlace(new EventContext().withId(extractSingleParameter(parameters, PARAM_EVENTID))
+                    .withRegattaId(extractSingleParameter(parameters, PARAM_REGATTAID)), parameters);
         }
-        
-        protected Map<String, String> getParameters(PLACE place) {
-            Map<String, String> parameters = new HashMap<>();
+
+        private String extractSingleParameter(Map<String, Set<String>> parameters, String key) {
+            Set<String> param = parameters.get(key);
+            return param == null ? null : param.stream().findFirst().orElse(null);
+        }
+
+        protected Map<String, Set<String>> getParameters(PLACE place) {
+            Map<String, Set<String>> parameters = new HashMap<>();
             EventContext context = place.getCtx();
-            parameters.put(PARAM_EVENTID, context.getEventId());
+            Util.addToValueSet(parameters, PARAM_EVENTID, context.getEventId());
             String regattaId = context.getRegattaId();
-            if(regattaId != null && !regattaId.isEmpty()) {
-                parameters.put(PARAM_REGATTAID, context.getRegattaId());
+            if (regattaId != null && !regattaId.isEmpty()) {
+                Util.addToValueSet(parameters, PARAM_REGATTAID, context.getRegattaId());
             }
             return parameters;
         }
-        
+
+        protected PLACE getRealPlace(EventContext context, Map<String, Set<String>> parameters) {
+            return getRealPlace(context);
+        }
+
         protected abstract PLACE getRealPlace(EventContext context);
     }
 }

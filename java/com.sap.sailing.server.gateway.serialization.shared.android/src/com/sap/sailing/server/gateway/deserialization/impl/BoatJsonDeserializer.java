@@ -11,12 +11,12 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.BoatFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     private static final Logger logger = Logger.getLogger(BoatJsonDeserializer.class.getName());
@@ -24,14 +24,34 @@ public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     private final BoatClassJsonDeserializer boatClassDeserializer;
     private final BoatFactory boatFactory;
 
-    public static BoatJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
-        return new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory));
+    /**
+     * An instance of this deserializer class may be used to load competitors and their boats
+     * from the persistent store. In this case, when creating the {@link Competitor} object,
+     * the new object shall <em>not</em> be stored / updated again to the persistent store
+     * because it just came from there. This behavior can be accomplished by setting this
+     * property to {@code false} by means of using a corresponding constructor.<p>
+     * 
+     * See also bug 5106.
+     */
+    private final boolean storeDeserializedCompetitorsPersistently;
+    
+    public static BoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory, boolean storeDeserializedCompetitorsPersistently) {
+        return new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory), storeDeserializedCompetitorsPersistently);
+    }
+    
+    public static BoatJsonDeserializer create(SharedDomainFactory<?> baseDomainFactory) {
+        return create(baseDomainFactory, /* storeDeserializedCompetitorsPersistently */ true);
     }
     
     public BoatJsonDeserializer(BoatFactory boatFactory, BoatClassJsonDeserializer boatClassDeserializer) {
+        this(boatFactory, boatClassDeserializer, /* storeDeserializedCompetitorsPersistently */ true);
+    }
+    
+    public BoatJsonDeserializer(BoatFactory boatFactory, BoatClassJsonDeserializer boatClassDeserializer, boolean storeDeserializedCompetitorsPersistently) {
         super();
         this.boatFactory = boatFactory;
         this.boatClassDeserializer = boatClassDeserializer;
+        this.storeDeserializedCompetitorsPersistently = storeDeserializedCompetitorsPersistently;
     }
     
     @Override
@@ -78,7 +98,7 @@ public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
             String colorAsString = (String) object.get(BoatJsonSerializer.FIELD_COLOR);
             final Color color = colorAsString == null || colorAsString.isEmpty() ? null
                     : new RGBColor(colorAsString);
-            DynamicBoat boat = (DynamicBoat) boatFactory.getOrCreateBoat(boatId, name, boatClass, sailId, color);
+            DynamicBoat boat = (DynamicBoat) boatFactory.getOrCreateBoat(boatId, name, boatClass, sailId, color, storeDeserializedCompetitorsPersistently);
             return boat;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);

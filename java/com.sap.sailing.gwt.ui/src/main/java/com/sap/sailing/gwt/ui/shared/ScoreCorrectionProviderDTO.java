@@ -4,14 +4,15 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class ScoreCorrectionProviderDTO extends NamedDTO {
     private static final long serialVersionUID = -636159261445539142L;
     private Map<String, Set<Util.Pair<String, Date>>> hasResultsForBoatClassFromDateByEventName;
     
-    public ScoreCorrectionProviderDTO() {}
+    @Deprecated
+    ScoreCorrectionProviderDTO() {} // for GWT RPC serialization only
 
     public ScoreCorrectionProviderDTO(String name, Map<String, Set<Util.Pair<String, Date>>> hasResultsForBoatClassFromDateByEventName2) {
         super(name);

@@ -5,11 +5,14 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.BaseChart;
@@ -64,7 +67,6 @@ import com.google.gwt.maps.client.events.rightclick.RightClickMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -81,6 +83,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
@@ -97,6 +100,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -105,7 +109,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler {
+public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler, HasAvailabilityCheck {
     protected static final int FIX_OVERLAY_Z_ORDER = 230;
     private final RaceMap raceMap;
     private final SingleRaceLeaderboardPanel leaderboardPanel;
@@ -114,7 +118,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     private LinePlotOptions markSeriesPlotOptions;
     private final Label noMarkSelectedLabel;
     private MapWidget map;
-    private boolean visible;
     private List<HandlerRegistration> courseMarkClickHandlers;
     
     private Map<MarkDTO, Pair<Date, Date>> marksFromToTimes;
@@ -131,18 +134,23 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     private final MarkPositionService markPositionService;
     
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
+    protected boolean nonTrackingWarningWasDisplayed;
+
+    private final Set<MarkDTO> marksCurrentlyRequestedViaRemoteCall = new HashSet<>();
+    private final SailingServiceWriteAsync sailingServiceWrite;
 
     public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
             final SingleRaceLeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
-            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
-        this.markPositionService = new MarkPositionServiceForSailingService(sailingService);
+        this.markPositionService = new MarkPositionServiceForSailingService(sailingServiceWrite);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.polylines = new HashMap<>();
         this.marksPanel = new MarksPanel(this, context, stringMessages);
         this.noMarkSelectedLabel = new Label(stringMessages.pleaseSelectAMark());
@@ -373,20 +381,25 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                     overlay.setVisible(false);
                     if (currentFixPositionChooser == null) {
                         OverlayClickHandler.this.unregisterAll();
-                        currentFixPositionChooser = new FixPositionChooser(EditMarkPositionPanel.this, stringMessages, map, getIndexOfFixInPolyline(mark, fix), polyline.getPath(), overlay, new Callback<Position, Exception>() {
-                            @Override
-                            public void onFailure(Exception reason) {
-                                overlay.setVisible(true);
-                                OverlayClickHandler.this.registerAll();
-                                resetCurrentFixPositionChooser();
-                            }
-                            @Override
-                            public void onSuccess(Position result) {
-                                editMarkFix(mark, fix, result);
-                                overlay.setVisible(true);
-                                OverlayClickHandler.this.registerAll();
-                                resetCurrentFixPositionChooser();
-                            }
+                        checkIfTracking(() -> {
+                            currentFixPositionChooser = new FixPositionChooser(EditMarkPositionPanel.this,
+                                    stringMessages, map, getIndexOfFixInPolyline(mark, fix), polyline.getPath(),
+                                    overlay, new Callback<Position, Exception>() {
+                                        @Override
+                                        public void onFailure(Exception reason) {
+                                            overlay.setVisible(true);
+                                            OverlayClickHandler.this.registerAll();
+                                            resetCurrentFixPositionChooser();
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Position result) {
+                                            editMarkFix(mark, fix, result);
+                                            overlay.setVisible(true);
+                                            OverlayClickHandler.this.registerAll();
+                                            resetCurrentFixPositionChooser();
+                                        }
+                                    });
                         });
                     }
                     popup.hide();
@@ -407,26 +420,28 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                 }
                 
                 private void addDeleteItemAndShowPopup(boolean enableDelete) {
-                    final MenuItem delete;
+                    Runnable r = () -> {
+                        final MenuItem delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
+                            @Override
+                            public void execute() {
+                                if (enableDelete) {
+                                    removeMarkFix(mark, fix);
+                                    popup.hide();
+                                }
+                            }
+                        });
+                        if (!enableDelete) {
+                            delete.setEnabled(false);
+                            delete.setTitle(stringMessages.theDeletionOfThisFix());
+                        }
+                        menu.addItem(delete);
+                        popup.setWidget(menu);
+                    };
                     if (enableDelete) {
-                        delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                                removeMarkFix(mark, fix);
-                                popup.hide();
-                            }
-                        });
+                        checkIfTracking(r);
                     } else {
-                        delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() {
-                            @Override
-                            public void execute() {
-                            }
-                        });
-                        delete.setEnabled(false);
-                        delete.setTitle(stringMessages.theDeletionOfThisFix());
+                        r.run();
                     }
-                    menu.addItem(delete);
-                    popup.setWidget(menu);
                 }
             });
         }
@@ -704,20 +719,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
 
     public void setVisible(boolean visible) {
-        this.visible = visible;
-        if(visible && !isVisible()){
-            sailingService.checkIfRaceIsTracked(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(stringMessages.serverError());
-                }
-                @Override
-                public void onSuccess(Boolean result) {
-                    if (Boolean.FALSE.equals(result)) {
-                        Window.alert(stringMessages.positionEditOnNonTrackingRace());
-                    }
-                }
-            });
+        if (visible && !isVisible()) {
+            checkIfTracking(() -> {});
         }
         if (map == null) {
             map = raceMap.getMap();
@@ -725,7 +728,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
                 setMap(map);
             }
         }
-        if (this.visible) {
+        if (visible) {
             if (sideBySideComponentViewer != null) {
                 sideBySideComponentViewer.setLeftComponent(marksPanel);
                 sideBySideComponentViewer.setLeftComponentToggleButtonVisible(false);
@@ -740,10 +743,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
         } else {
-            if (currentFixPositionChooser != null) {
-                currentFixPositionChooser.cancel();
-                currentFixPositionChooser = null;
-            }
+            cancelFixPositionChooserAndNotification();
             marksPanel.deselectMark();
             selectedMark = null;
             if (sideBySideComponentViewer != null) {
@@ -756,7 +756,41 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
             raceMap.registerAllCourseMarkInfoWindowClickHandlers();
         }
-        super.setVisible(this.visible);
+        super.setVisible(visible);
+    }
+
+    private void cancelFixPositionChooserAndNotification() {
+        if (currentFixPositionChooser != null) {
+            currentFixPositionChooser.cancel();
+            currentFixPositionChooser = null;
+            if (notificationTimer.isRunning()) {
+                notificationTimer.run();
+                notificationTimer.cancel();
+            }
+        }
+    }
+
+    private void checkIfTracking(Runnable continuation) {
+        if (nonTrackingWarningWasDisplayed) {
+            continuation.run();
+        } else {
+            sailingService.checkIfRaceIsTracking(selectedRaceIdentifier, new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.serverError(), Notification.NotificationType.ERROR);
+                    continuation.run();
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (Boolean.FALSE.equals(result)) {
+                        Notification.notify(stringMessages.positionEditOnNonTrackingRace(), Notification.NotificationType.WARNING);
+                        nonTrackingWarningWasDisplayed = true;
+                    }
+                    continuation.run();
+                }
+            });
+        }
     }
     
     @Override
@@ -841,11 +875,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
     
     private void selectMark(MarkDTO mark) {
-        selectedMark = mark;
-        if (currentFixPositionChooser != null) {
-            currentFixPositionChooser.cancel();
-            currentFixPositionChooser = null;
+        if (selectedMark != mark) {
+            cancelFixPositionChooserAndNotification();
         }
+        selectedMark = mark;
         if (selectedMark != null) {
             if (marksFromToTimes.get(selectedMark) != null) {
                 // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
@@ -887,24 +920,43 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public void onSelectionChange(SelectionChangeEvent event) {
         final MarkDTO mark = marksPanel.getSelectedMark();
+        retrieveAndSelectMarkIfNecessary(mark, null);
+    }
+
+    protected void retrieveAndSelectMarkIfNecessary(final MarkDTO mark, final Runnable callback) {
         if (mark != null && (marks.get(mark) == null || marks.get(mark).isEmpty())) {
-            if (mark != null) {
-                markPositionService.getMarkTrack(raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier), 
+            
+            if (marksCurrentlyRequestedViaRemoteCall.add(mark)) {
+                markPositionService.getMarkTrack(
+                        raceIdentifierToLeaderboardRaceColumnAndFleetMapper
+                                .getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
                         mark.getIdAsString(), new AsyncCallback<MarkTrackDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                errorReporter.reportError(stringMessages.errorCommunicatingWithServer()+": "+caught.getMessage());
+                                marksCurrentlyRequestedViaRemoteCall.remove(mark);
+                                errorReporter.reportError(
+                                        stringMessages.errorCommunicatingWithServer() + ": " + caught.getMessage());
                             }
-    
+
                             @Override
                             public void onSuccess(MarkTrackDTO result) {
+                                marksCurrentlyRequestedViaRemoteCall.remove(mark);
                                 createMarkTrackUi(mark, result.getFixes());
                                 selectMark(mark);
+                                if (callback != null) {
+                                    callback.run();
+                                }
                             }
                         });
             }
+            else {
+                // remote call of the same mark already in progress -> ignore this request
+            }
         } else {
             selectMark(mark);
+            if (callback != null) {
+                callback.run();
+            }
         }
     }
     
@@ -943,17 +995,21 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
      *             Is thrown when another fix position chooser is still open
      */
     public void createFixPositionChooserToAddFixToMark(MarkDTO mark, Callback<Position, Exception> callback) {
-        if (currentFixPositionChooser != null) { 
+        if (currentFixPositionChooser != null) {
             return;
         }
-        int index = 0;
-        for (GPSFixDTO fix : marks.get(mark).keySet()) {
-            if (fix.timepoint.after(timer.getTime()))
-                break;
-            index++;
-        }
-        Polyline polyline = polylines.get(mark);
-        currentFixPositionChooser = new FixPositionChooser(this, stringMessages, map, index, polyline != null ? polyline.getPath() : null, map.getCenter(), raceMap.getCoordinateSystem(), callback);
+        checkIfTracking(() -> {
+            int index = 0;
+            for (GPSFixDTO fix : marks.get(mark).keySet()) {
+                if (fix.timepoint.after(timer.getTime()))
+                    break;
+                index++;
+            }
+            Polyline polyline = polylines.get(mark);
+            currentFixPositionChooser = new FixPositionChooser(EditMarkPositionPanel.this, stringMessages, map, index,
+                    polyline != null ? polyline.getPath() : null, map.getCenter(), raceMap.getCoordinateSystem(),
+                    callback);
+        });
     }
     
     public void resetCurrentFixPositionChooser() {
@@ -1026,5 +1082,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public String getId() {
         return "EditMarkPositionPanel";
+    }
+
+    @Override
+    public void checkBackendAvailability(Consumer<Boolean> callback) {
+        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback,
+                stringMessages);
     }
 }

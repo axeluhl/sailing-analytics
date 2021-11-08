@@ -16,10 +16,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -47,10 +48,11 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
-import com.sap.sailing.domain.common.tracking.impl.VeryCompactWindImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactWindImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
@@ -66,6 +68,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -90,6 +93,36 @@ public class WindTest {
         track.add(wind1);
         track.add(wind2);
         Wind average = track.getAveragedWind(pos, middle);
+        PositionAssert.assertBearingEquals(new DegreeBearingImpl(0), average.getBearing().getDifferenceTo(new DegreeBearingImpl(0)), 0.01);
+    }
+    
+    /**
+     * When a wind track has a gap, e.g., because a sensor temporarily did not transmit data, averaging should still try to
+     * obtain fixes "left and right" of the time point requested up to the averaging interval set on the track, ideally
+     * symmetrically, and taking at least one fix before and one fix after the time point requested, if possible, rather than
+     * considering a long gap on one side an exceeding of the averaging interval although only one fix is consumed from that
+     * side.<p>
+     * 
+     * See also bug 5576.
+     */
+    @Test
+    public void testAveragingWindWithGapInTrack() throws InterruptedException {
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
+        TimePoint t = MillisecondsTimePoint.now();
+        TimePoint t1_left = t.minus(Duration.ONE_SECOND);
+        TimePoint t2_left = t1_left.minus(Duration.ONE_MINUTE);
+        TimePoint t1_right = t.plus(Duration.ONE_SECOND);
+        TimePoint t2_right = t1_right.plus(Duration.ONE_MINUTE);
+        DegreePosition pos = new DegreePosition(0, 0);
+        Wind wind1 = new WindImpl(pos, t2_left, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(340)));
+        Wind wind2 = new WindImpl(pos, t1_left, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(350)));
+        Wind wind3 = new WindImpl(pos, t1_right, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(10)));
+        Wind wind4 = new WindImpl(pos, t2_right, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(20)));
+        track.add(wind1);
+        track.add(wind2);
+        track.add(wind3);
+        track.add(wind4);
+        Wind average = track.getAveragedWind(pos, t);
         PositionAssert.assertBearingEquals(new DegreeBearingImpl(0), average.getBearing().getDifferenceTo(new DegreeBearingImpl(0)), 0.01);
     }
     
@@ -144,8 +177,10 @@ public class WindTest {
 
     /**
      * If the wind track has areas with no data, and wind information is requested for such an interval,
-     * it is essential to still average over the {@link #AVERAGING_INTERVAL_MILLIS} interval, even if the
-     * interval is further away than {@link #AVERAGING_INTERVAL_MILLIS}.
+     * it is essential to still average over at least one fix left and one fix right, even if the
+     * resulting interval is longer than {@link #AVERAGING_INTERVAL_MILLIS}. Furthermore, the wind track
+     * is expected to pick up half the interval length worth of fixes each side starting with the first fix
+     * found in that direction, regardless the distance to the first fix in that direction.
      */
     @Test
     public void testAveragingOfSparseWindTrack() {
@@ -165,19 +200,24 @@ public class WindTest {
         track.add(wind5);
         track.add(wind6);
         track.add(wind7);
-        
-        // interval does bearely reach 20's burst because 0 has 0 length and 1000..30000 has 29000 length
+        // expecting to pick up 0, 1000, 2000, and 10000, all with 20deg
         PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1)), 0.02);
-        // interval uses the two fixes to the left (0, 1000)=1000 and three to the right (2000, 10000, 30000)=28000
+        // interval uses the two fixes to the left (0, 1000) and two to the right (2000, 10000), total length 11000
         PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1001)), 0.02);
-        // in the middle of the "hole", fetches (0, 1000, 2000, 10000)=10000 and (30000, 40000)=10000, so 20000ms worth of wind
+        // in the middle of the "hole", fetches 10000 and 30000; then adding 2000, 1000, and 0 because it's closer than 15s to 10000; then
+        // adding 40000 because it's less than 15s away from 30000. The left values all are 20deg; on the right we have an average of 75deg;
+        // together things should end up at around 35deg (five fixes at 20deg, one fix at 130deg):
         final double averageFor20000 = track.getAveragedWind(pos, new MillisecondsTimePoint(20000)).getKnots();
         // value is hard to predict exactly because time difference-based confidences rate fixes closer to 20000ms higher than those further away
-        assertEquals(35, averageFor20000, 5);
-        // right of the middle of the "hole", fetches (0, 1000, 2000, 10000)=10000 and (30000, 40000, 50000)=20000
-        final double averageFor20500 = track.getAveragedWind(pos, new MillisecondsTimePoint(20500)).getKnots();
-        assertEquals(37, averageFor20500, 5);
-        assertTrue(averageFor20500 > averageFor20000);
+        assertEquals(35, averageFor20000, 2);
+        // right of the middle of the "hole", fetches 10000 and 30000 initially; thenthe same as for 20000, but the greater angles
+        // have greater weight as they are closer now to the time point (24000):
+        final double averageFor24000 = track.getAveragedWind(pos, new MillisecondsTimePoint(24000)).getKnots();
+        assertEquals(37, averageFor24000, 2);
+        assertTrue(averageFor24000 > averageFor20000);
+        // at 40000 and 50000 should be picked up, resulting in an average of ~150deg
+        final double averageFor100000 = track.getAveragedWind(pos, new MillisecondsTimePoint(100000)).getKnots();
+        assertEquals(150, averageFor100000, 2);
     }
     
     @Test
@@ -286,7 +326,8 @@ public class WindTest {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Mark startFinishLeft = domainFactory.getOrCreateMark("Start/Finish left");
         Mark startFinishRight = domainFactory.getOrCreateMark("Start/Finish right");
-        ControlPoint startFinish = domainFactory.createControlPointWithTwoMarks(startFinishLeft, startFinishRight, "Start/Finish");
+        ControlPoint startFinish = domainFactory.createControlPointWithTwoMarks(startFinishLeft, startFinishRight,
+                "Start/Finish", "Start/Finish");
         ControlPoint top = domainFactory.getOrCreateMark("Top");
         Waypoint w1 = domainFactory.createWaypoint(startFinish, /*passingInstruction*/ null);
         Waypoint w2 = domainFactory.createWaypoint(top, /*passingInstruction*/ null);
@@ -304,15 +345,18 @@ public class WindTest {
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
                 new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
-                        /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
-                	/* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null)),
+                        /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                        /*startDate*/ null, /*endDate*/ null,
+                        /* trackedRegattaRegistry */ null,
+                        domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null,
+                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
                 new RaceDefinitionImpl("Test Race",
                         new CourseImpl("Test Course", Arrays.asList(new Waypoint[] { w1, w2, w3 })),
                         boatClass, competitorsAndBoats), Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 1000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
-                        mock(RaceLogResolver.class));
+                        mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
         TimePoint start = MillisecondsTimePoint.now();
         TimePoint topMarkRounding = start.plus(30000);
         TimePoint finish = topMarkRounding.plus(30000);
@@ -328,7 +372,7 @@ public class WindTest {
     @Test
     public void testWindAveragingBasedOnPosition() {
         Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
-        /* halfConfidenceAfterMilliseconds */10000l, new MeterDistance(1000));
+        /* standard deviation */ Duration.ONE_SECOND.times(10), new MeterDistance(1000));
         ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
                 .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         TimePoint now = MillisecondsTimePoint.now();

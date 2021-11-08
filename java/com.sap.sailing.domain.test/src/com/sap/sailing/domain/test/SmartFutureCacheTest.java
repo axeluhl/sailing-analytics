@@ -29,7 +29,7 @@ import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 
 public class SmartFutureCacheTest {
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
     
     @Test
     public void testPerformanceOfGetAndCall() {

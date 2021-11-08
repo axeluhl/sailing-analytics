@@ -18,9 +18,9 @@ import java.util.Map.Entry;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -29,9 +29,11 @@ import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayPar
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayServiceImpl;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayToDomainAdapter;
 import com.sap.sailing.domain.test.DummyTrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class SwissTimingReplayAdapterServiceTest {
     
@@ -76,11 +78,12 @@ public class SwissTimingReplayAdapterServiceTest {
         assertEquals(321920, replayCountListener.rankingMarkCount);                
     }
 
+    @Ignore("SwissTiming has shut down the ota2.sportresult.com server around 2020-11-13")
     @Test
     public void testRaceData_SAW005905_20120805_EqualsOnlineVersion() throws Exception {
         byte[] localCopy = read(getClass().getResourceAsStream("/SAW005905.20120805.replay"));
-        byte[] onlineCopy = read((InputStream) new URL(
-                "http://ota2.sportresult.com/Replay?id=446495&_start=0").getContent());
+        byte[] onlineCopy = read((InputStream) HttpUrlConnectionHelper.redirectConnection(new URL(
+                "https://static.sapsailing.com/OSG2012/446495.rsc?id=446495")).getContent());
         assertArrayEquals(localCopy, onlineCopy);
     }
     
@@ -119,8 +122,8 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testRaceData_SAW005905_20120805_online() throws Exception {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
         // race ID is 450053, as extracted from http://live.ota.st-sportservice.com/service?cmd=unity_race_overview&id=91
-        byte[] onlineCopy = read((InputStream) new URL(
-                "http://ota2.sportresult.com/Replay?id=446495&_start=0").getContent());
+        byte[] onlineCopy = read((InputStream) HttpUrlConnectionHelper.redirectConnection(new URL(
+                "https://static.sapsailing.com/OSG2012/446495.rsc?id=446495")).getContent());
         new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(onlineCopy), replayCountListener);
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
         assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  
@@ -185,7 +188,8 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testRaceData_SAW010955_20120802_WithDomainAdapter() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, /* raceName */ "SAW005906",
                 "SAW005906", /* boatClass */ null, DomainFactory.INSTANCE, new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false,
-                mock(RaceLogResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null);
+                mock(RaceLogAndTrackedRaceResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null,
+                new DefaultRaceTrackingHandler());
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         assertFalse(Util.isEmpty(trackedRaces));
@@ -200,7 +204,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testStartPerformanceDetection() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, /* raceName */ "SAW005905",
                 "SAW005905", /* boatClass */ null, DomainFactory.INSTANCE, new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false,
-                mock(RaceLogResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null);
+                mock(RaceLogAndTrackedRaceResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null, new DefaultRaceTrackingHandler());
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005905.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         TrackedRace trackedRace = trackedRaces.iterator().next();
@@ -213,57 +217,30 @@ public class SwissTimingReplayAdapterServiceTest {
     }
 
     @Test
-    @Ignore
     public void printRaceData_SAW005906_20120805() throws Exception {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"),
                 new SwissTimingReplayPrintListener());
     }
 
     @Test
-    @Ignore
-    public void printRaceData_SAM009903_20120731_sapsailing_replay() throws Exception {
-        new SwissTimingReplayParserImpl().readData(
-                getClass().getResourceAsStream("/SAM009903.20120731_sapsailing.replay"),
-                new SwissTimingReplayPrintListener());
-    }
-
-    @Test
-    @Ignore
     public void printRaceData_SAM009903_20120731_replay() throws Exception {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM009903.20120731.replay"),
                 new SwissTimingReplayPrintListener());
     }
 
     @Test
-    @Ignore
     public void printReadRaceData_SAW010955_20120802() throws Exception {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW010955.20120802.replay"),
                 new SwissTimingReplayPrintListener());
     }
 
     @Test
-    @Ignore
-    public void printReadRaceData_SAM002901() throws Exception {
-        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM002901.replay"),
-                new SwissTimingReplayPrintListener());
-    }
-
-    @Test
-    @Ignore
-    public void printReadRaceData_SAM009904_20120731() throws Exception {
-        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM009904.20120731.replay"),
-                new SwissTimingReplayPrintListener());
-    }
-
-    @Test
-    @Ignore
     public void printRaceData_SAW102101_20120807() throws Exception {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW102101.20120807.replay"),
                 new SwissTimingReplayPrintListener());
     }
 
     @Test
-    @Ignore
     public void printRaceData_SAM102101_20120807() throws Exception {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM102101.20120807.replay"),
                 new SwissTimingReplayPrintListener());

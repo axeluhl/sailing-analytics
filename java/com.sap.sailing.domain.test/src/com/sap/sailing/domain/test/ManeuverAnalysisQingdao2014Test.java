@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,8 +27,6 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTestCase {
     public ManeuverAnalysisQingdao2014Test() throws MalformedURLException, URISyntaxException {
@@ -43,7 +40,7 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
 
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20140429_ESSQingdao-Race_4.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(

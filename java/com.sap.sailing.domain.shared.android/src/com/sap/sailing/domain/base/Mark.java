@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.common.MarkType;
-import com.sap.sse.common.Color;
+import java.util.UUID;
+
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sse.common.IsManagedByCache;
 
 
@@ -12,9 +13,8 @@ import com.sap.sse.common.IsManagedByCache;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Mark extends ControlPoint, IsManagedByCache<SharedDomainFactory> {
-    public Color getColor();
-    public String getShape();
-    public String getPattern();
-    public MarkType getType();
+public interface Mark extends CommonMarkProperties, ControlPoint, IsManagedByCache<SharedDomainFactory<?>> {
+    UUID getOriginatingMarkTemplateIdOrNull();
+
+    UUID getOriginatingMarkPropertiesIdOrNull();
 }

@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class RaceColumnDTO extends NamedDTO implements Serializable {
     private static final long serialVersionUID = -3228244237400937852L;
@@ -26,7 +27,11 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     
     public enum RaceColumnLiveState { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE };
 
-    public RaceColumnDTO() {
+    @Deprecated
+    RaceColumnDTO() {} // for GWT RPC serialization only
+    
+    public RaceColumnDTO(String name) {
+        super(name);
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();

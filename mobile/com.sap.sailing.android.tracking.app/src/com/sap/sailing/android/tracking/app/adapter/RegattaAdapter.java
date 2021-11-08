@@ -19,9 +19,10 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView regattaName = ViewHelper.get(view,R.id.regattaName);
+        TextView regattaName = ViewHelper.get(view, R.id.regattaName);
         if (regattaName != null) {
-            String regattaNameText = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
+            String regattaNameText = cursor
+                    .getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
             regattaName.setText(regattaNameText);
         }
         TextView regattaEvent = ViewHelper.get(view, R.id.regatta_event);
@@ -35,12 +36,14 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
             String detailText = "";
             int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
             if (type == CheckinUrlInfo.TYPE_COMPETITOR) {
-                detailText += cursor.getString(cursor.getColumnIndex(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME));
+                detailText += cursor
+                        .getString(cursor.getColumnIndex(AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME));
             } else if (type == CheckinUrlInfo.TYPE_MARK) {
                 detailText += cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_NAME));
             } else if (type == CheckinUrlInfo.TYPE_BOAT) {
                 detailText += cursor.getString(cursor.getColumnIndex(AnalyticsContract.Boat.BOAT_NAME));
-                ViewHelper.setColors(detail, cursor.getString(cursor.getColumnIndex(AnalyticsContract.Boat.BOAT_COLOR)));
+                ViewHelper.setColors(detail,
+                        cursor.getString(cursor.getColumnIndex(AnalyticsContract.Boat.BOAT_COLOR)));
             }
             detail.setText(detailText);
         }

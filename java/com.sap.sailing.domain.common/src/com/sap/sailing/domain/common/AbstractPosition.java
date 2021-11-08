@@ -2,10 +2,13 @@ package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.util.RoundingUtil;
@@ -110,14 +113,12 @@ public class AbstractPosition implements Position {
         double lat1 = getLatRad();
         double lon1 = getLngRad();
         double bearingRad = bearing.getRadians();
-
         double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distanceRad) + Math.cos(lat1) * Math.sin(distanceRad)
                 * Math.cos(bearingRad));
         double lon2 = lon1
                 + Math.atan2(Math.sin(bearingRad) * Math.sin(distanceRad) * Math.cos(lat1), Math.cos(distanceRad)
                         - Math.sin(lat1) * Math.sin(lat2));
         lon2 = (lon2 + 3 * Math.PI) % (2 * Math.PI) - Math.PI; // normalize to -180..+180
-
         return new DegreePosition(lat2 / Math.PI * 180., lon2 / Math.PI * 180.);
     }
 
@@ -223,6 +224,14 @@ public class AbstractPosition implements Position {
         Distance sumOfDistances1 = getDistance(intersectionPosition1).add(intersectionPosition1.getDistance(to));
         Distance sumOfDistances2 = getDistance(intersectionPosition2).add(intersectionPosition2.getDistance(to));
         return sumOfDistances1.compareTo(sumOfDistances2) < 0 ? intersectionPosition1 : intersectionPosition2;
+    }
+
+    @Override
+    public SpeedWithBearing getSpeedWithBearingToReachOnGreatCircle(Position to, Duration inTime) {
+        final Bearing bearing = getBearingGreatCircle(to);
+        final Distance distance = getDistance(to);
+        final Speed speed = distance.inTime(inTime);
+        return new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
     }
 
     private Position cartesianVectorToPosition(double[] vector) {

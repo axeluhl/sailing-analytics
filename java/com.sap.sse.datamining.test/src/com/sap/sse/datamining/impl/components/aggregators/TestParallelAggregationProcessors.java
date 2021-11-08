@@ -16,7 +16,7 @@ public class TestParallelAggregationProcessors extends AbstractTestParallelAvera
     
     @Test
     public void testSumAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> sumAggregationProcessor = ParallelGroupedNumberDataSumAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> sumAggregationProcessor = ParallelGroupedNumberDataSumAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getSharedExecutor(), receivers);
         Collection<GroupedDataEntry<Number>> elements = createElements();
         ConcurrencyTestsUtil.processElements(sumAggregationProcessor, elements);
         
@@ -27,7 +27,7 @@ public class TestParallelAggregationProcessors extends AbstractTestParallelAvera
 
     @Test
     public void testMedianAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> medianAggregationProcessor = ParallelGroupedNumberDataMedianAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> medianAggregationProcessor = ParallelGroupedNumberDataMedianAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getSharedExecutor(), receivers);
         Collection<GroupedDataEntry<Number>> elements = createElements();
         ConcurrencyTestsUtil.processElements(medianAggregationProcessor, elements);
         
@@ -38,7 +38,7 @@ public class TestParallelAggregationProcessors extends AbstractTestParallelAvera
 
     @Test
     public void testMaxAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> maxAggregationProcessor = ParallelGroupedNumberDataMaxAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> maxAggregationProcessor = ParallelGroupedNumberDataMaxAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getSharedExecutor(), receivers);
         Collection<GroupedDataEntry<Number>> elements = createElements();
         ConcurrencyTestsUtil.processElements(maxAggregationProcessor, elements);
         
@@ -49,7 +49,7 @@ public class TestParallelAggregationProcessors extends AbstractTestParallelAvera
 
     @Test
     public void testMinAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> minAggregationProcessor = ParallelGroupedNumberDataMinAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Number>, Map<GroupKey, Number>> minAggregationProcessor = ParallelGroupedNumberDataMinAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getSharedExecutor(), receivers);
         Collection<GroupedDataEntry<Number>> elements = createElements();
         ConcurrencyTestsUtil.processElements(minAggregationProcessor, elements);
         
@@ -60,7 +60,7 @@ public class TestParallelAggregationProcessors extends AbstractTestParallelAvera
 
     @Test
     public void testCountAggregationProcessor() throws InterruptedException {
-        Processor<GroupedDataEntry<Object>, Map<GroupKey, Number>> countAggregationProcessor = ParallelGroupedDataCountAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Object>, Map<GroupKey, Number>> countAggregationProcessor = ParallelGroupedDataCountAggregationProcessor.getDefinition().construct(ConcurrencyTestsUtil.getSharedExecutor(), receivers);
         @SuppressWarnings("unchecked")
         Collection<GroupedDataEntry<Object>> elements = (Collection<GroupedDataEntry<Object>>)(Collection<?>) createElements();
         ConcurrencyTestsUtil.processElements(countAggregationProcessor, elements);

@@ -1,0 +1,5 @@
+bin/agent-linux-amd64
+bin/orchestrator-linux-amd64
+configs/instance_template/master.json
+configs/secrets/conf_aws.json.sample
+env.sh

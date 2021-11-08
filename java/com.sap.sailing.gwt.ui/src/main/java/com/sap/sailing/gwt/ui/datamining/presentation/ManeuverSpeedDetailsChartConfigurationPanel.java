@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
@@ -25,7 +25,7 @@ public class ManeuverSpeedDetailsChartConfigurationPanel extends HorizontalPanel
 
     private static final String NUMBER_BOX_WIDTH = "40px";
 
-    public ManeuverSpeedDetailsChartConfigurationPanel(ClickHandler applyButtonClickHandler,
+    public ManeuverSpeedDetailsChartConfigurationPanel(Runnable applyConfigurationCallback,
             StringMessages stringMessages) {
         setHorizontalAlignment(ALIGN_LEFT);
         setVerticalAlignment(ALIGN_MIDDLE);
@@ -48,7 +48,7 @@ public class ManeuverSpeedDetailsChartConfigurationPanel extends HorizontalPanel
         add(new Label(stringMessages.zeroTo360AxisLabeling() + ":"));
         add(zeroTo360AxisLabelingCheckBox);
 
-        Button applyButton = new Button(stringMessages.apply(), applyButtonClickHandler);
+        Button applyButton = new Button(stringMessages.apply(), (ClickEvent e) -> applyConfigurationCallback.run());
         add(applyButton);
     }
 

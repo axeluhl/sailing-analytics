@@ -105,7 +105,7 @@ public class LeaderboardSettingsPanelPO extends PageArea {
         List<DetailCheckboxInfo> selectedDetails = new ArrayList<>();
         for (DetailCheckboxInfo detail : DetailCheckboxInfo.values()) {
             String checkboxId = detail.getId();
-            if(getCheckboxValue(checkboxId)) {
+            if (getCheckboxValue(checkboxId)) {
                 selectedDetails.add(detail);
             }
         }

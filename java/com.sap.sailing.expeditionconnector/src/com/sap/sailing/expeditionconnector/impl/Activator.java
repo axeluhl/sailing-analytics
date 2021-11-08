@@ -13,8 +13,10 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.persistence.DomainObjectFactory;
@@ -24,6 +26,8 @@ import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class Activator implements BundleActivator {
@@ -76,11 +80,24 @@ public class Activator implements BundleActivator {
                     /* sensorFixStore will be discovered by tracker factory through OSGi */ null, domainObjectFactory, mongoObjectFactory);
             registrations.add(context.registerService(ExpeditionTrackerFactory.class, expeditionTrackerFactory, /* properties */null));
             registrations.add(context.registerService(WindTrackerFactory.class, expeditionTrackerFactory, /* properties */null));
-            
             registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new ExpeditionGpsDeviceIdentifierJsonHandler(), getDict(ExpeditionGpsDeviceIdentifier.TYPE)));
             registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new ExpeditionGpsStringSerializationHandler(), getDict(ExpeditionGpsDeviceIdentifier.TYPE)));
             registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new ExpeditionSensorDeviceIdentifierJsonHandler(), getDict(ExpeditionSensorDeviceIdentifier.TYPE)));
             registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new ExpeditionSensorStringSerializationHandler(), getDict(ExpeditionSensorDeviceIdentifier.TYPE)));
+            new Thread(() -> {
+                final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+                try {
+                    final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
+                    for (final ExpeditionDeviceConfiguration deviceConfiguration : expeditionTrackerFactory.getDeviceConfigurations()) {
+                        securityService.migrateOwnership(deviceConfiguration);
+                    }
+                    securityService
+                            .assumeOwnershipMigrated(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getName());
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception trying to migrate IgtimiAccounts implementation", e);
+                }
+            }, getClass().getName() + " registering connectivity handler").start();
+
         });
     }
     

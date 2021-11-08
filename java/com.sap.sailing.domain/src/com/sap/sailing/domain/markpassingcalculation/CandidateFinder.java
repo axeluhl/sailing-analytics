@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -24,7 +25,7 @@ public interface CandidateFinder {
      *            fixes.
      * @return new {@link Candidate}s and those that should be removed.
      */
-    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
+    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFixMoving> fixes);
 
     /**
      * When initializing or refreshing the calculator, the whole race until now is evaluated. For that purpose all of the
@@ -40,7 +41,7 @@ public interface CandidateFinder {
      * @return The fixes for each Competitor that may have changed their status as a {@link Candidate} because of new
      *         mark fixes..
      */
-    Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> newMarkFixes);
+    Map<Competitor, List<GPSFixMoving>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> newMarkFixes);
 
     /**
      * Notifies this finder about the race's start time having changed. The finder is only interested in the non-inferred
@@ -53,6 +54,13 @@ public interface CandidateFinder {
      */
     Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterRaceStartTimeChange();
 
+    /**
+     * Notifies this finder about the race's start of tracking time having changed. In case of a race that infers
+     * the race start time from the start mark passings, a change in start of tracking needs to adjust the time range
+     * in which candidates are considered valid.
+     */
+    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterStartOfTrackingChange();
+    
     /**
      * Notifies this finder about the race's finished time having changed. The candidates collections are adjusted
      * accordingly: new candidates may be added if the finished time was moved to a later point in time and therefore

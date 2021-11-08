@@ -1,29 +1,35 @@
 package com.sap.sailing.polars.datamining.components;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
-import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.polars.datamining.data.impl.LeaderboardGroupWithPolarContext;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class PolarLeaderboardGroupRetrievalProcessor extends AbstractRetrievalProcessor<RacingEventService, HasLeaderboardGroupPolarContext> {
-
+public class PolarLeaderboardGroupRetrievalProcessor extends AbstractRetrievalProcessor<RacingEventService, HasLeaderboardGroupContext> {
     public PolarLeaderboardGroupRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasLeaderboardGroupPolarContext, ?>> resultReceivers, int retrievalLevel) {
-        super(RacingEventService.class, HasLeaderboardGroupPolarContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasLeaderboardGroupContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(RacingEventService.class, HasLeaderboardGroupContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override
-    protected Iterable<HasLeaderboardGroupPolarContext> retrieveData(RacingEventService element) {
-        return element.getLeaderboardGroups()
-                .values()
-                .stream()
-                .map(lg -> new LeaderboardGroupWithPolarContext(lg))
-                .collect(Collectors.toSet());
+    protected Iterable<HasLeaderboardGroupContext> retrieveData(RacingEventService element) {
+        Set<HasLeaderboardGroupContext> data = new HashSet<>();
+        for (LeaderboardGroup leaderboardGroup : element.getLeaderboardGroups().values()) {
+            if (isAborted()) {
+                break;
+            }
+            data.add(new LeaderboardGroupWithPolarContext(leaderboardGroup, element.getPolarDataService(), element.getBaseDomainFactory()));
+        }
+        return data;
     }
 
 }

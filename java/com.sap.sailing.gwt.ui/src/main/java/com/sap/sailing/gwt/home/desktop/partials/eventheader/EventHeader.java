@@ -19,17 +19,19 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
-import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
-import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingMetadataProvider;
+import com.sap.sailing.gwt.home.desktop.partials.sharing.EventHeaderSharingButtons;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
+import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
 
@@ -59,7 +61,8 @@ public class EventHeader extends Composite {
     @UiField DivElement eventCategory;
     @UiField DivElement courseAreaUi;
     @UiField FlowPanel dropdownContent;
-    @UiField SharingButtons sharing;
+    @UiField EventHeaderSharingButtons sharing;
+    @UiField DataByLogo dataByLogo;
 
     private EventViewDTO event;
     private Presenter presenter;
@@ -81,12 +84,10 @@ public class EventHeader extends Composite {
                 String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate());
                 return StringMessages.INSTANCE.eventSharingShortText(event.getDisplayName(), event.getLocationOrVenue(), dateString);
             }
-
+            
             @Override
-            public String getLongText(String url) {
-                // TODO regatta details?
-                String dateString = EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate());
-                return StringMessages.INSTANCE.eventSharingLongText(event.getDisplayName(), event.getLocationOrVenue(), dateString, url);
+            public ShareablePlaceContext getContext() {
+                return presenter.getCtx();
             }
         });
     }
@@ -149,18 +150,21 @@ public class EventHeader extends Composite {
             }
             hide(competitors, races, courseAreaUi, eventCategory);
         }
+        dataByLogo.setUp(event.getTrackingConnectorInfos(), /** colorIfPossible **/ true, /** enforceTextColor **/ false);
         initTitleAndSelection(nameToShow);
     }
 
     private void initTitleAndSelection(String nameToShow) {
-        if(!presenter.needsSelectionInHeader()) {
+        if (!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(eventState, event.getState().getStateMarker());
             UIObject.ensureDebugId(eventState, "EventStateLabelDiv");
             hide(dropdownTitle);
         } else {
             dropdownEventName.setInnerText(nameToShow);
-            LabelTypeUtil.renderLabelType(dropdownEventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
+            LabelTypeUtil.renderLabelType(dropdownEventState,
+                    presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker()
+                            : event.getState().getStateMarker());
             UIObject.ensureDebugId(dropdownEventState, "EventStateLabelDiv");
             hide(staticTitle);
             initDropdown();

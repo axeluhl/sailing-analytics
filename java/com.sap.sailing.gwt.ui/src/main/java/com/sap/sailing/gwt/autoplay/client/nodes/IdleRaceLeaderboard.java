@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
@@ -35,6 +36,7 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
     }
 
     public void onStart() {
+        leaderboardTimer.setTime(MillisecondsTimePoint.now().asMillis());
         leaderboardTimer.play();
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtxSignalError()
                 .getAutoplaySettings();

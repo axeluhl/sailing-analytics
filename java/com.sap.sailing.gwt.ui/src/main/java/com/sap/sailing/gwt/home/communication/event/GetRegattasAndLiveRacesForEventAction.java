@@ -52,12 +52,13 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
     @Override
     @GwtIncompatible
     public ResultWithTTL<RegattasAndLiveRacesDTO> execute(SailingDispatchContext context) {
+        context.getSecurityService().checkCurrentUserReadPermission(context.getRacingEventService().getEvent(eventId));
         final Map<String, RegattaMetadataDTO> regattas = mapRegattas(context);
         final TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces = new TreeMap<>();
         final TreeSet<RegattaMetadataDTO> regattasWithoutRaces = new TreeSet<>();
         final RaceRefreshCalculator refreshCalculator = new RaceRefreshCalculator();
 
-        EventActionUtil.forRacesOfEvent(context, eventId, raceContent -> {
+        EventActionUtil.forRacesOfEventWithReadPermissions(context, eventId, raceContent -> {
             Optional<LiveRaceDTO> liveRace = Optional.ofNullable(raceContent.getLiveRaceOrNull());
             liveRace.ifPresent(r -> ensureRegatta(raceContent, regattas, regattasWithRaces).add(r));
             refreshCalculator.doForRace(raceContent);
@@ -66,13 +67,13 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
                 .forEach(regattasWithoutRaces::add);
         RegattasAndLiveRacesDTO dto = new RegattasAndLiveRacesDTO(regattasWithRaces, regattasWithoutRaces);
         ResultWithTTL<RegattasAndLiveRacesDTO> result = new ResultWithTTL<>(refreshCalculator.getTTL(), dto);
-        return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, event -> result, dto);
+        return EventActionUtil.withLiveRaceOrDefaultScheduleWithReadPermissions(context, eventId, event -> result, dto);
     }
 
     @GwtIncompatible
     private Map<String, RegattaMetadataDTO> mapRegattas(SailingDispatchContext context) {
         final Map<String, RegattaMetadataDTO> result = new HashMap<>();
-        EventActionUtil.forLeaderboardsOfEvent(context, eventId, new LeaderboardCallback() {
+        EventActionUtil.forLeaderboardsOfEventWithReadPermissions(context, eventId, new LeaderboardCallback() {
             @Override
             public void doForLeaderboard(LeaderboardContext context) {
                 result.put(context.getLeaderboardName(), context.asRegattaMetadataDTO());

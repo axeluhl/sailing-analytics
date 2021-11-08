@@ -1,24 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
-import com.sap.sailing.racecommittee.app.utils.StringHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.util.NaturalComparator;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -34,10 +15,32 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
+import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorShortNameComparator;
+import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.util.NaturalComparator;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
 
-    private static final int SAILING_NUMBER_POSITION = 0;
-    private static final int COMPETITOR_NAME_POSITION = 1;
+    private static final int COMPETITOR_SHORT_NAME_POSITION = 0;
+    private static final int SAILING_NUMBER_POSITION = 1;
+    private static final int COMPETITOR_NAME_POSITION = 2;
 
     private final Context mContext;
     private final ItemListener mListener;
@@ -71,7 +74,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
             bgId = R.attr.sap_gray_black_20;
         }
         holder.itemView.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
-        holder.mItemText.setText(item.getCompetitorDisplayName());
+        holder.mItemText.setText(CompetitorUtils.getDisplayName(item));
         final boolean hasReason = !MaxPointsReason.NONE.equals(item.getMaxPointsReason());
         holder.mItemPenalty.setVisibility(hasReason ? View.VISIBLE : View.GONE);
         if (hasReason) {
@@ -105,17 +108,17 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         }
         Drawable mergeIcon;
         switch (item.getMergeState()) {
-            case WARNING:
-                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
-                break;
+        case WARNING:
+            mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+            break;
 
-            case ERROR:
-                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
-                break;
+        case ERROR:
+            mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+            break;
 
-            default:
-                mergeIcon = null;
-                break;
+        default:
+            mergeIcon = null;
+            break;
         }
         holder.mItemMergeState.setImageDrawable(mergeIcon);
     }
@@ -156,7 +159,8 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
                 result.addAll(mCompetitor);
             } else {
                 for (int i = 0; i < mCompetitor.size(); i++) {
-                    if (StringHelper.on(mContext).containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(), mFilter)) {
+                    if (StringHelper.on(mContext).containsIgnoreCase(CompetitorUtils.getDisplayName(mCompetitor.get(i)),
+                            mFilter)) {
                         result.add(mCompetitor.get(i));
                     }
                 }
@@ -168,26 +172,27 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     private void sortData() {
         Comparator<CompetitorResultEditableImpl> comparator = null;
         switch (mOrderBy) {
+            case COMPETITOR_SHORT_NAME:
+                comparator = new DisplayNameComparator(COMPETITOR_SHORT_NAME_POSITION);
+                break;
             case SAILING_NUMBER:
                 comparator = new DisplayNameComparator(SAILING_NUMBER_POSITION);
                 break;
-
             case COMPETITOR_NAME:
                 comparator = new DisplayNameComparator(COMPETITOR_NAME_POSITION);
                 break;
-
             default:
                 break;
         }
 
-        if (comparator != null) {
+        if (mFiltered != null && comparator != null) {
             Collections.sort(mFiltered, comparator);
         }
         notifyDataSetChanged();
     }
 
     public enum OrderBy {
-        SAILING_NUMBER, COMPETITOR_NAME, START_LINE, FINISH_LINE
+        COMPETITOR_SHORT_NAME, SAILING_NUMBER, COMPETITOR_NAME, START_LINE, FINISH_LINE
     }
 
     public interface ItemListener {
@@ -211,32 +216,16 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
         @Override
         public int compare(CompetitorResultEditableImpl lhs, CompetitorResultEditableImpl rhs) {
-            String[] left = splitDisplayName(lhs.getCompetitorDisplayName());
-            String[] right = splitDisplayName(rhs.getCompetitorDisplayName());
-
-            int leftPos = mPos;
-            int rightPos = mPos;
-            if (left.length == 1) {
-                leftPos = 0;
+            switch (mPos) {
+                case COMPETITOR_SHORT_NAME_POSITION:
+                    return CompetitorShortNameComparator
+                            .compare(lhs.getShortName(), rhs.getShortName(), mNaturalComparator);
+                case SAILING_NUMBER_POSITION:
+                    return CompetitorSailIdComparator
+                            .compare(lhs.getBoatSailId(), rhs.getBoatSailId(), mNaturalComparator);
+                default:
+                    return mNaturalComparator.compare(lhs.getName(), rhs.getName());
             }
-            if (right.length == 1) {
-                rightPos = 0;
-            }
-            String leftItem = left[leftPos];
-            String rightItem = right[rightPos];
-            if (mPos == SAILING_NUMBER_POSITION) {
-                for (String leftData : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(leftItem)) {
-                    leftItem = leftData;
-                }
-                for (String rightData : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(rightItem)) {
-                    rightItem = rightData;
-                }
-            }
-            return mNaturalComparator.compare(leftItem, rightItem);
-        }
-
-        private String[] splitDisplayName(String displayName) {
-            return displayName.split(" - ");
         }
     }
 

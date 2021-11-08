@@ -36,7 +36,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             String errorMessage;
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
-                if (dao.name.equals(leaderboardToValidate.getName())) {
+                if (dao.getName().equals(leaderboardToValidate.getName())) {
                     unique = false;
                 }
             }
@@ -81,14 +81,12 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
 
     protected ListBox createSortedRegattaListBox(Collection<RegattaDTO> regattas, String preSelectedRegattaName) {
         ListBox result = createListBox(false);
-
         // sort the regatta names
         List<String> sortedRegattaNames = new ArrayList<String>();
         for (RegattaDTO regatta : existingRegattas) {
             sortedRegattaNames.add(regatta.getName());
         }
         Collections.sort(sortedRegattaNames);
-        
         result.addItem(stringMessages.pleaseSelectARegatta());
         int i=1;
         for (String regattaName : sortedRegattaNames) {

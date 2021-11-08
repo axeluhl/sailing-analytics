@@ -6,24 +6,32 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 import java.util.TimeZone;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
+import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -33,17 +41,20 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.shared.util.Wait;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private static final Logger logger = Logger.getLogger(TrackRaceReplicationTest.class.getName());
@@ -91,7 +102,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
-                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* useOfficialEventsToUpdateRaceLog */ false);
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -102,7 +113,8 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     }
 
     private void startTrackingOnMaster() throws Exception {
-        racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, /* timeoutInMilliseconds */ 60000);
+        racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, /* timeoutInMilliseconds */ 60000,
+                new DefaultRaceTrackingHandler());
     }
 
     private void waitForTrackRaceReplicationTrigger() throws InterruptedException, IllegalAccessException {
@@ -124,7 +136,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
                 new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertNotNull(replicaTrackedRace);
         assertNotSame(masterTrackedRace, replicaTrackedRace);
@@ -185,9 +197,9 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());
         TimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());
         logger.info("Done running testRaceTimeReplication()");
     }
@@ -197,16 +209,27 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         try {
             logger.info("Running testWindSourcesToExcludeReplication()");
             startTracking();
+            final FlexibleLeaderboard lb = master.apply(new CreateFlexibleLeaderboard("LB", "LB Display Name", new int[0], new LowPoint(), Collections.emptySet()));
+            final FlexibleRaceColumn r1 = (FlexibleRaceColumn) master.apply(new AddColumnToLeaderboard("R1", lb.getName(), /* medal race */ false));
+            master.apply(new ConnectTrackedRaceToLeaderboardColumn(lb.getName(), r1.getName(), "Default", raceIdentifier));
             Thread.sleep(1000);
-            TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+            final TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
             assertTrue(Util.isEmpty(masterTrackedRace.getWindSourcesToExclude()));
             assertTrue(Util.isEmpty(replicaTrackedRace.getWindSourcesToExclude()));
-            masterTrackedRace.setWindSourcesToExclude(Collections.singleton(new WindSourceImpl(WindSourceType.WEB)));
-            assertEquals(1, Util.size(masterTrackedRace.getWindSourcesToExclude()));
-            assertEquals(WindSourceType.WEB, masterTrackedRace.getWindSourcesToExclude().iterator().next().getType());
-            Thread.sleep(1000);
-            assertEquals(1, Util.size(replicaTrackedRace.getWindSourcesToExclude()));
-            assertEquals(WindSourceType.WEB, replicaTrackedRace.getWindSourcesToExclude().iterator().next().getType());
+            if (Wait.wait(()->masterTrackedRace.getAttachedRaceLogs().iterator().hasNext(),
+                    Optional.of(Duration.ONE_MINUTE), Duration.ONE_SECOND,
+                    Level.INFO, "Waiting for race log(s) attached")) {
+                final RaceLog defaultRaceLog = masterTrackedRace.getAttachedRaceLogs().iterator().next();
+                defaultRaceLog.add(new RaceLogExcludeWindSourcesEventImpl(TimePoint.now(), new LogEventAuthorImpl("Me", 0), 0,
+                        Collections.singleton(new WindSourceImpl(WindSourceType.WEB))));
+                assertEquals(1, Util.size(masterTrackedRace.getWindSourcesToExclude()));
+                assertEquals(WindSourceType.WEB, masterTrackedRace.getWindSourcesToExclude().iterator().next().getType());
+                Thread.sleep(1000);
+                assertEquals(1, Util.size(replicaTrackedRace.getWindSourcesToExclude()));
+                assertEquals(WindSourceType.WEB, replicaTrackedRace.getWindSourcesToExclude().iterator().next().getType());
+            } else {
+                fail("Didn't find race log for "+raceIdentifier);
+            }
         } finally {
             logger.info("Done running testWindSourcesToExcludeReplication()");
         }

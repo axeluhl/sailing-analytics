@@ -1,94 +1,88 @@
 package com.sap.sse.security.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.sap.sse.common.mail.MailException;
-import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
-import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementService extends RemoteService {
-    Collection<UserDTO> getUserList();
 
-    Collection<UserDTO> getFilteredSortedUserList(String filter);
+    Collection<AccessControlListAnnotationDTO> getAccessControlLists()
+            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    UserDTO getCurrentUser();
+    Collection<UserGroupDTO> getUserGroups() throws org.apache.shiro.authz.UnauthorizedException;
 
-    SuccessInfo login(String username, String password);
+    UserGroupDTO getUserGroupByName(String userGroupName)
+            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL) throws UserManagementException, MailException;
-    
-    /**
-     * Either <code>oldPassword</code> or <code>passwordResetSecret</code> need to be provided, or the current user needs to have
-     * the {@link DefaultRoles#ADMIN} role to be able to set the new password.
-     */
-    void updateSimpleUserPassword(String name, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException;
+    StrippedUserGroupDTO getStrippedUserGroupByName(String userGroupName)
+            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException;
+    Collection<UserDTO> getUserList() throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    void updateUserProperties(String username, String fullName, String company, String localeName) throws UserManagementException;
+    Boolean userExists(String username) throws org.apache.shiro.authz.UnauthorizedException;
 
-    void resetPassword(String username, String eMailAddress, String baseURL) throws UserManagementException, MailException;
+    ArrayList<RoleDefinitionDTO> getRoleDefinitions() throws org.apache.shiro.authz.UnauthorizedException;
 
-    boolean validateEmail(String username, String validationSecret) throws UserManagementException;
+    Triple<UserDTO, UserDTO, ServerInfoDTO> getCurrentUser()
+            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    SuccessInfo deleteUser(String username);
+    Map<String, String> getSettings() throws org.apache.shiro.authz.UnauthorizedException;
 
-    SuccessInfo logout();
-
-    SuccessInfo setRolesForUser(String username, Iterable<String> roles);
-
-    SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions);
-
-    Map<String, String> getSettings();
-
-    Map<String, String> getSettingTypes();
-
-    void setSetting(String key, String clazz, String setting);
-
-    void addSetting(String key, String clazz, String setting);
-
-    /**
-     * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
-     * <code>username</code>.
-     * 
-     * @param key must not be <code>null</code>
-     * @param value must not be <code>null</code>
-     * @throws UserManagementException 
-     */
-    void setPreference(String username, String key, String value) throws UserManagementException;
-    
-    void setPreferences(String username, Map<String, String> keyValuePairs) throws UserManagementException;
-
-    /**
-     * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
-     * <code>username</code>.
-     */
-    void unsetPreference(String username, String key) throws UserManagementException;
+    Map<String, String> getSettingTypes() throws org.apache.shiro.authz.UnauthorizedException;
 
     /**
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
-    String getPreference(String username, String key) throws UserManagementException;
+    String getPreference(String username, String key)
+            throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
+
+    Map<String, String> getPreferences(String username, List<String> keys)
+            throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
+
+    Map<String, String> getAllPreferences(String username)
+            throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
+
+    String getOrCreateAccessToken(String username)
+            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
+
+    AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject)
+            throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
+
+    SerializationDummy serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions)
+            throws org.apache.shiro.authz.UnauthorizedException;
+
+    RolesAndPermissionsForUserDTO getRolesAndPermissionsForUser(String username)
+            throws UserManagementException, org.apache.shiro.authz.UnauthorizedException;
+
+    Boolean userGroupExists(String userGroupName) throws org.apache.shiro.authz.UnauthorizedException;
+
+    SecurityServiceSharingDTO getSharingConfiguration();
     
-    Map<String, String> getPreferences(String username, List<String> keys) throws UserManagementException;
-    
-    Map<String, String> getAllPreferences(String username) throws UserManagementException;
+    Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO);
 
-    String getAccessToken(String username);
+    SuccessInfo login(String username, String password) throws org.apache.shiro.authz.UnauthorizedException;
 
-    String getOrCreateAccessToken(String username);
+    SuccessInfo logout() throws org.apache.shiro.authz.UnauthorizedException;
 
-    // ------------------------------------------------ OAuth Interface --------------------------------------------------------------
-
-    public String getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
-
-    public UserDTO verifySocialUser(CredentialDTO credential) throws OAuthException;
-
+    ArrayList<HasPermissions> getAllHasPermissions();
 }

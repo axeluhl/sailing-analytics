@@ -17,6 +17,9 @@ import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompet
 public class RegattaCompetitionFleet extends AbstractRegattaCompetitionFleet {
 
     private static RegattaCompetitionFleetUiBinder uiBinder = GWT.create(RegattaCompetitionFleetUiBinder.class);
+    
+    private int fleetCount = -1;
+    private RegattaCompetitionFleetRace raceView;
 
     interface RegattaCompetitionFleetUiBinder extends UiBinder<Widget, RegattaCompetitionFleet> {
     }
@@ -31,9 +34,11 @@ public class RegattaCompetitionFleet extends AbstractRegattaCompetitionFleet {
     }
     
     @Override
-    public RegattaCompetitionRaceView addRaceView(SimpleRaceMetadataDTO race, RegattaCompetitionPresenter presenter) {
-        RegattaCompetitionFleetRace raceView = new RegattaCompetitionFleetRace(race, presenter);
+    public RegattaCompetitionRaceView addRaceView(SimpleRaceMetadataDTO race, String fleetName,
+            RegattaCompetitionPresenter presenter) {
+        raceView = new RegattaCompetitionFleetRace(race, fleetName, presenter);
         raceContainerUi.add(raceView);
+        updateRaceViewIfReady();
         return raceView;
     }
 
@@ -42,6 +47,8 @@ public class RegattaCompetitionFleet extends AbstractRegattaCompetitionFleet {
         getElement().getStyle().setWidth(100.0 / fleetCount, Unit.PCT);
         setStyleName(local_res.css().regattacompetition_phase_fleetfullwidth(), fleetCount < 2);
         setStyleName(local_res.css().regattacompetition_phase_fleetcompact(), fleetCount > 4);
+        this.fleetCount = fleetCount;
+        updateRaceViewIfReady();
     }
 
     @Override
@@ -64,5 +71,10 @@ public class RegattaCompetitionFleet extends AbstractRegattaCompetitionFleet {
     protected Element getFleetCornerUiElement() {
         return fleetCornerUi;
     }
-    
+
+    private void updateRaceViewIfReady() {
+        if (raceView != null && fleetCount > 1) {
+            raceView.removeBigRaceTitleCSS();
+        }
+    }
 }

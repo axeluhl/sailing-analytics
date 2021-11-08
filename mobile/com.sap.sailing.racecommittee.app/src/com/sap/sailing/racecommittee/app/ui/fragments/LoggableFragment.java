@@ -1,14 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import android.app.Fragment;
-import android.os.Bundle;
-
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+
 public abstract class LoggableFragment extends Fragment {
-    
-private LifecycleLogger lifeLogger;
-    
+
+    private LifecycleLogger lifeLogger;
+
     public LoggableFragment() {
         this.lifeLogger = new LifecycleLogger();
     }

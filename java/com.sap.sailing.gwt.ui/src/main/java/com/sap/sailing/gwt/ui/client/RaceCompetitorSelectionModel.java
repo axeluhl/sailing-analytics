@@ -16,6 +16,12 @@ public class RaceCompetitorSelectionModel extends CompetitorSelectionModel imple
         boatsOfCompetitors = new HashMap<>();
     }
 
+    public RaceCompetitorSelectionModel(boolean hasMultiSelection, Map<CompetitorDTO, BoatDTO> boatsOfCompetitors) {
+        super(hasMultiSelection);
+        this.boatsOfCompetitors = boatsOfCompetitors;
+        addAll(boatsOfCompetitors.keySet());
+    }
+    
     public RaceCompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, Map<CompetitorDTO, BoatDTO> boatsOfCompetitors) {
         super(hasMultiSelection, competitorColorProvider);
         this.boatsOfCompetitors = boatsOfCompetitors;
@@ -29,11 +35,11 @@ public class RaceCompetitorSelectionModel extends CompetitorSelectionModel imple
 
     @Override
     public void setBoat(CompetitorDTO competitor, BoatDTO boat) {
-        boatsOfCompetitors.put(competitor, boat);        
+        boatsOfCompetitors.put(competitor, boat);
     }
 
     @Override
     public BoatDTO getBoat(CompetitorDTO competitor) {
-        return boatsOfCompetitors.get(competitor);        
+        return boatsOfCompetitors.get(competitor);
     }
 }

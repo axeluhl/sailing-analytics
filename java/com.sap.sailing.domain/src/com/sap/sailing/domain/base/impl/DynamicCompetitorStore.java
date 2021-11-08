@@ -13,7 +13,7 @@ public interface DynamicCompetitorStore extends CompetitorAndBoatStore {
 
     @Override
     DynamicCompetitor getOrCreateCompetitor(Serializable competitorId, String name, String shortName, Color displayColor, String email, URI flagImage, 
-            DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
+            DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, boolean storePersistently);
 
     @Override
     Iterable<? extends DynamicCompetitor> getAllCompetitors();

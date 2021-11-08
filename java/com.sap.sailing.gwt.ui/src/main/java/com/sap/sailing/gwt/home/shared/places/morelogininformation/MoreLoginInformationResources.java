@@ -11,6 +11,8 @@ public interface MoreLoginInformationResources extends ClientBundle {
     ImageResource simulator();
 
     ImageResource notifications();
-    
+
     ImageResource settings();
+    
+    ImageResource sailorprofiles();
 }

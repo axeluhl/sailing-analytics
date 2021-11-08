@@ -8,6 +8,4 @@ public interface QueryRunner extends QueryDefinitionChangedListener, Component<Q
 
     void run(StatisticQueryDefinitionDTO queryDefinition);
 
-    void runQuery();
-
 }

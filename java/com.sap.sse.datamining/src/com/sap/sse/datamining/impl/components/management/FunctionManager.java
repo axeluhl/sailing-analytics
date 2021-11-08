@@ -20,10 +20,12 @@ import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.management.FunctionProvider;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.exceptions.MultipleDataMiningComponentsFoundForDTOException;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.functions.ConcatenatingCompoundFunction;
+import com.sap.sse.datamining.impl.functions.IdentityFunction;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
@@ -67,6 +69,9 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
 
     private final FunctionFactory functionFactory;
     
+    protected final IdentityFunction identityFunction;
+    protected final FunctionDTO identityFunctionDTO;
+    
     protected final Map<Class<?>, Set<Function<?>>> statistics;
     protected final Map<Class<?>, Set<Function<?>>> dimensions;
     protected final Map<Class<?>, Set<Function<?>>> externalFunctions;
@@ -75,6 +80,9 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
 
     public FunctionManager() {
         functionFactory = new FunctionFactory();
+        
+        identityFunction = new IdentityFunction();
+        identityFunctionDTO = new DataMiningDTOFactory().createFunctionDTO(identityFunction);
         
         statistics = new HashMap<>();
         dimensions = new HashMap<>();
@@ -207,6 +215,11 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             functionsHaveBeenUnregistered = functionsHaveBeenUnregistered ? true : functionsOfClassHaveBeenUnregistered;
         }
         return functionsHaveBeenUnregistered;
+    }
+    
+    @Override
+    public IdentityFunction getIdentityFunction() {
+        return identityFunction;
     }
     
     @Override
@@ -361,6 +374,10 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     
     @Override
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO, ClassLoader classLoader) {
+        if (identityFunctionDTO.equals(functionDTO)) {
+            return identityFunction;
+        }
+        
         Function<?> function = null;
         if (functionDTO != null) {
             try {

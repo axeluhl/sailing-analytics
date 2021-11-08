@@ -6,13 +6,13 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CompetitorWithBoatRefJsonSerializer implements JsonSerializer<CompetitorWithBoat> {
     private final JsonSerializer<Competitor> competitorJsonSerializer;
 
-    public static CompetitorWithBoatRefJsonSerializer create() {
-        return new CompetitorWithBoatRefJsonSerializer(CompetitorJsonSerializer.create(/* serialize boat */ false));
+    public static CompetitorWithBoatRefJsonSerializer create(boolean serializeNonPublicCompetitorFields) {
+        return new CompetitorWithBoatRefJsonSerializer(CompetitorJsonSerializer.create(/* serialize boat */ false, serializeNonPublicCompetitorFields));
     }
 
     public CompetitorWithBoatRefJsonSerializer(JsonSerializer<Competitor> competitorJsonSerializer) {

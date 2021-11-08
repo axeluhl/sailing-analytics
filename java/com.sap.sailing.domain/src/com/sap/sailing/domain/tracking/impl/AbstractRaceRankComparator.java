@@ -166,5 +166,8 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
         return result;
     }
 
+    /**
+     * A distance to use for competitor comparison. Less means better rank. Negative distances are allowed.
+     */
     protected abstract C getComparisonValueForSameLeg(Competitor competitor);
 }

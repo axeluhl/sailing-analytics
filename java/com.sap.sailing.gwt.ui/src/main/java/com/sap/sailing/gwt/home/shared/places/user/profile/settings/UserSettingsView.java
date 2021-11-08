@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.home.shared.places.user.profile.settings;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 import com.sap.sse.common.filter.Filter;
 
 /**
@@ -19,7 +19,7 @@ public interface UserSettingsView extends IsWidget {
 
     /**
      * Presenter interface for the user preferences UI, providing methods to load preferences and to access the required
-     * {@link SuggestedMultiSelectionDataProvider}s.
+     * {@link SuggestedMultiSelectionPresenter}s.
      */
     public interface Presenter {
         void loadData();

@@ -14,10 +14,13 @@ import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.SailingActivityManager;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.ServiceRoutingProvider;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 import com.sap.sse.gwt.resources.CommonControlsCSS;
 
@@ -27,6 +30,7 @@ import com.sap.sse.gwt.resources.CommonControlsCSS;
  */
 public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, MobileApplicationClientFactory> {
 
+    private SailingServiceAsync sailingService;
 
     @Override
     public void doOnModuleLoad() {
@@ -51,7 +55,8 @@ public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, Mobi
     }
 
     private void createMobileApplication(boolean isStandaloneServer) {
-        final MobileApplicationClientFactory clientFactory = new MobileApplicationClientFactory(isStandaloneServer);
+        final MobileApplicationClientFactory clientFactory = new MobileApplicationClientFactory(isStandaloneServer,
+                getSailingService());
         ApplicationHistoryMapper applicationHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new MobileActivityMapper(clientFactory));
     }
@@ -66,6 +71,17 @@ public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, Mobi
         SailingActivityManager<ResettableNavigationPathDisplay> sailingActivityManager = new SailingActivityManager<>(activityMapperRegistry, clientFactory.getEventBus());
         sailingActivityManager.setNavigationPathDisplay(clientFactory.getNavigationPathDisplay());
         return sailingActivityManager;
+    }
+
+    private SailingServiceAsync getSailingService() {
+        if (sailingService == null) {
+            if (this instanceof ServiceRoutingProvider) {
+                sailingService = SailingServiceHelper.createSailingServiceInstance((ServiceRoutingProvider) this);
+            } else {
+                sailingService = SailingServiceHelper.createSailingServiceInstance();
+            }
+        }
+        return sailingService;
     }
 
 }

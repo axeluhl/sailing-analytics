@@ -11,10 +11,6 @@ public class SeriesDefaultPlace extends AbstractSeriesPlace implements HasMobile
         super(ctx);
     }
 
-    public SeriesDefaultPlace(String eventUuidAsString) {
-        super(eventUuidAsString);
-    }
-
     @Prefix(PlaceTokenPrefixes.SeriesDefault)
     public static class Tokenizer extends AbstractSeriesPlace.Tokenizer<SeriesDefaultPlace> {
         @Override

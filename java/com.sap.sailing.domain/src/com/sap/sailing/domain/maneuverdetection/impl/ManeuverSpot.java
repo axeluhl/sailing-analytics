@@ -1,39 +1,39 @@
 package com.sap.sailing.domain.maneuverdetection.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Represents a spot within the track of competitor, where maneuvers have been detected by analysis of a douglas peucker
- * fixes group. The spot contains the analysed douglas peucker fixes group, the course change direction within douglas
- * peucker fixes group, determined maneuvers and the wind measurements performed during analysis of this spot.
+ * fixes group. The spot contains the analysed douglas peucker fixes group and the course change direction within
+ * douglas peucker fixes group of this spot.
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
 public class ManeuverSpot {
 
-    private final Iterable<GPSFixMoving> douglasPeuckerFixes;
+    private final List<GPSFixMoving> douglasPeuckerFixes;
     private final NauticalSide maneuverSpotDirection;
     private final CompleteManeuverCurve maneuverCurve;
-    private final Iterable<Maneuver> maneuvers;
-    private final WindMeasurement windMeasurement;
 
-    public ManeuverSpot(Iterable<GPSFixMoving> douglasPeuckerFixes, NauticalSide maneuverSpotDirection,
-            CompleteManeuverCurve maneuverCurve, Iterable<Maneuver> maneuvers, WindMeasurement windMeasurement) {
-        this.douglasPeuckerFixes = douglasPeuckerFixes;
+    public ManeuverSpot(List<GPSFixMoving> douglasPeuckerFixes, NauticalSide maneuverSpotDirection,
+            CompleteManeuverCurve maneuverCurve) {
+        this.douglasPeuckerFixes = Collections.unmodifiableList(new ArrayList<>(douglasPeuckerFixes));
         this.maneuverCurve = maneuverCurve;
-        this.maneuvers = maneuvers;
         this.maneuverSpotDirection = maneuverSpotDirection;
-        this.windMeasurement = windMeasurement;
     }
 
     /**
      * Gets douglas peucker fixes group which represents this spot.
      */
-    public Iterable<GPSFixMoving> getDouglasPeuckerFixes() {
+    public List<GPSFixMoving> getDouglasPeuckerFixes() {
         return douglasPeuckerFixes;
     }
 
@@ -48,18 +48,8 @@ public class ManeuverSpot {
         return maneuverCurve;
     }
 
-    /**
-     * Gets maneuvers discovered within this spot.
-     */
-    public Iterable<Maneuver> getManeuvers() {
-        return maneuvers;
-    }
-
-    /**
-     * Gets wind measurement data measured during analysis of this spot.
-     */
-    public WindMeasurement getWindMeasurement() {
-        return windMeasurement;
+    public TimePoint getTimePoint() {
+        return douglasPeuckerFixes.get(0).getTimePoint();
     }
 
 }

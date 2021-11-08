@@ -36,7 +36,7 @@ import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.trackfiles.impl.CompressedStreamsUtil;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionImportFileHandler;
@@ -54,13 +54,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class ExpeditionCourseInferrer {
     private static final Logger logger = Logger.getLogger(ExpeditionCourseInferrer.class.getName());
-    private static final String START_LINE_PORT_END_LAT = "Port lat";
-    private static final String START_LINE_PORT_END_LON = "Port lon";
-    private static final String START_LINE_STARBOARD_END_LAT = "Stbd lat";
-    private static final String START_LINE_STARBOARD_END_LON = "Stbd lon";
-    private static final String START_LINE_PORT_END_MARK_NAME = "Start P";
-    private static final String START_LINE_STARBOARD_END_MARK_NAME = "Start S";
-    private static final String START_LINE_CONTROL_POINT_NAME = "Start";
+    private static final String START_LINE_PORT_END_LAT = "port lat";
+    private static final String START_LINE_PORT_END_LON = "port lon";
+    private static final String START_LINE_STARBOARD_END_LAT = "stbd lat";
+    private static final String START_LINE_STARBOARD_END_LON = "stbd lon";
+    private static final String START_LINE_PORT_END_MARK_NAME = "start p";
+    private static final String START_LINE_STARBOARD_END_MARK_NAME = "start s";
+    private static final String START_LINE_CONTROL_POINT_NAME = "start";
     
     private final RaceLogTrackingAdapter raceLogTrackingAdapter;
     
@@ -124,7 +124,7 @@ public class ExpeditionCourseInferrer {
     }
     
     private Double getColumnValue(String[] lineContentTokens, Map<String, Integer> columnsInFileFromHeader, String columnName) {
-        return getColumnValue(lineContentTokens, columnsInFileFromHeader.get(columnName));
+        return getColumnValue(lineContentTokens, columnsInFileFromHeader.get(columnName.toLowerCase()));
     }
 
     private Double getColumnValue(String[] lineContentTokens, final Integer columnIndex) {
@@ -164,7 +164,7 @@ public class ExpeditionCourseInferrer {
             final Mark portMark, final Mark starboardMark) {
         logger.info("Creating start line in tracked race "+trackedRace.getRace().getName());
         final ControlPoint startLine = racingEventService.getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
-                UUID.randomUUID(), START_LINE_CONTROL_POINT_NAME, portMark, starboardMark);
+                UUID.randomUUID(), START_LINE_CONTROL_POINT_NAME, portMark, starboardMark, START_LINE_CONTROL_POINT_NAME);
         final CourseBase course = new CourseDataImpl("Auto-Course "+trackedRace.getRace().getName());
         course.addWaypoint(0, new WaypointImpl(startLine, PassingInstruction.Line));
         final RaceLog raceLog = trackedRace.getAttachedRaceLogs().iterator().next();
@@ -211,7 +211,7 @@ public class ExpeditionCourseInferrer {
                         }
                     }
                     if (mark == null) {
-                        mark = racingEventService.getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), markName);
+                        mark = racingEventService.getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), markName, markName);
                         final TimePoint now = MillisecondsTimePoint.now();
                         RegattaLogDefineMarkEventImpl defineMarkEvent = new RegattaLogDefineMarkEventImpl(now,
                                 racingEventService.getServerAuthor(), now, UUID.randomUUID(), mark);

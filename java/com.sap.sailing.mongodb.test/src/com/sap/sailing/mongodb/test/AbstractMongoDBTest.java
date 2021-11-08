@@ -7,32 +7,32 @@ import java.net.UnknownHostException;
 import org.junit.After;
 import org.junit.Before;
 
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
 public abstract class AbstractMongoDBTest {
-    protected Mongo mongo;
-    protected DB db;
+    protected MongoClient mongo;
+    protected MongoDatabase db;
     private final MongoDBConfiguration dbConfiguration;
-    private MongoDBService racingEventService;
+    private MongoDBService mongoDBService;
     
     public AbstractMongoDBTest() throws UnknownHostException, MongoException {
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
-        racingEventService = getDBConfiguration().getService();
+        mongoDBService = getDBConfiguration().getService();
         mongo = newMongo();
-        db = racingEventService.getDB();
+        db = mongoDBService.getDB();
     }
     
     protected MongoDBConfiguration getDBConfiguration() {
         return dbConfiguration;
     }
     
-    protected Mongo newMongo() throws UnknownHostException, MongoException {
-        return new MongoClient(dbConfiguration.getHostName(), dbConfiguration.getPort());
+    protected MongoClient newMongo() throws UnknownHostException, MongoException {
+        return MongoClients.create(dbConfiguration.getMongoClientURI());
     }
     
     @Before
@@ -46,11 +46,11 @@ public abstract class AbstractMongoDBTest {
     public void tearDown() {
     }
 
-    private void dropAllCollections(DB theDB) throws InterruptedException {
-        db.dropDatabase();
+    private void dropAllCollections(MongoDatabase theDB) throws InterruptedException {
+        db.drop();
     }
 
     protected MongoDBService getMongoService() {
-        return racingEventService;
+        return mongoDBService;
     }
 }

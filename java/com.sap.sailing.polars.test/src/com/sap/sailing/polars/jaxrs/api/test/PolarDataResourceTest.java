@@ -61,7 +61,7 @@ public class PolarDataResourceTest {
 
         assertThat(polarService.getSpeedRegressionsPerAngle().size(), is(68));
         assertThat(polarService.getCubicRegressionsPerCourse().size(), is(4));
-        assertThat(polarService.getFixCointPerBoatClass().get(boatClass), is(9330L));
+        assertThat(polarService.getFixCountPerBoatClass().get(boatClass), is(9330L));
         // presuming that if downwind functions & regression collections' size are correct then any other thing is
         // imported correctly
         assertThat(polarService.getAngleRegressionFunction(boatClass, LegType.DOWNWIND), is(angleDownwindFunction));

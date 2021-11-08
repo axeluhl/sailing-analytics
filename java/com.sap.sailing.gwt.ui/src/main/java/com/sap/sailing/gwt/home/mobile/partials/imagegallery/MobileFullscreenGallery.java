@@ -24,10 +24,10 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
-import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO>{
+public class MobileFullscreenGallery implements FullscreenViewer<ImageDTO>{
     
     private static MobileFullscreenGalleryUiBinder uiBinder = GWT.create(MobileFullscreenGalleryUiBinder.class);
 
@@ -71,7 +71,7 @@ public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO
     }
     
     @Override
-    public void show(SailingImageDTO selectedImage, Collection<SailingImageDTO> imageList) {
+    public void show(ImageDTO selectedImage, Collection<ImageDTO> imageList) {
         contentUi.setWidget(playerUi = new MobileGalleryPlayer(selectedImage, imageList));
         autoplayActionUi.setStyleName(style.is_autoplaying(), playerUi.isAutoplaying());
         contentUi.getWidget().getElement().addClassName(style.content());

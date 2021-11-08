@@ -33,11 +33,11 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
 
         showWindChartCheckBox = dialog.createCheckbox(stringMessages.showWindChart());
         showWindChartCheckBox.setValue(initialSettings.isShowWindChart());
-        vp.add(showWindChartCheckBox);        
+        vp.add(showWindChartCheckBox);
 
         showCompetitorsChartCheckBox = dialog.createCheckbox(stringMessages.showCompetitorCharts());
         showCompetitorsChartCheckBox.setValue(initialSettings.isShowCompetitorsChart());
-        vp.add(showCompetitorsChartCheckBox);        
+        vp.add(showCompetitorsChartCheckBox);
         
         return vp;
     }
@@ -46,7 +46,9 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
     public RaceBoardPerspectiveOwnSettings getResult() {
         RaceBoardPerspectiveOwnSettings result = new RaceBoardPerspectiveOwnSettings(initialSettings.getActiveCompetitorsFilterSetName(), 
                 showLeaderboardCheckBox.getValue(), showWindChartCheckBox.getValue(), showCompetitorsChartCheckBox.getValue(),
-                initialSettings.isCanReplayDuringLiveRaces(), initialSettings.getInitialDurationAfterRaceStartInReplay());
+                initialSettings.isCanReplayDuringLiveRaces(), initialSettings.getInitialDurationAfterRaceStartInReplay(), 
+                initialSettings.getSelectedCompetitor(), initialSettings.getSelectedCompetitors(), initialSettings.isShowTags(),
+                initialSettings.isShowManeuver(), initialSettings.getJumpToTag(), initialSettings.getZoomStart(), initialSettings.getZoomEnd(), initialSettings.isAutoExpandPreSelectedRace());
         return result;
     }
     

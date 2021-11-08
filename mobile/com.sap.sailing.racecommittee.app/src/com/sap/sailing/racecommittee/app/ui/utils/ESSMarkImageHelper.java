@@ -13,16 +13,21 @@ public class ESSMarkImageHelper extends MarkImageHelper {
 
     private ESSMarkImageHelper(Context context) {
         markImageDescriptors = new ArrayList<>();
-        defaultCourseMarkDescriptor = createMarkImageDescriptor(context, 0, MarkType.BUOY, /* use the mark color dynamically */ null, null, null);
-        createMarkImageDescriptor(context, R.drawable.buoy_white_cone, MarkType.BUOY, AbstractColor.getCssColor("white"), "conical", null);
-        createMarkImageDescriptor(context, R.drawable.buoy_black_cone, MarkType.BUOY, AbstractColor.getCssColor("black"), "conical", null);
-        createMarkImageDescriptor(context, R.drawable.buoy_black_cyl, MarkType.BUOY, AbstractColor.getCssColor("black"), "cylinder", "checkered");
+        defaultCourseMarkDescriptor = createMarkImageDescriptor(context, 0, MarkType.BUOY,
+                /* use the mark color dynamically */ null, null, null);
+        createMarkImageDescriptor(context, R.drawable.buoy_white_cone, MarkType.BUOY,
+                AbstractColor.getCssColor("white"), "conical", null);
+        createMarkImageDescriptor(context, R.drawable.buoy_black_cone, MarkType.BUOY,
+                AbstractColor.getCssColor("black"), "conical", null);
+        createMarkImageDescriptor(context, R.drawable.buoy_black_cyl, MarkType.BUOY, AbstractColor.getCssColor("black"),
+                "cylinder", "checkered");
 
         createMarkImageDescriptor(context, R.drawable.buoy_cameraboat, MarkType.CAMERABOAT, null, null, null);
         createMarkImageDescriptor(context, R.drawable.buoy_umpireboat, MarkType.UMPIREBOAT, null, null, null);
         createMarkImageDescriptor(context, R.drawable.buoy_rc_startboat, MarkType.STARTBOAT, null, null, null);
 
-        createMarkImageDescriptor(context, R.drawable.buoy_finish_flag, MarkType.LANDMARK, AbstractColor.getCssColor("black"), null, null);
+        createMarkImageDescriptor(context, R.drawable.buoy_finish_flag, MarkType.LANDMARK,
+                AbstractColor.getCssColor("black"), null, null);
     }
 
     public static ESSMarkImageHelper getInstance(Context context) {

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.simulator;
 
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
+
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -11,7 +13,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
@@ -23,7 +25,7 @@ import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 
-public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
+public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
 
     private final SimulatorServiceAsync simulatorService = GWT.create(SimulatorService.class);
     private int xRes = 40;
@@ -51,7 +53,7 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithExport();
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
         checkUrlParameters();
         createSimulatorPanel();
     }

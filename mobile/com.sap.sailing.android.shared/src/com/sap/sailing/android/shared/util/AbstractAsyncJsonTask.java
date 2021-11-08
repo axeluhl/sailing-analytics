@@ -13,7 +13,8 @@ import com.sap.sailing.android.shared.data.http.HttpRequest;
 import android.content.Context;
 import android.os.AsyncTask;
 
-public abstract class AbstractAsyncJsonTask<Params, Progress, Result, ListenerType extends AbstractAsyncTaskListener<Result>> extends AsyncTask<Params, Progress, Result> {
+public abstract class AbstractAsyncJsonTask<Params, Progress, Result, ListenerType extends AbstractAsyncTaskListener<Result>>
+        extends AsyncTask<Params, Progress, Result> {
     private URL mUrl;
     private final Context mContext;
     private final WeakReference<ListenerType> mListener;

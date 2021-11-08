@@ -3,6 +3,7 @@ package com.sap.sailing.polars.datamining;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.datamining.components.BackendPolarsBoatClassRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarCompetitorRetrievalProcessor;
@@ -16,13 +17,12 @@ import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
-import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
 import com.sap.sailing.polars.datamining.data.HasRaceColumnPolarContext;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SingleDataRetrieverChainDefinition;
@@ -46,7 +46,7 @@ public class PolarsDataRetrievalChainDefinitions {
         dataRetrieverChainDefinitions = new ArrayList<>();
         DataRetrieverChainDefinition<RacingEventService, HasGPSFixPolarContext> definition1 = new SimpleDataRetrieverChainDefinition<>(
                 RacingEventService.class, HasGPSFixPolarContext.class, "PolarChain1");
-        definition1.startWith(PolarLeaderboardGroupRetrievalProcessor.class, HasLeaderboardGroupPolarContext.class,
+        definition1.startWith(PolarLeaderboardGroupRetrievalProcessor.class, HasLeaderboardGroupContext.class,
                 "LeaderboardGroup");
         definition1.addAfter(PolarLeaderboardGroupRetrievalProcessor.class, PolarLeaderboardRetrievalProcessor.class,
                 HasLeaderboardPolarContext.class, "Leaderboard");

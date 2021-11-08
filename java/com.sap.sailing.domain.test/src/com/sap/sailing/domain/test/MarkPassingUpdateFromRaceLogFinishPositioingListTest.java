@@ -7,7 +7,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,8 +51,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 /**
  * Tests the implementation for bug3420: when a {@link RaceLogFinishPositioningConfirmedEvent} is found in a race log
@@ -84,7 +81,7 @@ public class MarkPassingUpdateFromRaceLogFinishPositioingListTest extends Abstra
 
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20140429_ESSQingdao-Race_4.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(
@@ -153,8 +150,8 @@ public class MarkPassingUpdateFromRaceLogFinishPositioingListTest extends Abstra
         final CompetitorResults results = new CompetitorResultsImpl();
         int rank = 1;
         for (Pair<Competitor, TimePoint> finishingTime : finishingTimes) {
-            results.add(new CompetitorResultImpl(finishingTime.getA().getId(), finishingTime.getA().getName(), rank++, /* maxPointsReason */
-                    null, /* score */null, finishingTime.getB(), /* comment */null, MergeState.OK));
+            results.add(new CompetitorResultImpl(finishingTime.getA().getId(), finishingTime.getA().getName(), finishingTime.getA().getShortName(),
+                    "BoatName", "BoatSailId", rank++, /* maxPointsReason */ null, /* score */null, finishingTime.getB(), /* comment */null, MergeState.OK));
         }
         return results;
     }

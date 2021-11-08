@@ -89,8 +89,8 @@ public class TestStatisticQuery {
     private static class NumberRetrievalProcessor extends AbstractRetrievalProcessor<Collection<Number>, Number> {
 
         @SuppressWarnings("unchecked")
-        public NumberRetrievalProcessor(ExecutorService executor, Collection<Processor<Number, ?>> resultReceivers, int retrievalLevel) {
-            super((Class<Collection<Number>>)(Class<?>) Collection.class, Number.class, executor, resultReceivers, retrievalLevel);
+        public NumberRetrievalProcessor(ExecutorService executor, Collection<Processor<Number, ?>> resultReceivers, int retrievalLevel, String retrievedDataTypeMessageKey) {
+            super((Class<Collection<Number>>)(Class<?>) Collection.class, Number.class, executor, resultReceivers, retrievalLevel, retrievedDataTypeMessageKey);
         }
 
         @Override

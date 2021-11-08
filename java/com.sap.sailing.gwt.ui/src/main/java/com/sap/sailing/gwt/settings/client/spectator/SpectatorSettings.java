@@ -28,7 +28,7 @@ public class SpectatorSettings extends AbstractGenericSerializableSettings {
         viewMode = new StringSetting("viewMode", this);
         canReplayDuringLiveRaces = new BooleanSetting(RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, this, false);
         showMapControls = new BooleanSetting(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, this, true);
-        showRaceDetails = new BooleanSetting("showRaceDetails", this, false);
+        showRaceDetails = new BooleanSetting("showRaceDetails", this, true);
         embedded = new BooleanSetting("embedded", this, false);
     }
     

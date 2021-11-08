@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
+import static com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListDataUtil.getFleetName;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,17 +15,19 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceWithEventsDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
@@ -55,6 +59,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
@@ -74,17 +80,35 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         final EventViewBase view = initView();
         panel.setWidget(view.asWidget());
     }
+
+    @Override
+    public com.google.web.bindery.event.shared.EventBus getEventBus() {
+        return clientFactory.getEventBus();
+    }
+
     
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
+    }
+
     protected abstract EventViewBase initView();
-    
+
     protected final void initSeriesNavigation(EventViewBase view) {
-        if (eventDTO.getType() == EventType.SERIES) {
-            String seriesIdAsString = eventDTO.getSeriesIdAsString();
-            PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(seriesIdAsString, null, false);
-            view.setSeriesNavigation(eventDTO.getSeriesName(), navigation);
+        final EventSeriesReferenceDTO seriesData;
+        final RegattaMetadataDTO regatta = getRegatta();
+        if (isRegattaLevel()) {
+            seriesData = (regatta != null) ? regatta.getSeriesReference() : null;
+        } else {
+            seriesData = eventDTO.getSeriesData();
+        }
+        if (seriesData != null) {
+            final UUID seriesLeaderboardGroupId = seriesData.getSeriesLeaderboardGroupId();
+            PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(SeriesContext.createWithLeaderboardGroupId(seriesLeaderboardGroupId), null, false);
+            view.setSeriesNavigation(seriesData.getSeriesDisplayName(), navigation);
         }
     }
-    
+
     protected final void initSailorInfo(EventViewBase view) {
         String sailorInfoUrl = eventDTO.getSailorsInfoWebsiteURL();
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
@@ -101,17 +125,18 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     protected final void initQuickfinder(EventViewBase view, boolean showQuickfinder) {
         EventViewDTO event = eventDTO;
-        if(showQuickfinder && event.getType() == EventType.MULTI_REGATTA) {
+        final SeriesReferenceWithEventsDTO seriesData = event.getSeriesData();
+        if (showQuickfinder && event.isMultiRegatta()) {
             view.setQuickFinderValues(getRegattasByLeaderboardGroupName());
-        } else if(showQuickfinder && event.getType() == EventType.SERIES) {
-            List<EventReferenceWithStateDTO> eventsOfSeriesSorted = event.getEventsOfSeriesSorted();
-            List<EventReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(eventsOfSeriesSorted.size());
-            for (EventReferenceWithStateDTO seriesEvent : eventsOfSeriesSorted) {
-                if(seriesEvent.getState() != EventState.PLANNED) {
+        } else if(showQuickfinder && seriesData != null) {
+            List<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeriesSorted = seriesData.getEventsOfSeries();
+            List<EventAndLeaderboardReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(eventsOfSeriesSorted.size());
+            for (EventAndLeaderboardReferenceWithStateDTO seriesEvent : eventsOfSeriesSorted) {
+                if (seriesEvent.getState() != EventState.PLANNED) {
                     seriesEventToShow.add(seriesEvent);
                 }
             }
-            view.setQuickFinderValues(event.getSeriesName(), seriesEventToShow);
+            view.setQuickFinderValues(seriesData.getSeriesDisplayName(), seriesEventToShow);
         } else {
             view.hideQuickfinder();
         }
@@ -149,7 +174,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     protected final void initMedia(final MediaCallback callback) {
-        if (eventDTO.isHasMedia()) {
+        if (eventDTO.isHasMedia() || 
+                this.getUserService().hasPermission(eventDTO, HasPermissions.DefaultActions.UPDATE)) {
             clientFactory.getDispatch().execute(new GetMediaForEventAction(eventDTO.getId()), 
                     new ActivityCallback<MediaDTO>(clientFactory, panel) {
                 @Override
@@ -196,12 +222,20 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
-        return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(new SeriesContext(getCtx().getEventId())), null, false);
+        final EventSeriesReferenceDTO seriesReference = getEventDTO().getSeriesData();
+        if (seriesReference != null) {
+            return clientFactory.getNavigator().getSeriesNavigation(
+                    new SeriesMiniOverallLeaderboardPlace(
+                            SeriesContext.createWithLeaderboardGroupId(seriesReference.getSeriesLeaderboardGroupId())),
+                    null, false);
+        }
+        return null;
     }
     
     @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator()
+                .getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), leaderboardName), null, false);
     }
 
     @Override
@@ -210,7 +244,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     public PlaceNavigation<?> getMediaPageNavigation() {
-        if (eventDTO.getType() == EventType.MULTI_REGATTA) {
+        if (eventDTO.isMultiRegatta()) {
             return clientFactory.getNavigator().getEventNavigation(new MultiregattaMediaPlace(getCtx()), null, false);
         } else {
             return clientFactory.getNavigator().getEventNavigation(new RegattaMediaPlace(getCtx()), null, false);
@@ -235,17 +269,29 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public PlaceNavigation<?> getSeriesEventOverviewNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(eventId.toString()), null, false);
+    public PlaceNavigation<?> getSeriesEventLeaderboardOverviewNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator().getEventNavigation(new RegattaOverviewPlace(eventId.toString(), leaderboardName), null, false);
     }
     
     public PlaceNavigation<?> getSeriesNavigationForCurrentEvent() {
-        return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(place.getEventUuidAsString()), null, false);
+        final EventSeriesReferenceDTO seriesData = getEventDTO().getSeriesData();
+        if (seriesData != null) {
+            SeriesContext seriesCTX = SeriesContext
+                    .createWithLeaderboardGroupId(seriesData.getSeriesLeaderboardGroupId());
+            return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(seriesCTX), null, false);
+        }
+        return null;
     }
     
     public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId) {
         EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
         return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx), null, false);
+    }
+
+    @Override
+    public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId, String prefSeriesName) {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx, prefSeriesName), null, false);
     }
     
     public PlaceNavigation<?> getLatesNewsNavigation() {
@@ -261,17 +307,16 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
         RegattaAndRaceIdentifier raceid = raceMetadata.getRegattaAndRaceIdentifier();
-        return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(), raceid,
-                mode);
+        return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
+                raceMetadata.getLeaderboardGroupId(), raceid, mode);
     }
     
-    private String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
-            RegattaAndRaceIdentifier raceIdentifier, String mode) {
+    private String getRaceViewerURL(final String leaderboardName, final String leaderboardGroupName,
+            final UUID leaderboardGroupId, RegattaAndRaceIdentifier raceIdentifier, String mode) {
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
-                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName,
+                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, leaderboardGroupId,
                 UUID.fromString(getCtx().getEventId()), mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
-        
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
@@ -279,12 +324,23 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
     }
     
+    @Override
+    public String getMapAndWindChartUrl(final String leaderboardName, final String raceName, final String fleetName) {
+        return EntryPointWithSettingsLinkFactory.createEmbeddedMapAndWindChartLink(leaderboardName, raceName, fleetName);
+    }
+    
+    @Override
+    public String getMapAndWindChartUrl(final RaceMetadataDTO<?> metadata) {
+        return EntryPointWithSettingsLinkFactory.createEmbeddedMapAndWindChartLink(metadata.getLeaderboardName(),
+                metadata.getRaceName(), getFleetName(metadata));
+    }
+    
     public String getRegattaId() {
         String regattaId = place.getRegattaId();
         if(regattaId  != null) {
             return regattaId;
         }
-        if(!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES)) {
+        if(!eventDTO.getRegattas().isEmpty() && !eventDTO.isMultiRegatta()) {
             return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;
@@ -310,18 +366,19 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     @Override
     public boolean isMultiRegattaEvent() {
-        return getEventDTO().getType() == EventType.MULTI_REGATTA;
+        return getEventDTO().isMultiRegatta();
     }
-
-    @Override
-    public boolean isSingleRegattaEvent() {
-        return getEventDTO().getType() == EventType.SINGLE_REGATTA;
+    
+    protected boolean isRegattaLevel() {
+        return true;
     }
 
     protected List<NavigationItem> getNavigationPathToEventLevel() {
         List<NavigationItem> navigationItems = new ArrayList<>();
-        if(getEventDTO().getType() == EventType.SERIES) {
-            navigationItems.add(new NavigationItem(getEventDTO().getSeriesName(), getSeriesNavigationForCurrentEvent()));
+        final SeriesReferenceWithEventsDTO seriesData = getEventDTO().getSeriesData();
+        if (seriesData != null) {
+            navigationItems
+                    .add(new NavigationItem(seriesData.getSeriesDisplayName(), getSeriesNavigationForCurrentEvent()));
         }
         navigationItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getEventNavigation()));
         return navigationItems;
@@ -329,8 +386,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     protected List<NavigationItem> getNavigationPathToRegattaLevel() {
         List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
-        if(getEventDTO().getType() == EventType.MULTI_REGATTA) {
-            navigationItems.add(new NavigationItem(getRegatta().getDisplayName(), getRegattaOverviewNavigation(getRegattaId())));
+        if (getEventDTO().isMultiRegatta()) {
+            navigationItems.add(
+                    new NavigationItem(getRegatta().getDisplayName(), getRegattaOverviewNavigation(getRegattaId())));
         }
         return navigationItems;
     }

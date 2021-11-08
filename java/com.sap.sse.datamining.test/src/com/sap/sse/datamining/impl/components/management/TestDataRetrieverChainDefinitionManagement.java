@@ -169,8 +169,8 @@ public class TestDataRetrieverChainDefinitionManagement {
     private class TestSeriesRetrievalProcessor extends AbstractRetrievalProcessor<Test_Regatta, Test_Series> {
 
         public TestSeriesRetrievalProcessor(ExecutorService executor,
-                Collection<Processor<Test_Series, ?>> resultReceivers, int retrievalLevel) {
-            super(Test_Regatta.class, Test_Series.class, executor, resultReceivers, retrievalLevel);
+                Collection<Processor<Test_Series, ?>> resultReceivers, int retrievalLevel, String retrievedDataTypeMessageKey) {
+            super(Test_Regatta.class, Test_Series.class, executor, resultReceivers, retrievalLevel, retrievedDataTypeMessageKey);
         }
 
         @Override
@@ -183,8 +183,8 @@ public class TestDataRetrieverChainDefinitionManagement {
     private class TestRaceFromSeriesRetrievalProcessor extends AbstractRetrievalProcessor<Test_Series, Test_HasRaceContext> {
 
         public TestRaceFromSeriesRetrievalProcessor(ExecutorService executor,
-                Collection<Processor<Test_HasRaceContext, ?>> resultReceivers, int retrievalLevel) {
-            super(Test_Series.class, Test_HasRaceContext.class, executor, resultReceivers, retrievalLevel);
+                Collection<Processor<Test_HasRaceContext, ?>> resultReceivers, int retrievalLevel, String retrievedDataTypeMessageKey) {
+            super(Test_Series.class, Test_HasRaceContext.class, executor, resultReceivers, retrievalLevel, retrievedDataTypeMessageKey);
         }
 
         @Override

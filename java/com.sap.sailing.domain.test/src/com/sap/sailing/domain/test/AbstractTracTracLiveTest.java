@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,6 +17,7 @@ import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -57,7 +57,13 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     private IRaceSubscriber raceSubscriber;
     private final Collection<Receiver> receivers;
 
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(3 * 60 * 1000);
+    /**
+     * Making this a method rule allows subclasses to adjust the timeout if required
+     */
+    @Rule
+    public TestRule getTimeoutRule() {
+        return Timeout.millis(3 * 60 * 1000);
+    }
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();
@@ -65,12 +71,9 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
 
     /**
      * Default set-up for an STG training session in Weymouth, 2011
-     * @throws SubscriberInitializationException 
-     * @throws CreateModelException 
-     * @throws TimeOutException 
      */
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
+    public void setUp() throws Exception {
         final String eventID = "event_20110505_SailingTea";
         final String raceID = "bd8c778e-7c65-11e0-8236-406186cbf87c";
         setUp(getParamURL(eventID, raceID), /* liveURI */ null, /* storedURI */ null);
@@ -101,6 +104,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         try {
             final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()), (int) /* timeout in milliseconds */ Duration.ONE_MINUTE.asMillis());
             this.race = race;
+            logger.info("Using race "+race.getName()+" with ID "+race.getId()+" for this test");
             ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
             if (storedUri == null) {
                 eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent());

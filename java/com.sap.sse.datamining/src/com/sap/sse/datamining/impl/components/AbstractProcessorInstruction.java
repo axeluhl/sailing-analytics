@@ -52,16 +52,26 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
     @Override
     public void run() {
         try {
-            ResultType result = computeResult();
-            handler.instructionSucceeded(result);
+            if (!isAborted()) {
+                ResultType result = computeResult();
+                handler.instructionSucceeded(result);
+            }
         } catch (Exception e) {
             handler.instructionFailed(e);
         } finally {
-            handler.afterInstructionFinished();
+            handler.afterInstructionFinished(this);
         }
+    }
+    
+    protected boolean isAborted() {
+        return handler.isAborted();
     }
 
     protected abstract ResultType computeResult() throws Exception;
+    
+    public ProcessorInstructionHandler<ResultType> getHandler() {
+        return handler;
+    }
     
     @Override
     public int getPriority() {

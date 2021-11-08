@@ -29,7 +29,23 @@ import com.sap.sse.common.IsManagedByCache;
  * 
  */
 public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectInputStream {
+    public interface ResolveListener {
+        /**
+         * Invoked if during {@link ObjectInputStreamResolvingAgainstCache#resolveObject(Object)} an object
+         * was replaced by a new object. The new object that will be returned by the {@code resolveObject} method
+         * is passed as parameter.
+         */
+        void onNewObject(Object result);
+        
+        /**
+         * Invoked if during {@link ObjectInputStreamResolvingAgainstCache#resolveObject(Object)} an object
+         * was not replaced by anything else but returned unmodified.
+         */
+        void onResolvedObject(Object result);
+    }
+
     private final C cache;
+    private ResolveListener resolveListener;
 
     /**
      * Package protected on purpose; instances to be created using a factory method on the {@link Replicable}. This
@@ -37,14 +53,16 @@ public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectIn
      * 
      * @param cache must not be {@code null}
      */
-    protected ObjectInputStreamResolvingAgainstCache(InputStream in, C cache) throws IOException {
+    protected ObjectInputStreamResolvingAgainstCache(InputStream in, C cache, ResolveListener resolveListener)
+            throws IOException {
         super(in);
         assert cache != null;
         this.cache = cache;
+        this.resolveListener = resolveListener;
         enableResolveObject(true);
     }
 
-    public C getCache() {
+    private C getCache() {
         return cache;
     }
 
@@ -66,6 +84,13 @@ public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectIn
             result = castResult;
         } else {
             result = o;
+        }
+        if (resolveListener != null) {
+            if (o == result) {
+                resolveListener.onResolvedObject(result);
+            } else {
+                resolveListener.onNewObject(result);
+            }
         }
         return result;
     }

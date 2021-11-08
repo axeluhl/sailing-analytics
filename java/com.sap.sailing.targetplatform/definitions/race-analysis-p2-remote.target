@@ -1,54 +1,53 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="114">
+<?pde version="3.8"?>
+<target name="Race Analysis Target" sequenceNumber="195">
 <locations>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
-<repository location="https://p2.sapsailing.com/p2/sailing/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.osgi" version="3.10.2.v20150203-1939"/>
-<unit id="org.eclipse.osgi.source" version="3.10.2.v20150203-1939"/>
-<unit id="org.eclipse.osgi.services" version="3.4.0.v20140312-2051"/>
-<unit id="org.eclipse.osgi.services.source" version="3.4.0.v20140312-2051"/>
-<unit id="org.eclipse.equinox.common" version="3.6.200.v20130402-1505"/>
-<unit id="org.eclipse.equinox.common.source" version="3.6.200.v20130402-1505"/>
-<unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337"/>
-<unit id="org.eclipse.equinox.util.source" version="1.0.500.v20130404-1337"/>
-<unit id="org.eclipse.equinox.simpleconfigurator" version="1.1.0.v20131217-1203"/>
-<unit id="org.eclipse.equinox.simpleconfigurator.source" version="1.1.0.v20131217-1203"/>
-<unit id="org.eclipse.equinox.console" version="1.1.0.v20140131-1639"/>
-<unit id="org.eclipse.equinox.console.source" version="1.1.0.v20140131-1639"/>
-<unit id="org.eclipse.equinox.launcher" version="1.3.0.v20140415-2008"/>
-<unit id="org.eclipse.equinox.launcher.source" version="1.3.0.v20140415-2008"/>
-<unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
-<unit id="org.apache.felix.gogo.command.source" version="0.10.0.v201209301215"/>
-<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
-<unit id="org.apache.felix.gogo.runtime.source" version="0.10.0.v201209301036"/>
-<unit id="org.apache.felix.gogo.shell" version="0.10.0.v201212101605"/>
-<unit id="org.apache.felix.gogo.shell.source" version="0.10.0.v201212101605"/>
-<repository location="http://download.eclipse.org/releases/luna"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.junit" version="4.8.2.v4_8_2_v20130308-0413"/>
-<unit id="org.junit.source" version="4.8.2.v4_8_2_v20130308-0413"/>
-<unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.core" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.generator" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.integration" version="1.1.0.v201303031500"/>
-<unit id="org.hamcrest.library" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140114142710/repository/"/>
-</location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
 <unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.objectweb.asm" version="9.0.0.v20201001-1419"/>
+<unit id="org.objectweb.asm.source" version="9.0.0.v20201001-1419"/>
+<unit id="org.objectweb.asm.commons" version="9.0.0.v20201001-1419"/>
+<unit id="org.objectweb.asm.commons.source" version="9.0.0.v20201001-1419"/>
+<unit id="org.objectweb.asm.tree" version="9.0.0.v20201001-1419"/>
+<unit id="org.objectweb.asm.tree.source" version="9.0.0.v20201001-1419"/>
+<unit id="javax.annotation" version="1.3.5.v20200909-1856"/>
+<unit id="org.apache.poi" version="4.1.1.v20200604-1524"/>
+<unit id="org.apache.poi.ooxml" version="4.1.1.v20200820-1148"/>
+<unit id="org.apache.poi.ooxml.schemas" version="4.1.1.v20200922-2105"/>
+<unit id="org.apache.poi.source" version="4.1.1.v20200604-1524"/>
+<unit id="org.apache.poi.ooxml.source" version="4.1.1.v20200820-1148"/>
+<unit id="org.apache.commons.collections4" version="4.4.0.v20200420-1700"/>
+<unit id="org.apache.commons.collections4.source" version="4.4.0.v20200420-1700"/>
+<unit id="org.apache.commons.compress" version="1.19.0.v20200106-2343"/>
+<unit id="org.apache.commons.compress.source" version="1.19.0.v20200106-2343"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20201130205003/repository/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.core" version="1.3.0.v20180420-1519"/>
+<unit id="org.hamcrest.generator" version="1.3.0.v201305210900"/>
+<unit id="org.hamcrest.integration" version="1.3.0.v201305210900"/>
+<unit id="org.hamcrest.library" version="1.3.0.v20180524-2246"/>
+<unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
+<unit id="org.junit" version="4.12.0.v201504281640"/>
+<unit id="org.junit.source" version="4.12.0.v201504281640"/>
+<unit id="com.sun.jersey" version="1.17.0.v201503170330"/>
+<unit id="com.sun.jersey.source" version="1.17.0.v201503170330"/>
+<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.xml" version="1.3.4.v201005080400"/>
+<unit id="javax.xml.bind" version="2.2.0.v201105210648"/>
+<unit id="javax.xml.bind.source" version="2.2.0.v201105210648"/>
+<unit id="javax.xml.stream" version="1.0.1.v201004272200"/>
+<unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
+<unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
+<unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
+<unit id="org.apache.commons.collections" version="3.2.2.v201511171945"/>
+<unit id="org.apache.commons.collections.source" version="3.2.2.v201511171945"/>
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
 <unit id="org.apache.commons.fileupload.source" version="1.2.2.v20111214-1400"/>
 <unit id="org.apache.commons.io" version="2.2.0.v201405211200"/>
@@ -56,61 +55,100 @@
 <unit id="org.apache.commons.lang" version="2.6.0.v201404270220"/>
 <unit id="org.apache.commons.lang.source" version="2.6.0.v201404270220"/>
 <unit id="org.apache.commons.math" version="2.1.0.v201105210652"/>
-<unit id="org.apache.commons.codec" version="1.6.0.v201305230611"/>
-<unit id="org.apache.commons.codec.source" version="1.6.0.v201305230611"/>
-<unit id="org.apache.commons.collections" version="3.2.2.v201511171945"/>
-<unit id="org.apache.commons.collections.source" version="3.2.2.v201511171945"/>
-<unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
-<unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
-<unit id="org.jdom" version="1.1.1.v201101151400"/>
-<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
-<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
-<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
-<unit id="com.sun.jersey" version="1.17.0.v201503170330"/>
-<unit id="com.sun.jersey.source" version="1.17.0.v201503170330"/>
-<unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
-<unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
-<unit id="org.apache.httpcomponents.httpclient" version="4.2.6.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpclient.source" version="4.2.6.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpcore" version="4.2.5.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpcore.source" version="4.2.5.v201311072007"/>
-<unit id="javax.servlet" version="3.1.0.v201410161800"/>
-<unit id="javax.servlet.source" version="3.1.0.v201410161800"/>
-<unit id="org.dom4j" version="1.6.1.v201312101416"/>
-<unit id="org.apache.xmlbeans" version="2.3.0.v201605172150"/>
-<unit id="org.apache.poi" version="3.9.0.v201405241750"/>
-<unit id="org.apache.poi.ooxml" version="3.9.0.v201405241905"/>
-<unit id="org.apache.poi.ooxml.schemas" version="3.9.0.v201405241750"/>
-<unit id="com.fasterxml.jackson.core.jackson-annotations" version="2.5.0.v201504151636"/>
-<unit id="com.fasterxml.jackson.core.jackson-core" version="2.5.0.v201504151636"/>
-<unit id="com.fasterxml.jackson.core.jackson-databind" version="2.5.0.v201504151636"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/"/>
+<unit id="org.apache.commons.math.source" version="2.1.0.v201105210652"/>
+<unit id="org.apache.commons.math3" version="3.5.0.v20160301-1110"/>
+<unit id="org.apache.commons.math3.source" version="3.5.0.v20160301-1110"/>
+<unit id="org.apache.commons.logging" version="1.2.0.v20180409-1502"/>
+<unit id="org.apache.httpcomponents.httpclient" version="4.5.5.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpclient.source" version="4.5.5.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpcore" version="4.4.9.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpcore.source" version="4.4.9.v20180409-1525"/>
+<unit id="com.jcraft.jsch" version="0.1.54.v20170116-1932"/>
+<unit id="com.jcraft.jsch.source" version="0.1.54.v20170116-1932"/>
+<unit id="org.apache.xalan" version="2.7.1.v201005080400"/>
+<unit id="org.apache.xml.serializer" version="2.7.1.v201005080400"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.8.201802270002"/>
-<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.36.v20210114"/>
+<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.36.v20210114"/>
+<repository location="https://p2.sapsailing.com/p2/jetty/"/>
 </location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.apache.felix.gogo.command" version="1.1.0.v20201023-1558"/>
+<unit id="org.apache.felix.gogo.runtime" version="1.1.2.v20201023-1558"/>
+<unit id="org.apache.felix.gogo.shell" version="1.1.2.v20201023-1558"/>
+<unit id="org.eclipse.equinox.app" version="1.5.0.v20200717-0620"/>
+<unit id="org.eclipse.equinox.cm" version="1.4.400.v20200422-1833"/>
+<unit id="org.eclipse.equinox.common" version="3.14.0.v20201102-2053"/>
+<unit id="org.eclipse.equinox.concurrent" version="1.1.500.v20200106-1437"/>
+<unit id="org.eclipse.equinox.console" version="1.4.200.v20200828-1034"/>
+<unit id="org.eclipse.equinox.coordinator" version="1.3.800.v20200422-1833"/>
+<unit id="org.eclipse.equinox.device" version="1.1.0.v20200810-0747"/>
+<unit id="org.eclipse.equinox.ds" version="1.6.200.v20200422-1833"/>
+<unit id="org.eclipse.equinox.event" version="1.5.500.v20200616-0800"/>
+<unit id="org.eclipse.equinox.http.jetty" version="3.7.500.v20200915-1207"/>
+<unit id="org.eclipse.equinox.http.registry" version="1.2.0.v20200614-1851"/>
+<unit id="org.eclipse.equinox.http.servletbridge" version="1.1.200.v20200422-1833"/>
+<unit id="org.eclipse.equinox.launcher" version="1.6.0.v20200915-1508"/>
+<unit id="org.eclipse.equinox.metatype" version="1.5.300.v20200422-1833"/>
+<unit id="org.eclipse.equinox.preferences" version="3.8.100.v20201102-2042"/>
+<unit id="org.eclipse.equinox.region" version="1.5.0.v20200807-1629"/>
+<unit id="org.eclipse.equinox.registry" version="3.10.0.v20201107-1818"/>
+<unit id="org.eclipse.equinox.servletbridge" version="1.6.0.v20200511-1902"/>
+<unit id="org.eclipse.equinox.simpleconfigurator" version="1.3.600.v20200721-1308"/>
+<unit id="org.eclipse.equinox.supplement" version="1.10.0.v20200612-0806"/>
+<unit id="org.eclipse.equinox.transforms.hook" version="1.2.500.v20190714-1852"/>
+<unit id="org.eclipse.equinox.transforms.xslt" version="1.1.100.v20200422-1833"/>
+<unit id="org.eclipse.equinox.useradmin" version="1.2.0.v20200807-1148"/>
+<unit id="org.eclipse.osgi" version="3.16.100.v20201030-1916"/>
+<unit id="org.eclipse.osgi.services" version="3.9.0.v20200511-1725"/>
+<unit id="org.eclipse.osgi.util" version="3.5.300.v20190708-1141"/>
+<repository location="https://download.eclipse.org/releases/2020-12"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.apache.xmlbeans" version="3.1.0.v20200922-1359"/>
+<unit id="org.apache.xmlbeans.source" version="3.1.0.v20200922-1359"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.16.19"/>
+<repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
+<repository location="https://p2.sapsailing.com/p2/sailing/"/>
+</location>
+<!-- local update site -->
+<!-- location path="C:\repository\java\com.sap.sailing.targetplatform.base\target\repository" type="Directory"/ -->
 </locations>
 <includeBundles>
-<plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
-<plugin id="com.fasterxml.jackson.core.jackson-core"/>
-<plugin id="com.fasterxml.jackson.core.jackson-databind"/>
 <plugin id="com.rabbitmq.client"/>
+<plugin id="com.rabbitmq.client.source"/>
+<plugin id="com.sun.activation.javax.activation"/>
+<plugin id="com.sun.istack.commons-runtime"/>
 <plugin id="com.sun.jersey"/>
 <plugin id="com.sun.jersey.contribs.jersey-multipart"/>
 <plugin id="com.sun.jersey.source"/>
 <plugin id="com.sun.mail.javax.mail"/>
+<plugin id="com.sun.xml.bind.jaxb-impl"/>
 <plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
 <plugin id="jackson-mapper-asl"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
-<plugin id="javax.servlet" version="3.1.0.v201410161800"/>
-<plugin id="javax.servlet.source" version="3.1.0.v201410161800"/>
 <plugin id="javax.validation"/>
 <plugin id="javax.validation.source"/>
 <plugin id="javax.ws.rs"/>
 <plugin id="javax.ws.rs.source"/>
+<plugin id="javax.xml"/>
+<plugin id="jaxb-api"/>
+<plugin id="javax.xml.stream"/>
+<plugin id="javax.xml.ws"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
 <plugin id="lz4-java"/>
@@ -126,14 +164,16 @@
 <plugin id="org.apache.commons.lang"/>
 <plugin id="org.apache.commons.lang.source"/>
 <plugin id="org.apache.commons.math"/>
+<plugin id="org.apache.commons.math.source"/>
+<plugin id="org.apache.commons.math3"/>
+<plugin id="org.apache.commons.math3.source"/>
+<plugin id="org.apache.commons.logging"/>
 <plugin id="org.apache.felix.gogo.command"/>
 <plugin id="org.apache.felix.gogo.command.source"/>
 <plugin id="org.apache.felix.gogo.runtime"/>
 <plugin id="org.apache.felix.gogo.runtime.source"/>
 <plugin id="org.apache.felix.gogo.shell"/>
 <plugin id="org.apache.felix.gogo.shell.source"/>
-<plugin id="org.apache.felix.shell"/>
-<plugin id="org.apache.felix.shell.remote"/>
 <plugin id="org.apache.httpcomponents.httpclient"/>
 <plugin id="org.apache.httpcomponents.httpclient.source"/>
 <plugin id="org.apache.httpcomponents.httpcore"/>
@@ -141,16 +181,26 @@
 <plugin id="org.apache.poi"/>
 <plugin id="org.apache.poi.ooxml"/>
 <plugin id="org.apache.poi.ooxml.schemas"/>
-<plugin id="org.apache.servicemix.bundles.aws-java-sdk"/>
+<plugin id="org.apache.commons.collections4"/>
+<plugin id="org.apache.commons.compress"/>
 <plugin id="org.apache.servicemix.bundles.ehcache"/>
+<plugin id="org.apache.servicemix.bundles.ehcache.source"/>
 <plugin id="org.apache.servicemix.bundles.scribe"/>
+<plugin id="org.apache.servicemix.bundles.scribe.source"/>
 <plugin id="org.apache.servicemix.bundles.zxing"/>
 <plugin id="org.apache.shiro.core"/>
 <plugin id="org.apache.shiro.ehcache"/>
 <plugin id="org.apache.shiro.web"/>
+<plugin id="org.owasp.encoder"/>
+<plugin id="org.apache.shiro.core.source"/>
+<plugin id="org.apache.shiro.ehcache.source"/>
+<plugin id="org.apache.shiro.web.source"/>
+<plugin id="org.owasp.encoder.source"/>
 <plugin id="org.apache.xmlbeans"/>
 <plugin id="org.codehaus.jettison.jettison"/>
 <plugin id="org.dom4j"/>
+<plugin id="org.eclipse.equinox.cm"/>
+<plugin id="org.eclipse.equinox.cm.source"/>
 <plugin id="org.eclipse.equinox.common"/>
 <plugin id="org.eclipse.equinox.common.source"/>
 <plugin id="org.eclipse.equinox.console"/>
@@ -159,18 +209,15 @@
 <plugin id="org.eclipse.equinox.launcher.source"/>
 <plugin id="org.eclipse.equinox.simpleconfigurator"/>
 <plugin id="org.eclipse.equinox.simpleconfigurator.source"/>
-<plugin id="org.eclipse.equinox.util"/>
-<plugin id="org.eclipse.equinox.util.source"/>
 <plugin id="org.eclipse.jetty.annotations"/>
 <plugin id="org.eclipse.jetty.annotations.source"/>
 <plugin id="org.eclipse.jetty.client"/>
 <plugin id="org.eclipse.jetty.client.source"/>
+<plugin id="org.eclipse.jetty.continuation"/>
 <plugin id="org.eclipse.jetty.deploy"/>
 <plugin id="org.eclipse.jetty.deploy.source"/>
 <plugin id="org.eclipse.jetty.http"/>
 <plugin id="org.eclipse.jetty.http.source"/>
-<plugin id="org.eclipse.jetty.io"/>
-<plugin id="org.eclipse.jetty.io.source"/>
 <plugin id="org.eclipse.jetty.jaas"/>
 <plugin id="org.eclipse.jetty.jmx"/>
 <plugin id="org.eclipse.jetty.jmx.source"/>
@@ -187,11 +234,10 @@
 <plugin id="org.eclipse.jetty.server.source"/>
 <plugin id="org.eclipse.jetty.servlet"/>
 <plugin id="org.eclipse.jetty.servlet.source"/>
-<plugin id="org.eclipse.jetty.servlets.source"/>
 <plugin id="org.eclipse.jetty.util"/>
+<plugin id="org.eclipse.jetty.util.source"/>
 <plugin id="org.eclipse.jetty.util.ajax"/>
 <plugin id="org.eclipse.jetty.util.ajax.source"/>
-<plugin id="org.eclipse.jetty.util.source"/>
 <plugin id="org.eclipse.jetty.webapp"/>
 <plugin id="org.eclipse.jetty.webapp.source"/>
 <plugin id="org.eclipse.jetty.websocket.api"/>
@@ -212,19 +258,67 @@
 <plugin id="org.hamcrest.library"/>
 <plugin id="org.hamcrest.text"/>
 <plugin id="org.hyperic.sigar"/>
-<plugin id="org.jdom"/>
-<plugin id="org.jdom.source"/>
-<plugin id="org.junit" version="4.8.2.v4_8_2_v20130308-0413"/>
-<plugin id="org.junit.source" version="4.8.2.v4_8_2_v20130308-0413"/>
+<plugin id="org.junit"/>
+<plugin id="org.junit.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
-<plugin id="org.mongodb.mongo-java-driver"/>
-<plugin id="org.objectweb.asm"/>
-<plugin id="org.objectweb.asm.source"/>
+<plugin id="org.mongodb.bson"/>
+<plugin id="org.mongodb.bson.source"/>
+<plugin id="org.mongodb.driver-core"/>
+<plugin id="org.mongodb.driver-core.source"/>
+<plugin id="org.mongodb.driver-sync"/>
+<plugin id="org.mongodb.driver-sync.source"/>
 <plugin id="org.objenesis"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
+<plugin id="com.chargebee.chargebee-java"/>
+<plugin id="com.chargebee.chargebee-java.source"/>
 <plugin id="slf4j.jdk14"/>
+<plugin id="com.amazon.aws.aws-java-api"/>
+<plugin id="com.jcraft.jsch"/>
+<plugin id="com.jcraft.jsch.source"/>
+<plugin id="org.apache.commons.codec.source"/>
+<plugin id="org.apache.poi.ooxml.source"/>
+<plugin id="org.apache.poi.source"/>
+<plugin id="org.apache.commons.collections4.source"/>
+<plugin id="org.apache.commons.compress.source"/>
+<plugin id="org.apache.xmlbeans.source"/>
+<plugin id="org.dom4j.source"/>
+<plugin id="com.amazon.aws.aws-java-api.source"/>
+<plugin id="com.sap.db.jdbc"/>
+<plugin id="org.eclipse.equinox.event"/>
+<plugin id="org.eclipse.equinox.event.source"/>
+<plugin id="org.eclipse.jetty.jndi"/>
+<plugin id="org.eclipse.jetty.jndi.source"/>
+<plugin id="org.eclipse.jetty.plus"/>
+<plugin id="org.eclipse.jetty.plus.source"/>
+<plugin id="javax.annotation-api"/>
+<plugin id="org.apache.aries.spifly.dynamic.bundle"/>
+<plugin id="org.objectweb.asm"/>
+<plugin id="org.objectweb.asm.commons"/>
+<plugin id="org.objectweb.asm.tree"/>
+<plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
+<plugin id="org.mortbay.jasper.apache-el"/>
+<plugin id="org.mortbay.jasper.apache-jsp"/>
+<plugin id="org.eclipse.jetty.apache-jsp"/>
+<plugin id="org.eclipse.jdt.core.compiler.batch"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
+<plugin id="org.apache.taglibs.standard-impl"/>
+<plugin id="org.apache.taglibs.taglibs-standard-spec"/>
+<plugin id="org.apache.xalan"/>
+<plugin id="org.apache.xml.serializer"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
+<plugin id="org.mortbay.jasper.apache-jsp.source"/>
+<plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
+<plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
+<plugin id="org.objectweb.asm.source"/>
+<plugin id="org.objectweb.asm.tree.source"/>
+<plugin id="org.objectweb.asm.commons.source"/>
+<plugin id="javax.annotation"/>
+<plugin id="org.eclipse.jetty.io"/>
+<plugin id="org.eclipse.osgi.util"/>
+<plugin id="org.eclipse.osgi.util.source"/>
+<plugin id="org.eclipse.jetty.io.source"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>

@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.shared.partials.videoplayer;
 
-import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia.MutualExclusionPlayHandler;
 import com.sap.sailing.gwt.ui.client.media.PauseEvent;
 import com.sap.sailing.gwt.ui.client.media.PlayEvent;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
@@ -24,6 +24,12 @@ public class VideoPlayer extends Composite {
     public VideoPlayer() {
         this(true, false);
     }
+    
+    public VideoPlayer(MutualExclusionPlayHandler exclusionPlayer) {
+        this();
+        exclusionPlayer.register(videoJSPlayer);
+    }
+    
     public VideoPlayer(boolean fullHeightWidth, boolean autoplay) {
         style.ensureInjected();
         panel = new FlowPanel();
@@ -64,7 +70,6 @@ public class VideoPlayer extends Composite {
     protected void onPaused() {
         playButton.setVisible(true);
     }
-    
 
     public void setVideo(VideoDTO video) {
         if(!initialized) {
@@ -73,12 +78,10 @@ public class VideoPlayer extends Composite {
         videoJSPlayer.setVideo(video.getMimeType(), video.getSourceRef());
     }
     
-    public VideoElement getVideoElement() {
-        return videoJSPlayer.getVideoElement();
-    }
     public boolean isFullscreen() {
         return videoJSPlayer.isFullscreen();
     }
+
     public boolean paused() {
         return videoJSPlayer.paused();
     }

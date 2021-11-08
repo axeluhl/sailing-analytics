@@ -20,8 +20,8 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.trackfiles.impl.ImportResult.TrackImportDTO;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
@@ -46,7 +46,6 @@ public class SensorDataImporter {
      *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
      *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
      *            importer is selected on a per-file basis.
-     * @return 
      * 
      * @throws IOException
      */
@@ -96,7 +95,7 @@ public class SensorDataImporter {
 
     private void storeFixes(Iterable<DoubleVectorFix> fixes, DeviceIdentifier deviceIdentifier) {
         try {
-            service.getSensorFixStore().storeFixes(deviceIdentifier, fixes);
+            service.getSensorFixStore().storeFixes(deviceIdentifier, fixes, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
         }

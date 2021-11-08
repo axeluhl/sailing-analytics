@@ -9,6 +9,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.ManeuverWithContext;
 import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithSpecificTimePointWithContext;
 import com.sap.sailing.datamining.shared.ManeuverSettings;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
@@ -24,9 +25,9 @@ public class ManeuverRetrievalProcessor
 
     public ManeuverRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings,
-            int retrievalLevel) {
+            int retrievalLevel, String retrievedDataTypeMessageKey) {
         super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers,
-                retrievalLevel);
+                retrievalLevel, retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 
@@ -36,6 +37,9 @@ public class ManeuverRetrievalProcessor
         TimePoint finishTime = element.getTrackedLegOfCompetitor().getFinishTime();
         if (finishTime != null) {
             Iterable<Maneuver> maneuvers = null;
+            if (!isLastLeg(element)) {
+                finishTime = finishTime.minus(1);
+            }
             try {
                 maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
             } catch (NoWindException e) {
@@ -44,6 +48,10 @@ public class ManeuverRetrievalProcessor
             Maneuver previousManeuver = null;
             Maneuver currentManeuver = null;
             for (Maneuver nextManeuver : maneuvers) {
+                if (isAborted()) {
+                    break;
+                }
+                
                 if (currentManeuver != null) {
                     ManeuverWithContext maneuverWithContext = new ManeuverWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
                             element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), currentManeuver.getTimePoint()), currentManeuver,
@@ -64,6 +72,15 @@ public class ManeuverRetrievalProcessor
             }
         }
         return maneuversWithContext;
+    }
+
+    private boolean isLastLeg(HasTrackedLegOfCompetitorContext element) {
+        if(element.getTrackedLegContext().getTrackedRaceContext().getRace() != null) {
+            Waypoint finishWaypoint = element.getTrackedLegContext().getTrackedRaceContext().getRace().getCourse().getLastWaypoint();
+            Waypoint toWaypoint = element.getTrackedLegOfCompetitor().getLeg().getTo();
+            return finishWaypoint.equals(toWaypoint);
+        }
+        return false;
     }
 
     private boolean isManeuverCompliantWithSettings(Maneuver previousManeuver,

@@ -67,10 +67,8 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
         RaceLogEvent minorEvent = createEvent(RaceLogEvent.class, 0, 0, UUID.randomUUID(), author);
         TargetPair pair = getTargetEventsAndResultForPassAwareTests(1, author);
         ResultType expectedResult = pair.getB();
-        
         pair.addAll(raceLog);
         raceLog.add(minorEvent);
-
         assertEquals(expectedResult, analyzer.analyze());
     }
     

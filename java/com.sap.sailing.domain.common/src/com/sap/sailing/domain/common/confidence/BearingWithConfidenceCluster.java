@@ -25,6 +25,7 @@ import com.sap.sse.common.Util;
 public class BearingWithConfidenceCluster<RelativeTo> {
     private final List<BearingWithConfidence<RelativeTo>> bearings;
     private final Weigher<RelativeTo> weigher;
+    private final ConfidenceBasedAverager<DoublePair, Bearing, RelativeTo> averager;
     
     /**
      * @param weigher
@@ -36,6 +37,7 @@ public class BearingWithConfidenceCluster<RelativeTo> {
     public BearingWithConfidenceCluster(Weigher<RelativeTo> weigher) {
         bearings = new ArrayList<BearingWithConfidence<RelativeTo>>();
         this.weigher = weigher;
+        averager = ConfidenceFactory.INSTANCE.createAverager(weigher);
     }
     
     /**
@@ -139,9 +141,10 @@ public class BearingWithConfidenceCluster<RelativeTo> {
      * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio. If the
      * combined confidence of the bearings in the cluster is 0.0, the result will contain <code>null</code> as
      * {@link BearingWithConfidence#getObject() object}.
+     * 
+     * TODO bug5576 comment 40: we could analyze the cluster's variance and let greater variances reduce the confidence
      */
     public BearingWithConfidence<RelativeTo> getAverage(RelativeTo relativeTo) {
-        ConfidenceBasedAverager<DoublePair, Bearing, RelativeTo> averager = ConfidenceFactory.INSTANCE.createAverager(weigher);
         HasConfidence<DoublePair, Bearing, RelativeTo> average = averager.getAverage(getBearings(), relativeTo);
         return average == null ? null : new BearingWithConfidenceImpl<RelativeTo>(average.getObject(), average.getConfidence(), average.getRelativeTo());
     }
@@ -168,5 +171,9 @@ public class BearingWithConfidenceCluster<RelativeTo> {
     
     private BearingWithConfidenceCluster<RelativeTo> createEmptyCluster() {
         return new BearingWithConfidenceCluster<RelativeTo>(weigher);
+    }
+
+    public void clear() {
+        bearings.clear();
     }
 }

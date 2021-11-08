@@ -2,6 +2,12 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.ArrayList;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -11,12 +17,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 public class RecallFlagsAdapter extends BaseFlagsAdapter {
 
@@ -37,9 +37,11 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
 
         mFlags = new ArrayList<>();
         if (procedure.hasIndividualRecall()) {
-            mFlags.add(new RecallFlag(context.getString(R.string.flag_xray), context.getString(R.string.flag_xray_desc), Flags.XRAY));
+            mFlags.add(new RecallFlag(context.getString(R.string.flag_xray), context.getString(R.string.flag_xray_desc),
+                    Flags.XRAY));
         }
-        mFlags.add(new RecallFlag(context.getString(R.string.flag_first_subst), context.getString(R.string.flag_first_subst_desc), Flags.FIRSTSUBSTITUTE));
+        mFlags.add(new RecallFlag(context.getString(R.string.flag_first_subst),
+                context.getString(R.string.flag_first_subst_desc), Flags.FIRSTSUBSTITUTE));
     }
 
     @Override

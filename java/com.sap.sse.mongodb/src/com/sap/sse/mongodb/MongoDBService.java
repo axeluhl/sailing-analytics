@@ -1,13 +1,13 @@
 package com.sap.sse.mongodb;
 
-import com.mongodb.DB;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.internal.MongoDBServiceImpl;
 
 public interface MongoDBService {
 
     MongoDBService INSTANCE = new MongoDBServiceImpl();
 
-    DB getDB();
+    MongoDatabase getDB();
 
     MongoDBConfiguration getConfiguration();
 

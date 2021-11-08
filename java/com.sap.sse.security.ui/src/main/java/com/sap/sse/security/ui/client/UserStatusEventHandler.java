@@ -1,7 +1,8 @@
 package com.sap.sse.security.ui.client;
 
-import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 
+@FunctionalInterface
 public interface UserStatusEventHandler {
     /**
      * Called when something about the currently signed-in user changes. This could be that user now has a different set

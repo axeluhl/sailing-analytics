@@ -21,6 +21,9 @@
 .eventsteps_phases_phaseinactive {
   color: #999;
 }
+.eventsteps_phases_phase_link {
+  color: #000;
+}
 /* .eventsteps_phases_phase:nth-child(2n-1) { */
 /*   padding-right: 0.333333333333333em; */
 /* } */
@@ -35,6 +38,7 @@
 /*   padding: .666666666666667em 0; */
   display: inline;
   vertical-align: middle;
+  margin-right: 0.333333333333333rem;
 }
 .eventsteps_phases_phase_progressbar {
   height: 1.266666666666667em;
@@ -58,7 +62,7 @@ img.eventsteps_phases_phase_progress_icon {
   vertical-align: middle;
   height: 1.133333333333333em;
   width: 1.133333333333333em;
-  margin: 0 0.333333333333333em;
+  margin-right: 0.333333333333333em;
 }
 .eventsteps_phases_phase_progress_text {
   font-size: 0.866666666666667em;

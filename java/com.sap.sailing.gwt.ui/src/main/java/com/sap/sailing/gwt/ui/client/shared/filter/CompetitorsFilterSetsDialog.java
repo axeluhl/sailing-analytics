@@ -160,7 +160,6 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
                             }
                         }
                         boolean isActiveFilterSet = activeFilterSetRadioButtons.get(index).getValue();
-                        
                         activeFilterSetRadioButtons.remove(index);
                         editFilterSetButtons.remove(index);
                         deleteFilterSetButtons.remove(index);
@@ -201,7 +200,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
                     index++;
                 }
                 // in case the filter set to delete is the 'active' one, we set the "Filter nothing" filter set 'active'
-                if(activeFilterSetRadioButtons.get(index).getValue()) {
+                if (activeFilterSetRadioButtons.get(index).getValue()) {
                     activeFilterSetRadioButtons.get(0).setValue(true);
                 }
                 activeFilterSetRadioButtons.remove(index);

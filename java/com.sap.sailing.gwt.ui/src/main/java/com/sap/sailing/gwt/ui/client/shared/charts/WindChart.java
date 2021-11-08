@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
@@ -226,63 +227,44 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     }
 
     private void updateVisibleSeries() {
-        List<Series> currentSeries = Arrays.asList(chart.getSeries());
-        Set<Series> visibleSeries = new HashSet<Series>(currentSeries);
+        final Set<Series> visibleSeries = new HashSet<Series>(Arrays.asList(chart.getSeries()));
 
         if (preselectFilter != null) {
             forceSeriesSelection(visibleSeries, windSourceDirectionSeries);
             forceSeriesSelection(visibleSeries, windSourceSpeedSeries);
         } else {
-            if (settings.isShowWindDirectionsSeries()) {
-                for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
-                    Series series = e.getValue();
-                    if (settings.getWindDirectionSourcesToDisplay().contains(e.getKey().getType())) {
-                        if (!visibleSeries.contains(series)) {
-                            chart.addSeries(series, false, false);
-                        }
-                        series.select(true); // ensures that the checkbox will be ticked
-                        series.setVisible(true); //and that it is actually being rendered
-                    } else {
-                        if (visibleSeries.contains(series)) {
-                            chart.removeSeries(series, false);
-                        }
-                    }
-                }
-            } else {
-                for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
-                    Series series = e.getValue();
-                    if (visibleSeries.contains(series)) {
-                        chart.removeSeries(series, false);
-                    }
-                }
-            }
-
-            if (settings.isShowWindSpeedSeries()) {
-                for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
-                    Series series = e.getValue();
-                    if (settings.getWindSpeedSourcesToDisplay().contains(e.getKey().getType())) {
-                        if (!visibleSeries.contains(series)) {
-                            chart.addSeries(series, false, false);
-                        }
-                        series.select(true); // ensures that the checkbox will be ticked
-                        series.setVisible(true); //and that it is actually being rendered
-                    } else {
-                        if (visibleSeries.contains(series)) {
-                            chart.removeSeries(series, false);
-                        }
-                    }
-                }
-            } else {
-                for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
-                    Series series = e.getValue();
-                    if (visibleSeries.contains(series)) {
-                        chart.removeSeries(series, false);
-                    }
-                }
-            }
+            final boolean showDirectionSeries = settings.isShowWindDirectionsSeries();
+            final Set<WindSourceType> directionSourceTypesToDisplay = settings.getWindDirectionSourcesToDisplay();
+            updateSeries(visibleSeries, windSourceDirectionSeries, showDirectionSeries, directionSourceTypesToDisplay);
+            final boolean showSpeedSeries = settings.isShowWindSpeedSeries();
+            final Set<WindSourceType> speedSourceTypesToDisplay = settings.getWindSpeedSourcesToDisplay();
+            updateSeries(visibleSeries, windSourceSpeedSeries, showSpeedSeries, speedSourceTypesToDisplay);
         }
 
         onResize();
+    }
+
+    private void updateSeries(final Set<Series> visibleSeries, final Map<WindSource, Series> windSourceToSeriesMap,
+            final boolean showSeries, final Set<WindSourceType> windSourceTypesToDisplay) {
+        if (showSeries) {
+            for (Entry<WindSource, Series> entry : windSourceToSeriesMap.entrySet()) {
+                final Series series = entry.getValue();
+                if (windSourceTypesToDisplay.contains(entry.getKey().getType())) {
+                    if (!visibleSeries.contains(series)) {
+                        chart.addSeries(series, false, false);
+                    }
+                } else if (visibleSeries.contains(series)) {
+                    chart.removeSeries(series, false);
+                }
+            }
+        } else {
+            for (Entry<WindSource, Series> entry : windSourceToSeriesMap.entrySet()) {
+                final Series series = entry.getValue();
+                if (visibleSeries.contains(series)) {
+                    chart.removeSeries(series, false);
+                }
+            }
+        }
     }
 
     private boolean forceSeriesSelection(Set<Series> visibleSeries, Map<WindSource, Series> toProcess) {

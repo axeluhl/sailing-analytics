@@ -25,7 +25,7 @@ public interface RevokeEvent<VisitorT> extends AbstractLogEvent<VisitorT> {
     String getReason();
 
     /**
-     * {@link Class#getSimpleName() Simple class name} of the revoked event.
+     * {@link Class#getName() Fully-qualified class name} of the revoked event.
      */
     String getRevokedEventType();
 }

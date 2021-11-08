@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.data.handlers;
 
+import java.util.Collection;
+
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
-
-import java.util.Collection;
 
 public class EventsDataHandler extends DataHandler<Collection<EventBase>> {
 

@@ -18,14 +18,15 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -41,7 +42,10 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ColorTextBox;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.controls.IntegerBox;
@@ -58,23 +62,30 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
  * @author Axel Uhl (d043530)
  */
 public abstract class DataEntryDialog<T> {
-    private final DialogBox dateEntryDialog;
+    private final DialogBox dataEntryDialog;
     private Validator<T> validator;
     private final Button okButton;
     private final Button cancelButton;
-    private final Label statusLabel;
+    private final HTML statusLabel;
     private final FlowPanel panelForAdditionalWidget;
     private final DockPanel buttonPanel;
     private final FlowPanel rightButtonPanel;
     private final FlowPanel leftButtonPanel;
+    private final AsyncActionsExecutor validationExecutor;
+    private static final String VALIDATION_ACTION_CATEGORY = "validation";
     
     private boolean dialogInInvalidState = false;
 
+    @FunctionalInterface
     public static interface Validator<T> {
         /**
          * @return <code>null</code> in case the <code>valueToValidate</code> is valid; a user-readable error message otherwise
          */
         String getErrorMessage(T valueToValidate);
+        
+        default void validate(T valueToValidate, AsyncCallback<String> callback, AsyncActionsExecutor validationExecutor) {
+            validationExecutor.execute(cb->cb.onSuccess(getErrorMessage(valueToValidate)), VALIDATION_ACTION_CATEGORY, callback);
+        }
     }
     
     public static interface DialogCallback<T> {
@@ -83,6 +94,10 @@ public abstract class DataEntryDialog<T> {
     }
 
     /**
+     * @param message
+     *            may be {@code null}
+     * @param cancelButtonName
+     *            if {@code null}, no cancel button will be displayed
      * @param validator
      *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
      *            data validation is triggered upon any noticeable change in any of the elements constructed by
@@ -97,26 +112,31 @@ public abstract class DataEntryDialog<T> {
     }
     
     /**
+     * @param message
+     *            may be {@code null}
+     * @param cancelButtonName
+     *            if {@code null}, no cancel button will be displayed
      * @param validator
      *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
      *            data validation is triggered upon any noticeable change in any of the elements constructed by
      *            {@link #createCheckbox(String)}, {@link #createTextBox(String)}, etc.
      * @param callback
      *            will be called when the dialog if {@link AsyncCallback#onFailure(Throwable) cancelled} or
-     *            {@link AsyncCallback#onSuccess(Object) confirmed}
+     *            {@link AsyncCallback#onSuccess(Object) confirmed}; may be {@code null}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
-        dateEntryDialog = new DialogBox();
-        dateEntryDialog.setText(title);
-        dateEntryDialog.setGlassEnabled(true);
+        validationExecutor = new AsyncActionsExecutor();
+        dataEntryDialog = new DialogBox();
+        dataEntryDialog.setText(title);
+        dataEntryDialog.setGlassEnabled(true);
         this.validator = validator;
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
         okButton.ensureDebugId("OkButton");
         FlowPanel dialogFPanel = new FlowPanel();
         dialogFPanel.setWidth("100%");
-        statusLabel = new Label();
+        statusLabel = new HTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
         statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
         if (message != null) {
@@ -137,77 +157,99 @@ public abstract class DataEntryDialog<T> {
         rightButtonPanel.add(okButton);
         buttonPanel.add(rightButtonPanel, DockPanel.EAST);
         buttonPanel.add(leftButtonPanel, DockPanel.WEST);
-        cancelButton = new Button(cancelButtonName);
-        cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
-        cancelButton.ensureDebugId("CancelButton");
-        rightButtonPanel.add(cancelButton);
-        cancelButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                dateEntryDialog.hide();
-                if (callback != null) {
-                    callback.cancel();
+        if (cancelButtonName != null) {
+            cancelButton = new Button(cancelButtonName);
+            cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
+            cancelButton.ensureDebugId("CancelButton");
+            rightButtonPanel.add(cancelButton);
+            cancelButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    dataEntryDialog.hide();
+                    if (callback != null) {
+                        callback.cancel();
+                    }
                 }
-            }
-        });
-        dateEntryDialog.setWidget(dialogFPanel);
+            });
+        } else {
+            cancelButton = null;
+        }
+        dataEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                dateEntryDialog.hide();
-                if (callback != null) {
-                    callback.ok(getResult());
-                }
+                // wait for any outstanding validation request and check last validation result; call OK only if the pending validation was OK
+                ifLastValidationRequestSuccesssful(()->{
+                    dataEntryDialog.hide();
+                    if (callback != null) {
+                        callback.ok(getResult());
+                    }
+                });
             }
         });
     }
     
+    /**
+     * If the {@link #validationExecutor} has no more pending actions and the last validation was successful,
+     * call {@code callback}. If an action is still pending in the {@link #validationExecutor}, wait until no more
+     * action is pending and invoke {@code callback} if the last validation state was OK.
+     */
+    protected void ifLastValidationRequestSuccesssful(Runnable callback) {
+        validationExecutor.runAfterLastActionReturned(VALIDATION_ACTION_CATEGORY, ()->{
+            if (!dialogInInvalidState) {
+                callback.run();
+            }
+        });
+    }
+
     public void setValidator(Validator<T> validator) {
         this.validator = validator;
     }
     
-    protected boolean validateAndUpdate() {
-        String errorMessage = null;
+    protected void validateAndUpdate() {
         T result = getResult();
         if (validator != null) {
-            errorMessage = validator.getErrorMessage(result);
+            validator.validate(result, new AsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    onSuccess(caught.getMessage());
+                }
+
+                /**
+                 * Note: if {@code errorMessage} is not {@code null}, the method name "onSuccess" is a bit misleading
+                 * because it notifies an error condition.
+                 */
+                @Override
+                public void onSuccess(String errorMessage) {
+                    boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
+                    if (invalidState != dialogInInvalidState) {
+                        onInvalidStateChanged(invalidState);
+                    }
+                    if (invalidState) {
+                        statusLabel.setHTML(SafeHtmlUtils.fromString(errorMessage));
+                        statusLabel.setStyleName("errorLabel");
+                        getOkButton().setEnabled(false);
+                    } else {
+                        statusLabel.setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
+                        onChange(result);
+                        getOkButton().setEnabled(true);
+                    }
+                }
+            }, validationExecutor);
         }
-        boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
-        if(invalidState != dialogInInvalidState) {
-            dialogInInvalidState = invalidState;
-            onInvalidStateChanged(invalidState);
-        }
-        if (!invalidState) {
-            getStatusLabel().setText("");
-            onChange(result);
-        } else {
-            getStatusLabel().setText(errorMessage);
-            getStatusLabel().setStyleName("errorLabel");
-        }
-        
-        return !invalidState;
     }
 
     /**
-     * Allows subcasses to listen to changes of the data shown in the dialog.
+     * Allows subclasses to listen to changes of the data shown in the dialog.
      */
     protected void onChange(T result) {
     }
     
     protected void onInvalidStateChanged(boolean invalidState) {
         getOkButton().setEnabled(!invalidState);
+        dialogInInvalidState = invalidState;
     }
 
     protected abstract T getResult();
-
-    /**
-     * Creates a text box with a key-up listener attached which ensures the value is updated after each
-     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
-     * 
-     * @param initialValue initial value to show in text box; <code>null</code> is permissible
-     */
-    public TextBox createTextBox(String initialValue) {
-        return createTextBoxInternal(initialValue, 30);
-    }
 
     /**
      * This methods creates a {@link MultiWordSuggestOracle} where the given suggest values are
@@ -268,14 +310,31 @@ public abstract class DataEntryDialog<T> {
      * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
+     */
+    public TextBox createTextBox(String initialValue) {
+        return createTextBox(initialValue, 30);
+    }
+    
+    /**
+     * Creates a text box with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validateAndUpdate() validated} in this case.
+     * 
+     * @param initialValue initial value to show in text box; <code>null</code> is permissible
      * @param visibleLength the visible length of the text box
      */
     public TextBox createTextBox(String initialValue, int visibleLength) {
-        return createTextBoxInternal(initialValue, visibleLength);
+        return configureTextBox(new TextBox(), initialValue, visibleLength);
     }
         
-    private TextBox createTextBoxInternal(String initialValue, int visibleLength) {
-        TextBox textBox = new TextBox();
+    public ColorTextBox createColorTextBox(Color initialValue) {
+        return createColorTextBox(initialValue, 30);
+    }
+    
+    public ColorTextBox createColorTextBox(Color initialValue, int visibleLength) {
+        return configureTextBox(new ColorTextBox(), initialValue == null ? null : initialValue.getAsHtml(), visibleLength);
+    }
+    
+    private <TextBoxType extends TextBox> TextBoxType configureTextBox(TextBoxType textBox, String initialValue, int visibleLength) {
         textBox.setVisibleLength(visibleLength);
         textBox.setText(initialValue == null ? "" : initialValue);
         DialogUtils.addFocusUponKeyUpToggler(textBox);
@@ -378,7 +437,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     private DoubleBox createDoubleBoxInternal(Double initialValue, int visibleLength) {
-        DoubleBox doubleBox = new DoubleBox();
+        final DoubleBox doubleBox = new DoubleBox();
         doubleBox.setVisibleLength(visibleLength);
         doubleBox.setValue(initialValue);
         DialogUtils.addFocusUponKeyUpToggler(doubleBox);
@@ -582,11 +641,11 @@ public abstract class DataEntryDialog<T> {
     }
 
     protected void setCursor(Style.Cursor cursor) {
-        dateEntryDialog.getElement().getStyle().setCursor(cursor);
+        dataEntryDialog.getElement().getStyle().setCursor(cursor);
     }
 
     public void center() {
-        dateEntryDialog.center();
+        dataEntryDialog.center();
     }
 
     public void show() {
@@ -595,7 +654,7 @@ public abstract class DataEntryDialog<T> {
             panelForAdditionalWidget.add(additionalWidget);
         }
         validateAndUpdate();
-        dateEntryDialog.center();
+        dataEntryDialog.center();
         final FocusWidget focusWidget = getInitialFocusWidget();
         if (focusWidget != null) {
             Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
@@ -611,15 +670,15 @@ public abstract class DataEntryDialog<T> {
     }
 
     protected DialogBox getDialogBox() {
-        return dateEntryDialog;
+        return dataEntryDialog;
     }
     
     public void ensureDebugId(String debugId) {
-        dateEntryDialog.ensureDebugId(debugId);
+        dataEntryDialog.ensureDebugId(debugId);
     }
     
     protected void addAutoHidePartner(Element element) {
-        dateEntryDialog.addAutoHidePartner(element);
+        dataEntryDialog.addAutoHidePartner(element);
     }
     
     protected FlowPanel getLeftButtonPannel() {

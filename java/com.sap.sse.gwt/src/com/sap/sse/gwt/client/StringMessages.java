@@ -1,8 +1,8 @@
 package com.sap.sse.gwt.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
+import com.google.gwt.i18n.client.Messages;
 
 /**
  * Defines the text strings for i18n that are used by the SSE GWT bundle. 
@@ -38,7 +38,13 @@ public interface StringMessages extends Messages {
     String resetToDefaultInProgress();
     String settingsRemoved();
     String settingsRemovedError();
-    
+    String settingsGetError();
+    String getAvailableDetailTypesForLeaderboardError();
+    String getLeaderboardNamesError();
+    String getLeaderboardError();
+    String pagerStateInfo(int start , int end, int size, @Select boolean exact);
+    String yes();
+    String no();
     String details();
     String filterBy();
     String noDataFound();
@@ -57,7 +63,6 @@ public interface StringMessages extends Messages {
     String minutes();
     String seconds();
     String milliseconds();
-    
     String run();
     String copyToClipboard();
     String code();
@@ -74,6 +79,7 @@ public interface StringMessages extends Messages {
     String groupMedianDescending();
     String choosePresentation();
     String shownDecimals();
+    String showDataLabels();
     String elements(long count);
     String resultsChart();
     String cantDisplayDataOfType(String resultType);
@@ -83,5 +89,20 @@ public interface StringMessages extends Messages {
     String centralAngleInRadian();
     String centralAngleInDegree();   
     String clearSelection();
-
+    String load();
+    String dataMiningStoredQueryPlaceholder();
+    String dataMiningStoredQueryUpdateSuccessful(String name);
+    String dataMiningStoredQueryCreationSuccessful(String name);
+    String dataMiningStoredQueryLoadedSuccessful(String name);
+    String dataMiningStoredQueryLoadedFailed(String name);
+    String dataMiningStoredQueryRemovedSuccessful(String name);
+    String dataMiningStoredQueryRemovedFailed(String name);
+    String loadOrSaveQueries();
+    String whatsNewDialogTitle();
+    String whatsNewDialogMessage();
+    String showChangelog();
+    String hideElementsWithoutUpdateRights();
+    String temporarilyUnavailable();
+    String sapAnalytics();
+    String sapAnalyticsURL();
 }

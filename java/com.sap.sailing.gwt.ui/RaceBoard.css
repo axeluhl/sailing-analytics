@@ -86,7 +86,7 @@ table {
 }
 
 .TopLeftControlsWrapperPanelParentDiv {
-	padding-top: 34px;
+	padding-top: 27px;
 	padding-left: 10px;
 }
 
@@ -97,10 +97,11 @@ table {
 	padding-left: 45px;
 }
 
-.MapSimulationLegendParentDiv {
-	padding-bottom: 10px;
-	padding-right: 10px;
+.MapMetricLegend {
 	pointer-events: none;
+}
+.MapMetricLegendParentDiv {
+	padding-top: 65px;
 }
 
 .MapSimulationLegend {
@@ -109,7 +110,7 @@ table {
 
 .MapSimulationLegendParentDiv {
 	padding-bottom: 10px;
-	padding-right: 10px;
+	padding-right: 50px;
 	pointer-events: none;
 }
 
@@ -472,10 +473,6 @@ img.openColumn {
 }
 
 .raceBoard-Logo {
-	position: absolute;
-	top: 6px;
-	left: 10px;
-	z-index: 10;
 	cursor: pointer;
 }
 
@@ -594,7 +591,9 @@ img.openColumn {
 	background-position: 5% 50%, 95% 50%
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard {
+.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard,
+.gwt-SplitLayoutPanel-WestToggleButton-Open-leaderboard
+ {
 	background-color: white;
 	background-image:
 		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_GHOSTED.png),
@@ -604,7 +603,8 @@ img.openColumn {
 	background-position: 5px center, calc(100% - 6px) center;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard {
+.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard,
+.gwt-SplitLayoutPanel-WestToggleButton-Closed-leaderboard {
 	background-color: white;
 	background-image:
 		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png),
@@ -612,6 +612,26 @@ img.openColumn {
 	background-repeat: no-repeat, no-repeat;
 	background-position: 4% 50%, 96% 50%;
 	background-position: 5px center, calc(100% - 6px) center;
+}
+
+.gwt-SplitLayoutPanel-WestToggleButton-Open-tags {
+	background-color: white;
+    background-image:
+        url(images/viewicons/@1x/img/SAP_RV_Map_GHOSTED.png),
+        url(images/arrows_bottom_black_small.png);
+    background-repeat: no-repeat, no-repeat;
+    background-position: 4% 50%, 96% 50%;
+    background-position: 5px center, calc(100% - 6px) center;
+}
+
+.gwt-SplitLayoutPanel-WestToggleButton-Closed-tags {
+    background-color: white;
+    background-image:
+        url(images/viewicons/@1x/img/SAP_RV_Map_INACTIVE.png),
+        url(images/arrows_top_black_small.png);
+    background-repeat: no-repeat, no-repeat;
+    background-position: 4% 50%, 96% 50%;
+    background-position: 5px center, calc(100% - 6px) center;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media,
@@ -648,8 +668,13 @@ img.openColumn {
 .RegattaRaceInformation-Header {
 	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	position: relative;
-	left: 140px;
-	top: 11px;
+}
+
+.raceBoard-Logo, .RegattaRaceInformation-Header {
+	display: inline-block;
+	vertical-align: text-bottom;
+	margin-left: 10px;
+	margin-top: 5px;
 }
 
 .RegattaRaceInformation-Header .RaceName-Label {
@@ -673,6 +698,15 @@ img.openColumn {
 	color: white;
 }
 
+.RegattaAndRaceTime-Header_with_databy {
+    top: 3px;
+}
+
+.compactHeader .RegattaAndRaceTime-Header.RegattaAndRaceTime-Header_with_databy {
+    top: 0;
+    font-size: 90%;
+}
+
 .RegattaAndRaceTime-Header .RegattaName-Anchor {
 	font-size: 15px;
 	color: white;
@@ -693,9 +727,14 @@ img.openColumn {
 	margin-top: 5px;
 }
 
-.compactHeader .RegattaRaceInformation-Header {
-    left: 110px;
+.compactHeader .RegattaAndRaceTime-Header>* {
+    margin-top: 3px;
 }
+
+.RegattaAndRaceTime-Header_with_databy .RegattaName-Anchor, .RegattaAndRaceTime-Header_with_databy .RaceTime-Label {
+    font-size: 13px;
+}
+
 .compactHeader .RegattaRaceInformation-Header .RaceName-Label {
     display: block;
     font-size: 16px;
@@ -703,7 +742,6 @@ img.openColumn {
 }
 .compactHeader .RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
     display: block;
-    margin-top: 5px;
     white-space: nowrap;
 }
 .compactHeader .RegattaAndRaceTime-Header {

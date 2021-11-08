@@ -21,9 +21,9 @@ import com.sap.sse.common.TimePoint;
 
 
 public interface RaceChangeListener extends CourseListener {
-    void competitorPositionChanged(GPSFixMoving fix, Competitor competitor);
+    void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, AddResult addedOrReplaced);
     
-    void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack);
+    void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced);
     
     void firstGPSFixReceived();
     
@@ -57,7 +57,13 @@ public interface RaceChangeListener extends CourseListener {
      * passing-based start time inference is active or not.
      */
     void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace);
-    
+
+    /**
+     * Fired by a change in the {@link RaceState#getFinisingTime() finishing time} inferred
+     * from the race log.
+     */
+    void finishingTimeChanged(TimePoint oldFinishingTime, TimePoint newFinishingTime);
+
     /**
      * Fired when in any of the attached {@link RaceLog}s a {@link RaceLogRaceStatusEvent} or a {@link RaceLogPassChangeEvent}
      * or a {@link RaceLogRevokeEvent} has caused a change in the {@link RaceState#getFinishedTime() finished time} inferred
@@ -73,7 +79,7 @@ public interface RaceChangeListener extends CourseListener {
     
     void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track);
     
-    void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix);
+    void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced);
     
     void regattaLogAttached(RegattaLog regattaLog);
     

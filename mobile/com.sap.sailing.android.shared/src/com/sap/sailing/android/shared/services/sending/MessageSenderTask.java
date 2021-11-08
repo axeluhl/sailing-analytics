@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
+import com.sap.sailing.android.shared.data.http.HttpRequest;
+import com.sap.sailing.android.shared.logging.ExLog;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
-import com.sap.sailing.android.shared.data.http.HttpRequest;
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class MessageSenderTask extends AsyncTask<Intent, Void, MessageSenderResult> {
 
@@ -40,10 +40,11 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, MessageSenderResu
         }
         InputStream responseStream = null;
         try {
-            ExLog.i(context, TAG, "Posting message" +(isResend?" (resend)":"")+": " + payload);
+            ExLog.i(context, TAG, "Posting message" + (isResend ? " (resend)" : "") + ": " + payload);
             HttpRequest post = new HttpJsonPostRequest(context, new URL(url), payload);
             responseStream = post.execute();
-            ExLog.i(context, TAG, "Post successful for the following" +(isResend?" (resend)":"")+" message: " + payload);
+            ExLog.i(context, TAG,
+                    "Post successful for the following" + (isResend ? " (resend)" : "") + " message: " + payload);
             result = new MessageSenderResult(intent, responseStream);
         } catch (IOException e) {
             ExLog.e(context, TAG, String.format("Post not successful, exception occured: %s", e.toString()));

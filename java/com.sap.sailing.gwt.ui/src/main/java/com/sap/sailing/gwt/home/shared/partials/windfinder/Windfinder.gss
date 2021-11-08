@@ -7,7 +7,7 @@
   text-decoration: none;
   vertical-align: bottom;
   padding-left: 1em;
-  padding-right: 0.5em
+  padding-right: 0.5em;
 }
 .windfindercontrol_text, .windfindercontrol_icon {
   display: inline-block;

@@ -13,5 +13,6 @@ Import-Package: com.sap.sailing.resultimport,
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sailing.domain.shared.android
 Automatic-Module-Name: com.sap.sailing.freg.resultimport

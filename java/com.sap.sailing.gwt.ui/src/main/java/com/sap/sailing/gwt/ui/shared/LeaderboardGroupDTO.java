@@ -17,7 +17,7 @@ import com.sap.sse.gwt.client.player.Timer;
 
 public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
     private static final long serialVersionUID = -2923229069598593687L;
-    public List<StrippedLeaderboardDTO> leaderboards;
+    public List<StrippedLeaderboardDTOWithSecurity> leaderboards;
     public boolean displayLeaderboardsInReverseOrder;
     
     private int[] overallLeaderboardDiscardThresholds;
@@ -29,7 +29,8 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
      */
     private Date currentServerTime;
     
-    LeaderboardGroupDTO() {}
+    @Deprecated
+    LeaderboardGroupDTO() {} // for GWT RPC serialization only
     
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for
@@ -47,19 +48,17 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
     }
 
     public LeaderboardGroupDTO(UUID id, String name, String displayName, String description) {
-        this(id, name, description, displayName, new ArrayList<StrippedLeaderboardDTO>());
+        this(id, name, description, displayName, new ArrayList<>());
     }
 
     /**
      * Creates a new LeaderboardGroupDTO with the given parameters as attributes.<br />
      * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
-     * @param displayName TODO
      */
-    private LeaderboardGroupDTO(UUID id, String name, String description, String displayName, List<StrippedLeaderboardDTO> leaderboards) {
-        super(id, name, displayName);
+    private LeaderboardGroupDTO(UUID id, String name, String description, String displayName, List<StrippedLeaderboardDTOWithSecurity> leaderboards) {
+        super(id, name, description, displayName, /* hasOverallLeaderboard */ false);
         currentServerTime = new Date();
-        this.description = description;
         this.leaderboards = leaderboards;
     }
     
@@ -168,7 +167,7 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((getDescription() == null) ? 0 : getDescription().hashCode());
         result = prime * result + ((leaderboards == null) ? 0 : leaderboards.hashCode());
         return result;
     }
@@ -182,10 +181,10 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
         if (getClass() != obj.getClass())
             return false;
         LeaderboardGroupDTO other = (LeaderboardGroupDTO) obj;
-        if (description == null) {
-            if (other.description != null)
+        if (getDescription() == null) {
+            if (other.getDescription() != null)
                 return false;
-        } else if (!description.equals(other.description))
+        } else if (!getDescription().equals(other.getDescription()))
             return false;
         if (leaderboards == null) {
             if (other.leaderboards != null)
@@ -195,7 +194,7 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
         return true;
     }
 
-    public List<StrippedLeaderboardDTO> getLeaderboards() {
+    public List<StrippedLeaderboardDTOWithSecurity> getLeaderboards() {
         return leaderboards;
     }
 

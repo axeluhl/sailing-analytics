@@ -1,5 +1,11 @@
 package com.sap.sailing.server.impl;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,9 +25,6 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.MimeType;
-
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
 
 
 public class MediaLibaryTest {

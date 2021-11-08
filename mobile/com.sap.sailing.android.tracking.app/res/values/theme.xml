@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="AppTheme.Base"/>
+    <style name="AppTheme" parent="AppTheme.Base" />
 
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
 
@@ -19,10 +19,13 @@
 
         <!-- You can also set colorControlNormal, colorControlActivated colorControlHighlight & colorSwitchThumbNormal. -->
 
+        <item name="buttonStyle">@style/buttonStyle</item>
+
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-        <item name="buttonStyle">@style/buttonStyle</item>
+        <item name="alertDialogTheme">@style/AppTheme.AlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <style name="launchScreenTheme" parent="Theme.AppCompat.NoActionBar">

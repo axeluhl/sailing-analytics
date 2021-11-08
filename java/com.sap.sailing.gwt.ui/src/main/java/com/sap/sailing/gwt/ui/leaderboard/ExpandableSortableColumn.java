@@ -13,10 +13,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
+import com.sap.sse.common.SortingOrder;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
 /**
  * A column that is sortable and offers an expand/collapse button in its column header.

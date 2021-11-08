@@ -1,23 +1,36 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class CourseDataImpl extends NamedImpl implements CourseBase {
-
-    private static final long serialVersionUID = 1389216430392253253L;
     
+    private static final long serialVersionUID = 2749443048689453078L;
+
     private final List<Waypoint> waypoints;
 
+    private final UUID originatingCourseTemplateId; 
+
+    private final Map<Mark, UUID> associatedRoles = new HashMap<>();
+
     public CourseDataImpl(String name) {
+        this(name, null);
+    }
+
+    public CourseDataImpl(String name, UUID originatingCourseTemplateId) {
         super(name);
         this.waypoints = new ArrayList<Waypoint>();
+        this.originatingCourseTemplateId = originatingCourseTemplateId;
     }
 
     @Override
@@ -73,4 +86,21 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
         return null;
     }
 
+    @Override
+    public UUID getOriginatingCourseTemplateIdOrNull() {
+        return originatingCourseTemplateId;
+    }
+
+    public void addRoleMapping(Mark mark, UUID role) {
+        associatedRoles.put(mark, role);
+    }
+
+    public Map<Mark, UUID> getAssociatedRoles() {
+        return associatedRoles;
+    }
+
+    @Override
+    public String toString() {
+        return internalToString();
+    }
 }

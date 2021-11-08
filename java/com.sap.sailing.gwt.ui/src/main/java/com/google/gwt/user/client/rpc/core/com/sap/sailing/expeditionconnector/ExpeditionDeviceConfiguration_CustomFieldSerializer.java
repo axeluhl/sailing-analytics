@@ -7,6 +7,8 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
 
 public class ExpeditionDeviceConfiguration_CustomFieldSerializer extends CustomFieldSerializer<ExpeditionDeviceConfiguration> {
 
@@ -21,6 +23,8 @@ public class ExpeditionDeviceConfiguration_CustomFieldSerializer extends CustomF
         streamWriter.writeString(instance.getName());
         streamWriter.writeObject(instance.getDeviceUuid());
         streamWriter.writeObject(instance.getExpeditionBoatId());
+        streamWriter.writeObject(instance.getAccessControlList());
+        streamWriter.writeObject(instance.getOwnership());
     }
 
     @Override
@@ -36,7 +40,12 @@ public class ExpeditionDeviceConfiguration_CustomFieldSerializer extends CustomF
 
     public static ExpeditionDeviceConfiguration instantiate(SerializationStreamReader streamReader)
             throws SerializationException {
-        return new ExpeditionDeviceConfiguration(streamReader.readString(), (UUID) streamReader.readObject(), (Integer) streamReader.readObject());
+        final ExpeditionDeviceConfiguration result = new ExpeditionDeviceConfiguration(streamReader.readString(), (UUID) streamReader.readObject(), (Integer) streamReader.readObject());
+        final AccessControlListDTO acl = (AccessControlListDTO) streamReader.readObject();
+        final OwnershipDTO ownership = (OwnershipDTO) streamReader.readObject();
+        result.setAccessControlList(acl);
+        result.setOwnership(ownership);
+        return result;
     }
 
     @Override

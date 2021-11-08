@@ -3,11 +3,16 @@ package com.sap.sse.datamining.ui.client.selection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -19,6 +24,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -36,8 +42,24 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponent<SerializableSettings>
         implements GroupingProvider {
 
-    private static final String GROUPING_PROVIDER_ELEMENT_STYLE = "groupingProviderElement";
-
+    private static final String GroupingProviderStyle = "groupingProvider";
+    private static final String GroupingProviderLabelStyle = "groupingProviderLabel";
+    private static final String GroupingProviderElementStyle = "groupingProviderElement";
+    
+    private static final NaturalComparator NaturalComparator = new NaturalComparator();
+    private static final Comparator<FunctionDTO> DimensionComparator = (d1, d2) -> {
+        // Null values (to deselect the dimension) on top
+        if (d1 == null || d2 == null) {
+            if (d1 == d2) return 0;
+            if (d1 == null) return -1;
+            if (d2 == null) return 1;
+        }
+        return NaturalComparator.compare(d1.getDisplayName(), d2.getDisplayName());
+    };
+    
+    @FunctionalInterface
+    private static interface DimensionMatcher extends BiPredicate<FunctionDTO, FunctionDTO> { }
+    
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<GroupingChangedListener> listeners;
@@ -46,8 +68,13 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
     private boolean isAwaitingReload;
+    private boolean isUpdating;
     private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
     private final List<FunctionDTO> availableDimensions;
+    
+    private Iterable<FunctionDTO> dimensionsToSelect;
+    private DimensionMatcher dimensionMatcher;
+    private Consumer<Iterable<String>> selectionCallback;
 
     public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -62,8 +89,11 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
         dimensionToGroupByBoxes = new ArrayList<ValueListBox<FunctionDTO>>();
 
         mainPanel = new FlowPanel();
+        mainPanel.addStyleName(GroupingProviderStyle);
+        
         Label groupByLabel = new Label(this.getDataMiningStringMessages().groupBy());
-        groupByLabel.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
+        groupByLabel.addStyleName(GroupingProviderLabelStyle);
+        groupByLabel.addStyleName("emphasizedLabel");
         mainPanel.add(groupByLabel);
 
         ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
@@ -77,7 +107,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     @Override
-    public boolean isAwatingReload() {
+    public boolean isAwaitingReload() {
         return isAwaitingReload;
     }
 
@@ -98,44 +128,78 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     private void updateAvailableDimensions() {
+        // Try to recover the selection even if the retriever chain has been null in between
+        Collection<FunctionDTO> currentDimensions = getDimensionsToGroupBy();
+        if (!currentDimensions.isEmpty()) {
+            dimensionsToSelect = currentDimensions;
+            // Match dimensions by display name to retain dimensions of different retriever chains that appear to be equal
+            dimensionMatcher = (d1, d2) -> {
+                if (d1 == d2) return true;
+                if (d1 == null || d2 == null) return false;
+                
+                return d1.getDisplayName().equals(d2.getDisplayName());
+            };
+            selectionCallback = EmptyApplyCallback;
+        }
+        
         if (currentRetrieverChainDefinition != null) {
+            isUpdating = true;
             dataMiningService.getDimensionsFor(currentRetrieverChainDefinition,
                     LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
                         @Override
                         public void onSuccess(HashSet<FunctionDTO> dimensions) {
-                            clearAvailableDimensionsAndGroupByBoxes();
+                            clear();
                             for (FunctionDTO dimension : dimensions) {
                                 availableDimensions.add(dimension);
                             }
                             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
                             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
                             if (!availableDimensions.isEmpty()) {
-                                Collections.sort(availableDimensions);
-                                firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
+                                Collections.sort(availableDimensions, DimensionComparator);
+                                if (dimensionsToSelect != null) {
+                                    setSelectedDimensions(dimensionsToSelect, dimensionMatcher, selectionCallback);
+                                } else {
+                                    Optional<FunctionDTO> dimensionWithLowestOrdinal = availableDimensions.stream().min((d1, d2) -> {
+                                        int ordinal1 = d1 == null ? Integer.MAX_VALUE : d1.getOrdinal();
+                                        int ordinal2 = d2 == null ? Integer.MAX_VALUE : d2.getOrdinal();
+                                        return Integer.compare(ordinal1, ordinal2);
+                                    });
+                                    dimensionWithLowestOrdinal.ifPresent(d -> firstDimensionToGroupByBox.setValue(d, true));
+                                }
+                                dimensionsToSelect = null;
+                                dimensionMatcher = null;
+                                selectionCallback = null;
                             } else {
                                 notifyListeners();
                             }
+                            isUpdating = false;
                         }
-
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError(
-                                    "Error fetching the dimensions from the server: " + caught.getMessage());
+                            errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
+                            dimensionsToSelect = null;
+                            dimensionMatcher = null;
+                            selectionCallback = null;
+                            isUpdating = false;
                         }
                     });
         } else {
-            clearAvailableDimensionsAndGroupByBoxes();
+            clear();
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
         }
     }
 
-    private void clearAvailableDimensionsAndGroupByBoxes() {
-        for (ValueListBox<FunctionDTO> dimensionToGroupByBox : dimensionToGroupByBoxes) {
-            mainPanel.remove(dimensionToGroupByBox);
+    private void clear() {
+        clearDimensionBoxes();
+        availableDimensions.clear();
+    }
+
+    private void clearDimensionBoxes() {
+        for (ValueListBox<FunctionDTO> dimensionBox : dimensionToGroupByBoxes) {
+            dimensionBox.removeFromParent();
         }
         dimensionToGroupByBoxes.clear();
-        availableDimensions.clear();
     }
 
     @Override
@@ -150,6 +214,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
 
     private ValueListBox<FunctionDTO> createDimensionToGroupByBox() {
         ValueListBox<FunctionDTO> dimensionToGroupByBox = createDimensionToGroupByBoxWithoutEventHandler();
+        dimensionToGroupByBox.addStyleName("dataMiningListBox");
         dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
             private boolean firstChange = true;
 
@@ -160,9 +225,8 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                     addDimensionToGroupByBox(newDimensionToGroupByBox);
                     firstChange = false;
                 } else if (event.getValue() == null) {
-                    Widget changedDimensionToGroupByBox = (Widget) event.getSource();
-                    mainPanel.remove(changedDimensionToGroupByBox);
-                    dimensionToGroupByBoxes.remove(changedDimensionToGroupByBox);
+                    mainPanel.remove(dimensionToGroupByBox);
+                    dimensionToGroupByBoxes.remove(dimensionToGroupByBox);
                 }
                 updateAcceptableValues();
                 notifyListeners();
@@ -181,7 +245,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                     }
 
                 });
-        dimensionToGroupByBox.addStyleName(GROUPING_PROVIDER_ELEMENT_STYLE);
+        dimensionToGroupByBox.addStyleName(GroupingProviderElementStyle);
         return dimensionToGroupByBox;
     }
 
@@ -202,8 +266,12 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             if (dimensionToGroupByBox.getValue() != null) {
                 acceptableValues.add(dimensionToGroupByBox.getValue());
             }
-            Collections.sort(acceptableValues);
-            acceptableValues.add(null);
+            if (!acceptableValues.isEmpty()) {
+                acceptableValues.add(null);
+                Collections.sort(acceptableValues, DimensionComparator);
+            } else {
+                dimensionToGroupByBox.setEnabled(false);
+            }
             dimensionToGroupByBox.setAcceptableValues(acceptableValues);
         }
     }
@@ -225,7 +293,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             final ValueListBox<FunctionDTO> dimensionListBox = i.next();
             if (Util.equalsWithNull(dimension, dimensionListBox.getValue())) {
                 i.remove();
-                mainPanel.remove(dimensionListBox);
+                dimensionListBox.removeFromParent();
                 updateAcceptableValues();
                 notifyListeners();
             }
@@ -233,16 +301,50 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     @Override
-    public String getCustomGrouperScriptText() {
-        return "";
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
+        DataRetrieverChainDefinitionDTO newRetrieverChain = queryDefinition.getDataRetrieverChainDefinition();
+        dimensionsToSelect = queryDefinition.getDimensionsToGroupBy();
+        dimensionMatcher = Objects::equals;
+        selectionCallback = callback;
+        if (!isAwaitingReload && !isUpdating && currentRetrieverChainDefinition.equals(newRetrieverChain)) {
+            clearDimensionBoxes();
+            ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
+            addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
+            
+            setSelectedDimensions(dimensionsToSelect, dimensionMatcher, selectionCallback);
+            dimensionsToSelect = null;
+            dimensionMatcher = null;
+            selectionCallback = null;
+        }
     }
 
-    @Override
-    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        int index = 0;
-        for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
-            dimensionToGroupByBoxes.get(index).setValue(dimension, true);
-            index++;
+    private void setSelectedDimensions(Iterable<FunctionDTO> dimensions, DimensionMatcher matcher, Consumer<Iterable<String>> callback) {
+        Collection<FunctionDTO> missingDimensions = new ArrayList<>();
+        int boxIndex = 0;
+        for (FunctionDTO dimension : dimensions) {
+            FunctionDTO dimensionToSelect = null;
+            for (int i = 0; i < availableDimensions.size(); i++) {
+                FunctionDTO availableDimension = availableDimensions.get(i);
+                if (matcher.test(dimension, availableDimension)) {
+                    dimensionToSelect = availableDimension;
+                    break;
+                }
+            }
+            if (dimensionToSelect != null) {
+                setDimensionToGroupBy(boxIndex, dimensionToSelect);
+                boxIndex++;
+            } else {
+                missingDimensions.add(dimension);
+            }
+        }
+        
+        if (!missingDimensions.isEmpty()) {
+            String listedDimensions = missingDimensions.stream().map(FunctionDTO::getDisplayName)
+                                                                .collect(Collectors.joining(", "));
+            callback.accept(Collections
+                    .singleton(getDataMiningStringMessages().groupingDimensionsAreNotAvailable(listedDimensions)));
+        } else {
+            callback.accept(Collections.emptySet());
         }
     }
 

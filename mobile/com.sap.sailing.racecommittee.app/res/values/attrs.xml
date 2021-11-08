@@ -71,6 +71,8 @@
     <attr name="course_updown_48dp" format="reference" />
     <attr name="course_updown_64dp" format="reference" />
     <attr name="dns" format="reference" />
+    <attr name="flag_18dp" format="reference" />
+    <attr name="flag_24dp" format="reference" />
     <attr name="hearing" format="reference" />
     <attr name="link_24dp" format="reference" />
     <attr name="list_24dp" format="reference" />
@@ -111,5 +113,9 @@
     <attr name="flags_course" format="reference" />
     <attr name="flags_postpone" format="reference" />
     <attr name="flags_recall" format="reference" />
+
+    <declare-styleable name="FlagTimeView">
+        <attr name="flagSize" format="integer" />
+    </declare-styleable>
 
 </resources>

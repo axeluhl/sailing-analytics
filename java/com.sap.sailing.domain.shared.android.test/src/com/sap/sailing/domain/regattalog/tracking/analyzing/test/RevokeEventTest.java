@@ -2,7 +2,7 @@ package com.sap.sailing.domain.regattalog.tracking.analyzing.test;
 
 import java.util.UUID;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 

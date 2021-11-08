@@ -16,8 +16,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class PolarFleetRetrievalProcessor extends AbstractRetrievalProcessor<HasRaceColumnPolarContext, HasFleetPolarContext> {
 
     public PolarFleetRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasFleetPolarContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasRaceColumnPolarContext.class, HasFleetPolarContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasFleetPolarContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasRaceColumnPolarContext.class, HasFleetPolarContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override
@@ -25,6 +27,9 @@ public class PolarFleetRetrievalProcessor extends AbstractRetrievalProcessor<Has
         Set<HasFleetPolarContext> fleetWithContext = new HashSet<>();
         RaceColumn raceColumn = element.getRaceColumn();
         for (Fleet fleet : raceColumn.getFleets()) {
+            if (isAborted()) {
+                break;
+            }
             fleetWithContext.add(new FleetWithPolarContext(fleet, raceColumn, element));
         }
         return fleetWithContext;

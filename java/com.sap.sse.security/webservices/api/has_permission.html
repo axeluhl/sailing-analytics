@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/has_permission</h2>
+
+<b>Description:</b>
+<p>Check whether the subject has one or more permissions. The permissions have to be provided as one or
+   more <tt>permission</tt> query parameters. The result is a JSON array with one object per permission
+   requested. Example request: <pre>
+     /security/api/restsecurity/has_permission?permission=EVENT:CREATE&permission=EVENT:DELETE:587e5fef-53ea-47f0-a71b-1fc29053b4f0
+   </pre>
+         </p>
+<br/>
+<table>
+	<tr>
+		<td>Request Method:</td>
+		<td>GET</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>a JSON document of the following format:<br>
+		    <pre>
+       		[
+			{
+				"permission": "EVENT:CREATE",
+				"granted": true
+			},
+			{
+				"permission": "EVENT:DELETE:587e5fef-53ea-47f0-a71b-1fc29053b4f0",
+				"granted": true
+			}
+		]
+         </pre>
+		</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>
+			<div>permission: can occur multiple times and describes a permission string in the typical format
+				TYPE:ACTION:OBJECT-ID. Example: permission=EVENT:DELETE:587e5fef-53ea-47f0-a71b-1fc29053b4f0.
+				Each colon-separated part can instead use a asterisk * character to mean "all".
+				Omitting trailing parts is equivalent to providing an asterisk for them.
+				</div> 
+		</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><code>curl -X GET "http://127.0.0.1:8888/security/api/restsecurity/has_permission?permission=EVENT:CREATE&permission=EVENT:DELETE:587e5fef-53ea-47f0-a71b-1fc29053b4f0"</code><br>
+	            Will provide a JSON document as explained above.</td>
+	</tr>
+</table>
+</body>
+</html>

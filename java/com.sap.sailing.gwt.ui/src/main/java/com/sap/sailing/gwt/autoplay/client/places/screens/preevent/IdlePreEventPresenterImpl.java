@@ -84,11 +84,11 @@ public class IdlePreEventPresenterImpl extends AutoPlayPresenterConfigured<IdleP
         List<ImageDTO> teaserHighlight = new ArrayList<>();
         List<ImageDTO> bigScreenImages = new ArrayList<>();
         for (ImageDTO imageDTO : getSlideCtx().getEvent().getImages()) {
-            if (imageDTO.getTags().contains(MediaTagConstants.BIGSCREEN)) {
+            if (imageDTO.getTags().contains(MediaTagConstants.BIGSCREEN.getName())) {
                 bigScreenImages.add(imageDTO);
-            } else if (imageDTO.getTags().contains(MediaTagConstants.TEASER)) {
+            } else if (imageDTO.getTags().contains(MediaTagConstants.TEASER.getName())) {
                 teaserHighlight.add(imageDTO);
-            } else if (imageDTO.getTags().contains(MediaTagConstants.HIGHLIGHT)) {
+            } else if (imageDTO.getTags().contains(MediaTagConstants.HIGHLIGHT.getName())) {
                 teaserHighlight.add(imageDTO);
             }
         }

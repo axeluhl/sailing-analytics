@@ -14,33 +14,27 @@ import java.util.Set;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.gwt.client.ErrorReporter;
 
 public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel {
     protected final TrackedRacesListComposite trackedRacesListComposite;
     private final List<RegattaDTO> availableRegattas;
     private final ListBox availableRegattasListBox;
     
-    public AbstractEventManagementPanel(SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher,
-            ErrorReporter errorReporter, boolean actionButtonsEnabled, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, stringMessages);
+    public AbstractEventManagementPanel(Presenter presenter, boolean actionButtonsEnabled,
+            StringMessages stringMessages) {
+        super(presenter, stringMessages);
         this.availableRegattas = new ArrayList<RegattaDTO>();
-        
         this.availableRegattasListBox = new ListBox();
         this.availableRegattasListBox.ensureDebugId("AvailableRegattasListBox");
-        
-        // TrackedEventsComposite should exist in every *ManagementPanel. 
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
-                regattaRefresher,
-                stringMessages, /* multiselection */ true, actionButtonsEnabled);
+        // TrackedEventsComposite should exist in every *ManagementPanel.
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, presenter, stringMessages,
+                /* multiselection */ true, actionButtonsEnabled);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
     }
     
@@ -121,8 +115,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
                     builder.append(")");
                     builder.append("\n");
                 }
-                Window.alert(builder.toString());
-                result = false;
+                result = Window.confirm(builder.toString());
             } else {
                 result = true;
             }

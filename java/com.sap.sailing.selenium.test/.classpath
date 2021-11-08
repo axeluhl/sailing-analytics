@@ -5,6 +5,5 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="resources"/>
 	<classpathentry exported="true" kind="lib" path="lib/cglib-nodep-2.2.3.jar"/>
-	<classpathentry kind="lib" path="/org.openqa.selenium.osgi/lib/commons-exec-1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

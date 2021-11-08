@@ -63,10 +63,10 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
      */
     @Override
     public void setSelected(T item, boolean selected) {
-        if (comp == null || dontcheckSelectionState || item == null || getSelectedObject() == null) {
+        if (getEntityIdentityComparator() == null || dontcheckSelectionState || item == null || getSelectedObject() == null) {
             super.setSelected(item, selected);
         } else {
-            if (comp.representSameEntity(getSelectedObject(), item)) {
+            if (getEntityIdentityComparator().representSameEntity(getSelectedObject(), item)) {
                 super.setSelected(getSelectedObject(), false); // This old version of item will be deleted with the next clear()
             }
             super.setSelected(item, selected);
@@ -112,7 +112,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
                 if (selected != null) {
                     clear();
                     for (final T it : newObjects) {
-                        boolean isEqual = comp == null ? selected.equals(it) : comp.representSameEntity(selected, it);
+                        boolean isEqual = getEntityIdentityComparator() == null ? selected.equals(it) : getEntityIdentityComparator().representSameEntity(selected, it);
                         if (isEqual) {
                             setSelected(it, true);
                             break;

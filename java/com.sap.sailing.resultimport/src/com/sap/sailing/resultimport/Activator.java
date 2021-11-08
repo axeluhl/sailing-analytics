@@ -7,7 +7,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sailing.resultimport.impl.ResultUrlRegistryImpl;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class Activator implements BundleActivator {
     

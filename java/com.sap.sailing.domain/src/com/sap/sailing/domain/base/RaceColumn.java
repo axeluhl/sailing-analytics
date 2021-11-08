@@ -102,6 +102,19 @@ public interface RaceColumn extends Named {
     TrackedRace getTrackedRace(Fleet fleet);
     
     /**
+     * Finds the {@link Fleet} from {@link #getFleets()} such that {@link #getTrackedRace(Fleet)} returns {@code trackedRace}
+     * for that fleet and returns it. If no such fleet can be found in this race column, {@code null} is returned.
+     */
+    default Fleet getFleetOfTrackedRace(TrackedRace trackedRace) {
+        for (final Fleet fleet : getFleets()) {
+            if (getTrackedRace(fleet) == trackedRace) {
+                return fleet;
+            }
+        }
+        return null;
+    }
+    
+    /**
      * If a race is associated with this column for the <code>fleet</code>, the respective {@link RaceDefinition} is returned.
      * Otherwise, <code>null</code> is returned.
      */
@@ -161,14 +174,6 @@ public interface RaceColumn extends Named {
      *            the fleet for which to release its tracked race
      */
     void releaseTrackedRace(Fleet fleet);
-    
-    /**
-     * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is
-     * a medal race column it usually counts double. Under certain circumstances, columns may also count with factors different
-     * from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee defined that in the
-     * overall series leaderboard the last two columns each count 1.5 times their scores.
-     */
-    double getFactor();
     
     /**
      * By default, a competitor's total score is computed by summing up the non-discarded total points of each race

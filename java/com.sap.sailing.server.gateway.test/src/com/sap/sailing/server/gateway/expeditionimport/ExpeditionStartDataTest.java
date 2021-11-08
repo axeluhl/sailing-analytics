@@ -33,11 +33,11 @@ public class ExpeditionStartDataTest {
         assertNotNull(result);
         final Set<TimePoint> startTimes = new HashSet<>();
         Util.addAll(result.getStartTimes(), startTimes);
-        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T14:44:59.481+0200"))));
-        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T14:34:59.260+0200"))));
-        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T14:14:58.819+0200"))));
-        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T15:29:59.740+0200"))));
-        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T14:24:58.953+0200"))));
+        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T14:45:00.086+0200"))));
+        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T14:35:40.041+0200"))));
+        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T14:14:59.424+0200"))));
+        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T15:30:00.518+0200"))));
+        assertTrue(startTimes.contains(new MillisecondsTimePoint(TIMEPOINT_FORMATTER.parse("2018-04-28T14:24:59.731+0200"))));
         assertEquals(34, Util.size(result.getStartLinePortFixes()));
         assertEquals(34, Util.size(result.getStartLineStarboardFixes()));
     }

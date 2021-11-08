@@ -33,6 +33,11 @@
         </a:header>
         <a:item>
             <login:MoreLoginInformationContentMobile
+                title="{i18n.moreLoginInformationSectionSailorProfilesHeading}" image="{local_res.sailorprofiles}"
+                content="{i18n.moreLoginInformationSectionSailorProfilesDescription}" />
+        </a:item>
+        <a:item>
+            <login:MoreLoginInformationContentMobile
                 title="{i18n.moreLoginInformationSectionUserSettingsHeading}" image="{local_res.settings}"
                 content="{i18n.moreLoginInformationSectionUserSettingsDescription}" />
         </a:item>

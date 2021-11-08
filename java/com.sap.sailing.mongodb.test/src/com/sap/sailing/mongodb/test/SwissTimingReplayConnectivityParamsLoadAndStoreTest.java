@@ -31,12 +31,13 @@ public class SwissTimingReplayConnectivityParamsLoadAndStoreTest extends Abstrac
         final String raceID = "Race ID 123";
         final String raceName = "The Race";
         final String boatClassName = "49er";
+        final String swissTimingUrl = "https://static.sapsailing.com/OSG2016/OSG2016_static.json";
         final boolean useInternalMarkPassingAlgorithm = false;
         final SwissTimingAdapter swissTimingAdapter = new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory());
         final SwissTimingReplayConnectivityParameters stParams = new SwissTimingReplayConnectivityParameters(
-                link, raceName, raceID, boatClassName, useInternalMarkPassingAlgorithm, swissTimingAdapter.getSwissTimingDomainFactory(),
-                new SwissTimingReplayServiceFactoryImpl().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory(), racingEventService),
-                /* raceLogStore */ null, /* regattaLogStore */ null);
+                link, swissTimingUrl, raceName, raceID, boatClassName, useInternalMarkPassingAlgorithm,
+                swissTimingAdapter.getSwissTimingDomainFactory(),
+                new SwissTimingReplayServiceFactoryImpl().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory(), racingEventService), /* raceLogStore */ null, /* regattaLogStore */ null);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
@@ -49,6 +50,7 @@ public class SwissTimingReplayConnectivityParamsLoadAndStoreTest extends Abstrac
         assertTrue(paramsReadFromDB instanceof SwissTimingReplayConnectivityParameters);
         SwissTimingReplayConnectivityParameters stParamsReadFromDB = (SwissTimingReplayConnectivityParameters) paramsReadFromDB;
         assertEquals(link, stParamsReadFromDB.getLink());
+        assertEquals(swissTimingUrl, stParams.getSwissTimingUrl());
         assertEquals(boatClassName, stParamsReadFromDB.getBoatClassName());
         assertEquals(raceID, stParamsReadFromDB.getRaceID());
         assertEquals(raceName, stParamsReadFromDB.getRaceName());

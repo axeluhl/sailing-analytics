@@ -10,12 +10,13 @@ import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumentProvider {
     private static final Logger logger = Logger.getLogger(UrlBasedXRRResultDocumentProvider.class.getName());
@@ -31,16 +32,15 @@ public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumen
     @Override
     public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
-        for (URL url : resultUrlProvider.getUrls()) {
-            URLConnection eventResultConn = url.openConnection();
-
+        for (URL url : resultUrlProvider.getReadableUrls()) {
+            URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
             InputStream is = (InputStream) eventResultConn.getContent();
             Parser parser = parserFactory.createParser(is, url.toString());
             try {
                 RegattaResults xrrParserResult = parser.parse();
                 if (xrrParserResult != null) {
                     List<ResultDocumentDescriptor> resultDocumentDescriptors = resolveResultDocumentDescriptors(xrrParserResult, url);
-                    if(resultDocumentDescriptors != null) {
+                    if (resultDocumentDescriptors != null) {
                         result.addAll(resultDocumentDescriptors);
                     }
                 }
@@ -48,7 +48,6 @@ public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumen
                 logger.severe("Could not parse XRR document from URL: " + url.toString());
                 e.printStackTrace();
             }
-
         }
         return result;
     }

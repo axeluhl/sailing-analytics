@@ -50,11 +50,11 @@ public class GetLiveRacesForEventAction implements SailingAction<ResultWithTTL<S
     @Override
     @GwtIncompatible
     public ResultWithTTL<SortedSetResult<LiveRaceDTO>> execute(final SailingDispatchContext context) {
-        return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, new CalculationWithEvent<SortedSetResult<LiveRaceDTO>>() {
+        return EventActionUtil.withLiveRaceOrDefaultScheduleWithReadPermissions(context, eventId, new CalculationWithEvent<SortedSetResult<LiveRaceDTO>>() {
             @Override
             public ResultWithTTL<SortedSetResult<LiveRaceDTO>> calculateWithEvent(Event event) {
                 LiveRaceCalculator liveRaceCalculator = new LiveRaceCalculator();
-                EventActionUtil.forRacesOfEvent(context, eventId, liveRaceCalculator);
+                EventActionUtil.forRacesOfEventWithReadPermissions(context, eventId, liveRaceCalculator);
                 return liveRaceCalculator.getResult();
             }
         });

@@ -2,9 +2,9 @@ package com.sap.sailing.domain.maneuverdetection.impl;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
+import com.sap.sailing.domain.tracking.impl.ManeuverCurveBoundariesImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -12,11 +12,10 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBoundariesWithDetailedManeuverLossImpl
+public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBoundariesImpl
         implements ManeuverMainCurveWithEstimationData {
 
     private final TimePoint lowestSpeedTimePoint;
-    private final SpeedWithBearing highestSpeed;
     private final TimePoint highestSpeedTimePoint;
     private final TimePoint timePointOfMaxTurningRate;
     private final double maxTurningRateInDegreesPerSecond;
@@ -30,14 +29,10 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
             double directionChangeInDegrees, SpeedWithBearing lowestSpeed, TimePoint lowestSpeedTimePoint,
             SpeedWithBearing highestSpeed, TimePoint highestSpeedTimePoint, TimePoint timePointOfMaxTurningRate,
             double maxTurningRateInDegreesPerSecond, Bearing courseAtMaxTurningRate,
-            Distance distanceSailedWithinManeuver, Distance distanceSailedWithinManeuverTowardMiddleAngleProjection,
-            Distance distanceSailedIfNotManeuvering, Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering,
             double avgTurningRateInDegreesPerSecond, int gpsFixesCount, Duration longestIntervalBetweenTwoFixes) {
         super(timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,
-                lowestSpeed, distanceSailedWithinManeuver, distanceSailedWithinManeuverTowardMiddleAngleProjection,
-                distanceSailedIfNotManeuvering, distanceSailedTowardMiddleAngleProjectionIfNotManeuvering);
+                lowestSpeed, highestSpeed);
         this.lowestSpeedTimePoint = lowestSpeedTimePoint;
-        this.highestSpeed = highestSpeed;
         this.highestSpeedTimePoint = highestSpeedTimePoint;
         this.timePointOfMaxTurningRate = timePointOfMaxTurningRate;
         this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
@@ -59,7 +54,7 @@ public class ManeuverMainCurveWithEstimationDataImpl extends ManeuverCurveBounda
 
     @Override
     public SpeedWithBearing getHighestSpeed() {
-        return highestSpeed;
+        return (SpeedWithBearing) super.getHighestSpeed();
     }
 
     @Override

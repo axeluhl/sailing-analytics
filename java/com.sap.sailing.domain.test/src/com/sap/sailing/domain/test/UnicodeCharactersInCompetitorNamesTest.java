@@ -15,12 +15,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -33,11 +34,11 @@ public class UnicodeCharactersInCompetitorNamesTest {
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private DomainFactory domainFactory;
     
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
 
     @Before
     public void setUp() {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.TEST_RACE_LOG_RESOLVER));
     }
     
     public static void main(String[] args) throws Exception {
@@ -54,7 +55,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
-                        mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), new RaceTrackingConnectivityParametersImpl(new URL(
+                        mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), new RaceTrackingConnectivityParametersImpl(new URL(
                                 "http://"
                                         + TracTracConnectionConstants.HOST_NAME
                                         + "/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),
@@ -70,8 +71,10 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                                 /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings*/
                                                 false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, domainFactory,
                                                 "tracTest", "tracTest", "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true,
-                                                /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS),
-                                                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                                                /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                                                /* useOfficialEventsToUpdateRaceLog */ false),
+                                                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                                                new DefaultRaceTrackingHandler());
 
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRaceHandle().getRace().getCompetitors();
         for (Competitor competitor : competitors) {

@@ -55,6 +55,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         legDetailsToShow = new EnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOfString);
         List<DetailType> raceDetails = new ArrayList<>();
         raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
+        raceDetails.add(DetailType.RACE_DISPLAY_BOATS);
         raceDetailsToShow = new EnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOfString);
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.REGATTA_RANK);
@@ -66,7 +67,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         showCompetitorBoatInfoColumn = new BooleanSetting("showCompetitorBoatInfoColumn", this, false);
     }
     
-    public LeaderboardSettings() {
+    public LeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault) {
+        showCompetitorBoatInfoColumn.setDefaultValue(showCompetitorBoatInfoColumnDefault);
     }
     
     /**
@@ -94,28 +96,28 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public Collection<DetailType> getManeuverDetailsToShow() {
-        return Util.createSet(maneuverDetailsToShow.getValues());
+        return Util.asSet(maneuverDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public Collection<DetailType> getLegDetailsToShow() {
-        return Util.createSet(legDetailsToShow.getValues());
+        return Util.asSet(legDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public Collection<DetailType> getRaceDetailsToShow() {
-        return Util.createSet(raceDetailsToShow.getValues());
+        return Util.asSet(raceDetailsToShow.getValues());
     }
     
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public Collection<DetailType> getOverallDetailsToShow() {
-        return Util.createSet(overallDetailsToShow.getValues());
+        return Util.asSet(overallDetailsToShow.getValues());
     }
     
     /**

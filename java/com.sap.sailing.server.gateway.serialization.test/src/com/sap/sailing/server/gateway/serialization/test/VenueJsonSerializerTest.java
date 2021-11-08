@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.serialization.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hamcrest.CoreMatchers;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -17,8 +17,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class VenueJsonSerializerTest {
     
@@ -66,7 +66,7 @@ public class VenueJsonSerializerTest {
         JSONArray actualCourseAreas = (JSONArray) result.get(VenueJsonSerializer.FIELD_COURSE_AREAS);
         assertEquals(expectedCourseAreas.size(), actualCourseAreas.size());
         for (JSONObject courseArea : expectedCourseAreas.values()) {
-            assertThat(actualCourseAreas, hasItem((Object)courseArea));
+            assertThat(actualCourseAreas, CoreMatchers.hasItem((Object)courseArea));
         }
     }
 }

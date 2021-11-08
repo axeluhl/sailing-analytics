@@ -55,10 +55,10 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
                     StrippedLeaderboardDTO leaderBoard = AutoplayHelper.getSelectedLeaderboard(event,
                             apcd.getLeaderboardName());
 
-                    apcd.getType().getConfig().loadSettingsDefault(event, leaderBoard, clientFactory.getUserService(), new OnSettingsCallback() {
+                    apcd.getType().getConfig().loadSettingsDefault(event, apcd, leaderBoard, clientFactory.getUserService(), new OnSettingsCallback() {
 
                         @Override
-                        public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
+                        public void newSettings(PerspectiveCompositeSettings<?> newSettings, String urlWithSettings) {
                             if (newSettings != null) {
                                 serializer.deserializeSettingsMapFromCurrentLocation(newSettings);
                             }

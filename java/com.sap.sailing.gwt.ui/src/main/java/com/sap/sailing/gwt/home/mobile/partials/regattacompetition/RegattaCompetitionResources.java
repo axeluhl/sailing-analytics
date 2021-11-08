@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.mobile.partials.regattacompetition;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 
 public interface RegattaCompetitionResources extends SharedHomeResources {
     public static final RegattaCompetitionResources INSTANCE = GWT.create(RegattaCompetitionResources.class);
@@ -33,5 +33,6 @@ public interface RegattaCompetitionResources extends SharedHomeResources {
         String regattacompetition_phase_fleet_raceplanned();
         String regattacompetition_phase_fleet_race_state();
         String regattacompetition_phase_fleet_race_date();
+        String regattacompetition_phase_fleet_race_title_big();
     }
 }

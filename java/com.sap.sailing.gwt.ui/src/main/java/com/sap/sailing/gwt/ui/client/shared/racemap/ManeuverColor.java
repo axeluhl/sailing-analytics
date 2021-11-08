@@ -6,7 +6,7 @@ public enum ManeuverColor {
     RED, GREEN;
 
     public static ManeuverColor getManeuverColor(ManeuverDTO maneuver) {
-        return maneuver.directionChangeInDegrees < 0 ? RED : GREEN;
+        return maneuver.getDirectionChangeInDegrees() < 0 ? RED : GREEN;
     }
 
 }

@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class Helpers {
     private final static Logger logger = Logger.getLogger(Helpers.class.getName());
@@ -31,7 +31,7 @@ public class Helpers {
     public static JSONObject getNestedObjectSafe(JSONObject parent, String fieldName)
             throws JsonDeserializationException {
         Object childObject = parent.get(fieldName);
-        if (!(childObject instanceof JSONObject)) {
+        if (childObject != null && !(childObject instanceof JSONObject)) {
             throw new JsonDeserializationException(String.format("Field %s with %s wasn't a nested JSON object.",
                     fieldName, childObject.toString()));
         }

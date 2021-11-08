@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 
 public class CombinedWindPanel extends FlowPanel {
     
@@ -44,17 +45,26 @@ public class CombinedWindPanel extends FlowPanel {
             @Override
             public void onClick(ClickEvent event) {
                 RaceMapSettings oldRaceMapSettings = map.getSettings();
-                boolean newShowStreamletsOverlaySetting = !oldRaceMapSettings.isShowWindStreamletOverlay();
-                
+                // when off, turn on; when on and no color, turn on color; when on with color, turn off
+                boolean newShowStreamletsOverlaySetting = oldRaceMapSettings.isShowWindStreamletOverlay() ?
+                        oldRaceMapSettings.isShowWindStreamletColors() ? false : true : true;
+                boolean newShowWindStreamletColors = oldRaceMapSettings.isShowWindStreamletOverlay() ? !oldRaceMapSettings.isShowWindStreamletColors() :
+                    false;
                 final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
                         oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
                         oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), oldRaceMapSettings.isWindUp(),
                         oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
-                        oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
+                        oldRaceMapSettings.isShowSelectedCompetitorsInfo(), newShowWindStreamletColors,
                         newShowStreamletsOverlaySetting, oldRaceMapSettings.isShowSimulationOverlay(),
                         oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
                         oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
-                        oldRaceMapSettings.getStartCountDownFontSizeScaling());
+                        oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
+                        oldRaceMapSettings.isShowSatelliteLayer());
+                if (map.getComponentContext() != null
+                        && map.getComponentContext().isStorageSupported(map)) {
+                    map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,
+                            new DummyOnSettingsStoredCallback());
+                }
                 map.updateSettings(newRaceMapSettings);
             }
         });

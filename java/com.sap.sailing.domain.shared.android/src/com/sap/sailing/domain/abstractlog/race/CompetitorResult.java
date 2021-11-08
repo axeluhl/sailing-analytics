@@ -40,7 +40,13 @@ public interface CompetitorResult extends Serializable {
     
     Serializable getCompetitorId();
     
-    String getCompetitorDisplayName();
+    String getName();
+
+    String getShortName();
+
+    String getBoatName();
+
+    String getBoatSailId();
     
     int getOneBasedRank();
     

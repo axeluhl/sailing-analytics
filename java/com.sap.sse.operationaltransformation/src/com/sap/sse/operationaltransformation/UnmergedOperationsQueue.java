@@ -12,7 +12,7 @@ public class UnmergedOperationsQueue<O extends Operation<S>, S> {
      */
     private int numberOfFirstInList;
     
-    private List<O> unmergedOperations;
+    private final List<O> unmergedOperations;
     
     public UnmergedOperationsQueue() {
 	numberOfFirstInList = 0;

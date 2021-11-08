@@ -10,7 +10,6 @@ public class SAPHeaderComponentSettings extends AbstractGenericSerializableSetti
 
     @Override
     protected void addChildSettings() {
-        super.addChildSettings();
         title = new StringSetting("title", this,"");
     }
     

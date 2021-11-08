@@ -10,7 +10,7 @@
         </div>
         <div class="{local_res.css.suggestionsContent}">
             <g:FlowPanel ui:field="notificationToggleContainerUi" />
-            <div class="{local_res.css.suggestionsContentSeparator}"></div>
+            <div ui:field="contentSeparatorUi" class="{local_res.css.suggestionsContentSeparator}"></div>
             <div class="{local_res.css.suggestionsContentToolbar}">
                 <sp:filter.AbstractFilterWidget addStyleNames="{local_res.css.suggestionsAddFilter}" ui:field="suggestionWidgetUi" />
                 <g:Button addStyleNames="{res.mainCss.button} {res.mainCss.buttonred} {local_res.css.suggestionsRemoveButton}" ui:field="removeAllButtonUi">

@@ -1,16 +1,16 @@
 package com.sap.sailing.android.shared.logging;
 
-import android.content.Context;
-import android.provider.Settings.Secure;
-import android.text.TextUtils;
-import android.util.Log;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import android.content.Context;
+import android.provider.Settings.Secure;
+import android.text.TextUtils;
+import android.util.Log;
 
 /**
  * Simple wrapper for logging to various targets.
@@ -47,8 +47,8 @@ public class ExLog {
         if (UNIQUE_ID == null) {
             UNIQUE_ID = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
         }
-        i(context, "ID: " + String.valueOf(eventID), System.currentTimeMillis() + ":" + (UNIQUE_ID == null ? "" : UNIQUE_ID)
-                + ":" + (msg == null ? "" : msg));
+        i(context, "ID: " + String.valueOf(eventID), System.currentTimeMillis() + ":"
+                + (UNIQUE_ID == null ? "" : UNIQUE_ID) + ":" + (msg == null ? "" : msg));
     }
 
     public static String UNIQUE_ID = null;

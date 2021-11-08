@@ -30,6 +30,11 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
         return getString(ExpeditionAllInOneConstants.RESPONSE_LEADER_BOARD_GROUP_NAME);
     }
     
+    public final UUID getLeaderboardGroupId() {
+        String leaderboardGroupId = getString(ExpeditionAllInOneConstants.RESPONSE_LEADER_BOARD_GROUP_ID);
+        return leaderboardGroupId == null ? null : UUID.fromString(leaderboardGroupId);
+    }
+    
     public final String getLeaderboardName() {
         return getString(ExpeditionAllInOneConstants.RESPONSE_LEADER_BOARD_NAME);
     }
@@ -77,8 +82,7 @@ public class ExpeditionDataImportResponse extends AbstractDataImportResponse {
     };
 
     public final boolean hasEventId() {
-        final String stringValue = getString("eventId");
-        return stringValue != null && !stringValue.isEmpty();
+        return getEventId() != null;
     }
 
 }

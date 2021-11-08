@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
@@ -17,6 +20,10 @@ import com.sap.sailing.util.RegattaUtil;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * The name shall be unique across all regattas tracked concurrently. In particular, if you want to keep apart regattas
@@ -25,7 +32,8 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
+public interface Regatta
+        extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike, WithQualifiedObjectIdentifier {
 
     /**
      * As taken from the Racing Rules of Sailing:
@@ -52,19 +60,20 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
     void setEndDate(TimePoint startDate);
 
     /**
-     * Gets the course area for all races of this {@link Regatta}.
+     * Gets the course areas that the races of this {@link Regatta} are expected to be run on. This can, e.g., be used
+     * to implement a filter when retrieving regattas from an event.
      * 
-     * @return the {@link CourseArea} object.
+     * @return the {@link CourseArea} objects on which races of this regatta may run; always valid, never
+     *         {@code null}, but may be empty; callers need to {@code synchronize} on the object returned
+     *         if they want to iterate.
      */
-    CourseArea getDefaultCourseArea();
+    Iterable<CourseArea> getCourseAreas();
 
     /**
-     * Sets the course area for all races of this {@link Regatta}.
-     * 
-     * @param newCourseArea
-     *            {@link CourseArea} to be set.
+     * Sets the course areas, telling where races in this regatta can be sailed. Replaces the course areas set
+     * so far.
      */
-    void setDefaultCourseArea(CourseArea newCourseArea);
+    void setCourseAreas(Iterable<CourseArea> newCourseAreas);
 
     /**
      * Gets the {@link RegattaConfiguration} associated with this {@link Regatta}'s races.
@@ -230,9 +239,63 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
      * show_bug.cgi?id=3588</a>.
      */
     boolean isControlTrackingFromStartAndFinishTimes();
-
+    
     /**
      * @see #isControlTrackingFromStartAndFinishTimes()
      */
     void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes);
+    
+    /**
+     * Tells whether in the scope of this regatta tracking of a race shall automatically be re-started if the competitor
+     * registrations change. Removing the {@link TrackedRace tracked races} and {@link RaceDefinition}s affected is then
+     * required because the {@link RaceDefinition#getCompetitors() set of competitors of a race} is modeled to be
+     * immutable. As the set of competitors that are part of a tracked race is provided by the tracking connector, the
+     * responsibility for adhering to this flag, which rather expresses a request than describes a fact, lies with the
+     * respective connectors.
+     */
+    boolean isAutoRestartTrackingUponCompetitorSetChange();
+    
+    /**
+     * @see #isAutoRestartTrackingUponCompetitorSetChange()
+     */
+    void setAutoRestartTrackingUponCompetitorSetChange(boolean autoRestartTrackingUponCompetitorSetChange);
+
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getName());
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String regattaName) {
+        return new TypeRelativeObjectIdentifier(regattaName);
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaName regattaName) {
+        return new TypeRelativeObjectIdentifier(regattaName.getRegattaName());
+    }
+
+    @Override
+    default HasPermissions getPermissionType() {
+        return SecuredDomainType.REGATTA;
+    }
+
+    /**
+     * get secret for registration link of open regattas.
+     * @return secret to append on regisration URL
+     */
+    String getRegistrationLinkSecret();
+
+    /**
+     * set secret for registration link for a regatta to be appended to the URL.
+     * 
+     * @param registrationLinkSecret
+     *            secret string
+     */
+    void setRegistrationLinkSecret(String registrationLinkSecret);
+
+    void setCompetitorRegistrationType(CompetitorRegistrationType competitorRegistrationType);
+
 }

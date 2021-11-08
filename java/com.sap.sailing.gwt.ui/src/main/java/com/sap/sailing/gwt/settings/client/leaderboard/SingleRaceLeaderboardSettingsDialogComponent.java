@@ -13,11 +13,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 public class SingleRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<SingleRaceLeaderboardSettings> {
 
-    protected CheckBox showRaceRankColumn;
+    private CheckBox showRaceRankColumn;
     
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
             StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
-        super(initialSettings, stringMessages, availableDetailTypes, true /*canBoatInfoBeShown*/);        
+        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true);
     }
 
     @Override
@@ -33,7 +33,8 @@ public class SingleRaceLeaderboardSettingsDialogComponent
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), 
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
                 showCompetitorShortNameColumnCheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
-                showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue(), showRaceRankColumn.getValue());
+                showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue(),
+                showRaceRankColumn.getValue());
         return newSettings;
     }
     

@@ -1,8 +1,8 @@
 package com.sap.sailing.dashboards.gwt.client.actions;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.dashboards.gwt.shared.dispatch.RequiresLiveRaceAction;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
+import com.sap.sailing.dashboards.gwt.shared.dispatch.RequiresLiveRaceAction;
 import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;

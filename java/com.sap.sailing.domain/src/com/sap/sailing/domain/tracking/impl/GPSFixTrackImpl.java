@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
@@ -51,7 +52,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTrackImpl<ItemType, FixType>
         implements GPSFixTrack<ItemType, FixType> {
@@ -624,13 +625,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(),
                         ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                                getMillisecondsOverWhichToAverageSpeed() / 2, /* minimumConfidence */ 0.00000001)); // half
-                                                                                                                    // confidence
-                                                                                                                    // if
-                                                                                                                    // half
-                                                                                                                    // averaging
-                                                                                                                    // interval
-                                                                                                                    // apart
+                                getMillisecondsOverWhichToAverageSpeed() / 2, /* minimumConfidence */ 0.00000001)); // half confidence if half averaging interval apart
                 result = estimatedSpeed == null ? null : estimatedSpeed.getObject();
                 if (estimatedSpeed != null) {
                     if (ceil != null && ceil.getTimePoint().equals(at)) {
@@ -947,6 +942,11 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         };
     }
 
+    @Override
+    public boolean isValid(FixType e) {
+        return isValid(getInternalFixes(), e);
+    }
+    
     /**
      * When redefining this method, make sure to redefine
      * {@link #invalidateValidityAndEstimatedSpeedAndDistanceCaches(GPSFix)} accordingly. This implementation checks the
@@ -1119,12 +1119,13 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     @Override
     protected boolean add(FixType fix, boolean replace) {
         final boolean result;
+        final AddResult addResult;
         final boolean firstFixInTrack;
         lockForWrite();
         try {
             firstFixInTrack = getRawFixes().isEmpty();
-            result = addWithoutLocking(fix, replace);
-            if (!validityCachingSuspended) {
+            addResult = addWithoutLocking(fix, replace);
+            if (addResult != AddResult.NOT_ADDED && !validityCachingSuspended) {
                 invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
             }
         } finally {
@@ -1145,9 +1146,10 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 unlockAfterRead();
             }
         }
+        result = addResult == AddResult.ADDED || addResult == AddResult.REPLACED;
         if (result) {
             for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
-                listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack);
+                listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack, addResult);
             }
         }
         return result;
@@ -1171,20 +1173,13 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         Bearing lastCourse = null;
         TimePoint lastTimePoint = null;
         double lastCourseChangeAngleInDegrees = 0;
-        TimePoint fixTimePointAfterToTimePoint = null;
         try {
             lockForRead();
-            TimePoint timePoint = fromTimePoint;
-            for (Iterator<FixType> iterator = getFixesIterator(fromTimePoint, false); iterator
-                    .hasNext(); timePoint = iterator.next().getTimePoint()) {
-                if (timePoint == null) {
-                    continue;
-                }
-                if (timePoint.after(toTimePoint)) {
-                    fixTimePointAfterToTimePoint = timePoint;
-                    timePoint = toTimePoint;
-                }
-                SpeedWithBearing estimatedSpeed = getEstimatedSpeed(timePoint);
+            FixType firstFix = getLastFixAtOrBefore(fromTimePoint);
+            TimePoint currentTimePoint = firstFix == null ? fromTimePoint : firstFix.getTimePoint();
+            for (Iterator<FixType> iterator = getFixesIterator(currentTimePoint, false); iterator
+                    .hasNext(); currentTimePoint = iterator.next().getTimePoint()) {
+                SpeedWithBearing estimatedSpeed = getEstimatedSpeed(currentTimePoint);
                 if (estimatedSpeed != null) {
                     Bearing course = estimatedSpeed.getBearing();
                     /*
@@ -1195,44 +1190,20 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                     double courseChangeAngleInDegrees = lastCourse == null ? 0
                             : lastCourse.getDifferenceTo(course, new DegreeBearingImpl(lastCourseChangeAngleInDegrees))
                                     .getDegrees();
+                    double turningRateInDegreesPerSecond = lastTimePoint == null ? 0
+                            : Math.abs(courseChangeAngleInDegrees
+                                    / lastTimePoint.until(currentTimePoint).asSeconds());
 
-                    // Fix distorted turning rate due to inappropriate interpolation of getEstimatedSpeed() at first
-                    // and last step
-                    double courseChangeInDegreesForTurningRateCalculation = courseChangeAngleInDegrees;
-                    Duration durationBetweenStepsForTurningRateCalculation = lastTimePoint == null ? null
-                            : lastTimePoint.until(timePoint);
-                    if (fromTimePoint.equals(lastTimePoint)) {
-                        FixType firstFix = getLastFixAtOrBefore(fromTimePoint);
-                        if (firstFix != null && !firstFix.getTimePoint().equals(fromTimePoint)) {
-                            SpeedWithBearing firstFixEstimatedSpeed = getEstimatedSpeed(firstFix.getTimePoint());
-                            if (firstFixEstimatedSpeed != null) {
-                                durationBetweenStepsForTurningRateCalculation = firstFix.getTimePoint()
-                                        .until(timePoint);
-                                courseChangeInDegreesForTurningRateCalculation = courseChangeAngleInDegrees
-                                        + firstFixEstimatedSpeed.getBearing().getDifferenceTo(lastCourse).getDegrees();
-                            }
-                        }
-                    } else if (fixTimePointAfterToTimePoint != null && lastCourse != null) {
-                        SpeedWithBearing lastFixEstimatedSpeed = getEstimatedSpeed(fixTimePointAfterToTimePoint);
-                        if (lastFixEstimatedSpeed != null) {
-                            durationBetweenStepsForTurningRateCalculation = lastTimePoint == null ? null
-                                    : lastTimePoint.until(fixTimePointAfterToTimePoint);
-                            courseChangeInDegreesForTurningRateCalculation = courseChangeAngleInDegrees + estimatedSpeed
-                                    .getBearing().getDifferenceTo(lastFixEstimatedSpeed.getBearing()).getDegrees();
-                        }
-                    }
-
-                    double turningRateInDegreesPerSecond = durationBetweenStepsForTurningRateCalculation == null ? 0
-                            : Math.abs(courseChangeInDegreesForTurningRateCalculation
-                                    / durationBetweenStepsForTurningRateCalculation.asSeconds());
-
-                    speedWithBearingSteps.add(new SpeedWithBearingStepImpl(timePoint, estimatedSpeed,
+                    speedWithBearingSteps.add(new SpeedWithBearingStepImpl(currentTimePoint, estimatedSpeed,
                             courseChangeAngleInDegrees, turningRateInDegreesPerSecond));
+                    if (currentTimePoint.after(toTimePoint)) {
+                        break;
+                    }
                     lastCourse = course;
                     lastCourseChangeAngleInDegrees = courseChangeAngleInDegrees;
-                    lastTimePoint = timePoint;
+                    lastTimePoint = currentTimePoint;
                 }
-                if (!timePoint.before(toTimePoint)) {
+                if (!currentTimePoint.before(toTimePoint)) {
                     break;
                 }
             }

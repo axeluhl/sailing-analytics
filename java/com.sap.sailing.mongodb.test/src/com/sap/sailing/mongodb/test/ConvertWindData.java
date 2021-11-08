@@ -2,9 +2,11 @@ package com.sap.sailing.mongodb.test;
 
 import java.net.UnknownHostException;
 
-import com.mongodb.DBCollection;
+import org.bson.Document;
+
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -24,13 +26,13 @@ public class ConvertWindData extends AbstractMongoDBTest {
 
     public static void main(String[] args) {
         MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
-        DBCollection windTracksCollection = mof.getWindTrackCollection();
-        for (DBObject dbo : windTracksCollection.find()) {
-             windTracksCollection.remove(dbo);
+        MongoCollection<Document> windTracksCollection = mof.getWindTrackCollection();
+        for (Document dbo : windTracksCollection.find()) {
+             windTracksCollection.deleteOne(dbo);
             DBObject wind = (DBObject) dbo.get(FieldNames.WIND.name());
             wind.put(FieldNames.DEGREE_BEARING.name(),
                     new DegreeBearingImpl((Double) wind.get(FieldNames.DEGREE_BEARING.name())).reverse().getDegrees());
-            windTracksCollection.insert(dbo);
+            windTracksCollection.insertOne(dbo);
         }
     }
 }

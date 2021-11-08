@@ -8,8 +8,8 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.shared.Permission;
-import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -20,20 +20,17 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  *
  */
 public class AuthorizedContentDecorator extends Composite implements RequiresResize, NeedsAuthenticationContext {
-
     private final SimplePanel contentHolder = new SimplePanel();
     private Widget content;
     private WidgetFactory contentWidgetFactory;
     private final NotLoggedInView notLoggedInView;
-    private String permissionToCheck;
-    private PermissionsForRoleProvider permissionsForRoleProvider;
+    private SecuredDTO securedDTO;
+    private Action action;
 
     public AuthorizedContentDecorator(NotLoggedInPresenter presenter, NotLoggedInView notLoggedInView) {
         this.notLoggedInView = notLoggedInView;
-
         notLoggedInView.setPresenter(presenter);
         notLoggedInView.setSignInText(StringMessages.INSTANCE.signIn());
-
         initWidget(contentHolder);
     }
 
@@ -92,15 +89,12 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
         boolean isAuthenticated = authenticationContext.isLoggedIn();
         boolean isPermitted = isPermitted(authenticationContext);
         boolean maySeeRealContent = isAuthenticated && isPermitted;
-
         IsWidget isWidget = maySeeRealContent ? getContentWidget() : notLoggedInView;
-
         if (!maySeeRealContent) {
             String message = !isAuthenticated ? StringMessages.INSTANCE.youAreNotSignedIn() : StringMessages.INSTANCE
                     .youDontHaveRequiredPermission();
             notLoggedInView.setMessage(message);
         }
-
         Widget widget = isWidget.asWidget();
         if (widget instanceof RequiresResize) {
             widget.setSize("100%", "100%");
@@ -112,15 +106,8 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
     }
 
     private boolean isPermitted(AuthenticationContext userManagementContext) {
-        return permissionToCheck == null
-                || userManagementContext.getCurrentUser().hasPermission(permissionToCheck, permissionsForRoleProvider);
-    }
-
-    /**
-     * @param permissionsForRoleProvider the PermissionsForRoleProvider used when checking the required permission of a user.
-     */
-    public void setPermissionsForRoleProvider(PermissionsForRoleProvider permissionsForRoleProvider) {
-        this.permissionsForRoleProvider = permissionsForRoleProvider;
+        // secured dto + action are both null implies that there is no permission to check
+        return (securedDTO == null && action == null) || userManagementContext.hasPermission(securedDTO, action);
     }
 
     /**
@@ -128,28 +115,8 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
      * 
      * @param permissionToCheck the permission to check
      */
-    public void setPermissionToCheck(String permissionToCheck) {
-        this.permissionToCheck = permissionToCheck;
-    }
-
-    /**
-     * Setting a permission causes that the user not only needs to be logged in but also needs to have the given permission.
-     * 
-     * @param permissionToCheck the permission to check
-     */
-    public void setPermissionToCheck(Permission permissionToCheck) {
-        setPermissionToCheck(permissionToCheck.getStringPermission());
-    }
-
-    
-    /**
-     * Setting a permission causes that the user not only needs to be logged in but also needs to have the given permission.
-     * 
-     * @param permissionToCheck the permission to check
-     * @param permissionsForRoleProvider the PermissionsForRoleProvider used when checking the required permission of a user.
-     */
-    public void setPermissionToCheck(Permission permissionToCheck, PermissionsForRoleProvider permissionsForRoleProvider) {
-        setPermissionToCheck(permissionToCheck);
-        setPermissionsForRoleProvider(permissionsForRoleProvider);
+    public void setPermissionToCheck(SecuredDTO securedDTO, Action action) {
+        this.securedDTO = securedDTO;
+        this.action = action;
     }
 }

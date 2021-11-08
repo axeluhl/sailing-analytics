@@ -24,7 +24,7 @@ public class LeaderboardWithZoomingPerspectiveLifecycle extends AbstractPerspect
         this.stringMessages = stringMessages;
         this.leaderboardPanelLifecycle = new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages, availableDetailTypes);
         this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +
-                (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName()),
+                (leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName()),
                         stringMessages);
         
         addLifeCycle(leaderboardPanelLifecycle);

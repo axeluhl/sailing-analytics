@@ -9,11 +9,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -31,33 +29,31 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitorsAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
-import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
-import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
-import com.sap.sailing.gwt.ui.leaderboard.HasStringAndDoubleValue;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
-import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
+import com.sap.sse.gwt.client.celltable.SortableColumn;
+import com.sap.sse.gwt.client.celltable.SortedCellTableWithStylableHeaders;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeProvider;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
@@ -68,9 +64,9 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTableSettings>
         implements CompetitorSelectionChangeListener, TimeListener {
@@ -80,9 +76,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     private final ManeuverTablePanelResources resources = GWT.create(ManeuverTablePanelResources.class);
 
     private final StringMessages stringMessages;
-    private final CompetitorSelectionProvider competitorSelectionModel;
-
-    private final NumberFormat towDigitAccuracy = NumberFormatterFactory.getDecimalFormat(2);
+    private final RegattaAndRaceIdentifier raceIdentifier;
+    private final RaceCompetitorSelectionProvider competitorSelectionModel;
 
     private final SimplePanel contentPanel = new SimplePanel();
     private final Label importantMessageLabel = new Label();
@@ -96,27 +91,27 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
     public ManeuverTablePanel(final Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
-            final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
+            final RaceCompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
             final Timer timer, final ManeuverTableSettings initialSettings,
             final TimeRangeWithZoomModel timeRangeWithZoomProvider, final LeaderBoardStyle style,
-            final UserService userService) {
+            final UserService userService, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context);
         final UserStatusEventHandler userStatusChangeHandler = new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                hasCanReplayDuringLiveRacesPermission = user != null
-                        && user.hasPermission(Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(),
-                                SailingPermissionsForRoleProvider.INSTANCE);
+                hasCanReplayDuringLiveRacesPermission = userService.hasPermission(raceDTO,
+                        TrackedRaceActions.CAN_REPLAY_DURING_LIVE_RACES);
             }
         };
         userService.addUserStatusEventHandler(userStatusChangeHandler);
         userStatusChangeHandler.onUserStatusChange(userService.getCurrentUser(), /* preAuthenticated */ true);
         this.resources.css().ensureInjected();
         this.settings = initialSettings;
+        this.raceIdentifier = raceIdentifier;
         this.competitorSelectionModel = competitorSelectionModel;
         this.stringMessages = stringMessages;
         this.competitorDataProvider = new CachedManeuverTableDataProvider(timeRangeWithZoomProvider, timer,
-                raceIdentifier, sailingService, asyncActionsExecutor);
+                sailingService, asyncActionsExecutor);
         this.competitorSelectionModel.addCompetitorSelectionChangeListener(this);
         timer.addTimeListener(this);
         final FlowPanel rootPanel = new FlowPanel();
@@ -160,86 +155,33 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 this.stringMessages.maxTurningRate(), this.stringMessages.degreesPerSecondUnit()));
         this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getAverageTurningRate,
                 this.stringMessages.avgTurningRate(), this.stringMessages.degreesPerSecondUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getManeuverLoss,
+        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getManeuverLossInMeters,
                 this.stringMessages.maneuverLoss(), stringMessages.metersUnit()));
-        this.maneuverCellTable.addColumn(createSortableMinMaxColumn(ManeuverTableData::getDirectionChange,
+        this.maneuverCellTable.addColumn(createSortableAbsMinMaxColumn(ManeuverTableData::getDirectionChange,
                 stringMessages.directionChange(), this.stringMessages.degreesShort()));
         initWidget(rootPanel);
         setVisible(false);
     }
 
+    /**
+     * Creates a sortable column with the absolute value. Whereas {@link #createSortableMinMaxColumn()} creates a
+     * sortable column with signed values.
+     */
+    private SortableColumn<ManeuverTableData, String> createSortableAbsMinMaxColumn(
+            Function<ManeuverTableData, Double> extractor, String title, String unit) {
+        return new SortableMinMaxColumn(extractor, title, unit, maneuverCellTable.getDataProvider(), /* absolute */ true);
+    }
+    
+    /**
+     * Creates a sortable column with signed values. 
+     */
     private SortableColumn<ManeuverTableData, String> createSortableMinMaxColumn(
             Function<ManeuverTableData, Double> extractor, String title, String unit) {
-        final SortableColumn<ManeuverTableData, String> col = new AbstractSortableColumnWithMinMax<ManeuverTableData, String>(
-                new TextCell(), SortingOrder.ASCENDING) {
-            final InvertibleComparator<ManeuverTableData> comparatorWithAbs = new InvertibleComparatorAdapter<ManeuverTableData>() {
-                @Override
-                public int compare(ManeuverTableData o1, ManeuverTableData o2) {
-                    Double o1v = extractor.apply(o1);
-                    Double o2v = extractor.apply(o2);
-                    if (o1v == null && o2v == null) {
-                        return 0;
-                    }
-                    if (o1v == null && o2v != null) {
-                        return -1;
-                    }
-                    if (o1v != null && o2v == null) {
-                        return 1;
-                    }
-                    return Double.compare(Math.abs(o1v), Math.abs(o2v));
-                }
-            };
-            final HasStringAndDoubleValue<ManeuverTableData> dataProvider = new HasStringAndDoubleValue<ManeuverTableData>() {
-                @Override
-                public String getStringValueToRender(ManeuverTableData row) {
-                    Double value = extractor.apply(row);
-                    if (value == null) {
-                        return null;
-                    }
-                    return towDigitAccuracy.format(value);
-                }
-
-                @Override
-                public Double getDoubleValue(ManeuverTableData row) {
-                    Double value = extractor.apply(row);
-                    return value == null ? null : Math.abs(value);
-                }
-            };
-
-            final MinMaxRenderer<ManeuverTableData> renderer = new MinMaxRenderer<ManeuverTableData>(dataProvider, comparatorWithAbs);
-
-            @Override
-            public InvertibleComparator<ManeuverTableData> getComparator() {
-                return comparatorWithAbs;
-            }
-
-            @Override
-            public void render(Context context, ManeuverTableData object, SafeHtmlBuilder sb) {
-                renderer.render(context, object, title, sb);
-            }
-
-            @Override
-            public Header<?> getHeader() {
-                return new TextHeader(title + " [" + unit + "]");
-            }
-
-            @Override
-            public String getValue(ManeuverTableData object) {
-                return dataProvider.getStringValueToRender(object);
-            }
-
-            @Override
-            public void updateMinMax() {
-                renderer.updateMinMax(maneuverCellTable.getDataProvider().getList());
-            }
-        };
-        col.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        return col;
+        return new SortableMinMaxColumn(extractor, title, unit, maneuverCellTable.getDataProvider(), /* absolute */ false);
     }
 
     private SortableColumn<ManeuverTableData, String> createManeuverTypeColumn() {
         return new SortableColumn<ManeuverTableData, String>(new TextCell(), SortingOrder.ASCENDING) {
-
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
                 return new InvertibleComparatorAdapter<ManeuverTableData>() {
@@ -269,7 +211,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return o1.getTimePoint().compareTo(o2.getTimePoint());
             }
         };
-
         final SortableColumn<ManeuverTableData, Date> col = new SortableColumn<ManeuverTableData, Date>(
                 new DateCell(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG)), SortingOrder.ASCENDING) {
             @Override
@@ -297,7 +238,6 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
                 return -Boolean.compare(o1.isMarkPassing(), o2.isMarkPassing());
             }
         };
-
         final SortableColumn<ManeuverTableData, Boolean> column = new SortableColumn<ManeuverTableData, Boolean>(
                 new AbstractCell<Boolean>() {
                     @Override
@@ -325,16 +265,23 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         return column;
     }
 
-    private SortableColumn<ManeuverTableData, String> createCompetitorColumn() {
+    private SortableColumn<ManeuverTableData, ManeuverTableData> createCompetitorColumn() {
         InvertibleComparator<ManeuverTableData> comparator = new InvertibleComparatorAdapter<ManeuverTableData>() {
             @Override
             public int compare(ManeuverTableData o1, ManeuverTableData o2) {
                 return o1.getCompetitorName().compareTo(o2.getCompetitorName());
             }
         };
-
-        return new SortableColumn<ManeuverTableData, String>(new TextCell(), SortingOrder.ASCENDING) {
-
+        return new SortableColumn<ManeuverTableData, ManeuverTableData>(new AbstractCell<ManeuverTableData>() {
+            @Override
+            public void render(Context context, ManeuverTableData data, SafeHtmlBuilder sb) {
+                final String color = data.getCompetitorColor();
+                final String divStyle = color == null ? "border: none;" : "border-bottom: 2px solid " + color + ";";
+                sb.appendHtmlConstant("<div style=\"" + divStyle + "\">");
+                sb.appendEscaped(data.getCompetitorName());
+                sb.appendHtmlConstant("</div>");
+            }
+        }, SortingOrder.ASCENDING) {
             @Override
             public InvertibleComparator<ManeuverTableData> getComparator() {
                 return comparator;
@@ -346,8 +293,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             }
 
             @Override
-            public String getValue(ManeuverTableData object) {
-                return object.getCompetitorName();
+            public ManeuverTableData getValue(ManeuverTableData object) {
+                return object;
             }
         };
     }
@@ -384,8 +331,9 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         final Map<CompetitorDTO, Iterable<ManeuverDTO>> cachedData = competitorDataProvider.getCachedData();
         for (final Entry<CompetitorDTO, Iterable<ManeuverDTO>> entry : cachedData.entrySet()) {
             for (ManeuverDTO maneuver : entry.getValue()) {
-                if (settings.getSelectedManeuverTypes().contains(maneuver.type)) {
-                    data.add(new ManeuverTableData(entry.getKey(), maneuver));
+                if (settings.getSelectedManeuverTypes().contains(maneuver.getType())) {
+                    final Color competitorColor = competitorSelectionModel.getColor(entry.getKey(), raceIdentifier);
+                    data.add(new ManeuverTableData(entry.getKey(), competitorColor.getAsHtml(), maneuver));
                 }
             }
         }
@@ -493,15 +441,12 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
 
     private class CachedManeuverTableDataProvider extends CachedRaceDataProvider<CompetitorDTO, ManeuverDTO> {
         private final AsyncActionsExecutor asyncActionsExecutor;
-        private final RegattaAndRaceIdentifier raceIdentifier;
         private final SailingServiceAsync sailingService;
 
         private CachedManeuverTableDataProvider(final TimeRangeProvider timeRangeProvider, final Timer timer,
-                final RegattaAndRaceIdentifier raceIdentifier, final SailingServiceAsync sailingService,
-                final AsyncActionsExecutor asyncActionsExecutor) {
-            super(timeRangeProvider, timer, m -> m.timePoint, LOADING_OFFSET_TO_NEXT_MANEUVER_PROVIDER, true);
+                final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor) {
+            super(timeRangeProvider, timer, m -> m.getTimePoint(), LOADING_OFFSET_TO_NEXT_MANEUVER_PROVIDER, true);
             this.asyncActionsExecutor = asyncActionsExecutor;
-            this.raceIdentifier = raceIdentifier;
             this.sailingService = sailingService;
         }
 

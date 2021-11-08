@@ -85,9 +85,9 @@ public class RaceStateChangedListeners extends HashSet<RaceStateChangedListener>
     }
 
     @Override
-    public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
+    public void onFinishingPositionsChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : getWorkingCopyOfListeners()) {
-            listener.onFinishingPositioningsChanged(state);
+            listener.onFinishingPositionsChanged(state);
         }
     }
 
@@ -109,6 +109,20 @@ public class RaceStateChangedListeners extends HashSet<RaceStateChangedListener>
     public void onWindFixChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : getWorkingCopyOfListeners()) {
             listener.onWindFixChanged(state);
+        }
+    }
+
+    @Override
+    public void onTagEventsChanged(ReadonlyRaceState state) {
+        for (RaceStateChangedListener listener : getWorkingCopyOfListeners()) {
+            listener.onTagEventsChanged(state);
+        }
+    }
+
+    @Override
+    public void onResultsAreOfficialChanged(ReadonlyRaceState state) {
+        for (RaceStateChangedListener listener : getWorkingCopyOfListeners()) {
+            listener.onResultsAreOfficialChanged(state);
         }
     }
 }

@@ -3,7 +3,6 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -39,8 +38,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetectionTestCase {
 
@@ -49,7 +46,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.txt").getCanonicalPath()),

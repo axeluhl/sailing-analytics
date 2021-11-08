@@ -192,7 +192,7 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
         MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService,
                 asyncActionsExecutor,
                 leaderboardSettings, /*isEmbedded*/true,
-                competitorSelectionProvider, timer, /* leaderboardGroupName */"",
+                competitorSelectionProvider, timer,
                 leaderboardName, errorReporter, stringMessages,
                 /* showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */

@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -173,13 +174,20 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
                 Map<String, Object> capabilityDefinitions = this.definition.getCapabilities();
                 @SuppressWarnings("unchecked")
                 Class<WebDriver> clazz = (Class<WebDriver>) Class.forName(driverClassname);
-                DesiredCapabilities capabilities = new DesiredCapabilities(capabilityDefinitions);
                 Constructor<WebDriver> constructor = clazz.getConstructor(Capabilities.class);
-                WebDriver driver = constructor.newInstance(capabilities);
+                
+                final Supplier<WebDriver> webDriverFactory = () -> {
+                    DesiredCapabilities capabilities = new DesiredCapabilities(capabilityDefinitions);
+                    try {
+                        return constructor.newInstance(capabilities);
+                    } catch (Exception e) {
+                        throw new IllegalStateException(e);
+                    }
+                };
                 
                 File screenshots = resolveScreenshotFolder();
                 
-                return new TestEnvironmentImpl(driver, this.root, screenshots);
+                return new TestEnvironmentImpl(webDriverFactory, this.root, screenshots);
             } catch (Exception exception) {
                 throw exception;
             }

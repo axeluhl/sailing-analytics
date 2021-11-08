@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.eventview;
 
 import java.util.Date;
 
+import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 
 public interface HasRegattaMetadata {
@@ -45,5 +46,7 @@ public interface HasRegattaMetadata {
 
     boolean isFlexibleLeaderboard();
 
-    String getDefaultCourseAreaId();
+    Iterable<String> getCourseAreaIdsAsStrings();
+    
+    EventSeriesReferenceDTO getSeriesReference();
 }

@@ -37,7 +37,7 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
         
         Collection<Processor<Integer, ?>> receivers = new ArrayList<>();
         receivers.add(receiver);
-        processor = new AbstractParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
+        processor = new AbstractParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getSharedExecutor(), receivers) {
             @Override
             protected ProcessorInstruction<Integer> createInstruction(final Integer element) {
                 return new AbstractProcessorInstruction<Integer>(this) {

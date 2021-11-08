@@ -9,9 +9,9 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifier;
+import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.mongodb.MongoDBService;

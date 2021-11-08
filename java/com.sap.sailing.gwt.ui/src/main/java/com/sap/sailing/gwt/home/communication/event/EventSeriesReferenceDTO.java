@@ -6,23 +6,24 @@ import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class EventSeriesReferenceDTO implements DTO {
 
-    private UUID id;
-    private String displayName;
+    private String seriesDisplayName;
+    private UUID seriesLeaderboardGroupId;
 
     protected EventSeriesReferenceDTO() {
     }
 
-    public EventSeriesReferenceDTO(UUID id, String displayName) {
-        this.id = id;
-        this.displayName = displayName;
+    public EventSeriesReferenceDTO(String seriesDisplayName, UUID seriesLeaderboardGroupId) {
+        super();
+        this.seriesDisplayName = seriesDisplayName;
+        this.seriesLeaderboardGroupId = seriesLeaderboardGroupId;
     }
 
-    public UUID getId() {
-        return id;
+    public String getSeriesDisplayName() {
+        return seriesDisplayName;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public UUID getSeriesLeaderboardGroupId() {
+        return seriesLeaderboardGroupId;
     }
 
 }

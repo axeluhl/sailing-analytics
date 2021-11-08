@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class ManeuverJsonSerializer implements JsonSerializer<Maneuver> {
     public static final String MANEUVER_TYPE = "maneuverType";
@@ -44,7 +44,7 @@ public class ManeuverJsonSerializer implements JsonSerializer<Maneuver> {
                 : maneuver.getSpeedWithBearingAfter().getBearing().getDegrees());
         result.put(DIRECTION_CHANGE_IN_DEGREES, maneuver.getDirectionChangeInDegrees());
         result.put(MANEUVER_LOSS,
-                maneuver.getManeuverLoss() == null ? null : distanceSerializer.serialize(maneuver.getManeuverLoss()));
+                maneuver.getManeuverLoss() == null ? null : distanceSerializer.serialize(maneuver.getManeuverLoss().getProjectedDistanceLost()));
         result.put(POSITION_AND_TIME, gpsFixSerializer.serialize(maneuver));
         result.put(MAX_TURNING_RATE_IN_DEGREES_PER_SECOND, maneuver.getMaxTurningRateInDegreesPerSecond());
         result.put(AVG_TURNING_RATE_IN_DEGREES_PER_SECOND, maneuver.getAvgTurningRateInDegreesPerSecond());

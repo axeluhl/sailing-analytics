@@ -72,7 +72,7 @@ public class VeryCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingImpl
         }
     }
     
-    private class VeryCompactSpeedWithBearing extends AbstractCompactSpeedWithBearing {
+    public class VeryCompactSpeedWithBearing extends AbstractCompactSpeedWithBearing {
         private static final long serialVersionUID = 1802065090733146728L;
 
         @Override
@@ -104,7 +104,7 @@ public class VeryCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingImpl
         }
     }
 
-    private class VeryCompactEstimatedSpeed extends AbstractSpeedWithAbstractBearingImpl {
+    public class VeryCompactEstimatedSpeed extends AbstractSpeedWithAbstractBearingImpl {
         private static final long serialVersionUID = -5871855443391817248L;
 
         @Override

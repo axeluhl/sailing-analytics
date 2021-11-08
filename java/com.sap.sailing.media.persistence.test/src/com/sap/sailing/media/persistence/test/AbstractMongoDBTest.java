@@ -3,19 +3,22 @@ package com.sap.sailing.media.persistence.test;
 import static org.junit.Assert.assertNotNull;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import org.junit.Before;
 
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
 public abstract class AbstractMongoDBTest {
-    protected Mongo mongo;
-    protected DB db;
+    protected final MongoClient mongo;
+    protected final MongoDatabase db;
     private final MongoDBConfiguration dbConfiguration;
     private MongoDBService service;
     
@@ -30,8 +33,10 @@ public abstract class AbstractMongoDBTest {
         return dbConfiguration;
     }
     
-    protected Mongo newMongo() throws UnknownHostException, MongoException {
-        return new MongoClient(System.getProperty("mongo.host", "127.0.0.1"), dbConfiguration.getPort());
+    protected MongoClient newMongo() throws UnknownHostException, MongoException {
+        return MongoClients.create(MongoClientSettings.builder().applyToClusterSettings(
+                clusterSettings->clusterSettings.hosts(Arrays.asList(
+                        new ServerAddress(System.getProperty("mongo.host", "127.0.0.1"), dbConfiguration.getPort())))).build());
     }
     
     @Before
@@ -41,8 +46,8 @@ public abstract class AbstractMongoDBTest {
         assertNotNull(db);
     }
 
-    private void dropAllCollections(DB theDB) throws InterruptedException {
-        db.dropDatabase();
+    private void dropAllCollections(MongoDatabase theDB) throws InterruptedException {
+        db.drop();
     }
 
     protected MongoDBService getMongoService() {

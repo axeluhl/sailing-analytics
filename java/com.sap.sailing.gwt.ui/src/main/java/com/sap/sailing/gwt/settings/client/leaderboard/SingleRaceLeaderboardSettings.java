@@ -10,15 +10,16 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
 
     private BooleanSetting showRaceRankColumn;
     
-    public SingleRaceLeaderboardSettings() {
-        super();
+    public SingleRaceLeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault) {
+        super(showCompetitorBoatInfoColumnDefault);
     }
 
     public SingleRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
             Collection<DetailType> legDetailsToShow, Collection<DetailType> raceDetailsToShow,
             Collection<DetailType> overallDetailsToShow, Long delayBetweenAutoAdvancesInMilliseconds,
-            boolean showAddedScores, boolean showCompetitorShortNameColumn,
-            boolean showCompetitorFullNameColumn, boolean showCompetitorBoatInfoColumn, boolean isCompetitorNationalityColumnVisible,boolean showRaceRankColumn) {
+            boolean showAddedScores, boolean showCompetitorShortNameColumn, boolean showCompetitorFullNameColumn,
+            boolean showCompetitorBoatInfoColumn, boolean isCompetitorNationalityColumnVisible,
+            boolean showRaceRankColumn) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
                 delayBetweenAutoAdvancesInMilliseconds, showAddedScores, showCompetitorShortNameColumn,
                 showCompetitorFullNameColumn, showCompetitorBoatInfoColumn, isCompetitorNationalityColumnVisible);
@@ -33,5 +34,16 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
     protected void addChildSettings() {
         super.addChildSettings();
         showRaceRankColumn = new BooleanSetting("racerank", this, false);
+    }
+
+    /**
+     * Constructs a new {@link SingleRaceLeaderboardSettings} instance using defaults except the values for
+     * raceDetailsToShow which are set to the given values.
+     */
+    public static SingleRaceLeaderboardSettings createDefaultSettingsWithRaceDetailValues(
+            final Iterable<DetailType> raceDetailsToShow) {
+        final SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(false);
+        newSettings.raceDetailsToShow.setValues(raceDetailsToShow);
+        return newSettings;
     }
 }

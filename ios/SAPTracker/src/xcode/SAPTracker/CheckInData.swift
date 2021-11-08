@@ -16,6 +16,7 @@ class CheckInData: NSObject {
         static let LeaderboardName = "leaderboard_name"
         static let CompetitorID = "competitor_id"
         static let MarkID = "mark_id"
+        static let Secret = "secret"
     }
     
     public enum CheckInDataType {
@@ -31,6 +32,7 @@ class CheckInData: NSObject {
     let competitorID: String?
     let markID: String?
     let isTraining: Bool
+    let secret: String?
     let type: CheckInDataType
 
     var eventData = EventData()
@@ -44,7 +46,8 @@ class CheckInData: NSObject {
          eventID: String,
          leaderboardName: String,
          competitorID: String,
-         isTraining: Bool)
+         isTraining: Bool,
+         secret: String? = nil)
     {
         self.boatID = nil
         self.competitorID = competitorID
@@ -53,6 +56,7 @@ class CheckInData: NSObject {
         self.markID = nil
         self.serverURL = serverURL
         self.isTraining = isTraining
+        self.secret = secret
         self.type = CheckInDataType.competitor
         super.init()
     }
@@ -61,7 +65,8 @@ class CheckInData: NSObject {
          eventID: String,
          leaderboardName: String,
          markID: String,
-         isTraining: Bool)
+         isTraining: Bool,
+         secret: String? = nil)
     {
         self.boatID = nil
         self.competitorID = nil
@@ -70,6 +75,7 @@ class CheckInData: NSObject {
         self.markID = markID
         self.serverURL = serverURL
         self.isTraining = isTraining
+        self.secret = secret
         type = CheckInDataType.mark
         super.init()
     }
@@ -78,7 +84,8 @@ class CheckInData: NSObject {
          eventID: String,
          leaderboardName: String,
          boatID: String,
-         isTraining: Bool)
+         isTraining: Bool,
+         secret: String? = nil)
     {
         self.boatID = boatID
         self.competitorID = nil
@@ -87,6 +94,7 @@ class CheckInData: NSObject {
         self.markID = nil
         self.serverURL = serverURL
         self.isTraining = isTraining
+        self.secret = secret
         type = CheckInDataType.boat
         super.init()
     }
@@ -97,7 +105,8 @@ class CheckInData: NSObject {
             eventID: boatCheckIn.event.eventID,
             leaderboardName: boatCheckIn.leaderboard.name,
             boatID: boatCheckIn.boatID,
-            isTraining: boatCheckIn.isTraining.boolValue
+            isTraining: boatCheckIn.isTraining.boolValue,
+            secret: boatCheckIn.secret
         )
     }
 
@@ -107,7 +116,8 @@ class CheckInData: NSObject {
             eventID: competitorCheckIn.event.eventID,
             leaderboardName: competitorCheckIn.leaderboard.name,
             competitorID: competitorCheckIn.competitorID,
-            isTraining: competitorCheckIn.isTraining.boolValue
+            isTraining: competitorCheckIn.isTraining.boolValue,
+            secret: competitorCheckIn.secret
         )
     }
 
@@ -117,31 +127,42 @@ class CheckInData: NSObject {
             eventID: markCheckIn.event.eventID,
             leaderboardName: markCheckIn.leaderboard.name,
             markID: markCheckIn.markID,
-            isTraining: markCheckIn.isTraining.boolValue
+            isTraining: markCheckIn.isTraining.boolValue,
+            secret: markCheckIn.secret
         )
     }
 
     convenience init?(url: URL) {
-        guard let host = url.host else { return nil }
+
+        // handle the case where a user uses the app to scan a QR code containing a branch.io deeplink
+        let branchQueryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+        let checkinUrl = branchQueryItems?.first(where: {$0.name == "checkinUrl"}).map { URL(string: $0.value!)! }
+
+        let unwrappedUrl = checkinUrl ?? url
+
+        guard let host = unwrappedUrl.host else { return nil }
         
         // Set server URL
-        let serverURL = url.scheme! + "://" + host + (url.port != nil ? ":\(url.port!)" : "")
+        let serverURL = unwrappedUrl.scheme! + "://" + host + (unwrappedUrl.port != nil ? ":\(unwrappedUrl.port!)" : "")
         
         // In query component replace '+' occurrences with '%20' as a workaround for bug 3664
-        var components = URLComponents(string: url.absoluteString)
+        var components = URLComponents(string: unwrappedUrl.absoluteString)
         components?.percentEncodedQuery = components?.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%20")
         guard let queryItems = components?.queryItems else { return nil }
         
         // Get check-in items
         guard let eventID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.EventID) else { return nil }
         guard let leaderboardName = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.LeaderboardName) else { return nil }
+        let secret = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.Secret)
+        
         if let competitorID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.CompetitorID) {
             self.init(
                 serverURL: serverURL,
                 eventID: eventID,
                 leaderboardName: leaderboardName,
                 competitorID: competitorID,
-                isTraining: false
+                isTraining: false,
+                secret: secret
             )
         } else if let markID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.MarkID) {
             self.init(
@@ -149,7 +170,8 @@ class CheckInData: NSObject {
                 eventID: eventID,
                 leaderboardName: leaderboardName,
                 markID: markID,
-                isTraining: false
+                isTraining: false,
+                secret: secret
             )
         } else if let boatID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.BoatID) {
             self.init(
@@ -157,7 +179,8 @@ class CheckInData: NSObject {
                 eventID: eventID,
                 leaderboardName: leaderboardName,
                 boatID: boatID,
-                isTraining: false
+                isTraining: false,
+                secret: secret
             )
         } else {
             logError(name: "\(#function)", error: "unknown check-in type")

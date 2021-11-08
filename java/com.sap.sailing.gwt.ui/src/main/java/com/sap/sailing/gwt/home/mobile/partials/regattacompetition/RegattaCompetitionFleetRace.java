@@ -22,8 +22,9 @@ public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleet
     @UiField DivElement raceStateUi;
     @UiField DivElement raceDateUi;
 
-    public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, RegattaCompetitionPresenter presenter) {
-        super(race, presenter);
+    public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, String fleetName,
+            RegattaCompetitionPresenter presenter) {
+        super(race, fleetName, presenter);
     }
 
     @Override
@@ -64,6 +65,10 @@ public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleet
     @Override
     protected String getRaceUntrackedStyleName() {
         return local_res.css().regattacompetition_phase_fleet_raceuntracked();
+    }
+
+    public void removeBigRaceTitleCSS() {
+        raceNameUi.removeClassName(local_res.css().regattacompetition_phase_fleet_race_title_big());
     }
     
 }

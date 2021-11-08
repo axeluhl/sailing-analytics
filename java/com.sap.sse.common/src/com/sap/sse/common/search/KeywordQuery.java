@@ -12,7 +12,11 @@ public class KeywordQuery implements Query, Serializable {
     
     private Iterable<String> keywords;
 
-    KeywordQuery() {} // for GWT RPC serialization
+    /**
+     * @deprecated for GWT RPC serialization only
+     */
+    @Deprecated
+    KeywordQuery() {}
     
     public KeywordQuery(String... keywords) {
         this.keywords = trim(Arrays.asList(keywords));
@@ -45,7 +49,9 @@ public class KeywordQuery implements Query, Serializable {
             } else {
                 sb.append(' ');
             }
+            sb.append('"');
             sb.append(keyword);
+            sb.append('"');
         }
         return sb.toString();
     }

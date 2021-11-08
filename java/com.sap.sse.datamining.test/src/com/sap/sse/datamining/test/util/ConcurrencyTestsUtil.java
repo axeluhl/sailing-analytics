@@ -19,7 +19,7 @@ public class ConcurrencyTestsUtil extends TestsUtil {
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static final ExecutorService executor = new DataMiningExecutorService(THREAD_POOL_SIZE);
 
-    public static ExecutorService getExecutor() {
+    public static ExecutorService getSharedExecutor() {
         return executor;
     }
 
@@ -47,7 +47,7 @@ public class ConcurrencyTestsUtil extends TestsUtil {
         }
     }
 
-    public static void tryToFinishTheProcessorInAnotherThread(final Processor<?, ?> processor) {
+    public static Thread tryToFinishTheProcessorInAnotherThread(final Processor<?, ?> processor) {
         Thread finishingThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -59,6 +59,7 @@ public class ConcurrencyTestsUtil extends TestsUtil {
             }
         });
         finishingThread.start();
+        return finishingThread;
     }
 
     protected ConcurrencyTestsUtil() {

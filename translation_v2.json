@@ -18,6 +18,91 @@
             }
          ]
       },
+      {  
+         "collectionName":"LandscapeManagementUi",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sailing.landscape.ui/src/com/sap/sailing/landscape/ui/client/i18n",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"/XLF/[fullPath]/[targetFile]",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {  
+         "collectionName":"DataMiningGwtUi",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sse.datamining.ui/src/main/java/com/sap/sse/datamining/ui/client",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"/XLF/[fullPath]/[targetFile]",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
+         "collectionName":"Manage2SailImport",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sailing.manage2sail.resultimport/resources/stringmessages",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
+         "collectionName":"YachtScoringImport",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sailing.yachtscoring.resultimport/resources/stringmessages",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
+         "collectionName":"YellowBrickConnector",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sailing.domain.yellowbrickadapter/resources/stringmessages",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
       {
          "collectionName":"RacelogTracking",
          "folders":[  
@@ -82,10 +167,10 @@
          ]
       },
       {
-         "collectionName":"FileStorage",
+         "collectionName":"AdminConsole",
          "folders":[  
             {  
-               "startingFolderPath":"java/com.sap.sse.gwt/src/com/sap/sse/gwt/client/controls/filestorage",
+               "startingFolderPath":"java/com.sap.sse.gwt.adminconsole/src/com/sap/sse/gwt/adminconsole",
                "sourceFilters":[  
                   "**/StringMessages*.properties"
                ],
@@ -95,7 +180,29 @@
                "xlfFolderPath":"./XLF",
 	       "targetFolderPath":".",
 	       "pseudoLocFolderPath":"."
-            },
+            }
+         ]
+      },
+      {
+         "collectionName":"SseGwt",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sse.gwt/src/com/sap/sse/gwt/client",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
+         "collectionName":"FileStorage",
+         "folders":[  
             {  
                "startingFolderPath":"java/com.sap.sse.filestorage/resources/stringmessages",
                "sourceFilters":[  
@@ -115,6 +222,23 @@
          "folders":[  
             {  
                "startingFolderPath":"java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {  
+         "collectionName":"SecurityServer",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sse.security/resources/stringmessages",
                "sourceFilters":[  
                   "**/StringMessages*.properties"
                ],
@@ -177,6 +301,72 @@
                "pseudoLocFolderPath":"."
             }
          ]
+      },
+      {
+         "collectionName":"BuoyPingerAppAndroid",
+         "folders":[
+           {
+	     "startingFolderPath": "mobile/com.sap.sailing.android.buoy.positioning.app/res/values/**",
+	     "sourceFilters":["strings.xml"],
+	     "targetFolderPath":"../values-[langCode]",
+		"targetFileNamingConvention":"[filename].[extension]"
+           }
+	 ]
+      },
+      {
+         "collectionName":"BuoyPingerAppAndroid",
+         "folders":[
+           {
+	     "startingFolderPath": "mobile/com.sap.sailing.android.buoy.positioning.app/res/values-land/**",
+	     "sourceFilters":["strings.xml"],
+	     "targetFolderPath":"../values-[langCode]-land",
+		"targetFileNamingConvention":"[filename].[extension]"
+           }
+	 ]
+      },
+      {
+         "collectionName":"RaceManagerAppAndroid",
+         "folders":[
+           {
+	     "startingFolderPath": "mobile/com.sap.sailing.racecommittee.app/res/**",
+	     "sourceFilters":["strings.xml"],
+	     "targetFolderPath":"../values-[langCode]",
+		"targetFileNamingConvention":"[filename].[extension]"
+           }
+	 ]
+      },
+      {
+         "collectionName":"SailInsightAppAndroid",
+         "folders":[
+           {
+	     "startingFolderPath": "mobile/com.sap.sailing.android.tracking.app/res/**",
+	     "sourceFilters":["strings.xml", "strings_fragment.xml", "preferences.xml", "strings_dialog.xml", "strings_uss_sailing.xml" ],
+	     "targetFolderPath":"../values-[langCode]",
+		"targetFileNamingConvention":"[filename].[extension]"
+           }
+	 ]
+      },
+      {
+         "collectionName":"AndroidAppsShared",
+         "folders":[
+	   {
+	     "startingFolderPath": "mobile/com.sap.sailing.android.shared/res/**",
+	     "sourceFilters":["strings.xml", "strings_fragment.xml"],
+	     "targetFolderPath":"../values-[langCode]",
+		"targetFileNamingConvention":"[filename].[extension]"
+	   }
+	 ]
+      },
+      {
+         "collectionName":"SailInsightAppIOS",
+         "folders":[
+	   {
+	     "startingFolderPath": "ios/SAPTracker/src/xcode/SAPTracker/**",
+	     "sourceFilters":["*.strings"],
+	     "targetFolderPath":"../[langCode].lproj",
+		"targetFileNamingConvention":"[filename].[extension]"
+	   }
+	 ]
       }
    ],
    "defaultConfiguration":{  

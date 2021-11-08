@@ -8,7 +8,7 @@ import com.sap.sse.common.TimePoint;
 
 public class CsvParserFactoryImpl implements CsvParserFactory {
     @Override
-    public CsvParser createParser(InputStream is, String name, TimePoint lastModified) {
-        return new CsvParserImpl(is, name, lastModified);
+    public CsvParser createParser(InputStream inputStream, String filename, TimePoint lastModified) {
+        return new CsvParserImpl(inputStream, filename, lastModified);
     }
 }

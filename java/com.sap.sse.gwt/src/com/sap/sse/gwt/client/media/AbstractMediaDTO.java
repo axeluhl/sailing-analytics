@@ -25,6 +25,7 @@ public abstract class AbstractMediaDTO implements IsSerializable, Comparable<Abs
     protected String locale;
 
     /** for GWT */
+    @Deprecated
     protected AbstractMediaDTO() {
     }
 

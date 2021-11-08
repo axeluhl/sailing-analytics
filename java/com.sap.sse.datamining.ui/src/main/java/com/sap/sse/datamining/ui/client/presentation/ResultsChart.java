@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.ui.client.presentation;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,12 +26,16 @@ import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
+import org.moxieapps.gwt.highcharts.client.labels.DataLabels;
+import org.moxieapps.gwt.highcharts.client.labels.DataLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.DataLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
@@ -41,6 +46,8 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
+import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.SimpleObjectRenderer;
@@ -135,6 +142,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private final HorizontalPanel sortByPanel;
     private final ValueListBox<Comparator<GroupKey>> keyComparatorListBox;
     private final ValueListBox<Integer> decimalsListBox;
+    private final CheckBox showDataLabelsCheckBox;
 
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
@@ -165,43 +173,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         super(parent, context);
         this.showErrorBars = showErrorBars;
         this.drillDownCallback = drillDownCallback;
-        sortByPanel = new HorizontalPanel();
-        sortByPanel.setSpacing(5);
-        sortByPanel.add(new Label(getDataMiningStringMessages().sortBy() + ":"));
-        keyComparatorListBox = new ValueListBox<>(new AbstractRenderer<Comparator<?>>() {
-            @Override
-            public String render(Comparator<?> object) {
-                return object.toString();
-            }
-        });
-        keyComparatorListBox.addValueChangeHandler(new ValueChangeHandler<Comparator<GroupKey>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Comparator<GroupKey>> event) {
-                resetChartSeries();
-                showResultData();
-            }
-        });
-        sortByPanel.add(keyComparatorListBox);
-        sortByPanel.setVisible(false);
-        addControl(sortByPanel);
-
-        HorizontalPanel decimalsPanel = new HorizontalPanel();
-        decimalsPanel.setSpacing(5);
-        decimalsPanel.add(new Label(getDataMiningStringMessages().shownDecimals() + ":"));
-        decimalsListBox = new ValueListBox<Integer>(new SimpleObjectRenderer<Integer>());
-        decimalsPanel.add(decimalsListBox);
-        decimalsListBox.setValue(0);
-        decimalsListBox.setAcceptableValues(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
-        decimalsListBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Integer> event) {
-                updateChartLabels();
-                resetChartSeries();
-                showResultData();
-            }
-        });
-        addControl(decimalsPanel);
-
+        
         chartPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -211,6 +183,59 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         };
         chart = createChart();
         chartPanel.setWidget(chart);
+        
+        sortByPanel = new HorizontalPanel();
+        sortByPanel.setSpacing(5);
+        sortByPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        sortByPanel.add(new Label(getDataMiningStringMessages().sortBy() + ":"));
+        keyComparatorListBox = new ValueListBox<>(new AbstractRenderer<Comparator<?>>() {
+            @Override
+            public String render(Comparator<?> object) {
+                return object.toString();
+            }
+        });
+        keyComparatorListBox.addValueChangeHandler(e -> {
+            resetChartSeries();
+            showResultData();
+        });
+        sortByPanel.add(keyComparatorListBox);
+        sortByPanel.setVisible(false);
+        addControl(sortByPanel);
+
+        HorizontalPanel decimalsPanel = new HorizontalPanel();
+        decimalsPanel.setSpacing(5);
+        decimalsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        decimalsPanel.add(new Label(getDataMiningStringMessages().shownDecimals() + ":"));
+        decimalsListBox = new ValueListBox<Integer>(new SimpleObjectRenderer<Integer>());
+        decimalsPanel.add(decimalsListBox);
+        decimalsListBox.setValue(0);
+        decimalsListBox.setAcceptableValues(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        decimalsListBox.addValueChangeHandler(e -> {
+            updateChartLabels();
+            resetChartSeries();
+            showResultData();
+        });
+        addControl(decimalsPanel);
+        
+        HorizontalPanel showDataLabelsPanel = new HorizontalPanel();
+        showDataLabelsPanel.setSpacing(5);
+        showDataLabelsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        showDataLabelsPanel.add(new Label(getDataMiningStringMessages().showDataLabels() + ":"));
+        showDataLabelsCheckBox = new CheckBox();
+        showDataLabelsPanel.add(showDataLabelsCheckBox);
+        showDataLabelsCheckBox.setValue(true);
+        showDataLabelsCheckBox.addValueChangeHandler(e -> {
+            resetChartSeries();
+            showResultData();
+        });
+        addControl(showDataLabelsPanel);
+        
+
+        StringMessages stringMessages = getDataMiningStringMessages();
+        ChartToCsvExporter csvExporter = new ChartToCsvExporter(stringMessages.csvCopiedToClipboard());
+        Button exportButton = new Button(stringMessages.csvExport());
+        exportButton.addClickHandler(e -> csvExporter.exportChartAsCsvToClipboard(chart));
+        addControl(exportButton);
 
         seriesMappedByGroupKey = new HashMap<>();
         errorSeriesMappedByGroupKey = new HashMap<>();
@@ -235,7 +260,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         updateKeyComparatorListBox();
         resetChartSeries();
         updateChartLabels();
-        updateChartSubtitle();
         showResultData();
     }
 
@@ -270,11 +294,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private void updateChartLabels() {
         chart.getYAxis().setAxisTitleText(getCurrentResult().getResultSignifier());
         chart.setToolTip(new ToolTip().setValueDecimals(decimalsListBox.getValue()));
-    }
-
-    private void updateChartSubtitle() {
-        chart.setChartSubtitle(new ChartSubtitle().setText(getDataMiningStringMessages().queryResultsChartSubtitle(
-                getCurrentResult().getRetrievedDataAmount(), getCurrentResult().getCalculationTimeInSeconds())));
     }
 
     private void showResultData() {
@@ -414,8 +433,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private Chart createChart() {
         Chart chart = new Chart().setType(Series.Type.COLUMN).setMarginLeft(100).setMarginRight(45).setWidth100()
                 .setHeight100().setBorderColor(new Color("#F0AB00")).setPlotBorderWidth(0)
-                .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(getDataMiningStringMessages().dataMiningResult()));
+                .setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""))
+                .setCredits(new Credits().setEnabled(false));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
@@ -428,7 +447,15 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
                 }
             }
         }));
-        chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesClickEventHandler(new SeriesClickHandler()));
+        chart.setSeriesPlotOptions(new SeriesPlotOptions()
+                .setDataLabels(new DataLabels().setEnabled(true).setFormatter(new DataLabelsFormatter() {
+                    @Override
+                    public String format(DataLabelsData dataLabelsData) {
+                        String dataLabel = String.valueOf(BigDecimal.valueOf(dataLabelsData.getYAsDouble())
+                                .setScale(decimalsListBox.getValue(), BigDecimal.ROUND_HALF_UP).doubleValue());
+                        return showDataLabelsCheckBox.getValue() ? dataLabel : null;
+                    }
+                })).setSeriesClickEventHandler(new SeriesClickHandler()));
         return chart;
     }
 

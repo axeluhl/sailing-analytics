@@ -14,13 +14,15 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
+import com.sap.sse.security.ui.client.UserService;
 
 public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFleetsDialog<EventAndRegattaDTO> {
     public DefaultRegattaCreateDialog(List<EventDTO> existingEvents, RegattaDTO selectedRegatta,
-            SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<EventAndRegattaDTO> callback) {
-        super(selectedRegatta, selectedRegatta.series, existingEvents, null, stringMessages.createDefaultSettingsForAllRegattas(),
-                stringMessages.ok(), stringMessages, null /* RegattaParameterValidator */, callback);
+            SailingServiceAsync sailingService, UserService userService, ErrorReporter errorReporter,
+            StringMessages stringMessages, com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<EventAndRegattaDTO> callback) {
+        super(sailingService, userService, selectedRegatta, selectedRegatta.series, existingEvents,
+                null, stringMessages.createDefaultSettingsForAllRegattas(), stringMessages.ok(),
+                stringMessages, null /* RegattaParameterValidator */, callback);
         if (existingEvents != null && !existingEvents.isEmpty()) {
             sailingEventsListBox.addItem((existingEvents.get(0)).getName());
         } else {
@@ -51,7 +53,7 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
 
     @Override
     protected EventAndRegattaDTO getResult() {
-        final RegattaDTO regattaDTO = getRegattaDTO();
+        final RegattaDTO regattaDTO = getRegattaDTO(/* no name */ "");
         EventAndRegattaDTO eventAndRegatta = new EventAndRegattaDTO(getSelectedEvent(), regattaDTO);
         setRankingMetrics(regattaDTO);
         return eventAndRegatta;

@@ -7,12 +7,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import android.support.v4.content.FileProvider;
 
 public class CameraHelper {
 
@@ -72,14 +73,16 @@ public class CameraHelper {
      * Returns a folder Uri for app depended picture folder
      */
     public Uri getOutputMediaFolderUri(@Nullable String subFolder) {
-        return Uri.fromFile(getOutputMediaFolder(subFolder));
+        File mediaFile = getOutputMediaFolder(subFolder);
+        return FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".fileprovider", mediaFile);
     }
 
     /**
      * Create a file Uri for saving an image or video
      */
     public Uri getOutputMediaFileUri(int type, @Nullable String subFolder) {
-        return Uri.fromFile(getOutputMediaFile(type, subFolder));
+        File mediaFile = getOutputMediaFile(type, subFolder);
+        return FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".fileprovider", mediaFile);
     }
 
     /**
@@ -92,7 +95,8 @@ public class CameraHelper {
             subFolder += File.separator;
         }
 
-        File mediaStorageDir = new File(mContext.getExternalFilesDir(null), MAIN_SUB_FOLDER + File.separator + subFolder);
+        File mediaStorageDir = new File(mContext.getExternalFilesDir(null),
+                MAIN_SUB_FOLDER + File.separator + subFolder);
 
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
@@ -114,11 +118,16 @@ public class CameraHelper {
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + MEDIA_TYPE_IMAGE_EXT);
-        } else if (type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + MEDIA_TYPE_VIDEO_EXT);
-        } else {
+        switch (type) {
+        case MEDIA_TYPE_IMAGE:
+            mediaFile = new File(
+                    mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + MEDIA_TYPE_IMAGE_EXT);
+            break;
+        case MEDIA_TYPE_VIDEO:
+            mediaFile = new File(
+                    mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + MEDIA_TYPE_VIDEO_EXT);
+            break;
+        default:
             return null;
         }
 

@@ -6,14 +6,11 @@ import java.util.Collection;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
@@ -25,6 +22,8 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogDeseri
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceGroupJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsOfRaceGroupSerializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 
@@ -32,7 +31,7 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
     private final JsonDeserializer<SeriesWithRows> seriesDeserializer;
     private final JsonDeserializer<RegattaConfiguration> configurationDeserializer;
 
-    public static RaceGroupDeserializer create(SharedDomainFactory domainFactory,
+    public static RaceGroupDeserializer create(SharedDomainFactory<?> domainFactory,
             JsonDeserializer<RegattaConfiguration> proceduresDeserializer) {
         return new RaceGroupDeserializer(new BoatClassJsonDeserializer(domainFactory), new SeriesWithRowsDeserializer(
                 new RaceRowDeserializer(new FleetDeserializer(new ColorDeserializer()), new RaceCellDeserializer(
@@ -54,12 +53,7 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
         BoatClass boatClass = null;
         String displayName = null;
         Boolean canBoatsOfCompetitorsChangePerRace = false;
-        CourseArea courseArea = null;
         RegattaConfiguration configuration = null;
-        if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
-            // TODO: deserialize CourseArea ...
-            // WHY should I?
-        }
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_BOAT_CLASS)) {
             boatClass = boatClassDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                     RaceGroupJsonSerializer.FIELD_BOAT_CLASS));
@@ -81,6 +75,6 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
             final Object canBoatsOfCompetitorsChangePerRaceJson = object.get(RaceGroupJsonSerializer.FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE);
             canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRaceJson == null ? null : (Boolean) canBoatsOfCompetitorsChangePerRaceJson; 
         }
-        return new RaceGroupImpl(name, displayName, boatClass, canBoatsOfCompetitorsChangePerRace, courseArea, series, configuration);
+        return new RaceGroupImpl(name, displayName, boatClass, canBoatsOfCompetitorsChangePerRace, series, configuration);
     }
 }

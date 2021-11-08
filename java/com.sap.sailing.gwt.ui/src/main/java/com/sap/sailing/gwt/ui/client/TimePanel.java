@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
+import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -20,8 +21,10 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.TimePanelCssResources.TimePanelCss;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider;
@@ -78,12 +81,15 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     private final Button slowDownButton;
     private final Button speedUpButton;
     private final Button toggleAdvancedModeButton;
+    private final Button resetZoomButton;
 
     private final FlowPanel controlsPanel;
     private final SimplePanel timePanelSlider;
     private final FlowPanel timePanelSliderFlowWrapper;
     private final FlowPanel playControlPanel;
     private final FlowPanel timePanelInnerWrapper;
+
+    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
 
     /** 
      * the minimum time the slider extends its time when the end of the slider is reached
@@ -106,8 +112,10 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
             TimeRangeWithZoomProvider timeRangeProvider,
             StringMessages stringMessages,
-            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService) {
+            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService,
+            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context);
+        this.raceDTO = raceDTO;
         this.userService = userService;
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
@@ -145,7 +153,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
                 return timeWithMinutesFormatter.format(date); 
             }
         });
-
+        timeSlider.ensureDebugId("timeSlider");
         timeSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
@@ -309,6 +317,16 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
         
+        resetZoomButton = new Button(stringMessages.resetZoom());
+        resetZoomButton.setEnabled(false);
+        resetZoomButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                timeRangeProvider.resetTimeZoom();
+            }
+        });
+        controlsPanel.add(resetZoomButton);
+        
         hideControlsPanel();
     }
     
@@ -444,24 +462,23 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
      */
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
-                
-        boolean changed = false;
-        changed = timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
-        if (changed) {
+        final Optional<Pair<Double, Double>> changed =
+                timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
+        if (changed.isPresent()) {
+            final Double changedMin = changed.get().getA();
+            final Double changedMax = changed.get().getB();
             if (!timeRangeProvider.isZoomed()) {
-                timeRangeProvider.setTimeRange(min, max, this);
+                timeRangeProvider.setTimeRange(new Date(changedMin.longValue()), new Date(changedMax.longValue()), this);
             }
-            
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
                 timeSlider.setStepSize(numSteps, fireEvent);
             } else {
                 timeSlider.setStepSize(1000, fireEvent);
             }
-
             // Christopher: following setCurrentValue requires stepsize to be set <> 0 (otherwise division by zero; NaN)
             if (timeSlider.getCurrentValue() == null) {
-                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
+                timeSlider.setCurrentValue(changedMin, fireEvent);
             }
         }
     }
@@ -536,10 +553,12 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        resetZoomButton.setEnabled(true);
     }
 
     @Override
     public void onTimeZoomReset() {
+        resetZoomButton.setEnabled(false);
     }
 
     @Override
@@ -606,7 +625,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
 
     @Override
     public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
-        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages, userService);
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages, userService, raceDTO);
     }
 
     @Override

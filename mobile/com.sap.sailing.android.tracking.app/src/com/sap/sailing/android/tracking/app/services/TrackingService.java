@@ -1,39 +1,19 @@
 package com.sap.sailing.android.tracking.app.services;
 
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.hardware.GeomagneticField;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -41,7 +21,6 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
@@ -51,6 +30,20 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 public class TrackingService extends Service implements LocationListener {
 
@@ -64,19 +57,15 @@ public class TrackingService extends Service implements LocationListener {
     private static final int GREAT_DISTANCE = 10;
     private static final int NO_DISTANCE = 0;
 
-    private NotificationManager notificationManager;
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 40;
+
     private AppPreferences prefs;
 
     private GPSQualityListener gpsQualityListener;
     private final IBinder trackingBinder = new TrackingBinder();
 
-    // Unique Identification Number for the Notification.
-    // We use it on Notification start, and to cancel it.
-    private int NOTIFICATION_ID = R.string.tracker_started;
-
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
     public final static String GPS_DISABLED_MESSAGE = "gpsDisabled";
-    private float minLocationUpdateDistanceInMeters = 0f;
 
     private String checkinDigest;
     private EventInfo event;
@@ -85,8 +74,8 @@ public class TrackingService extends Service implements LocationListener {
     private LocationWatchDog locationWatchDog;
 
     /**
-     * Must be synchronized upon while modifying the {@link #timerForDelayingSendingMessages} field
-     * and while modifying the {@link #locationsQueuedBasedOnSendingInterval} list.
+     * Must be synchronized upon while modifying the {@link #timerForDelayingSendingMessages} field and while modifying
+     * the {@link #locationsQueuedBasedOnSendingInterval} list.
      */
     private final Object messageSendingTimerMonitor = new Object();
 
@@ -107,27 +96,17 @@ public class TrackingService extends Service implements LocationListener {
     private Timer timerForDelayingSendingMessages;
 
     /**
-     * When a {@link Location} is added and {@link #timerForDelayingSendingMessages} is {@code null}, a new timer
-     * will be created and assigned to {@link #timerForDelayingSendingMessages}. Otherwise, we can assume that the
-     * existing timer will pick up this new element upon its next turn.
+     * When a {@link Location} is added and {@link #timerForDelayingSendingMessages} is {@code null}, a new timer will
+     * be created and assigned to {@link #timerForDelayingSendingMessages}. Otherwise, we can assume that the existing
+     * timer will pick up this new element upon its next turn.
      */
     private LinkedHashMap<String, List<Location>> locationsQueuedBasedOnSendingInterval;
 
     @Override
     public void onCreate() {
-        super.onCreate();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            /**
-             * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored,
-             * so providing a minimum distance value greater than 0 is recommended
-             */
-            minLocationUpdateDistanceInMeters = .5f;
-        }
-
         locationsQueuedBasedOnSendingInterval = new LinkedHashMap<>();
         prefs = new AppPreferences(this);
 
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
 
@@ -144,15 +123,14 @@ public class TrackingService extends Service implements LocationListener {
                     stopTracking();
                 } else {
                     if (intent.getExtras() != null) {
-                        checkinDigest = intent.getExtras().getString(
-                                getString(R.string.tracking_service_checkin_digest_parameter));
+                        checkinDigest = intent.getExtras()
+                                .getString(getString(R.string.tracking_service_checkin_digest_parameter));
 
                         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
 
                         if (BuildConfig.DEBUG) {
                             ExLog.i(this, TAG, "Starting Tracking Service with checkinDigest: " + checkinDigest);
                         }
-
                         startTracking();
                     }
                 }
@@ -163,11 +141,10 @@ public class TrackingService extends Service implements LocationListener {
         return Service.START_STICKY;
     }
 
+    @SuppressWarnings("MissingPermission")
     private void startTracking() {
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), minLocationUpdateDistanceInMeters, this);
-
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL_IN_MILLIS_DEFAULT, 0f, this);
         ExLog.i(this, TAG, "Started Tracking");
-        showNotification();
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
@@ -217,7 +194,7 @@ public class TrackingService extends Service implements LocationListener {
         if (prefs.getDisplayHeadingWithSubtractedDeclination() && bearingImpl != null) {
             GeomagneticField geomagneticField = new GeomagneticField((float) latitude, (float) longitude,
                     (float) altitude, System.currentTimeMillis());
-            bearingImpl.add(new DegreeBearingImpl(- geomagneticField.getDeclination()));
+            bearingImpl.add(new DegreeBearingImpl(-geomagneticField.getDeclination()));
         }
 
         if (gpsQualityListener != null) {
@@ -253,7 +230,7 @@ public class TrackingService extends Service implements LocationListener {
         }
         return fixesAsJson;
     }
-    
+
     private JSONObject createFixesMessage(Iterable<Location> locations) throws JSONException {
         final JSONObject fixesMessage = new JSONObject();
         final JSONArray fixesJson = createJsonLocationFixes(locations);
@@ -264,11 +241,13 @@ public class TrackingService extends Service implements LocationListener {
 
     /**
      * Based on the {@link #prefs} and the {@link AppPreferences#getMessageSendingIntervalInMillis()} the message
-     * sending intent is either immediately forwarded to the message sending service or it is enqueued for a timer
-     * to pick it up in a bulk operation later, after the sending interval has expired.
+     * sending intent is either immediately forwarded to the message sending service or it is enqueued for a timer to
+     * pick it up in a bulk operation later, after the sending interval has expired.
      *
-     * @param postUrl URL to send fixes
-     * @param location the location fix to enqueue for sending to the URL specified by {@code postUrl}
+     * @param postUrl
+     *            URL to send fixes
+     * @param location
+     *            the location fix to enqueue for sending to the URL specified by {@code postUrl}
      */
     private void enqueueForSending(String postUrl, Location location) {
         synchronized (messageSendingTimerMonitor) {
@@ -285,8 +264,10 @@ public class TrackingService extends Service implements LocationListener {
      * Add the {@code payload} to the HashMap, if the postUrl isn't included. If the url is included the fixes will be
      * concat to the current waiting data.
      *
-     * @param postUrl URL to send fixes
-     * @param location the fix to store in {@link #locationsQueuedBasedOnSendingInterval}
+     * @param postUrl
+     *            URL to send fixes
+     * @param location
+     *            the fix to store in {@link #locationsQueuedBasedOnSendingInterval}
      */
     private void newOrAppendPayload(String postUrl, Location location) {
         synchronized (messageSendingTimerMonitor) {
@@ -309,9 +290,11 @@ public class TrackingService extends Service implements LocationListener {
                     synchronized (messageSendingTimerMonitor) {
                         if (!locationsQueuedBasedOnSendingInterval.isEmpty()) {
                             reschedule = true;
-                            for (Map.Entry<String, List<Location>> pair : locationsQueuedBasedOnSendingInterval.entrySet()) {
+                            for (Map.Entry<String, List<Location>> pair : locationsQueuedBasedOnSendingInterval
+                                    .entrySet()) {
                                 if (!pair.getValue().isEmpty()) {
-                                    intentsToSend.add(MessageSendingService.createMessageIntent(TrackingService.this, pair.getKey(), null, UUID.randomUUID(),
+                                    intentsToSend.add(MessageSendingService.createMessageIntent(TrackingService.this,
+                                            pair.getKey(), null, UUID.randomUUID(),
                                             createFixesMessage(pair.getValue()).toString(), null));
                                 }
                             }
@@ -321,19 +304,21 @@ public class TrackingService extends Service implements LocationListener {
                             timerForDelayingSendingMessages.cancel();
                             timerForDelayingSendingMessages = null;
                         } else {
-                            timerForDelayingSendingMessages.schedule(createTimerTask(), prefs.getMessageSendingIntervalInMillis());
+                            timerForDelayingSendingMessages.schedule(createTimerTask(),
+                                    prefs.getMessageSendingIntervalInMillis());
                         }
                     }
                     for (final Intent intentToSend : intentsToSend) {
                         startService(intentToSend);
                     }
                 } catch (JSONException e) {
-                    ExLog.e(TrackingService.this, TAG, "Internal error converting location fixes to JSON message: "+e.getMessage());
+                    ExLog.e(TrackingService.this, TAG,
+                            "Internal error converting location fixes to JSON message: " + e.getMessage());
                 }
             }
         };
     }
-    
+
     @Override
     public IBinder onBind(Intent intent) {
         return trackingBinder;
@@ -342,16 +327,16 @@ public class TrackingService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         stopTracking();
-        notificationManager.cancel(NOTIFICATION_ID);
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
 
     /**
      * Methods implemented through LocationManager
-     */ 
+     */
     @Override
     public void onLocationChanged(Location location) {
-        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(), location.getLatitude(), location.getLongitude(), location.getAltitude());
+        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
+                location.getLatitude(), location.getLongitude(), location.getAltitude());
         final String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
         enqueueForSending(postUrlStr, location);
 
@@ -368,36 +353,21 @@ public class TrackingService extends Service implements LocationListener {
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        //Status Update by the provider (GPS)
+        // Status Update by the provider (GPS)
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        //provider (GPS) disabled by the user while tracking
+        // provider (GPS) disabled by the user while tracking
         Intent local = new Intent();
         local.setAction(GPS_DISABLED_MESSAGE);
         this.sendBroadcast(local);
     }
-    
+
     @Override
     public void onProviderEnabled(String provider) {
-        //provider (GPS) (re)enabled by the user while tracking
+        // provider (GPS) (re)enabled by the user while tracking
     }
-
-     private void showNotification() {
-         Intent intent = new Intent(this, TrackingActivity.class);
-         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-         Notification notification = new NotificationCompat.Builder(this)
-             .setContentTitle(getText(R.string.app_name))
-             .setContentText(getString(R.string.tracking_notification_text, event.name))
-             .setContentIntent(pi)
-             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-             .setSmallIcon(R.drawable.ic_directions_boat)
-             .setOngoing(true)
-             .build();
-         notificationManager.notify(NOTIFICATION_ID, notification);
-     }
 
     public void registerGPSQualityListener(GPSQualityListener listener) {
         gpsQualityListener = listener;
@@ -425,19 +395,14 @@ public class TrackingService extends Service implements LocationListener {
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case NO_LOCATION:
-                    ExLog.i(getApplicationContext(), TAG, "No Location");
-                    Location location = (Location) msg.obj;
-                    if (location == null) {
-                        location = new Location(LocationManager.GPS_PROVIDER);
-                    }
-                    reportGPSQualityBearingAndSpeed(NO_DISTANCE, location.getBearing(), location.getSpeed(),
+            if (msg.what == NO_LOCATION) {
+                ExLog.i(getApplicationContext(), TAG, "No Location");
+                Location location = (Location) msg.obj;
+                if (location == null) {
+                    location = new Location(LocationManager.GPS_PROVIDER);
+                }
+                reportGPSQualityBearingAndSpeed(NO_DISTANCE, location.getBearing(), location.getSpeed(),
                         location.getLatitude(), location.getLongitude(), location.getAltitude());
-                    break;
-
-                default:
-                    super.handleMessage(msg);
             }
         }
     }

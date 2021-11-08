@@ -15,6 +15,27 @@
   font-size: 1.066666666666667em;
   font-weight: 700;
 }
+.regattastatus_filter {
+  position: absolute;
+  top: 50%;
+  right: 1em;
+  -webkit-transform: translateY(-50%);
+     -moz-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+          transform: translateY(-50%);
+  font-weight: 600;
+  height: auto;
+  width: 16.666666666666666em;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color: #008fcc;
+  border: none;
+  border-radius: 0;
+  padding: 0.666666666666667em 2em 0.666666666666667em 1em;
+  background: resourceUrl("filter") 100% no-repeat transparent;
+  background-size: 1.333333333333333em;
+}
 .regattastatus_content {
   visibility: visible;
 }
@@ -83,16 +104,20 @@
   height: 100%;
   background: #efaa00;
 }
-img.regattastatus_content_regatta_race_arrow {
+.regattastatus_content_regatta_race_arrow {
+  height: 0.8em;
+  width: 0.8em;
+  background-size: 125%;
+  background-position: center;
+  background-image: resourceUrl('arrowDownGrey');
+  background-repeat: no-repeat;
   position: absolute;
   top: 50%;
   right: 1em;
-  -webkit-transform: translateY(-50%);
-     -moz-transform: translateY(-50%);
-      -ms-transform: translateY(-50%);
-          transform: translateY(-50%);
-  height: 0.8em;
-  display: inline-block;
+  -webkit-transform: translateY(-50%) rotate(270deg);
+     -moz-transform: translateY(-50%) rotate(270deg);
+      -ms-transform: translateY(-50%) rotate(270deg);
+          transform: translateY(-50%) rotate(270deg);
 }
 .regattastatus .sectionheader {
   background: #f2f2f2;

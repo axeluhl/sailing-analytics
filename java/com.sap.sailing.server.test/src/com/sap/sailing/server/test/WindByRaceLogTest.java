@@ -49,8 +49,8 @@ import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -106,7 +106,7 @@ public class WindByRaceLogTest {
         raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
         service.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 5000,
-                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000, null));
         trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
     }
@@ -115,8 +115,8 @@ public class WindByRaceLogTest {
         Competitor competitor = masterDomainFactory.getOrCreateCompetitor("GER 61", "Sailor", "S", Color.RED, "noone@nowhere.de", null, new TeamImpl("Sailor",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Sailor 1", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null)}),
                 new PersonImpl("Sailor 2", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        DynamicBoat boat = (DynamicBoat) masterDomainFactory.getOrCreateBoat("boat", "GER 61", boatClass, "GER 61", null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
+        DynamicBoat boat = (DynamicBoat) masterDomainFactory.getOrCreateBoat("boat", "GER 61", boatClass, "GER 61", null, /* storePersistently */ true);
         return new CompetitorWithBoatImpl(competitor, boat);
     }
     

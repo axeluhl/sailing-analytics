@@ -1,0 +1,23 @@
+.checkBoxInvisible {
+	visibility : hidden;
+    background-color : red;
+    padding: 3px;
+    padding-right: 5px;
+    padding-bottom: 4px;
+}
+
+.checkBoxNormal {
+	visibility : visible;
+	background-color : white;
+    padding: 3px;
+    padding-right: 5px;
+    padding-bottom: 4px;
+}
+
+.checkBoxError {
+    visibility : visible;
+	background-color : red;
+	padding: 3px;
+    padding-right: 5px;
+    padding-bottom: 4px;
+}

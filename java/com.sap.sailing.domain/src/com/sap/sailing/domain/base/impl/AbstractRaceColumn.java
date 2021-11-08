@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,15 +62,15 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private TrackedRaces trackedRaces;
     private Map<Fleet, RaceIdentifier> raceIdentifiers;
 
-    private Map<Fleet, RaceLog> raceLogs;
-
+    private ConcurrentMap<Fleet, RaceLog> raceLogs;
+    
     private transient RaceLogStore raceLogStore;
     private RegattaLikeIdentifier regattaLikeParent;
 
     public AbstractRaceColumn() {
         this.trackedRaces = new TrackedRaces();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
-        this.raceLogs = new HashMap<Fleet, RaceLog>();
+        this.raceLogs = new ConcurrentHashMap<Fleet, RaceLog>();
     }
 
     @Override
@@ -82,9 +84,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public RaceLog getRaceLog(Fleet fleet) {
-        synchronized (raceLogs) {
-            return raceLogs.get(fleet);
-        }
+        return raceLogs.get(fleet);
     }
 
     @Override
@@ -197,25 +197,23 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public void reloadRaceLog(Fleet fleet) {
-        synchronized (raceLogs) {
-            RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
-            RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
-            RaceLog raceLogAvailable = raceLogs.get(fleet);
-            if (raceLogAvailable == null) {
-                RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
-                // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
-                // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
-                newOrLoadedRaceLog.addListener(listener);
-                raceLogs.put(fleet, newOrLoadedRaceLog);
-                final TrackedRace trackedRace = getTrackedRace(fleet);
-                if (trackedRace != null) {
-                    // need to attach race log
-                    trackedRace.attachRaceLog(newOrLoadedRaceLog);
-                }
-            } else {
-                // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
-                raceLogAvailable.merge(newOrLoadedRaceLog);
+        RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
+        RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
+        RaceLog raceLogAvailable = raceLogs.get(fleet);
+        if (raceLogAvailable == null) {
+            RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
+            // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
+            // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
+            newOrLoadedRaceLog.addListener(listener);
+            raceLogs.put(fleet, newOrLoadedRaceLog);
+            final TrackedRace trackedRace = getTrackedRace(fleet);
+            if (trackedRace != null) {
+                // need to attach race log
+                trackedRace.attachRaceLog(newOrLoadedRaceLog);
             }
+        } else {
+            // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
+            raceLogAvailable.merge(newOrLoadedRaceLog);
         }
     }
 
@@ -238,6 +236,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 TrackedRace trackedRace = getTrackedRace(fleet);
                 if (trackedRace != null) {
                     trackedRace.attachRaceLog(raceLog);
+                    RegattaLog regattaLog = getRegattaLog();
+                    if (regattaLog != null) {
+                        trackedRace.attachRegattaLog(regattaLog);
+                    }
                 }
             }, /* prio */0);
             // because this will add the race log to the tracked race's attachedRaceLogs collection again, and
@@ -387,18 +389,27 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         }
         Set<Competitor> competitorSet = new HashSet<Competitor>();
         Util.addAll(competitors, competitorSet);
-        RaceLog raceLog = getRaceLog(fleet);
-        for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
-            if (event instanceof RegisterCompetitorEvent) {
-                RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
-                if (competitorSet.contains(registerEvent.getCompetitor())) {
-                    try {
-                        raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, event,
-                                "unregistering competitor because no longer selected for registration");
-                    } catch (NotRevokableException e) {
-                        logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
+        final RaceLog raceLog = getRaceLog(fleet);
+        final Set<RaceLogEvent> competitorRegistrationEventsToRevoke = new HashSet<>();
+        raceLog.lockForRead();
+        try {
+            for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
+                if (event instanceof RegisterCompetitorEvent) {
+                    RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
+                    if (competitorSet.contains(registerEvent.getCompetitor())) {
+                        competitorRegistrationEventsToRevoke.add(event);
                     }
                 }
+            }
+        } finally {
+            raceLog.unlockAfterRead();
+        }
+        for (final RaceLogEvent eventToRevoke : competitorRegistrationEventsToRevoke) {
+            try {
+                raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, eventToRevoke,
+                        "unregistering competitor because no longer selected for registration");
+            } catch (NotRevokableException e) {
+                logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
             }
         }
     }
@@ -471,7 +482,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException {
-        RaceLog raceLog = getRaceLog(fleet);
+        final RaceLog raceLog = getRaceLog(fleet);
         List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsFromRaceLogEvent.class).analyze();
         for (RaceLogEvent event : events) {
             raceLog.lockForRead();

@@ -21,7 +21,7 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
     public void doOnModuleLoad() {
         applyMGWTSettings();
         DashboardClientFactory dashboardClientFactory = new DashboardClientFactoryImpl();
-        DashboardPanel rootPanel = new DashboardPanel(dashboardClientFactory);
+        DashboardPanel rootPanel = new DashboardPanel(dashboardClientFactory, this);
         RootLayoutPanel.get().add(rootPanel);
         WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(dashboardClientFactory);
         windBotDataRetriever.addNumberOfWindBotsChangeListeners(rootPanel);

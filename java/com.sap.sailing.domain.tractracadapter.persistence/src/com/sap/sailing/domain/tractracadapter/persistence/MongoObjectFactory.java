@@ -21,6 +21,12 @@ public interface MongoObjectFactory {
      * {@link DomainObjectFactory#getTracTracConfigurations()} called for the same <code>database</code>
      * will return an equal <code>tracTracConfiguration</code> in its results.
      */
-    void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
+    void createTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
+
+    void updateTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
+
+    void deleteTracTracConfiguration(String creatorName, String jsonurl);
+
+    void clear();
     
 }

@@ -11,8 +11,8 @@ import com.sap.sailing.domain.regattalike.FlexibleLeaderboardAsRegattaLikeIdenti
 import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifierResolver;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnRegatta;
 

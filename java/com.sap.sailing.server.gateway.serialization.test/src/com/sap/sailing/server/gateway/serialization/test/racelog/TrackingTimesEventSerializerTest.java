@@ -14,12 +14,9 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImp
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEndOfTrackingEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogStartOfTrackingEventDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
@@ -30,6 +27,9 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEndOfTra
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartOfTrackingEventSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class TrackingTimesEventSerializerTest {
     private JsonSerializer<RaceLogEvent> createStartOfTrackingEventSerializer() {
@@ -54,7 +54,7 @@ public class TrackingTimesEventSerializerTest {
 
     private CompetitorJsonSerializer createCompetitorSerializer() {
         return new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
+                new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()), /* serializeNonPublicFields */ false);
     }
 
     @Test

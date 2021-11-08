@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import java.util.Date;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -7,61 +8,35 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.adminconsole.AssignRacesToMediaDialog;
+import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObservable;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.gwt.client.ErrorReporter;
 
 public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
-
-    private SailingServiceAsync sailingService;
-
-    private ErrorReporter errorReporter;
-
-    private RegattaRefresher regattaRefresher;
-
-    private Set<RegattasDisplayer> regattasDisplayers;
 
     private Widget listOfRacesForMedia;
 
     private AssignRacesToMediaDialog racesForMediaDialog;
 
+    private final Presenter presenter;
+
     public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime,
-            StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, Set<RegattasDisplayer> regattasDisplayers,
+            StringMessages stringMessages, Presenter presenter,
+            FileStorageServiceConnectionTestObservable storageServiceConnection,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<MediaTrack> dialogCallback) {
-        super(mediaService, defaultStartTime, stringMessages, null, dialogCallback);
-        this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
-        this.regattasDisplayers = regattasDisplayers;
+        super(mediaService, defaultStartTime, stringMessages, null, storageServiceConnection, dialogCallback);
+        this.presenter = presenter;
     }
 
-    protected void updateStartTimeFromUi() {
-        try {
-            String startTime = startTimeBox.getValue();
-            if (startTime != null && !startTime.equals("")) {
-                mediaTrack.startTime = new MillisecondsTimePoint(TimeFormatUtil.DATETIME_FORMAT.parse(startTime));
-                regattaRefresher.fillRegattas();
-                listOfRacesForMedia.setVisible(true);
-            }
-        } catch (Exception e) {
-            listOfRacesForMedia.setVisible(false);
-        }
-    }
-
+    @Override
     protected void connectMediaWithRace() {
         mediaTrack.assignedRaces = racesForMediaDialog.getAssignedRaces();
     }
 
     private Widget racesForMedia() {
-        racesForMediaDialog = new AssignRacesToMediaDialog(sailingService, mediaTrack, errorReporter, regattaRefresher,
-                stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
-
+        racesForMediaDialog = new AssignRacesToMediaDialog(presenter, mediaTrack, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
                     @Override
                     public void cancel() {
                     }
@@ -76,11 +51,11 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
                 });
         racesForMediaDialog.ensureDebugId("AssignedRacesDialog");
         racesForMediaDialog.hideRefreshButton();
-        regattasDisplayers.add(racesForMediaDialog);
-
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(racesForMediaDialog.getRegattasDisplayer());
         return listOfRacesForMedia = racesForMediaDialog.getAdditionalWidget();
     }
 
+    @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = (VerticalPanel) super.getAdditionalWidget();
         mainPanel.add(racesForMedia());
@@ -88,4 +63,17 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
         return mainPanel;
     }
 
+    @Override
+    protected void refreshUI() {
+        super.refreshUI();
+        try {
+            Date value = startTimeBox.getValue();
+            if (value != null) {
+                presenter.getRegattasRefresher().reloadAndCallFillAll();
+                listOfRacesForMedia.setVisible(true);
+            }
+        } catch (Exception e) {
+            listOfRacesForMedia.setVisible(false);
+        }
+    }
 }

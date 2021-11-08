@@ -54,14 +54,12 @@ public class ParallelGroupedNumberPairCollectingProcessor
 
             final Double doubleValueA = a == null ? null : a.doubleValue();
             final Double doubleValueB = b == null ? null : b.doubleValue();
-            
             if (doubleValueA != null && doubleValueB != null) {
-                if(aggregate == null) {
+                if (aggregate == null) {
                     aggregate = new HashSet<>();
                     aggregate.add(new Pair<>(doubleValueA, doubleValueB));
                     individualPairs.put(element.getKey(), aggregate);
-                }
-                else {
+                } else {
                     individualPairs.get(element.getKey()).add(new Pair<>(doubleValueA, doubleValueB));
                 }
             } 
@@ -83,6 +81,9 @@ public class ParallelGroupedNumberPairCollectingProcessor
     protected Map<GroupKey, PairWithStats<Number>> aggregateResult() {
         Map<GroupKey, PairWithStats<Number>> result = new HashMap<>();
         for (Entry<GroupKey, HashSet<Pair<Number, Number>>> sumAggregationEntry : individualPairs.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             GroupKey key = sumAggregationEntry.getKey();
             result.put(key, new PairWithStatsImpl<Number>(null,
                     /* min */ null, 

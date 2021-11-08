@@ -55,6 +55,6 @@ public class MasterDataImportPO extends PageArea {
         }
         new Select(leaderBoardGroupListBox).selectByValue(eventName);
         importBtn.click();
-        waitForAlertAndDismiss();
+        waitForNotificationAndDismiss();
     }
 }

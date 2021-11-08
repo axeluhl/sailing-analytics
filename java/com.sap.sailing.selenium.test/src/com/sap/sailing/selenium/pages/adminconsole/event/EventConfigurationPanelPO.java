@@ -11,9 +11,9 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupCreateDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaCreateDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.security.DataEntryWithSecurityActionsPO;
 import com.sap.sailing.selenium.pages.common.ConfirmDialogPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
-import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 import com.sap.sailing.selenium.pages.regattaoverview.RegattaOverviewPage;
 
@@ -28,7 +28,7 @@ public class EventConfigurationPanelPO extends PageArea {
     public static final String ID_LINK_LEADERBORAD_TO_GROUP_DIALOG = "LinkRegattaLeaderboardToLeaderboardGroupOfEventDialog";
     public static final String ID_LINK_EVENT_OVERVIEW_URL_LABEL = "EventOverviewURLLabel";
     
-    public static class EventEntryPO extends DataEntryPO {
+    public static class EventEntryPO extends DataEntryWithSecurityActionsPO {
 
         public EventEntryPO(CellTablePO<?> table, WebElement element) {
             super(table, element);
@@ -39,9 +39,14 @@ public class EventConfigurationPanelPO extends PageArea {
             return getColumnContent("Event");
         }
         
+        public String getUUID() {
+            return getColumnContent("ID");
+        }
+        
         public String getEventURL() {
             return getWebElement().findElement(By.xpath(".//td/div/a")).getAttribute("href");
-        }        
+        }
+
     }
     
     @FindBy(how = BySeleniumId.class, using = "RefreshEventsButton")
@@ -66,14 +71,14 @@ public class EventConfigurationPanelPO extends PageArea {
     
     public void createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(String eventName, String eventDesc,
             String venue, Date eventStartDate, Date eventEndDate, boolean isPublic, String regattaName, String boatClass,
-            Date regattaStartDate, Date regattaEndDate, boolean useOverallLeaderboard, String...courseAreaNames) {
+            Date regattaStartDate, Date regattaEndDate, boolean useOverallLeaderboard, String... courseAreaNames) {
         createEvent(eventName, eventDesc, venue, eventStartDate, eventEndDate, isPublic, courseAreaNames).pressYes();
         LeaderboardGroupCreateDialogPO leaderboardGroupCreateDialogPO = getPO(LeaderboardGroupCreateDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_DIALOG);
         leaderboardGroupCreateDialogPO.setUseOverallLeaderboard(useOverallLeaderboard);
         leaderboardGroupCreateDialogPO.pressOk();
         waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_CONFIRM_DIALOG, 5).pressYes();
-        if(courseAreaNames.length > 0) {
-            createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate, eventName, "Default").pressOk();
+        if (courseAreaNames.length > 0) {
+            createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate, eventName, courseAreaNames).pressOk();
         } else {
             createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate).pressOk();
         }
@@ -119,11 +124,12 @@ public class EventConfigurationPanelPO extends PageArea {
         return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG, 5);
     }
     
-    private ConfirmDialogPO createRegatta(String name, String boatClass, Date start, Date end, String eventToLink, String courseAreaToLink) {
+    private ConfirmDialogPO createRegatta(String name, String boatClass, Date start, Date end, String eventToLink,
+            String[] courseAreasToLink) {
         RegattaCreateDialogPO createDialog = getPO(RegattaCreateDialogPO::new, ID_REGATTA_CREATE_DIALOG);
         createDialog.setValues(name, boatClass, start, end);
-        if(eventToLink != null && courseAreaToLink != null) {
-            createDialog.setEventAndCourseArea(eventToLink, courseAreaToLink);
+        if (eventToLink != null && courseAreasToLink != null) {
+            createDialog.setEventAndCourseArea(eventToLink, courseAreasToLink);
         }
         createDialog.pressOk();
         return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG, 30);
@@ -144,6 +150,12 @@ public class EventConfigurationPanelPO extends PageArea {
         WebElement element = findElementBySeleniumId(ID_LINK_EVENT_OVERVIEW_URL_LABEL);
         String regattaOverviewLink = element.getAttribute("href");
         return regattaOverviewLink;
+    }
+    
+    public EventConfigurationPanelPO refreshEvents() {
+        refreshEventsButton.click();
+        waitForAjaxRequests();
+        return this;
     }
     
 }

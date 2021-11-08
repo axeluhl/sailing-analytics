@@ -525,7 +525,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         raceStatusColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                if(entryClickedHandler != null) {
+                if (entryClickedHandler != null) {
                     entryClickedHandler.onEntryClicked(object);
                 }
             }
@@ -726,10 +726,6 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         });
     }
 
-    public List<RegattaOverviewEntryDTO> getAllRaces() {
-        return allEntries;
-    }
-
     @Override
     public boolean hasSettings() {
         return true;
@@ -807,17 +803,6 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                 }
             }
         }
-        // if (!hasAnyRaceGroupASeries) {
-        // if (regattaOverviewTable.getColumnIndex(seriesNameColumn) >= 0) {
-        // regattaOverviewTable.removeColumn(seriesNameColumn);
-        // }
-        // }
-        // if (!hasAnyRaceGroupAFleet) {
-        // if (regattaOverviewTable.getColumnIndex(fleetNameColumn) >= 0) {
-        // regattaOverviewTable.removeColumn(fleetNameColumn);
-        // }
-        // }
-        // regattaOverviewTable.redraw();
     }
 
     private DialogBox createCourseViewDialogBox(RaceInfoDTO raceInfoDTO) {
@@ -897,7 +882,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
     private String createRaceLink(RegattaOverviewEntryDTO entryDTO) {
         if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
             RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.raceInfo.raceIdentifier.getRegattaName(),
-                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.leaderboardName, null, null, null);
+                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.leaderboardName, null, null, null, null);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(true);
             

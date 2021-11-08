@@ -20,14 +20,15 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public abstract class AbstractRegattaCompetitionFleetRace extends Widget implements RegattaCompetitionRaceView {
     
     private static final StringMessages I18N = StringMessages.INSTANCE;
-    private final RaceviewerLaunchPadController launchPadController;
+    private final RaceviewerLaunchPadController<SimpleRaceMetadataDTO> launchPadController;
     protected final Element mainElement;
     private final SimpleRaceMetadataDTO race;
 
-    protected AbstractRegattaCompetitionFleetRace(final SimpleRaceMetadataDTO race,
+    protected AbstractRegattaCompetitionFleetRace(final SimpleRaceMetadataDTO race, String fleetName,
             RegattaCompetitionPresenter presenter) {
         this.race = race;
-        this.launchPadController = new RaceviewerLaunchPadController(presenter::getRaceViewerURL);
+        this.launchPadController = new RaceviewerLaunchPadController<>(presenter::getRaceViewerURL,
+                r -> presenter.getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), fleetName));
         this.mainElement = getMainUiElement();
         setupRaceState(race);
         getRaceNameUiElement().setInnerText(race.getRaceName());
@@ -60,7 +61,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
             mainElement.addClassName(getRaceLiveStyleName());
             getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
         } else if (race.isFinished()) {
-            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.actionAnalyze());
+            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.tracking());
         } else {
             mainElement.addClassName(getRacePlannedStyleName());
             if (race.isScheduled()) {

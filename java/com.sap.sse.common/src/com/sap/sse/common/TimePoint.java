@@ -16,6 +16,22 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
 
     Date asDate();
     
+    static TimePoint of(Date date) {
+        return new MillisecondsTimePoint(date);
+    }
+    
+    static TimePoint of(Long millis) {
+        return millis == null ? null : of((long) millis);
+    }
+    
+    static TimePoint of(long millis) {
+        return new MillisecondsTimePoint(millis);
+    }
+    
+    static TimePoint now() {
+        return MillisecondsTimePoint.now();
+    }
+
     /**
      * @return a time point that is {@code milliseconds} later than {@code this} time point, except in case the
      *         resulting time point would be after the {@link #EndOfTime} in which case {@link #EndOfTime} is returned
@@ -59,4 +75,5 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
      *         minimal. In particular, the time difference will always be less than or equal to 30s.
      */
     TimePoint getNearestModuloOneMinute(TimePoint syncToClosestSecondsAndMillisOf);
+
 }

@@ -36,13 +36,14 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
                 }
             }
             getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
+            super.onInitializationFinished();
         }
     }
 
     @Override
     public void competitorsForRaceDefined(Iterable<CompetitorDTO> competitorsInRace) {
         this.competitorsInRace = competitorsInRace;
-        trigger();
+        checkIfTrigger();
     }
     
     protected Iterable<CompetitorDTO> getCompetitorsInRace() {

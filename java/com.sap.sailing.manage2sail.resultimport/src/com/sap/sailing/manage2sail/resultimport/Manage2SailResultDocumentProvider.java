@@ -2,9 +2,9 @@ package com.sap.sailing.manage2sail.resultimport;
 
 import java.net.URL;
 
+import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 
 public class Manage2SailResultDocumentProvider extends AbstractManage2SailResultDocumentProvider implements ResultDocumentProvider {
 

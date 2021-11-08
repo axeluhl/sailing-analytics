@@ -5,9 +5,9 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.place.shared.Prefix;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
 public class ConfirmationPlace extends AbstractBasePlace implements HasMobileVersion {
     private final String name;
@@ -27,6 +27,7 @@ public class ConfirmationPlace extends AbstractBasePlace implements HasMobileVer
     }
 
     public ConfirmationPlace(Action action, String name, String validationSecret) {
+        super((String) null); // TODO bug5288 the AbstractBasePlace logic is 
         this.action = action;
         this.name = name;
         this.validationSecret = validationSecret;
@@ -86,7 +87,22 @@ public class ConfirmationPlace extends AbstractBasePlace implements HasMobileVer
 
         @Override
         public String getToken(ConfirmationPlace place) {
-            return place.getAction().name()+"?u="+URL.encodeQueryString(place.getName())+"&v="+URL.encodeQueryString(place.getValidationSecret());
+            final StringBuilder result = new StringBuilder(place.getAction().name());
+            if (place.getName() != null || place.getValidationSecret() != null) {
+                result.append('?');
+                if (place.getName() != null) {
+                    result.append("u=");
+                    result.append(URL.encodeQueryString(place.getName()));
+                }
+                if (place.getValidationSecret() != null) {
+                    if (place.getName() != null) {
+                        result.append('&');
+                    }
+                    result.append("v=");
+                    result.append(URL.encodeQueryString(place.getValidationSecret()));
+                }
+            }
+            return result.toString();
         }
     }
 }

@@ -36,7 +36,8 @@ public class GetStagedEventsAction implements SailingAction<ListResult<EventStag
     @GwtIncompatible
     public ListResult<EventStageDTO> execute(final SailingDispatchContext context) throws DispatchException {
         EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();
-        HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(),
+        HomeServiceUtil.forAllPublicEventsWithReadPermission(context.getRacingEventService(), context.getRequest(),
+                context.getSecurityService(),
                 stageCandidateCalculator);
         ListResult<EventStageDTO> result = new ListResult<>();
         int count = 0;

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 
 /**
  * Interface holding configuration options for a Regatta, including configurations for 
@@ -26,6 +27,12 @@ public interface RegattaConfiguration extends Serializable, Cloneable {
      * Gets the default {@link RacingProcedureType} for races configured.
      */
     RacingProcedureType getDefaultRacingProcedureType();
+
+    /**
+     * Gets the default protest time duration. May be {@code null} in case no default is set for the
+     * regatta.
+     */
+    Duration getDefaultProtestTimeDuration();
     
     /**
      * Gets the configuration for RRS26 races.

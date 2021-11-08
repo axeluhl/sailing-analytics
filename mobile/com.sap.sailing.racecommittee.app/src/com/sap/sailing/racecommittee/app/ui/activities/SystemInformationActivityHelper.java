@@ -1,12 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.util.Date;
-
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.EulaHelper;
-import com.sap.sailing.android.shared.util.LicenseHelper;
-import com.sap.sailing.racecommittee.app.R;
-
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
 import android.view.View;
@@ -14,6 +7,16 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.LicenseHelper;
+import com.sap.sailing.racecommittee.app.R;
+
+import java.util.Date;
+
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.model.Notices;
 
@@ -36,12 +39,15 @@ public class SystemInformationActivityHelper {
     public void updateSendingServiceInformation() {
         TextView statusView = (TextView) activity.findViewById(R.id.system_information_persistence_status);
         TextView waitingView = (TextView) activity.findViewById(R.id.system_information_persistence_waiting);
-        if (activity.boundSendingService) {
-            Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
+        final MessageSendingService service = activity.getService();
+        if (service != null && activity.isBound()) {
+            Date lastSuccessfulSend = service.getLastSuccessfulSend();
             String never = activity.getString(R.string.never);
-            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent, activity.sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? never : lastSuccessfulSend));
+            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent,
+                    service.getDelayedIntentsCount(),
+                    lastSuccessfulSend == null ? never : lastSuccessfulSend));
 
-            Iterable<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
+            Iterable<String> delayedIntentsContent = service.getDelayedIntentsContent();
             StringBuilder waitingEvents = new StringBuilder();
             synchronized (delayedIntentsContent) {
                 boolean first = true;
@@ -66,8 +72,9 @@ public class SystemInformationActivityHelper {
         clearButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (activity.boundSendingService) {
-                    activity.sendingService.clearDelayedIntents();
+                final MessageSendingService service = activity.getService();
+                if (service != null && activity.isBound()) {
+                    service.clearDelayedIntents();
                 } else {
                     Toast.makeText(activity.getApplicationContext(), "", Toast.LENGTH_SHORT).show();
                 }
@@ -102,8 +109,8 @@ public class SystemInformationActivityHelper {
             installView.setText(activity.getString(R.string.generic_error));
         } else {
             Date installDate = new Date(info.lastUpdateTime);
-            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate), DateFormat
-                .getTimeFormat(activity).format(installDate)));
+            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate),
+                    DateFormat.getTimeFormat(activity).format(installDate)));
         }
     }
 
@@ -128,12 +135,10 @@ public class SystemInformationActivityHelper {
         Notices notices = new Notices();
         LicenseHelper licenseHelper = new LicenseHelper();
         notices.addNotice(licenseHelper.getAndroidSupportNotice(activity));
-        notices.addNotice(licenseHelper.getAdvancedRecyclerViewNotice(activity));
         notices.addNotice(licenseHelper.getJsonSimpleNotice());
         notices.addNotice(licenseHelper.getDialogNotice(activity));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.license_information));
-        builder.setThemeResourceId(R.style.AppTheme_AlertDialog);
         builder.setNotices(notices);
         builder.build().show();
     }

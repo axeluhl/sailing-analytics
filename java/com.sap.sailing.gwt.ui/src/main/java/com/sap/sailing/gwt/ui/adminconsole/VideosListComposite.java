@@ -31,7 +31,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -47,6 +49,7 @@ public class VideosListComposite extends Composite {
     private SingleSelectionModel<VideoDTO> videoSelectionModel;
     private ListDataProvider<VideoDTO> videoListDataProvider;
     private final Label noVideosLabel;
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
@@ -67,9 +70,9 @@ public class VideosListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public VideosListComposite(final StringMessages stringMessages) {
+    public VideosListComposite(final StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable) {
         this.stringMessages = stringMessages;
-
+        this.storageServiceAvailable = storageServiceAvailable;
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
@@ -82,7 +85,7 @@ public class VideosListComposite extends Composite {
         createVideoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.GALLERY);
+                openCreateVideoDialog(MediaTagConstants.GALLERY.getName());
             }
         });
         videosControlsPanel.add(createVideoBtn);
@@ -91,7 +94,7 @@ public class VideosListComposite extends Composite {
         addLiveStreamBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.LIVESTREAM);
+                openCreateVideoDialog(MediaTagConstants.LIVESTREAM.getName());
             }
         });
         videosControlsPanel.add(addLiveStreamBtn);
@@ -100,7 +103,7 @@ public class VideosListComposite extends Composite {
         addHighlightBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.HIGHLIGHT);
+                openCreateVideoDialog(MediaTagConstants.HIGHLIGHT.getName());
             }
         });
         videosControlsPanel.add(addHighlightBtn);
@@ -245,33 +248,35 @@ public class VideosListComposite extends Composite {
     }
 
     private void openCreateVideoDialog(String initialTag) {
-        VideoCreateDialog dialog = new VideoCreateDialog(initialTag, stringMessages, new DialogCallback<VideoDTO>() {
-            @Override
-            public void cancel() {
-            }
+        VideoCreateDialog dialog = new VideoCreateDialog(initialTag, stringMessages, storageServiceAvailable,
+                new DialogCallback<VideoDTO>() {
+                    @Override
+                    public void cancel() {
+                    }
 
-            @Override
-            public void ok(VideoDTO newVideo) {
-                videoListDataProvider.getList().add(newVideo);
-                updateTableVisisbilty();
-            }
-        });
+                    @Override
+                    public void ok(VideoDTO newVideo) {
+                        videoListDataProvider.getList().add(newVideo);
+                        updateTableVisisbilty();
+                    }
+                });
         dialog.show();
     }
 
     private void openEditVideoDialog(final VideoDTO selectedVideo) {
-        VideoEditDialog dialog = new VideoEditDialog(selectedVideo, stringMessages, new DialogCallback<VideoDTO>() {
-            @Override
-            public void cancel() {
-            }
+        VideoEditDialog dialog = new VideoEditDialog(selectedVideo, stringMessages, storageServiceAvailable,
+                new DialogCallback<VideoDTO>() {
+                    @Override
+                    public void cancel() {
+                    }
 
-            @Override
-            public void ok(VideoDTO updatedVideo) {
-                videoListDataProvider.getList().remove(selectedVideo);
-                videoListDataProvider.getList().add(updatedVideo);
-                updateTableVisisbilty();
-            }
-        });
+                    @Override
+                    public void ok(VideoDTO updatedVideo) {
+                        videoListDataProvider.getList().remove(selectedVideo);
+                        videoListDataProvider.getList().add(updatedVideo);
+                        updateTableVisisbilty();
+                    }
+                });
         dialog.show();
     }
 

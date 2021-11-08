@@ -276,8 +276,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         return configuration;
     }
 
-    protected abstract Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime);
-
     @Override
     public void onStartTimeChanged(ReadonlyRaceState state) {
         getChangedListeners().onActiveFlagsChanged(this);

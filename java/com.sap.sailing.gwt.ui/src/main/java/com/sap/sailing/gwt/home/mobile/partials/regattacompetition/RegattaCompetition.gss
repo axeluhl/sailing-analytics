@@ -50,6 +50,7 @@
   text-align: center;
 }
 .regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race_title {
+  text-overflow: ellipsis;
   position: absolute;
   top: 50%;
   left: 1.133333333333333em;
@@ -177,4 +178,20 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.regattacompetition_phase_fleet_race_title_big {
+  width: 27%;
+}
+
+@media (min-width: 375px) {
+  .regattacompetition_phase_fleet_race_title_big {
+    width: 33%;
+  }
+}
+
+@media (min-width: 700px) {
+  .regattacompetition_phase_fleet_race_title_big {
+    width: 40%;
+  }
 }

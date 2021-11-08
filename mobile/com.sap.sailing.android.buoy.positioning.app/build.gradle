@@ -1,0 +1,117 @@
+apply plugin: "com.android.application"
+if (!project.hasProperty("xmake")) {
+    apply plugin: "com.getkeepsafe.dexcount"
+}
+
+android {
+    buildToolsVersion rootProject.ext.buildTools
+    compileSdkVersion rootProject.ext.compileSdk
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.sourceCompatibilityVersion
+        targetCompatibility rootProject.ext.targetCompatibilityVersion
+    }
+
+    /**
+     * Copies apk into www apps directory and create version file
+     */
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = new File(outputFileName.replace("-$variant.buildType.name", ""))
+        }
+        variant.assemble.doLast { assemble ->
+            // Create version file
+            def versionFile = new File(rootProject.ext.destinationFolder, packageName + ".version")
+            versionFile.text = packageName + ".apk=$appVersionCode-$variant.buildType.name"
+            copy {
+                from variant.outputs*.outputFile
+                into rootProject.ext.destinationFolder
+            }
+        }
+    }
+
+    defaultConfig {
+        applicationId packageName
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.targetSdk
+        versionCode appVersionCode.toInteger()
+        versionName appVersionName
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile "AndroidManifest.xml"
+            java.srcDirs = ["src"]
+            res.srcDirs = ["res"]
+            assets.srcDirs = ["assets", "assets_gen"]
+        }
+
+        androidTest {
+            java.srcDirs = ["tests-ui/src"]
+            res.srcDirs = ["tests-ui/res"]
+            assets.srcDirs = ["tests-ui/assets"]
+        }
+
+        test {
+            java.srcDirs = ["tests-jvm/src"]
+        }
+    }
+
+    signingConfigs {
+        stg_debug {
+            keyAlias "stg_debug"
+            keyPassword "stg_debug"
+            storeFile file("../android-keystore/STG-debug.jks")
+            storePassword "stg_debug"
+        }
+    }
+
+    buildTypes {
+        debug {
+            versionNameSuffix ".debug"
+            signingConfig signingConfigs.stg_debug
+
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt", "../proguard-mobile.txt"
+        }
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt", "../proguard-mobile.txt"
+        }
+    }
+
+    packagingOptions {
+        exclude "LICENSE.txt"
+    }
+}
+
+dependencies {
+    /* local dependencies */
+    implementation project(':mobile:com.sap.sailing.android.shared')
+    /* JVM tests */
+    testImplementation "junit:junit:${rootProject.ext.junit}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
+}
+
+// Custom tasks
+preBuild.doLast {
+    // save the combined build info into assets/build.info file
+    def repo = org.ajoberstar.grgit.Grgit.open(dir: System.env.XMAKE_PROJECTDIR)
+    def result_line = "${repo.branch.current().getName()}-${repo.head().abbreviatedId} (${new Date().toString()})\n"
+    def assetsDir = android.sourceSets.main.assets.srcDirs.toArray()[1]
+    delete(assetsDir)
+    mkdir(assetsDir)
+    def buildInfoFile = new File(assetsDir, 'build_gradle.info').getAbsolutePath()
+    new File(buildInfoFile).write(result_line)
+    repo.close()
+}
+
+/**
+ * Deletes apk and version from www apps directory
+ */
+clean.doLast {
+    ant.delete() {
+        fileset(dir: file("../../java/com.sap.sailing.www/apps"), includes: "$packageName*")
+    }
+}

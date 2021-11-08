@@ -24,6 +24,21 @@ public interface PairingListTemplate {
      * @return double, stated as the standard deviation.
      */
     double getQuality();
+    
+    /**
+     * The value corresponds to the quality of the distribution of competitors on the different boats. The quality is calculated by the standard
+     * deviation of values in assignment matrix.
+     * 
+     * @return double, stated as the standard deviation.
+     */
+    double getBoatAssignmentsQuality();
+    
+    /**
+     * This value represents the number of boat changes needed in the whole competition.
+     * 
+     * @return int, sum of boat changes.
+     */
+    int getBoatChanges();
 
     /**
      * Every row of this array represents a single group of a flight with competitors per group (competitors/groups) in

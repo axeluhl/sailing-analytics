@@ -42,10 +42,6 @@
             <span><ui:text from="{i18n.anniversaryLegalNoticeSectionCommunicationParagraph}"/></span>
         </p>
         <p>
-            <span><ui:text from="{i18n.anniversaryLegalNoticeSectionCharitablyPurposeParagraphTitle}"/></span>
-            <span><ui:text from="{i18n.anniversaryLegalNoticeSectionCharitablyPurposeParagraph}"/></span>
-        </p>
-        <p>
             <span><ui:text from="{i18n.anniversaryLegalNoticeSectionPrizesParagraphTitle}"/></span>
             <span ui:field="legalNoticeSectionPrizes"></span>
         </p>

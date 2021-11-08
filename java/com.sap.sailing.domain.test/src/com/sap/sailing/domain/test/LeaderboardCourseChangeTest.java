@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -43,6 +42,7 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -52,6 +52,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -64,7 +65,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LeaderboardCourseChangeTest {
-
     /**
      * See bug 2011
      * 
@@ -74,25 +74,21 @@ public class LeaderboardCourseChangeTest {
      */
     @Test
     public void testLeaderboardDTOCreationForCourseChange() throws NoWindException, InterruptedException, ExecutionException {
-        
         Date date = Calendar.getInstance().getTime();
         TimePoint timePoint = new MillisecondsTimePoint(date);
-        
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
-        
         Fleet fleet = new FleetImpl("TestFleet");
         Series series = createSeries(trackedRegattaRegistry, fleet);
         Set<Series> seriesSet = new HashSet<>();
         seriesSet.add(series);
-        
         BoatClass boatClass = new BoatClassImpl("TestClass", true);
-
         String raceColumnName = "TestRace";
         RaceColumn raceColumn = series.addRaceColumn(raceColumnName, trackedRegattaRegistry);
         ScoringScheme scoringScheme = new LowPoint();
         Regatta mockedRegatta = new RegattaImpl(RegattaImpl.getDefaultName("TestRegatta", boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, seriesSet, false, scoringScheme,
-                UUID.randomUUID(), mock(CourseArea.class), OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, seriesSet, false, scoringScheme,
+                UUID.randomUUID(), mock(CourseArea.class), OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         ControlPoint start = new MarkImpl("Start");
         ControlPoint m1 = new MarkImpl("M1");
         ControlPoint m2 = new MarkImpl("M2");
@@ -117,26 +113,20 @@ public class LeaderboardCourseChangeTest {
         raceColumn.setTrackedRace(fleet, mockedTrackedRace);
         Set<String> raceColumnNames = new HashSet<>();
         raceColumnNames.add(raceColumnName);
-        
         int[] ruleRaw = { 5, 3, 2 };
         ThresholdBasedResultDiscardingRule rule = new ThresholdBasedResultDiscardingRuleImpl(ruleRaw);
         Leaderboard leaderboard = createRegattaLeaderboard(mockedRegatta, rule);
-        
-        DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
+        DomainFactory baseDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
                 trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
-
         assertEquals(6, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
-
         course.removeWaypoint(2);
         course.removeWaypoint(3);
-
         leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false, trackedRegattaRegistry,
                 baseDomainFactory, /* fillTotalPointsUncorrected */ false);
         assertEquals(4, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
-
     }
 
     protected RegattaLeaderboard createRegattaLeaderboard(Regatta mockedRegatta,
@@ -150,7 +140,7 @@ public class LeaderboardCourseChangeTest {
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
                 new HashSet<Sideline>(), EmptyWindStore.INSTANCE, 5000, 20000, 20000,
                 /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
-                mock(RaceLogResolver.class)));
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null));
 
         return spyedTrackedRace;
     }

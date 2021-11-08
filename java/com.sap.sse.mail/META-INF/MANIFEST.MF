@@ -15,8 +15,8 @@ Import-Package: javax.mail,
  javax.mail.util;version="1.4.0",
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1"
-Require-Bundle: com.sap.sse.replication,
- com.sap.sse.operationaltransformation,
+Require-Bundle: com.sap.sse.operationaltransformation,
  com.sap.sse.common,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sse.replication.interfaces;bundle-version="1.0.0"
 Automatic-Module-Name: com.sap.sse.mail

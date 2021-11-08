@@ -16,6 +16,9 @@
 .accordion_content {
   font-size: inherit;
 }
+.accordion_panel {
+    float: none;
+}
 .eventsoverviewrecent {
   font-size: 1rem;
   padding-top: 2em;

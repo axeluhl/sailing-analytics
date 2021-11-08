@@ -5,7 +5,7 @@
 .flyover_position_grid {
     visibility: visible;
     right: 0.25em;
-    top: 55px;
+    top: 60px;
 }
 
 @media ( max-width: 40em) {

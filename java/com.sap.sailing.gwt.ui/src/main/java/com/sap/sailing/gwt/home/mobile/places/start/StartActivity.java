@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.home.mobile.places.start.StartView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
@@ -33,11 +32,13 @@ public class StartActivity extends AbstractActivity implements Presenter {
         panel.setWidget(clientFactory.createBusyView());
         Window.setTitle(place.getTitle());
         final StartView view = new StartViewImpl(StartActivity.this);
+        final RefreshManagerWithErrorAndBusy refreshManager = new RefreshManagerWithErrorAndBusy(view.asWidget(), panel,
+                clientFactory.getDispatch(), clientFactory);
         clientFactory.getDispatch().execute(new GetStagedEventsAction(true), 
                 new ActivityCallback<ListResult<EventStageDTO>>(clientFactory, panel) {
             @Override
             public void onSuccess(ListResult<EventStageDTO> result) {
-                panel.setWidget(view.asWidget());
+                refreshManager.attachContent();
                 Window.setTitle(place.getTitle());
                 view.setFeaturedEvents(result.getValues());
             }
@@ -50,8 +51,6 @@ public class StartActivity extends AbstractActivity implements Presenter {
             }
         });
 
-        final RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(view.asWidget(), panel,
-                clientFactory.getDispatch(), clientFactory);
         refreshManager.add(view.getAnniversariesView(), new GetAnniversariesAction());
     }
 

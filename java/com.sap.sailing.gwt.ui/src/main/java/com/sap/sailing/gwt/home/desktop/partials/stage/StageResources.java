@@ -30,6 +30,7 @@ public interface StageResources extends ClientBundle {
         String stageteaser_content_band_text_headline();
         String stageteaser_content_band_text_name();
         String stageteaser_content_band_action();
+        String stageteaser_rightbound_bond_item();
         String swipercontainer();
         String swiperslide();
         String stage();
@@ -37,6 +38,7 @@ public interface StageResources extends ClientBundle {
         String stage_controls();
         String stage_progress();
         String stage_progress_bar();
+        String stage_dataBy_logo_container();
     }
     
 }

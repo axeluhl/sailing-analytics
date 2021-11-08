@@ -8,8 +8,8 @@ import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifierResolver;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnRegatta;
 

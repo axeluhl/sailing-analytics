@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +39,9 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
+import com.sap.sailing.domain.tracking.RaceWindCalculator;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
@@ -53,8 +56,9 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.communication.race.wind.SimpleWindDTO;
+import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -104,7 +108,7 @@ public class RaceContext {
         this.fleet = fleet;
         trackedRace = raceColumn.getTrackedRace(fleet);
         raceLog = raceColumn.getRaceLog(fleet);
-        state = (raceLog == null) ? null : ReadonlyRaceStateImpl.create(raceLogResolver, raceLog);
+        state = (raceLog == null) ? null : ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceLog);
     }
 
     private boolean isShowFleetData() {
@@ -153,14 +157,15 @@ public class RaceContext {
         final SimpleWindDTO result;
         if (trackedRace != null) {
             TimePoint toTimePoint = getWindToTimePoint();
-            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = RaceWindCalculator.getWindFromTrackedRace(toTimePoint,trackedRace);
+            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence =
+                    new RaceWindCalculator().getWindFromTrackedRace(toTimePoint, trackedRace);
             if (averagedWindWithConfidence != null) {
                 result = new SimpleWindDTO(averagedWindWithConfidence.getObject().getFrom().getDegrees(), averagedWindWithConfidence.getObject().getKnots());
             } else {
                 result = null;
             }
         } else {
-            Wind wind = RaceWindCalculator.checkForWindFixesFromRaceLog(raceLog);
+            Wind wind = new RaceWindCalculator().checkForLatestWindFixFromRaceLog(raceLog);
             if (wind != null) {
                 result = new SimpleWindDTO(wind.getFrom().getDegrees(), wind.getKnots());
             } else {
@@ -180,7 +185,7 @@ public class RaceContext {
     private TimePoint getWindToTimePoint() {
         final TimePoint finishTime = getFinishTime();
         TimePoint toTimePoint = finishTime == null ? getLiveTimePoint() : finishTime;
-        if(trackedRace != null) {
+        if (trackedRace != null) {
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             if (newestEvent != null && newestEvent.before(toTimePoint)) {
                 toTimePoint = newestEvent;
@@ -251,7 +256,7 @@ public class RaceContext {
     }
     
     private String getCourseAreaOrNull() {
-        return HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard);
+        return HomeServiceUtil.getCourseAreaNameForRegattaIfThereIsMoreThanOne(event, leaderboard);
     }
 
     private RaceProgressDTO getProgressOrNull() {
@@ -336,7 +341,8 @@ public class RaceContext {
     public RaceListRaceDTO getFinishedRaceOrNull() {
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
-        if (getLiveRaceViewState() == RaceViewState.FINISHED) {
+        // See: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5029
+        if (getLiveRaceViewState() == RaceViewState.FINISHED && !isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
             RaceListRaceDTO raceListRaceDTO = new RaceListRaceDTO(getLeaderboardName(), 
                     getRaceIdentifierOrNull(), getRaceName());
@@ -346,15 +352,22 @@ public class RaceContext {
             raceListRaceDTO.setWindSourcesCount(getWindSourceCount());
             raceListRaceDTO.setVideoCount(getVideoCount());
             raceListRaceDTO.setAudioCount(getAudioCount());
-            raceListRaceDTO.setWind(RaceWindCalculator.getWindStatisticsOrNull(trackedRace,getWindToTimePoint(),getStartTime(),raceLog));
+            final WindSummary windSummary = new RaceWindCalculator().getWindSummary(trackedRace, raceLog);
+            final WindStatisticsDTO windStatsDTO;
+            if (windSummary != null) {
+                windStatsDTO = new WindStatisticsDTO(windSummary.getTrueWindDirection().getDegrees(),
+                        windSummary.getTrueLowerboundWind().getKnots(), windSummary.getTrueUpperboundWind().getKnots());
+            } else {
+                windStatsDTO = null;
+            }
+            raceListRaceDTO.setWind(windStatsDTO);
             return raceListRaceDTO;
         }
         return null;
     }
     
     public SimpleRaceMetadataDTO getRaceCompetitionFormat() {
-        SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), 
-                getRaceIdentifierOrNull(), getRaceName());
+        SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
         fillSimpleRaceMetadata(raceDTO);
         return raceDTO;
     }
@@ -438,6 +451,9 @@ public class RaceContext {
         final Iterable<String> leaderboardGroupNames = leaderboardContext.getLeaderboardGroupNames();
         dto.setLeaderboardGroupName(leaderboardGroupNames == null || Util.isEmpty(leaderboardGroupNames) ? null :
             leaderboardGroupNames.iterator().next());
+        final Iterable<UUID> leaderboardGroupIds = leaderboardContext.getLeaderboardGroupIds();
+        dto.setLeaderboardGroupId(leaderboardGroupIds == null || Util.isEmpty(leaderboardGroupIds) ? null :
+            leaderboardGroupIds.iterator().next());
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
@@ -538,13 +554,13 @@ public class RaceContext {
             RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 Flags upperFlag = abortingFlagEvent.getUpperFlag();
-                if(upperFlag.equals(Flags.AP)) {
+                if (upperFlag.equals(Flags.AP)) {
                     return RaceViewState.POSTPONED;
                 }
-                if(upperFlag.equals(Flags.NOVEMBER)) {
+                if (upperFlag.equals(Flags.NOVEMBER)) {
                     return RaceViewState.ABANDONED;
                 }
-                if(upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+                if (upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
                     return RaceViewState.ABANDONED;
                 }
             }

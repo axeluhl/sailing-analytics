@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -102,16 +104,21 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
         seriesCreationParameters.put(seriesName, creationParametersForDefaultSeries);
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);
-        AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
-                /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
-                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true,
-                /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN);
+        AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName,
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
+                /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true, new LowPoint(),
+                /* a single default course area ID */ Collections.singleton(master.getBaseDomainFactory()
+                        .getOrCreateCourseArea(UUID.randomUUID(), "Course Area").getId()),
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN);
         return master.apply(addRegattaOperation);
     }
 
     protected FlexibleLeaderboard setupFlexibleLeaderboard(final String leaderboardName) {
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, leaderboardName, new int[] { 19, 44 }, new LowPoint(), null);
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName,
+                leaderboardName, new int[] { 19, 44 }, new LowPoint(), Collections.emptySet());
         FlexibleLeaderboard masterLeaderboard = master.apply(createTestLeaderboard);
         return masterLeaderboard;
     }

@@ -114,7 +114,7 @@ public abstract class GwtHttpRequestUtils {
      * @param defaultValue
      *            the default value to use as fallback
      */
-    public static long getLongParameter(String name, long defaultValue) {
+    public static Long getLongParameter(String name, Long defaultValue) {
         if (Window.Location.getParameter(name) == null) {
             return defaultValue;
         }
@@ -146,7 +146,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter
      */
     public static long getRequiredLongParameter(String name) throws ParseHttpParameterException {
-
         return LONG_PARSER.parseLong(name, Window.Location.getParameter(name));
     }
 

@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import android.content.Context;
-
 import com.sap.sailing.android.shared.R;
 
+import android.content.Context;
 import de.psdev.licensesdialog.licenses.ApacheSoftwareLicense20;
 import de.psdev.licensesdialog.licenses.License;
 import de.psdev.licensesdialog.model.Notice;
@@ -34,14 +33,6 @@ public class LicenseHelper {
         String name = "Android Support Library";
         String url = "http://developer.android.com/tools/support-library/index.html";
         String copyright = getContent(context, R.raw.android_support_library);
-        License license = new ApacheSoftwareLicense20();
-        return new Notice(name, url, copyright, license);
-    }
-
-    public Notice getAdvancedRecyclerViewNotice(Context context) {
-        String name = "Advanced RecyclerView";
-        String url = "https://github.com/h6ah4i/android-advancedrecyclerview";
-        String copyright = getContent(context, R.raw.advanced_recylerview);
         License license = new ApacheSoftwareLicense20();
         return new Notice(name, url, copyright, license);
     }

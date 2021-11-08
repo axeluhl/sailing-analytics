@@ -11,8 +11,9 @@ import com.sap.sailing.datamining.impl.data.CompleteManeuverCurveWithEstimationD
 import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
-import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.ManeuverDetectorWithEstimationDataSupport;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
+import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorWithEstimationDataSupportDecoratorImpl;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
@@ -33,9 +34,9 @@ public class CompleteManeuverCurveWithEstimationDataRetrievalProcessor extends
 
     public CompleteManeuverCurveWithEstimationDataRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasCompleteManeuverCurveWithEstimationDataContext, ?>> resultReceivers,
-            ManeuverSettings settings, int retrievalLevel) {
+            ManeuverSettings settings, int retrievalLevel, String retrievedDataTypeMessageKey) {
         super(HasRaceOfCompetitorContext.class, HasCompleteManeuverCurveWithEstimationDataContext.class, executor,
-                resultReceivers, retrievalLevel);
+                resultReceivers, retrievalLevel, retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 
@@ -45,15 +46,29 @@ public class CompleteManeuverCurveWithEstimationDataRetrievalProcessor extends
         List<HasCompleteManeuverCurveWithEstimationDataContext> result = new ArrayList<>();
         TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         Competitor competitor = element.getCompetitor();
-        ManeuverDetector maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
+        ManeuverDetectorWithEstimationDataSupport maneuverDetector = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
+                new ManeuverDetectorImpl(trackedRace, competitor),
+                element.getTrackedRaceContext().getLeaderboardContext().getLeaderboardGroupContext().getPolarDataService());
+        
         Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, false);
+        if (isAborted()) {
+            return result;
+        }
+        
         Iterable<CompleteManeuverCurve> maneuverCurves = maneuverDetector.getCompleteManeuverCurves(maneuvers);
+        if (isAborted()) {
+            return result;
+        }
+        
         Iterable<CompleteManeuverCurveWithEstimationData> maneuversWithEstimationData = maneuverDetector
                 .getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
-
         CompleteManeuverCurveWithEstimationData previousManeuver = null;
         CompleteManeuverCurveWithEstimationData currentManeuver = null;
         for (CompleteManeuverCurveWithEstimationData nextManeuver : maneuversWithEstimationData) {
+            if (isAborted()) {
+                break;
+            }
+            
             if (currentManeuver != null) {
                 CompleteManeuverCurveWithEstimationDataWithContext maneuverWithContext = new CompleteManeuverCurveWithEstimationDataWithContext(
                         element, currentManeuver, settings, previousManeuver, nextManeuver);

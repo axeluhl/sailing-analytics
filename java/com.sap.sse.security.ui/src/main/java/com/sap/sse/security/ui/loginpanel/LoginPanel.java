@@ -7,27 +7,28 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.IconResources;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class LoginPanel extends HorizontalPanel implements UserStatusEventHandler {
-    public final UserManagementServiceAsync userManagementService;
+    public final UserManagementWriteServiceAsync userManagementWriteService;
     
     public static final StringMessages stringMessages = GWT.create(StringMessages.class);
 
@@ -41,7 +42,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
     private final OAuthLogin oAuthPanel;
 
     public LoginPanel(final LoginPanelCss css, final UserService userService) {
-        this.userManagementService = userService.getUserManagementService();
+        this.userManagementWriteService = userService.getUserManagementWriteService();
         this.userService = userService;
         css.ensureInjected();
         getElement().addClassName(css.loginPanel());
@@ -50,17 +51,17 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         signInLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementService, userService, new DialogCallback<UserData>() {
+                final SignInDialog signInDialog = new SignInDialog(stringMessages, userManagementWriteService, userService, new DialogCallback<UserData>() {
                     @Override
                     public void ok(UserData userData) {
                         userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.invalidCredentials());
+                                Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                             }
                             @Override public void onSuccess(SuccessInfo result) {
                                 if (!result.isSuccessful()) {
-                                    Window.alert(stringMessages.invalidCredentials());
+                                    Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                                 }
                             }
                         }));
@@ -74,23 +75,23 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         signUpLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final SignUpDialog signUpDialog = new SignUpDialog(stringMessages, userManagementService, new DialogCallback<UserData>() {
+                final SignUpDialog signUpDialog = new SignUpDialog(stringMessages, userManagementWriteService, new DialogCallback<UserData>() {
                     @Override
                     public void ok(final UserData userData) {
-                        userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
+                        userManagementWriteService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
                                 /* fullName */ null, /* company */ null, LocaleInfo.getCurrentLocale().getLocaleName(),
-                                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
+                                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.errorCreatingUser(userData.getUsername(), caught.getMessage()));
+                                Notification.notify(stringMessages.errorCreatingUser(userData.getUsername(), caught.getMessage()), NotificationType.ERROR);
                             }
                             @Override public void onSuccess(UserDTO result) {
                                 userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         // pretty strange; we just successfully created the user with these credentials...
-                                        Window.alert(stringMessages.invalidCredentials());
+                                        Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                                     }
                                     @Override public void onSuccess(SuccessInfo result) {}
                                 }));
@@ -125,7 +126,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
         add(signInLink);
         add(signUpLink);
         add(signOutLink);
-        oAuthPanel = new OAuthLogin(userManagementService);
+        oAuthPanel = new OAuthLogin(userManagementWriteService);
         add(oAuthPanel);
         userService.addUserStatusEventHandler(this);
         updateStatus();

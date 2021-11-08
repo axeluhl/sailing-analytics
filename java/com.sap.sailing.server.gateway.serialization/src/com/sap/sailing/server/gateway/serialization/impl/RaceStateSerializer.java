@@ -19,10 +19,10 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Fleet>> {
     private final RaceLogResolver raceLogResolver;
@@ -45,7 +45,7 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLogResolver, raceLog);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceLog);
             RaceLogRaceStatus status = state.getStatus();
             TimePoint startTime = state.getStartTime();
             TimePoint finishedTime = state.getFinishedTime();

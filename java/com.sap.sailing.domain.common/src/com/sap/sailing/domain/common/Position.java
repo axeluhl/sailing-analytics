@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 
 
 public interface Position extends Serializable {
@@ -134,4 +135,10 @@ public interface Position extends Serializable {
      */
     Position getIntersection(Bearing thisBearing, Position to, Bearing toBearing);
     
+    /**
+     * Calculates the speed vector needed to reach the {@code to} position from this position in time
+     * {@code inTime}. A {@link NullPointerException} will be thrown if either {@code to} or {@code inTime}
+     * is {@code null}.
+     */
+    SpeedWithBearing getSpeedWithBearingToReachOnGreatCircle(Position to, Duration inTime);
 }

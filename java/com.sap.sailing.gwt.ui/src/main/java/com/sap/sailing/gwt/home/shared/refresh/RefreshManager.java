@@ -98,7 +98,6 @@ public abstract class RefreshManager {
      * Triggers an update for all {@link RefreshableWidget}s that will have a timeout in the next 5 seconds.
      */
     private void update() {
-
         for (final RefreshHolder<DTO, SailingAction<ResultWithTTL<DTO>>> refreshable : refreshables) {
             // Everything that needs refresh within the next 5000ms will be refreshed now.
             // This makes it possible to use batching resulting in less requests.
@@ -145,7 +144,6 @@ public abstract class RefreshManager {
             @Override
             public void execute() {
                 scheduled = false;
-
                 if (refreshables.isEmpty()) {
                     LOG.log(Level.FINE, "No refreshables found -> skipping refresh");
                     return;
@@ -158,7 +156,6 @@ public abstract class RefreshManager {
                     LOG.log(Level.FINE, "Refresh not allowed to execute -> skipping refresh");
                     return;
                 }
-
                 Long nextUpdate = null;
                 for (final RefreshHolder<DTO, SailingAction<ResultWithTTL<DTO>>> refreshable : refreshables) {
                     if (refreshable.callRunning || !refreshable.provider.isActive()) {
@@ -170,8 +167,8 @@ public abstract class RefreshManager {
                         nextUpdate = Math.min(nextUpdate, refreshable.timeout);
                     }
                 }
-                if(nextUpdate == null) {
-                    // This can occur, if there is already a call running for all RefreshableWidgets 
+                if (nextUpdate == null) {
+                    // This can occur if there is already a call running for all RefreshableWidgets 
                     LOG.log(Level.FINE, "Nothing to auto update");
                 } else {
                     int delayMillis = (int) (nextUpdate - System.currentTimeMillis());
@@ -182,7 +179,6 @@ public abstract class RefreshManager {
                         LOG.log(Level.FINE, "Scheduling auto refresh in " + delayMillis + "ms");
                         timer.schedule(delayMillis);
                     }
-                    
                 }
             }
         });
