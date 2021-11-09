@@ -43,7 +43,7 @@ public interface RaceTracker {
     static long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
 
     /**
-     * Stops tracking the race.
+     * Stops tracking the race. Same as calling {@link #stop(boolean, boolean) stop(preemptive, false)}.
      * 
      * @param preemptive
      *            if <code>false</code>, the tracker will continue to process data already received but will stop
