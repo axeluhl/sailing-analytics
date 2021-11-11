@@ -1737,6 +1737,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     @Override
     public boolean isRaceBeingTracked(Regatta regattaContext, RaceDefinition r) {
+        // it's okay to read a snapshot here without any locking as raceTrackersByRegatta and its value sets are all concurrency-safe
         final Set<RaceTracker> trackers = raceTrackersByRegatta.get(regattaContext);
         if (trackers != null) {
             for (RaceTracker tracker : trackers) {
@@ -2589,7 +2590,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 if (race != null) {
                     stopTrackingWind(regatta, race);
                 }
-                raceTracker.stop(/* preemptive */false, willBeRemoved);
+                raceTracker.stop(/* preemptive */ false, willBeRemoved);
                 final Object trackerId = raceTracker.getID();
                 final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
                 try {
@@ -2644,7 +2645,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                     try {
                         stopTracking(tracker.getRegatta(),
                                 /* tracker matcher */ raceTracker->raceTracker==tracker,
-                                /* runnable */ null, /* stopTrackerPreemptively */ true, /* trackerWillBeRemoved */ true);
+                                /* stopTrackerPreemptively */ true, /* trackerWillBeRemoved */ true);
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "scheduleAbortTrackerAfterInitialTimeout", e);
                     }
@@ -2658,69 +2659,87 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     public void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
             InterruptedException {
         logger.info("Stopping tracking for " + race + "...");
-        stopTracking(regatta, raceTracker -> raceTracker.getRace() == race, () -> {
-            try {
-                stopTrackingWind(regatta, race);
-                final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
-                // update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
-                if (connectivityParams != null) {
-                    if (connectivityParams.isTrackWind()) {
-                        connectivityParams.setTrackWind(false);
-                        getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
-                    }
-                } else {
-                    logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
+        stopTracking(regatta, raceTracker -> raceTracker.getRace() == race);
+        try {
+            stopTrackingWind(regatta, race);
+            final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
+            // update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
+            if (connectivityParams != null) {
+                if (connectivityParams.isTrackWind()) {
+                    connectivityParams.setTrackWind(false);
+                    getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } else {
+                logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
             }
-        });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @Override
     public void stopTracker(Regatta regatta, RaceTracker tracker)
             throws MalformedURLException, IOException, InterruptedException {
-        stopTracking(regatta, raceTracker -> raceTracker == tracker, /* runnable */ null);
+        stopTracking(regatta, raceTracker -> raceTracker == tracker);
     }
 
-    private void stopTracking(Regatta regatta, Predicate<RaceTracker> matcher,
-            Runnable actionBeforePotentiallyRemovingTrackedRegatta)
+    private void stopTracking(Regatta regatta, Predicate<RaceTracker> matcher)
             throws MalformedURLException, IOException, InterruptedException {
-        stopTracking(regatta, matcher, actionBeforePotentiallyRemovingTrackedRegatta,
-                /* stopTrackerPreemptively */ false, /* trackerWillBeRemoved */ false);
+        stopTracking(regatta, matcher, /* stopTrackerPreemptively */ false, /* trackerWillBeRemoved */ false);
     }
-
-    private void stopTracking(Regatta regatta, Predicate<RaceTracker> matcher, Runnable actionBeforePotentiallyRemovingTrackedRegatta, 
-            boolean stopTrackerPreemtively, boolean trackerWillBeRemoved) throws MalformedURLException, IOException, InterruptedException {
-        final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
-        if (trackerSet != null) {
-            // FIXME bug4493: not holding any lock on raceTrackersByRegatta while iterating; what if other threads add trackers or try calling stopTracking(Regatta, boolean)?
-            final Iterator<RaceTracker> trackerIter = trackerSet.iterator();
-            while (trackerIter.hasNext()) {
-                final RaceTracker raceTracker = trackerIter.next();
-                if (matcher.test(raceTracker)) {
-                    logger.info("Found tracker to stop for races " + raceTracker.getRace());
-                    raceTracker.stop(stopTrackerPreemtively, trackerWillBeRemoved);
-                    trackerIter.remove();
-                    final Object trackerId = raceTracker.getID();
-                    final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
-                    try {
-                        raceTrackersByID.remove(trackerId);
-                    } finally {
-                        unlockRaceTrackersById(trackerId, lock);
+    
+    /**
+     * Obtains the <em>write</em> lock of {@link #raceTrackersByRegattaLock}, then searches the {@code regatta}'s {@link RaceTracker}s
+     * for one that is matched by the {@code matcher}. If found, the tracker is removed from the regatta's tracker set, and if this
+     * turns the tracker set empty, the {@code regatta} key is also removed from {@link #raceTrackersByRegatta}; furthermore, the tracker
+     * found is then, after the {@link #raceTrackersByRegattaLock}'s write lock has been released, removed from
+     * {@link #raceTrackersByID} under the corresponding {@link #lockRaceTrackersById(Object) lock}. The tracker is returned. If
+     * no tracker is found, {@code null} is returned.
+     */
+    private RaceTracker getAndRemoveRaceTracker(Regatta regatta, Predicate<RaceTracker> matcher) {
+        RaceTracker raceTracker = null;
+        LockUtil.lockForWrite(raceTrackersByRegattaLock);
+        try {
+            final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
+            if (trackerSet != null) {
+                final Iterator<RaceTracker> trackerIter = trackerSet.iterator();
+                while (trackerIter.hasNext()) {
+                    raceTracker = trackerIter.next();
+                    if (matcher.test(raceTracker)) {
+                        logger.info("Found tracker for races " + raceTracker.getRace());
+                        trackerIter.remove();
+                        if (trackerSet.isEmpty()) {
+                            raceTrackersByRegatta.remove(regatta);
+                        }
+                        break;
                     }
                 }
+            } else {
+                logger.warning("Didn't find any trackers for regatta " + regatta);
             }
+        } finally {
+            LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
+        }
+        if (raceTracker != null) {
+            final Object trackerId = raceTracker.getID();
+            final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+            try {
+                raceTrackersByID.remove(trackerId);
+            } finally {
+                unlockRaceTrackersById(trackerId, lock);
+            }
+        }
+        return raceTracker;
+    }
+
+    private void stopTracking(Regatta regatta, Predicate<RaceTracker> matcher, boolean stopTrackerPreemtively, 
+            boolean trackerWillBeRemoved) throws MalformedURLException, IOException, InterruptedException {
+        final RaceTracker raceTracker = getAndRemoveRaceTracker(regatta, matcher);
+        if (raceTracker != null) {
+            logger.info("Found tracker to stop for races " + raceTracker.getRace());
+            raceTracker.stop(stopTrackerPreemtively, trackerWillBeRemoved);
         } else {
             logger.warning("Didn't find any trackers for regatta " + regatta);
-        }
-        if (actionBeforePotentiallyRemovingTrackedRegatta != null) {
-            actionBeforePotentiallyRemovingTrackedRegatta.run();
-        }
-        // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
-        if (trackerSet == null || trackerSet.isEmpty()) {
-            // FIXME bug4493: not holding any lock on raceTrackersByRegatta; this may cause inconsistencies if a tracker is added for the regatta just now in another thread
-            stopTracking(regatta, trackerWillBeRemoved);
         }
     }
 
@@ -2920,7 +2939,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
      */
     private void stopAllTrackersForWhichRaceIsLastReachable(Regatta regatta, RaceDefinition race)
             throws MalformedURLException, IOException, InterruptedException {
-        stopTracking(regatta, tracker->tracker.getRace() == race, /* runnable */ null, /* stopTrackerPreemptively */ true, /* raceWillBeRemoved */ true);
+        stopTracking(regatta, tracker->tracker.getRace() == race, /* stopTrackerPreemptively */ true, /* raceWillBeRemoved */ true);
     }
 
     @Override
@@ -4525,6 +4544,9 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             LockUtil.unlockAfterRead(regattasByNameLock);
         }
         if (regatta != null) {
+            // it's important to obtain the read lock here to make sure that while deciding which callbacks to invoke
+            // and which callbacks to enqueue no concurrent insertions take place which could lead to trackers ending
+            // up not invoking their callback. See the write-locking in addRace(...).
             LockUtil.lockForRead(raceTrackersByRegattaLock);
             try {
                 final Set<RaceTracker> raceTrackersForRegatta = raceTrackersByRegatta.get(regatta);
