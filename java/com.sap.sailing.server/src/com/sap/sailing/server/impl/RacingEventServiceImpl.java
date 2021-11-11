@@ -2604,7 +2604,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     @Override
     public void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
         if (regatta != null) {
-            stopTracking(regatta, /* willBeRemoved */ true);
+            stopTracking(regatta, /* willBeRemoved */ true); // also stops wind tracking
             if (regatta.getName() != null) {
                 logger.info("Removing regatta " + regatta.getName() + " (" + regatta.hashCode() + ") from " + this);
                 LockUtil.lockForWrite(regattasByNameLock);
@@ -2622,9 +2622,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 regatta.removeRegattaListener(this);
                 regatta.removeRaceColumnListener(raceLogReplicator);
                 regatta.removeRaceColumnListener(raceLogScoringReplicator);
-            }
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                stopTrackingWind(regatta, race);
             }
         }
     }
