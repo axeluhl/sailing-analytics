@@ -2576,8 +2576,13 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     @Override
     public void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
-        // FIXME bug4493: reading raceTrackersByRegatta without locking on raceTrackersByRegattaLock seems dangerous; other threads may add 
-        final Set<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
+        final Set<RaceTracker> trackersForRegatta;
+        LockUtil.lockForWrite(raceTrackersByRegattaLock);
+        try {
+            trackersForRegatta = raceTrackersByRegatta.remove(regatta);
+        } finally {
+            LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
+        }
         if (trackersForRegatta != null) {
             for (RaceTracker raceTracker : trackersForRegatta) {
                 final RaceDefinition race = raceTracker.getRace();
@@ -2593,19 +2598,13 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                     unlockRaceTrackersById(trackerId, lock);
                 }
             }
-            LockUtil.lockForWrite(raceTrackersByRegattaLock);
-            try {
-                raceTrackersByRegatta.remove(regatta);
-            } finally {
-                LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
-            }
         }
     }
 
     @Override
     public void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        stopTracking(regatta, /* willBeRemoved */ true);
         if (regatta != null) {
+            stopTracking(regatta, /* willBeRemoved */ true);
             if (regatta.getName() != null) {
                 logger.info("Removing regatta " + regatta.getName() + " (" + regatta.hashCode() + ") from " + this);
                 LockUtil.lockForWrite(regattasByNameLock);
@@ -2698,7 +2697,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             boolean stopTrackerPreemtively, boolean trackerWillBeRemoved) throws MalformedURLException, IOException, InterruptedException {
         final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
         if (trackerSet != null) {
-         // FIXME bug4493: not holding any lock on raceTrackersByRegatta while iterating; what if other threads add trackers or try calling stopTracking(Regatta, boolean)?
+            // FIXME bug4493: not holding any lock on raceTrackersByRegatta while iterating; what if other threads add trackers or try calling stopTracking(Regatta, boolean)?
             final Iterator<RaceTracker> trackerIter = trackerSet.iterator();
             while (trackerIter.hasNext()) {
                 final RaceTracker raceTracker = trackerIter.next();
