@@ -29,7 +29,10 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
  * <p>
  * 
  * A {@link RaceTracker} controls the lifecycle of a {@link TrackedRace} in contrast to a {@link TrackingDataLoader} which just
- * contributes to the composite status but does not control the lifecycle.
+ * contributes to the composite status but does not control the lifecycle.<p>
+ * 
+ * Implementing classes must not override {@link Object#equals(Object)} or {@link Object#hashCode()}; collections have to rely
+ * on objects whose class implement this interface to compare by object identity.
  * 
  * @author Axel Uhl (d043530)
  * 
