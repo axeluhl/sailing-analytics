@@ -126,7 +126,7 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         oldPwBox = createPasswordTextBox("", 30);
         pwBox = createPasswordTextBox("", 30);
         pwBox.ensureDebugId("pw");
-        nameBox.setName("password");
+        pwBox.setName("password");
         pwRepeat = createPasswordTextBox("", 30);
         pwRepeat.ensureDebugId("pwrepeat");
         if (user != null) {

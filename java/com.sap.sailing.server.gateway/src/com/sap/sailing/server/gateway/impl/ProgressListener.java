@@ -1,9 +1,10 @@
 package com.sap.sailing.server.gateway.impl;
 
-public class ProgressListener implements org.apache.commons.fileupload.ProgressListener {
+import java.io.Serializable;
 
+public class ProgressListener implements org.apache.commons.fileupload.ProgressListener, Serializable {
+    private static final long serialVersionUID = 6154127000928850893L;
     private long num100Ks = 0;
-
     private long theBytesRead = 0;
     private long theContentLength = -1;
     private int percentDone = 0;
@@ -16,7 +17,6 @@ public class ProgressListener implements org.apache.commons.fileupload.ProgressL
         }
         theBytesRead = bytesRead;
         theContentLength = contentLength;
-
         final long nowNum100Ks = bytesRead / 100000;
         // Only run this code once every 100K
         if (nowNum100Ks > num100Ks || theBytesRead == theContentLength) {
@@ -33,7 +33,6 @@ public class ProgressListener implements org.apache.commons.fileupload.ProgressL
         } else {
             return "" + theBytesRead + " of " + theContentLength + " bytes have been read (" + percentDone + "% done).";
         }
-
     }
 
     public long getTheBytesRead() {
@@ -47,5 +46,4 @@ public class ProgressListener implements org.apache.commons.fileupload.ProgressL
     public int getPercentDone() {
         return percentDone;
     }
-
 }

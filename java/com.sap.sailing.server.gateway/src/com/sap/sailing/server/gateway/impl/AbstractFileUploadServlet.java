@@ -25,6 +25,7 @@ import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
  */
 public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet {
     public static final String PREFERRED_IMPORTER = "preferredImporter";
+    public static final String PROGRESS_LISTENER_SESSION_ATTRIBUTE_NAME = "progressListener";
     private static final long serialVersionUID = 1120226743039934620L;
 
     @Override
@@ -39,7 +40,7 @@ public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet 
         if (session != null) {
             ProgressListener progressListener = new ProgressListener();
             upload.setProgressListener(progressListener);
-            session.setAttribute("progressListener", progressListener);
+            session.setAttribute(PROGRESS_LISTENER_SESSION_ATTRIBUTE_NAME, progressListener);
         }
         try {
             @SuppressWarnings("unchecked")

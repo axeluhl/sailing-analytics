@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,6 +37,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public static final String TRACKED_RANK_AT_MARK_PASSING = "trackedRankAtMarkPassing";
     public static final String ONE_BASED_PASSING_ORDER = "oneBasedPassingOrder";
     public static final String POINTS_BASED_ON_PASSING_ORDER = "pointsBasedOnPassingOrder";
+    public static final String NET_POINTS_BASED_ON_PASSING_ORDER = "netPointsBasedOnPassingOrder";
     public static final String MAX_POINTS_REASON = "maxPointsReason";
     private static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
@@ -124,12 +127,25 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                     if (leaderboard != null) {
                         final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
                         if (raceColumnAndFleet != null) {
-                            // TODO apply column factor!
                             final Double totalPoints = leaderboard.getScoreCorrection().getCorrectedScore(() -> passingOrder,
                                     competitor, raceColumnAndFleet.getA(), leaderboard, markPassing.getTimePoint(),
                                     leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), leaderboard.getScoringScheme(), cache)
                                     .getCorrectedScore();
+                            final Function<RaceColumn, Double> totalPointsSupplier = raceColumn->{
+                                final Double totalPointsForRaceColumn;
+                                if (raceColumn == raceColumnAndFleet.getA()) {
+                                    totalPointsForRaceColumn = totalPoints;
+                                } else {
+                                    totalPointsForRaceColumn = leaderboard.getTotalPoints(competitor, raceColumn, markPassing.getTimePoint());
+                                }
+                                return totalPointsForRaceColumn;
+                            };
+                            final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard,
+                                    leaderboard.getRaceColumns(), markPassing.getTimePoint(), totalPointsSupplier, cache);
+                            final Double netPoints = leaderboard.getNetPoints(competitor, raceColumnAndFleet.getA(),
+                                    markPassing.getTimePoint(), discardedRaceColumns, ()->totalPoints);
                             markPassingJson.put(POINTS_BASED_ON_PASSING_ORDER, totalPoints);
+                            markPassingJson.put(NET_POINTS_BASED_ON_PASSING_ORDER, netPoints);
                             markPassingJson.put(MAX_POINTS_REASON, leaderboard.getMaxPointsReason(competitor,
                                     raceColumnAndFleet.getA(), markPassing.getTimePoint()));
                         }
