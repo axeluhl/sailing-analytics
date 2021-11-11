@@ -69,6 +69,10 @@ public class SimulationServiceImpl implements SimulationService {
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
     final private RacingEventService racingEventService;
     final private ScheduledExecutorService scheduler;
+    
+    /**
+     * Keys are regatta names
+     */
     final private HashMap<String, SimulationRaceListener> raceListeners;
     final private HashMap<RaceIdentifier, LegChangeListener> legListeners;
     final private long WAIT_MILLIS = 20000; // milliseconds to wait until earliest cache-update for simulation
@@ -159,7 +163,7 @@ public class SimulationServiceImpl implements SimulationService {
         @Override
         protected void defaultAction() {
             removeCacheEntriesAndTriggerRecalculationIfStillHot(0, trackedRace.getRace().getCourse().getNumberOfWaypoints());
-            if ((!this.covered) && (legIdentifier != null)) {
+            if (!this.covered && legIdentifier != null) {
                 this.covered = true;
                 LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getOneBasedLegIndex());
                 scheduler.schedule(() -> triggerUpdate(tmpLegIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
@@ -275,7 +279,7 @@ public class SimulationServiceImpl implements SimulationService {
         }
         
         private void removeCacheEntryAndTriggerRecalculationIfStillHot(final LegIdentifierImpl key) {
-            cache.remove(key);
+            cache.remove(key); // TODO bug4596: this isn't triggering any recalculation for anything "hot" yet...
         }
     }
 
