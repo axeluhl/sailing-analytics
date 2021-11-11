@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
@@ -19,6 +20,11 @@ public class UserProfileSubscriptionTabView extends Composite
 
     private UserProfileSubscriptionView view;
     private UserProfileSubscriptionView.Presenter currentPresenter;
+    private final DesktopPlacesNavigator homePlacesNavigator;
+
+    public UserProfileSubscriptionTabView(final DesktopPlacesNavigator homePlacesNavigator) {
+        this.homePlacesNavigator = homePlacesNavigator;
+    }
 
     @Override
     public Class<UserProfileSubscriptionPlace> getPlaceClassForActivation() {
@@ -33,7 +39,7 @@ public class UserProfileSubscriptionTabView extends Composite
     @Override
     public void setPresenter(Presenter presenter) {
         view = new UserProfileSubscriptionViewImpl();
-        currentPresenter = new UserProfileSubscriptionPresenter(view, presenter);
+        currentPresenter = new UserProfileSubscriptionPresenter(homePlacesNavigator, view, presenter);
     }
 
     @Override

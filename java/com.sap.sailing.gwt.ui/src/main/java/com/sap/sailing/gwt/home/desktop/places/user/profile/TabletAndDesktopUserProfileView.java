@@ -12,8 +12,10 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.preferencestab.UserProfilePreferencesTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileTabView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab.UserProfileSubscriptionTabView;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -48,10 +50,15 @@ public class TabletAndDesktopUserProfileView extends Composite
 
     @UiField(provided = true)
     SailorProfileTabView sailorProfileTabUi;
+    
+    @UiField(provided = true)
+    UserProfileSubscriptionTabView subscriptionTabUi;
 
+    private final DesktopPlacesNavigator homePlacesNavigator;
     private final FlagImageResolver flagImageResolver;
 
-    public TabletAndDesktopUserProfileView(FlagImageResolver flagImageResolver) {
+    public TabletAndDesktopUserProfileView(DesktopPlacesNavigator homePlacesNavigator, FlagImageResolver flagImageResolver) {
+        this.homePlacesNavigator = homePlacesNavigator;
         this.flagImageResolver = flagImageResolver;
         UserProfileResources.INSTANCE.css().ensureInjected();
     }
@@ -66,6 +73,8 @@ public class TabletAndDesktopUserProfileView extends Composite
         preferencesTabUi = new UserProfilePreferencesTabView(flagImageResolver);
 
         sailorProfileTabUi = new SailorProfileTabView(flagImageResolver);
+        
+        subscriptionTabUi = new UserProfileSubscriptionTabView(homePlacesNavigator);
 
         initWidget(uiBinder.createAndBindUi(this));
     }

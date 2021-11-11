@@ -7,7 +7,7 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 /**
  * View for displaying user subscription information like plan, subscription status...In this view user is able to
  * subscribe to a plan or cancel current subscription.
- * 
+ *
  * @author Tu Tran
  */
 public interface UserSubscriptionView extends BaseUserSubscriptionView, IsWidget {
@@ -32,7 +32,7 @@ public interface UserSubscriptionView extends BaseUserSubscriptionView, IsWidget
 
         /**
          * Open checkout modal from which user can create new subscription or change current subscription
-         * 
+         *
          * @param planId
          *            Id of plan to subscribe to
          */
@@ -42,7 +42,7 @@ public interface UserSubscriptionView extends BaseUserSubscriptionView, IsWidget
 
         /**
          * Request to cancel current user's subscription
-         * 
+         *
          * @param planId
          *            Id of plan to cancel
          * @param providerName
@@ -51,5 +51,7 @@ public interface UserSubscriptionView extends BaseUserSubscriptionView, IsWidget
         public void cancelSubscription(String planId, String providerName);
 
         public SubscriptionPlanDTO getPlanById(String planId);
+
+        public void navigateToSubscribe();
     }
 }

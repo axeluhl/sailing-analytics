@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.Notification;
@@ -30,9 +32,12 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     private final C clientFactory;
     private UserSubscriptionView view;
     private final Map<Serializable, SubscriptionPlanDTO> subscriptionPlans = new HashMap<>();
+    private final PlaceNavigation<SubscriptionPlace> subscribePlaceNavigation;
 
-    public UserSubscriptionPresenter(C clientFactory) {
+    public UserSubscriptionPresenter(final C clientFactory,
+            final PlaceNavigation<SubscriptionPlace> subscribePlaceNavigation) {
         this.clientFactory = clientFactory;
+        this.subscribePlaceNavigation = subscribePlaceNavigation;
     }
 
     @Override
@@ -149,5 +154,10 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     @Override
     public SubscriptionPlanDTO getPlanById(String planId) {
         return subscriptionPlans.get(planId);
+    }
+
+    @Override
+    public void navigateToSubscribe() {
+        subscribePlaceNavigation.goToPlace();
     }
 }

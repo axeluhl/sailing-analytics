@@ -70,9 +70,8 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     @UiHandler("subscribeButtonUi")
-    public void handleUpdateSubscriptionClick(final ClickEvent e) {
-        // FIXME: Implement navigation to subscribe site
-        Window.alert("[TODO] Go to subscribe site ...");
+    public void handleUpdateSubscriptionClick(final ClickEvent event) {
+        presenter.navigateToSubscribe();
     }
 
     @Override

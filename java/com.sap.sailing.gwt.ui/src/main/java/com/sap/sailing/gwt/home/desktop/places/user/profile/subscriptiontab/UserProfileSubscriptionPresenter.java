@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
 
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
@@ -17,11 +18,12 @@ public class UserProfileSubscriptionPresenter implements UserProfileSubscription
     private final UserProfileView.Presenter userProfilePresenter;
     private final UserSubscriptionView.Presenter userSubscriptionPresenter;
 
-    public UserProfileSubscriptionPresenter(final UserProfileSubscriptionView view,
-            final UserProfileView.Presenter userProfilePresenter) {
+    public UserProfileSubscriptionPresenter(final DesktopPlacesNavigator homePlacesNavigator,
+            final UserProfileSubscriptionView view, final UserProfileView.Presenter userProfilePresenter) {
         this.view = view;
         this.userProfilePresenter = userProfilePresenter;
-        this.userSubscriptionPresenter = new UserSubscriptionPresenter<>(userProfilePresenter.getClientFactory());
+        this.userSubscriptionPresenter = new UserSubscriptionPresenter<>(userProfilePresenter.getClientFactory(),
+                homePlacesNavigator.getSubscriptionsNavigation());
         this.userSubscriptionPresenter.init();
         view.setPresenter(this);
     }
