@@ -2646,31 +2646,11 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             public void run() {
                 if (tracker.getRace() == null) {
                     try {
-                        final Regatta regatta = tracker.getRegatta();
-                        logger.log(Level.SEVERE, "RaceDefinition for a race in regatta " + regatta.getName()
-                                + " not obtained within " + timeoutInMilliseconds
-                                + "ms. Aborting tracker for this race.");
-                        final Set<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
-                        // we would expect to have found the tracker by its regatta because addRace should have added it:
-                        if (trackersForRegatta != null) {
-                            // FITME bug4493: modifying this structure without obtaining a lock may compete with stopTracking(Regatta, boolean) and stopTracking(Regatta, Predicate, Runnable, boolean, boolean)
-                            trackersForRegatta.remove(tracker);
-                        }
-                        tracker.stop(/* preemptive */true, /* willBeRemoved */ true);
-                        final Object trackerId = tracker.getID();
-                        final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
-                        try {
-                            raceTrackersByID.remove(trackerId);
-                        } finally {
-                            unlockRaceTrackersById(trackerId, lock);
-                        }
-                        if (trackersForRegatta == null || trackersForRegatta.isEmpty()) {
-                            // FIXME bug4493: this is outside of any locking using raceTrackersByRegattaLock, so trackers may be added just after this check by other threads and before stopTracking removes the entry
-                            stopTracking(regatta, /* willBeRemoved */ true);
-                        }
+                        stopTracking(tracker.getRegatta(),
+                                /* tracker matcher */ raceTracker->raceTracker==tracker,
+                                /* runnable */ null, /* stopTrackerPreemptively */ true, /* trackerWillBeRemoved */ true);
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "scheduleAbortTrackerAfterInitialTimeout", e);
-                        e.printStackTrace();
                     }
                 }
             }
@@ -2715,8 +2695,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     private void stopTracking(Regatta regatta, Predicate<RaceTracker> matcher, Runnable actionBeforePotentiallyRemovingTrackedRegatta, 
-    boolean stopTrackerPreemtively, boolean trackerWillBeRemoved) throws MalformedURLException, IOException,
-    InterruptedException {
+            boolean stopTrackerPreemtively, boolean trackerWillBeRemoved) throws MalformedURLException, IOException, InterruptedException {
         final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
         if (trackerSet != null) {
          // FIXME bug4493: not holding any lock on raceTrackersByRegatta while iterating; what if other threads add trackers or try calling stopTracking(Regatta, boolean)?
