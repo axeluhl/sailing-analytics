@@ -127,6 +127,8 @@
         <module>com.sap.sailing.domain.deckmanadapter</module>
         <module>com.sap.sailing.domain.oceanraceadapter</module>
         <module>com.sap.sailing.domain.yellowbrickadapter</module>
+        <module>com.sap.sailing.domain.yellowbrickadapter.test</module>
+        <module>com.sap.sailing.domain.yellowbrickadapter.persistence</module>
         <module>com.sap.sailing.domain.bravoadapter</module>
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>

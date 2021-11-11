@@ -48,7 +48,7 @@ public class InsertRaceStatement extends AbstractPreparedInsertStatement<Tracked
         getPreparedStatement().setString(1, trackedRace.getRace().getName());
         getPreparedStatement().setString(2, trackedRace.getTrackedRegatta().getRegatta().getName());
         getPreparedStatement().setString(3, raceColumnFleetAndTrackedRace.getRaceColumn().getName());
-        getPreparedStatement().setString(4, raceColumnFleetAndTrackedRace.getFleet().getName());
+        getPreparedStatement().setString(4, raceColumnFleetAndTrackedRace.getFleet() == null ? null : raceColumnFleetAndTrackedRace.getFleet().getName());
         if (trackedRace.getStartOfTracking() != null) {
             getPreparedStatement().setDate(5, new Date(trackedRace.getStartOfTracking().asMillis()));
         } else {

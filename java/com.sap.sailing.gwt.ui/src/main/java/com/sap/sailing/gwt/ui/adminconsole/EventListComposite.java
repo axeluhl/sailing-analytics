@@ -227,8 +227,9 @@ public class EventListComposite extends Composite {
                     }
                 },filterTextbox.getAllListDataProvider(),table);
         AnchorCell anchorCell = new AnchorCell();
+        ListHandler<EventDTO> listHandler = new ListHandler<EventDTO>(eventListDataProvider.getList());
         final TextColumn<EventDTO> eventUUidColumn = new AbstractSortableTextColumn<EventDTO>(
-                event -> event.getId() == null ? "<null>" : event.getId().toString());
+                event -> event.getId() == null ? "<null>" : event.getId().toString(), listHandler);
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
@@ -364,9 +365,9 @@ public class EventListComposite extends Composite {
         leaderboardGroupsColumn.setSortable(true);
         groupColumn.setSortable(true);
         userColumn.setSortable(true);
-        final ListHandler<EventDTO> columnSortHandler = getEventTableColumnSortHandler(eventListDataProvider.getList(),
-                eventSelectionCheckboxColumn, eventNameColumn, venueNameColumn, startEndDateColumn, isPublicColumn,
-                courseAreasColumn, leaderboardGroupsColumn, groupColumn, userColumn);
+        configureTableColumnSortHandler(listHandler, eventSelectionCheckboxColumn,
+                eventNameColumn, venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn,
+                leaderboardGroupsColumn, groupColumn, userColumn);
         table.addColumn(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getHeader());
         table.addColumn(eventNameColumn, stringMessages.event());
         table.addColumn(venueNameColumn, stringMessages.venue());
@@ -381,32 +382,31 @@ public class EventListComposite extends Composite {
         table.addColumn(eventUUidColumn, stringMessages.id());
         table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
-        table.addColumnSortHandler(columnSortHandler);
+        table.addColumnSortHandler(listHandler);
         table.getColumnSortList().push(startEndDateColumn);
         return table;
     }
     
-    private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
-            SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn, Column<EventDTO, SafeHtml> eventNameColumn,
-            TextColumn<EventDTO> venueNameColumn, TextColumn<EventDTO> startEndDateColumn,
-            TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
-            Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn,
-            SecuredDTOOwnerColumn<EventDTO> groupColumn, SecuredDTOOwnerColumn<EventDTO> userColumn) {
-        ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
-        result.setComparator(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getComparator());
-        result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
+    private void configureTableColumnSortHandler(ListHandler<EventDTO> columnSortHandler, SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn,
+            Column<EventDTO, SafeHtml> eventNameColumn, TextColumn<EventDTO> venueNameColumn,
+            TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn,
+            Column<EventDTO, SafeHtml> courseAreasColumn, Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn,
+            SecuredDTOOwnerColumn<EventDTO> groupColumn,
+            SecuredDTOOwnerColumn<EventDTO> userColumn) {
+        columnSortHandler.setComparator(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getComparator());
+        columnSortHandler.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return new NaturalComparator().compare(e1.getName(), e2.getName());
             }
         });
-        result.setComparator(venueNameColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(venueNameColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return new NaturalComparator().compare(e1.venue.getName(), e2.venue.getName());
             }
         });
-        result.setComparator(startEndDateColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(startEndDateColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 int result;
@@ -422,27 +422,26 @@ public class EventListComposite extends Composite {
                 return result;
             }
         });
-        result.setComparator(isPublicColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(isPublicColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.isPublic == e2.isPublic ? 0 : e1.isPublic ? 1 : -1;
             }
         });
-        result.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.venue.getCourseAreas().toString().compareTo(e2.venue.getCourseAreas().toString());
             }
         });
-        result.setComparator(leaderboardGroupsColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(leaderboardGroupsColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.getLeaderboardGroups().toString().compareTo(e2.getLeaderboardGroups().toString());
             }
         });
-        result.setComparator(groupColumn, groupColumn.getComparator());
-        result.setComparator(userColumn, userColumn.getComparator());
-        return result;
+        columnSortHandler.setComparator(groupColumn, groupColumn.getComparator());
+        columnSortHandler.setComparator(userColumn, userColumn.getComparator());
     }
 
     private void removeEvents(Collection<EventDTO> events) {

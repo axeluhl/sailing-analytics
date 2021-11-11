@@ -68,6 +68,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -554,7 +555,9 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
-
+    
+    private final ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker;
+    
     private transient final ConcurrentHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionListenersByLeaderboard;
 
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
@@ -619,7 +622,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
                 /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
                 /* securityServiceTracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
-                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                /* resultUrlRegistryServiceTracker */ null);
     }
 
     /**
@@ -648,7 +652,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             FullyInitializedReplicableTracker<SecurityService> securityServiceTracker,
             FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker, ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker,
             ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
-            ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
+            ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker, ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -680,7 +684,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory, trackedRegattaListener,
                 sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
                 securityServiceTracker, sharedSailingDataTracker, /* replicationServiceTracker */ null,
-                scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
+                scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -717,7 +721,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 /* tracked regatta listener */ null,
                 sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
                 /* security service tracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
-                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                /* resultUrlRegistryServiceTracker */ null);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -748,7 +753,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 /* tracked regatta listener */ null, /* sailingNotificationService */ null,
                 /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, /* security service tracker */ null,
                 /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
-                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                /* resultUrlRegistryServiceTracker */ null);
     }
 
     /**
@@ -774,6 +780,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
      *            {@code false}, all restore information is
      *            {@link MongoObjectFactory#removeAllConnectivityParametersForRacesToRestore() cleared} from the
      *            database, and the server starts out with an empty list of tracked races.
+     * @param competitorProviderServiceTracker TODO
      * @param securityServiceAvailable
      *            will complete as soon as the securityServiceTracker is able to provide a SecurityService, NEVER hold a
      *            reference to the result of this, as it might become invalid if bundles are replaced/ restarted
@@ -788,6 +795,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker,
             ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker,
             ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
+            ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker,
             ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         logger.info("Created " + this);
         this.securityServiceTracker = securityServiceTracker;
@@ -796,6 +804,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         this.numberOfTrackedRacesStillLoading = new AtomicInteger();
         this.resultUrlRegistryServiceTracker = resultUrlRegistryServiceTracker;
         this.scoreCorrectionProviderServiceTracker = scoreCorrectionProviderServiceTracker;
+        this.competitorProviderServiceTracker = competitorProviderServiceTracker;
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.connectivityParametersByRace = new ConcurrentHashMap<>();
         this.notificationService = sailingNotificationService;
@@ -3920,7 +3929,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         }
         return Optional.ofNullable(resultUrlRegistryServiceTracker.getService());
     }
-
+    
     @Override
     public Optional<ResultUrlProvider> getUrlBasedScoreCorrectionProvider(String resultProviderName) {
         for (ResultUrlProvider resultUrlProvider : getAllUrlBasedScoreCorrectionProviders()) {
@@ -3932,10 +3941,27 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     private Iterable<ResultUrlProvider> getAllUrlBasedScoreCorrectionProviders() {
-        List<ResultUrlProvider> result = new ArrayList<>();
+        final Set<ResultUrlProvider> result = new HashSet<>();
         for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp instanceof ResultUrlProvider) {
                 result.add((ResultUrlProvider) scp);
+            }
+        }
+        for (CompetitorProvider cp : getAllCompetitorProviders()) {
+            if (cp instanceof ResultUrlProvider) {
+                result.add((ResultUrlProvider) cp);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<CompetitorProvider> getAllCompetitorProviders() {
+        final CompetitorProvider[] services = competitorProviderServiceTracker.getServices(new CompetitorProvider[0]);
+        List<CompetitorProvider> result = new ArrayList<>();
+        if (services != null) {
+            for (final CompetitorProvider service : services) {
+                result.add(service);
             }
         }
         return result;
@@ -4944,8 +4970,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
         DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
         BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
-        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorId, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
-        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatId,
+        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(boatId, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
+        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId,
                 competitorDescriptor.getName(), competitorDescriptor.getShortName(), /* color */ null, /* eMail */ null,
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat, /* storePersistently */ true);

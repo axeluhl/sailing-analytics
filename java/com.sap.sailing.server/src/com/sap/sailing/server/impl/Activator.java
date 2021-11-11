@@ -24,6 +24,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -277,12 +278,14 @@ public class Activator implements BundleActivator {
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker =
                 ServiceTrackerFactory.createAndOpen(context, ScoreCorrectionProvider.class);
+        ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker =
+                ServiceTrackerFactory.createAndOpen(context, CompetitorProvider.class);
         ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker = ServiceTrackerFactory
                 .createAndOpen(context, ResultUrlRegistry.class);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker, sharedSailingDataTracker,
-                replicationServiceTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
+                replicationServiceTracker, scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
         final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(
                 context, racingEventService);

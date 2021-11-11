@@ -57,21 +57,16 @@ CREATE TABLE SAILING."Competitor" (
         "nationality"   NVARCHAR(3)     NOT NULL,
         "sailNumber"    NVARCHAR(255)
 );
-CREATE TABLE SAILING."CompetitorRace" (
-        "competitorId"  NVARCHAR(255),
-        "race"          NVARCHAR(255),
-        "regatta"	NVARCHAR(255),
-        PRIMARY KEY ("competitorId", "race"),
-        FOREIGN KEY ("competitorId")    REFERENCES SAILING."Competitor" ("id"),
-        FOREIGN KEY ("race", "regatta") REFERENCES SAILING."Race" ("name", "regatta")
-);
 CREATE TABLE SAILING."RaceResult" (
         "regatta"       NVARCHAR(255)    NOT NULL,
         "raceColumn"	NVARCHAR(255)    NOT NULL,
-        "competitorId"  NVARCHAR(255)     NOT NULL,
+        "fleet"		NVARCHAR(255)    NOT NULL,
+        "competitorId"  NVARCHAR(255)    NOT NULL,
         "points"        DOUBLE,
         "discarded"	BOOLEAN,
         "irm"           NVARCHAR(4),
+        "columnFactor"	DOUBLE,
+        "netPoints"	DOUBLE,
         PRIMARY KEY ("regatta", "raceColumn", "competitorId"),
         FOREIGN KEY ("competitorId")            REFERENCES SAILING."Competitor" ("id")
 );

@@ -22,6 +22,7 @@ import javax.security.auth.Subject;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
+import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -1067,4 +1068,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Pair<Boolean, String> checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName,
             String fleetName, Set<String> markIds);
+
+    Iterable<CompetitorProvider> getAllCompetitorProviders();
 }

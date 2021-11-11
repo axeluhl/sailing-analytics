@@ -150,7 +150,8 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     /**
      * Produces a {@link TimeRange} that {@link TimeRange#includes(TimeRange) includes} {@code this} and
      * {@link TimeRange#includes(TimePoint) includes} {@code timePoint}. If {@code this} time range already
-     * {@link #includes(TimePoint)} {@code timePoint}, {@code this} is returned.
+     * {@link #includes(TimePoint)} {@code timePoint}, {@code this} is returned. If {@code timePoint}
+     * is {@code null}, {@code this} time range is returned unmodified.
      */
     TimeRange extend(TimePoint timePoint);
 

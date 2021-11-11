@@ -2366,6 +2366,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String includeAccessTokenForYourAccount();
     String alternateTextIfQRCodeTooBig();
     String pleaseUseHttpsForImageUrls();
+    String windAndCourse();
     String zoomIn();
     String zoomOut();
     String moreOptions();
@@ -2378,4 +2379,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noImageOrVideoDetected();
     String errorWhileUpdatingEvent();
     String updateEventSuccessfully();
+    String raceUrl();
+    String yellowBrickConfiguration();
+    String addYellowBrickConfiguration();
+    String filterYellowBrickConfigurations();
+    String yellowBrickEvents();
+    String timePointOfLastFix();
+    String copyMarkDeviceMappings();
 }

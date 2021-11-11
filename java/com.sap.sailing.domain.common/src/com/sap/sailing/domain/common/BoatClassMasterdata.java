@@ -67,6 +67,7 @@ public enum BoatClassMasterdata {
     IQFOIL_MEN("iQFOil Men", true, 2.20, 0.95, BoatHullType.SURFERBOARD, false, "iQFOil 95 Men"),
     IQFOIL_WOMEN("iQFOil Women", true, 2.20, 0.95, BoatHullType.SURFERBOARD, false, "iQFOil 95 Women"),
     IQFOIL_YOUTH("iQFOil Youth", true, 2.15, 0.85, BoatHullType.SURFERBOARD, false, "iQFOil 85 Youth"),
+    IRC("IRC", true, 15.00, 4.00, BoatHullType.MONOHULL, false),
     J22 ("J/22", true, 6.86, 2.44, BoatHullType.MONOHULL, true, "J22", "J-22"),
     J24 ("J/24", true, 7.32, 2.67, BoatHullType.MONOHULL, true, "J24", "J-24"),
     J70 ("J/70", true, 6.93, 2.25, BoatHullType.MONOHULL, true, "J70", "J-70"),

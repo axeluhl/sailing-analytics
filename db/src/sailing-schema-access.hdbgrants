@@ -1,0 +1,14 @@
+{
+  "sailing-access": {
+        "object_owner": {
+            "roles": [
+                "external_access_to_sailing_g"
+            ]
+        },
+        "application_user": {
+            "roles": [
+                "external_access_to_sailing"
+            ]
+        }
+    }
+}

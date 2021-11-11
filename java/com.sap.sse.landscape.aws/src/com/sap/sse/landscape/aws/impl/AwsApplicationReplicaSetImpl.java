@@ -202,24 +202,30 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                         myLoadBalancer = Util.first(Util.filter(loadBalancers, loadBalancer->loadBalancer.getArn().equals(e.getKey().loadBalancerArn())));
                         loadBalancer.complete(myLoadBalancer);
                         dnsCache.getHostedZoneId(AwsLandscape.getHostedZoneName(hostname)).handle((hzid, ex)->hostedZoneId.complete(hzid));
-                        dnsCache.getResourceRecordSetsAsync(hostname).thenAccept(resourceRecordSets->
-                            Util.stream(resourceRecordSets).findFirst().ifPresent(rrs->{
-                                resourceRecordSet.complete(rrs);
-                                try {
-                                    if (rrs.type() == RRType.CNAME && !Util.isEmpty(Util.filter(rrs.resourceRecords(), rr->{
-                                        try {
-                                            return rr.value().equals(getLoadBalancer().getDNSName());
-                                        } catch (InterruptedException | ExecutionException e1) {
-                                            logger.log(Level.WARNING, "This shouldn't have happened", e1);
-                                            throw new RuntimeException(e1);
+                        dnsCache.getResourceRecordSetsAsync(hostname).thenAccept(resourceRecordSets->{
+                            final Optional<ResourceRecordSet> firstResourceRecordSet = Util.stream(resourceRecordSets).findFirst();
+                            if (!firstResourceRecordSet.isPresent()) {
+                                resourceRecordSet.complete(null);
+                            } else {
+                                firstResourceRecordSet.ifPresent(rrs->{
+                                    resourceRecordSet.complete(rrs);
+                                    try {
+                                        if (rrs.type() == RRType.CNAME && !Util.isEmpty(Util.filter(rrs.resourceRecords(), rr->{
+                                            try {
+                                                return rr.value().equals(getLoadBalancer().getDNSName());
+                                            } catch (InterruptedException | ExecutionException e1) {
+                                                logger.log(Level.WARNING, "This shouldn't have happened", e1);
+                                                throw new RuntimeException(e1);
+                                            }
+                                        }))) {
+                                            logger.fine("Found DNS resource record "+getHostname()+" pointing to application replica set's load balancer "+getLoadBalancer().getArn());
                                         }
-                                    }))) {
-                                        logger.fine("Found DNS resource record "+getHostname()+" pointing to application replica set's load balancer "+getLoadBalancer().getArn());
+                                    } catch (InterruptedException | ExecutionException e1) {
+                                        logger.log(Level.WARNING, "This shouldn't have happened", e1);
                                     }
-                                } catch (InterruptedException | ExecutionException e1) {
-                                    logger.log(Level.WARNING, "This shouldn't have happened", e1);
-                                }
-                            }));
+                                });
+                            }
+                        });
                         break outer;
                     }
                 }

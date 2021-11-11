@@ -88,6 +88,7 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions SWISS_TIMING_ARCHIVE_ACCOUNT = new SecuredDomainType(
             "SWISS_TIMING_ARCHIVE_ACCOUNT");
     public static final HasPermissions TRACTRAC_ACCOUNT = new SecuredDomainType("TRACTRAC_ACCOUNT");
+    public static final HasPermissions YELLOWBRICK_ACCOUNT = new SecuredDomainType("YELLOWBRICK_ACCOUNT");
     public static final HasPermissions WIND_ESTIMATION_MODELS = new SecuredDomainType("WIND_ESTIMATION_MODELS");
     public static final HasPermissions MARK_PROPERTIES = new SecuredDomainType("MARK_PROPERTIES");
     public static final HasPermissions MARK_TEMPLATE = new SecuredDomainType("MARK_TEMPLATE");

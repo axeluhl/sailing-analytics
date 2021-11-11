@@ -4,9 +4,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 
-public abstract class AbstractRaceTrackerImpl extends AbstractRaceTrackerBaseImpl {
-
-    public AbstractRaceTrackerImpl(RaceTrackingConnectivityParameters connectivityParams) {
+public abstract class AbstractRaceTrackerImpl<RTCP extends RaceTrackingConnectivityParameters> extends AbstractRaceTrackerBaseImpl<RTCP> {
+    public AbstractRaceTrackerImpl(RTCP connectivityParams) {
         super(connectivityParams);
     }
 
@@ -26,7 +25,4 @@ public abstract class AbstractRaceTrackerImpl extends AbstractRaceTrackerBaseImp
         }
         return result;
     }
-
-    @Override
-    public abstract DynamicTrackedRegatta getTrackedRegatta();
 }

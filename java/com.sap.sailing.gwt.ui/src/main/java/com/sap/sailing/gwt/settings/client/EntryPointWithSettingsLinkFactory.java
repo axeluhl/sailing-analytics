@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.settings.client;
 import java.util.Collections;
 import java.util.UUID;
 
+import com.sap.sailing.gwt.settings.client.embeddedmapandwindchart.EmbeddedMapAndWindChartContextDefinition;
+import com.sap.sailing.gwt.settings.client.embeddedmapandwindchart.EmbeddedMapAndWindChartSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardContextDefinition;
@@ -27,6 +29,7 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
     private static final String LEADERBOARD_EDITING_PATH = "/gwt/LeaderboardEditing.html";
     private static final String RACE_BOARD_PATH = "/gwt/RaceBoard.html";
     private static final String REGATTA_OVERVIEW_PATH = "/gwt/RegattaOverview.html";
+    private static final String EMBEDDED_MAP_AND_WIND_CHART_PATH = "/gwt/EmbeddedMapAndWindChart.html";
 
     public static String createRegattaOverviewLink(RegattaOverviewContextDefinition regattaOverviewSettings) {
         return createRegattaOverviewLink(regattaOverviewSettings, new RegattaRaceStatesSettings(), true);
@@ -77,6 +80,13 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
         final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
                 LEADERBOARD_EDITING_PATH, new EditableLeaderboardContextDefinition(leaderboardName));
         return linkWithSettingsGenerator.createUrl();
+    }
+    
+    public static String createEmbeddedMapAndWindChartLink(String leaderboardName, String raceName, String fleetName) {
+        final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
+                EMBEDDED_MAP_AND_WIND_CHART_PATH,
+                new EmbeddedMapAndWindChartContextDefinition(leaderboardName, raceName, fleetName));
+        return linkWithSettingsGenerator.createUrl(new EmbeddedMapAndWindChartSettings(/* play */ true));
     }
 
 }

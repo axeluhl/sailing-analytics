@@ -85,6 +85,8 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -649,10 +651,16 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas, List<String> visibleRegattas,
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
-            Duration clientTimeZoneOffset, AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
+            Duration clientTimeZoneOffset, AsyncCallback<List<RegattaOverviewEntryDTO>> callback);
 
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
     
     void getAdminConsoleChangeLogSize(AsyncCallback<Integer> callback);
+
+    void getPreviousYellowBrickConfigurations(
+            AsyncCallback<List<YellowBrickConfigurationWithSecurityDTO>> callback);
+
+    void listYellowBrickRacesInEvent(YellowBrickConfigurationWithSecurityDTO configuration,
+            AsyncCallback<Pair<String, List<YellowBrickRaceRecordDTO>>> callback);
 }

@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -495,6 +497,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             }
         }
         final Map<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new HashMap<>();
+        final ConcurrentMap<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> futuresForCompetitorAndColumnName = new ConcurrentHashMap<>();
         for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
             LeaderboardRowDTO row = new LeaderboardRowDTO();
@@ -506,44 +509,30 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
             result.competitors.add(competitorDTO);
-            Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
             final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
+                // in case boats can't change set the also the boat on the row to simplify access
+                if (result.canBoatsOfCompetitorsChangePerRace == false && row.boat == null) {
+                    final Boat boatOfCompetitor = getBoatOfCompetitor(competitor, raceColumn);
+                    // find a raceColumn where a boat is available
+                    row.boat = boatOfCompetitor == null ? null : baseDomainFactory.convertToBoatDTO(boatOfCompetitor);
+                }
                 final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
                         namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName());
-                // if leg details are to be requested, the ranking info needs to be provided:
-                // TODO bug5143 (performance): shouldn't the rankingInfoCache be passed on because detail computations need them all?
-                final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
-                        raceColumnAndCompetitor->{
-                            final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
-                            return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
-                        }) : null;
                 Future<LeaderboardEntryDTO> future = executor.submit(() -> {
+                    // if leg details are to be requested, the ranking info needs to be provided:
+                    // TODO bug5143 (performance): shouldn't the rankingInfoCache be passed on because detail computations need them all?
+                    final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
+                            raceColumnAndCompetitor->{
+                                final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
+                                return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                            }) : null;
                     Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
                     return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint, computeLegDetails,
                             rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
                             fillTotalPointsUncorrected, cache);
                 });
-                futuresForColumnName.put(raceColumn.getName(), future);
-            }
-            for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
-                try {
-                    row.fieldsByRaceColumnName.put(raceColumnNameAndFuture.getKey(), raceColumnNameAndFuture.getValue().get());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
-                    // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
-                    // null values.
-                    // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
-                    // this helps robustness from a user's perspective.
-                    logger.log(
-                            Level.SEVERE,
-                            AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
-                                    + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
-                                    + "): exception during computing leaderboard entry for competitor "
-                                    + competitor.getName() + " in race column " + raceColumnNameAndFuture.getKey()
-                                    + ". Leaving empty.", e);
-                }
+                futuresForCompetitorAndColumnName.put(new Pair<>(competitor, raceColumn.getName()), new Pair<>(row, future));
             }
             if (addOverallDetails) {
                 //this reuses several prior calculated fields, so must be evaluated after them
@@ -554,22 +543,35 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             if (displayName != null) {
                 result.competitorDisplayNames.put(competitorDTO, displayName);
             }
-            // in case boats can't change set the also the boat on the row to simplify access
-            if (result.canBoatsOfCompetitorsChangePerRace == false && !row.fieldsByRaceColumnName.isEmpty()) {
-                // find a raceColumn where a boat is available
-                for (LeaderboardEntryDTO leaderboardEntry : row.fieldsByRaceColumnName.values()) {
-                    if (leaderboardEntry != null && leaderboardEntry.boat != null) {
-                        row.boat = leaderboardEntry.boat;
-                        break;
-                    }
-                }
-            }
             if (isLeaderboardThatHasRegattaLike) {
                 LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
                 final Duration regattaLevelTimeOnDistanceAllowancePerNauticalMile = regattaLikeLeaderboard.getRegattaLike().getTimeOnDistanceAllowancePerNauticalMile(competitor, Optional.empty());
                 final Double regattaLevelTimeOnTimeFactor = regattaLikeLeaderboard.getRegattaLike().getTimeOnTimeFactor(competitor, Optional.empty());
                 row.effectiveTimeOnDistanceAllowancePerNauticalMile = regattaLevelTimeOnDistanceAllowancePerNauticalMile;
                 row.effectiveTimeOnTimeFactor = regattaLevelTimeOnTimeFactor;
+            }
+        } // competitors
+        for (java.util.Map.Entry<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> competitorAndRaceColumnNameAndRowAndFuture : futuresForCompetitorAndColumnName.entrySet()) {
+            try {
+                final LeaderboardRowDTO rowForCompetitor = competitorAndRaceColumnNameAndRowAndFuture.getValue().getA();
+                final String columnName = competitorAndRaceColumnNameAndRowAndFuture.getKey().getB();
+                final Future<LeaderboardEntryDTO> future = competitorAndRaceColumnNameAndRowAndFuture.getValue().getB();
+                rowForCompetitor.fieldsByRaceColumnName.put(columnName, future.get());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
+                // null values.
+                // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
+                // this helps robustness from a user's perspective.
+                final Competitor competitor = competitorAndRaceColumnNameAndRowAndFuture.getKey().getA();
+                logger.log(
+                        Level.SEVERE,
+                        AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
+                                + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
+                                + "): exception during computing leaderboard entry for competitor "
+                                + competitor.getName() + " in race column " + competitorAndRaceColumnNameAndRowAndFuture.getKey()
+                                + ". Leaving empty.", e);
             }
         }
         final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
@@ -657,23 +659,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
-        Boat boat;
-        if (trackedRace != null) {
-            boat = trackedRace.getBoatOfCompetitor(competitor);
-        } else {
-            // check if it's a CompetitorWithBoat:
-            if (competitor.hasBoat()) {
-                boat = ((CompetitorWithBoat) competitor).getBoat();
-            } else {
-                final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                if (fleetOfCompetitor != null) {
-                    final Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getCompetitorsRegisteredInRacelog(fleetOfCompetitor);
-                    boat = competitorsAndTheirBoats.get(competitor);
-                } else {
-                    boat = null;
-                }
-            }
-        }
+        Boat boat = getBoatOfCompetitor(competitor, raceColumn);
         entryDTO.boat = boat == null ? null : baseDomainFactory.convertToBoatDTO(boat);
         entryDTO.totalPoints = entry.getTotalPoints();
         if (fillTotalPointsUncorrected) {
@@ -808,6 +794,16 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         final Fleet fleet = entry.getFleet();
         entryDTO.fleet = fleet == null ? null : baseDomainFactory.convertToFleetDTO(fleet);
         return entryDTO;
+    }
+
+    private Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn) {
+        final Boat boat;
+        if (competitor.hasBoat()) {
+            boat = ((CompetitorWithBoat) competitor).getBoat();
+        } else {
+            boat = getBoatOfCompetitor(competitor, raceColumn, raceColumn.getFleetOfCompetitor(competitor));
+        }
+        return boat;
     }
 
     private void calculateRacesMetadata(MetaLeaderboardColumn metaLeaderboardColumn, MetaLeaderboardRaceColumnDTO columnDTO,

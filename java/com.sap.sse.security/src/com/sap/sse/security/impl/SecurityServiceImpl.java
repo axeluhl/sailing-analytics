@@ -692,8 +692,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public Ownership internalSetOwnership(QualifiedObjectIdentifier objectId, String userOwnerName, UUID tenantOwnerId, String displayName) {
+        final Ownership result = accessControlStore.setOwnership(objectId, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
         permissionChangeListeners.ownershipChanged(objectId);
-        return accessControlStore.setOwnership(objectId, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
+        return result;
     }
 
     @Override
@@ -705,8 +706,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalDeleteOwnership(QualifiedObjectIdentifier objectId) {
-        permissionChangeListeners.ownershipChanged(objectId);
         accessControlStore.removeOwnership(objectId);
+        permissionChangeListeners.ownershipChanged(objectId);
         return null;
     }
 
@@ -843,11 +844,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (userGroup == null) {
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
-            for (final OwnershipAnnotation ownershipWithGroupAsOwner : accessControlStore.getOwnerhipsWithGroupOwner(userGroup)) {
-                permissionChangeListeners.ownershipChanged(ownershipWithGroupAsOwner.getIdOfAnnotatedObject());
-            }
+            final Iterable<OwnershipAnnotation> ownerhipsWithGroupOwner = accessControlStore.getOwnerhipsWithGroupOwner(userGroup);
             accessControlStore.removeAllOwnershipsFor(userGroup);
             store.deleteUserGroup(userGroup);
+            for (final OwnershipAnnotation ownershipWithGroupAsOwner : ownerhipsWithGroupOwner) {
+                permissionChangeListeners.ownershipChanged(ownershipWithGroupAsOwner.getIdOfAnnotatedObject());
+            }
         }
         return null;
     }

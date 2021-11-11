@@ -241,6 +241,11 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
+    public MaxPointsReason getMaxPointsReason() {
+        return getLeaderboard().getMaxPointsReason(competitor, raceColumn, MillisecondsTimePoint.now());
+    }
+
+    @Override
     public Boolean isPodiumFinish() {
         Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();

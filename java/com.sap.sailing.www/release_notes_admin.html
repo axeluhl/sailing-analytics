@@ -26,6 +26,45 @@
                     <h2 class="articleSubheadline">October 2021</h2>
                     <ul class="bulletList">
 			<li>Added "Elan 350" boat class</li>
+			<li>Added "IRC" as a class</li>
+			<li>Fixed issue with mixed-up boat ID and competitor ID during competitor import</li>
+			<li>A new experimental connector for YellowBrick is now provided. Provide a "race URL" such
+			    as "rmsr2021" to start tracking a race. It is advisable to import competitors up-front.
+			    A CSV file, as exported, e.g., from Excel, that has the column headers
+			    <ul>
+			      <li>Race Name</li>
+			      <li>Sail Number</li>
+			      <li>Model</li>
+			      <li>loa</li>
+			      <li>Entrant</li>
+			      <li>Country</li>
+			      <li>Skipper</li>
+			      <li>cat-IRC</li>
+			      <li>IRC</li>
+			      <li>MOCRA</li>
+			      <li>DH</li>
+			      <li>ORC only</li>
+			      <li>YellowBrick Name</li>
+			      <li>Competitor ID</li>
+			    </ul>
+			    will be parsed properly. The "YellowBrick Name" column must contain the name
+			    exactly as it appears in the YellowBrick API for the boat. The "Competitor ID"
+			    column must be constructed as "YB-{raceURL}-{YellowBrick Name}". For example,
+			    if your race URL is "rmsr2021" and a competitor has the YellowBrick Name "BAIT" then
+			    the "Competitor ID" must be "YB-rmsr2021-BAIT".<p>
+			    The IRC column holds the handicap ToT / TMF / TCC value (e.g., 1.013) The "cat-IRC"
+			    is a category / classification, such as "Class 5" which will show in the competitor
+			    import as a suggestion for the fleet name. MOCRA, DH, and ORC only are columns which
+			    may be empty or have any non-empty string such as "x", indicating that the competitor
+			    is competing in the MOCRA, Double-Handed, and/or ORC class. If the "cat-IRC" is "undefined"
+			    then "ORC only" competitors will have "ORC" suggested as the race name and fleet name.<p>
+			    The connector will ask for new positions every minute which is safely below the request
+			    quota of once every five seconds set by YellowBrick. If the newest fix is more than 24h
+			    old, the tracker stops requesting new positions automatically.
+			</li>
+			<li>It is now possible to copy course marks, course definitions and marks' tracking device
+			    associations from one regatta to another. Use the "Copy Course and Competitors" action icon
+			    in the "Connectors - Smartphone Tracking" race column list bottom left.</li>
                     </ul>
           <h2 class="articleSubheadline">September 2021</h2>
           <ul class="bulletList">

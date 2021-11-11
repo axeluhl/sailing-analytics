@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
@@ -53,6 +54,10 @@ public interface EventViewBase extends IsWidget {
         PlaceNavigation<?> getMediaPageNavigation();
 
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
+
+        String getMapAndWindChartUrl(RaceMetadataDTO<?> metadata);
+
+        String getMapAndWindChartUrl(String leaderboardName, String raceName, String fleetName);
 
         String getRegattaId();
 

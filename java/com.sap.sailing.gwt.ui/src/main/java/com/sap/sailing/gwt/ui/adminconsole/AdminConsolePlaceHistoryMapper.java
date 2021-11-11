@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SmartphoneTrackingP
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SwissTimingArchivedEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SwissTimingEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.TracTracEventsPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.connectors.YellowBrickEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.CourseTemplatesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkPropertiesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkRolesPlace;
@@ -38,7 +39,7 @@ import com.sap.sailing.landscape.ui.client.LandscapeManagementPlace;
 @WithTokenizers({EventsPlace.Tokenizer.class, RegattasPlace.Tokenizer.class, 
     LeaderboardsPlace.Tokenizer.class, LeaderboardGroupsPlace.Tokenizer.class, TrackedRacesPlace.Tokenizer.class, CompetitorsPlace.Tokenizer.class,
     BoatsPlace.Tokenizer.class, CourseLayoutPlace.Tokenizer.class, WindPlace.Tokenizer.class, AudioAndVideoPlace.Tokenizer.class, 
-    TracTracEventsPlace.Tokenizer.class, SwissTimingArchivedEventsPlace.Tokenizer.class, SwissTimingEventsPlace.Tokenizer.class, 
+    TracTracEventsPlace.Tokenizer.class, YellowBrickEventsPlace.Tokenizer.class, SwissTimingArchivedEventsPlace.Tokenizer.class, SwissTimingEventsPlace.Tokenizer.class, 
     SmartphoneTrackingPlace.Tokenizer.class, IgtimiAccountsPlace.Tokenizer.class, ExpeditionDeviceConfigurationsPlace.Tokenizer.class,
     ResultImportUrlsPlace.Tokenizer.class, Manage2SailRegattaStructureImportPlace.Tokenizer.class, DeviceConfigurationPlace.Tokenizer.class,
     ReplicationPlace.Tokenizer.class, MasterDataImportPlace.Tokenizer.class, RemoteServerInstancesPlace.Tokenizer.class, LocalServerPlace.Tokenizer.class,
