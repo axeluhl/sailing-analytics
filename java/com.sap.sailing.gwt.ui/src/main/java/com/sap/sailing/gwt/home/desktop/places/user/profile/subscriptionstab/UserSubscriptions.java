@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptionstab;
 
 import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.formatDateAndTime;
 
@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
-import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserSubscriptionsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.client.Notification;
@@ -40,10 +40,10 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
- * Implementation view for {@link UserSubscriptionView}
+ * Implementation view for {@link UserSubscriptionsView}
  */
-public class UserSubscription extends Composite implements UserSubscriptionView {
-    interface MyUiBinder extends UiBinder<Widget, UserSubscription> {
+public class UserSubscriptions extends Composite implements UserSubscriptionsView {
+    interface MyUiBinder extends UiBinder<Widget, UserSubscriptions> {
     }
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -61,7 +61,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     private final Presenter presenter;
     private final SubscriptionStringConstants stringConstants;
 
-    public UserSubscription(final UserSubscriptionView.Presenter presenter) {
+    public UserSubscriptions(final UserSubscriptionsView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
         initSubscriptionsTable(presenter);
         presenter.setView(this);
@@ -70,7 +70,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     @UiHandler("subscribeButtonUi")
-    public void handleUpdateSubscriptionClick(final ClickEvent event) {
+    public void onSubscribeClicked(final ClickEvent event) {
         presenter.navigateToSubscribe();
     }
 

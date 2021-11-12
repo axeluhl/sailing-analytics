@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptionstab;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.resources.client.ClientBundle;

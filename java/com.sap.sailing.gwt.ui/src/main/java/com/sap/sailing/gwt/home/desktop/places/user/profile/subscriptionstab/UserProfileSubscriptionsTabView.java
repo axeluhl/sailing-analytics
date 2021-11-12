@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptionstab;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
-import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserProfileSubscriptionPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserProfileSubscriptionsPlace;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 /**
@@ -15,30 +15,30 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
  * 
  * @author Tu Tran
  */
-public class UserProfileSubscriptionTabView extends Composite
-        implements UserProfileTabView<UserProfileSubscriptionPlace> {
+public class UserProfileSubscriptionsTabView extends Composite
+        implements UserProfileTabView<UserProfileSubscriptionsPlace> {
 
-    private UserProfileSubscriptionView view;
-    private UserProfileSubscriptionView.Presenter currentPresenter;
+    private UserProfileSubscriptionsView view;
+    private UserProfileSubscriptionsView.Presenter currentPresenter;
     private final DesktopPlacesNavigator homePlacesNavigator;
 
-    public UserProfileSubscriptionTabView(final DesktopPlacesNavigator homePlacesNavigator) {
+    public UserProfileSubscriptionsTabView(final DesktopPlacesNavigator homePlacesNavigator) {
         this.homePlacesNavigator = homePlacesNavigator;
     }
 
     @Override
-    public Class<UserProfileSubscriptionPlace> getPlaceClassForActivation() {
-        return UserProfileSubscriptionPlace.class;
+    public Class<UserProfileSubscriptionsPlace> getPlaceClassForActivation() {
+        return UserProfileSubscriptionsPlace.class;
     }
 
     @Override
-    public void start(UserProfileSubscriptionPlace requestedPlace, AcceptsOneWidget contentArea) {
+    public void start(UserProfileSubscriptionsPlace requestedPlace, AcceptsOneWidget contentArea) {
         contentArea.setWidget(view);
     }
 
     @Override
     public void setPresenter(Presenter presenter) {
-        view = new UserProfileSubscriptionViewImpl();
+        view = new UserProfileSubscriptionsViewImpl();
         currentPresenter = new UserProfileSubscriptionPresenter(homePlacesNavigator, view, presenter);
     }
 
@@ -47,8 +47,8 @@ public class UserProfileSubscriptionTabView extends Composite
     }
 
     @Override
-    public UserProfileSubscriptionPlace placeToFire() {
-        return new UserProfileSubscriptionPlace();
+    public UserProfileSubscriptionsPlace placeToFire() {
+        return new UserProfileSubscriptionsPlace();
     }
 
     @Override

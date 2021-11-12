@@ -43,7 +43,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPla
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserProfileSubscriptionPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserProfileSubscriptionsPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class,
         EventsPlace.Tokenizer.class, SolutionsPlace.Tokenizer.class, SubscriptionPlace.Tokenizer.class,
@@ -79,7 +79,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserProf
         UserProfilePreferencesPlace.Tokenizer.class,
         SailorProfilePlace.Tokenizer.class,
         UserProfileSettingsPlace.Tokenizer.class,
-        UserProfileSubscriptionPlace.Tokenizer.class,
+        UserProfileSubscriptionsPlace.Tokenizer.class,
         AuthenticationPlace.Tokenizer.class,
         ConfirmationPlace.Tokenizer.class,
         PasswordResetPlace.Tokenizer.class,

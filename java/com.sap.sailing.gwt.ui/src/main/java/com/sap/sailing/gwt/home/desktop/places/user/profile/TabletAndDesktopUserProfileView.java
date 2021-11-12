@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.preferencestab.UserProfilePreferencesTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileTabView;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab.UserProfileSubscriptionTabView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptionstab.UserProfileSubscriptionsTabView;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -52,12 +52,12 @@ public class TabletAndDesktopUserProfileView extends Composite
     SailorProfileTabView sailorProfileTabUi;
     
     @UiField(provided = true)
-    UserProfileSubscriptionTabView subscriptionTabUi;
+    UserProfileSubscriptionsTabView subscriptionTabUi;
 
     private final DesktopPlacesNavigator homePlacesNavigator;
     private final FlagImageResolver flagImageResolver;
 
-    public TabletAndDesktopUserProfileView(DesktopPlacesNavigator homePlacesNavigator, FlagImageResolver flagImageResolver) {
+    public TabletAndDesktopUserProfileView(final DesktopPlacesNavigator homePlacesNavigator, final FlagImageResolver flagImageResolver) {
         this.homePlacesNavigator = homePlacesNavigator;
         this.flagImageResolver = flagImageResolver;
         UserProfileResources.INSTANCE.css().ensureInjected();
@@ -74,21 +74,21 @@ public class TabletAndDesktopUserProfileView extends Composite
 
         sailorProfileTabUi = new SailorProfileTabView(flagImageResolver);
         
-        subscriptionTabUi = new UserProfileSubscriptionTabView(homePlacesNavigator);
+        subscriptionTabUi = new UserProfileSubscriptionsTabView(homePlacesNavigator);
 
         initWidget(uiBinder.createAndBindUi(this));
     }
 
     @Override
-    public void navigateTabsTo(AbstractUserProfilePlace place) {
+    public void navigateTabsTo(final AbstractUserProfilePlace place) {
         tabPanelUi.activatePlace(place);
-        StringBuilder titleBuilder = new StringBuilder(
+        final StringBuilder titleBuilder = new StringBuilder(
                 (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
                         : StringMessages.INSTANCE.whitelabelSailing())).append(" - ");
 
         titleBuilder.append(place.getLocationTitle());
 
-        String currentTabTitle = tabPanelUi.getCurrentTabTitle();
+        final String currentTabTitle = tabPanelUi.getCurrentTabTitle();
         if (currentTabTitle != null && !currentTabTitle.isEmpty()) {
             titleBuilder.append(" - ").append(currentTabTitle);
         }
@@ -96,19 +96,19 @@ public class TabletAndDesktopUserProfileView extends Composite
     }
 
     @Override
-    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+    public void setAuthenticationContext(final AuthenticationContext authenticationContext) {
         headerUi.setAuthenticationContext(authenticationContext);
         tabPanelUi.getCurrentTab().setAuthenticationContext(authenticationContext);
     }
 
     @SuppressWarnings("unchecked")
     @UiHandler("tabPanelUi")
-    public void onTabSelection(TabPanelPlaceSelectionEvent e) {
+    public void onTabSelection(final TabPanelPlaceSelectionEvent e) {
         currentPresenter.handleTabPlaceSelection((TabView<?, UserProfileView.Presenter>) e.getSelectedActivity());
     }
 
     @Override
-    public void showErrorInCurrentTab(IsWidget errorView) {
+    public void showErrorInCurrentTab(final IsWidget errorView) {
         tabPanelUi.overrideCurrentContentInTab(errorView);
     }
 }

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
+package com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
@@ -10,14 +10,14 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
  *
  * @author Tu Tran
  */
-public interface UserSubscriptionView extends BaseUserSubscriptionView, IsWidget {
+public interface UserSubscriptionsView extends BaseUserSubscriptionView, IsWidget {
     /**
      * Called on start loading subscription data
      */
     public void onStartLoadSubscription();
 
     /**
-     * Presenter for {@link UserSubscriptionView}
+     * Presenter for {@link UserSubscriptionsView}
      */
     public interface Presenter {
         /**
@@ -38,7 +38,7 @@ public interface UserSubscriptionView extends BaseUserSubscriptionView, IsWidget
          */
         public void openCheckout(String planId);
 
-        public void setView(UserSubscriptionView view);
+        public void setView(UserSubscriptionsView view);
 
         /**
          * Request to cancel current user's subscription

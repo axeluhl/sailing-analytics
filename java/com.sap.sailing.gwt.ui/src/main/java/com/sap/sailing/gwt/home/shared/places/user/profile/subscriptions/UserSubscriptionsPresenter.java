@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
+package com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,19 +22,19 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
- * Implementation presenter of {@link UserSubscriptionView.Presenter}
+ * Implementation presenter of {@link UserSubscriptionsView.Presenter}
  *
  * @author Tu Tran
  */
-public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSecurity>
-        implements UserSubscriptionView.Presenter {
+public class UserSubscriptionsPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSecurity>
+        implements UserSubscriptionsView.Presenter {
 
     private final C clientFactory;
-    private UserSubscriptionView view;
+    private UserSubscriptionsView view;
     private final Map<Serializable, SubscriptionPlanDTO> subscriptionPlans = new HashMap<>();
     private final PlaceNavigation<SubscriptionPlace> subscribePlaceNavigation;
 
-    public UserSubscriptionPresenter(final C clientFactory,
+    public UserSubscriptionsPresenter(final C clientFactory,
             final PlaceNavigation<SubscriptionPlace> subscribePlaceNavigation) {
         this.clientFactory = clientFactory;
         this.subscribePlaceNavigation = subscribePlaceNavigation;
@@ -52,7 +52,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     }
 
     @Override
-    public void setView(UserSubscriptionView view) {
+    public void setView(UserSubscriptionsView view) {
         this.view = view;
     }
 
