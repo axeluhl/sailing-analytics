@@ -1,13 +1,18 @@
 package com.sap.sailing.server.simulation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,6 +45,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
@@ -57,6 +63,7 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.SmartFutureCache;
@@ -151,38 +158,23 @@ public class SimulationServiceImpl implements SimulationService {
      */
     private class LegChangeListener extends AbstractRaceChangeListener {
         private final TrackedRace trackedRace;
-        private LegIdentifier legIdentifier;
-        private boolean covered;
+        
+        /**
+         * Contains a mapping for those {@link LegIdentifier}s for which a cache update trigger has been scheduled. The
+         * value is always {@code true}. A concurrent map is used in order to have atmic behavior of
+         * {@link ConcurrentMap#computeIfAbsent(Object, java.util.function.Function)}.
+         */
+        private final ConcurrentMap<LegIdentifier, Boolean> cacheUpdateTriggerScheduledForLeg;
 
         public LegChangeListener(TrackedRace trackedRace) {
             this.trackedRace = trackedRace;
-            this.legIdentifier = null;
-            this.covered = false;
+            this.cacheUpdateTriggerScheduledForLeg = new ConcurrentHashMap<>();
         }
-
-        @Override
-        protected void defaultAction() {
-            removeCacheEntriesAndTriggerRecalculationIfStillHot(0, trackedRace.getRace().getCourse().getNumberOfWaypoints());
-            if (!this.covered && legIdentifier != null) {
-                this.covered = true;
-                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getOneBasedLegIndex());
-                scheduler.schedule(() -> triggerUpdate(tmpLegIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
-            }
-        }
-
-        private void triggerUpdate(LegIdentifier legIdentifier) {
-            if (this.legIdentifier.equals(legIdentifier)) {
-                this.covered = false;
-            }
-            logger.info("Simulation Scheduled Update Triggered: \"" + legIdentifier.toString() + "\"");
-            cache.triggerUpdate(legIdentifier, null);
-        }
-        
 
         @Override
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
             // relevant for simulation: start of leg 1 changes; requires update of leg 1
-            // TODO: update leg 1
+            scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(/* zero-based */ 0, /* wait */ 0);
         }
 
         @Override
@@ -193,7 +185,7 @@ public class SimulationServiceImpl implements SimulationService {
         @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
             // relevant for simulation: update all legs when wind changes overall
-            // TODO: update all legs
+            scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(/* zero-based */ 0, /* wait */ 0);
         }
 
         @Override
@@ -243,7 +235,37 @@ public class SimulationServiceImpl implements SimulationService {
         @Override
         public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
             // relevant for simulation: update start- and end-times of legs
-            // TODO: update influenced legs; "live" update current leg
+            final Pair<Integer, Integer> firstAndLastZeroBasedNumberOfLegWithChangedAdjacendMarkPassing = getFirstAndLastZeroBasedNumberOfLegWithChangedAdjacendMarkPassing(oldMarkPassings, markPassings);
+            if (firstAndLastZeroBasedNumberOfLegWithChangedAdjacendMarkPassing != null) {
+                scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(firstAndLastZeroBasedNumberOfLegWithChangedAdjacendMarkPassing.getA(), firstAndLastZeroBasedNumberOfLegWithChangedAdjacendMarkPassing.getB(), WAIT_MILLIS);
+            }
+        }
+
+        private Pair<Integer, Integer> getFirstAndLastZeroBasedNumberOfLegWithChangedAdjacendMarkPassing(
+                Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
+            final Course course = trackedRace.getRace().getCourse();
+            final Set<Integer> affectedZeroBasedWaypointIndexes = new HashSet<>();
+            final Set<Waypoint> removed = new HashSet<>(oldMarkPassings.keySet());
+            for (final MarkPassing newMarkPassing : markPassings) {
+                removed.remove(newMarkPassing.getWaypoint());
+                final MarkPassing oldMarkPassing = oldMarkPassings.get(newMarkPassing.getWaypoint());
+                if (oldMarkPassing == null || !oldMarkPassing.getTimePoint().equals(newMarkPassing.getTimePoint())) {
+                    // mark passing changed
+                    affectedZeroBasedWaypointIndexes.add(course.getIndexOfWaypoint(newMarkPassing.getWaypoint()));
+                }
+            }
+            removed.forEach(waypointWithMarkPassingRemoved->affectedZeroBasedWaypointIndexes.add(course.getIndexOfWaypoint(waypointWithMarkPassingRemoved)));
+            final Pair<Integer, Integer> result;
+            if (affectedZeroBasedWaypointIndexes.isEmpty()) {
+                result = null;
+            } else {
+                final int min = Collections.min(affectedZeroBasedWaypointIndexes);
+                final int max = Collections.max(affectedZeroBasedWaypointIndexes);
+                // now extend to each side because a mark passing change for a waypoint affects both
+                // adjacent legs, unless there is no adjacent leg in that direction
+                result = new Pair<>(min == 0 ? 0 : min-1, max==course.getNumberOfWaypoints()-1 ? max : max+1);
+            }
+            return result;
         }
 
         @Override
@@ -260,25 +282,51 @@ public class SimulationServiceImpl implements SimulationService {
         public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
             // relevant for simulation: legs with indices starting at zeroBasedIndex are affected and need to have their simulation results removed from the cache
             final int numberOfWaypoints = trackedRace.getRace().getCourse().getNumberOfWaypoints();
-            removeCacheEntriesAndTriggerRecalculationIfStillHot(zeroBasedIndex, numberOfWaypoints);
+            scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(zeroBasedIndex, numberOfWaypoints, /* wait */ 0);
         }
 
         @Override
         public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
             // relevant for simulation: legs with indices starting at zeroBasedIndex are affected and need to have their simulation results removed from the cache
             final int numberOfWaypoints = trackedRace.getRace().getCourse().getNumberOfWaypoints();
-            removeCacheEntriesAndTriggerRecalculationIfStillHot(zeroBasedIndex, numberOfWaypoints);
+            scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(zeroBasedIndex, numberOfWaypoints, /* wait */ 0);
         }
 
-        private void removeCacheEntriesAndTriggerRecalculationIfStillHot(final int fromZeroBasedLegIndex, final int toZeroBasedLegIndexExclusive) {
-            for (int i=fromZeroBasedLegIndex; i<toZeroBasedLegIndexExclusive; i++) {
-                final LegIdentifierImpl key = new LegIdentifierImpl(trackedRace.getRaceIdentifier(), i+1);
-                removeCacheEntryAndTriggerRecalculationIfStillHot(key);
+        @Override
+        protected void defaultAction() {
+            scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(0, trackedRace.getRace().getCourse().getNumberOfWaypoints(), WAIT_MILLIS);
+        }
+
+        private void scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(final int fromZeroBasedLegIndex, final int toZeroBasedLegIndexExclusive, long schedulingDelayMillis) {
+            for (int zeroBasedLegNumber=fromZeroBasedLegIndex; zeroBasedLegNumber<toZeroBasedLegIndexExclusive; zeroBasedLegNumber++) {
+                scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(zeroBasedLegNumber, WAIT_MILLIS);
             }
         }
         
-        private void removeCacheEntryAndTriggerRecalculationIfStillHot(final LegIdentifierImpl key) {
-            cache.remove(key); // TODO bug4596: this isn't triggering any recalculation for anything "hot" yet...
+        private void scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduled(int zeroBasedLegNumber, long schedulingDelayMillis) {
+            final LegIdentifierImpl key = new LegIdentifierImpl(trackedRace.getRaceIdentifier(), zeroBasedLegNumber+1);
+            scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduledYet(key, WAIT_MILLIS);
+        }
+
+        private void scheduleUpdateTriggerForLegIfCachedAndNoUpdateScheduledYet(final LegIdentifier cacheKey, long schedulingDelayMillis) {
+            // several calls to this method may occur more or less concurrently; try to reduce redundant scheduling
+            // as far as possible by using the atomic computeIfAbsent method on the ConcurrentMap:
+            cacheUpdateTriggerScheduledForLeg.computeIfAbsent(cacheKey, ck->{
+                final Boolean result;
+                if (cache.get(cacheKey, /* waitForLatest */ false) != null) {
+                    scheduler.schedule(() -> triggerUpdate(cacheKey), schedulingDelayMillis, TimeUnit.MILLISECONDS);
+                    result = true;
+                } else {
+                    result = null;
+                }
+                return result;
+            });
+        }
+
+        private void triggerUpdate(LegIdentifier legIdentifier) {
+            cacheUpdateTriggerScheduledForLeg.remove(legIdentifier); // now it's no longer scheduled but actually running
+            logger.info("Simulation Scheduled Update Triggered: \"" + legIdentifier.toString() + "\"");
+            cache.triggerUpdate(legIdentifier, null);
         }
     }
 

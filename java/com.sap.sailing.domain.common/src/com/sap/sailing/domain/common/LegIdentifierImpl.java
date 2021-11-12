@@ -5,7 +5,8 @@ public class LegIdentifierImpl extends RegattaNameAndRaceName implements LegIden
     private RegattaAndRaceIdentifier raceIdentifier = null;
     private int oneBasedLegIndex;
 
-    LegIdentifierImpl() {}
+    @Deprecated
+    LegIdentifierImpl() {} // for GWT RPC serialization only
     
     public LegIdentifierImpl(RegattaAndRaceIdentifier raceIdentifier, int oneBasedLegIndex) {
         super(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
