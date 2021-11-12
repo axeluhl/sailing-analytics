@@ -1598,8 +1598,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
                 rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
                 rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
-            result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getOneBasedLegIndex(), simulationResults.getStartTime(), simulationResults.getTimeStep(),
-                        simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
+                result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(),
+                        legIdentifier.getOneBasedLegIndex(), simulationResults.getStartTime(),
+                        simulationResults.getTimeStep(), simulationResults.getLegDuration(), rcDTO, pathDTOs, null,
+                        null);
             }
         return result;
     }

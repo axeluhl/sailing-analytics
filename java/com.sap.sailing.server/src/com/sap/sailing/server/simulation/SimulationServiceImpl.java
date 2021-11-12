@@ -187,8 +187,7 @@ public class SimulationServiceImpl implements SimulationService {
 
         @Override
         public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
-            // relevant for simulation? for last leg?
-            // TODO: update last leg?
+            // not relevant for simulation because we care when the boats entered the leg, not when the last one finished
         }
 
         @Override
@@ -341,9 +340,9 @@ public class SimulationServiceImpl implements SimulationService {
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
             boolean isLive = trackedRace.isLive(simulationStartTime);
-            int legNumber = legIdentifier.getOneBasedLegIndex();
+            int zeroBasedlegNumber = legIdentifier.getOneBasedLegIndex()-1;
             Course raceCourse = trackedRace.getRace().getCourse();
-            Leg leg = raceCourse.getLegs().get(legNumber);
+            Leg leg = raceCourse.getLegs().get(zeroBasedlegNumber);
             // get previous mark or start line as start-position
             Waypoint fromWaypoint = leg.getFrom();
             // get next mark as end-position
@@ -360,7 +359,7 @@ public class SimulationServiceImpl implements SimulationService {
             }
             if (markPassing != null) {
                 startTimePoint = markPassing.getTimePoint();
-            } else if (isLive && (legNumber == 0)) {
+            } else if (isLive && (zeroBasedlegNumber == 0)) {
                 startTimePoint = simulationStartTime;
             }
             markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
