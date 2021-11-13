@@ -1607,11 +1607,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     private SimulatorWindDTO createSimulatorWindDTO(TimedPositionWithSpeed timedPositionWithSpeed) {
-
         Position position = timedPositionWithSpeed.getPosition();
         SpeedWithBearing speedWithBearing = timedPositionWithSpeed.getSpeed();
         TimePoint timePoint = timedPositionWithSpeed.getTimePoint();
-
         SimulatorWindDTO result = new SimulatorWindDTO();
         if (speedWithBearing == null) {
                 result.trueWindBearingDeg = 0.0;
@@ -1620,15 +1618,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 result.trueWindBearingDeg = speedWithBearing.getBearing().getDegrees();
                 result.trueWindSpeedInKnots = speedWithBearing.getKnots();
         }
-
         if (position != null) {
             result.position = position;
         }
-
         if (timePoint != null) {
-            result.timepoint = timePoint.asMillis();
+            result.timepoint = timePoint;
         }
-
         return result;
     }
 

@@ -54,6 +54,7 @@ import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
@@ -138,66 +139,53 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 errorReporter.reportError(notificationMessage, true);
                 warningAlreadyShown = true;
             }
-
             PathDTO[] paths = result.getPaths();
-
             LOGGER.info("Number of Paths : " + paths.length);
-            long startTime = paths[0].getPoints().get(0).timepoint;
-            long maxDurationTime = 0;
-
+            final TimePoint startTime = paths[0].getPoints().get(0).timepoint;
+            long maxDurationMillis = 0;
             if (mode == SailingSimulatorConstants.ModeMeasured) {
                 Position pos1 = result.getRaceCourse().coursePositions.waypointPositions.get(0);
                 Position pos2 = result.getRaceCourse().coursePositions.waypointPositions.get(1);
                 raceCourseCanvasOverlay.setStartEndPoint(coordinateSystem.toLatLng(pos1), coordinateSystem.toLatLng(pos2));
             }
-
             raceCourseCanvasOverlay.draw();
             removeOverlays();
             // pathCanvasOverlays.clear();
             replayPathCanvasOverlays.clear();
             colorPalette.reset();
-
             PathDTO currentPath = null;
             //String color = null;
             String pathName = null;
             boolean algorithmTimedOut = false;
             int noOfPaths = paths.length;
-
             for (int index = 0; index < noOfPaths; ++index) {
-
                 currentPath = paths[index];
                 pathName = currentPath.getName();
                 algorithmTimedOut = currentPath.getAlgorithmTimedOut();
                 //color = colorPalette.getColor(noOfPaths - 1 - index);
-
                 if (pathName.equals("Polyline")) {
                     pathPolyline = createPathPolyline(currentPath);
                 } else if (pathName.equals("GPS Poly")) {
                     continue;
                 } else {
-
                     /* TODO Revisit for now creating a WindFieldDTO from the path */
                     WindFieldDTO pathWindDTO = null;
                     if (!currentPath.getMixedLeg()) {
                         pathWindDTO = new WindFieldDTO();
                         pathWindDTO.setMatrix(currentPath.getPoints());
                     }
-
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX, 
                             pathNameFormatter.format(currentPath), timer, windParams, algorithmTimedOut, currentPath.getMixedLeg(), coordinateSystem);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setPathColor(colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1));
-
                     if (summaryView) {
                         replayPathCanvasOverlay.displayWindAlongPath = true;
                         timer.removeTimeListener(replayPathCanvasOverlay);
                         replayPathCanvasOverlay.setTimer(null);
                     }
-
                     if (SHOW_ONLY_PATH_POLYLINE == false) {
                         replayPathCanvasOverlay.addToMap();
                     }
-
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
                     replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.getStartPoint(), raceCourseCanvasOverlay.getEndPoint());
                     /*if (index == 0) {
@@ -209,32 +197,27 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                         replayPathCanvasOverlay.draw();
                     }
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
-
                     long tmpDurationTime = currentPath.getPathTime();
-                    if ((!currentPath.getMixedLeg())&&(!currentPath.getAlgorithmTimedOut())&&(tmpDurationTime > maxDurationTime)) {
-                        maxDurationTime = tmpDurationTime;
+                    if ((!currentPath.getMixedLeg())&&(!currentPath.getAlgorithmTimedOut())&&(tmpDurationTime > maxDurationMillis)) {
+                        maxDurationMillis = tmpDurationTime;
                     }
                 }
             }
-            
-        	legendCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
-
+            legendCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
             if (timePanel != null) {
-            	Date endDate = new Date(startTime + maxDurationTime);
-                timePanel.setMinMax(new Date(startTime), endDate, true);
+            	final TimePoint endDate = startTime.plus(maxDurationMillis);
+                timePanel.setMinMax(startTime.asDate(), endDate.asDate(), true);
                 timePanel.resetTimeSlider();
                 timePanel.timeChanged(windParams.getStartTime(), null);
                 if (windParams.isShowStreamlets()) {
-                	windStreamletsCanvasOverlay.setEndDate(endDate);
+                    windStreamletsCanvasOverlay.setEndDate(endDate.asDate());
                 }
             }
-
             /**
              * Now we always get the wind field
              */
             WindFieldDTO windFieldDTO = result.getWindField();
             //LOGGER.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
-
             if (windParams.isShowGrid()) {
                 windGridCanvasOverlay.addToMap();
             }

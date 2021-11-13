@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -204,10 +205,10 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 }
             }
             ctxt.stroke();
-            SimulatorWindDTO start = points.get(0);
-            long timeStep = simulationResult.getTimeStep();
+            final SimulatorWindDTO start = points.get(0);
+            final Duration timeStep = simulationResult.getTimeStep();
             for (SimulatorWindDTO point : points) {
-                if ((point.timepoint - start.timepoint) % (timeStep) != 0) {
+                if (start.timepoint.until(point.timepoint).asMillis() % timeStep.asMillis() != 0) {
                     continue;
                 }
                 Point px = mapProjection.fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
@@ -357,11 +358,11 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                             if ((result.getPaths() != null) && (result.getVersion() >= requestedSimulationVersion) && (result.getLeg() == raceLeg)) {
                                 simulationResult = result;
                                 PathDTO[] paths = result.getPaths();
-                                if (result.getLegDuration() > 0) {
+                                if (result.getLegDuration().compareTo(Duration.NULL) > 0) {
                                     racePath = new PathDTO("0#Race Leader");
                                     List<SimulatorWindDTO> racePathPoints = new ArrayList<SimulatorWindDTO>();
                                     racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint));
-                                    racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint + result.getLegDuration()));
+                                    racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint.plus(result.getLegDuration())));
                                     racePath.setPoints(racePathPoints);
                                 } else {
                                     racePath = null;

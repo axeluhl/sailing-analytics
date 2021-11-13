@@ -929,6 +929,16 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         }
     }
 
+    @Override
+    public void addTrackedRegattaListener(TrackedRegattaListener listener) {
+        trackedRegattaListener.addListener(listener);
+    }
+    
+    @Override
+    public void removeTrackedRegattaListener(TrackedRegattaListener listener) {
+        trackedRegattaListener.removeListener(listener);
+    }
+    
     /**
      * FIXME: Attention! This method is a migration effort. It shall not be called outside of the Activators initial startup, 
      * since it does manipulate Preference Objects directly, outside of the preferenceLock in the UserStoreImpl.

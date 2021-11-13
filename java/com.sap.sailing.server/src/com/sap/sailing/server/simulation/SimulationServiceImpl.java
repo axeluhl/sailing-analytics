@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
@@ -63,19 +64,20 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldTrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.SmartFutureCache;
 
 public class SimulationServiceImpl implements SimulationService {
-
     private static final Logger logger = Logger.getLogger(SimulationService.class.getName());
 
     final private ScheduledExecutorService executor;
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
+    final private ConcurrentMap<LegIdentifier, TimePoint> cacheReadTimePoints;
     final private RacingEventService racingEventService;
     final private ScheduledExecutorService scheduler;
+    final private Duration CACHE_ENTRY_EXPIRY_DURATION = Duration.ONE_MINUTE.times(10);
     
     /**
      * Keys are regatta names
@@ -85,6 +87,7 @@ public class SimulationServiceImpl implements SimulationService {
     final private long WAIT_MILLIS = 20000; // milliseconds to wait until earliest cache-update for simulation
     
     public SimulationServiceImpl(ScheduledExecutorService executor, RacingEventService racingEventService) {
+        this.cacheReadTimePoints = new ConcurrentHashMap<>();
         this.executor = executor;
         this.scheduler = executor;
         this.racingEventService = racingEventService;
@@ -101,10 +104,25 @@ public class SimulationServiceImpl implements SimulationService {
                             return results;
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
+            scheduler.scheduleAtFixedRate(()->expireCacheEntries(), CACHE_ENTRY_EXPIRY_DURATION.asMillis(), CACHE_ENTRY_EXPIRY_DURATION.asMillis(), TimeUnit.MILLISECONDS);
         } else {
             this.raceListeners = null;
             this.legListeners = null;
             this.cache = null;
+        }
+    }
+
+    private void expireCacheEntries() {
+        final TimePoint expireAllOlderThan = TimePoint.now().minus(CACHE_ENTRY_EXPIRY_DURATION);
+        for (final Iterator<Entry<LegIdentifier, TimePoint>> cacheReadTimePointsIterator = cacheReadTimePoints.entrySet().iterator(); cacheReadTimePointsIterator.hasNext(); ) {
+            final Entry<LegIdentifier, TimePoint> cacheReadTimePointsEntry = cacheReadTimePointsIterator.next();
+            if (cacheReadTimePointsEntry.getValue().before(expireAllOlderThan)) {
+                logger.info("Removing expired simulator result for leg "+cacheReadTimePointsEntry.getKey()+
+                        " because it was last accessed at "+cacheReadTimePointsEntry.getValue()+
+                        " which is more than "+CACHE_ENTRY_EXPIRY_DURATION+" before now.");
+                cacheReadTimePointsIterator.remove();
+                cache.remove(cacheReadTimePointsEntry.getKey());
+            }
         }
     }
 
@@ -323,7 +341,7 @@ public class SimulationServiceImpl implements SimulationService {
             });
         }
 
-        private void triggerUpdate(LegIdentifier legIdentifier) {
+        private void triggerUpdate(final LegIdentifier legIdentifier) {
             cacheUpdateTriggerScheduledForLeg.remove(legIdentifier); // now it's no longer scheduled but actually running
             logger.info("Simulation Scheduled Update Triggered: \"" + legIdentifier.toString() + "\"");
             cache.triggerUpdate(legIdentifier, null);
@@ -344,11 +362,21 @@ public class SimulationServiceImpl implements SimulationService {
         if (result == null) {
             logger.fine("Simulation Get: Cache Empty: \"" + legIdentifier.toString() + "\"");
             if (!raceListeners.containsKey(legIdentifier.getRegattaName())) {
-                Regatta regatta = racingEventService.getRegattaByName(legIdentifier.getRegattaName());
-                DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
-                SimulationRaceListener raceListener = new SimulationRaceListener(); 
+                final Regatta regatta = racingEventService.getRegattaByName(legIdentifier.getRegattaName());
+                final DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
+                final SimulationRaceListener raceListener = new SimulationRaceListener(); 
                 raceListeners.put(legIdentifier.getRegattaName(), raceListener);
                 trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty(), /* synchronous */ false);
+                racingEventService.addTrackedRegattaListener(new TrackedRegattaListener() {
+                    @Override public void regattaAdded(TrackedRegatta trackedRegatta) {}
+
+                    @Override
+                    public void regattaRemoved(TrackedRegatta tr) {
+                        if (trackedRegatta == tr) {
+                            tr.removeRaceListener(raceListener);
+                        }
+                    }
+                });
             }
             if (!legListeners.containsKey(legIdentifier.getRaceIdentifier())) {
                 TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
@@ -364,8 +392,14 @@ public class SimulationServiceImpl implements SimulationService {
         }
         if (result == null) {
             logger.fine("Simulation Get: Null-Result: \"" + legIdentifier.toString() + "\"");
+        } else {
+            recordCacheHit(legIdentifier);
         }
         return result;
+    }
+
+    private void recordCacheHit(LegIdentifier legIdentifier) {
+        cacheReadTimePoints.put(legIdentifier, TimePoint.now());
     }
 
     private List<Position> getLinePositions(Waypoint wayPoint, TimePoint at, TrackedRace trackedRace) {
@@ -383,7 +417,7 @@ public class SimulationServiceImpl implements SimulationService {
 
     private SimulationResults computeSimulationResults(LegIdentifier legIdentifier) throws InterruptedException,
             ExecutionException {
-        TimePoint simulationStartTime = MillisecondsTimePoint.now();
+        final TimePoint simulationStartTime = TimePoint.now();
         SimulationResults result = null;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
@@ -395,35 +429,31 @@ public class SimulationServiceImpl implements SimulationService {
             Waypoint fromWaypoint = leg.getFrom();
             // get next mark as end-position
             Waypoint toWaypoint = leg.getTo();
-
-            TimePoint startTimePoint = null;
-            TimePoint endTimePoint = null;
-            MarkPassing markPassing;
-            Iterator<MarkPassing> markPassingIterator = trackedRace.getMarkPassingsInOrder(fromWaypoint).iterator();
-            if (markPassingIterator.hasNext()) {
-                markPassing = markPassingIterator.next();
+            final TimePoint startTimePoint;
+            final TimePoint endTimePoint;
+            final Duration legDuration; // FIXME the startTimePoint and endTimePoint may originate from different competitors; their difference therefore may not be any real time spent by any single competitor in that leg
+            final MarkPassing toMarkPassing = Util.first(trackedRace.getMarkPassingsInOrder(toWaypoint));
+            if (toMarkPassing != null) {
+                final Optional<MarkPassing> fromMarkPassing = trackedRace.getMarkPassings(toMarkPassing.getCompetitor()).stream().filter(mp->mp.getWaypoint() == fromWaypoint).findAny();
+                if (fromMarkPassing.isPresent()) {
+                    startTimePoint = fromMarkPassing.get().getTimePoint();
+                    // find the leg finish mark passing of the same competitor; the competitor may not have finished yet, may have been passed by
+                    // another competitor who then finished the leg already (this time as the fastest).
+                    endTimePoint = toMarkPassing.getTimePoint();
+                    legDuration = startTimePoint.until(endTimePoint);
+                } else {
+                    legDuration = Duration.NULL;
+                    if (isLive && zeroBasedlegNumber == 0) {
+                        endTimePoint = simulationStartTime;
+                        startTimePoint = simulationStartTime;
+                    } else {
+                        startTimePoint = null;
+                        endTimePoint = null;
+                    }
+                }
             } else {
-                markPassing = null;
-            }
-            if (markPassing != null) {
-                startTimePoint = markPassing.getTimePoint();
-            } else if (isLive && (zeroBasedlegNumber == 0)) {
+                legDuration = Duration.NULL;
                 startTimePoint = simulationStartTime;
-            }
-            markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
-            if (markPassingIterator.hasNext()) {
-                markPassing = markPassingIterator.next();
-            } else {
-                markPassing = null;
-            }
-            if (markPassing != null) {
-                endTimePoint = markPassing.getTimePoint();
-            }
-            long legDuration = 0; // FIXME the startTimePoint and endTimePoint may originate from different competitors; their difference therefore may not be any real time spent by any single competitor in that leg
-            if ((startTimePoint != null) && (endTimePoint != null)) {
-                legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
-            }
-            if (isLive && (markPassing == null)) {
                 endTimePoint = simulationStartTime;
             }
             Position startPosition = null;
@@ -446,7 +476,6 @@ public class SimulationServiceImpl implements SimulationService {
             } else if (startTimePoint != null) {
                 endPosition = trackedRace.getApproximatePosition(toWaypoint, startTimePoint);
             }
-
             // determine legtype upwind/downwind/reaching
             LegType legType = null;
             if (startTimePoint != null) {
@@ -458,12 +487,10 @@ public class SimulationServiceImpl implements SimulationService {
             } else {
                 return null;
             }
-
             // get windfield
             WindFieldGenerator windField = new WindFieldTrackedRaceImpl(trackedRace);
             Duration timeStep = new MillisecondsDurationImpl(15 * 1000);
             windField.generate(startTimePoint, null, timeStep);
-
             // prepare simulation-parameters
             List<Position> course = new ArrayList<Position>();
             course.add(startPosition);
@@ -487,8 +514,8 @@ public class SimulationServiceImpl implements SimulationService {
                 paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
             }
             // prepare simulator-results
-            result = new SimulationResults(startTimePoint.asDate(), timeStep.asMillis(), legDuration, startPosition,
-                    endPosition, paths, null, simulationStartTime);
+            result = new SimulationResults(startTimePoint, timeStep, legDuration, startPosition,
+                    endPosition, paths, null, TimePoint.now());
         }
         return result;
     }
