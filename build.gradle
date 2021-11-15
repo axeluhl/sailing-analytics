@@ -45,7 +45,7 @@ allprojects {
 // dependency versions for all sub modules
 ext {
     // regular
-    buildTools = "30.0.2"
+    buildTools = "30.0.3"
     compileSdk = 30
     minSdk = 16
     targetSdk = 30
