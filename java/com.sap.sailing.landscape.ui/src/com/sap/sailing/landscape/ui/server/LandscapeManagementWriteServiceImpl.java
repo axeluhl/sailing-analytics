@@ -650,7 +650,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                          .and(SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG, name))
             .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
             .setImage(masterHostBuilder.getMachineImage())
-            .setReplicaConfiguration(replicaConfigurationBuilder.build());
+            .setReplicaConfiguration(replicaConfigurationBuilder.build()); // use the default scaling parameters (currently 1/30/30000)
         if (optionalKeyName != null) {
             createLaunchConfigurationAndAutoScalingGroupBuilder.setKeyName(optionalKeyName);
         }
