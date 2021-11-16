@@ -57,7 +57,7 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
 
     //don't align the already signed apks anymore
     //assert execute(zipalign.absolutePath, "-v", "4", apkUnsigned, apkToDeploy) == 0
-    assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
+    //assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
 
     def deployable = new File(apkToDeploy)
     def expectedLocation = new File("$gendir/$name")
@@ -72,7 +72,7 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
 
     //println "Execute APK local signing ..."
     //assert execute(apksigner.absolutePath, "sign", "--ks", "${CODESIGN_TOOL_DIR}/localSigningKeystore-1.0.0.jks", "--ks-pass", "pass:localSigningPassword", "-in", "${apkToSign}", "-out", "${apkToDeploy}" ) == 0 
-    assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
+    //assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
   }
 }
 
