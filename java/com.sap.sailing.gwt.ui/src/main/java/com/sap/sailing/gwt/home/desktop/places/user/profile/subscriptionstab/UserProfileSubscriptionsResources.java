@@ -16,8 +16,6 @@ public interface UserProfileSubscriptionsResources extends ClientBundle {
 
     public interface SubscriptionProfileCss extends UserProfileResources.UserProfileStyle {
 
-        String hideText();
-
         String textColorBlue();
 
         String textColorRed();

@@ -3,9 +3,15 @@
              xmlns:f="urn:import:com.sap.sailing.gwt.home.shared.partials.filter">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .footerContainer {
+            border-top: 2px solid #ccc;
+            padding-top: 1rem;
+        }
+    </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-        <g:FlowPanel ui:field="subscriptionsContainerUi" addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermarginbottommediumsmall}" />
-        <g:FlowPanel addStyleNames="{res.mediaCss.column}">
+        <g:FlowPanel ui:field="subscriptionsContainerUi" addStyleNames="{res.mediaCss.column} {res.mediaCss.small12}" />
+        <g:FlowPanel addStyleNames="{res.mediaCss.column} {style.footerContainer}">
             <g:Button ui:field="subscribeButtonUi" addStyleNames=" {res.mediaCss.small12} {res.mainCss.button} {res.mainCss.buttonprimary}">
                 <ui:text from="{i18n.subscribe}" />
             </g:Button>

@@ -4,27 +4,15 @@
              xmlns:sh="urn:import:com.sap.sailing.gwt.home.mobile.partials.sectionHeader">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
-        .wordwrapping {
-            word-wrap: break-word;
-        }
-        .content {
-            padding: .333333333333333em;
-        }
-        .deleteControl {
-            color: #e94a1b;
-            width: 100%;
-        }
-    </ui:style>
-    <ms:MobileSection addStyleNames="{style.wordwrapping}">
+    <ms:MobileSection>
         <ms:header>
             <sh:SectionHeaderContent ui:field="sectionHeaderUi"/>
         </ms:header>
         <ms:content>
-            <g:HTMLPanel ui:field="contentContainerUi" addStyleNames="{style.content}">
-                <div ui:field="settingsDataUi" class="{res.mainCss.spacermarginbottomsmall}"></div>
+            <g:HTMLPanel ui:field="contentContainerUi" addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
+                <div ui:field="subscriptionInfoUi" class="{res.mediaCss.small12}"/>
                 <g:Button ui:field="cancelControlUi" text="{i18n.delete}"
-                          addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {style.deleteControl}" />
+                          addStyleNames="{res.mediaCss.small12} {res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonred}" />
             </g:HTMLPanel>
         </ms:content>
     </ms:MobileSection>
