@@ -20,7 +20,7 @@ assert mavenclient.exists()
 println "mavenclient check passed"
 
 def setup_android_tool(String toolname) {
-  def tool = new File(CODESIGN_TOOL_DIR, "android-10/" + toolname )
+  def tool = new File(CODESIGN_TOOL_DIR, "android-11/" + toolname )
   //check zipalign in the exploded build-tools dir
   tool.setExecutable(true)
   assert tool.canExecute()
@@ -29,7 +29,7 @@ def setup_android_tool(String toolname) {
 }
 
 //tools required in the exploded build-tools dir
-//def zipalign = setup_android_tool("zipalign")
+def zipalign = setup_android_tool("zipalign")
   // google play store checks the APK with this tool - below API level 18 only SHA1 digest algorithm allowed
   // 
   // if you see similar message:
