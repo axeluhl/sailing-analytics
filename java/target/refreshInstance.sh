@@ -282,15 +282,6 @@ auto_install ()
         append_default_envsh_rules
         # make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
         source `pwd`/env.sh
-        if [ -z $MEMORY ]; then
-          # Compute a default amount of memory based on available physical RAM, with a minimum of 2GB:
-          MINIMUM_MEMORY_IN_MB=2000
-          MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
-          MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
-          MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
-          echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
-          echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>`pwd`/env.sh
-        fi
         # Append mail-related environment variables to configuration/mail.properties to override defaults
         echo "mail.enabled = true" >>configuration/mail.properties
         if [ -n "$MAIL_FROM" ]; then

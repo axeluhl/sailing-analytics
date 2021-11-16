@@ -91,6 +91,7 @@ if [ -z "${SERVER_STARTUP_NOTIFY}" ]; then
   export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 fi
 if [ -z "${MEMORY}" ]; then
+  # Compute a default amount of memory based on available physical RAM, with a minimum of 2GB:
   MINIMUM_MEMORY_IN_MB=2000
   MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
   MEMORY_FOR_APPLICATIONS=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
