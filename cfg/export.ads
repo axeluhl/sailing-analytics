@@ -53,7 +53,7 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
     def apkUnsigned = apkFile.getAbsolutePath()
     def name = apkFile.getName()
     def index = name.indexOf("-")
-    def apkToDeploy = "$repodir/${name.substring(0 , index)}-release-centralsigned.apk"
+    def apkToDeploy = apkUnsigned
 
     //don't align the already signed apks anymore
     //assert execute(zipalign.absolutePath, "-v", "4", apkUnsigned, apkToDeploy) == 0
