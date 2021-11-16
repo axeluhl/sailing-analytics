@@ -283,8 +283,7 @@ auto_install ()
         # make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
         source `pwd`/env.sh
         if [ -z $MEMORY ]; then
-          # Compute a default amount of memory based on available physical RAM and the number of applications, with a minimum of 2GB:
-          NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
+          # Compute a default amount of memory based on available physical RAM, with a minimum of 2GB:
           MINIMUM_MEMORY_IN_MB=2000
           MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
           MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
