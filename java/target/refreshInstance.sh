@@ -92,9 +92,11 @@ activate_user_data ()
 
 append_default_envsh_rules()
 {
-    echo "# Default rules: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+    echo "
+# Default rules: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
     cat "${SERVER_HOME}/env-default-rules.sh" >>$SERVER_HOME/env.sh
-    echo "# Default rules: END" >> $SERVER_HOME/env.sh
+    echo "
+# Default rules: END" >> $SERVER_HOME/env.sh
     echo "Updated env.sh with data from env-default-rules.sh file!"
 }
 
@@ -104,7 +106,8 @@ append_user_data_to_envsh ()
     # make backup of original file
     cp $SERVER_HOME/env.sh $SERVER_HOME/environment/env.sh.backup
 
-    echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+    echo "
+# User-Data: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
     echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
@@ -136,9 +139,11 @@ install_environment ()
 	    echo "Using environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
 	    wget -P environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT
 	fi
-        echo "# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+        echo "
+# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
         cat ${SERVER_HOME}/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
-        echo "# Environment: END" >> ${SERVER_HOME}/env.sh
+        echo "
+# Environment: END" >> ${SERVER_HOME}/env.sh
         echo "Updated env.sh with data from environment file!"
     else
         echo "No environment file specified!"
