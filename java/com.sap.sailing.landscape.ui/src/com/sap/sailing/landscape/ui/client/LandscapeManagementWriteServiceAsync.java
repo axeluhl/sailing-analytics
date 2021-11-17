@@ -1,7 +1,6 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -198,6 +197,6 @@ public interface LandscapeManagementWriteServiceAsync {
     void deployApplicationToExistingHost(String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
             String replicaInstanceType, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
-            String replicaReplicationBearerToken, String optionalDomainName, Optional<Integer> memoryInMegabytes,
-            Optional<Integer> memoryTotalSizeFactor, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }

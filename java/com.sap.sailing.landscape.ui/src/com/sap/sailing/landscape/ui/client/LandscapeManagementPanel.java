@@ -442,7 +442,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
                                                 instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
-                                                instructions.getOptionalDomainName(), instructions.getMemoryInMegabytes(), instructions.getMemoryTotalSizeFactor(),
+                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(), instructions.getOptionalMemoryTotalSizeFactorOrNUll(),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {

@@ -1,7 +1,5 @@
 package com.sap.sailing.landscape.ui.client;
 
-import java.util.Optional;
-
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -24,20 +22,20 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         private final String instanceType;
         private final boolean dynamicLoadBalancerMapping;
         private final String optionalDomainName;
-        private final Optional<Integer> memoryInMegabytes;
-        private final Optional<Integer> memoryTotalSizeFactor;
+        private final Integer optionalMemoryInMegabytesOrNull;
+        private final Integer optionalMemoryTotalSizeFactorOrNull;
         
         public CreateApplicationReplicaSetInstructions(String name, String instanceType,
                 String releaseNameOrNullForLatestMaster, boolean dynamicLoadBalancerMapping,
                 String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-                Optional<Integer> memoryInMegabytes, Optional<Integer> memoryTotalSizeFactor) {
+                Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) {
             super(releaseNameOrNullForLatestMaster, masterReplicationBearerToken, replicaReplicationBearerToken);
             this.name = name;
             this.dynamicLoadBalancerMapping = dynamicLoadBalancerMapping;
             this.optionalDomainName = Util.hasLength(optionalDomainName) ? optionalDomainName : null;
             this.instanceType = instanceType;
-            this.memoryInMegabytes = memoryInMegabytes;
-            this.memoryTotalSizeFactor = memoryTotalSizeFactor;
+            this.optionalMemoryInMegabytesOrNull = optionalMemoryInMegabytesOrNull;
+            this.optionalMemoryTotalSizeFactorOrNull = optionalMemoryTotalSizeFactorOrNull;
         }
         public String getName() {
             return name;
@@ -51,11 +49,11 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         public String getInstanceType() {
             return instanceType;
         }
-        public Optional<Integer> getMemoryInMegabytes() {
-            return memoryInMegabytes;
+        public Integer getOptionalMemoryInMegabytesOrNull() {
+            return optionalMemoryInMegabytesOrNull;
         }
-        public Optional<Integer> getMemoryTotalSizeFactor() {
-            return memoryTotalSizeFactor;
+        public Integer getOptionalMemoryTotalSizeFactorOrNUll() {
+            return optionalMemoryTotalSizeFactorOrNull;
         }
     }
     
@@ -142,6 +140,6 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
                 getInstanceTypeListBox().getSelectedValue(), getReleaseNameBoxValue(),
                 dynamicLoadBalancerCheckBox.getValue(), getMasterReplicationBearerTokenBox().getValue(),
                 getReplicaReplicationBearerTokenBox().getValue(), domainNameBox.getValue(),
-                /* memoryInMegabytes */ Optional.empty(), /* memoryTotalSizeFactor */ Optional.empty());
+                memoryInMegabytesBox.getValue(), memoryTotalSizeFactorBox.getValue());
     }
 }

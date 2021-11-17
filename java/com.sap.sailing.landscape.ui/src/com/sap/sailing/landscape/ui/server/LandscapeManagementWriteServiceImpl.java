@@ -681,15 +681,29 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
-    MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
-    SailingAnalyticsHost<String>,
-    SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>> SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(
+    public SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(
             String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
             String replicaInstanceType,
             byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Optional<Integer> memoryInMegabytes, Optional<Integer> memoryTotalSizeFactor)
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull)
+            throws Exception {
+        return deployApplicationToExistingHostInternal(regionId, replicaSetName, hostToDeployTo,
+                dynamicLoadBalancerMapping, releaseNameOrNullForLatestMaster, optionalKeyName, replicaInstanceType,
+                privateKeyEncryptionPassphrase, masterReplicationBearerToken, replicaReplicationBearerToken,
+                optionalDomainName, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+    }
+    
+    private <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
+        MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
+        SailingAnalyticsHost<String>,
+        SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
+    SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHostInternal(
+            String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
+            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
+            String replicaInstanceType,
+            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
@@ -705,8 +719,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setRelease(release)
             .setRegion(region)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(bearerTokenUsedByMaster)).build());
-        memoryInMegabytes.map(mb->{ masterConfigurationBuilder.setMemoryInMegabytes(mb); return null; }).orElseGet(()->
-                memoryTotalSizeFactor.map(tsf->{ masterConfigurationBuilder.setMemoryTotalSizeFactor(tsf); return null; }));
+        if (optionalMemoryInMegabytesOrNull != null) {
+            masterConfigurationBuilder.setMemoryInMegabytes(optionalMemoryInMegabytesOrNull);
+        } else if (optionalMemoryTotalSizeFactorOrNull != null) {
+            masterConfigurationBuilder.setMemoryTotalSizeFactor(optionalMemoryTotalSizeFactorOrNull);
+        }
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
                 DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> builder(
                         masterConfigurationBuilder);

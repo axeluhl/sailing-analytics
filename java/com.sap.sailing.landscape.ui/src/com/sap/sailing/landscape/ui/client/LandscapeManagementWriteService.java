@@ -1,13 +1,9 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.sap.sailing.landscape.SailingAnalyticsHost;
-import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
-import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
@@ -101,13 +97,10 @@ public interface LandscapeManagementWriteService extends RemoteService {
             MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception;
 
-    <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
-    MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<
-        MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
     SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(
             String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, String replicaInstanceType,
             byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
-            String replicaReplicationBearerToken, String optionalDomainName, Optional<Integer> memoryInMegabytes,
-            Optional<Integer> memoryTotalSizeFactor) throws Exception;
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
 }
