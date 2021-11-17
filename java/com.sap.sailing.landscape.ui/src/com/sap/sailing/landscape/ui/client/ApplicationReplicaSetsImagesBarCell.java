@@ -14,6 +14,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
     static final String ACTION_ARCHIVE = "ARCHIVE";
     static final String ACTION_DEFINE_LANDING_PAGE = "DEFINE_LANDING_PAGE";
     static final String ACTION_CREATE_LOAD_BALANCER_MAPPING = "CREATE_LOAD_BALANGER_MAPPING";
+    public static final String ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER = "LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER";
 
     private final StringMessages stringMessages;
 
@@ -38,6 +39,8 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
                         IconResources.INSTANCE.editIcon()),
                 new ImageSpec(ACTION_CREATE_LOAD_BALANCER_MAPPING, stringMessages.createLoadBalancerMapping(),
                         IconResources.INSTANCE.loadBalancerIcon()),
+                new ImageSpec(ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER, stringMessages.launchAnotherReplicaSetOnThisMaster(),
+                        IconResources.INSTANCE.launchAnotherReplicaSetOnThisMasterIcon()),
                 new ImageSpec(ACTION_UPGRADE, stringMessages.upgrade(),
                         IconResources.INSTANCE.refreshIcon())
                 );

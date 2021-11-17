@@ -108,4 +108,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String numberOfMinutesBeforeAndBetweenCompareServers();
     String numberOfCompareServersAttempts();
     String replicaReplicationBearerToken();
+    String memoryInMegabytes();
+    String memoryTotalSizeFactor();
+    String launchAnotherReplicaSetOnThisMaster();
 }
