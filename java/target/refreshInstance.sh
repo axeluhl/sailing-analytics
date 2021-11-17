@@ -412,4 +412,3 @@ else
     echo "install-user-data: appends the user data set for the EC2 instance to the env.sh file"
     exit 0
 fi
-

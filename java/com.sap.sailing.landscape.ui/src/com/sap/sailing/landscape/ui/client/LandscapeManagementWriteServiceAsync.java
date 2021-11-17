@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -187,4 +188,16 @@ public interface LandscapeManagementWriteServiceAsync {
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet,
             MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption,
             AsyncCallback<UUID> callback);
+
+    /**
+     * Like {@link #createApplicationReplicaSet(String, String, String, boolean, String, String, byte[], String, String, String, AsyncCallback)},
+     * only that in this case the master is deployed on an already existing host ({@code hostToDeployTo}) using the next available combination
+     * of ports, and only for the replicas an instance type ({@code replicaInstanceType}) can be specified. The minimum number of replicas is
+     * set to 0 (instead of 1), so the resulting application replica set is created in "low availability" ("economy") mode.
+     */
+    void deployApplicationToExistingHost(String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
+            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
+            String replicaInstanceType, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Optional<Integer> memoryInMegabytes,
+            Optional<Integer> memoryTotalSizeFactor, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }
