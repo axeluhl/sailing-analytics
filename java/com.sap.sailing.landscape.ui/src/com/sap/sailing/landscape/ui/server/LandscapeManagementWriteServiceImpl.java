@@ -677,7 +677,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             createLaunchConfigurationAndAutoScalingGroupBuilder.setImage(replicaMachineImage.get());
         } else {
             // obtain the latest AMI for launching a Sailing Analytics replica host:
-            createLaunchConfigurationAndAutoScalingGroupBuilder.setImage(StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder).getMachineImage());
+            createLaunchConfigurationAndAutoScalingGroupBuilder.setImage(
+                    StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder)
+                        .setLandscape(getLandscape())
+                        .getMachineImage());
         }
         if (optionalKeyName != null) {
             createLaunchConfigurationAndAutoScalingGroupBuilder.setKeyName(optionalKeyName);
