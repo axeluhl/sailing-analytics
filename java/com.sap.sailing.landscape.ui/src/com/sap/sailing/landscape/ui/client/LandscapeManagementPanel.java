@@ -395,7 +395,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
                                                 instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
-                                                instructions.getOptionalDomainName(),
+                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(),
+                                                instructions.getOptionalMemoryTotalSizeFactorOrNull(),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {
@@ -437,12 +438,12 @@ public class LandscapeManagementPanel extends SimplePanel {
                     public void ok(CreateApplicationReplicaSetInstructions instructions) {
                         applicationReplicaSetsBusy.setBusy(true);
                         landscapeManagementService.deployApplicationToExistingHost(regionId, instructions.getName(), hostToDeployTo, 
-                                instructions.isDynamicLoadBalancerMapping(), instructions.getReleaseNameOrNullForLatestMaster(),
-                                        sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(), instructions.getInstanceType(),
+                                instructions.getInstanceType(), instructions.isDynamicLoadBalancerMapping(),
+                                        instructions.getReleaseNameOrNullForLatestMaster(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
                                                 instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
-                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(), instructions.getOptionalMemoryTotalSizeFactorOrNUll(),
+                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(), instructions.getOptionalMemoryTotalSizeFactorOrNull(),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {

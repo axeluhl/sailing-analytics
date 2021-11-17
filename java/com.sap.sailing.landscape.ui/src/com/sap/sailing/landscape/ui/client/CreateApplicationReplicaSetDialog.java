@@ -52,7 +52,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         public Integer getOptionalMemoryInMegabytesOrNull() {
             return optionalMemoryInMegabytesOrNull;
         }
-        public Integer getOptionalMemoryTotalSizeFactorOrNUll() {
+        public Integer getOptionalMemoryTotalSizeFactorOrNull() {
             return optionalMemoryTotalSizeFactorOrNull;
         }
     }

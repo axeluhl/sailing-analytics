@@ -89,8 +89,9 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
@@ -195,8 +196,8 @@ public interface LandscapeManagementWriteServiceAsync {
      * set to 0 (instead of 1), so the resulting application replica set is created in "low availability" ("economy") mode.
      */
     void deployApplicationToExistingHost(String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            String replicaInstanceType, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
+            String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
             String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
             Integer optionalMemoryTotalSizeFactorOrNull, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }

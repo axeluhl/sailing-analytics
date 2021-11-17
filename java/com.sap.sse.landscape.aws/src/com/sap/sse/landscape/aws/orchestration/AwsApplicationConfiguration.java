@@ -162,8 +162,8 @@ implements UserDataProvider {
         private Boolean mailSmtpAuth;
         private String mailSmtpUser;
         private String mailSmtpPassword;
-        private Optional<Integer> memoryInMegabytes;
-        private Optional<Integer> memoryTotalSizeFactor;
+        private Optional<Integer> memoryInMegabytes = Optional.empty();
+        private Optional<Integer> memoryTotalSizeFactor = Optional.empty();
 
         @Override
         public BuilderT setRegion(AwsRegion region) {
