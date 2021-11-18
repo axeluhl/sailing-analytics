@@ -748,7 +748,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final SailingAnalyticsProcess<String> master = deployer.getProcess();
         return createLoadBalancingAndAutoScalingSetup(landscape, region, replicaSetName, master, release, replicaInstanceType, dynamicLoadBalancerMapping,
                 optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName, /* use default AMI as replica machine image */ Optional.empty(),
-                bearerTokenUsedByReplicas, /* minimum number of replicas */ Optional.of(1), /* maximum number of replicas */ Optional.empty());
+                bearerTokenUsedByReplicas, /* minimum number of replicas */ Optional.of(0), /* maximum number of replicas */ Optional.empty());
     }
 
     private void applyMemoryConfigurationToApplicationConfigurationBuilder(
