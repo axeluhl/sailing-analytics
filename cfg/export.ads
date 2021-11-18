@@ -61,7 +61,7 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
 
     def deployable = new File(apkToDeploy)
     def expectedLocation = new File("$gendir/$name")
-    deployable.renameTo(expectedLocation)
+    expectedLocation << deployable.bytes
   }
 } else {
   // snapshot and milestone builds are not eligible for central signing
