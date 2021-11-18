@@ -647,8 +647,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setServerName(replicaSetName)
             .setRelease(release)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
-                    .setMasterHostname(masterHostname)
-                    .setMasterHttpPort(master.getPort())
+                    .setMasterHostname(masterHostname) // don't set the master port; the replica set talks to "itself" through the load balancer using HTTPS
                     .setCredentials(new BearerTokenReplicationCredentials(bearerTokenUsedByReplicas))
                     .build());
         final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
