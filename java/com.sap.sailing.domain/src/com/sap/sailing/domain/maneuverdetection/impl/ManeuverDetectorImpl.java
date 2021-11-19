@@ -523,18 +523,20 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         Speed lowestSpeedAfter = null;
         Speed highestSpeedAfter = null;
         SpeedWithBearingStep firstStepAfter = null;
-        for (SpeedWithBearingStep step : splitSteps.getB()) {
-            if (firstStepAfter == null) {
-                firstStepAfter = step;
-                lowestSpeedAfter = step.getSpeedWithBearing();
-                highestSpeedAfter = lowestSpeedAfter;
-            }
-            courseChangeInDegreesAfter += step.getCourseChangeInDegrees();
-            if (lowestSpeedAfter.compareTo(step.getSpeedWithBearing()) > 0) {
-                lowestSpeedAfter = step.getSpeedWithBearing();
-            }
-            if (highestSpeedAfter.compareTo(step.getSpeedWithBearing()) < 0) {
-                highestSpeedAfter = step.getSpeedWithBearing();
+        if (splitSteps != null) {
+            for (SpeedWithBearingStep step : splitSteps.getB()) {
+                if (firstStepAfter == null) {
+                    firstStepAfter = step;
+                    lowestSpeedAfter = step.getSpeedWithBearing();
+                    highestSpeedAfter = lowestSpeedAfter;
+                }
+                courseChangeInDegreesAfter += step.getCourseChangeInDegrees();
+                if (lowestSpeedAfter.compareTo(step.getSpeedWithBearing()) > 0) {
+                    lowestSpeedAfter = step.getSpeedWithBearing();
+                }
+                if (highestSpeedAfter.compareTo(step.getSpeedWithBearing()) < 0) {
+                    highestSpeedAfter = step.getSpeedWithBearing();
+                }
             }
         }
         if (lastStepBefore == null || firstStepAfter == null) {

@@ -214,7 +214,8 @@ public class MarkPassingCalculator {
         
         public Listen() {
             this.raceName = race.getRace().getName();
-            lock = new NamedReentrantReadWriteLock("lock for calculation thread (" + Listen.class.getSimpleName() + ")", /* fair */ false);
+            lock = new NamedReentrantReadWriteLock("lock for calculation thread (" + Listen.class.getSimpleName() +
+                    ") for race "+raceName, /* fair */ false);
         }
         
         public void lockForRead() {

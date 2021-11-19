@@ -20,7 +20,7 @@ public class TagPreviewPanel extends FlowPanel {
     private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
 
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     private final UserService userService;
 
     private final CellList<TagDTO> tagPreviewCellList;
@@ -30,18 +30,18 @@ public class TagPreviewPanel extends FlowPanel {
      * Creates panel showing preview of tag when creating a {@link TagButton}. Adds change listener on input fields to
      * be able to rerender the {@link TagCell preview cell} whenever user changes values of the input fields.
      * 
-     * @param taggingPanel
+     * @param taggingComponent
      *            references {@link UserService}
      * @param inputPanel
      *            references input fields used to get current user input
      */
-    protected TagPreviewPanel(TaggingPanel taggingPanel, TagInputPanel inputPanel, StringMessages stringMessages,
+    protected TagPreviewPanel(TaggingComponent taggingComponent, TagInputPanel inputPanel, StringMessages stringMessages,
             UserService userService) {
-        this.taggingPanel = taggingPanel;
+        this.taggingComponent = taggingComponent;
         this.userService = userService;
 
         setStyleName(style.tagPreviewPanel());
-        tagPreviewCellList = new CellList<TagDTO>(new TagCell(taggingPanel, stringMessages, userService, true),
+        tagPreviewCellList = new CellList<TagDTO>(new TagCell(taggingComponent, stringMessages, userService, true),
                 resources);
         listContainingPreviewTag = new ArrayList<TagDTO>();
         add(new Label(stringMessages.tagPreview()));
@@ -72,7 +72,7 @@ public class TagPreviewPanel extends FlowPanel {
         listContainingPreviewTag.removeAll(listContainingPreviewTag);
         listContainingPreviewTag.add(new TagDTO(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(), "",
                 inputPanel.isVisibleForPublic(), userService.getCurrentUser().getName(),
-                new MillisecondsTimePoint(taggingPanel.getTimerTime()), MillisecondsTimePoint.now()));
+                new MillisecondsTimePoint(taggingComponent.getTimerTime()), MillisecondsTimePoint.now()));
         tagPreviewCellList.setRowData(listContainingPreviewTag);
         setVisible(!inputPanel.getTag().isEmpty());
     }

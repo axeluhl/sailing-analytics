@@ -20,6 +20,6 @@ public class DatabaseImpl extends NamedImpl implements Database {
 
     @Override
     public String toString() {
-        return "DatabaseImpl [endpoint=" + endpoint + "]";
+        return "Database "+getName()+" on " + endpoint;
     }
 }

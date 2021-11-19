@@ -23,6 +23,28 @@ public enum DefaultProcessConfigurationVariables implements ProcessConfiguration
     INSTALL_FROM_RELEASE,
     
     /**
+     * The amount of memory to grant to the process. Expected in the format a Java VM would accept for its {@code -Xmx}
+     * VM parameter, e.g., {@code 2500m} or {@code 4g}. If provided, this takes precedence over the
+     * {@link #TOTAL_MEMORY_SIZE_FACTOR} variable. If neither this nor {@link #TOTAL_MEMORY_SIZE_FACTOR} are provided,
+     * a default size is computed based on the physical RAM available, assuming this process is the only application
+     * process running on the host.
+     */
+    MEMORY,
+    
+    /**
+     * Will be superseded by the {@link #MEMORY} variable and is used only to compute a default in case no explicit
+     * {@link #MEMORY} value is provided. The factor by which the total physical memory size (minus some space for the
+     * operating system) is greater than the memory to award to the process. Example: {@code 4} would mean that if the
+     * host has 66GB of physical RAM of which 2GB are reserved for the operating system then 16GB would be reserved for
+     * the process ((66GB-2GB)/4). The factor is an approximation for how many such processes will fit into the physical
+     * RAM at the same time. If neither this nor {@link #MEMORY} are provided, a default size is computed based on the
+     * physical RAM available, assuming this process is the only application process running on the host. (Obviously, if
+     * the resulting memory size for the process is used as a Java VM's heap size, more memory than just the heap size
+     * will be consumed by the Java VM process in total. Yet, as an approximation this is better than nothing.)
+     */
+    TOTAL_MEMORY_SIZE_FACTOR,
+    
+    /**
      * The user data variable used to specify the MongoDB connection URI
      */
     MONGODB_URI,

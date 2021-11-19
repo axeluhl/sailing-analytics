@@ -4,7 +4,7 @@ import org.bson.Document;
 
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
@@ -29,7 +29,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         keyPairDocument.put(FieldNames.SSH_KEY_PAIR_PUBLIC_KEY.name(), keyPair.getPublicKey());
         keyPairDocument.put(FieldNames.SSH_KEY_PAIR_ENCRYPTED_PRIVATE_KEY.name(), keyPair.getEncryptedPrivateKey());
         db.getCollection(CollectionNames.SSH_KEY_PAIRS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED)
-                .replaceOne(query, keyPairDocument, new UpdateOptions().upsert(true));
+                .replaceOne(query, keyPairDocument, new ReplaceOptions().upsert(true));
     }
 
     private Document getSSHKeyPairDBQuery(String regionId, String keyName) {

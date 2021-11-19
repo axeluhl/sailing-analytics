@@ -23,6 +23,20 @@ import elemental2.promise.Promise;
  * element which is triggered in particular as the user changes the file selection.
  * <p>
  * 
+ * Use like this:
+ * 
+ * <pre>
+ *      final FileUpload someFileUpload = ...;
+ *      final FileUploadWithLocalFileContent fuwlfc = new FileUploadWithLocalFileContent(someFileUpload);
+        someFileUpload.addChangeHandler(e->{
+            if (fuwlfc.getFileList().length == 1) {
+                fuwlfc.getFileContents(0, (byte[] contents)->{
+                    // some function using the file contents as a byte array
+                });
+            }
+        });
+ * </pre>
+ * 
  * @author Axel Uhl (D043530)
  *
  */
@@ -43,6 +57,10 @@ public class FileUploadWithLocalFileContent {
         return getFileUploadAsHtmlInputElement().files;
     }
     
+    /**
+     * @param i
+     *            number of the file, starting with 0; use 0 if it's a single file upload field
+     */
     public void getFileContents(int i, FileContentCallback callback) {
         final FileList fileList = getFileList();
         final File file = fileList.item((double) i);

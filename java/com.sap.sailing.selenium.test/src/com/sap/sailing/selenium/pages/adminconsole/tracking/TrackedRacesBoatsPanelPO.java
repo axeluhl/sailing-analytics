@@ -2,6 +2,9 @@ package com.sap.sailing.selenium.pages.adminconsole.tracking;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -43,13 +46,15 @@ public class TrackedRacesBoatsPanelPO extends PageArea {
         return new TrackedRacesBoatTablePO(this.driver, this.boatsTable);
     }
     
-    public void waitForBoatEntry(String name, String sailId, String boatClassName) {
+    public BoatEntry waitForBoatEntry(String name, String sailId, String boatClassName) {
+        final List<BoatEntry> findings = new ArrayList<TrackedRacesBoatTablePO.BoatEntry>();
         waitUntil(() -> {
             boolean boatFound = false;
             for (final BoatEntry it : getBoatsTable().getEntries()) {
                 String itName = it.getName();
                 if (itName.equals(name)) {
                     boatFound = true;
+                    findings.add(it);
                     // found a candidate:
                     assertEquals(sailId, it.getSailId());
                     assertEquals(boatClassName, it.getBoatClassName());
@@ -57,5 +62,10 @@ public class TrackedRacesBoatsPanelPO extends PageArea {
             }
             return boatFound;
         });
+        BoatEntry result = null;
+        if (findings.size() > 0) {
+            result = findings.get(0);
+        }
+        return result;
     }
 }

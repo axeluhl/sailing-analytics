@@ -17,7 +17,7 @@ import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
-public abstract class AbstractManage2SailResultDocumentProvider implements ResultDocumentProvider{
+public abstract class AbstractManage2SailResultDocumentProvider implements ResultDocumentProvider {
     private final ResultUrlProvider resultUrlProvider;
 
     public AbstractManage2SailResultDocumentProvider(final ResultUrlProvider resultUrlProvider) {

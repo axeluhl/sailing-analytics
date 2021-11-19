@@ -20,10 +20,12 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -57,7 +59,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     private final BusyIndicator busyIndicator;
     private final ImportCompetitorCallback importCompetitorCallback;
     private final Runnable validator;
-    private final Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever;
+    private final Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> registeredCompetitorsRetriever;
     private final boolean restrictPoolToLeaderboard;
 
     /**
@@ -71,16 +73,25 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
      * @param registeredCompetitorsRetriever
      *            although declared as a consumer, this is a provider of the set of competitors to be shown in the
      *            "registered" competitors table. Technically, it "consumes" a callback to which to pass the competitors
-     *            retrieved as the "registered" ones.
+     *            retrieved as the "registered" ones. This panel passes itself ({@code this}) as the pair's first element
+     *            to work around the initialization order problem (see also https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5419#c14):
+     *            When the competitors are already loaded in their {@link Refresher} then the panel tries to initialize its table
+     *            contents synchronously, filling data in straight from the refresher. Objects initializing this registration panel
+     *            in their constructor and assigning it to a field won't have finished the field assignment while this constructor
+     *            is running. Therefore, if the retriever callback needs to access this panel, e.g., to query its {@link #showOnlyCompetitorsOfLog()}
+     *            result, they wouldn't be able to find the panel through the field. That's why the retriever is passed a pair with the
+     *            actual callback as the second and this instance as the first element.
      * @param restrictPoolToLeaderboard
      *            whether the pool of "all" competitors is to be restricted to those obtained from the leaderboard, or
      *            to all competitors in the server's competitor store
      * @param additionalWidgetsBeforeTables widgets to be inserted above / before the competitor tables; may be {@code null} or empty
      */
-    protected CompetitorRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
-            Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever,
+    protected CompetitorRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite,
+            final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
+            Refresher<BoatDTO> boatsRefresher, final StringMessages stringMessages, final ErrorReporter errorReporter,
+            boolean editable, String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass,
+            Runnable validator,
+            Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> registeredCompetitorsRetriever,
             boolean restrictPoolToLeaderboard, Widget... additionalWidgetsBeforeTables) {
         this.errorReporter = errorReporter;
         this.restrictPoolToLeaderboard = restrictPoolToLeaderboard;
@@ -107,7 +118,6 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
                 registeredCompetitorsTable.openEditCompetitorWithBoatDialog(competitorDTO, boatClass);
             }
         });
-
         final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
         inviteCompetitorsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -126,10 +136,11 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
                         MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
-                                sailingServiceWrite, userService, stringMessages, errorReporter);
+                                sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages,
+                                errorReporter);
                         CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
-                                matchCompetitorsDialogFactory, CompetitorRegistrationsPanel.this, providerNames, sailingServiceWrite,
-                                stringMessages, errorReporter);
+                                matchCompetitorsDialogFactory, CompetitorRegistrationsPanel.this, providerNames,
+                                sailingServiceWrite, stringMessages, errorReporter);
                         dialog.show();
                     }
 
@@ -144,10 +155,12 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         final HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
         final CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         final CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
-        allCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages,
-                errorReporter, /* multiSelection */ true, /* enablePager */ true, /* filterCompetitorWithBoat */ false,
-                /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
-        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages,
+        allCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, competitorsRefresher, boatsRefresher,
+                stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true,
+                /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
+        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService,
+                /* competitorsRefresher not needed; filled based on registrations */ null, 
+                /* boatsRefresher not needed */ null, stringMessages,
                 errorReporter, /* multiSelection */ true, /* enablePager */ false, /* filterCompetitorWithBoat */ false,
                 /* filterCompetitorsWithoutBoat */ false);
         registeredCompetitorsTable.getSelectionModel().addSelectionChangeHandler(event -> validateAndUpdate());
@@ -208,15 +221,17 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     }
     
     private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
-            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter) {
+            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
+            final StringMessages stringMessages, final ErrorReporter errorReporter) {
         return new MatchImportedCompetitorsDialogFactory() {
             @Override
             public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
                     final Pair<List<CompetitorDescriptor>, String> competitorDescriptorsAndHint,
                     final Iterable<CompetitorDTO> competitors) {
-                return new MatchImportedCompetitorsDialog(competitorDescriptorsAndHint.getA(), competitors, competitorDescriptorsAndHint.getB(),
-                        stringMessages, sailingServiceWrite, userService, errorReporter, importCompetitorCallback);
+                return new MatchImportedCompetitorsDialog(competitorDescriptorsAndHint.getA(), competitors,
+                        competitorDescriptorsAndHint.getB(), stringMessages, sailingServiceWrite, userService,
+                        competitorsRefresher, boatsRefresher, errorReporter, importCompetitorCallback);
             }
         };
     }
@@ -257,7 +272,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         allCompetitorsTable.refreshCompetitorList(this.restrictPoolToLeaderboard ? leaderboardName : null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
-                registeredCompetitorsRetriever.accept(new AsyncCallback<Collection<CompetitorDTO>>() {
+                registeredCompetitorsRetriever.accept(new Pair<>(CompetitorRegistrationsPanel.this, new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
                     public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                         moveFromPoolToRegistered(registeredCompetitors);
@@ -268,7 +283,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
                     public void onFailure(Throwable reason) {
                         errorReporter.reportError("Could not load already registered competitors: " + reason.getMessage());
                     }
-                });
+                }));
             }
     
             @Override

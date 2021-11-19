@@ -120,8 +120,9 @@ import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.util.impl.UUIDHelper;
 
-@Path("/v1/events")
+@Path(EventsResource.V1_EVENTS)
 public class EventsResource extends AbstractSailingServerResource {
+    public static final String V1_EVENTS = "/v1/events";
     private static final Logger logger = Logger.getLogger(EventsResource.class.getName());
     private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     

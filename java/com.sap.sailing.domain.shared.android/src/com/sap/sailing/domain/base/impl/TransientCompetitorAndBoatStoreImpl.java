@@ -302,7 +302,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
         LockUtil.lockForRead(lock);
         try {
             List<Competitor> competitors = new ArrayList<>();
-            for (Competitor c: competitorCache.values()) {
+            for (Competitor c : competitorCache.values()) {
                 if (!c.hasBoat()) {
                     competitors.add(c);
                 }

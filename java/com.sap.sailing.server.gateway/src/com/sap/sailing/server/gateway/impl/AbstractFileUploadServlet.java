@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -24,6 +25,7 @@ import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
  */
 public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet {
     public static final String PREFERRED_IMPORTER = "preferredImporter";
+    public static final String PROGRESS_LISTENER_SESSION_ATTRIBUTE_NAME = "progressListener";
     private static final long serialVersionUID = 1120226743039934620L;
 
     @Override
@@ -34,6 +36,12 @@ public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet 
         }
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
+        HttpSession session = req.getSession(true);
+        if (session != null) {
+            ProgressListener progressListener = new ProgressListener();
+            upload.setProgressListener(progressListener);
+            session.setAttribute(PROGRESS_LISTENER_SESSION_ATTRIBUTE_NAME, progressListener);
+        }
         try {
             @SuppressWarnings("unchecked")
             List<FileItem> items = (List<FileItem>) upload.parseRequest(req);
@@ -44,4 +52,5 @@ public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet 
     }
 
     abstract protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+    
 }

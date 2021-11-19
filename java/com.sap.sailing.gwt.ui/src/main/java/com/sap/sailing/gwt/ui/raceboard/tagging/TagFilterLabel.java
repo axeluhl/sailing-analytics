@@ -15,22 +15,21 @@ public class TagFilterLabel extends Label {
 
     private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     private final StringMessages stringMessages;
 
     /**
      * Creates {@link Label} and adds it as observer at the {@link TagListProvider}.
      * 
-     * @param taggingPanel
+     * @param taggingComponent
      *            provides reference to {@link TagListProvider} and {@link StringMessages}.
      */
-    public TagFilterLabel(TaggingPanel taggingPanel, StringMessages stringMessages) {
-        this.taggingPanel = taggingPanel;
+    public TagFilterLabel(TaggingComponent taggingComponent, StringMessages stringMessages) {
+        this.taggingComponent = taggingComponent;
         this.stringMessages = stringMessages;
-
         addStyleName(style.tagFilterCurrentSelection());
-        update(taggingPanel.getTagListProvider().getTagFilterSet());
-        taggingPanel.getTagListProvider().addObserveringLabel(this);
+        update(taggingComponent.getTagListProvider().getTagFilterSet());
+        taggingComponent.getTagListProvider().addObserveringLabel(this);
     }
 
     /**
@@ -48,6 +47,6 @@ public class TagFilterLabel extends Label {
             setText("");
             addStyleName(style.hidden());
         }
-        taggingPanel.refreshContentPanel();
+        taggingComponent.refreshContentPanel();
     }
 }

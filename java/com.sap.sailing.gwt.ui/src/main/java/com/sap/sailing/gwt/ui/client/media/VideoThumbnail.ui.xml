@@ -1,23 +1,56 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
-	<ui:style>
-	.holder {
-		cursor: pointer;
-	}
-	.thumbnail {
-		
-		display: block;
-		width: 100%;
-		height: auto;
-		text-align: center;
-	}
-	.caption {
-		padding: 5px;
-	} 
-	
-	</ui:style>
-	<div class="{style.holder}">
-		<img class="{style.thumbnail}" ui:field="thumbnailUi"/>
-		<div class="{style.caption}" ui:field="captionUi" />
-	</div>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res"
+        type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res"
+        type="com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources" />
+    <ui:with field="res_home"
+        type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
+    <ui:style gss="true">
+    .holder {
+        cursor: pointer;
+        position: relative;
+    }
+    .thumbnail {
+        display: block;
+        width: 100%;
+        height: auto;
+        text-align: center;
+    }
+    .caption {
+        padding: 5px;
+    }
+    .thumbnail_overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+    .thumbnail_button {
+        display: inline-block;
+        position: absolute;
+        width: 2em;
+        height: 2em;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 50%;
+        background-color: #9f9f9f;
+    }
+    .thumbnail_delete_button {
+        top: 10px;
+        right: 60px;
+    }
+    </ui:style>
+    <g:HTMLPanel>
+        <div class="{style.holder}">
+            <div class="{res_home.sharedHomeCss.overlay}"
+                ui:field="overlay" style="display:none;">
+                <g:Anchor ui:field="deleteAnchor"
+                    href="javascript:;"
+                    styleName="{res.mainCss.button} {local_res.css.button} {local_res.css.thumbnail_delete_button}" />
+            </div>
+            <img class="{style.thumbnail}" ui:field="thumbnailUi" />
+            <div class="{style.caption}" ui:field="captionUi" />
+        </div>
+    </g:HTMLPanel>
 </ui:UiBinder>

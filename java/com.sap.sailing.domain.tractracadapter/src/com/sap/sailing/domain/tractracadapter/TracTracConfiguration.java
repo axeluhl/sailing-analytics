@@ -51,11 +51,12 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
         return SecuredDomainType.TRACTRAC_ACCOUNT;
     }
 
+    // TODO it would be nice to factor the redundancy with TracTracConfigurationWithSecurityDTO.getTypeRelativeObjectIdentifier but it would require introducing a new .common bundle
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(getJSONURL(), getCreatorName());
     }
 
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl, String username) {
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl, String username) {
         return username == null ? new TypeRelativeObjectIdentifier(jsonUrl)
                 : new TypeRelativeObjectIdentifier(jsonUrl, username);
     }

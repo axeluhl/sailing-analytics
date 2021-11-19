@@ -60,4 +60,12 @@ public interface Database extends UserDataProvider, Named {
     static Database of(MongoEndpoint mongoEndpoint, String databaseName) {
         return new DatabaseImpl(mongoEndpoint, databaseName);
     }
+
+    /**
+     * Produces a new object that equals this object, in particular using the same {@link #getEndpoint() MongoDB
+     * endpoint}, except for the database {@link #getName() name} which is replaced by {@code differentName}.
+     */
+    default Database getWithDifferentName(String differentName) {
+        return new DatabaseImpl(getEndpoint(), differentName);
+    }
 }

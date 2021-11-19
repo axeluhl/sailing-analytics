@@ -6,9 +6,33 @@ package com.sap.sailing.landscape.ui.shared;
  * @author Axel Uhl (D043530)
  *
  */
-public class HomeRedirectDTO implements RedirectDTO {
+public class HomeRedirectDTO extends AbstractRedirectDTO {
+    public HomeRedirectDTO() {
+        this(Type.HOME);
+    }
+    
+    public HomeRedirectDTO(Type type) {
+        super(type);
+    }
+    
     @Override
     public String getPath() {
         return "/gwt/Home.html";
+    }
+    
+    @Override
+    public void accept(RedirectVisitor visitor) throws Exception {
+        visitor.visit(this);
+    }
+
+    static HomeRedirectDTO parse(String redirectPath) {
+        final HomeRedirectDTO candidate = new HomeRedirectDTO();
+        final HomeRedirectDTO result;
+        if (candidate.getPathAndQuery().equals(redirectPath)) {
+            result = candidate;
+        } else {
+            result = null;
+        }
+        return result;
     }
 }

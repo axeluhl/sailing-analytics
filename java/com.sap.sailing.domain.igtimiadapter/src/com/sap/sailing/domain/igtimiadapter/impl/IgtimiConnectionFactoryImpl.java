@@ -26,6 +26,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -58,6 +59,10 @@ import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
     
+    private static final int CONNECTION_REQUEST_TIMEOUT_MILLIS = 100000;
+
+    private static final int CONNECTION_TIMEOUT_MILLIS = 100000;
+
     private final Map<Account, String> accessTokensByAccount;
     private final Map<String, Account> accountsByEmail;
     private final Map<Account, IgtimiConnection> connectionsByAccount;
@@ -518,7 +523,12 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     public HttpClient getHttpClient() {
-        HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
+        HttpClient client = HttpClientBuilder.create()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                    .setConnectionRequestTimeout(CONNECTION_REQUEST_TIMEOUT_MILLIS)
+                    .setConnectTimeout(CONNECTION_TIMEOUT_MILLIS)
+                    .build())
+                .setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         return client;
     }
     
@@ -545,5 +555,4 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             mongoObjectFactory.removeAccessToken(account.getCreatorName(), accessToken);
         }
     }
-
 }
