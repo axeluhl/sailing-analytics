@@ -1505,7 +1505,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         quickFlagDataProvider.quickRanksReceivedFromServer(raceMapDataDTO.quickRanks);
                         if (isSimulationEnabled && settings.isShowSimulationOverlay()) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
-                                simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
+                            simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
                         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
                         Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData);
@@ -3174,7 +3174,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void showSimulationOverlay(boolean visible) {
         simulationOverlay.setVisible(visible);
         if (visible) {
-            simulationOverlay.updateLeg(Math.max(lastLegNumber,1), true, -1 /* ensure ui-update */);
+            simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), true, -1 /* ensure ui-update */);
         }
     }
 
@@ -3207,7 +3207,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
             return newBounds;
         }
-        
     }
     
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {

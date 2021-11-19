@@ -32,6 +32,7 @@ import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.Cre
 import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
@@ -256,6 +257,9 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_CREATE_LOAD_BALANCER_MAPPING,
                 applicationReplicaSetForWhichToDefineLoadBalancerMapping -> createDefaultLoadBalancerMappings(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLoadBalancerMapping));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER,
+                applicationReplicaSetForWhichToDefineLoadBalancerMapping -> createApplicationReplicaSetWithMasterOnExistingHost(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLoadBalancerMapping.getMaster().getHost()));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_REMOVE,
                 applicationReplicaSetToRemove -> removeApplicationReplicaSet(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToRemove));
@@ -391,7 +395,55 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
                                                 instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
-                                                instructions.getOptionalDomainName(),
+                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(),
+                                                instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                 @Override
+                                 public void onFailure(Throwable caught) {
+                                    applicationReplicaSetsBusy.setBusy(false);
+                                    errorReporter.reportError(caught.getMessage());
+                                 }
+                                 
+                                 @Override
+                                 public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                    applicationReplicaSetsBusy.setBusy(false);
+                                    Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
+                                    if (result != null) {
+                                        applicationReplicaSetsTable.getFilterPanel().add(result);
+                                    }
+                                 }
+                              });
+                    }
+                    
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
+            }
+        });
+    }
+
+    private void createApplicationReplicaSetWithMasterOnExistingHost(StringMessages stringMessages, String regionId, AwsInstanceDTO hostToDeployTo) {
+        landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(ArrayList<ReleaseDTO> result) {
+                new CreateApplicationReplicaSetDialog(landscapeManagementService, result.stream().map(r->r.getName())::iterator,
+                        stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
+                    @Override
+                    public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        landscapeManagementService.deployApplicationToExistingHost(regionId, instructions.getName(), hostToDeployTo, 
+                                instructions.getInstanceType(), instructions.isDynamicLoadBalancerMapping(),
+                                        instructions.getReleaseNameOrNullForLatestMaster(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
+                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(), instructions.getOptionalMemoryTotalSizeFactorOrNull(),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {
