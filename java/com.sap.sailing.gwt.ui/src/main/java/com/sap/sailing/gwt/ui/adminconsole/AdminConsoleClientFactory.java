@@ -10,21 +10,20 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.mvp.TopLevelView;
 import com.sap.sse.security.ui.client.WithSecurity;
 
-public interface AdminConsoleClientFactory extends WithSecurity{
+public interface AdminConsoleClientFactory extends WithSecurity {
+    EventBus getEventBus();
     
-    public EventBus getEventBus();
+    PlaceController getPlaceController();
     
-    public PlaceController getPlaceController();
+    ErrorReporter getErrorReporter();
     
-    public ErrorReporter getErrorReporter();
+    SailingServiceWriteAsync getSailingService();
     
-    public SailingServiceWriteAsync getSailingService();
+    MediaServiceWriteAsync getMediaServiceWrite();
     
-    public MediaServiceWriteAsync getMediaServiceWrite();
+    Widget getRoot();
     
-    public Widget getRoot();
-    
-    public TopLevelView getTopLevelView();
+    TopLevelView getTopLevelView();
 
-    public AcceptsOneWidget getContent();
+    AcceptsOneWidget getContent();
 }

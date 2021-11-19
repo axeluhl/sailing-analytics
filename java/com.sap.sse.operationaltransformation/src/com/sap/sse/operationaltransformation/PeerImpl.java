@@ -3,6 +3,9 @@ package com.sap.sse.operationaltransformation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,15 +27,15 @@ import com.sap.sse.util.ThreadPoolUtil;
 public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     private static final Logger logger = Logger.getLogger(PeerImpl.class.getName());
     
-    private String name;
+    private final String name;
     
-    private S currentState;
+    private volatile S currentState;
     
     /**
      * Tells if this peer acts in the server or client role. This is used to determine in which
      * direction to apply the operational transformation.
      */
-    private Role role;
+    private final Role role;
     
     /**
      * Tells if this peer is currently actively running, with a certain number of pending / running requests
@@ -46,11 +49,11 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * confirmed, the first operation from the queue is removed because operations sent
      * from this peer to the remote peer are processed in order.
      */
-    private final Map<Peer<O, S>, UnmergedOperationsQueue<O, S>> unmergedOperationsForPeer = new HashMap<Peer<O, S>, UnmergedOperationsQueue<O, S>>();
+    private final ConcurrentMap<Peer<O, S>, UnmergedOperationsQueue<O, S>> unmergedOperationsForPeer = new ConcurrentHashMap<Peer<O, S>, UnmergedOperationsQueue<O, S>>();
     
     /**
      * Remembers per peer how many of that peer's operations this peer has already
-     * applied locally.
+     * applied locally. Access happens while {@code synchronized} on {@code this} object's monitor.
      */
     private final Map<Peer<O, S>, Integer> numberOfMergedOperations = new HashMap<Peer<O, S>, Integer>();
 
@@ -62,14 +65,14 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     private final ExecutorService merger;
 
     public PeerImpl(Transformer<S, O> transformer, S initialState, Role role) {
+        this(/* name */ null, transformer, initialState, role);
+    }
+    
+    public PeerImpl(String name, Transformer<S, O> transformer, S initialState, Role role) {
         this.transformer = transformer;
         currentState = initialState;
         this.role = role;
         this.merger = createMerger();
-    }
-    
-    public PeerImpl(String name, Transformer<S, O> transformer, S initialState, Role role) {
-	this(transformer, initialState, role);
 	this.name = name;
     }
     
@@ -79,12 +82,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * the server.
      */
     public PeerImpl(Transformer<S, O> transformer, Peer<O, S> server) {
-        this.transformer = transformer;
-        S initialState = server.addPeer(this);
-        currentState = initialState;
-        this.role = Role.CLIENT;
-        this.merger = createMerger();
-        addPeer(server);
+        this(/* name */ null, transformer, server);
     }
 
     /**
@@ -93,8 +91,9 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * server peers. The initial state is taken from the server.
      */
     public PeerImpl(String name, Transformer<S, O> transformer, Peer<O, S> server) {
-	this(transformer, server);
-	this.name = name;
+        this(name, transformer, /* initial state */ null, Role.CLIENT);
+        currentState = server.addPeer(this);
+        addPeer(server);
     }
     
     @Override
@@ -104,7 +103,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 
     private ExecutorService createMerger() {
         return ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(1,
-                this.getClass().getName() + " " + name);
+                this.getClass().getName() + " " + name + UUID.randomUUID());
     }
 
     private Transformer<S, O> getTransformer() {
@@ -222,6 +221,8 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 			 * that time. It may, though, have pending tasks in its updatePeers that can
 			 * continue to run. This may include updates for this peer which would be received
 			 * by this peer's apply(...) method.
+			 * 
+			 * FIXME since this Runnable is not synchronized, this could lead to the numberOfMergedOpsForPeer to change before this is executed...
 			 */
 			peer.apply(PeerImpl.this, operation, numberOfMergedOpsForPeer);
 			// TODO what to do if apply throws a RuntimeException?

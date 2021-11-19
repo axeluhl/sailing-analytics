@@ -42,7 +42,7 @@ public class LineDetailsImpl implements LineDetails {
     public TimePoint getTimePoint() {
         return timePoint;
     }
-
+    
     @Override
     public Waypoint getWaypoint() {
         return waypoint;

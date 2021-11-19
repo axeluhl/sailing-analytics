@@ -45,8 +45,10 @@ public class ExpeditionAllInOneImportPanel extends Composite {
     private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
 
     private final RegattaSuggestOracle regattaOracle;
+    private final Displayer<RegattaDTO> regattasDisplayer;
 
     public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final Presenter presenter) {
+        regattasDisplayer = result->fillRegattas(result);
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
         final Button uploadButton = new Button(stringMessages.upload());
@@ -66,7 +68,6 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
         contentPanel.add(fileUpload);
-
         final FlowPanel importModePanel = new FlowPanel();
         contentPanel.add(importModePanel);
         final HorizontalPanel regattaNamePanel = new HorizontalPanel();
@@ -108,7 +109,6 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         regattaNamePanel.setCellVerticalAlignment(regattaNameLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         final TextBox regattaName = new TextBox();
         regattaName.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_REGATTA_NAME);
-
         regattaOracle = new RegattaSuggestOracle();
         final SuggestBox regattaSuggestBox = new SuggestBox(regattaOracle, regattaName);
         regattaSuggestBox.getValueBox().getElement().getStyle().setProperty("minWidth", 30, Unit.EM);
@@ -154,10 +154,13 @@ public class ExpeditionAllInOneImportPanel extends Composite {
                 Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
             } else if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getLeaderboardGroupId(), 
-                        response.getRaceEntries(), response.getGpsDeviceIds(), response.getSensorDeviceIds(),
-                        response.getSensorFixImporterType(), response.getStartTimes(), presenter.getSailingService(), 
-                        presenter.getUserService(), presenter.getErrorReporter(), stringMessages);
+                        response.getLeaderboardName(), response.getLeaderboardGroupName(),
+                        response.getLeaderboardGroupId(), response.getRaceEntries(), response.getGpsDeviceIds(),
+                        response.getSensorDeviceIds(), response.getSensorFixImporterType(), response.getStartTimes(),
+                        presenter.getSailingService(), presenter.getUserService(), presenter.getCompetitorsRefresher(),
+                        presenter.getBoatsRefresher(), presenter.getRegattasRefresher(), presenter.getEventsRefresher(),
+                        presenter.getLeaderboardsRefresher(), presenter.getLeaderboardGroupsRefresher(),
+                        presenter.getErrorReporter(), stringMessages, getRegattasDisplayer());
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);
             }
@@ -188,14 +191,6 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         validation.run();
         initWidget(formPanel);
     }
-    
-    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
-        
-        @Override
-        public void fill(Iterable<RegattaDTO> result) {
-            fillRegattas(result);
-        }
-    };
     
     public Displayer<RegattaDTO> getRegattasDisplayer() {
         return regattasDisplayer;

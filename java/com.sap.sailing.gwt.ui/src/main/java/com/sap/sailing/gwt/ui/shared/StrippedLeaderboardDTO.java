@@ -15,8 +15,8 @@ public class StrippedLeaderboardDTO extends AbstractLeaderboardDTO {
         super(); // for GWT serialization only
     }
     
-    public StrippedLeaderboardDTO(BoatClassDTO boatClass) {
-        super(boatClass);
+    public StrippedLeaderboardDTO(String name, BoatClassDTO boatClass) {
+        super(name, boatClass);
     }
     
     public void removeRace(String raceColumnName) {

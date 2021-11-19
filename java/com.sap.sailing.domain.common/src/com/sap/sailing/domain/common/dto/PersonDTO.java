@@ -11,6 +11,7 @@ public class PersonDTO extends NamedDTO {
     private String description;
     private String nationalityThreeLetterIOCAcronym;
 
+    @Deprecated
     PersonDTO() {} // for GWT de-serialization only
 
     public PersonDTO(String name, Date dateOfBirth, String description, String nationalityThreeLetterIOCAcronym) {

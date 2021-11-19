@@ -22,21 +22,21 @@ extends ReverseProxy<ShardingKey, MetricsT, ProcessT, LogT> {
      * 
      * @return at least one host
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts();
+    Iterable<AwsInstance<ShardingKey>> getHosts();
     
     /**
      * Add one host of the instance type specified to the availability zone {@code az}.
      * 
      * @return the host that was added by this request; it will also be part of the response of {@link #getHosts()} now
      */
-    AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName);
+    AwsInstance<ShardingKey> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName);
     
-    void addHost(AwsInstance<ShardingKey, MetricsT> host);
+    void addHost(AwsInstance<ShardingKey> host);
 
     /**
      * Removes a single host from this reverse proxy, terminating the host. When trying to remove the last remaining
      * host, an {@link IllegalStateException} will be thrown and the method will not complete the request. Consider
      * using {@link #terminate()} to terminate all hosts forming this reverse proxy.
      */
-    void removeHost(AwsInstance<ShardingKey, MetricsT> host);
+    void removeHost(AwsInstance<ShardingKey> host);
 }

@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,6 +60,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.HttpUrlConnectionHelper;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * A set of {@link RemoteSailingServerReference}s including a cache of their {@link EventBase events} that is
@@ -101,6 +103,8 @@ public class RemoteSailingServerSet {
      * <code>false</code>/disable for replicas in order to save bandwidth and CPU.
      */
     private final AtomicBoolean retrieveRemoteRaceResult = new AtomicBoolean(true);
+    
+    private final ConcurrentMap<RemoteSailingServerReference, Future<?>> runningUpdateTasksPerServerReference;
 
     /**
      * @param scheduler
@@ -112,6 +116,7 @@ public class RemoteSailingServerSet {
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         cachedStatisticsByYearForRemoteSailingServers = new ConcurrentHashMap<>();
         cachedTrackedRacesForRemoteSailingServers = new ConcurrentHashMap<>();
+        runningUpdateTasksPerServerReference = new ConcurrentHashMap<>();
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -154,14 +159,42 @@ public class RemoteSailingServerSet {
     public RemoteSailingServerReference getServerReferenceByName(String name) {
         return remoteSailingServers.get(name);
     }
+    
+    /**
+     * If this set has a {@link RemoteSailingServerReference} whose {@link RemoteSailingServerReference#getURL() url}
+     * equals <code>url</code>, it is returned. Otherwise, <code>null</code> is returned.
+     */
+    public RemoteSailingServerReference getServerReferenceByUrl(URL url) {
+        return remoteSailingServers.values().stream().filter(r->equalIgnoringTrailingSlash(r.getURL(), url)).findAny().orElse(null);
+    }
+    
+    private boolean equalIgnoringTrailingSlash(URL url1, URL url2) {
+        final String url1AsString = url1.toString() + (url1.toString().endsWith("/") ? "" : "/");
+        final String url2AsString = url2.toString() + (url2.toString().endsWith("/") ? "" : "/");
+        return url1AsString.equals(url2AsString);
+    }
+
+    /**
+     * @return a snapshot copy of the internal map with all remote sailing server references currently known, regardless
+     *         of whether or not they are {@link #getLiveRemoteServerReferences() live}.
+     */
+    public Map<String, RemoteSailingServerReference> getAllRemoteServerReferences() {
+        return new HashMap<>(remoteSailingServers);
+    }
 
     private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
-        new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref).start();
-        new Thread(() -> updateRemoteServerStatisticsCacheSynchronously(ref),
-                "Statistics by year Cache Updater for remote server " + ref).start();
-        if (retrieveRemoteRaceResult.get()) {
-            new Thread(() -> updateRemoteServerTrackedRacesCacheSynchronously(ref),
-                    "Anniversary Cache Updater for remote server " + ref).start();
+        final Future<?> lastJobForRef = runningUpdateTasksPerServerReference.get(ref);
+        if (lastJobForRef == null || lastJobForRef.isDone()) {
+            runningUpdateTasksPerServerReference.put(ref,
+                    ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().submit(()->{
+                        updateRemoteServerEventCacheSynchronously(ref);
+                        updateRemoteServerStatisticsCacheSynchronously(ref);
+                        if (retrieveRemoteRaceResult.get()) {
+                            updateRemoteServerTrackedRacesCacheSynchronously(ref);
+                        }
+                    }));
+        } else {
+            logger.warning("Not re-scheduling update for remote reference "+ref+" because a previous job for it is still not done yet.");
         }
     }
 
@@ -194,12 +227,9 @@ public class RemoteSailingServerSet {
     private void updateRemoteServerTrackedRacesCacheSynchronously(RemoteSailingServerReference ref) {
         Util.Pair<Iterable<SimpleRaceInfo>, Exception> result;
         try {
-            
             logger.fine("Updating racelist for remote server " + ref + " from URL " + ref.getURL());
-            
             final SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
             final Set<SimpleRaceInfo> races = new HashSet<>();
-            
             for (Object remoteWithRaces : getJSONFromRemoteRacesListSynchronously(ref)) {
                 JSONObject remoteWithRacesAsJson = (JSONObject) remoteWithRaces;
                 String remoteUrlAsString = (String) remoteWithRacesAsJson
@@ -362,7 +392,8 @@ public class RemoteSailingServerSet {
                 Duration.ONE_SECOND.times(1000), "POST", (connection) -> {
                     connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     connection.setRequestProperty(HEADER_FORWARD_TO_REPLICA.getA(), HEADER_FORWARD_TO_REPLICA.getB());
-                }, Optional.of(outputStream -> {
+                }, /* post-connect modifier */ null,
+                Optional.of(outputStream -> {
                     try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, "utf-8")) {
                         writer.write(formParams.toString());
                     }

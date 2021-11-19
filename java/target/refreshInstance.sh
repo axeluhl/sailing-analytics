@@ -92,9 +92,11 @@ activate_user_data ()
 
 append_default_envsh_rules()
 {
-    echo "# Default rules: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+    echo "
+# Default rules: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
     cat "${SERVER_HOME}/env-default-rules.sh" >>$SERVER_HOME/env.sh
-    echo "# Default rules: END" >> $SERVER_HOME/env.sh
+    echo "
+# Default rules: END" >> $SERVER_HOME/env.sh
     echo "Updated env.sh with data from env-default-rules.sh file!"
 }
 
@@ -104,7 +106,8 @@ append_user_data_to_envsh ()
     # make backup of original file
     cp $SERVER_HOME/env.sh $SERVER_HOME/environment/env.sh.backup
 
-    echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+    echo "
+# User-Data: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
     echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
@@ -123,11 +126,24 @@ install_environment ()
         # clean up directory to really make sure that there are no files left
         rm -rf ${SERVER_HOME}/environment
         mkdir ${SERVER_HOME}/environment
-        echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
-        wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
-        echo "# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+        if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
+            SCP_PORT=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^[^:]*:\?\([0-9]*\)\?$/\1/' )
+            if [ -n "${SCP_PORT}" ]; then
+                SCP_PORT_OPTION="-P ${SCP_PORT}"
+            fi
+            SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
+	    echo "Using environment ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT}"
+	    mkdir -p ./environment
+            scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT} ./environment
+        else
+	    echo "Using environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
+	    wget -P environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT
+	fi
+        echo "
+# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
         cat ${SERVER_HOME}/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
-        echo "# Environment: END" >> ${SERVER_HOME}/env.sh
+        echo "
+# Environment: END" >> ${SERVER_HOME}/env.sh
         echo "Updated env.sh with data from environment file!"
     else
         echo "No environment file specified!"
@@ -137,22 +153,28 @@ install_environment ()
 load_from_release_file ()
 {
     if [[ ${INSTALL_FROM_RELEASE} == "" ]]; then
-        INSTALL_FROM_RELEASE="$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
-        echo "You didn't provide a release. Defaulting to latest master build http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
+        INSTALL_FROM_RELEASE="$(wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
+        echo "You didn't provide a release. Defaulting to latest master build https://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
     fi
-    if [[ ${INSTALL_FROM_RELEASE} != "" ]]; then
-        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
-          echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
+    if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+      echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
+    fi
+    RELEASE_FILE_NAME=${INSTALL_FROM_RELEASE}.tar.gz
+    cd ${SERVER_HOME}
+    rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
+    rm -rf *.tar.gz
+    if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
+            SCP_PORT=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^[^:]*:\?\([0-9]*\)\?$/\1/' )
+        if [ -n "${SCP_PORT}" ]; then
+            SCP_PORT_OPTION="-P ${SCP_PORT}"
         fi
-        cd ${SERVER_HOME}
-        rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
-        rm -rf *.tar.gz
-        echo "Loading from release file http://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${INSTALL_FROM_RELEASE}.tar.gz"
-        wget http://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${INSTALL_FROM_RELEASE}.tar.gz
-        load_from_local_release_file
+        SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
+        scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME} .
     else
-        echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
+        echo "Loading from release file https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}"
+        wget https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}
     fi
+    load_from_local_release_file
 }
 
 load_from_local_release_file ()
@@ -265,16 +287,6 @@ auto_install ()
         append_default_envsh_rules
         # make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
         source `pwd`/env.sh
-        if [ -z $MEMORY ]; then
-          # Compute a default amount of memory based on available physical RAM and the number of applications, with a minimum of 2GB:
-          NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
-          MINIMUM_MEMORY_IN_MB=2000
-          MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
-          MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
-          MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
-          echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
-          echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>`pwd`/env.sh
-        fi
         # Append mail-related environment variables to configuration/mail.properties to override defaults
         echo "mail.enabled = true" >>configuration/mail.properties
         if [ -n "$MAIL_FROM" ]; then
@@ -299,7 +311,7 @@ auto_install ()
         echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
         echo "DEPLOY_TO: $DEPLOY_TO"
         echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
-        echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
+        echo "USE_ENVIRONMENT: $USE_ENVIRONMENT"
         echo ""
 }
 
@@ -353,7 +365,7 @@ elif [[ $OPERATION == "install-local-release" ]]; then
 elif [[ $OPERATION == "install-env" ]]; then
     USE_ENVIRONMENT=$PARAM
     if [[ $USE_ENVIRONMENT == "" ]]; then
-        echo "You need to provide the name of an environment from http://releases.sapsailing.com/environments"
+        echo "You need to provide the name of an environment from https://releases.sapsailing.com/environments"
         exit 1
     fi
 
@@ -405,4 +417,3 @@ else
     echo "install-user-data: appends the user data set for the EC2 instance to the env.sh file"
     exit 0
 fi
-

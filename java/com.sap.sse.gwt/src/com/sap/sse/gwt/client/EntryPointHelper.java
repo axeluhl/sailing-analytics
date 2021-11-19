@@ -52,7 +52,7 @@ public class EntryPointHelper {
                             rb.setHeader(header.getA(), header.getB());
                     }
                 }
-                rb.setHeader(HttpRequestHeaderConstants.HEADER_LOCALE, LocaleInfo.getCurrentLocale().getLocaleName());
+                rb.setHeader(HttpRequestHeaderConstants.HEADER_KEY_LOCALE, LocaleInfo.getCurrentLocale().getLocaleName());
             }
         });
     }

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +9,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -49,7 +52,12 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
     private final GPSFixTrack<Competitor, GPSFixMoving> track;
     private final BoatClass boatClass;
     private final FixWindow fixWindow;
-    private final TreeSet<GPSFixMoving> maneuverCandidates;
+    
+    /**
+     * The following set is a {@code synchronized} navigable set; all simple access methods synchronize trivially on it.
+     * All iterations, including serializing this object, must {@code synchronize} on it.
+     */
+    private final NavigableSet<GPSFixMoving> maneuverCandidates;
     
     /**
      * The fix window consists of the list of fixes, a corresponding list with the course
@@ -309,9 +317,15 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
         this.track = track;
         this.boatClass = boatClass;
         this.fixWindow = new FixWindow();
-        this.maneuverCandidates = new TreeSet<>(TimedComparator.INSTANCE);
+        this.maneuverCandidates = Collections.synchronizedNavigableSet(new TreeSet<>(TimedComparator.INSTANCE));
         track.addListener(this);
         addAllFixesOfTrack();
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        synchronized (maneuverCandidates) {
+            oos.defaultWriteObject();
+        }
     }
     
     private synchronized void addAllFixesOfTrack() {
@@ -424,7 +438,9 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
             }
         }
         if (from.before(to)) {
-            result = new ArrayList<>(maneuverCandidates.subSet(createDummyFix(from), /* fromInclusive */ true, createDummyFix(to), /* toInclusive */ true));
+            synchronized (maneuverCandidates) {
+                result = new ArrayList<>(maneuverCandidates.subSet(createDummyFix(from), /* fromInclusive */ true, createDummyFix(to), /* toInclusive */ true));
+            }
         } else {
             result = Collections.emptySet();
         }

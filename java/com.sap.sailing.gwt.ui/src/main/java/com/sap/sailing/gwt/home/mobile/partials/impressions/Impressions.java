@@ -7,7 +7,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.mobile.partials.imagegallery.MobileFullscreenGallery;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
@@ -15,6 +14,7 @@ import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBoxResou
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class Impressions extends Composite {
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -53,12 +53,12 @@ public class Impressions extends Composite {
         headerUi.setSubtitle(sb.toString());
     }
 
-    public void addImages(Collection<SailingImageDTO> images) {
+    public void addImages(Collection<ImageDTO> images) {
         if (images.isEmpty()) {
             return;
         }
         GWT.log("Got " + images.size() + " images");
-        ImageCarousel<SailingImageDTO> imageCarousel = new ImageCarousel<SailingImageDTO>();
+        ImageCarousel<ImageDTO> imageCarousel = new ImageCarousel<ImageDTO>();
         imageCarousel.registerFullscreenViewer(new MobileFullscreenGallery());
         int count = addImages(imageCarousel, images);
         if (count > 1) {
@@ -68,9 +68,9 @@ public class Impressions extends Composite {
         }
     }
     
-    private int addImages(ImageCarousel<SailingImageDTO> imageCarousel, Collection<SailingImageDTO> images) {
+    private int addImages(ImageCarousel<ImageDTO> imageCarousel, Collection<ImageDTO> images) {
         int count = 0;
-        for (SailingImageDTO imageDTO : images) {
+        for (ImageDTO imageDTO : images) {
             if (imageDTO.getHeightInPx() == null || imageDTO.getWidthInPx() == null) {
                 GWT.log("Ignore image without size ");
                 continue;

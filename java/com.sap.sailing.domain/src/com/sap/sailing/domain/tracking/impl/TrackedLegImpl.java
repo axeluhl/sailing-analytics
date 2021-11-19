@@ -196,7 +196,7 @@ public class TrackedLegImpl implements TrackedLeg {
         Bearing legBearing = getLegBearing(at);
         final Bearing result;
         if (legBearing != null) {
-            result = legBearing.getDifferenceTo(wind.getBearing());
+            result = legBearing.getDifferenceTo(wind.getFrom());
         } else {
             result = null;
         }
@@ -209,11 +209,11 @@ public class TrackedLegImpl implements TrackedLeg {
         if (twa != null) {
             double deltaDeg = twa.getDegrees();
             if (Math.abs(deltaDeg) < LegType.UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
-                return LegType.DOWNWIND;
+                return LegType.UPWIND;
             } else {
                 double deltaDegOpposite = twa.getDifferenceTo(new DegreeBearingImpl(180)).getDegrees();
                 if (Math.abs(deltaDegOpposite) < LegType.UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
-                    return LegType.UPWIND;
+                    return LegType.DOWNWIND;
                 }
             }
         }
@@ -262,8 +262,13 @@ public class TrackedLegImpl implements TrackedLeg {
      */
     @Override
     public Position getMiddleOfLeg(TimePoint at) {
-        Position approximateLegStartPosition = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
-        Position approximateLegEndPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
+        return getMiddleOfLeg(at, new MarkPositionAtTimePointCacheImpl(getTrackedRace(), at));
+    }
+    
+    @Override
+    public Position getMiddleOfLeg(TimePoint at, MarkPositionAtTimePointCache cache) {
+        Position approximateLegStartPosition = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at, cache);
+        Position approximateLegEndPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), at, cache);
         final Position middleOfLeg;
         if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
             middleOfLeg = null;

@@ -3,6 +3,7 @@ package com.sap.sse.gwt.client.async;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;
 
@@ -34,7 +35,7 @@ import com.sap.sse.common.Util.Pair;
  * @see TimeRangeActionsExecutor
  * @author Tim Hessenmüller (D062243)
  */
-public interface TimeRangeAsyncCallback<Result, SubResult, Key> {
+public interface TimeRangeAsyncCallback<Result, SubResult, Key> extends AsyncCallback<Result> {
     /**
      * Splits up a server response into {@link SubResult}s by {@link Key}.
      * Inverse operation of {@link #zipSubResults()}.
@@ -75,6 +76,7 @@ public interface TimeRangeAsyncCallback<Result, SubResult, Key> {
      * @param result
      *            result of the remote procedure call.
      */
+    @Override
     void onSuccess(Result result);
 
     /**
@@ -83,5 +85,6 @@ public interface TimeRangeAsyncCallback<Result, SubResult, Key> {
      * @param caught
      *            {@link Throwable}
      */
+    @Override
     void onFailure(Throwable caught);
 }

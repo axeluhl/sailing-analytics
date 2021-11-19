@@ -8,7 +8,6 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -217,7 +216,6 @@ public class RegattaListComposite extends Composite {
         };
         competitorRegistrationTypeColumn.setSortable(true);
         columnSortHandler.setComparator(competitorRegistrationTypeColumn, (r1, r2)->r1.competitorRegistrationType.ordinal() - r2.competitorRegistrationType.ordinal());
-
         TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -282,7 +280,10 @@ public class RegattaListComposite extends Composite {
         // https://github.com/gwtproject/gwt/issues/9333
         // https://github.com/gwtproject/gwt/issues/9307
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), type,
-                regatta -> presenter.getRegattasRefresher().reloadAndCallFillAll(), stringMessages);
+                regatta -> {
+                    presenter.getRegattasRefresher().reloadAndCallFillAll();
+                    presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
+                }, stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 regattaDTO -> config.openOwnershipDialog(regattaDTO));
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
@@ -314,30 +315,31 @@ public class RegattaListComposite extends Composite {
 
             @Override
             public void onSuccess(Void result) {
-                presenter.getRegattasRefresher().reloadAndCallFillAll();
+                presenter.getRegattasRefresher().remove(regatta);
+                presenter.getRegattasRefresher().callAllFill();
+                presenter.getLeaderboardsRefresher().removeAll(leaderboard->Util.equalsWithNull(leaderboard.regattaName, regatta.getName()));
             }
         }));
     }
 
     private void editRegatta(final RegattaDTO toBeEdited) {
         final Collection<RegattaDTO> existingRegattas = getAllRegattas();
-        sailingServiceWrite.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
+        @SuppressWarnings("unchecked")
+        final Displayer<EventDTO>[] eventDisplayer = (Displayer<EventDTO>[]) new Displayer<?>[1];
+        eventDisplayer[0] = new Displayer<EventDTO>() {
             @Override
-            public void onFailure(Throwable caught) {
-                openEditRegattaDialog(toBeEdited, existingRegattas, Collections.<EventDTO> emptyList());
+            public void fill(Iterable<EventDTO> events) {
+                openEditRegattaDialog(toBeEdited, existingRegattas, events);
+                presenter.getEventsRefresher().removeDisplayer(eventDisplayer[0]);
             }
-
-            @Override
-            public void onSuccess(List<EventDTO> events) {
-                openEditRegattaDialog(toBeEdited, existingRegattas, Collections.unmodifiableList(events));
-            }
-        }));
+        };
+        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(eventDisplayer[0]);
     }
 
     private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents) {
+            Iterable<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsDialog dialog = new RegattaWithSeriesAndFleetsEditDialog(regatta, existingRegattas,
-                existingEvents, /*correspondingEvent*/ null, sailingServiceWrite, stringMessages, new DialogCallback<RegattaDTO>() {
+                existingEvents, /*correspondingEvent*/ null, sailingServiceWrite, userService, stringMessages, new DialogCallback<RegattaDTO>() {
                     @Override
                     public void cancel() {
                     }
@@ -366,6 +368,7 @@ public class RegattaListComposite extends Composite {
                     @Override
                     public void onSuccess(Void result) {
                         presenter.getRegattasRefresher().reloadAndCallFillAll();
+                        presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                     }
                 }));
 
@@ -388,6 +391,7 @@ public class RegattaListComposite extends Composite {
                             @Override
                             public void onSuccess(Void result) {
                                 presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                 run(); // update next series if iterator has next element
                             }
                         }));

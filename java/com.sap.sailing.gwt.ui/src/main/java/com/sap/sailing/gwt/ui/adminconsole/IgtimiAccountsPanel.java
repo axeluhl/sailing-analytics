@@ -224,11 +224,11 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
         final ListHandler<AccountWithSecurityDTO> columnSortHandler = new ListHandler<>(filteredAccounts.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(accountSelectionCheckboxColumn, accountSelectionCheckboxColumn.getComparator());
-        final TextColumn<AccountWithSecurityDTO> accountNameColumn = new AbstractSortableTextColumn<AccountWithSecurityDTO>(
+        final TextColumn<AccountWithSecurityDTO> accountNameColumn = new AbstractSortableTextColumn<>(
                 account -> account.getName(), columnSortHandler);
-        final TextColumn<AccountWithSecurityDTO> accountEmailColumn = new AbstractSortableTextColumn<AccountWithSecurityDTO>(
+        final TextColumn<AccountWithSecurityDTO> accountEmailColumn = new AbstractSortableTextColumn<>(
                 account -> account.getEmail(), columnSortHandler);
-        final TextColumn<AccountWithSecurityDTO> creatorNameColumn = new AbstractSortableTextColumn<AccountWithSecurityDTO>(
+        final TextColumn<AccountWithSecurityDTO> creatorNameColumn = new AbstractSortableTextColumn<>(
                 account -> account.getCreatorName(), columnSortHandler);
 
         final HasPermissions type = SecuredDomainType.IGTIMI_ACCOUNT;

@@ -64,39 +64,21 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
             beatAngles.put(tws, new DegreeBearingImpl(
                     ((Number) ((JSONObject) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BEAT_ANGLES))
                             .get(twsKey)).doubleValue()));
-            beatVMGPredictionPerTrueWindSpeed.put(tws,
-                    new KnotSpeedImpl(((Number) ((JSONObject) json
-                            .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS)).get(twsKey))
-                                    .doubleValue()));
+            addKnotSpeedFromPropertyToMap(beatVMGPredictionPerTrueWindSpeed, tws, twsKey, ORCCertificateJsonSerializer.ORC_CERTIFICATE_BEAT_VMG_PREDICTIONS, json);
             beatAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(
                     ((Number) ((JSONObject) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BEAT_ALLOWANCES))
                             .get(twsKey)).doubleValue()));
             runAngles.put(tws, new DegreeBearingImpl(
                     ((Number) ((JSONObject) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_RUN_ANGLES))
                             .get(twsKey)).doubleValue()));
-            runVMGPredictionPerTrueWindSpeed.put(tws,
-                    new KnotSpeedImpl(((Number) ((JSONObject) json
-                            .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_RUN_VMG_PREDICTIONS)).get(twsKey))
-                                    .doubleValue()));
+            addKnotSpeedFromPropertyToMap(runVMGPredictionPerTrueWindSpeed, tws, twsKey, ORCCertificateJsonSerializer.ORC_CERTIFICATE_RUN_VMG_PREDICTIONS, json);
             runAllowancePerTrueWindSpeed.put(tws, new SecondsDurationImpl(
                     ((Number) ((JSONObject) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_RUN_ALLOWANCES))
                             .get(twsKey)).doubleValue()));
-            windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws,
-                    new KnotSpeedImpl(((Number) ((JSONObject) json
-                            .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_WINDWARD_LEEWARD_SPEED_PREDICTIONS))
-                            .get(twsKey)).doubleValue()));
-            longDistanceSpeedPredictionPerTrueWindSpeed.put(tws,
-                    new KnotSpeedImpl(((Number) ((JSONObject) json
-                            .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_LONG_DISTANCE_SPEED_PREDICTIONS))
-                            .get(twsKey)).doubleValue()));
-            circularRandomSpeedPredictionPerTrueWindSpeed.put(tws,
-                    new KnotSpeedImpl(((Number) ((JSONObject) json
-                            .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS))
-                                    .get(twsKey)).doubleValue()));
-            nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws,
-                    new KnotSpeedImpl(((Number) ((JSONObject) json
-                            .get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS))
-                                    .get(twsKey)).doubleValue()));
+            addKnotSpeedFromPropertyToMap(windwardLeewardSpeedPredictionPerTrueWindSpeed, tws, twsKey, ORCCertificateJsonSerializer.ORC_CERTIFICATE_WINDWARD_LEEWARD_SPEED_PREDICTIONS, json);
+            addKnotSpeedFromPropertyToMap(longDistanceSpeedPredictionPerTrueWindSpeed, tws, twsKey, ORCCertificateJsonSerializer.ORC_CERTIFICATE_LONG_DISTANCE_SPEED_PREDICTIONS, json);
+            addKnotSpeedFromPropertyToMap(circularRandomSpeedPredictionPerTrueWindSpeed, tws, twsKey, ORCCertificateJsonSerializer.ORC_CERTIFICATE_CIRCULAR_RANDOM_SPEED_PREDICTIONS, json);
+            addKnotSpeedFromPropertyToMap(nonSpinnakerSpeedPredictionPerTrueWindSpeed, tws, twsKey, ORCCertificateJsonSerializer.ORC_CERTIFICATE_NON_SPINNAKER_SPEED_PREDICTIONS, json);
             Map<Bearing, Speed> velocityPredictionAtCurrentTrueWindSpeedPerTrueWindAngle = new HashMap<>();
             for (Bearing twa : trueWindAngles) {
                 String twaKey = ORCCertificateJsonSerializer.bearingToDegreeString(twa);
@@ -117,6 +99,26 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
                 longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
                 nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         return certificate;
+    }
+
+    /**
+     * The value obtained from the {@code jsonObject} at index {@code jsonPropertyName} may be missing, usually due to an
+     * {@link Double#isInfinite() infinite} speed which in turn may have been caused by {@code 0.0} values in an original
+     * JSON or RMS file. In this case, we default the speed that we insert into the map to {@link Speed#NULL}.
+     */
+    private void addKnotSpeedFromPropertyToMap(Map<Speed, Speed> speedPredictionMap, Speed tws, String twsKey,
+            String jsonPropertyName, JSONObject jsonObject) {
+        final JSONObject speedPredictions = (JSONObject) jsonObject.get(jsonPropertyName);
+        final Object speedPredictionObject = speedPredictions.get(twsKey);
+        final Number value;
+        if (speedPredictionObject instanceof Number) {
+            value = (Number) speedPredictionObject;
+        } else if (speedPredictionObject instanceof JSONObject) {
+            value = Double.POSITIVE_INFINITY;
+        } else {
+            value = 0.0;
+        }
+        speedPredictionMap.put(tws, new KnotSpeedImpl(value == null ? Double.POSITIVE_INFINITY : value.doubleValue()));
     }
 
     private <T> T[] convertJsonArrayOfDoublesToArrayOfObjectsOrReturnDefault(final Object supposedJsonArray,

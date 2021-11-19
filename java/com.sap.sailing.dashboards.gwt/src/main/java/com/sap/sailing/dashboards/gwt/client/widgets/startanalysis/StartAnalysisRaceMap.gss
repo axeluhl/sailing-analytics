@@ -54,3 +54,80 @@
 .estimatedDurationWithHeader {
     margin-top:70px;
 }
+
+.raceMapShareLinkButton {
+    margin-right: 10px;
+    margin-bottom: 110px;
+    z-index: 1;
+    border-color: white;
+    width: 28px !important;
+    height: 28px !important;
+    cursor: pointer;
+}
+
+.raceMapVideoUploadButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204) !important;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("uploadVideoIcon");
+    background-size: 74%;
+}
+
+.advancedFunctionsPopup {
+    display: none;
+}
+
+.exitFullScreenButton {
+    display: none;
+}
+
+.fullScreenButton {
+    display: none;
+}
+
+.moreOptionsButton {
+    display: none;
+}
+
+.settingsButton {
+    display: none;
+}
+
+.tagsButton {
+    display: none;
+}
+
+.topLeftControlsWrapperPanel {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.trueNorthIndicatorButton {
+    display: none;
+}
+
+.underHeaderPosition {
+    top: 0;
+    padding-top: 60px; 
+}
+ 
+.zoomInButton {
+    display: none;
+}
+
+.zoomOutButton {
+    display: none;
+}
+
+.moreOptions {}

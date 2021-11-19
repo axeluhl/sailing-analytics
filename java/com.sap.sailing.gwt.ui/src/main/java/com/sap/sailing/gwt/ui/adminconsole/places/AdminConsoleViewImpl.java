@@ -63,6 +63,8 @@ import com.sap.sailing.gwt.ui.adminconsole.UserGroupManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.UserManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.WindPanel;
 import com.sap.sailing.gwt.ui.adminconsole.WindPanelSupplier;
+import com.sap.sailing.gwt.ui.adminconsole.YellowBrickEventManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.YellowBrickEventManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.CourseTemplatePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
@@ -83,6 +85,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SmartphoneTrackingP
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SwissTimingArchivedEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SwissTimingEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.TracTracEventsPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.connectors.YellowBrickEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.CourseTemplatesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkPropertiesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkRolesPlace;
@@ -115,10 +118,10 @@ import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
-import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.client.UserService;
@@ -172,12 +175,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(stringMessages.administration());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(userService, header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-        authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
-            @Override
-            public Widget get() {
-                return createAdminConsolePanel(serverInfo);
-            }
-        });
+        authorizedContentDecorator.setContentWidgetFactory(() -> createAdminConsolePanel(serverInfo));
         headerPanel.setHeaderWidget(header);
         headerPanel.setContentWidget(authorizedContentDecorator);
         return headerPanel;
@@ -249,7 +247,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public void refreshAfterBecomingVisible() {
                 if (getWidget() != null) {
-                    getWidget().refreshCompetitorList();
+                    presenter.getCompetitorsRefresher().callFillAndReloadInitially(getWidget().getCompetitorsDisplayer());
                 }
             }
         }, stringMessages.competitors(), new CompetitorsPlace(null),
@@ -260,7 +258,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public void refreshAfterBecomingVisible() {
                 if (getWidget() != null) {
-                    getWidget().refreshBoatList();
+                    presenter.getBoatsRefresher().callFillAndReloadInitially(getWidget().getBoatsDisplayer());
                 }
             }
         }, stringMessages.boats(), new BoatsPlace((String) null /* no place token */),
@@ -319,6 +317,20 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 },
                 stringMessages.tracTracEvents(), new TracTracEventsPlace((String) null /* no place token */),
                 SecuredDomainType.TRACTRAC_ACCOUNT.getPermission(DefaultActions.values()));
+        /* YellowBrick Event Management */
+        final YellowBrickEventManagementPanelSupplier yellowBrickEventManagementPanelSupplier =
+                new YellowBrickEventManagementPanelSupplier(stringMessages, presenter, tableResources);
+        adminConsolePanel.addToTabPanel(connectorsTabPanel,
+                new DefaultRefreshableAdminConsolePanel<YellowBrickEventManagementPanel>(yellowBrickEventManagementPanelSupplier) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        if (getWidget() != null) {
+                            getWidget().refreshYellowBrickConnectors();
+                        }
+                    }
+                },
+                stringMessages.yellowBrickEvents(), new YellowBrickEventsPlace((String) null /* no place token */),
+                SecuredDomainType.YELLOWBRICK_ACCOUNT.getPermission(DefaultActions.values()));
         /* Swiss Timing Replay Connector */
         final SwissTimingReplayConnectorPanelSupplier swissTimingReplayConnectorPanelSupplier =
                 new SwissTimingReplayConnectorPanelSupplier(stringMessages, presenter, tableResources);
@@ -481,7 +493,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<LandscapeManagementPanel>(landscapeManagementPanelSupplier),
                 stringMessages.landscape(), new LandscapeManagementPlace((String) null /* no place token */),
-                SecuredLandscapeTypes.LANDSCAPE.getPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
+                SecuredLandscapeTypes.LANDSCAPE.getPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
+                        new TypeRelativeObjectIdentifier("AWS")));
         /* COURSE CREATION */
         final HorizontalTabLayoutPanel courseCreationTabPanel = adminConsolePanel
                 .addVerticalTab(stringMessages.courseCreation(), COURSE_CREATION);

@@ -17,4 +17,4 @@
 #  done
 #done
 
-ssh -A root@sapsailing.com ssh -A dbserver.internal.sapsailing.com finduserbyemail $1
+ssh -A root@sapsailing.com ssh -A ec2-user@dbserver.internal.sapsailing.com finduserbyemail $1

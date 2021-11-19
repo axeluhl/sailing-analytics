@@ -126,11 +126,11 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append(htmlify(messages.get(locale, "userProfile")))
                 .append("</a>")
                 .append(" | ");
-        footerLinks.append("<a href=\"http://go.sap.com/about/legal/impressum.html\">")
+        footerLinks.append("<a href=\"http://go.sap.com/about/legal/impressum.html?campaigncode=CRM-XH21-OSP-Sailing\">")
                 .append(htmlify(messages.get(locale, "imprint")))
                 .append("</a>")
                 .append(" | ");
-        footerLinks.append("<a href=\"http://go.sap.com/about/legal/privacy.html\">")
+        footerLinks.append("<a href=\"http://go.sap.com/about/legal/privacy.html?campaigncode=CRM-XH21-OSP-Sailing\">")
                 .append(htmlify(messages.get(locale, "privacy")))
                 .append("</a>");
 

@@ -122,6 +122,17 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
      * {@code column} in the {@link #getColumnSortHandler() sort handler} and {@link #addColumn(Column, String) adds the
      * column}.
      */
+    public void addColumnWithNaturalComparatorOnStringRepresentation(Column<T, ?> column, String header) {
+        addColumn(column, header,
+                (t1, t2)->new NaturalComparator(/* case sensitive */ false)
+                    .compare(""+column.getValue(t1), ""+column.getValue(t2)));
+    }
+    
+    /**
+     * Sets the {@code column} as {@link Column#setSortable(boolean) sortable}, assigns the comparator for the
+     * {@code column} in the {@link #getColumnSortHandler() sort handler} and {@link #addColumn(Column, String) adds the
+     * column}.
+     */
     public void addColumn(Column<T, ?> column, String header, Comparator<T> comparator) {
         ListHandler<T> boatColumnListHandler = getColumnSortHandler();
         column.setSortable(true);
@@ -141,6 +152,20 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
             }
         };
         addColumn(textColumn, header, Comparator.comparing(t->textColumn.getValue(t), new NaturalComparator()));
+    }
+
+    /**
+     * Adds a sortable {@link TextColumn} whose {@link TextColumn#getValue(Object)} method is based on the {@code valueMapper}
+     * and whose sorting is based on the comparator passed.
+     */
+    public void addColumn(Function<T, String> valueMapper, String header, Comparator<T> comparator) {
+        final TextColumn<T> textColumn = new TextColumn<T>() {
+            @Override
+            public String getValue(T object) {
+                return valueMapper.apply(object);
+            }
+        };
+        addColumn(textColumn, header, comparator);
     }
 
     public void setEmptyTableWidget(Widget widget) {

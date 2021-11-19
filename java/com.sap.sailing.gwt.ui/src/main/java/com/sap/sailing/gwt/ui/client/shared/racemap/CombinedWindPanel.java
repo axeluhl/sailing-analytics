@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 
 public class CombinedWindPanel extends FlowPanel {
     
@@ -60,6 +61,11 @@ public class CombinedWindPanel extends FlowPanel {
                         oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
                         oldRaceMapSettings.isShowSatelliteLayer(), oldRaceMapSettings.isShowWindLadder(),
                         oldRaceMapSettings.isWindLadderOverride(), oldRaceMapSettings.getWindLadderManeuverAngle());
+                if (map.getComponentContext() != null
+                        && map.getComponentContext().isStorageSupported(map)) {
+                    map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,
+                            new DummyOnSettingsStoredCallback());
+                }
                 map.updateSettings(newRaceMapSettings);
             }
         });

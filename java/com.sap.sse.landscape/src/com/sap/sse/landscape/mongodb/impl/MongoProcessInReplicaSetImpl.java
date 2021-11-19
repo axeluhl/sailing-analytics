@@ -2,6 +2,7 @@ package com.sap.sse.landscape.mongodb.impl;
 
 import java.net.URISyntaxException;
 
+import com.mongodb.connection.ClusterConnectionMode;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
@@ -15,7 +16,7 @@ public class MongoProcessInReplicaSetImpl extends MongoProcessImpl implements Mo
     }
 
     public MongoProcessInReplicaSetImpl(MongoReplicaSet replicaSet, int port, Host host) {
-        super(port, host);
+        super(host, port);
         this.replicaSet = replicaSet;
     }
 
@@ -26,6 +27,6 @@ public class MongoProcessInReplicaSetImpl extends MongoProcessImpl implements Mo
     
     @Override
     public boolean isInReplicaSet() throws URISyntaxException {
-        return getReplicaSet().getClient().getReplicaSetStatus() != null;
+        return getReplicaSet().getClient().getClusterDescription().getConnectionMode() != ClusterConnectionMode.SINGLE;
     }
 }

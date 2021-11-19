@@ -1,8 +1,13 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.i18n.client.NumberFormat;
+import com.sap.sse.common.Duration;
 
 public class DurationAsHoursMinutesSecondsFormatter {
+    public String getHoursMinutesSeconds(Duration duration) {
+        return getHoursMinutesSeconds(duration == null ? null : duration.asSeconds());
+    }
+    
     public String getHoursMinutesSeconds(Double durationInSeconds) {
         String result;
         if (durationInSeconds == null) {

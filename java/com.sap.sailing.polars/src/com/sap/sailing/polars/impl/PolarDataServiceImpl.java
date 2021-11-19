@@ -4,14 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -37,6 +33,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.PolarDataOperation;
 import com.sap.sailing.polars.ReplicablePolarService;
 import com.sap.sailing.polars.mining.AngleAndSpeedRegression;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
@@ -50,13 +47,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.OperationsToMasterSender;
-import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.util.ClearStateTestSupport;
 
 /**
@@ -68,44 +59,19 @@ import com.sap.sse.util.ClearStateTestSupport;
  * @author Axel Uhl
  * 
  */
-public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateTestSupport {
+public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStream<PolarDataService, PolarDataOperation<?>> implements ReplicablePolarService, ClearStateTestSupport {
 
     private static final Logger logger = Logger.getLogger(PolarDataServiceImpl.class.getSimpleName());
 
     private PolarDataMiner polarDataMiner;
 
-    private final ConcurrentMap<OperationExecutionListener<PolarDataService>, OperationExecutionListener<PolarDataService>> operationExecutionListeners;
-
-    /**
-     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not
-     * currently replicated from any master.
-     */
-    private ReplicationMasterDescriptor replicatingFromMaster;
-
-    private final Set<OperationWithResult<PolarDataService, ?>> operationsSentToMasterForReplication;
-
-    private volatile boolean currentlyFillingFromInitialLoad;
-    
-    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
-
     private DomainFactory domainFactory;
-
-    /**
-     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
-     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
-     * method.
-     */
-    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
     /**
      * Constructs the polar data service with default generation settings.
      */
     public PolarDataServiceImpl() {
         resetState();
-        this.currentlyFillingFromInitialLoad = false;
-        this.operationsSentToMasterForReplication = new HashSet<>();
-        this.operationExecutionListeners = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -284,7 +250,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
     @Override
     public void insertExistingFixes(TrackedRace trackedRace) {
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+            final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
             track.lockForRead();
             try {
                 for (GPSFixMoving fix : track.getFixes()) {
@@ -307,43 +273,8 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
     }
 
     @Override
-    public void addOperationExecutionListener(OperationExecutionListener<PolarDataService> listener) {
-        operationExecutionListeners.put(listener, listener);
-    }
-
-    @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<PolarDataService> listener) {
-        operationExecutionListeners.remove(listener);
-    }
-
-    @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         polarDataMiner = null;
-    }
-
-    @Override
-    public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
-        return currentlyApplyingOperationReceivedFromMaster.get();
-    }
-
-    @Override
-    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
-        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
-    }
-
-    @Override
-    public Serializable getId() {
-        return getClass().getName();
     }
 
     @Override
@@ -375,37 +306,6 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
         // objectOutputStream.writeObject(polarDataMiner.getMovingAverageProcessor());
         objectOutputStream.writeObject(polarDataMiner.getCubicRegressionPerCourseProcessor());
         objectOutputStream.writeObject(polarDataMiner.getSpeedRegressionPerAngleClusterProcessor());
-    }
-
-    @Override
-    public Iterable<OperationExecutionListener<PolarDataService>> getOperationExecutionListeners() {
-        return operationExecutionListeners.keySet();
-    }
-
-    @Override
-    public ReplicationMasterDescriptor getMasterDescriptor() {
-        return replicatingFromMaster;
-    }
-
-    @Override
-    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = master;
-    }
-
-    @Override
-    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = null;
-    }
-
-    @Override
-    public boolean hasSentOperationToMaster(OperationWithResult<PolarDataService, ?> operation) {
-        return this.operationsSentToMasterForReplication.contains(operation);
-    }
-
-    @Override
-    public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<PolarDataService, ?> operation) {
-        this.operationsSentToMasterForReplication.add(operation);
     }
 
     @Override
@@ -445,18 +345,5 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
     @Override
     public void clearState() throws Exception {
         resetState();
-    }
-
-    @Override
-    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
-        this.unsentOperationsToMasterSender = service;
-    }
-
-    @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            O operationWithResult, OperationsToMasterSender<S, O> sender) {
-        if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
-        }
     }
 }

@@ -213,6 +213,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("RÉUNION", "RE", "REU", "re", null, null, "638", "262"));
         add(new CountryCodeImpl("ROMANIA", "RO", "ROU", "ro", "RO", "ROU", "642", "40"));
         add(new CountryCodeImpl("RUSSIAN FEDERATION", "RU", "RUS", "ru", "RUS", "RUS", "643", "7"));
+        add(new CountryCodeImpl("RUSSIAN OLYMPIC COMMITTEE", "RC", "ROC", "rc", "ROC", "ROC", "643", "7"));
         add(new CountryCodeImpl("RWANDA", "RW", "RWA", "rw", "RWA", "RWA", "646", "250"));
         add(new CountryCodeImpl("SAINT BARTHÉLEMY", "BL", "BLM", "bl", null, null, "652", null));
         add(new CountryCodeImpl("SAINT HELENA", "SH", "SHN", "sh", null, null, "654", "290"));

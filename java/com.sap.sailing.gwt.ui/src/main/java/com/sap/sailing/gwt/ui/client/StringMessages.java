@@ -342,6 +342,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String replication();
     String averageAbsoluteCrossTrackErrorInMeters();
     String averageSignedCrossTrackErrorInMeters();
+    String currentAbsoluteCrossTrackErrorInMeters();
+    String currentSignedCrossTrackErrorInMeters();
     String helpLines();
     String startLine();
     String finishLine();
@@ -586,6 +588,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windwardDistanceToGoInMetersTooltip();
     String averageAbsoluteCrossTrackErrorInMetersTooltip();
     String averageSignedCrossTrackErrorInMetersTooltip();
+    String currentAbsoluteCrossTrackErrorInMetersTooltip();
+    String currentSignedCrossTrackErrorInMetersTooltip();
     String raceAverageAbsoluteCrossTrackErrorInMetersTooltip();
     String raceAverageSignedCrossTrackErrorInMetersTooltip();
     String gapChangeSinceLegStartInSecondsTooltip();
@@ -948,6 +952,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String rerunQueryAfterRefresh();
     String refreshIntervalMustntBeEmpty();
     String selectionTables();
+
     String addConfiguration();
     String noConfigurations();
     String errorRetrievingConfiguration();
@@ -2303,6 +2308,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unsetPosition();
     String errorTryingToUpdateMarkProperties(String message);
     String confirmUnsettingPositionForMarkProperties(String name);
+    String shareTheLink();
+    String timeStampCheckBoxLabel();
+    String windChartCheckBoxLabel();
+    String leaderboardCheckBoxLabel();
+    String competitorChartCheckBoxLabel();
+    String filterSetNameCheckBoxLabel();
+    String competitorSelectionCheckBoxLabel();
+    String copyToClipboard();
+    String maneuverCheckBoxLabel();
+    String tagsCheckBoxLabel();
     String useOfficialResultsForAutomaticUpdates();
     String keepEmptyForDefaultUserAndPassword();
     String autoRestartTrackingUponCompetitorSetChange();
@@ -2332,9 +2347,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorSaveSubscription(String errMessage);
     String errorInvalidSubscritionProvider(String errMessage);
     String unableToLoadCourseAreas(String message);
+    String zoomCheckBoxLabel();
     String insufficientPermissions();
     String manageEvents();
     String sharingLinkCopied();
+    String browserDoesNotSupportCopyToClipboard();
+    String browserDoesNotSupportNativeSharing();
     String startOfTrackingMustNotBeAfterEndOfTracking();
     String landscape();
     String identifier();
@@ -2346,4 +2364,26 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String shoreControl();
     String demoMode();
     String includeAccessTokenForYourAccount();
+    String alternateTextIfQRCodeTooBig();
+    String pleaseUseHttpsForImageUrls();
+    String windAndCourse();
+    String zoomIn();
+    String zoomOut();
+    String moreOptions();
+    String confirmDeleteImage();
+    String confirmDeleteVideo();
+    String fileUpload();
+    String or();
+    String noMediaSelected();
+    String fileTypeNotSupported();
+    String noImageOrVideoDetected();
+    String errorWhileUpdatingEvent();
+    String updateEventSuccessfully();
+    String raceUrl();
+    String yellowBrickConfiguration();
+    String addYellowBrickConfiguration();
+    String filterYellowBrickConfigurations();
+    String yellowBrickEvents();
+    String timePointOfLastFix();
+    String copyMarkDeviceMappings();
 }

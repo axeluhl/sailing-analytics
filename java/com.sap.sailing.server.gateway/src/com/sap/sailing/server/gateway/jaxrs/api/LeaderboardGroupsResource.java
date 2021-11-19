@@ -48,18 +48,29 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.json.JsonDeserializationException;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
-@Path("/v1/leaderboardgroups")
+@Path(LeaderboardGroupsResource.V1_LEADERBOARDGROUPS)
 public class LeaderboardGroupsResource extends AbstractSailingServerResource {
+    public static final String IDENTIFIABLE = "/identifiable";
+    public static final String V1_LEADERBOARDGROUPS = "/v1/leaderboardgroups";
+    protected static final String NAME_OR_UUID_PATH_PARAM = "nameOrUUID";
+    protected static final String COPY_MEMBERS_AND_ROLES_QUERY_PARAM = "copyMembersAndRoles";
+    protected static final String MIGRATE_BOATS_QUERY_PARAM = "migrateBoats";
+    protected static final String MIGRATE_COMPETITORS_QUERY_PARAM = "migrateCompetitors";
+    protected static final String NEW_GROUP_NAME_QUERY_PARAM = "newGroupName";
+    protected static final String EXISTING_GROUP_ID_QUERY_PARAM = "existingGroupId";
+    protected static final String CREATE_NEW_GROUP_QUERY_PARAM = "createNewGroup";
+    protected static final String NAME_PATH_PARAM = "name";
+
     @POST
-    @Path("/{name}/migrate")
-    public Response migrateOwnershipForLeaderboardGroup(@PathParam("name") String leaderboardGroupName,
-            @QueryParam("createNewGroup") Boolean createNewGroup,
-            @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
-            @QueryParam("migrateCompetitors") Boolean migrateCompetitors,
-            @QueryParam("migrateBoats") Boolean migrateBoats,
-            @QueryParam("copyMembersAndRoles") Boolean copyMembersAndRoles)
+    @Path("/{"+NAME_PATH_PARAM+"}/migrate")
+    public Response migrateOwnershipForLeaderboardGroup(@PathParam(NAME_PATH_PARAM) String leaderboardGroupName,
+            @QueryParam(CREATE_NEW_GROUP_QUERY_PARAM) Boolean createNewGroup,
+            @QueryParam(EXISTING_GROUP_ID_QUERY_PARAM) UUID existingGroupIdOrNull, @QueryParam(NEW_GROUP_NAME_QUERY_PARAM) String newGroupName,
+            @QueryParam(MIGRATE_COMPETITORS_QUERY_PARAM) Boolean migrateCompetitors,
+            @QueryParam(MIGRATE_BOATS_QUERY_PARAM) Boolean migrateBoats,
+            @QueryParam(COPY_MEMBERS_AND_ROLES_QUERY_PARAM) Boolean copyMembersAndRoles)
             throws ParseException, JsonDeserializationException {
         LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(leaderboardGroupName);
         SailingHierarchyOwnershipUpdater updater = SailingHierarchyOwnershipUpdater.createOwnershipUpdater(
@@ -95,7 +106,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
     }
 
     @GET
-    @Path("/identifiable")
+    @Path(IDENTIFIABLE)
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboardGroupsIdentifiable() {
         final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroup->{
@@ -111,8 +122,8 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{nameOrUUID}")
-    public Response getLeaderboardGroup(@PathParam("nameOrUUID") String leaderboardGroupName) {
+    @Path("{"+NAME_OR_UUID_PATH_PARAM+"}")
+    public Response getLeaderboardGroup(@PathParam(NAME_OR_UUID_PATH_PARAM) String leaderboardGroupName) {
         Response response;
         final Serializable uuid = UUIDHelper.tryUuidConversion(leaderboardGroupName);
         final LeaderboardGroup leaderboardGroup;
@@ -132,6 +143,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                 JSONObject jsonLeaderboardGroup = new JSONObject();
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.NAME, leaderboardGroup.getName());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.ID, leaderboardGroup.getId().toString());
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.DISPLAYNAME, leaderboardGroup.getDisplayName());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.DESCRIPTION, leaderboardGroup.getDescription());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.TIMEPOINT, timePoint.toString());
                 final Set<Event> eventsReferencingLeaderboardGroup = new HashSet<>();
@@ -198,14 +210,14 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                         for (final Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>> e : seriesNameAndFleetsAndRaceColumnsOfSeries) {
                             JSONObject jsonSeries = new JSONObject();
                             jsonSeriesEntries.add(jsonSeries);
-                            jsonSeries.put("name", e.getA());
+                            jsonSeries.put(NAME_PATH_PARAM, e.getA());
                             jsonSeries.put(LeaderboardNameConstants.ISMEDALSERIES, medalSeriesNames.get(e.getA()));
                             JSONArray jsonFleetsEntries = new JSONArray();
                             jsonSeries.put(LeaderboardNameConstants.FLEETS, jsonFleetsEntries);
                             for (final Fleet fleet : e.getB()) {
                                 if (fleet != null) {
                                     JSONObject jsonFleet = new JSONObject();
-                                    jsonFleet.put("name", fleet.getName());
+                                    jsonFleet.put(NAME_PATH_PARAM, fleet.getName());
                                     jsonFleet.put(LeaderboardNameConstants.COLOR,
                                             fleet.getColor() != null ? fleet.getColor().getAsHtml() : null);
                                     jsonFleet.put(LeaderboardNameConstants.ORDERING, fleet.getOrdering());
@@ -214,7 +226,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                     jsonFleet.put(LeaderboardNameConstants.RACES, jsonRacesEntries);
                                     for (RaceColumn raceColumn : e.getC()) {
                                         JSONObject jsonRaceColumn = new JSONObject();
-                                        jsonRaceColumn.put("name", raceColumn.getName());
+                                        jsonRaceColumn.put(NAME_PATH_PARAM, raceColumn.getName());
                                         jsonRaceColumn.put(LeaderboardNameConstants.ISMEDALRACE,
                                                 raceColumn.isMedalRace());
                                         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);

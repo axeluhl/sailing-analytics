@@ -29,23 +29,18 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
     public SAPHeaderWithAuthentication(String applicationName, String applicationBaseUrl) {
         super(applicationName, applicationBaseUrl);
         res.css().ensureInjected();
-        
         FlowPanel rightWithAuthentication = new FlowPanel();
         rightWithAuthentication.addStyleName(res.css().header_right_wrapper());
-
         final LanguageSelector languageSelector = new LanguageSelector();
         languageSelector.addStyleName(res.css().languageSelector());
         rightWithAuthentication.add(languageSelector);
-        
         Anchor authenticationMenu = new Anchor();
         authenticationMenu.addStyleName(res.css().usermanagement_icon());
         rightWithAuthentication.add(authenticationMenu);
         authenticationMenuView = new AuthenticationMenuViewImpl(authenticationMenu, res.css().usermanagement_loggedin(), res.css().usermanagement_open());
-        
         rightWrapper = new SimplePanel();
         rightWrapper.addStyleName(res.css().header_right_extension());
         rightWithAuthentication.add(rightWrapper);
-        
         super.addWidgetToRightSide(rightWithAuthentication);
     }
 

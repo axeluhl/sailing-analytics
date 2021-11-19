@@ -9,6 +9,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 
 /**
  * Utility class to show multiple non obstructive warning / info messages using a small notification at the bottom of the page.
@@ -55,7 +56,7 @@ public class Notification {
 
     interface NotificationCSS extends CssResource {
         String notification_bar();
-
+        String notification_bar_mobile();
         String notification();
     }
 
@@ -63,7 +64,11 @@ public class Notification {
         ress.css().ensureInjected();
         RootPanel.get().add(notifications);
         notifications.getElement().setId("notificationBar");
-        notifications.addStyleName(ress.css().notification_bar());
+        if (DeviceDetector.isDesktop()) {
+            notifications.addStyleName(ress.css().notification_bar());
+        } else {
+            notifications.addStyleName(ress.css().notification_bar_mobile());
+        }
     }
 
     private Notification() {

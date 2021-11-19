@@ -21,7 +21,11 @@ Require-Bundle: com.amazon.aws.aws-java-api;bundle-version="2.13.50",
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core,
  com.sap.sse.landscape.common,
- com.sap.sse.landscape.aws.common
+ com.sap.sse.landscape.aws.common,
+ com.sap.sse.replication.interfaces,
+ com.sap.sse.operationaltransformation,
+ org.mongodb.driver-core;bundle-version="4.3.1",
+ org.mongodb.driver-sync;bundle-version="4.3.1"
 Web-ContextPath: /landscape
 Import-Package: org.apache.shiro;version="1.2.2",
  org.osgi.framework;version="1.8.0",

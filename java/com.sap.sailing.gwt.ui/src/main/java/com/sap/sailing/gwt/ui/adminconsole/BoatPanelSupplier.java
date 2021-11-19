@@ -19,10 +19,9 @@ public class BoatPanelSupplier extends AdminConsolePanelSupplier<BoatPanel> {
 
     @Override
     public BoatPanel init() {
-        logger.info("Create BoatPanel");
         final BoatPanel boatPanel = new BoatPanel(presenter, stringMessages);
         boatPanel.ensureDebugId("BoatPanel");
-        boatPanel.refreshBoatList();
+        presenter.getBoatsRefresher().addDisplayerAndCallFillOnInit(boatPanel.getBoatsDisplayer());
         return boatPanel;
     }
 

@@ -8,7 +8,6 @@ import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 
 public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSupplier<TracTracEventManagementPanel> {
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
     private final AdminConsoleTableResources tableResources;
@@ -23,7 +22,6 @@ public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSuppl
 
     @Override
     public TracTracEventManagementPanel init() {
-        logger.info("Create TracTracEventManagementPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
                 presenter, stringMessages, tableResources);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
@@ -35,7 +33,6 @@ public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSuppl
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
-
             @Override
             public void onSuccess() {
                 widget = init();
@@ -48,5 +45,4 @@ public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSuppl
             }
         });
     }
-
 }

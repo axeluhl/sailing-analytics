@@ -56,6 +56,14 @@ public class MobileSection extends Composite {
         sectionContentUi.add(theContentWidget);
     }
 
+    public int getWidgetCount() {
+        return sectionContentUi.getWidgetCount();
+    }
+
+    public Widget getWidget(int index) {
+        return sectionContentUi.getWidget(index);
+    }
+
     private void showAsSubSection() {
         sectionHeaderHolderUi.addClassName(local_res.css().sectionSubHeader());
     }

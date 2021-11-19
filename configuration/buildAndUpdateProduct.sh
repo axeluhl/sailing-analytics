@@ -36,6 +36,24 @@ clean_gwt_artifacts ()
     rm -rf com.sap.sse.gwt/com.sap.sse.gwt.* com.sap.sse.gwt/.generated
 }
 
+set_ACDIR_and_depending_variables () {
+    ACDIR="$1"
+    JETTY_CONFIG_DIR="${ACDIR}/${JETTY_CONFIG_SUBDIR}"
+    VERSION_TXT="${JETTY_CONFIG_DIR}/version.txt"
+    VERSION_JSON="${JETTY_CONFIG_DIR}/version.json"
+}
+
+create_version_info_files ()
+{
+    echo "$VERSION_INFO System:" > "${VERSION_TXT}"
+    echo "{
+    \"commit_id\":\"$HEAD_SHA\",
+    \"active_branch\":\"$active_branch\",
+    \"build_date\":\"$HEAD_DATE\",
+    \"release\":\"$SIMPLE_VERSION_INFO\"
+}" > "${VERSION_JSON}"
+}
+
 # this holds for default installation
 USER_HOME=~
 START_DIR="`pwd`"
@@ -79,10 +97,9 @@ SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 # The number of worker threads to use for building GWT permutations.
 # Can be overridden using the -x option
 GWT_WORKERS=2
-
-# The number of worker threads to use for building GWT permutations.
-# Can be overridden using the -x option
-GWT_WORKERS=2
+# The default resolution for headless Firefox for Selenium tests:
+export MOZ_HEADLESS_WIDTH=1600
+export MOZ_HEADLESS_HEIGHT=900
 
 MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
 MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
@@ -194,7 +211,8 @@ do
     esac
 done
 
-ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
+JETTY_CONFIG_SUBDIR=configuration/jetty
+set_ACDIR_and_depending_variables "${SERVERS_HOME}/${TARGET_SERVER_NAME}"
 echo INSTALL goes to $ACDIR
 echo TMP will be used for java.io.tmpdir and is $TMP
 if [ "$TMP" = "" ]; then
@@ -257,7 +275,7 @@ if [[ "$@" == "release" ]]; then
     rm -rf $PROJECT_HOME/dist/*
     mkdir -p $PROJECT_HOME/build
 
-    RELEASE_NOTES="Release $VERSION_INFO\n$RELEASE_NOTES"
+    RELEASE_NOTES="Release ${VERSION_INFO}\n${RELEASE_NOTES}"
     echo -e $RELEASE_NOTES > $PROJECT_HOME/build/release-notes.txt
     echo "" >> $PROJECT_HOME/build/release-notes.txt
     echo "Commits for the last $COMMIT_WEEK_COUNT weeks:" >> $PROJECT_HOME/build/release-notes.txt
@@ -265,26 +283,27 @@ if [[ "$@" == "release" ]]; then
     cd $PROJECT_HOME
     git log --decorate --pretty=format:"%h - %an, %ar : %s" --date=relative --abbrev-commit --since=$COMMIT_WEEK_COUNT.weeks >> $PROJECT_HOME/build/release-notes.txt
 
-    cd $PROJECT_HOME/build
-    ACDIR=$PROJECT_HOME/build
+    set_ACDIR_and_depending_variables "${PROJECT_HOME}/build"
+    cd "${ACDIR}"
 
-    mkdir -p configuration/jetty/etc
+    mkdir -p ${JETTY_CONFIG_SUBDIR}/etc
     mkdir plugins
 
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/env-default-rules.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/defineReverseProxyMappings.sh $ACDIR/
     cp -v $p2PluginRepository/configuration/config.ini configuration/
 
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deploy.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-http.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-deploy.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/realm.properties ${JETTY_CONFIG_SUBDIR}/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
     cp -v $PROJECT_HOME/java/target/configuration/mail.properties configuration/
     cp -v $PROJECT_HOME/java/target/configuration/debug.properties configuration/
@@ -297,11 +316,10 @@ if [[ "$@" == "release" ]]; then
     cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
-
     if [[ $OSGI_BUNDLE_NAME != "" ]]; then
         SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
+    create_version_info_files
 
     # removing compile reports as they do not belong into a release
     find $ACDIR -name soycReport | xargs rm -rf
@@ -504,7 +522,6 @@ if [[ "$@" == "hot-deploy" ]]; then
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
-
 	if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "I will now stop and reinstall the bundle mentioned in the line above. Is this right? (y/N): " answer
         case $answer in
@@ -788,8 +805,8 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/configuration
     fi
 
-    if [ ! -d "$ACDIR/configuration/jetty/etc" ]; then
-        mkdir -p $ACDIR/configuration/jetty/etc
+    if [ ! -d "${JETTY_CONFIG_DIR}/etc" ]; then
+        mkdir -p ${JETTY_CONFIG_DIR}/etc
     fi
 
     cd $ACDIR
@@ -806,15 +823,16 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
 
     # overwrite configurations that should never be customized and belong to the build
     cp -v $p2PluginRepository/configuration/config.ini configuration/
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deploy.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-http.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-deploy.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/realm.properties ${JETTY_CONFIG_SUBDIR}/etc
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
@@ -837,7 +855,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     . $ACDIR/env.sh
     . $ACDIR/env-default-rules.sh
 
-    echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
+    create_version_info_files
 
     # When a server is installed using this script
     # then we no longer define important options in
@@ -851,7 +869,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     sed -i "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
     sed -i "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
     sed -i "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
-    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-http.xml"
+    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "${JETTY_CONFIG_DIR}/etc/jetty-http.xml"
 
     echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
@@ -895,13 +913,13 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SSH_CMD "mkdir -p $REMOTE_SERVER/plugins"
         $SSH_CMD "mkdir -p $REMOTE_SERVER/logs"
         $SSH_CMD "mkdir -p $REMOTE_SERVER/tmp"
-        $SSH_CMD "mkdir -p $REMOTE_SERVER/configuration/jetty/etc"
+        $SSH_CMD "mkdir -p $REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc"
 
         $SCP_CMD $p2PluginRepository/configuration/config.ini $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deploy.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
+        $SCP_CMD $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc
+        $SCP_CMD $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-http.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc
+        $SCP_CMD $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-deploy.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc
+        $SCP_CMD $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/mail.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
 
@@ -911,6 +929,8 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/stop $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/status $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/refreshInstance.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/stopReplicating.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
 
         $SCP_CMD $PROJECT_HOME/java/target/http2udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
@@ -928,7 +948,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SCP_CMD $p2PluginRepository/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
 
     echo "$VERSION_INFO System: remotedly-deployed" > /tmp/version-remote-deploy.txt
-    $SCP_CMD /tmp/version-remote-deploy.txt $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/version.txt
+    $SCP_CMD /tmp/version-remote-deploy.txt $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/version.txt
     rm /tmp/version-remote-deploy.txt
 
     echo "Deployed successfully. I did NOT change any configuration (no env.sh or config.ini or jetty.xml adaption), only code!"

@@ -38,8 +38,14 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/restsecurity")
 public class SecurityResource extends AbstractSecurityResource {
+    public static final String COMPANY = "company";
+    public static final String FULL_NAME = "fullName";
+    public static final String EMAIL = "email";
     private static final Logger logger = Logger.getLogger(SecurityResource.class.getName());
     private static final String SECURITY_UI_URL_PATH = "/security/ui/";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String ACCESS_TOKEN = "access_token";
 
     /**
      * Can be used to figure out the current subject. Accepts the GET method. If the subject is
@@ -98,7 +104,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @POST
     @Path("/change_password")
     @Produces("text/plain;charset=UTF-8")
-    public Response changePassword(@FormParam("username") String username, @FormParam("password") String password) {
+    public Response changePassword(@FormParam(USERNAME) String username, @FormParam(PASSWORD) String password) {
         if (!getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
@@ -114,8 +120,8 @@ public class SecurityResource extends AbstractSecurityResource {
     @POST
     @Path("/forgot_password")
     @Produces("text/plain;charset=UTF-8")
-    public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam("username") String username,
-            @QueryParam("email") String email, @QueryParam("application") String application) {
+    public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam(USERNAME) String username,
+            @QueryParam(EMAIL) String email, @QueryParam("application") String application) {
         try {
             final User user;
             if (username != null) {
@@ -140,11 +146,11 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/create_user")
     @Produces("text/plain;charset=UTF-8")
     public Response createUser(@Context UriInfo uriInfo,
-            @QueryParam("username") String queryUsername, @FormParam("username") String formUsername,
-            @QueryParam("email") String queryEmail, @FormParam("email") String formEmail,
-            @QueryParam("password") String queryPassword, @FormParam("password") String formPassword,
-            @QueryParam("fullName") String queryFullName, @FormParam("fullName") String formFullName,
-            @QueryParam("company") String queryCompany, @FormParam("company") String formCompany) {
+            @QueryParam(USERNAME) String queryUsername, @FormParam(USERNAME) String formUsername,
+            @QueryParam(EMAIL) String queryEmail, @FormParam(EMAIL) String formEmail,
+            @QueryParam(PASSWORD) String queryPassword, @FormParam(PASSWORD) String formPassword,
+            @QueryParam(FULL_NAME) String queryFullName, @FormParam(FULL_NAME) String formFullName,
+            @QueryParam(COMPANY) String queryCompany, @FormParam(COMPANY) String formCompany) {
         try {
             User user = getService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(queryUsername,
                     new Callable<User>() {
@@ -198,19 +204,20 @@ public class SecurityResource extends AbstractSecurityResource {
     @GET
     @Path("/user")
     @Produces("application/json;charset=UTF-8")
-    public Response getUser(@QueryParam("username") String username) {
+    public Response getUser(@QueryParam(USERNAME) String username) {
         final Subject subject = SecurityUtils.getSubject();
         final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
         if (user == null) {
             return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
         } else if (getService().hasCurrentUserReadPermission(user) || getService()
                 .hasCurrentUserOneOfExplicitPermissions(user, SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC)) {
-            // TODO: pruning when current user only has READ_PUBLIC
             JSONObject result = new JSONObject();
-            result.put("username", user.getName());
-            result.put("fullName", user.getFullName());
-            result.put("email", user.getEmail());
-            result.put("company", user.getCompany());
+            result.put(USERNAME, user.getName());
+            if (getService().hasCurrentUserReadPermission(user)) {
+                result.put(FULL_NAME, user.getFullName());
+                result.put(EMAIL, user.getEmail());
+                result.put(COMPANY, user.getCompany());
+            }
             return Response.ok(streamingOutput(result)).build();
         } else {
             return Response.status(Status.UNAUTHORIZED).build();
@@ -220,7 +227,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @DELETE
     @Path("/user")
     @Produces("text/plain;charset=UTF-8")
-    public Response deleteUser(@QueryParam("username") String username) {
+    public Response deleteUser(@QueryParam(USERNAME) String username) {
         User user = getService().getUserByName(username);
         if (user != null) {
             return getService().checkPermissionAndDeleteOwnershipForObjectRemoval(user, () -> {
@@ -239,9 +246,9 @@ public class SecurityResource extends AbstractSecurityResource {
     @PUT
     @Path("/user")
     @Produces("text/plain;charset=UTF-8")
-    public Response updateUser(@Context UriInfo uriInfo, @QueryParam("username") String username,
-            @QueryParam("email") String email, @QueryParam("fullName") String fullName,
-            @QueryParam("company") String company) {
+    public Response updateUser(@Context UriInfo uriInfo, @QueryParam(USERNAME) String username,
+            @QueryParam(EMAIL) String email, @QueryParam(FULL_NAME) String fullName,
+            @QueryParam(COMPANY) String company) {
         if (!getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
@@ -348,7 +355,7 @@ public class SecurityResource extends AbstractSecurityResource {
 
     Response respondWithAccessTokenForUser(final String username) {
         JSONObject response = new JSONObject();
-        response.put("username", username);
+        response.put(USERNAME, username);
         getService().checkCurrentUserReadPermission(getService().getUserByName(username));
         String accessToken;
         if (getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
@@ -360,7 +367,7 @@ public class SecurityResource extends AbstractSecurityResource {
                         "No access token was found and the permission to create one is lacking.");
             }
         }
-        response.put("access_token", accessToken);
+        response.put(ACCESS_TOKEN, accessToken);
         return Response.ok(streamingOutput(response), MediaType.APPLICATION_JSON_TYPE).build();
     }
 }

@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.mongodb.MongoDBConfiguration;
@@ -19,12 +19,12 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
@@ -100,7 +100,7 @@ public class SecurityStoreMerger {
         final MongoDBConfiguration cfgForTarget = MongoDBConfiguration.getDefaultConfiguration();
         final SecurityStoreMerger instance = new SecurityStoreMerger(cfgForTarget, System.getProperty(TARGET_DEFAULT_TENANT_NAME_SYSTEM_PROPERTY_NAME));
         for (int i=0; i<args.length/2; i++) {
-            final MongoDBConfiguration cfgForSource = new MongoDBConfiguration(new MongoClientURI(args[2*i]));
+            final MongoDBConfiguration cfgForSource = new MongoDBConfiguration(new ConnectionString(args[2*i]));
             instance.importStores(cfgForSource, args[2*i+1]);
         }
     }
@@ -252,8 +252,8 @@ public class SecurityStoreMerger {
                             (qualifiedForUser != userQualifierInTarget || qualifiedForGroup != groupQualifierInTarget)) {
                         logger.info("Qualifying user/group for role "+role+" on user "+sourceUser.getName()+
                                 " merged to target. Updating role");
-                        rolesToReplaceDueToChangingQualifierObject.put(role,
-                                new Role(targetRoleDefinition, groupQualifierInTarget, userQualifierInTarget));
+                        rolesToReplaceDueToChangingQualifierObject.put(role, new Role(targetRoleDefinition,
+                                groupQualifierInTarget, userQualifierInTarget, role.isTransitive()));
                     }
                 }
             }

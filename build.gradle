@@ -45,10 +45,10 @@ allprojects {
 // dependency versions for all sub modules
 ext {
     // regular
-    buildTools = "29.0.3"
-    compileSdk = 29
+    buildTools = "30.0.3"
+    compileSdk = 30
     minSdk = 16
-    targetSdk = 29
+    targetSdk = 30
 
     sourceCompatibilityVersion = JavaVersion.VERSION_1_8
     targetCompatibilityVersion = JavaVersion.VERSION_1_8

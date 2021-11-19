@@ -29,6 +29,7 @@ public class MarkPropertiesDTO extends NamedDTO implements SecuredDTO {
 
     /** GWT constructor */
     public MarkPropertiesDTO() {
+        super("");
         commonMarkProperties = new CommonMarkPropertiesDTO();
     }
 

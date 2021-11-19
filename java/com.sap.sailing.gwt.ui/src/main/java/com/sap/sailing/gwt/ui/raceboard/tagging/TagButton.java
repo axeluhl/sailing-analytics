@@ -4,9 +4,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 
 /**
- * Used to store preset {@link com.sap.sailing.gwt.ui.shared.TagDTO tags} which will be rendered in {@link TaggingPanel}
+ * Used to store preset {@link com.sap.sailing.gwt.ui.shared.TagDTO tags} which will be rendered in {@link TaggingComponent}
  * as buttons for quick and easy access. Clicking on tag-buttons does not have any effect until click listener gets
- * added manually! See example at {@link TaggingPanel#addTagButton(TagButton) addTagButton()}.
+ * added manually! See example at {@link TaggingComponent#addTagButton(TagButton) addTagButton()}.
  */
 public class TagButton extends Button {
 

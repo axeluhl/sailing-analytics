@@ -59,13 +59,16 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final String HOME_REDIRECT_MACRO = "Home-SSL";
     private static final String PLAIN_REDIRECT_MACRO = "Plain-SSL";
     private static final String EVENT_REDIRECT_MACRO = "Event-SSL";
-    private static final String SERIES_REDIRECT_MACRO = "Series-SSL"; 
+    private static final String SERIES_REDIRECT_MACRO = "Series-SSL";
+    private static final String HOME_ARCHIVE_REDIRECT_MACRO = "Home-ARCHIVE";
+    private static final String EVENT_ARCHIVE_REDIRECT_MACRO = "Event-ARCHIVE";
+    private static final String SERIES_ARCHIVE_REDIRECT_MACRO = "Series-ARCHIVE";
     private static final String STATUS = "Status";
     private static final String CONFIG_FILE_FOR_INTERNALS = "001-internals"+CONFIG_FILE_EXTENSION;
     
-    private final AwsInstance<ShardingKey, MetricsT> host;
+    private final AwsInstance<ShardingKey> host;
     
-    public ApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, AwsInstance<ShardingKey, MetricsT> host) {
+    public ApacheReverseProxy(AwsLandscape<ShardingKey> landscape, AwsInstance<ShardingKey> host) {
         super(landscape);
         this.host = host;
     }
@@ -79,7 +82,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
 
     private void setRedirect(String configFileNameForHostname, String macroName, String hostname,
-            byte[] privateKeyEncryptionPassphrase, String... macroArguments)
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String... macroArguments)
             throws Exception {
         final String command = "echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments)
                 + "\" >" + getConfigFilePath(configFileNameForHostname) + "; service httpd reload";
@@ -88,11 +91,11 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
                 + runCommandAndReturnStdoutAndStderr(command,
                         "Standard error from setting up the re-direct for " + hostname
                                 + " and reloading the Apache httpd server: ",
-                        Level.INFO, privateKeyEncryptionPassphrase));
+                        Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase));
     }
     
-    private String runCommandAndReturnStdoutAndStderr(String command, String stderrLogPrefix, Level stderrLogLevel, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final SshCommandChannel sshChannel = getHost().createRootSshChannel(TIMEOUT, privateKeyEncryptionPassphrase);
+    private String runCommandAndReturnStdoutAndStderr(String command, String stderrLogPrefix, Level stderrLogLevel, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final SshCommandChannel sshChannel = getHost().createRootSshChannel(TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase);
         final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(command, stderrLogPrefix, stderrLogLevel);
         return stdout;
     }
@@ -107,60 +110,77 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
 
     @Override
-    public void setPlainRedirect(String hostname, ProcessT applicationProcess, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public void setPlainRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), PLAIN_REDIRECT_MACRO, hostname, privateKeyEncryptionPassphrase, host, ""+port);
+        setRedirect(getConfigFileNameForHostname(hostname), PLAIN_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, host, ""+port);
     }
 
     @Override
-    public void setHomeRedirect(String hostname, ProcessT applicationProcess, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public void setHomeRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), HOME_REDIRECT_MACRO, hostname, privateKeyEncryptionPassphrase, host, ""+port);
+        setRedirect(getConfigFileNameForHostname(hostname), HOME_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, host, ""+port);
     }
 
     @Override
-    public void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), EVENT_REDIRECT_MACRO, hostname, privateKeyEncryptionPassphrase, eventId.toString(), host, ""+port);
+        setRedirect(getConfigFileNameForHostname(hostname), EVENT_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, eventId.toString(), host, ""+port);
     }
 
     @Override
     public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
-            UUID leaderboardGroupId, byte[] privateKeyEncryptionPassphrase) throws Exception {
+            UUID leaderboardGroupId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, privateKeyEncryptionPassphrase, leaderboardGroupId.toString(), host, ""+port);
+        setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, leaderboardGroupId.toString(), host, ""+port);
     }
 
     @Override
-    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        setRedirect(CONFIG_FILE_FOR_INTERNALS, STATUS, getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), privateKeyEncryptionPassphrase, INTERNAL_SERVER_STATUS);
+    public void setHomeArchiveRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(getConfigFileNameForHostname(hostname), HOME_ARCHIVE_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
-    public void removeRedirect(Scope<ShardingKey> scope, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public void setEventArchiveRedirect(String hostname, UUID eventId, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(getConfigFileNameForHostname(hostname), EVENT_ARCHIVE_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, eventId.toString());
+    }
+
+    @Override
+    public void setEventSeriesArchiveRedirect(String hostname, UUID leaderboardGroupId,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(getConfigFileNameForHostname(hostname), SERIES_ARCHIVE_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, leaderboardGroupId.toString());
+    }
+
+    @Override
+    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(CONFIG_FILE_FOR_INTERNALS, STATUS, getHost().getPrivateAddress(optionalTimeout).getHostAddress(), optionalKeyName, privateKeyEncryptionPassphrase, INTERNAL_SERVER_STATUS);
+    }
+
+    @Override
+    public void removeRedirect(Scope<ShardingKey> scope, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String configFilePath = getConfigFilePath(getConfigFileNameForScope(scope));
-        removeRedirect(configFilePath, scope.toString(), privateKeyEncryptionPassphrase);
+        removeRedirect(configFilePath, scope.toString(), optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     @Override
-    public void removeRedirect(String hostname, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public void removeRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String configFilePath = getConfigFilePath(getConfigFileNameForHostname(hostname));
-        removeRedirect(configFilePath, hostname, privateKeyEncryptionPassphrase);
+        removeRedirect(configFilePath, hostname, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     private void removeRedirect(String configFilePath, String redirectNameForLogOutput,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String command = "rm " + configFilePath + "; service httpd reload";
         logger.info("Standard output from removing the re-direct for " + redirectNameForLogOutput
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
                         "Standard error from removing the re-direct for " + redirectNameForLogOutput
                                 + " and reloading the Apache httpd server: ",
-                        Level.INFO, privateKeyEncryptionPassphrase));
+                        Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase));
     }
 
     @Override
@@ -178,7 +198,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
      * {@link AwsInstance}.
      */
     @Override
-    public AwsInstance<ShardingKey, MetricsT> getHost() {
+    public AwsInstance<ShardingKey> getHost() {
         return host;
     }
 

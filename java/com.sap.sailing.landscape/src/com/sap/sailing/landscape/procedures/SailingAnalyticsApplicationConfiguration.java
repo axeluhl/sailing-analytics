@@ -27,6 +27,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
      * <li>If no {@link #setTelnetPort(int) telnet port} is provided, the {@link #DEFAULT_TELNET_PORT} is used (14888).</li>
      * <li>If no {@link #setExpeditionPort(int) expedition UDP port} is provided, the {@link #DEFAULT_EXPEDITION_PORT} is used (2010).</li>
      * <li>If no {@link #setServerDirectory(String) server directory} is specified, it defaults to {@link ApplicationProcessHost#DEFAULT_SERVER_PATH}.</li>
+     * <li>If no {@link #setRelease(Release) release} is specified, it defaults to {@link SailingReleaseRepository#getLatestMasterRelease()}.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -103,7 +104,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         }
 
         protected String getServerDirectory() {
-            return serverDirectory == null ? ApplicationProcessHost.DEFAULT_SERVER_PATH : serverDirectory;
+            return serverDirectory == null ? ApplicationProcessHost.DEFAULT_SERVERS_PATH + "/" + getServerName() : serverDirectory;
         }
         
         protected boolean isServerDirectorySet() {
@@ -133,7 +134,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
          * Expose for callers in same package as this class
          */
         @Override
-        protected AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getLandscape() {
+        protected AwsLandscape<ShardingKey> getLandscape() {
             return super.getLandscape();
         }
 
@@ -203,5 +204,12 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
 
     protected String getServerDirectory() {
         return serverDirectory;
+    }
+    
+    /**
+     * Expose the superclass method to other classes in the same package
+     */
+    protected String getServerName() {
+        return super.getServerName();
     }
 }

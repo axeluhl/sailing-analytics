@@ -72,15 +72,15 @@ fi
 JAVA_BINARY="$JAVA_HOME/bin/java"
 JAVA_VERSION_OUTPUT=$("$JAVA_BINARY" -version 2>&1)
 JAVA_VERSION=$(echo "$JAVA_VERSION_OUTPUT" | sed 's/^.* version "\(.*\)\.\(.*\)\..*".*$/\1.\2/; 1q')
-export JAVA_11_LOGGING_ARGS="-Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
+export JAVA_11_LOGGING_ARGS="-Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=10000000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
 export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC ${JAVA_11_LOGGING_ARGS}"
 export JAVA_8_LOGGING_ARGS="-XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
-echo JAVA_VERSION detected: $JAVA_VERSION
+echo JAVA_VERSION detected: $JAVA_VERSION >&2
 if echo $JAVA_VERSION | grep -q "^11\."; then
-  echo Java 11 detected
+  echo Java 11 detected >&2
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_11_ARGS
 else
-  echo Java other than 11 detected
+  echo Java other than 11 detected >&2
   # options for use with SAP JVM only:
   if echo "$JAVA_VERSION_OUTPUT" | grep -q "SAP Java"; then
     ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
@@ -88,12 +88,12 @@ else
     MAJOR=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\1/' )
     MINOR=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\2/' )
     UPDATE=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\3/' )
-    echo "SAP JVM $MAJOR $MINOR $UPDATE detected"
+    echo "SAP JVM $MAJOR $MINOR $UPDATE detected" >&2
     if [ $MAJOR -ge 8 -a $MINOR -ge 1 -a $UPDATE -ge 45 ]; then
-      echo "Update 8.1.045 or later; using Java11 GC logging options"
+      echo "Update 8.1.045 or later; using Java11 GC logging options" >&2
       LOGGING_ARGS="$JAVA_11_LOGGING_ARGS"
     else 
-      echo "Update before 8.1.045; using Java8 GC logging options"
+      echo "Update before 8.1.045; using Java8 GC logging options" >&2
       LOGGING_ARGS="$JAVA_8_LOGGING_ARGS"
     fi
   else

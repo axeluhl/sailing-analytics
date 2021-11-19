@@ -10,7 +10,7 @@ import com.rabbitmq.client.Channel;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.util.impl.ApproximateTime;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 
 /**
  * Output stream that can split its contents into messages for RabbitMQ. This stream creates a RabbitMQ queue and sends

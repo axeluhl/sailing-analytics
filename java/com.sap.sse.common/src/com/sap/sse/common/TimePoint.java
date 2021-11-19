@@ -20,6 +20,10 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
         return new MillisecondsTimePoint(date);
     }
     
+    static TimePoint of(Long millis) {
+        return millis == null ? null : of((long) millis);
+    }
+    
     static TimePoint of(long millis) {
         return new MillisecondsTimePoint(millis);
     }

@@ -34,23 +34,25 @@ public abstract class DialogUtils {
     }
 
     public static void linkEscapeToButton(final Button button, HasAllKeyHandlers... widgets) {
-        for (HasAllKeyHandlers widget : widgets) {
-            widget.addKeyPressHandler(new KeyPressHandler() {
-                @Override
-                public void onKeyPress(KeyPressEvent event) {
-                    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
-                        button.click();
+        if (button != null) {
+            for (HasAllKeyHandlers widget : widgets) {
+                widget.addKeyPressHandler(new KeyPressHandler() {
+                    @Override
+                    public void onKeyPress(KeyPressEvent event) {
+                        if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
+                            button.click();
+                        }
                     }
-                }
-            });
-            widget.addKeyUpHandler(new KeyUpHandler() {
-                @Override
-                public void onKeyUp(KeyUpEvent event) {
-                    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
-                        button.click();
+                });
+                widget.addKeyUpHandler(new KeyUpHandler() {
+                    @Override
+                    public void onKeyUp(KeyUpEvent event) {
+                        if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
+                            button.click();
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 

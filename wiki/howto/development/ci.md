@@ -1,6 +1,6 @@
 # Continuous Integration with Hudson/Jenkins
 
-Our default Hudson runs on http://hudson.sapsailing.com. If you need access, please contact axel.uhl@sap.com or simon.marcel.pamies@sap.com. We have a build job running for the master branch which will automatically pick up any changes, run a build with tests and inform committers about flaws they introduced that broke the build.
+Our default Hudson runs on https://hudson.sapsailing.com. If you need access, please contact axel.uhl@sap.com or simon.marcel.pamies@sap.com. We have a build job running for the master branch which will automatically pick up any changes, run a build with tests and inform committers about flaws they introduced that broke the build.
 
 It is good practice to set up a new Hudson job for major branches that require solid testing before being merged into the master branch. The entry page at http://hudson.sapsailing.com explains how to do this. It basically comes down to copying a template job and adjusting the branch name. As easy as that :-)
 
@@ -79,3 +79,7 @@ The image has been crafted specifically to contain the tools required for the bu
 Furthermore, the ephemeral storage is partitioned with a ``gpt`` label into a swap partition with 8GB and the remainder as an ``ext4`` partition mounted under ``/ephemeral/data`` with is then bound with a "bind" mount to ``/home/hudson/workspace``. See the ``/etc/systemd/system/mounthudsonworkspace.service`` systemd service definition on the slave instances. The ``launchhudsonslave`` script launches the instance, checks for it to enter the ``running`` state, then tries to connect using SSH with user ``hudson``. The respective keys are baked into the image and match up with the key stored in ``hudson@hudson.sapsailing.com:.ssh``.
 
 The ``launchhudsonslave`` script will then establish the SSH connection, launching the ``slave.jar`` connector. When the Hudson Master disconnects, the Java VM running ``slave.jar`` will terminate, and the next script command of ``launchhudsonslave`` will shutdown the host. This is possible for user ``hudson`` due to corresponding entries under ``/etc/sudoers.d``. The hosts are launched such that shutting them down will terminate the Amazon EC2 instance.
+
+## Hudson patch for mail-1.6.2
+
+With JDKs around 1.8.0_291 an original Hudson installation faces trouble when sending out e-mails through TLS-secured SMTP servers such as Amazon Simple Email Service (SES). The problem can be solved by replacing ``WEB-INF/lib/mail-1.4.4.jar`` in the ``/usr/lib/hudson/hudson.war`` file by a newer copy, such as ``mail-1.6.2.jar``, sometimes also referred to as ``com.sun.mail-1.6.2.jar`` or ``javax.mail-1.6.2.jar``. A correspondingly patched version can be found at [https://static.sapsailing.com/hudson.war.patched-with-mail-1.6.2](https://static.sapsailing.com/hudson.war.patched-with-mail-1.6.2).

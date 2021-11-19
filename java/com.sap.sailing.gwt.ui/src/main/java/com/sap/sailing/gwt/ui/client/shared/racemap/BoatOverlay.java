@@ -45,7 +45,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
 
     private Color color; 
 
-    private Map<Integer, Util.Pair<Size, Size>> boatScaleAndSizePerZoomCache; 
+    private Map<Long, Util.Pair<Size, Size>> boatScaleAndSizePerWorldWidthCache; 
 
     private final BoatClassVectorGraphics boatVectorGraphics;
 
@@ -74,7 +74,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
         super(map, zIndex, coordinateSystem);
         this.boatClass = boatDTO.getBoatClass();
         this.color = color;
-        boatScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Size,Size>>();
+        boatScaleAndSizePerWorldWidthCache = new HashMap<>();
         boatVectorGraphics = BoatClassVectorGraphicsResolver.resolveBoatClassVectorGraphics(boatClass.getName());
     }
     
@@ -82,8 +82,8 @@ public class BoatOverlay extends CanvasOverlayV3 {
     protected void draw() {
         if (mapProjection != null && boatFix != null) {
             // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
-            int zoom = map.getZoom();
-            final Util.Pair<Size, Size> boatScaleAndSize = boatScaleAndSizePerZoomCache.computeIfAbsent(zoom, z->getBoatScaleAndSize(boatClass));
+            final long worldWidth = (long) mapProjection.getWorldWidth();
+            final Util.Pair<Size, Size> boatScaleAndSize = boatScaleAndSizePerWorldWidthCache.computeIfAbsent(worldWidth, z->getBoatScaleAndSize(boatClass));
             final Size boatSizeScaleFactor = boatScaleAndSize.getA();
             canvasWidth = (int) (boatScaleAndSize.getB().getWidth());
             canvasHeight = (int) (boatScaleAndSize.getB().getHeight());

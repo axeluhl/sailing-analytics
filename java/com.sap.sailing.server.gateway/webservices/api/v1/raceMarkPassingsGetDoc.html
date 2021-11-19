@@ -16,6 +16,25 @@
 The mark passings for each competitor are ordered by the waypoint sequence; the mark passings for
 the waypoints are ordered by the time at which the competitor passed the mark..<br/>
 All slashes contained within the {regattaname} and {racename} parameters must be replaced by "__" (double underscore).</p>
+
+Some fields that describe the mark passings may need some explanation: <tt>trackedRankAtMarkPassing</tt> is the rank
+as determined at the mark passing for the competitor using the regatta's ranking metric. This means that these ranks
+do not always have to correspond to the order in which the mark is being passed, especially for handicap ranking. For one-design,
+this will match up with the order of passing. The raw passing order is described in the <tt>trackedRankAtMarkPassing</tt> field
+which, as the name suggests, gives <tt>1</tt> for the first boat passing the mark.<p>
+
+The <tt>pointsBasedOnPassingOrder</tt> field
+maps the mark passing order through the scoring scheme, considering score corrections and penalties based on the time point
+of the mark passing but ignores discarding rules and column factors.
+For example, a <tt>UFD</tt> penalty will be considered from the first waypoint on, but a <tt>DNF</tt> will
+not be considered until the competitor has passed the finish line or the race end time has passed. This way, <tt>pointsBasedOnPassingOrder</tt>
+will, e.g., give one point to a competitor rounding the mark in second place if the competitor rounding in first place
+has a penalty that already applies at the time point of the mark passing, such as an <tt>OCS</tt> or a <tt>UFD</tt> or <tt>BFD</tt>.<p>
+
+The <tt>netPointsBasedOnPassingOrder</tt> field is based on the value of <tt>pointsBasedOnPassingOrder</tt> and applies
+the discarding rule (reporting 0.0 for a score discarded) as well as column factors (e.g., doubling the score for a medal race
+in a regular low-point scoring scheme).<p>
+
 <br/>
 <table>
 	<tr>
@@ -32,7 +51,12 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>None</td>
+		<td>leaderboard</td>
+		<td>If provided, this has to be a leaderboard containing the race identified by the path parameters. In this case
+		    the leaderboard identified this way will be used for rank/score/penalty/IRM determination. It defaults to the
+		    name of the regatta, therefore by default using the regular regatta leaderboard. Usually, this will
+		    equal the regatta name provided, but, e.g., in the case of elimination leaderboards other options are possible.
+		</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>

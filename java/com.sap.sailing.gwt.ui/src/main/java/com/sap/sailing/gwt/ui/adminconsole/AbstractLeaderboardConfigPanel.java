@@ -186,35 +186,30 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         this.stringMessages = theStringConstants;
         this.sailingServiceWrite = presenter.getSailingService();
         this.userService = presenter.getUserService();
-        filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTOWithSecurity>();
+        filteredLeaderboardList = new ListDataProvider<>();
         allRegattas = new ArrayList<RegattaDTO>();
         this.errorReporter = presenter.getErrorReporter();
         this.presenter = presenter;
-        this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTOWithSecurity>();
+        this.availableLeaderboardList = new ArrayList<>();
         mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
         this.setWidget(mainPanel);
-
         // Create leaderboards list and functionality
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
         leaderboardsCaptionPanel.setStyleName("bold");
         mainPanel.add(leaderboardsCaptionPanel);
-
         VerticalPanel leaderboardsPanel = new VerticalPanel();
         leaderboardsCaptionPanel.add(leaderboardsPanel);
-
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, LEADERBOARD);
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
         leaderboardsPanel.add(buttonPanel);
-        
-        final Button createLeaderboardRefreshBtn = buttonPanel.addCreateAction(stringMessages.refresh(), new Command() {
+        final Button createLeaderboardRefreshBtn = buttonPanel.addAction(stringMessages.refresh(), ()->true, new Command() {
             @Override
             public void execute() {
                 getLeaderboardsRefresher().reloadAndCallFillAll();
             }
         });
         createLeaderboardRefreshBtn.ensureDebugId("LeaderboardRefreshButton");
-        
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTOWithSecurity>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity>(lblFilterEvents,
@@ -235,7 +230,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
         filterLeaderboardPanel
                 .setUpdatePermissionFilterForCheckbox(leaderboard -> userService.hasPermission(leaderboard, DefaultActions.UPDATE));
-
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
         addColumnsToLeaderboardTableAndSetSelectionModel(userService, leaderboardTable, tableRes,
@@ -259,30 +253,24 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardsPanel.add(leaderboardTable);
         mainPanel.add(new Grid(1, 1));
-
         // caption panels for the selected leaderboard and tracked races
         HorizontalPanel splitPanel = new HorizontalPanel();
         splitPanel.setWidth("100%");
         splitPanel.ensureDebugId("LeaderboardDetailsPanel");
         mainPanel.add(splitPanel);
-
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
         splitPanel.add(selectedLeaderBoardPanel);
         splitPanel.setCellWidth(selectedLeaderBoardPanel, "50%");
-
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
         selectedLeaderBoardPanel.setContentWidget(vPanel);
-
         trackedRacesCaptionPanel = new CaptionPanel(stringMessages.trackedRaces());
         splitPanel.add(trackedRacesCaptionPanel);
         splitPanel.setCellWidth(trackedRacesCaptionPanel, "50%");
-
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
-
         trackedRacesListComposite = new TrackedRacesListComposite(null, null, presenter, stringMessages,
                 /* multiselection */false, isActionButtonsEnabled());
         refreshableTrackedRaceSelectionModel = trackedRacesListComposite.getSelectionModel();
@@ -365,7 +353,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         raceColumnTable.asWidget().ensureDebugId("RaceColumnTable");
         raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
-
         this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
         raceColumnTableSelectionModel.addSelectionChangeHandler(event -> {
             // If the selection on the raceColumnTable changes,
@@ -420,8 +407,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         leaderboardRaceColumnSelectionChanged();
     }
 
-    /**
-     */
     public void loadAndRefreshLeaderboard(final String leaderboardName) {
         MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity> callback = new MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity>(
                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
@@ -454,7 +439,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
     
     public void loadAndRefreshLeaderboard(final StrippedLeaderboardDTOWithSecurity leaderboard) {
-
         for (StrippedLeaderboardDTOWithSecurity leaderboardDTO : leaderboardSelectionModel.getSelectedSet()) {
             if (leaderboardDTO.getName().equals(leaderboard.getName())) {
                 leaderboardSelectionModel.setSelected(leaderboardDTO, false);
@@ -462,8 +446,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
         }
         replaceLeaderboardInList(availableLeaderboardList, leaderboard.getName(), leaderboard);
-        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList
-                                                                    // provider
+        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
         leaderboardSelectionModel.setSelected(leaderboard, true);
         leaderboardSelectionChanged();
         getLeaderboardsRefresher().updateAndCallFillForAll(filteredLeaderboardList.getList(), this.getLeaderboardsDisplayer());

@@ -23,7 +23,6 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
-import com.sap.sse.datamining.Query.QueryType;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -107,12 +106,12 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
             @Override
             public void performAction() {
                 memoryMonitor.logWarning("Yellow Alert free memory is below " + (100*getThreshold()) + "%!");
-                int numberOfRunningStatisticQueries = dataMiningQueryManager.getNumberOfRunningQueriesOfType(QueryType.STATISTIC);
-                if (numberOfRunningStatisticQueries > 0) {
-                    memoryMonitor.logWarning("Aborting random statistic query.");
-                    dataMiningQueryManager.abortRandomQueryOfType(QueryType.STATISTIC);
+                final int numberOfRunningQueries = dataMiningQueryManager.getNumberOfRunningQueries();
+                if (numberOfRunningQueries > 0) {
+                    memoryMonitor.logWarning("Aborting random query.");
+                    dataMiningQueryManager.abortRandomQuery();
                 } else {
-                    memoryMonitor.logWarning("Can't abort random statistic query, because none are running.");
+                    memoryMonitor.logWarning("Can't abort random query, because none are running.");
                 }
             }
         });

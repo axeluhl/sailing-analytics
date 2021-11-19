@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sse.shared.json.JsonDeserializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 /**
  * A competitor de-serializer that does not store the competitors it loads back to the DB because it assumes

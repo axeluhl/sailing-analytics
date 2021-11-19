@@ -39,7 +39,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
             }
         });
         table.addColumn(itemTypeCol, stringMessages.mappedToType());
-        
         TextColumn<DeviceMappingDTO> itemCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
@@ -55,7 +54,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
             }
         });
         table.addColumn(itemCol, stringMessages.mappedTo());
-        
         TextColumn<DeviceMappingDTO> deviceTypeCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
@@ -70,7 +68,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
             }
         });
         table.addColumn(deviceTypeCol, stringMessages.deviceType());
-        
         TextColumn<DeviceMappingDTO> deviceIdCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
@@ -86,7 +83,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
         });
         table.addColumn(deviceIdCol, stringMessages.deviceId());
         table.setColumnWidth(deviceIdCol, 400, Unit.PX);
-        
         TextColumn<DeviceMappingDTO> fromCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
@@ -101,7 +97,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
             }
         });
         table.addColumn(fromCol, stringMessages.from());
-        
         TextColumn<DeviceMappingDTO> toCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
@@ -116,7 +111,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
             }
         });
         table.addColumn(toCol, stringMessages.to());
-
         TextColumn<DeviceMappingDTO> lastFixCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
@@ -131,7 +125,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
             }
         });
         table.addColumn(lastFixCol, stringMessages.lastFix());
-
         table.addColumnSortHandler(listHandler);
     }
     

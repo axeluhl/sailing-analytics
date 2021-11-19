@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=sailracer
 SERVER_NAME=sailracer
 SERVER_PORT=8922
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/sailracer?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/sailracer?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2044
 TELNET_PORT=14922

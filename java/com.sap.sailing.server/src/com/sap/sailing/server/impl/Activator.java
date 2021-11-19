@@ -24,6 +24,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -73,6 +74,7 @@ import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.util.GenericJSONPreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -138,7 +140,6 @@ public class Activator implements BundleActivator {
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         sharedSailingDataTracker = FullyInitializedReplicableTracker.createAndOpen(context, SharedSailingData.class);
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
-        securityServiceTracker.open();
         new Thread(""+this+" initializing RacingEventService in the background") {
             public void run() {
                 try {
@@ -228,19 +229,33 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
-                    final RoleDefinition sailingViewerRoleDefinition = securityService
-                            .getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
-                    if (securityService.isNewServer()) {
-                        // The server is initially set to be public by adding sailing_viewer role to the server group
-                        // with forAll=true
-                        securityService.putRoleDefinitionToUserGroup(securityService.getServerGroup(),
-                                sailingViewerRoleDefinition, true);
-                    }
-                    if (securityService.isInitialOrMigration()) {
-                        // sailing_viewer role is publicly readable
-                                securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(),
-                                        null, DefaultActions.READ.name());
-                    }
+                    final Thread backgroundThread = new Thread(()->{
+                        ReplicationService replicationService;
+                        try {
+                            replicationService = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class).waitForService(0);
+                            if (!replicationService.isReplicationStarting() && securityService.getMasterDescriptor() == null) {
+                                // see also bug 5569: this must only be done if it is clear that this instance is not to become a replica
+                                final RoleDefinition sailingViewerRoleDefinition = securityService
+                                        .getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
+                                if (securityService.isNewServer()) {
+                                    // The server is initially set to be public by adding sailing_viewer role to the server group
+                                    // with forAll=true
+                                    securityService.putRoleDefinitionToUserGroup(securityService.getServerGroup(),
+                                            sailingViewerRoleDefinition, true);
+                                }
+                                if (securityService.isInitialOrMigration()) {
+                                    // sailing_viewer role is publicly readable
+                                    securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(),
+                                            null, DefaultActions.READ.name());
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                            logger.log(Level.SEVERE, "Couldn't get a hold of the ReplicationService to tell whether this SecurityService is to become a replica; "+
+                                    "not setting server to public, not enforcing READability of sailing_viewer role", e);
+                        }
+                    }, "Waiting for replication service to tell whether this SecurityService will become a replica");
+                    backgroundThread.setDaemon(true);
+                    backgroundThread.start();
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),
@@ -254,12 +269,14 @@ public class Activator implements BundleActivator {
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker =
                 ServiceTrackerFactory.createAndOpen(context, ScoreCorrectionProvider.class);
+        ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker =
+                ServiceTrackerFactory.createAndOpen(context, CompetitorProvider.class);
         ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker = ServiceTrackerFactory
                 .createAndOpen(context, ResultUrlRegistry.class);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors,
                 serviceFinderFactory, trackedRegattaListener, notificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker, sharedSailingDataTracker,
-                replicationServiceTracker, scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
+                replicationServiceTracker, scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
         final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(
                 context, racingEventService);

@@ -5,7 +5,7 @@ APP_DIRS="mobile/com.sap.sailing.android.tracking.app/ mobile/com.sap.sailing.an
 APP_GRADLE_PROPERTIES="gradle.properties"
 FILES2SIGN=cfg/files2sign.json
 VERSION_FILE=cfg/VERSION
-GIT_REMOTE=origin
+GIT_REMOTE=sap
 
 OPTION_UPDATE_ANDROID_VERSIONS=1
 OPTION_PERFORM_GIT_OPERATIONS=1

@@ -406,7 +406,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     public Set<ManeuverType> getManeuverTypesToShow() {
-        return Util.createSet(maneuverTypesToShow.getValues());
+        return Util.asSet(maneuverTypesToShow.getValues());
     }
 
     public boolean isShowEstimatedDuration() {

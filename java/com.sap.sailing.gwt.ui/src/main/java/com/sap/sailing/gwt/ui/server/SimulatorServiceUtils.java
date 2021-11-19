@@ -394,13 +394,10 @@ public class SimulatorServiceUtils {
         List<TimedPositionWithSpeed> pathPoints = gpsTrack.getPathPoints();
         int noOfPathPoints = pathPoints.size();
         List<Double> diffs = new ArrayList<Double>();
-
         for (int index = 0; index < noOfPathPoints; index++) {
             diffs.add(new Double(Math.abs(pathPoints.get(index).getTimePoint().asMillis() - timepointAsMillis)));
         }
-
         int indexOfMinDiff = diffs.indexOf(Collections.min(diffs));
-
         return pathPoints.get(indexOfMinDiff).getSpeed();
     }
 
@@ -423,8 +420,7 @@ public class SimulatorServiceUtils {
         double lngDeg = position.getLngDeg();
         double windSpeedKn = windSpeedWithBearing.getKnots();
         double windBearingDeg = windSpeedWithBearing.getBearing().getDegrees();
-        long timepointMsec = timePoint.asMillis();
-        return new SimulatorWindDTO(latDeg, lngDeg, windSpeedKn, windBearingDeg, timepointMsec);
+        return new SimulatorWindDTO(latDeg, lngDeg, windSpeedKn, windBearingDeg, timePoint);
     }
 
     public static SimulatorUISelection toSimulatorUISelection(SimulatorUISelectionDTO selection) {

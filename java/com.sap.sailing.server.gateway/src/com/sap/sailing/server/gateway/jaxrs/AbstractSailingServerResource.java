@@ -1,42 +1,23 @@
 package com.sap.sailing.server.gateway.jaxrs;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
-import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Regatta;
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractSailingServerResource extends SharedAbstractSailingServerResource {
-    protected <T> T[] getServices(Class<T> clazz) {
-        final ServiceTracker<T, T> tracker = getServiceTracker(clazz);
-        final Object[] objectServices = tracker.getServices();
-        @SuppressWarnings("unchecked")
-        final T[] services = (T[]) Array.newInstance(clazz, objectServices.length);
-        System.arraycopy(objectServices, 0, services, 0, services.length);
-        tracker.close();
-        return services;
-    }
-
-    protected <T> ServiceTracker<T, T> getServiceTracker(Class<T> clazz) {
-        final BundleContext context = getBundleContext();
-        final ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
-        tracker.open();
-        return tracker;
-    }
-
+    private static final Logger logger = Logger.getLogger(AbstractSailingServerResource.class.getName());
     private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders() {
         return Arrays.asList(getServices(ScoreCorrectionProvider.class));
     }
@@ -46,29 +27,35 @@ public abstract class AbstractSailingServerResource extends SharedAbstractSailin
                 filter(scp->scp.getName().equals(scoreCorrectionProviderName)).findAny();
     }
     
-    protected TrackedRace findTrackedRace(Regatta regatta, String raceName) {
-        final TrackedRace trackedRace;
-        final RaceDefinition race = findRaceByName(regatta, raceName);
-        if (race != null) {
-            DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-            if (trackedRegatta != null) {
-                trackedRace = trackedRegatta.getExistingTrackedRace(race);
-            } else {
-                trackedRace = null;
-            }
-        } else {
-            trackedRace = null;
-        }
-        return trackedRace;
+    /**
+     * Valid combinations: user+password; bearer; nothing
+     */
+    protected boolean validateAuthenticationParameters(String user, String password, String bearer) {
+        return (((Util.hasLength(user) && Util.hasLength(password) && !Util.hasLength(bearer))
+                || (!Util.hasLength(user) && !Util.hasLength(password) && Util.hasLength(bearer)))
+                || (!Util.hasLength(user) && !Util.hasLength(password) && !Util.hasLength(bearer)));
     }
-    
+
+    protected Response returnInternalServerError(Throwable e) {
+        final Response response = Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        logger.severe(e.getMessage());
+        return response;
+    }
+
+    protected Response badRequest(String message) {
+        final Response response = Response.status(Status.BAD_REQUEST).entity(message).build();
+        return response;
+    }
+
+    protected Response returnUnauthorized(UnauthorizedException e) {
+        final Response response = Response.status(Status.UNAUTHORIZED).build();
+        logger.warning(e.getMessage() + " for user: " + getSecurityService().getCurrentUser());
+        return response;
+    }
+
     protected static Double roundDouble(Double value, int places) {
         BigDecimal bigDecimal = new BigDecimal(value);
         bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
-    }
-    
-    public RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
-        return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
 }

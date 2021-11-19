@@ -12,6 +12,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.jaxrs.api.SecurityResource;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public final class RemoteServerUtil {
@@ -36,7 +37,7 @@ public final class RemoteServerUtil {
      */
     public static String resolveBearerTokenForRemoteServer(String hostname, int port, String username, String password) {
         try {
-            return resolveBearerTokenForRemoteServer(new URL("http", hostname, port, ""), username, password);
+            return resolveBearerTokenForRemoteServer(new URL(port==443?"https":"http", hostname, port, ""), username, password);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -64,7 +65,7 @@ public final class RemoteServerUtil {
             Object requestBody = JSONValue.parseWithException(jsonToken);
             if (requestBody instanceof JSONObject) {
                 JSONObject json = (JSONObject) requestBody;
-                Object tokenObj = json.get("access_token");
+                Object tokenObj = json.get(SecurityResource.ACCESS_TOKEN);
                 if (tokenObj instanceof String) {
                     token = (String) tokenObj;
                     logger.info("Obtained access token for user "+username);

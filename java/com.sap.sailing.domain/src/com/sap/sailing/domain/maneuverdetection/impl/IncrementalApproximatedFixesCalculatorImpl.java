@@ -17,7 +17,7 @@ import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
  * Incremental douglas peucker calculator which reuses the already calculated douglas peucker points within legs. It

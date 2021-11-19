@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
@@ -55,14 +56,16 @@ public class DataByLogo extends Widget {
         TrackingConnectorInfoDTO potentialConnectorInfo = null;
         if (trackingConnectorInfos != null && !trackingConnectorInfos.isEmpty()) {
             for (TrackingConnectorInfoDTO trackingConnectorInfo : trackingConnectorInfos) {
-                // This logic currently only supports TracTrac as ConnectorInfo
-                if (trackingConnectorInfo.getTrackingConnectorName().equals(TracTracAdapter.NAME)) {
+                // This logic currently only supports TracTrac and YellowBrick as ConnectorInfo
+                if (trackingConnectorInfo.getTrackingConnectorName().equals(TracTracAdapter.NAME) ||
+                    trackingConnectorInfo.getTrackingConnectorName().equals(YellowBrickTrackingAdapter.NAME)) {
                     potentialConnectorInfo = trackingConnectorInfo;
                     String webUrl = trackingConnectorInfo.getWebUrl();
                     if (webUrl != null && !webUrl.isEmpty()) {
                         break;
                     }
                 }
+
             }
         }
         return potentialConnectorInfo;
@@ -72,16 +75,26 @@ public class DataByLogo extends Widget {
             TrackingConnectorInfoDTO trackingConnectorInfo) {
         if (trackingConnectorInfo.getTrackingConnectorName().equals(TracTracAdapter.NAME)) {
             setUpTracTracLogo(colorIfPossible, enforceTextColor);
+        } else if (trackingConnectorInfo.getTrackingConnectorName().equals(YellowBrickTrackingAdapter.NAME)) {
+            setUpYellowBrickLogo(colorIfPossible, enforceTextColor);
         }
         setUrl(trackingConnectorInfo);
     }
 
     private void setUpTracTracLogo(boolean colorIfPossible, boolean enforceTextColor) {
         final DataByLogoResources resources = DataByLogoResources.INSTANCE;
-
         final DataResource imageToSet = colorIfPossible ? resources.tractracColor() : resources.tractracWhite();
         logo.setSrc(imageToSet.getSafeUri().asString());
+        if (enforceTextColor) {
+            this.addStyleName(colorIfPossible ? resources.css().databylogo_black_text()
+                    : resources.css().databylogo_white_text());
+        }
+    }
 
+    private void setUpYellowBrickLogo(boolean colorIfPossible, boolean enforceTextColor) {
+        final DataByLogoResources resources = DataByLogoResources.INSTANCE;
+        final DataResource imageToSet = colorIfPossible ? resources.yellowBrickColor() : resources.yellowBrickWhite();
+        logo.setSrc(imageToSet.getSafeUri().asString());
         if (enforceTextColor) {
             this.addStyleName(colorIfPossible ? resources.css().databylogo_black_text()
                     : resources.css().databylogo_white_text());
