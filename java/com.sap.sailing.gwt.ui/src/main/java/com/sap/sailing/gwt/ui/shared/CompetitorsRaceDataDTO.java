@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -26,8 +27,11 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
         this.competitorsData = new HashMap<>();
     }
     
-    public CompetitorsRaceDataDTO(DetailType detailType, HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
+    public CompetitorsRaceDataDTO(DetailType detailType, Date requestedFromTime, Date requestedToTime,
+            Map<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
         this.detailType = detailType;
+        this.requestedFromTime = requestedFromTime;
+        this.requestedToTime = requestedToTime;
         this.competitorsData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
     }
     

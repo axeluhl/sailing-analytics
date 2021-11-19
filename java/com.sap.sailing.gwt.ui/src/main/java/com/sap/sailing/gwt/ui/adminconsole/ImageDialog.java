@@ -256,7 +256,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
         this.creationDate = creationDate;
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
-        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, true);
+        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, true, "image/*");
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<String>> event) {
@@ -340,10 +340,10 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                 mediaTags.add(MediaTagConstants.fromName(tags.get(i)));
             }
         }
-        ArrayList<ImageResizingTaskDTO> results = new ArrayList<>(imageURLAndUploadComposite.getURLs().size());
-        List<String> urls = imageURLAndUploadComposite.getURLs();
-        for (int i = 0; i < urls.size(); i++) {
-            final String imageURL = urls.get(i);
+        ArrayList<ImageResizingTaskDTO> results = new ArrayList<>(imageURLAndUploadComposite.getUris().size());
+        List<String> uris = imageURLAndUploadComposite.getUris();
+        for (int i = 0; i < uris.size(); i++) {
+            final String imageURL = uris.get(i);
             final ImageDTO image = new ImageDTO(imageURL, creationDate);
             image.setTitle(titleTextBox.getValue());
             image.setSubtitle(subtitleTextBox.getValue());

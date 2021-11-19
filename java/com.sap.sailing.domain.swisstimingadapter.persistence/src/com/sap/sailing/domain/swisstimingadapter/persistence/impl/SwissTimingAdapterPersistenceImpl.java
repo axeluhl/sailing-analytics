@@ -10,7 +10,7 @@ import org.bson.Document;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -152,7 +152,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 .getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
         Document result = storeSwissTimingArchiveConfiguration(config);
         stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(result, result,
-                new UpdateOptions().upsert(true));
+                new ReplaceOptions().upsert(true));
     }
 
     private Document storeSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration config) {
@@ -185,11 +185,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         MongoCollection<org.bson.Document> stConfigCollection = database
                 .getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
         Document result = storeSwissTimingConfiguration(config);
-
         Document updateQuery = new Document(FieldNames.ST_CONFIG_JSON_URL.name(), config.getJsonURL());
         updateQuery.put(FieldNames.ST_CONFIG_CREATOR_NAME.name(), config.getCreatorName());
-
         stConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
-                new UpdateOptions().upsert(true));
+                new ReplaceOptions().upsert(true));
     }
 }

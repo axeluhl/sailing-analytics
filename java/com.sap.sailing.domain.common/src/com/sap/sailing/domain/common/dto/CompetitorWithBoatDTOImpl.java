@@ -68,7 +68,7 @@ public class CompetitorWithBoatDTOImpl extends CompetitorDTOImpl implements Comp
         } else if (getShortName() != null && !getShortName().trim().isEmpty()) {
             result = getShortName(); 
         } else if (getBoat() != null) {
-            result = getBoat().getSailId() != null ? getBoat().getSailId() : getBoat().getName();
+            result = getBoat().getName() != null ? getBoat().getName() : getBoat().getSailId();
         } else {
             result = super.getShortName();
         }

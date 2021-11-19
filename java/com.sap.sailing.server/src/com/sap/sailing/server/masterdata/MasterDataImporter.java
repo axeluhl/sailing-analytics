@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -11,12 +12,13 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MasterDataImportInformation;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
-import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -44,7 +46,7 @@ public class MasterDataImporter {
         this.tenant = tenant;
     }
 
-    public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override)
+    public Map<LeaderboardGroup, ? extends Iterable<Event>> importFromStream(InputStream inputStream, UUID importOperationId, boolean override)
             throws IOException, ClassNotFoundException {
         ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService
                 .getBaseDomainFactory()
@@ -98,6 +100,7 @@ public class MasterDataImporter {
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
                 DataImportSubProgress.TRANSFER_COMPLETED, 0.5);
         applyMasterDataImportOperation(topLevelMasterData, importOperationId, override);
+        return topLevelMasterData.getEventForLeaderboardGroup();
     }
 
     private void setAllowCompetitorsDataToBeReset(List<Serializable> competitorIds) {
@@ -127,16 +130,14 @@ public class MasterDataImporter {
      */
     private MasterDataImportObjectCreationCount applyMasterDataImportOperation(TopLevelMasterData topLevelMasterData,
             UUID importOperationId, boolean override) {
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         ImportMasterDataOperation strippedOpForReplicas = new ImportMasterDataOperation(
-                topLevelMasterData.copyAndStripOffDataNotNeededOnReplicas(), importOperationId, override, creationCount,
-                user, tenant);
+                topLevelMasterData.copyAndStripOffDataNotNeededOnReplicas(), importOperationId, override, user,
+                tenant);
         // replicate explicitly first and let isRequiresExplicitTransitiveReplication return false; see also bug5574
         racingEventService.replicate(strippedOpForReplicas);
         ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
-                creationCount, user, tenant);
-        creationCount = racingEventService.apply(op);
-        return creationCount;
+                user, tenant);
+        return racingEventService.apply(op);
     }
 
 }

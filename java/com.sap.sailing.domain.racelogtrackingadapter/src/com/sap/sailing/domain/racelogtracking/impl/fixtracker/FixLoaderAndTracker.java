@@ -75,7 +75,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * This class listens to RaceLog Events, changes to the race and fix loading events and properly handles mappings and
  * fix loading.<br>
  * The two main responsibility are to 1. load fixes already available in the DB when a race is tracked and 2. add fixes
- * newly send by trackers to {@link Track}s of a {@link TrackedRace} if the fix is relevant for the race. In order to
+ * newly sent by trackers to {@link Track}s of a {@link TrackedRace} if the fix is relevant for the race. In order to
  * save memory we try to keep the set of loaded fixes as constrained as possible. In general the following rules apply:
  * <ul>
  * <li>The fixes loaded to a track for a specific item (Mark, Competitor) are associated to a device that needs to be
@@ -112,7 +112,9 @@ import com.sap.sse.util.ThreadPoolUtil;
  * There is a corner case that is assumed to be acceptable for the specific semantic of a {@link Mark}'s fixes:<br>
  * If a Marks is tracked and not pinged, any new fix transferred from the tracking device is treated as being better
  * than the one before. So all fixes are being recorded starting at the time point when the operator starts tracking for
- * a race and startOfTracking is in the future.<br>
+ * a race and startOfTracking is in the future.<p>
+ * Loading jobs are scheduled with a dedicated thread pool {@link #executor} that has "foreground" priority. With this, the number
+ * of concurrently executing loading jobs is restricted to approximately the number of CPUs on the executing host.<p>
  * Some related classes:
  * <ul>
  * <li>{@link RaceChangeListener}</li>
@@ -216,9 +218,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 if (competitor != null) {
                                     recordSensorFixForCompetitor(competitor, event);
                                 } else {
-                                    logger.log(Level.WARNING,
-                                            "Could not record fix for boat because no competitor could be determined. Boat: "
-                                                    + boat);
+                                    logger.log(Level.FINE, ()->"Could not record fix for boat because no competitor could be determined. Boat: " + boat);
                                 }
                             }
                             
@@ -249,9 +249,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 if (comp != null) {
                                     recordForCompetitor(comp);
                                 } else {
-                                    logger.log(Level.WARNING,
-                                            "Could not record fix for boat because no competitor could be determined. Boat: "
-                                                    + boat);
+                                    // this is not necessarily something to warn of; while a boat tracker may continuously track
+                                    logger.log(Level.FINE,
+                                            ()->"Could not record fix for boat because no competitor could be determined. Boat: " + boat);
                                 }
                             }
                             

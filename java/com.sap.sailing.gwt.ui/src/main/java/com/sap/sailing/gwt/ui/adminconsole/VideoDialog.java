@@ -91,14 +91,14 @@ public abstract class VideoDialog extends DataEntryDialog<List<VideoDTO>> implem
         for (String locale : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
             localeListBox.addItem(GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(locale), locale == null ? "" : locale);
         }
-        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, true);
+        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, true, true, "audio/*,video/*");
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<String>> event) {
                 validateAndUpdate();
             }
         });
-        thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, false);
+        thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, true, true, "audio/*,video/*");
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaTagConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
@@ -108,9 +108,9 @@ public abstract class VideoDialog extends DataEntryDialog<List<VideoDTO>> implem
 
     @Override
     protected List<VideoDTO> getResult() {
-        List<VideoDTO> results = new ArrayList<VideoDTO>(videoURLAndUploadComposite.getURLs().size());
-        for (String videoURL : videoURLAndUploadComposite.getURLs()) {
-            VideoDTO videoDTO = new VideoDTO(videoURL, getSelectedMimeType(), creationDate);
+        List<VideoDTO> results = new ArrayList<VideoDTO>(videoURLAndUploadComposite.getUris().size());
+        for (String videoUri : videoURLAndUploadComposite.getUris()) {
+            VideoDTO videoDTO = new VideoDTO(videoUri, getSelectedMimeType(), creationDate);
             videoDTO.setTitle(titleTextBox.getValue());
             videoDTO.setSubtitle(subtitleTextBox.getValue());
             videoDTO.setCopyright(copyrightTextBox.getValue());
@@ -120,7 +120,7 @@ public abstract class VideoDialog extends DataEntryDialog<List<VideoDTO>> implem
                 tags.add(tag);
             }
             videoDTO.setTags(tags);
-            videoDTO.setThumbnailRef(thumbnailURLAndUploadComposite.getURL());
+            videoDTO.setThumbnailRef(videoUri);
             results.add(videoDTO);
         }
         return results;

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -34,6 +35,12 @@ public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet 
         }
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
+        HttpSession session = req.getSession(true);
+        if (session != null) {
+            ProgressListener progressListener = new ProgressListener();
+            upload.setProgressListener(progressListener);
+            session.setAttribute("progressListener", progressListener);
+        }
         try {
             @SuppressWarnings("unchecked")
             List<FileItem> items = (List<FileItem>) upload.parseRequest(req);
@@ -44,4 +51,5 @@ public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet 
     }
 
     abstract protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+    
 }

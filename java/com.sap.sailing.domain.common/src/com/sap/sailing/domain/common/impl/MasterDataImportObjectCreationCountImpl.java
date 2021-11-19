@@ -59,7 +59,6 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
         trackedRacesCount++;
     }
     
-    @Override
     public void addOneMediaTrack() {
     	mediaTrackCount++;
     }
@@ -128,12 +127,11 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     }
 
     @Override
-    public Set<String> getOverwrittenRegattaNames() {
+    public Iterable<String> getOverwrittenRegattaNames() {
         return overwrittenRegattas;
     }
 
     public void addOverwrittenRegattaName(String name) {
         overwrittenRegattas.add(name);
     }
-   
 }

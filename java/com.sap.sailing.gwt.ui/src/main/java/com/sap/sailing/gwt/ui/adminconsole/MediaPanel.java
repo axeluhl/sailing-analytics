@@ -178,7 +178,7 @@ public class MediaPanel extends FlowPanel implements FilterablePanelProvider<Med
                 strings.add(t.title);
                 strings.add(t.url);
                 if (t.startTime == null) {
-                    GWT.log("startTime of media track "+t.title+" undefined");
+                    GWT.log("startTime of media track " + t.title + " undefined");
                 } else {
                     strings.add(t.startTime.toString());
                 }
@@ -630,15 +630,13 @@ public class MediaPanel extends FlowPanel implements FilterablePanelProvider<Med
                 });
         dialog.show();
     }
-
+    
     private TimePoint getDefaultStartTime() {
-        
-        if(getLatestDate()!=null){
+        if (getLatestDate() != null) {
             return new MillisecondsTimePoint(latestDate); 
-        }else{
+        } else {
             return MillisecondsTimePoint.now();
         }
-
     }
 
     private Date getLatestDate() {
@@ -668,6 +666,8 @@ public class MediaPanel extends FlowPanel implements FilterablePanelProvider<Med
         }));
         return latestDate;
     }
+
+
 
     private String listAssignedRaces(MediaTrackWithSecurityDTO mediaTrack) {
         final String result;

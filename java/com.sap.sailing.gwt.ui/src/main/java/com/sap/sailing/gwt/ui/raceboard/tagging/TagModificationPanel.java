@@ -7,20 +7,20 @@ import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Panel used to create and edit tags and {@link TagButton tag-buttons} at the {@link TaggingPanel#footerPanel footer}
- * of the {@link TaggingPanel}.
+ * Panel used to create and edit tags and {@link TagButton tag-buttons} at the {@link TaggingComponent#footerPanel footer}
+ * of the {@link TaggingComponent}.
  */
 public class TagModificationPanel extends FlowPanel {
 
     private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     private final StringMessages stringMessages;
 
     private final Label heading;
@@ -31,26 +31,26 @@ public class TagModificationPanel extends FlowPanel {
     /**
      * Creates panel used to create tags and {@link TagButton tag-buttons}.
      * 
-     * @param taggingPanel
+     * @param taggingComponent
      *            provides reference to {@link StringMessages}
      * @param tagFooterPanel
      *            required for creation of {@link TagButton tag-buttons}
      */
-    protected TagModificationPanel(TaggingPanel taggingPanel, TagFooterPanel tagFooterPanel,
+    protected TagModificationPanel(TaggingComponent taggingComponent, TagFooterPanel tagFooterPanel,
             SailingServiceAsync sailingService, StringMessages stringMessages, UserService userService) {
-        this.taggingPanel = taggingPanel;
+        this.taggingComponent = taggingComponent;
         this.stringMessages = stringMessages;
         setStyleName(style.tagModificationPanel());
-        inputPanel = new TagInputPanel(taggingPanel, sailingService, stringMessages, new DialogCallback<TagDTO>() {
+        inputPanel = new TagInputPanel(taggingComponent, sailingService, stringMessages, new DialogCallback<TagDTO>() {
             @Override
             public void ok(TagDTO editedObject) {
-                if (taggingPanel.getCurrentState().equals(State.EDIT_TAG)) {
-                    taggingPanel.updateTag(taggingPanel.getSelectedTag(), inputPanel.getTag(), inputPanel.getComment(),
+                if (taggingComponent.getCurrentState().equals(State.EDIT_TAG)) {
+                    taggingComponent.updateTag(taggingComponent.getSelectedTag(), inputPanel.getTag(), inputPanel.getComment(),
                             inputPanel.getImageURL(), inputPanel.isVisibleForPublic());
                     resetState();
                 } else {
-                    if (taggingPanel.isLoggedInAndRaceLogAvailable()) {
-                        taggingPanel.saveTag(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
+                    if (taggingComponent.isLoggedInAndRaceLogAvailable()) {
+                        taggingComponent.saveTag(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
                                 inputPanel.isVisibleForPublic());
                         // TODO: Add callback to saveTag() to clear fields only if tag got really added
                         inputPanel.clearAllValues();
@@ -60,9 +60,9 @@ public class TagModificationPanel extends FlowPanel {
 
             @Override
             public void cancel() {
-                if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
-                        || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
-                                && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
+                if ((taggingComponent.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
+                        || (taggingComponent.getCurrentState().equals(State.EDIT_TAG)
+                                && !inputPanel.compareFieldsToTag(taggingComponent.getSelectedTag()))) {
                     new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
                             stringMessages.tagDiscardChanges(), result -> {
                                 if (result) {
@@ -78,8 +78,8 @@ public class TagModificationPanel extends FlowPanel {
         editCustomTagButtons.setStyleName(style.tagDialogButton());
         editCustomTagButtons.addStyleName("gwt-Button");
         editCustomTagButtons.addClickHandler(event -> {
-            if (taggingPanel.isLoggedInAndRaceLogAvailable()) {
-                new TagButtonDialog(taggingPanel, tagFooterPanel, sailingService, stringMessages, userService);
+            if (taggingComponent.isLoggedInAndRaceLogAvailable()) {
+                new TagButtonDialog(taggingComponent, tagFooterPanel, sailingService, stringMessages, userService);
             }
         });
         inputPanel.getOkButton().setText(stringMessages.tagAddTag());
@@ -103,9 +103,9 @@ public class TagModificationPanel extends FlowPanel {
         closeFooterButton.setStyleName(style.tagModificationPanelHeaderButton());
         closeFooterButton.setTitle(stringMessages.close());
         closeFooterButton.addClickHandler(event -> {
-            if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
-                    || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
-                            && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
+            if ((taggingComponent.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
+                    || (taggingComponent.getCurrentState().equals(State.EDIT_TAG)
+                            && !inputPanel.compareFieldsToTag(taggingComponent.getSelectedTag()))) {
                 new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
                         stringMessages.tagDiscardChanges(), result -> {
                             if (result) {
@@ -124,7 +124,7 @@ public class TagModificationPanel extends FlowPanel {
     }
 
     /**
-     * Updates UI to match {@link TaggingPanel#getCurrentState() current state}.
+     * Updates UI to match {@link TaggingComponent#getCurrentState() current state}.
      * 
      * @param state
      *            new state
@@ -135,7 +135,7 @@ public class TagModificationPanel extends FlowPanel {
             editCustomTagButtons.setVisible(false);
             inputPanel.getOkButton().setText(stringMessages.save());
             inputPanel.getCancelButton().setVisible(true);
-            inputPanel.setTag(taggingPanel.getSelectedTag());
+            inputPanel.setTag(taggingComponent.getSelectedTag());
             inputPanel.validateAndUpdate();
         } else {
             heading.setText(stringMessages.tagAddTags());
@@ -147,10 +147,10 @@ public class TagModificationPanel extends FlowPanel {
     }
 
     /**
-     * Resets input fields and {@link TaggingPanel#setCurrentState(State) TaggingPanels currentState}.
+     * Resets input fields and {@link TaggingComponent#setCurrentState(State) TaggingPanels currentState}.
      */
     private void resetState() {
         inputPanel.clearAllValues();
-        taggingPanel.setCurrentState(State.VIEW);
+        taggingComponent.setCurrentState(State.VIEW);
     }
 }

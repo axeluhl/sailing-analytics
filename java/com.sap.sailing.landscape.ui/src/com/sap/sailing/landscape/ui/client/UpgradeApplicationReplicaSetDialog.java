@@ -9,8 +9,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class UpgradeApplicationReplicaSetDialog extends AbstractApplicationReplicaSetDialog<UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions> {
     public static class UpgradeApplicationReplicaSetInstructions extends AbstractApplicationReplicaSetDialog.AbstractApplicationReplicaSetInstructions {
-        public UpgradeApplicationReplicaSetInstructions(String releaseNameOrNullForLatestMaster, String replicationBearerToken) {
-            super(releaseNameOrNullForLatestMaster, replicationBearerToken);
+        public UpgradeApplicationReplicaSetInstructions(String releaseNameOrNullForLatestMaster, String masterReplicationBearerToken, String replicaReplicationBearerToken) {
+            super(releaseNameOrNullForLatestMaster, masterReplicationBearerToken, replicaReplicationBearerToken);
         }
     }
     
@@ -28,8 +28,8 @@ public class UpgradeApplicationReplicaSetDialog extends AbstractApplicationRepli
         int row=0;
         result.setWidget(row, 0, new Label(stringMessages.release()));
         result.setWidget(row++, 1, getReleaseNameBox());
-        result.setWidget(row, 0, new Label(stringMessages.bearerTokenForSecurityReplication()));
-        result.setWidget(row++, 1, getReplicationBearerTokenBox());
+        result.setWidget(row, 0, new Label(stringMessages.replicaReplicationBearerToken()));
+        result.setWidget(row++, 1, getReplicaReplicationBearerTokenBox());
         return result;
     }
 
@@ -40,6 +40,6 @@ public class UpgradeApplicationReplicaSetDialog extends AbstractApplicationRepli
     
     @Override
     protected UpgradeApplicationReplicaSetInstructions getResult() {
-        return new UpgradeApplicationReplicaSetInstructions(getReleaseNameBoxValue(), getReplicationBearerTokenBox().getValue());
+        return new UpgradeApplicationReplicaSetInstructions(getReleaseNameBoxValue(), getMasterReplicationBearerTokenBox().getValue(), getReplicaReplicationBearerTokenBox().getValue());
     }
 }

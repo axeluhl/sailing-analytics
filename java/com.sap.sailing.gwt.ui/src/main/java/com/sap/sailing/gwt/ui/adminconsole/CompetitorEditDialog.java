@@ -115,10 +115,10 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         this.displayColorTextBox = createColorTextBox(competitorToEdit.getColor()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         DialogUtils.makeCountrySelection(this.threeLetterIocCountryCode, competitorToEdit.getThreeLetterIocCountryCode());
-        this.flagImageURL = new URLFieldWithFileUpload(stringMessages);
-        this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
-        this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
-        this.imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
+        this.flagImageURL = new URLFieldWithFileUpload(stringMessages, "image/*");
+        this.flagImageURL.setUri(competitorToEdit.getFlagImageURL());
+        this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages, "image/*");
+        this.imageUrlAndUploadComposite.setUri(competitorToEdit.getImageURL());
         this.yardstickLabel = new Label(stringMessages.yardstickNumber(yardstickScale));
         this.yardstickNumber = createDoubleBox(competitorToEdit.getTimeOnTimeFactor() == null ? null
                 : convertYardstickTimeOnTime(competitorToEdit.getTimeOnTimeFactor(), yardstickScale), 10);
@@ -216,7 +216,7 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, competitorToEdit.getIdAsString(),
-                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(),
+                imageUrlAndUploadComposite.getUri(), flagImageURL.getUri(),
                 timeOnTimeFactor.getValue(),
                 timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue() == null ? null :
                         new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)), searchTag.getValue(), null);

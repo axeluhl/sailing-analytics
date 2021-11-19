@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -20,6 +21,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -53,6 +55,7 @@ import com.sap.sse.gwt.client.celltable.ActionsColumn;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -103,6 +106,14 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final AwsMfaLoginWidget mfaLoginWidget;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
+    
+    /**
+     * The time to wait after archiving a replica set and before starting a "compare servers" run for the content
+     * archived. This waiting period is owed to the process of loading the race content which is an asynchronous
+     * process running mainly in the "background" and after the master data import has reported "completion."
+     */
+    private static final Duration DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS = Duration.ONE_MINUTE.times(1);
+    private static final int DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS = 3;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -379,7 +390,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                                         sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                                instructions.getReplicationBearerToken(),instructions.getOptionalDomainName(),
+                                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
+                                                instructions.getOptionalDomainName(),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {
@@ -428,11 +440,129 @@ public class LandscapeManagementPanel extends SimplePanel {
             });
         }
     }
+    
+    private static class ReplicaSetArchivingParameters {
+        private final String bearerTokenOrNullForApplicationReplicaSetToArchive;
+        private final String bearerTokenOrNullForArchive;
+        private final boolean removeApplicationReplicaSet;
+        private final Duration durationToWaitBeforeAndBetweenCompareServerAttempts;
+        private final int numberOfTimesToTryCompareServers;
+        public ReplicaSetArchivingParameters(String bearerTokenOrNullForApplicationReplicaSetToArchive,
+                String bearerTokenOrNullForArchive, boolean removeApplicationReplicaSet,
+                Duration durationToWaitBeforeAndBetweenCompareServerAttempts,
+                int numberOfTimesToTryCompareServers) {
+            super();
+            this.bearerTokenOrNullForApplicationReplicaSetToArchive = bearerTokenOrNullForApplicationReplicaSetToArchive;
+            this.bearerTokenOrNullForArchive = bearerTokenOrNullForArchive;
+            this.removeApplicationReplicaSet = removeApplicationReplicaSet;
+            this.durationToWaitBeforeAndBetweenCompareServerAttempts = durationToWaitBeforeAndBetweenCompareServerAttempts;
+            this.numberOfTimesToTryCompareServers = numberOfTimesToTryCompareServers;
+        }
+        public String getBearerTokenOrNullForApplicationReplicaSetToArchive() {
+            return bearerTokenOrNullForApplicationReplicaSetToArchive;
+        }
+        public String getBearerTokenOrNullForArchive() {
+            return bearerTokenOrNullForArchive;
+        }
+        public boolean isRemoveApplicationReplicaSet() {
+            return removeApplicationReplicaSet;
+        }
+        public Duration getDurationToWaitBeforeAndBetweenCompareServerAttempts() {
+            return durationToWaitBeforeAndBetweenCompareServerAttempts;
+        }
+        public int getNumberOfTimesToTryCompareServers() {
+            return numberOfTimesToTryCompareServers;
+        }
+    }
 
     private void archiveApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive) {
-        Notification.notify("archiveApplicationReplicaSet not implemented yet", NotificationType.ERROR);
-        // TODO Implement LandscapeManagementPanel.archiveApplicationReplicaSet(...)
+        final MongoEndpointDTO selectedMongoEndpointForDBArchiving = mongoEndpointsTable.getSelectionModel().getSelectedObject();
+        new DataEntryDialog<ReplicaSetArchivingParameters>(stringMessages.createLoadBalancerMapping(), stringMessages.createLoadBalancerMapping(),
+                stringMessages.ok(), stringMessages.cancel(), /* validator */ null, new DialogCallback<ReplicaSetArchivingParameters>() {
+                    @Override
+                    public void ok(ReplicaSetArchivingParameters bearerTokensAndWhetherToRemoveReplicaSet) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        landscapeManagementService.archiveReplicaSet(regionId, applicationReplicaSetToArchive,
+                                bearerTokensAndWhetherToRemoveReplicaSet.getBearerTokenOrNullForApplicationReplicaSetToArchive(),
+                                bearerTokensAndWhetherToRemoveReplicaSet.getBearerTokenOrNullForArchive(),
+                                bearerTokensAndWhetherToRemoveReplicaSet.getDurationToWaitBeforeAndBetweenCompareServerAttempts(),
+                                bearerTokensAndWhetherToRemoveReplicaSet.getNumberOfTimesToTryCompareServers(),
+                                bearerTokensAndWhetherToRemoveReplicaSet.isRemoveApplicationReplicaSet(),
+                                selectedMongoEndpointForDBArchiving, sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                    ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                new AsyncCallback<UUID>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                applicationReplicaSetsBusy.setBusy(false);
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(UUID progressId) {
+                                // TODO try to follow the progress and trigger removing the replica set from the table when complete
+                                applicationReplicaSetsBusy.setBusy(false);
+                                if (bearerTokensAndWhetherToRemoveReplicaSet.isRemoveApplicationReplicaSet()) {
+                                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToArchive);
+                                }
+                                Notification.notify(stringMessages.successfullyArchivedReplicaSet(
+                                        applicationReplicaSetToArchive.getName()), NotificationType.SUCCESS);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+            
+        }) {
+            private final TextBox bearerTokenOrNullForApplicationReplicaSetToArchiveBox = createTextBox("");
+            private final TextBox bearerTokenOrNullForArchiveBox = createTextBox("");
+            private final IntegerBox numberOfMinutesBeforeAndBetweenCompareServersBox = createIntegerBox((int) DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS.asMinutes(), /* visible length */ 3);
+            private final IntegerBox numberOfCompareServersAttemptsBox = createIntegerBox(DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS, /* visible length */ 3);
+            private final CheckBox removeReplicaSetBox = createCheckbox(stringMessages.removeArchivedReplicaSet());
+            
+            @Override
+            protected Widget getAdditionalWidget() {
+                final Grid result = new Grid(5, 2);
+                int row=0;
+                result.setWidget(row, 0, new Label(stringMessages.bearerTokenOrNullForApplicationReplicaSetToArchive(applicationReplicaSetToArchive.getName())));
+                result.setWidget(row++, 1, bearerTokenOrNullForApplicationReplicaSetToArchiveBox);
+                result.setWidget(row, 0, new Label(stringMessages.bearerTokenOrNullForArchive()));
+                result.setWidget(row++, 1, bearerTokenOrNullForArchiveBox);
+                result.setWidget(row, 0, new Label(stringMessages.numberOfMinutesBeforeAndBetweenCompareServers()));
+                result.setWidget(row++, 1, numberOfMinutesBeforeAndBetweenCompareServersBox);
+                result.setWidget(row, 0, new Label(stringMessages.numberOfCompareServersAttempts()));
+                result.setWidget(row++, 1, numberOfCompareServersAttemptsBox);
+                result.setWidget(row++, 0, removeReplicaSetBox);
+                return result;
+            }
+
+            @Override
+            protected FocusWidget getInitialFocusWidget() {
+                return bearerTokenOrNullForApplicationReplicaSetToArchiveBox;
+            }
+
+            @Override
+            protected ReplicaSetArchivingParameters getResult() {
+                return new ReplicaSetArchivingParameters(
+                        Util.hasLength(bearerTokenOrNullForApplicationReplicaSetToArchiveBox.getValue())
+                                ? bearerTokenOrNullForApplicationReplicaSetToArchiveBox.getValue()
+                                : null,
+                        Util.hasLength(bearerTokenOrNullForArchiveBox.getValue())
+                                ? bearerTokenOrNullForArchiveBox.getValue()
+                                : null,
+                        removeReplicaSetBox.getValue(),
+                        numberOfMinutesBeforeAndBetweenCompareServersBox.getValue() == null
+                                ? DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS
+                                : Duration.ONE_MINUTE
+                                        .times(numberOfMinutesBeforeAndBetweenCompareServersBox.getValue()),
+                        numberOfCompareServersAttemptsBox.getValue() == null
+                                ? DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS
+                                : numberOfCompareServersAttemptsBox.getValue());
+            }
+        }.show();
     }
     
     private void createDefaultLoadBalancerMappings(final StringMessages stringMessages, String regionId,
@@ -548,7 +678,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                     sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                             sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                                    upgradeInstructions.getReplicationBearerToken(),
+                                                    upgradeInstructions.getReplicaReplicationBearerToken(),
                                                     new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                                         @Override
                                                         public void onFailure(Throwable caught) {

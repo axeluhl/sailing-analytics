@@ -18,7 +18,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.InvertibleComparator;
 
 public class SortedCellTable<T> extends BaseCelltable<T> {
-
     /**
      * The currently sorted column
      */
@@ -94,7 +93,7 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
     }
     
     public void sort() {
-        if(currentlySortedColumn != null) {
+        if (currentlySortedColumn != null) {
             InvertibleComparator<T> comparator = comparators.get(currentlySortedColumn);
             if (comparator != null) {
                 sortColumn(currentlySortedColumn, comparator, comparator.isAscending());
@@ -143,7 +142,7 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
     }
 
     /**
-     * Easy helper to correctly add sortableColumns without that much parameters
+     * Easy helper to correctly add sortableColumns without that many parameters
      */
     public void addColumn(SortableColumn<T, ?> column) {
         addColumn(column, column.getHeader(), column.getComparator(), column.getPreferredSortingOrder().isAscending());

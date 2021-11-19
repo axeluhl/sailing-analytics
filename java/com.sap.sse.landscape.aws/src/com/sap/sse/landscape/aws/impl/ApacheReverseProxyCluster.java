@@ -111,9 +111,33 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
 
     @Override
     public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
-            UUID leaderboardGroupId, byte[] privateKeyEncryptionPassphrase, Optional<String> optionalKeyName) throws Exception {
+            UUID leaderboardGroupId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
-            proxy.setEventSeriesRedirect(hostname, applicationProcess, leaderboardGroupId, privateKeyEncryptionPassphrase, optionalKeyName);
+            proxy.setEventSeriesRedirect(hostname, applicationProcess, leaderboardGroupId, optionalKeyName, privateKeyEncryptionPassphrase);
+        }
+    }
+
+    @Override
+    public void setEventArchiveRedirect(String hostname, UUID eventId, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+            proxy.setEventArchiveRedirect(hostname, eventId, optionalKeyName, privateKeyEncryptionPassphrase);
+        }
+    }
+
+    @Override
+    public void setEventSeriesArchiveRedirect(String hostname, UUID leaderboardGroupId,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+            proxy.setEventSeriesArchiveRedirect(hostname, leaderboardGroupId, optionalKeyName, privateKeyEncryptionPassphrase);
+        }
+    }
+
+    @Override
+    public void setHomeArchiveRedirect(String hostname, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+            proxy.setHomeArchiveRedirect(hostname, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 

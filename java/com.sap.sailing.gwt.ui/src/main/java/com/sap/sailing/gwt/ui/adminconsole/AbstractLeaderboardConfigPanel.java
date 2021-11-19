@@ -186,11 +186,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         this.stringMessages = theStringConstants;
         this.sailingServiceWrite = presenter.getSailingService();
         this.userService = presenter.getUserService();
-        filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTOWithSecurity>();
+        filteredLeaderboardList = new ListDataProvider<>();
         allRegattas = new ArrayList<RegattaDTO>();
         this.errorReporter = presenter.getErrorReporter();
         this.presenter = presenter;
-        this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTOWithSecurity>();
+        this.availableLeaderboardList = new ArrayList<>();
         mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
         this.setWidget(mainPanel);

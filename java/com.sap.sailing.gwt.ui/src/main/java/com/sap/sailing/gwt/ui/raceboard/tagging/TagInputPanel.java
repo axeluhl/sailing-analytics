@@ -34,13 +34,13 @@ public class TagInputPanel extends FlowPanel {
      */
     private class TagEntryFields extends DataEntryDialog<TagDTO> {
         private final StringMessages stringMessages;
-        private final TaggingPanel taggingPanel;
+        private final TaggingComponent taggingComponent;
         private final TextBox tagTextBox;
         private final TextArea commentTextArea;
         private final CheckBox visibleForPublicCheckBox;
         private final URLFieldWithFileUpload imageUploadPanel;
 
-        public TagEntryFields(StringMessages stringMessages, TaggingPanel taggingPanel,
+        public TagEntryFields(StringMessages stringMessages, TaggingComponent taggingComponent,
                 DialogCallback<TagDTO> callback) {
             // set empty values for parameters which are not shown to the user. okayButtonText will be set by the using
             // components.
@@ -48,12 +48,12 @@ public class TagInputPanel extends FlowPanel {
                     /* animationEnabled */ true, callback);
             this.setValidator(this::validate);
             this.stringMessages = stringMessages;
-            this.taggingPanel = taggingPanel;
+            this.taggingComponent = taggingComponent;
             tagTextBox = createTextBox(DEFAULT_TAG);
             commentTextArea = createTextArea(DEFAULT_COMMENT);
             visibleForPublicCheckBox = createCheckbox(stringMessages.tagVisibleForPublicCheckBox());
             visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);
-            imageUploadPanel = new URLFieldWithFileUpload(stringMessages);
+            imageUploadPanel = new URLFieldWithFileUpload(stringMessages, null);
             validateAndUpdate();
         }
 
@@ -70,7 +70,7 @@ public class TagInputPanel extends FlowPanel {
                 result = stringMessages.unknown();
             } else if (tagToValidate.getTag() == null || tagToValidate.getTag().isEmpty()) {
                 result = stringMessages.tagNotSpecified();
-            } else if (taggingPanel.tagAlreadyExists(tagToValidate.getTag(), tagToValidate.getComment(),
+            } else if (taggingComponent.tagAlreadyExists(tagToValidate.getTag(), tagToValidate.getComment(),
                     tagToValidate.getImageURL(), tagToValidate.getResizedImageURL(), tagToValidate.isVisibleForPublic(),
                     tagToValidate.getRaceTimepoint())) {
                 result = stringMessages.tagAlreadyExists();
@@ -118,7 +118,7 @@ public class TagInputPanel extends FlowPanel {
         @Override
         protected TagDTO getResult() {
             return new TagDTO(getTagTextBox().getValue(), getCommentTextArea().getValue(),
-                    getImageUploadPanel().getURL(), null, getVisibleForPublicCheckBox().getValue(), null, null, null);
+                    getImageUploadPanel().getUri(), null, getVisibleForPublicCheckBox().getValue(), null, null, null);
         }
 
         @Override
@@ -136,7 +136,7 @@ public class TagInputPanel extends FlowPanel {
     }
 
     private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     private final TagEntryFields tagEntryFields;
     private final Grid grid;
     private final FlowPanel checkboxWrapper;
@@ -145,10 +145,10 @@ public class TagInputPanel extends FlowPanel {
     /**
      * Creates view allowing users to input values for tags and {@link TagButton tag-buttons}.
      */
-    protected TagInputPanel(TaggingPanel taggingPanel, SailingServiceAsync sailingService,
+    protected TagInputPanel(TaggingComponent taggingComponent, SailingServiceAsync sailingService,
             StringMessages stringMessages, DialogCallback<TagDTO> callback) {
-        this.taggingPanel = taggingPanel;
-        tagEntryFields = new TagEntryFields(stringMessages, taggingPanel, callback);
+        this.taggingComponent = taggingComponent;
+        tagEntryFields = new TagEntryFields(stringMessages, taggingComponent, callback);
         setStyleName(style.tagInputPanel());
         grid = new Grid(4, 2);
         // tag
@@ -228,7 +228,7 @@ public class TagInputPanel extends FlowPanel {
     }
 
     public String getImageURL() {
-        return tagEntryFields.getImageUploadPanel().getURL();
+        return tagEntryFields.getImageUploadPanel().getUri();
     }
 
     protected void setTag(String tag) {
@@ -240,7 +240,7 @@ public class TagInputPanel extends FlowPanel {
     }
 
     protected void setImageURL(String imageURL) {
-        getImageURLTextBox().setURL(imageURL);
+        getImageURLTextBox().setUri(imageURL);
     }
 
     protected void setVisibleForPublic(boolean visibleForPublic) {
@@ -319,7 +319,7 @@ public class TagInputPanel extends FlowPanel {
      * information label instead.
      */
     protected void setCurrentStatus() {
-        if (taggingPanel.hasPermissionToModifyPublicTags()) {
+        if (taggingComponent.hasPermissionToModifyPublicTags()) {
             getVisibleForPublicCheckBox().setVisible(true);
             noPermissionForPublicTagsLabel.setVisible(false);
         } else {

@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.mobile.partials.videogallery;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 
-public interface VideoGalleryResources extends ClientBundle {
+public interface VideoGalleryResources extends SharedHomeResources {
     public static final VideoGalleryResources INSTANCE = GWT.create(VideoGalleryResources.class);
 
     @Source("VideoGallery.gss")

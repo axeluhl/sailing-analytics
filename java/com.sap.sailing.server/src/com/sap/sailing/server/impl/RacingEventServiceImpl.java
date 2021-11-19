@@ -68,6 +68,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -138,7 +139,6 @@ import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -157,6 +157,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
+import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -278,7 +279,6 @@ import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForExist
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForNewMarkTrack;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
-import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroupFromEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
@@ -555,7 +555,9 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
-
+    
+    private final ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker;
+    
     private transient final ConcurrentHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionListenersByLeaderboard;
 
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
@@ -620,7 +622,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
                 /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
                 /* securityServiceTracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
-                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                /* resultUrlRegistryServiceTracker */ null);
     }
 
     /**
@@ -649,7 +652,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             FullyInitializedReplicableTracker<SecurityService> securityServiceTracker,
             FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker, ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker,
             ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
-            ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
+            ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker, ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -681,7 +684,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory, trackedRegattaListener,
                 sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
                 securityServiceTracker, sharedSailingDataTracker, /* replicationServiceTracker */ null,
-                scoreCorrectionProviderServiceTracker, resultUrlRegistryServiceTracker);
+                scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -718,7 +721,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 /* tracked regatta listener */ null,
                 sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
                 /* security service tracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
-                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                /* resultUrlRegistryServiceTracker */ null);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -749,7 +753,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 /* tracked regatta listener */ null, /* sailingNotificationService */ null,
                 /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, /* security service tracker */ null,
                 /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
-                /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                /* resultUrlRegistryServiceTracker */ null);
     }
 
     /**
@@ -775,6 +780,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
      *            {@code false}, all restore information is
      *            {@link MongoObjectFactory#removeAllConnectivityParametersForRacesToRestore() cleared} from the
      *            database, and the server starts out with an empty list of tracked races.
+     * @param competitorProviderServiceTracker TODO
      * @param securityServiceAvailable
      *            will complete as soon as the securityServiceTracker is able to provide a SecurityService, NEVER hold a
      *            reference to the result of this, as it might become invalid if bundles are replaced/ restarted
@@ -789,6 +795,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker,
             ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker,
             ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
+            ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker,
             ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         logger.info("Created " + this);
         this.securityServiceTracker = securityServiceTracker;
@@ -797,6 +804,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         this.numberOfTrackedRacesStillLoading = new AtomicInteger();
         this.resultUrlRegistryServiceTracker = resultUrlRegistryServiceTracker;
         this.scoreCorrectionProviderServiceTracker = scoreCorrectionProviderServiceTracker;
+        this.competitorProviderServiceTracker = competitorProviderServiceTracker;
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.connectivityParametersByRace = new ConcurrentHashMap<>();
         this.notificationService = sailingNotificationService;
@@ -1639,8 +1647,18 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
+    public Map<String, RemoteSailingServerReference> getAllRemoteServerReferences() {
+        return remoteSailingServerSet.getAllRemoteServerReferences();
+    }
+
+    @Override
     public RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName) {
         return remoteSailingServerSet.getServerReferenceByName(remoteServerReferenceName);
+    }
+
+    @Override
+    public RemoteSailingServerReference getRemoteServerReferenceByUrl(URL remoteServerReferenceUrl) {
+        return remoteSailingServerSet.getServerReferenceByUrl(remoteServerReferenceUrl);
     }
 
     @Override
@@ -3662,7 +3680,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     public void removeEvent(UUID id) {
         removeEventFromEventsById(id);
         mongoObjectFactory.removeEvent(id);
-        replicate(new RemoveEvent(id));
     }
 
     protected void removeEventFromEventsById(Serializable id) {
@@ -3794,7 +3811,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
-    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creationCount, boolean override) throws Exception {
+    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCountImpl creationCount, boolean override) throws Exception {
     	Exception firstException = null;
         for (MediaTrack trackToImport : mediaTracksToImport) {
         	try {
@@ -3912,7 +3929,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         }
         return Optional.ofNullable(resultUrlRegistryServiceTracker.getService());
     }
-
+    
     @Override
     public Optional<ResultUrlProvider> getUrlBasedScoreCorrectionProvider(String resultProviderName) {
         for (ResultUrlProvider resultUrlProvider : getAllUrlBasedScoreCorrectionProviders()) {
@@ -3924,10 +3941,27 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     private Iterable<ResultUrlProvider> getAllUrlBasedScoreCorrectionProviders() {
-        List<ResultUrlProvider> result = new ArrayList<>();
+        final Set<ResultUrlProvider> result = new HashSet<>();
         for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp instanceof ResultUrlProvider) {
                 result.add((ResultUrlProvider) scp);
+            }
+        }
+        for (CompetitorProvider cp : getAllCompetitorProviders()) {
+            if (cp instanceof ResultUrlProvider) {
+                result.add((ResultUrlProvider) cp);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<CompetitorProvider> getAllCompetitorProviders() {
+        final CompetitorProvider[] services = competitorProviderServiceTracker.getServices(new CompetitorProvider[0]);
+        List<CompetitorProvider> result = new ArrayList<>();
+        if (services != null) {
+            for (final CompetitorProvider service : services) {
+                result.add(service);
             }
         }
         return result;
@@ -4936,8 +4970,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
         DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
         BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
-        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorId, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
-        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatId,
+        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(boatId, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
+        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorId,
                 competitorDescriptor.getName(), competitorDescriptor.getShortName(), /* color */ null, /* eMail */ null,
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat, /* storePersistently */ true);
@@ -4979,10 +5013,12 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
-    public void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
-            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            final String targetServerUsername, final String targetServerPassword, final String targetServerBearerToken,
-            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException {
+    public Map<LeaderboardGroup, ? extends Iterable<Event>> importMasterData(final String urlAsString,
+            final UUID[] leaderboardGroupIds, final boolean override, final boolean compress, final boolean exportWind,
+            final boolean exportDeviceConfigurations, final String targetServerUsername,
+            final String targetServerPassword, final String targetServerBearerToken,
+            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId)
+            throws IllegalArgumentException {
         if (dataImportLock.getProgress(importOperationId) != null) {
             IllegalArgumentException e = new IllegalArgumentException(
                     "The UUID for the importOperationId already exists.");
@@ -5026,7 +5062,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
             }
             final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, this, user, tenant);
-            importer.importFromStream(inputStream, importOperationId, override);
+            return importer.importFromStream(inputStream, importOperationId, override);
         } catch (Throwable e) {
             // do not assume that RuntimeException is logged properly
             String message = e.getMessage();
@@ -5111,7 +5147,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     @Override
     public String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
             String targetServerPassword, String targetServerBearerToken) {
-        if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
+        if ((Util.hasLength(targetServerUsername) || Util.hasLength(targetServerPassword))
                 && Util.hasLength(targetServerBearerToken)) {
             IllegalArgumentException e = new IllegalArgumentException(
                     "Please use either username/password or bearer token, not both.");
@@ -5121,15 +5157,15 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         final User user = getSecurityService().getCurrentUser();
         // Default to current user's token
         final String effectiveTargetServerBearerToken;
-        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword)
-                && !Util.hasLength(targetServerBearerToken)) {
-            effectiveTargetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
+        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword) && !Util.hasLength(targetServerBearerToken)) {
+            effectiveTargetServerBearerToken = user == null ? null : getSecurityService().getOrCreateAccessToken(user.getName());
         } else {
             effectiveTargetServerBearerToken = targetServerBearerToken;
         }
         final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
-                ? RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername,
-                        targetServerPassword)
+                ? targetServerUsername != null ?
+                        RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername, targetServerPassword) :
+                        null // in case no effective bearer token has been provided but no user name either
                 : effectiveTargetServerBearerToken);
         return token;
     }

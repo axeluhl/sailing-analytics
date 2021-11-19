@@ -11,7 +11,7 @@ public class InsertEventStatement extends AbstractPreparedInsertStatement<Event>
     protected InsertEventStatement(Connection connection) throws SQLException {
         super(connection.prepareStatement(
                 "INSERT INTO SAILING.\"Event\" (\"id\", \"name\", \"startDate\", \"endDate\", \"venue\", \"isListed\", \"description\", \"location\") "+
-                "VALUES (?, ?, ?, ?, ?, ?, ?, NEW ST_POINT(?, 3857));"));
+                "VALUES (?, ?, ?, ?, ?, ?, ?, new ST_GEOMETRY('POINT('|| ? || ' ' || ? ||')', 4326).ST_Transform(3857));"));
     }
 
     @Override
@@ -24,6 +24,7 @@ public class InsertEventStatement extends AbstractPreparedInsertStatement<Event>
         getPreparedStatement().setBoolean(6, event.isPublic());
         getPreparedStatement().setString(7, event.getDescription());
         final Position location = event.getLocation();
-        getPreparedStatement().setString(8, location != null ? String.format("POINT(%1.8f %1.8f)", location.getLngDeg(), location.getLatDeg()) : null);
+        getPreparedStatement().setString(8, location != null ? String.format("%1.8f", location.getLngDeg()) : null);
+        getPreparedStatement().setString(9, location != null ? String.format("%1.8f", location.getLatDeg()) : null);
     }
 }
