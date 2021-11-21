@@ -3,7 +3,6 @@ package com.sap.sse.security.ui.server.subscription;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +29,6 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Role;
@@ -197,13 +195,8 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     }
     
     protected SubscriptionPlanDTO convertToDto(SubscriptionPlan plan) {
-        HashSet<StringMessagesKey> featureKeys = new HashSet<StringMessagesKey>();
-        Stream.of(plan.getRoles()).forEach((role) -> {
-            featureKeys.add(role.getMessageKey());
-        });
         final boolean isUserSubscribedToPlan = isUserSubscribedToPlan(plan.getId());
-        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getMessageKey(), plan.getDescMessagesKey(),
-                featureKeys, plan.getPrices(), null);
+        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getPrices(), null);
     }
 
     private boolean isUserSubscribedToPlan(String planId) {

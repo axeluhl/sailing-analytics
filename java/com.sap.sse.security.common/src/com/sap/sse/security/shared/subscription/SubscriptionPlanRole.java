@@ -3,8 +3,6 @@ package com.sap.sse.security.shared.subscription;
 import java.io.Serializable;
 import java.util.UUID;
 
-import com.sap.sse.security.shared.StringMessagesKey;
-
 /**
  * Specify role UUID associated with a plan with qualification. Role qualification (by group/user ownership) can be
  * specified by rules, such as qualifying for objects owned by the subscribing user, qualified by the subscribing user's
@@ -56,7 +54,6 @@ public class SubscriptionPlanRole implements Serializable{
     }
 
     private final UUID roleId;
-    private final StringMessagesKey messageKey;
     private final UserQualificationMode userQualificationMode;
     private final GroupQualificationMode groupQualificationMode;
 
@@ -70,9 +67,9 @@ public class SubscriptionPlanRole implements Serializable{
      */
     private final String explicitUserQualification;
 
-    public SubscriptionPlanRole(UUID roleId, StringMessagesKey messageKey, GroupQualificationMode groupQualificationMode,
+    public SubscriptionPlanRole(UUID roleId, GroupQualificationMode groupQualificationMode,
             UserQualificationMode userQualificationMode) {
-        this(roleId, messageKey, groupQualificationMode, userQualificationMode, /* explicitUserQualification */ null, /* explicitGroupQualification */ null);
+        this(roleId, groupQualificationMode, userQualificationMode, /* explicitUserQualification */ null, /* explicitGroupQualification */ null);
     }
 
     /**
@@ -83,7 +80,7 @@ public class SubscriptionPlanRole implements Serializable{
      *            must be {@code null} or {@link GroupQualificationMode#NONE} in case a non-{@code null}
      *            {@code explicitUserQualification} is specified
      */
-    public SubscriptionPlanRole(UUID roleId, StringMessagesKey messageKey,
+    public SubscriptionPlanRole(UUID roleId,
             GroupQualificationMode groupQualificationMode, UserQualificationMode userQualificationMode,
             String explicitUserQualification, UUID idOfExplicitGroupQualification) {
         if (explicitUserQualification != null
@@ -97,15 +94,14 @@ public class SubscriptionPlanRole implements Serializable{
                     + groupQualificationMode + " hides it.");
         }
         this.roleId = roleId;
-        this.messageKey = messageKey;
         this.userQualificationMode = userQualificationMode;
         this.groupQualificationMode = groupQualificationMode;
         this.explicitUserQualification = explicitUserQualification;
         this.idOfExplicitGroupQualification = idOfExplicitGroupQualification;
     }
 
-    public SubscriptionPlanRole(UUID roleId, StringMessagesKey messageKey) {
-        this(roleId, messageKey, /* groupQualificationMode */ null, /* userQualificationMode */ null,
+    public SubscriptionPlanRole(UUID roleId) {
+        this(roleId, /* groupQualificationMode */ null, /* userQualificationMode */ null,
                 /* explicitUserQualfication */ null, /* explicitGroupQualification */ null);
     }
 
@@ -127,10 +123,6 @@ public class SubscriptionPlanRole implements Serializable{
 
     public String getExplicitUserQualification() {
         return explicitUserQualification;
-    }
-    
-    public StringMessagesKey getMessageKey() {
-        return messageKey;
     }
 
     @Override
