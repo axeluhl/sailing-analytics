@@ -43,7 +43,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     @Override
     public void loadSubscription() {
         view.onStartLoadSubscription();
-        fetchSubscription();
+        fetchSubscriptions();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                                 showError(StringMessages.INSTANCE.failedCancelSubscription());
                             } else {
                                 clientFactory.getUserService().updateUser(true);
-                                fetchSubscription();
+                                fetchSubscriptions();
                             }
                         }
 
@@ -86,7 +86,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         }
     }
 
-    private void fetchSubscription() {
+    private void fetchSubscriptions() {
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
                     .getSubscriptions(new AsyncCallback<SubscriptionListDTO>() {
@@ -109,7 +109,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
         }
     }
 
-    private void updateView(SubscriptionListDTO subscription) {
+    private void updateView(SubscriptionListDTO subscriptions) {
         try {
             final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionServiceFactory()
                     .getDefaultAsyncService();
@@ -119,13 +119,13 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                 public void onFailure(Throwable caught) {
                     // This will simply not refresh the SubscriptionPlan list in the view.
                     // Not critical, since the case of a changed set of SubscriptionPlans is highly unlikely.
-                    view.updateView(subscription, null);
+                    view.updateView(subscriptions, null);
                 }
 
                 @Override
                 public void onSuccess(ArrayList<SubscriptionPlanDTO> result) {
                     updateSubscriptionPlanMap(result);
-                    view.updateView(subscription, result);
+                    view.updateView(subscriptions, result);
                 }
             });
         } catch (InvalidSubscriptionProviderException e) {
