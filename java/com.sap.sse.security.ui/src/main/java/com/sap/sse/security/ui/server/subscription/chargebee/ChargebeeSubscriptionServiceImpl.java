@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
-import com.chargebee.models.ItemPrice;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
@@ -64,7 +63,10 @@ public class ChargebeeSubscriptionServiceImpl extends
         PrepareCheckoutDTO response = new PrepareCheckoutDTO();
         try {
             User user = getCurrentUser();
-            final SubscriptionPlan planForPrice = getSubscriptionPlanForPrice(priceId);
+            final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
+            if(planForPrice == null) {
+                throw new IllegalArgumentException("No matching subscription plan found for given price id");
+            }
             if (!isUserSubscribedToPlan(user, planForPrice.getId())
                     || isSubscriptionCancelled(user.getSubscriptionByPlan(planForPrice.getId()))) {
                 Pair<String, String> usernames = getUserFirstAndLastName(user);
@@ -88,12 +90,6 @@ public class ChargebeeSubscriptionServiceImpl extends
         return response;
     }
 
-    protected SubscriptionPlan getSubscriptionPlanForPrice(String priceId) throws Exception {
-        final ItemPrice itemPrice = ItemPrice.retrieve(priceId).request().itemPrice();
-        final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanById(itemPrice.itemId());
-        return planForPrice;
-    }
-
     @Override
     public SubscriptionListDTO getSubscriptions() {
         SubscriptionListDTO subscriptionDto = null;
@@ -105,7 +101,7 @@ public class ChargebeeSubscriptionServiceImpl extends
                 for (Subscription subscription : subscriptions) {
                     if (subscription.hasSubscriptionId() && !isSubscriptionCancelled(subscription)) {
                         itemList.add(
-                                new ChargebeeSubscriptionDTO(subscription.getPlanId(), subscription.getTrialStart(),
+                                new ChargebeeSubscriptionDTO(subscription.getPlanId(), subscription.getSubscriptionUpdatedAt(),
                                         subscription.getTrialEnd(), subscription.getSubscriptionStatus(),
                                         subscription.getPaymentStatus(), subscription.getTransactionType()));
                     }

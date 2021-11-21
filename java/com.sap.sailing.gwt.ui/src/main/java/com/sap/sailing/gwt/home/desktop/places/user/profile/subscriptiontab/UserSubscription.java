@@ -98,14 +98,14 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     @Override
-    public void updateView(final SubscriptionListDTO subscription, final Iterable<SubscriptionPlanDTO> planList) {
+    public void updateView(final SubscriptionListDTO subscriptions, final Iterable<SubscriptionPlanDTO> planList) {
         subscribeButtonUi.setEnabled(true);
-        if (subscription == null) {
+        if (subscriptions == null) {
             subscriptionsUi.setPageSize(0);
             subscriptionsUi.setList(new ArrayList<SubscriptionDTO>());
         } else {
-            subscriptionsUi.setPageSize(subscription.getSubscriptionItems().length);
-            subscriptionsUi.setList(Arrays.asList(subscription.getSubscriptionItems()));
+            subscriptionsUi.setPageSize(subscriptions.getSubscriptionItems().length);
+            subscriptionsUi.setList(Arrays.asList(subscriptions.getSubscriptionItems()));
         }
         setVisible(true);
     }
@@ -125,7 +125,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
                     td.className(cellTable.getResources().style().cell());
                     final DivBuilder div = td.startDiv();
                     div.text(i18n.trialText(getTrialRemainingText(rowValue),
-                            formatDateAndTime(rowValue.getTrialEnd().asDate())));
+                            formatDateAndTime(rowValue.getCurrentEnd().asDate())));
                     div.endDiv();
                     td.endTD();
                     tr.endTR();
@@ -218,7 +218,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     private String getTrialRemainingText(final SubscriptionDTO subscription) {
-        long remainingSecs = Math.round(TimePoint.now().until(subscription.getTrialEnd()).asSeconds());
+        long remainingSecs = Math.round(TimePoint.now().until(subscription.getCurrentEnd()).asSeconds());
         final StringBuilder remainText = new StringBuilder();
         if (remainingSecs <= 0) {
             remainText.append(i18n.numHours(0));

@@ -13,16 +13,6 @@ public abstract class SubscriptionDTO implements IsSerializable {
     private String planId;
 
     /**
-     * Trial start time
-     */
-    private TimePoint trialStart;
-
-    /**
-     * Trial end time
-     */
-    private TimePoint trialEnd;
-
-    /**
      * Subscription status: active or trial
      */
     private String subscriptionStatus;
@@ -42,15 +32,18 @@ public abstract class SubscriptionDTO implements IsSerializable {
      * Subscription provider name
      */
     private String provider;
+    
+    private TimePoint currentEnd;
+    private TimePoint createdAt;
 
     public SubscriptionDTO() {
     }
 
-    public SubscriptionDTO(String planId, TimePoint trialStart, TimePoint trialEnd, String subscriptionStatus,
+    public SubscriptionDTO(String planId, TimePoint startedAt, TimePoint currentEnd, String subscriptionStatus,
             String paymentStatus, String transactionType, String provider) {
         this.planId = planId;
-        this.trialStart = trialStart;
-        this.trialEnd = trialEnd;
+        this.createdAt = startedAt;
+        this.currentEnd = currentEnd;
         this.subscriptionStatus = subscriptionStatus;
         this.paymentStatus = paymentStatus;
         this.transactionType = transactionType;
@@ -88,14 +81,6 @@ public abstract class SubscriptionDTO implements IsSerializable {
         return planId;
     }
 
-    public TimePoint getTrialStart() {
-        return trialStart;
-    }
-
-    public TimePoint getTrialEnd() {
-        return trialEnd;
-    }
-
     public String getSubscriptionStatus() {
         return subscriptionStatus;
     }
@@ -106,14 +91,6 @@ public abstract class SubscriptionDTO implements IsSerializable {
 
     public void setPlanId(String planId) {
         this.planId = planId;
-    }
-
-    public void setTrialStart(TimePoint trialStart) {
-        this.trialStart = trialStart;
-    }
-
-    public void setTrialEnd(TimePoint trialEnd) {
-        this.trialEnd = trialEnd;
     }
 
     public void setSubscriptionStatus(String subscriptionStatus) {
@@ -138,5 +115,21 @@ public abstract class SubscriptionDTO implements IsSerializable {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+
+    public TimePoint getCurrentEnd() {
+        return currentEnd;
+    }
+
+    public void setCurrentEnd(TimePoint currentEnd) {
+        this.currentEnd = currentEnd;
+    }
+
+    public TimePoint getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(TimePoint createdAt) {
+        this.createdAt = createdAt;
     }
 }

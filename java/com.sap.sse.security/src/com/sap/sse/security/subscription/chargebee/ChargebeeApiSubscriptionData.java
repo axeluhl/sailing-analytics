@@ -45,12 +45,14 @@ public class ChargebeeApiSubscriptionData {
         final Timestamp trialStart = subscription.trialStart();
         final Timestamp trialEnd = subscription.trialEnd();
          String planId = getPlanId();
-        return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
-                trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime() : TimePoint.of(trialStart),
-                trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime() : TimePoint.of(trialEnd), subscriptionStatus,
-                paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus,
-                TimePoint.of(subscription.createdAt()), TimePoint.of(subscription.updatedAt()), TimePoint.now(),
-                TimePoint.now());
+         return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
+                 trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
+                         : TimePoint.of(trialStart),
+                 trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
+                         : TimePoint.of(trialEnd),
+                 subscriptionStatus, paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus,
+                 TimePoint.of(subscription.createdAt()), TimePoint.of(subscription.updatedAt()), TimePoint.now(),
+                 com.sap.sse.security.shared.subscription.Subscription.emptyTime());
     }
     
     // TODO bug5510 Integrate this into the API Request / APIService Structure to ensure the API limits are kept
