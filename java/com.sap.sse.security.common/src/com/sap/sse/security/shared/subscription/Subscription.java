@@ -118,18 +118,18 @@ public abstract class Subscription implements Serializable {
         this.subscriptionId = subscriptionId;
         this.planId = planId;
         this.customerId = customerId;
-        this.trialStart = trialStart;
-        this.trialEnd = trialEnd;
+        this.trialStart = trialStart == null ? emptyTime() : trialStart;
+        this.trialEnd = trialEnd == null ? emptyTime() : trialEnd;
         this.subscriptionStatus = subscriptionStatus;
         this.paymentStatus = paymentStatus;
         this.transactionType = transactionType;
         this.transactionStatus = transactionStatus;
         this.invoiceId = invoiceId;
         this.invoiceStatus = invoiceStatus;
-        this.subscriptionCreatedAt = subscriptionCreatedAt;
-        this.subscriptionUpdatedAt = subscriptionUpdatedAt;
-        this.latestEventTime = latestEventTime;
-        this.manualUpdatedAt = manualUpdatedAt;
+        this.subscriptionCreatedAt = subscriptionCreatedAt == null ? emptyTime() : subscriptionCreatedAt;
+        this.subscriptionUpdatedAt = subscriptionUpdatedAt == null ? emptyTime() : subscriptionUpdatedAt;
+        this.latestEventTime = latestEventTime == null ? emptyTime() : latestEventTime;
+        this.manualUpdatedAt = manualUpdatedAt == null ? emptyTime() : manualUpdatedAt;
         this.providerName = providerName;
     }
 
@@ -232,11 +232,12 @@ public abstract class Subscription implements Serializable {
                 .append(getStringFieldValue(paymentStatus)).append(separator).append("transactionType: ")
                 .append(getStringFieldValue(transactionType)).append(separator).append("transactionStatus: ")
                 .append(getStringFieldValue(transactionStatus)).append(separator).append("trialStart: ")
-                .append(trialStart.asMillis()).append(separator).append("trialEnd: ").append(trialEnd.asMillis())
-                .append(separator).append("invoiceId: ").append(getStringFieldValue(invoiceId)).append(separator)
-                .append("invoiceStatus: ").append(getStringFieldValue(invoiceStatus)).append(separator)
-                .append("latestEventTime: ").append(latestEventTime.asMillis()).append(separator)
-                .append("manualUpdatedAt: ").append(manualUpdatedAt.asMillis()).append(separator)
+                .append(trialStart.asMillis()).append(separator).append("trialEnd: ")
+                .append(trialEnd.asMillis()).append(separator).append("invoiceId: ")
+                .append(getStringFieldValue(invoiceId)).append(separator).append("invoiceStatus: ")
+                .append(getStringFieldValue(invoiceStatus)).append(separator).append("latestEventTime: ")
+                .append(latestEventTime.asMillis()).append(separator).append("manualUpdatedAt: ")
+                .append(manualUpdatedAt.asMillis()).append(separator)
                 .append("subscriptionCreatedAt: ").append(subscriptionCreatedAt.asMillis()).append(separator)
                 .append("subscriptionUpdatedAt: ").append(subscriptionUpdatedAt.asMillis());
         return builder.toString();
