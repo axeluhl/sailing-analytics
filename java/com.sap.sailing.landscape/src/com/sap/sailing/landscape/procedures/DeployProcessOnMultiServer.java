@@ -250,8 +250,8 @@ implements Procedure<ShardingKey> {
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         {
-            logger.info("Deploying process to multi-server "+getHostToDeployTo()+" into directory "+serverDirectory+" with configuration:\n"+
-                    applicationConfiguration.getAsEnvironmentVariableAssignments());
+            logger.info("Deploying process to multi-server "+getHostToDeployTo()+" into directory "+serverDirectory);
+            logger.fine("Using configuration:\n"+applicationConfiguration.getAsEnvironmentVariableAssignments());
             final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
                     "su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+

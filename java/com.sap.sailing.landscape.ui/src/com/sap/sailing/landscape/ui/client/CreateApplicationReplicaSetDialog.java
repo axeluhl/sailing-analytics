@@ -98,6 +98,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         instanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter);
         memoryInMegabytesBox = createIntegerBox(null, 7);
         memoryTotalSizeFactorBox = createIntegerBox(null, 2);
+        memoryInMegabytesBox.addValueChangeHandler(e->memoryTotalSizeFactorBox.setEnabled(e.getValue() == null));
     }
     
     protected ListBox getInstanceTypeListBox() {
