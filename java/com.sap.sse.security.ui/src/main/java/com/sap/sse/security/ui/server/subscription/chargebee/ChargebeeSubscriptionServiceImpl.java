@@ -95,7 +95,7 @@ public class ChargebeeSubscriptionServiceImpl extends
     }
 
     @Override
-    public SubscriptionListDTO getSubscription() {
+    public SubscriptionListDTO getSubscriptions() {
         SubscriptionListDTO subscriptionDto = null;
         try {
             final User user = getCurrentUser();
