@@ -59,9 +59,9 @@ import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
     
-    private static final int CONNECTION_REQUEST_TIMEOUT_MILLIS = 10000;
+    private static final int CONNECTION_REQUEST_TIMEOUT_MILLIS = 100000;
 
-    private static final int CONNECTION_TIMEOUT_MILLIS = 10000;
+    private static final int CONNECTION_TIMEOUT_MILLIS = 100000;
 
     private final Map<Account, String> accessTokensByAccount;
     private final Map<String, Account> accountsByEmail;
@@ -555,5 +555,4 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             mongoObjectFactory.removeAccessToken(account.getCreatorName(), accessToken);
         }
     }
-
 }

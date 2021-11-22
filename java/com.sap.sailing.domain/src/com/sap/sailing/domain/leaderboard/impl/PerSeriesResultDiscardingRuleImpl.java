@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -41,20 +42,20 @@ public class PerSeriesResultDiscardingRuleImpl implements ResultDiscardingRule {
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        Set<RaceColumn> result = new HashSet<>();
-        for (Series s : regatta.getSeries()) {
+            Function<RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Set<RaceColumn> result = new HashSet<>();
+        for (final Series s : regatta.getSeries()) {
             if (s.getResultDiscardingRule() != null) {
-                Iterable<RaceColumn> columnsToConsiderInSeries = getColumnsToConsiderInSeries(s, raceColumnsToConsider);
-                result.addAll(s.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard, columnsToConsiderInSeries, timePoint, cache));
+                final Iterable<RaceColumn> columnsToConsiderInSeries = getColumnsToConsiderInSeries(s, raceColumnsToConsider);
+                result.addAll(s.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard, columnsToConsiderInSeries, timePoint, totalPointsSupplier, cache));
             }
         }
         return result;
     }
 
     private Iterable<RaceColumn> getColumnsToConsiderInSeries(Series series, Iterable<RaceColumn> allRaceColumnsToConsider) {
-        Set<RaceColumn> result = new LinkedHashSet<>();
-        for (RaceColumn seriesColumn : series.getRaceColumns()) {
+        final Set<RaceColumn> result = new LinkedHashSet<>();
+        for (final RaceColumn seriesColumn : series.getRaceColumns()) {
             if (Util.contains(allRaceColumnsToConsider, seriesColumn)) {
                 result.add(seriesColumn);
             }

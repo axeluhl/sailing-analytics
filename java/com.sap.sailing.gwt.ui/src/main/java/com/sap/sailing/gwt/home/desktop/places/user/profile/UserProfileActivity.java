@@ -32,14 +32,14 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
 
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     
-    private UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView;
+    private final UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView;
 
     public UserProfileActivity(AbstractUserProfilePlace place, UserProfileClientFactory clientFactory,
             DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay, FlagImageResolver flagImageResolver) {
         this.currentPlace = place;
         this.clientFactory = clientFactory;
         this.homePlacesNavigator = homePlacesNavigator;
-        currentView = new TabletAndDesktopUserProfileView(flagImageResolver);
+        this.currentView = new TabletAndDesktopUserProfileView(homePlacesNavigator, flagImageResolver);
 
         initNavigationPath(navigationPathDisplay);
     }

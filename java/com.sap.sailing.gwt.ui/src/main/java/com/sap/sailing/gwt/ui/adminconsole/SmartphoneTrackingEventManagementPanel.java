@@ -280,11 +280,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 return doesCourseExist(raceColumnAndFleetName) ? stringMessages.ok() : stringMessages.none();
             }
         };
-
         final AccessControlledActionsColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, RaceLogTrackingEventManagementRaceImagesBarCell> raceActionColumn = AccessControlledActionsColumn
                 .create(new RaceLogTrackingEventManagementRaceImagesBarCell(stringMessages, this), userService,
                         t -> t.getC());
-
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING,
                 DefaultActions.UPDATE, this::denoteForRaceLogTracking);
         raceActionColumn.addAction(RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_REMOVE_DENOTATION,
@@ -338,8 +336,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         races.remove(t);
         Distance buoyZoneRadius = getSelectedRegatta() == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
                 : getSelectedRegatta().getCalculatedBuoyZoneRadius();
-        new CopyCourseAndCompetitorsDialog(sailingServiceWrite, errorReporter, stringMessages, races, leaderboardName,
-                buoyZoneRadius, new DialogCallback<CourseAndCompetitorCopyOperation>() {
+        new CopyCourseAndCompetitorsDialog(sailingServiceWrite, errorReporter, stringMessages, races, t, availableLeaderboardList,
+                leaderboardName, buoyZoneRadius, new DialogCallback<CourseAndCompetitorCopyOperation>() {
                     @Override
                     public void ok(CourseAndCompetitorCopyOperation operation) {
                         operation.perform(leaderboardName, t, /* onSuccessCallback */ new Runnable() {
@@ -510,7 +508,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 refreshTrackingActionButtons();
             }
         });
-        
         raceColumnTableSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

@@ -200,6 +200,7 @@
 <setEntry value="com.sap.sailing.domain.deckmanadapter@5:true"/>
 <setEntry value="com.sap.sailing.domain.oceanraceadapter@5:true"/>
 <setEntry value="com.sap.sailing.domain.yellowbrickadapter@5:true"/>
+<setEntry value="com.sap.sailing.domain.yellowbrickadapter.persistence@4:true"/>
 <setEntry value="com.sap.sailing.xrr.structureimport@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization.shared.android@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization@default:default"/>

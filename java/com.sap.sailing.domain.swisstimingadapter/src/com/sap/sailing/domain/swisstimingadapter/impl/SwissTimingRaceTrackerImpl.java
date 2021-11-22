@@ -79,7 +79,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
 
-public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
+public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl<SwissTimingTrackingConnectivityParameters>
         implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
 
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());

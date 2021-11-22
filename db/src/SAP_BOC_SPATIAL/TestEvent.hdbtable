@@ -1,0 +1,5 @@
+COLUMN TABLE "SAP_BOC_SPATIAL::TestEvent" (
+    "eventID"         NVARCHAR(36) PRIMARY KEY,
+    "eventName"       NVARCHAR(255) NOT NULL,
+    "eventLocation"   ST_POINT(3857) 
+)

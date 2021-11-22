@@ -244,7 +244,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     @Override
     public TimeRange extend(TimePoint timePoint) {
         final TimeRange result;
-        if (this.includes(timePoint)) {
+        if (timePoint == null || this.includes(timePoint)) {
             result = this;
         } else {
             if (this.startsAfter(timePoint)) {

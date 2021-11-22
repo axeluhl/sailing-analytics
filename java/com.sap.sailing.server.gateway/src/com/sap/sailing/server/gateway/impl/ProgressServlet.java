@@ -24,22 +24,21 @@ public class ProgressServlet extends HttpServlet {
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
-
-        HttpSession session = request.getSession(true);
+        final HttpSession session = request.getSession(true);
         if (session == null) {
             logger.warning("Sorry, session is null"); // just to be safe
-            return;
+        } else {
+            final ProgressListener progressListener = (ProgressListener) session
+                    .getAttribute(AbstractFileUploadServlet.PROGRESS_LISTENER_SESSION_ATTRIBUTE_NAME);
+            if (progressListener == null) {
+                logger.warning("Progress listener is null");
+            } else {
+                final JSONObject json = new JSONObject();
+                json.put(FileUploadConstants.PROGRESS_PERCENTAGE, progressListener.getPercentDone());
+                json.put(FileUploadConstants.PROGRESS_BYTE_DONE, progressListener.getTheBytesRead());
+                json.put(FileUploadConstants.PROGRESS_BYTE_TOTAL, progressListener.getTheContentLength());
+                json.writeJSONString(response.getWriter());
+            }
         }
-
-        ProgressListener progressListener = (ProgressListener) session.getAttribute("progressListener");
-        if (progressListener == null) {
-            logger.warning("Progress listener is null");
-            return;
-        }
-        JSONObject json = new JSONObject();
-        json.put(FileUploadConstants.PROGRESS_PERCENTAGE, progressListener.getPercentDone());
-        json.put(FileUploadConstants.PROGRESS_BYTE_DONE, progressListener.getTheBytesRead());
-        json.put(FileUploadConstants.PROGRESS_BYTE_TOTAL, progressListener.getTheContentLength());
-        json.writeJSONString(response.getWriter());
     }
 }

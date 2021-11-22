@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.mobile.partials.regattaStatus;
 
 import java.util.Date;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -41,12 +42,13 @@ public class RegattaStatusRace extends Composite {
     @UiField DivElement raceLegsInfoLabelUi;
     @UiField DivElement raceLegsInfoProgressUi;
     @UiField DivElement actionArrowUi;
-    private final RaceviewerLaunchPadController launchPadController;
+    private final RaceviewerLaunchPadController<LiveRaceDTO> launchPadController;
     private final LiveRaceDTO race;
 
-    public RegattaStatusRace(LiveRaceDTO race, BiFunction<SimpleRaceMetadataDTO, String, String> raceboardUrlFactory) {
+    public RegattaStatusRace(LiveRaceDTO race, BiFunction<? super SimpleRaceMetadataDTO, String, String> raceboardUrlFactory,
+            final Function<? super SimpleRaceMetadataDTO, String> mapAndWindChartUrlFactory) {
         this.race = race;
-        this.launchPadController = new RaceviewerLaunchPadController(raceboardUrlFactory);
+        this.launchPadController = new RaceviewerLaunchPadController<LiveRaceDTO>(raceboardUrlFactory, mapAndWindChartUrlFactory);
         initWidget(uiBinder.createAndBindUi(this));
         initRaceFleetCorner(race.getFleet());
         raceTitleUi.setInnerText(race.getRaceName());

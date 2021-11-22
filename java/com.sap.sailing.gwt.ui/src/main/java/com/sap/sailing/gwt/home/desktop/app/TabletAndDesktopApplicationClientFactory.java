@@ -150,7 +150,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             }
             @Override
             public void manageSubscriptions() {
-                getHomePlacesNavigator().goToPlace(getHomePlacesNavigator().getUserProfileSubscriptionPlace());
+                getHomePlacesNavigator().goToPlace(getHomePlacesNavigator().getUserSubscriptionsNavigation());
             }
             @Override
             public void toggleAuthenticationFlyout() {

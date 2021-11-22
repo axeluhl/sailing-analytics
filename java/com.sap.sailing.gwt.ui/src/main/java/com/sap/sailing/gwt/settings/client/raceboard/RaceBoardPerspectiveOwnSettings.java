@@ -231,8 +231,8 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         final boolean showTags = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_TAGS, defaultForViewShowTags);
         final boolean showManeuverTable = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_MANEUVER_TABLE, defaultForViewShowManeuverTable);
         final String jumpToTag = GwtHttpRequestUtils.getStringParameter(PARAM_JUMP_TO_TAG, defaultForJumpToTag /* default */);
-        final Long zoomStart = GwtHttpRequestUtils.getLongParameter(PARAM_ZOOM_START, defaultForZoomStart);
-        final Long zoomEnd = GwtHttpRequestUtils.getLongParameter(PARAM_ZOOM_END, defaultForZoomEnd);
+        final Long zoomStart = defaultForZoomStart == null ? null : GwtHttpRequestUtils.getLongParameter(PARAM_ZOOM_START, defaultForZoomStart);
+        final Long zoomEnd = defaultForZoomEnd == null ? null : GwtHttpRequestUtils.getLongParameter(PARAM_ZOOM_END, defaultForZoomEnd);
         final boolean autoExpandPreSelectedRace = GwtHttpRequestUtils.getBooleanParameter(PARAM_AUTO_EXPAND_PRE_SELECTED_RACE, defaultForAutoExpandPreSelectedRace);
         return new RaceBoardPerspectiveOwnSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay,

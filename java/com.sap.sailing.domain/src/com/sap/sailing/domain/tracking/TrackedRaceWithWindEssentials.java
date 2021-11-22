@@ -56,6 +56,8 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
      */
     protected transient ConcurrentMap<WindSource, WindTrack> windTracks;
     
+    private transient ConcurrentMap<WindSourceType, ConcurrentMap<WindSource, WindSource>> windSourcesByType;
+    
     protected final RaceDefinition race;
     
     protected transient WindStore windStore;
@@ -68,7 +70,8 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
             final long millisecondsOverWhichToAverageWind) {
         this.race = race;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
-        windTracks = new ConcurrentHashMap<WindSource, WindTrack>();
+        windTracks = new ConcurrentHashMap<>();
+        windSourcesByType = new ConcurrentHashMap<>();
         this.windStore = windStore;
         this.trackedRegatta = trackedRegatta;
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "
@@ -141,11 +144,22 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     /**
      * Creates a wind track for the <code>windSource</code> specified and stores it in {@link #windTracks}. The
      * averaging interval is set according to the averaging interval set for all other wind sources, or the default if
-     * no other wind source exists yet.
+     * no other wind source exists yet. Maintains the {@link #windSourceByType} map.
      */
-    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        return windStore.getWindTrack(trackedRegatta.getRegatta().getName(), this, windSource, millisecondsOverWhichToAverageWind,
-                delayForWindEstimationCacheInvalidation);
+    private WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
+        final WindTrack result = windStore.getWindTrack(trackedRegatta.getRegatta().getName(), this, windSource,
+                millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation);
+        updateWindSourcesByType(windSource);
+        return result;
+    }
+
+    protected void updateWindSourcesByType(WindSource windSource) {
+        ConcurrentMap<WindSource, WindSource> windSourcesOfType = windSourcesByType.get(windSource.getType());
+        if (windSourcesOfType == null) {
+            windSourcesOfType = new ConcurrentHashMap<>();
+            windSourcesByType.put(windSource.getType(), windSourcesOfType);
+        }
+        windSourcesOfType.put(windSource, windSource);
     }
     
     private WindSource getLegMiddleWindSource(TrackedLeg trackedLeg) {
@@ -166,7 +180,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     
     @Override
     public Set<WindSource> getWindSources(WindSourceType type) {
-        Set<WindSource> result = new HashSet<WindSource>();
+        final Set<WindSource> result = new HashSet<WindSource>();
         if (type == WindSourceType.COMBINED) {
             result.add(new WindSourceImpl(WindSourceType.COMBINED));
         } else if (type == WindSourceType.LEG_MIDDLE) {
@@ -174,8 +188,9 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
                 result.add(getLegMiddleWindSource(trackedLeg));
             }
         } else {
-            for (WindSource windSource : getWindSources()) {
-                if (windSource.getType() == type) {
+            final ConcurrentMap<WindSource, WindSource> windSourcesOfType = windSourcesByType.get(type);
+            if (windSourcesOfType != null) {
+                for (WindSource windSource : windSourcesOfType.keySet()) {
                     result.add(windSource);
                 }
             }
@@ -185,13 +200,8 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
 
     @Override
     public Set<WindSource> getWindSources() {
-        while (true) {
-            try {
-                return new HashSet<>(windTracks.keySet());
-            } catch (ConcurrentModificationException cme) {
-                logger.info("Caught " + cme + "; trying again.");
-            }
-        }
+        // being a ConcurrentMap, iteration is thread-safe, weakly-consistent and never throws a ConcurrentModificationException
+        return windTracks.keySet();
     }
     
     protected NamedReentrantReadWriteLock getSerializationLock() {
@@ -225,5 +235,9 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
         @SuppressWarnings("unchecked")
         Map<WindSource, WindTrack> windTracks = (Map<WindSource, WindTrack>) ois.readObject();
         this.windTracks = new ConcurrentHashMap<>(windTracks);
+        this.windSourcesByType = new ConcurrentHashMap<>();
+        for (final WindSource windSource : windTracks.keySet()) {
+            updateWindSourcesByType(windSource);
+        }
     }
 }

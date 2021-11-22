@@ -87,6 +87,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.common.client.sharing.FloatingSharingButtonsResources;
@@ -830,7 +831,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             }
                         }
                         if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
-                                && settings.isShowWindStreamletOverlay()) {
+                                && settings.isShowWindStreamletOverlay()
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
                         }
                     }
@@ -860,14 +862,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         settings = new RaceMapSettings(settings, clearedZoomSettings);
                         currentlyDragging = false;
                         refreshMapWithoutAnimation();
-                        if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
+                        if (streamletOverlay != null 
+                                && settings.isShowWindStreamletOverlay()
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                             streamletOverlay.onDragEnd();
                         }
                     }
                 });
                 map.addDragStartHandler(event -> {
                     currentlyDragging = true;
-                    if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
+                    if (streamletOverlay != null 
+                            && settings.isShowWindStreamletOverlay()
+                            && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                         streamletOverlay.onDragStart();
                     }
                 });
@@ -885,7 +891,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             map.panTo(autoZoomLatLngBounds.getCenter());
                             autoZoomOut = false;
                         }
-                        if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
+                        if (streamletOverlay != null 
+                                && settings.isShowWindStreamletOverlay()
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                             streamletOverlay.setCanvasSettings();
                         }
                         if (!currentlyDragging) {
@@ -929,7 +937,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
                 streamletOverlay.addToMap();
                 streamletOverlay.setColors(settings.isShowWindStreamletColors());
-                if (settings.isShowWindStreamletOverlay()) {
+                if (settings.isShowWindStreamletOverlay()
+                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                     streamletOverlay.setVisible(true);
                 }
                 if (isSimulationEnabled) {
@@ -1394,6 +1403,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public WindInfoForRaceDTO getLastCombinedWindTrackInfoDTO() {
         return lastCombinedWindTrackInfoDTO;
     }
+    
     /**
      * Requests updates for map data and, when received, updates the map structures accordingly.
      * <p>
@@ -1442,7 +1452,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         for (CompetitorDTO competitor : competitorSelection.getAllCompetitors()) {
             competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
         }
-
         // only update the tails for these competitors
         // Note: the fromAndToAndOverlap.getC() map will be UPDATED by the call to updateBoatPositions happening inside
         // the callback provided by getRaceMapDataCallback(...) for those
@@ -2731,7 +2740,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType lastFix) {
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.getName()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorSelection.getBoat(competitorDTO).getSailId()));
+        final BoatDTO boat = competitorSelection.getBoat(competitorDTO);
+        if (Util.hasLength(boat.getName())) {
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.boat(), boat.getName()));
+        }
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), boat.getSailId()));
         final Integer rank = getRank(competitorDTO);
         if (rank != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
@@ -3138,7 +3151,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             estimatedDurationOverlay.removeFromParent();
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
-            streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
+            streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay() 
+                    && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS));
             streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {

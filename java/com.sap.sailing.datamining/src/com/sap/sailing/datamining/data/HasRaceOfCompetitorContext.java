@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.common.Distance;
@@ -33,6 +34,9 @@ public interface HasRaceOfCompetitorContext {
     @Dimension(messageKey="RelativeScoreInPercent", ordinal=14)
     ClusterDTO getPercentageClusterForRelativeScore();
     
+    @Dimension(messageKey="IRM")
+    MaxPointsReason getMaxPointsReason();
+    
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     Distance getDistanceToStartLineAtStart();
 
@@ -45,17 +49,26 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="DistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace", resultDecimals=1)
     Distance getDistanceToNextBoatToStarboardProjectedToStartLineAtStartOfRace();
 
+    @Statistic(messageKey="TotalDistanceToNeighboursProjectedToStartLineAtStartOfRace", resultDecimals=1)
+    Distance getTotalDistanceToNeighboursProjectedToStartLineAtStartOfRace();
+    
     @Statistic(messageKey="WindwardDistanceToNextBoatToPortAtStartOfRace", resultDecimals=1)
     Distance getWindwardDistanceToNextBoatToPortAtStartOfRace();
 
     @Statistic(messageKey="WindwardDistanceToNextBoatToStarboardAtStartOfRace", resultDecimals=1)
     Distance getWindwardDistanceToNextBoatToStarboardAtStartOfRace();
 
+    @Statistic(messageKey="TotalWindwardDistanceToNeighboursAtStartOfRace", resultDecimals=1)
+    Distance getTotalWindwardDistanceToNeighboursAtStartOfRace();
+
     @Statistic(messageKey="DistanceToNextBoatToPortAtStartOfRacePerpendicularToStartLine", resultDecimals=1)
-    Distance getDistanceToNextBoatToPortAtStartOfRacePerpendicularToStartLine();
+    Distance getDistanceToNextBoatToPortPerpendicularToStartLineAtStartOfRace();
 
     @Statistic(messageKey="DistanceToNextBoatToStarboardAtStartOfRacePerpendicularToStartLine", resultDecimals=1)
-    Distance getDistanceToNextBoatToStarboardAtStartOfRacePerpendicularToStartLine();
+    Distance getDistanceToNextBoatToStarboardPerpendicularToStartLineAtStartOfRace();
+
+    @Statistic(messageKey="TotalDistanceToNeighboursPerpendicularToStarLineAtStartOfRace", resultDecimals=1)
+    Distance getTotalDistanceToNeighboursPerpendicularToStarLineAtStartOfRace();
 
     @Statistic(messageKey="NormalizedDistanceToStarboardSideOfStartLineProjectedOntoLineAtStart", resultDecimals=2)
     Double getNormalizedDistanceFromStarboardSideOfStartLineProjectedOntoLineAtStartOfRace();

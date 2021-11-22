@@ -74,7 +74,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.landscape.common,
  com.sap.sse.landscape.aws.common,
  org.apache.httpcomponents.httpcore;bundle-version="4.4.9",
- org.apache.httpcomponents.httpclient;bundle-version="4.5.5"
+ org.apache.httpcomponents.httpclient;bundle-version="4.5.5",
+ com.sap.sailing.domain.yellowbrickadapter
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",

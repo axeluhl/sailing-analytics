@@ -157,7 +157,7 @@ public class MobileApplicationClientFactory extends
             }
             @Override
             public void manageSubscriptions() {
-                navigator.goToPlace(navigator.getUserProfileSubscriptionPlace());
+                navigator.goToPlace(navigator.getUserSubscriptionsNavigation());
             }
             @Override
             public void toggleAuthenticationFlyout() {

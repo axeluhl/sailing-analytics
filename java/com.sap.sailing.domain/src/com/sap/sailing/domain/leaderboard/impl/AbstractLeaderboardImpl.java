@@ -116,7 +116,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
 
     @Override
     public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
-        return raceColumn.getAllCompetitorsAndTheirBoats(fleet).get(competitor);
+        return fleet == null ? null : raceColumn.getAllCompetitorsAndTheirBoats(fleet).get(competitor);
     }
 
     @Override

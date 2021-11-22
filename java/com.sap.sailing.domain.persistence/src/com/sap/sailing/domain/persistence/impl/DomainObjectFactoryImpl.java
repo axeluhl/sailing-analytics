@@ -2673,7 +2673,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UUID originatingMarkPropertiesId = originatingMarkPropertiesIdObject == null ? null
                 : UUID.fromString(originatingMarkPropertiesIdObject.toString());
         MarkType markType = markTypeRaw == null ? null : MarkType.valueOf((String) markTypeRaw);
-
         Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markShortName, markType, markColor, markShape,
                 markPattern, originatingMarkTemplateId, originatingMarkPropertiesId);
         return mark;

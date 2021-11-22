@@ -34,7 +34,6 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
      * and then calls {@link #getOrCreateMark(Serializable, String, String)} with the result and the <code>name</code>
      * parameter, or with <code>ToStringRepresentationOfID</code> and <code>name</code> in case the string
      * representation of the ID is not known. So in the latter case, the string is used as the ID for the new mark.
-     * @param shortName TODO
      */
     Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName);
 

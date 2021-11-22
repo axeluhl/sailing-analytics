@@ -4,6 +4,16 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">November 2021</h5>
+         <ul class="bulletList">
+           <li>When signing up for a new user account, the user name is now trimmed, meaning that
+               leading and trailing whitespace / blank characters are removed. For example, if you
+               sign up for a user name " abc123 " it will become "abc123". This change is inteneded
+               to help those using touch-screen keyboards with auto-completion where particularly
+               trailing blanks are often appended, leading to problems logging in to these accounts
+               if the trailing blank remains part of the username but then are not provided during
+               the login process.</li>
+         </ul>
          <h5 class="articleSubheadline">October 2021</h5>
          <ul class="bulletList">
            <li>The <a href="/gwt/DataMining.html">Data Mining</a> module now has additional statistics for a competitor's
@@ -11,6 +21,14 @@
                projected onto the start line, the distance to the next boat to port/starboard at the start projected
                onto the start line, and the windward/line-perpendicular distances to the port/starboard neighbors
                at the start line.</li>
+           <li>More enhancements to the DataMining module, e.g., adding the IRM / penalty code as a filter / grouping
+               dimension, and providing sums of absolute distances to neighbors at start line.</li>
+           <li>Performance improvements for ORC Performance Curve Scoring, especially for the "WINDWARD_LEEWARD_REAL_LIVE"
+               leg type.</li>
+           <li>Performance improvements for leaderboards with few or only a single column but many competitors by parallelizing
+               calculations across competitors, too.</li>
+           <li>When a boat name but no competitor short name is provided, the boat name now takes precedence over the sail number in the
+               little flag-shaped overlays on the race map.</li>
          </ul>
          <h5 class="articleSubheadline">September 2021</h5>
          <ul class="bulletList">

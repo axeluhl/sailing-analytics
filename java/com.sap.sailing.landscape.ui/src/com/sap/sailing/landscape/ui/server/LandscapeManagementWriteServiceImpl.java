@@ -730,8 +730,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             logger.severe("Couldn't find any result for the master data import. Aborting.");
             throw new IllegalStateException("Couldn't find any result for the master data import. Aborting archiving of replica set "+from);
         }
-        final DataImportProgress mdiProgress = waitForMDICompletionOrError(archive, idForProgressTracking, durationToWaitBeforeCompareServers,
-                /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
+        final DataImportProgress mdiProgress = waitForMDICompletionOrError(archive, idForProgressTracking, /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
         if (mdiProgress != null && !mdiProgress.failed() && mdiProgress.getResult() != null) {
             logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Waiting "+durationToWaitBeforeCompareServers+" before starting to compare content...");
             Thread.sleep(durationToWaitBeforeCompareServers.asMillis());
@@ -814,7 +813,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     private DataImportProgress waitForMDICompletionOrError(SailingServer archive,
-            UUID idForProgressTracking, Duration durationToWaitBeforeCompareServers, String logMessage) throws Exception {
+            UUID idForProgressTracking, String logMessage) throws Exception {
         return Wait.wait(()->archive.getMasterDataImportProgress(idForProgressTracking), progress->progress.failed() || progress.getResult() != null,
                 /* retryOnException */ false, MDI_TIMEOUT, TIME_TO_WAIT_BETWEEN_MDI_COMPLETION_CHECKS,
                 Level.INFO, logMessage);

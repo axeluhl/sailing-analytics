@@ -15,16 +15,18 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 public class CompetitorRaceDataDTO implements IsSerializable {
-    
     private CompetitorDTO competitor;
     private DetailType detailType;
 
     /**
-     * A: mark name; B: mark passing time; C: data as defined by {@link #detailType} for {@link #competitor} for time point B
+     * A: mark name; B: mark passing time; C: data as defined by {@link #detailType} for {@link #competitor} for time point B.
+     * Ordered with the comparator {@link MarkPassingsByTime}.
      */
     private List<Util.Triple<String, Date, Double>> markPassingsData;
+    
     /**
-     * A: time for B; B: data as defined by {@link #detailType} for {@link #competitor} for time point A
+     * A: time for B; B: data as defined by {@link #detailType} for {@link #competitor} for time point A.
+     * Ordered with the comparator {@link RaceDataByTime}.
      */
     private List<Util.Pair<Date, Double>> raceData;
     
@@ -34,9 +36,9 @@ public class CompetitorRaceDataDTO implements IsSerializable {
             Collection<Util.Triple<String, Date, Double>> markPassingsData, Collection<Util.Pair<Date, Double>> raceData) {
         this.competitor = competitor;
         this.detailType = detailType;
-        this.markPassingsData = new ArrayList<Util.Triple<String, Date, Double>>();
+        this.markPassingsData = new ArrayList<>();
+        this.raceData = new ArrayList<>();
         addAllMarkPassingsData(markPassingsData);
-        this.raceData = new ArrayList<Util.Pair<Date, Double>>();
         addAllRaceData(raceData);
     }
 
@@ -52,8 +54,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * Takes the {@link Date} of the last elements in {@link #raceData} and {@link #markPassingsData} and returns the newer date.
      */
     public Date getDateOfNewestData() {
-        Date dateOfNewestRaceData = !raceData.isEmpty() ? raceData.get(raceData.size() - 1).getA() : null;
-            return dateOfNewestRaceData != null ? dateOfNewestRaceData : null;
+        return !raceData.isEmpty() ? raceData.get(raceData.size() - 1).getA() : null;
     }
     
     /**
@@ -61,7 +62,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * @param markPassingsData
      */
     public void setMarkPassingsData(List<Util.Triple<String, Date, Double>> markPassingsData) {
-        this.markPassingsData = new ArrayList<Util.Triple<String,Date,Double>>();
+        this.markPassingsData = new ArrayList<>();
         addAllMarkPassingsData(markPassingsData);
     }
 
@@ -119,9 +120,8 @@ public class CompetitorRaceDataDTO implements IsSerializable {
 
     /**
      * Adds the data <code>raceDataToAdd</code> at the correct index (via binary search) to {@link #raceData}.
-     * Checks if the data is already contained, but not if the detailTypes fit. The data will not be added, if it's already contained.
-     * 
-     * @param raceDataToAdd
+     * Checks if the data is already contained, but not if the detailTypes fit. The data will not be added if a value
+     * for that time point is already contained.
      */
     public void addRaceData(Util.Pair<Date, Double> raceDataToAdd) {
         int index = Collections.binarySearch(raceData, raceDataToAdd, new RaceDataByTime());
@@ -134,8 +134,6 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     /**
      * Adds all data with {@link #addAllMarkPassingsData(Collection)} and {@link #addAllRaceData(Collection)}, if the
      * detailTypes fit. Checks if the data is already contained. The data will not be added, if it's already contained.
-     * 
-     * @param dataToAdd
      */
     public void addAllData(CompetitorRaceDataDTO dataToAdd) {
         if (detailType == dataToAdd.getDetailType()) {
@@ -166,5 +164,4 @@ public class CompetitorRaceDataDTO implements IsSerializable {
             return m1.getB().compareTo(m2.getB());
         }
     }
-
 }

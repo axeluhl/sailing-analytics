@@ -125,7 +125,6 @@ public class Swarm implements TimeListener {
     private void startSwarmIfNecessaryAndUpdateProjection() {
         if (projection == null) {
             projection = new Mercator(fullcanvas, map);
-
         }
         // ensure projection fits the map
         projection.calibrate();

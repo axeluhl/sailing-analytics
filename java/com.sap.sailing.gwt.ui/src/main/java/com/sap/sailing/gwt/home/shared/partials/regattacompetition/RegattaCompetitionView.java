@@ -16,7 +16,8 @@ public interface RegattaCompetitionView {
     }
     
     public interface RegattaCompetitionFleetView {
-        RegattaCompetitionRaceView addRaceView(SimpleRaceMetadataDTO race, RegattaCompetitionPresenter presenter);
+        RegattaCompetitionRaceView addRaceView(SimpleRaceMetadataDTO race, String fleetName,
+                RegattaCompetitionPresenter presenter);
         void setNumberOfFleetsInSeries(int fleetCount);
         void doFilter(boolean filter);
     }

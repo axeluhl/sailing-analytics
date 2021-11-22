@@ -7,11 +7,15 @@ if [ "$1" = "-h" -o "$1" = "-?" ]; then
 else
   echo "SERVER_PORT is ${SERVER_PORT}"
   URL="http://127.0.0.1:${SERVER_PORT}/replication/replication?action=STOP_REPLICATING"
-  if [ "$1" = "" ]; then
+  BEARER_TOKEN="$1"
+  if [ "${BEARER_TOKEN}" = "" ]; then
+    BEARER_TOKEN="${REPLICATE_MASTER_BEARER_TOKEN}"
+  fi
+  if [ "${BEARER_TOKEN}" = "" ]; then
     read -p "Username: " USERNAME
     read -s -p "Password (not echoed): " PASSWORD
     curl -i -X POST -d "username=$USERNAME&password=$PASSWORD" "${URL}"
   else
-    curl -i -X POST -H 'Authorization: Bearer '$1 "http://127.0.0.1:${SERVER_PORT}/replication/replication?action=STOP_REPLICATING"
+    curl -i -X POST -H 'Authorization: Bearer '${BEARER_TOKEN} "http://127.0.0.1:${SERVER_PORT}/replication/replication?action=STOP_REPLICATING"
   fi
 fi

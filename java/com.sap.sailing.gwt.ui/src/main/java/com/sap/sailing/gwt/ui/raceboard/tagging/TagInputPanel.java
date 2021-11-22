@@ -53,7 +53,7 @@ public class TagInputPanel extends FlowPanel {
             commentTextArea = createTextArea(DEFAULT_COMMENT);
             visibleForPublicCheckBox = createCheckbox(stringMessages.tagVisibleForPublicCheckBox());
             visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);
-            imageUploadPanel = new URLFieldWithFileUpload(stringMessages);
+            imageUploadPanel = new URLFieldWithFileUpload(stringMessages, null);
             validateAndUpdate();
         }
 

@@ -260,7 +260,7 @@ public class FixesAndTails {
                 final CompetitorDTO competitor = e.getKey();
                 List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(competitor);
                 if (fixesForCompetitor == null) {
-                    fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
+                    fixesForCompetitor = new ArrayList<>();
                     fixes.put(competitor, fixesForCompetitor);
                 }
                 if (!overlapsWithKnownFixes.get(competitor)) {
@@ -268,11 +268,10 @@ public class FixesAndTails {
                     fixesForCompetitor.clear();
                     // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
                     // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
-                    final Triggerable triggerable = new Triggerable(new Runnable() { @Override public void run() { clearTail(competitor); } });
+                    final Triggerable triggerable = new Triggerable(()->clearTail(competitor));
                     registerTriggerable(competitor, triggerable);
                     fixesForCompetitor.addAll(e.getValue());
                     overlapsWithKnownFixes.put(competitor, true); // In case this was only one part of a split request, the next request *does* have an overlap
-
                     minDetailValueFix.remove(competitor);
                     maxDetailValueFix.remove(competitor);
                 } else {
@@ -372,12 +371,7 @@ public class FixesAndTails {
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         final int finalIntoThisIndex = intoThisIndex;
                         final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
-                        final Triggerable triggerable = new Triggerable(new Runnable() {
-                            @Override
-                            public void run() {
-                                tail.removeAt(finalIntoThisIndex - finalIndexOfFirstShownFix);
-                            }
-                        });
+                        final Triggerable triggerable = new Triggerable(()->tail.removeAt(finalIntoThisIndex - finalIndexOfFirstShownFix));
                         registerTriggerable(competitorDTO, triggerable);
                         Timer timer = new TriggerableTimer(triggerable);
                         runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
@@ -473,7 +467,6 @@ public class FixesAndTails {
         if (indexOfLastShownFix != -1) {
             lastShownFix.put(competitorDTO, new Trigger<>(indexOfLastShownFix));
         }
-
         if (earliestMergeIndex != -1) {
             lastSearchedFix.merge(competitorDTO, earliestMergeIndex, Math::min);
         }
@@ -535,7 +528,9 @@ public class FixesAndTails {
                         if (vertexCount-1 == 0 || (indexOfLastShownFix-1 >= 0 && !fixesForCompetitor.get(indexOfLastShownFix-1).timepoint.after(to))) {
                             // the loop will abort after this iteration
                         }
-                        tail.removeAt(--vertexCount);
+                        if (tail.getLength() > --vertexCount) {
+                            tail.removeAt(vertexCount);
+                        }
                         indexOfLastShownFix--;
                     }
                     // now the polyline contains no more vertices representing fixes after "to";
@@ -599,7 +594,6 @@ public class FixesAndTails {
      * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
      * competitor from {@link #competitorsToShow} there are all fixes known by the server for that competitor starting
      * at <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive).
-     * @param effectiveTailLengthInMilliseconds 
      * 
      * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
      *         second} component contains the "to" times for the competitors whose trails / positions to show; the
@@ -612,14 +606,13 @@ public class FixesAndTails {
         Map<CompetitorDTO, Date> from = new HashMap<>();
         Map<CompetitorDTO, Date> to = new HashMap<>();
         Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<>();
-        
         for (CompetitorDTO competitor : competitorsToShow) {
-            List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
-            Date fromDate;
-            Date toDate;
-            Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
-            Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
-            boolean overlap = !detailTypeChanged && (timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
+            final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
+            final Date fromDate;
+            final Date toDate;
+            final Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
+            final Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
+            final boolean overlap = !detailTypeChanged && (timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
                     new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo)).intersects(
                             new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix))));
             if (fixesForCompetitor != null && timepointOfFirstKnownFix != null

@@ -41,7 +41,7 @@ public class ORCPerformanceCurveLegImpl implements ORCPerformanceCurveLeg {
 
     @Override
     public ORCPerformanceCurveLeg scale(double share) {
-        final Distance scaledLength = getLength().scale(share);
+        final Distance scaledLength = getLength()==null?null:getLength().scale(share);
         return getType() == ORCPerformanceCurveLegTypes.TWA ? new ORCPerformanceCurveLegImpl(scaledLength, getTwa()) :
             new ORCPerformanceCurveLegImpl(scaledLength, getType());
     }

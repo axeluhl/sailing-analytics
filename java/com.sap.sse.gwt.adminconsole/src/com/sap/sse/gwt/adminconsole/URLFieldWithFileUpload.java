@@ -65,11 +65,11 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     private final FormPanel uploadFormPanel;
     private final FlowPanel uploadPanel;
     
-    public URLFieldWithFileUpload(final StringMessages stringMessages) {
-        this(stringMessages, true, true);
+    public URLFieldWithFileUpload(final StringMessages stringMessages, String acceptedFileTypes) {
+        this(stringMessages, true, true, acceptedFileTypes);
     }
    
-    public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload, boolean showUrlAfterUpload) {
+    public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload, boolean showUrlAfterUpload, String acceptedFileTypes) {
         RESOURCES.urlFieldWithFileUploadStyle().ensureInjected();
         startUploadEvent = new StartUploadEvent() {
             @Override
@@ -131,7 +131,9 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
-        fileUploadField.getElement().setAttribute("accept", "audio/*,video/*");
+        if (acceptedFileTypes != null) {
+            fileUploadField.getElement().setAttribute("accept", acceptedFileTypes);
+        }
         fileUploadField.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().fileInputClass());
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
