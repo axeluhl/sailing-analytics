@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 
@@ -12,11 +11,11 @@ import com.sap.sse.security.ui.client.subscription.SubscriptionService;
  * SubscriptionPlan data transfer object {@link SubscriptionService#getAllSubscriptionPlans()}
  */
 public class SubscriptionPlanDTO implements IsSerializable {
+    private static final String FEATURES_MESSAGE_KEY_SUFFX = "_features";
+    private static final String NAME_MESSAGE_KEY_SUFFX = "_name";
+    private static final String DESC_MESSAGE_KEY_SUFFX = "_description";
     private static final long serialVersionUID = -1990028347487353679L;
     private String id;
-    private StringMessagesKey nameMessageKey;
-    private StringMessagesKey descMessageKey;
-    private HashSet<StringMessagesKey> featureIds;
     private HashSet<SubscriptionPrice> prices = new HashSet<SubscriptionPrice>();
     private String error;
     private boolean isUserSubscribedToPlan;
@@ -28,13 +27,9 @@ public class SubscriptionPlanDTO implements IsSerializable {
     public SubscriptionPlanDTO() {
     }
 
-    public SubscriptionPlanDTO(String id, boolean isUserSubscribedToPlan, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
-            Set<StringMessagesKey> features, Set<SubscriptionPrice> prices, String error) {
+    public SubscriptionPlanDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices, String error) {
         this.id = id;
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
-        this.nameMessageKey = nameMessageKey;
-        this.descMessageKey = descMessageKey;
-        this.featureIds = new HashSet<StringMessagesKey>(features);
         this.prices = new HashSet<SubscriptionPrice>(prices);
         this.error = error;
     }
@@ -55,20 +50,16 @@ public class SubscriptionPlanDTO implements IsSerializable {
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
     }
 
-    public StringMessagesKey getNameMessageKey() {
-        return nameMessageKey;
+    public String getNameMessageKey() {
+        return this.id + NAME_MESSAGE_KEY_SUFFX;
     }
 
-    public StringMessagesKey getDescMessageKey() {
-        return descMessageKey;
+    public String getDescMessageKey() {
+        return this.id + DESC_MESSAGE_KEY_SUFFX;
     }
 
-    public void setDescMessageKey(StringMessagesKey descMessageKey) {
-        this.descMessageKey = descMessageKey;
-    }
-
-    public Set<StringMessagesKey> getFeatures() {
-        return featureIds;
+    public String getFeatureMessageKey() {
+        return this.id + FEATURES_MESSAGE_KEY_SUFFX;
     }
 
     public String getError() {

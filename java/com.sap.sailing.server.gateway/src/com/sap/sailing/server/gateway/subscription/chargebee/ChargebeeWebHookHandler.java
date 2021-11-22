@@ -14,6 +14,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 
 /**
@@ -150,12 +151,24 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         }
         return userSubscription;
     }
+    
+    private String getPlanIdFromEvent(SubscriptionWebHookEvent event) {
+        String planId = event.getPlanId();
+        if(planId == null) {
+            final String itemPriceId = event.getItemPriceId();
+            final SubscriptionPlan plan = context.getSecurityService().getSubscriptionPlanByItemPriceId(itemPriceId);
+            if(plan != null) {
+                planId = plan.getId();
+            }
+        }
+        return planId;
+    }
 
     private Subscription buildEmptySubscription(Subscription currentSubscription, SubscriptionWebHookEvent event) {
         return ChargebeeSubscription.createEmptySubscription(event.getPlanId(), event.getEventOccurredAt(),
                 currentSubscription != null ? currentSubscription.getManualUpdatedAt() : Subscription.emptyTime());
     }
-
+    
     /**
      * Build new {@code Subscription} instance from current user subscription and webhook event
      * {@code SubscriptionWebHookEvent}
@@ -185,7 +198,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                 paymentStatus = currentSubscription.getPaymentStatus();
             }
         }
-        return new ChargebeeSubscription(event.getSubscriptionId(), event.getPlanId(), event.getCustomerId(),
+        return new ChargebeeSubscription(event.getSubscriptionId(), getPlanIdFromEvent(event), event.getCustomerId(),
                 event.getSubscriptionTrialStart(), event.getSubscriptionTrialEnd(), subscriptionStatus, paymentStatus,
                 transactionType, transactionStatus, invoiceId, invoiceStatus, event.getSubscriptionCreatedAt(),
                 event.getSubscriptionUpdatedAt(), event.getEventOccurredAt(),

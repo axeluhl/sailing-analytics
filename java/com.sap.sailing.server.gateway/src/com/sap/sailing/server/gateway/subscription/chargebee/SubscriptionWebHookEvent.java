@@ -95,19 +95,21 @@ public class SubscriptionWebHookEvent {
     }
 
     public String getPlanId() {
-        final String planId = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_PLAN_ID);
-        if(planId == null) {
-            final JSONArray subscriptionItems = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, "subscription_items");
-            if(subscriptionItems != null) {
-                for (int i = 0; i < subscriptionItems.size(); i++) {
-                    final String itemType = getJsonValue((JSONObject) subscriptionItems.get(i), "item_type");
-                    if("plan".equals(itemType)) {
-                        return getJsonValue((JSONObject) subscriptionItems.get(i), "item_id");
-                    }
+        return getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_PLAN_ID);
+    }
+    
+    public String getItemPriceId() {
+        String itemPriceId = null;
+        final JSONArray subscriptionItems = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, "subscription_items");
+        if(subscriptionItems != null) {
+            for (int i = 0; i < subscriptionItems.size(); i++) {
+                final String itemType = getJsonValue((JSONObject) subscriptionItems.get(i), "item_type");
+                if("plan".equals(itemType)) {
+                    itemPriceId = getJsonValue((JSONObject) subscriptionItems.get(i), "item_price_id");
                 }
             }
         }
-        return planId;
+        return itemPriceId;
     }
  
     public String getSubscriptionId() {

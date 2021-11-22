@@ -1,16 +1,18 @@
 package com.sap.sailing.domain.common.subscription;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice.PaymentInterval;
 
 /**
  * Payment subscription plans. A subscription plan has a name, a {@link String}-based ID, and a set of
@@ -21,38 +23,30 @@ import com.sap.sse.security.shared.subscription.SubscriptionPrice;
  * 
  */
 public class SailingSubscriptionPlan extends SubscriptionPlan {
+    private static final String USD_CURRENCY_CODE = "usd";
+    private static final BigDecimal YEARLY_PLAN_PRICE = new BigDecimal(49.99);
+    private static final BigDecimal WEEKLY_PLAN_PRICE = new BigDecimal(4.99);
     private static final long serialVersionUID = 2563619370274543312L;
-    private static final String BASIC_PLAN_ID = "cbdemo_basic";
-    private static final String ADVANCED_PLAN_ID = "cbdemo_advanced";
-    private static final String AAAS_PLAN_ID = "Annual-all-access-subscription";
-    private static final String BASIC_PLAN_NAME_KEY = "basic_plan_name";
-    private static final String ADVANCED_PLAN_NAME_KEY = "advanced_plan_name";
-    private static final String AAAS_PLAN_NAME_KEY = "aaas_plan_name";
-    private static final String BASIC_PLAN_DESC_KEY = "basic_plan_desc";
-    private static final String ADVANCED_PLAN_DESC_KEY = "advanced_plan_desc";
-    private static final String AAAS_PLAN_DESC_KEY = "aaas_plan_desc";
+    private static final String YEARLY_PLAN_ID = "yearly_premium";
+    private static final String WEEKLY_PLAN_ID = "weekly_premium";
+    private static final String WEEKLY_PLAN_ITEMPRICE_ID = "weekly_premium_usd_weekly";
+    private static final String YEARLY_PLAN_ITEMPRICE_ID = "weekly_premium_usd_yearly";
     private static final Map<String, SubscriptionPlan> plansById = new HashMap<>();
 
-    private SailingSubscriptionPlan(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
-            Set<SubscriptionPrice> prices, SubscriptionPlanRole... roles) {
-        super(id, nameMessageKey, descMessageKey, prices, roles);
+    private SailingSubscriptionPlan(String id, Set<SubscriptionPrice> prices, SubscriptionPlanRole... roles) {
+        super(id, prices, roles);
         plansById.put(id, this);
     }
 
-    public static final SubscriptionPlan Basic = new SailingSubscriptionPlan(BASIC_PLAN_ID,
-            new StringMessagesKey(BASIC_PLAN_NAME_KEY), new StringMessagesKey(BASIC_PLAN_DESC_KEY), new HashSet<>(),
-            new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
-                    new StringMessagesKey(StreamletViewerRole.getMessageKey())));
-    
-    public static final SubscriptionPlan Advanced = new SailingSubscriptionPlan(ADVANCED_PLAN_ID,
-            new StringMessagesKey(ADVANCED_PLAN_NAME_KEY), new StringMessagesKey(ADVANCED_PLAN_DESC_KEY), new HashSet<>(),
-            new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
-                    new StringMessagesKey(StreamletViewerRole.getMessageKey())));
-    
-    public static final SubscriptionPlan AAAS = new SailingSubscriptionPlan(AAAS_PLAN_ID,
-            new StringMessagesKey(AAAS_PLAN_NAME_KEY), new StringMessagesKey(AAAS_PLAN_DESC_KEY), new HashSet<>(),
-            new SubscriptionPlanRole(StreamletViewerRole.getRoleId(),
-                    new StringMessagesKey(StreamletViewerRole.getMessageKey())));
+    public static final SubscriptionPlan YEARLY = new SailingSubscriptionPlan(YEARLY_PLAN_ID,
+            Stream.of(new SubscriptionPrice(YEARLY_PLAN_ITEMPRICE_ID, YEARLY_PLAN_PRICE, USD_CURRENCY_CODE,
+                    PaymentInterval.YEAR)).collect(Collectors.toSet()),
+            new SubscriptionPlanRole(StreamletViewerRole.getRoleId()));
+
+    public static final SubscriptionPlan WEEKLY = new SailingSubscriptionPlan(WEEKLY_PLAN_ID,
+            Stream.of(new SubscriptionPrice(WEEKLY_PLAN_ITEMPRICE_ID, WEEKLY_PLAN_PRICE, USD_CURRENCY_CODE,
+                    PaymentInterval.WEEK)).collect(Collectors.toSet()),
+            new SubscriptionPlanRole(StreamletViewerRole.getRoleId()));
 
     public static Map<Serializable, SubscriptionPlan> getAllInstances() {
         return Collections.unmodifiableMap(plansById);

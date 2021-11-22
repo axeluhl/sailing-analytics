@@ -175,6 +175,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -323,6 +324,20 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public SubscriptionPlan getSubscriptionPlanById(String planId) {
         return subscriptionPlanProvider.getAllSubscriptionPlans().get(planId);
+    }
+    
+    @Override
+    public SubscriptionPlan getSubscriptionPlanByItemPriceId(String itemPriceId) {
+        SubscriptionPlan result = null;
+        final Map<Serializable, SubscriptionPlan> allSubscriptionPlans = getAllSubscriptionPlans();
+        for (SubscriptionPlan plan : allSubscriptionPlans.values()) {
+            for(SubscriptionPrice price : plan.getPrices()) {
+                if(itemPriceId.equals(price.getPriceId())) {
+                    result = plan;
+                }
+            }
+        }
+        return result;
     }
     
     @Override
@@ -2840,4 +2855,5 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
         permissionChangeListeners.removePermissionChangeListener(permission, listener);
     }
+
 }

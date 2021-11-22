@@ -52,7 +52,7 @@ class UserSubscriptionItem extends Composite {
 
         if (subscription.isInTrial()) {
             addInfo(create("", i18n.trialText(getTrialRemainingText(subscription),
-                    formatDateAndTime(subscription.getTrialEnd().asDate()))).highlightValue(false));
+                    formatDateAndTime(subscription.getCurrentEnd().asDate()))).highlightValue(false));
         }
 
         sectionHeaderUi.initCollapsibility(contentContainerUi.getElement(), false);
@@ -99,7 +99,7 @@ class UserSubscriptionItem extends Composite {
     }
 
     private String getTrialRemainingText(final SubscriptionDTO subscription) {
-        long remainingSecs = Math.round(TimePoint.now().until(subscription.getTrialEnd()).asSeconds());
+        long remainingSecs = Math.round(TimePoint.now().until(subscription.getCurrentEnd()).asSeconds());
         final StringBuilder remainText = new StringBuilder();
         if (remainingSecs <= 0) {
             remainText.append(i18n.numHours(0));

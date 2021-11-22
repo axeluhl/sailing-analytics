@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import com.sap.sse.security.shared.StringMessagesKey;
-
 /**
  * Payment subscription plans. A subscription plan has a name, a {@link String}-based ID, and a set of
  * {@link SubscriptionPlanRole roles} it grants to a subscribing user. These roles can specify how they are to be
@@ -21,9 +19,8 @@ public class SSESubscriptionPlan extends SubscriptionPlan {
     private static final long serialVersionUID = 9061666338780737555L;
     private static final Map<String, SSESubscriptionPlan> plansById = new HashMap<String, SSESubscriptionPlan>();
 
-    private SSESubscriptionPlan(String id, StringMessagesKey nameMessageKey, StringMessagesKey descMessageKey,
-            HashSet<SubscriptionPrice> prices, SubscriptionPlanRole... roles) {
-        super(id, nameMessageKey, descMessageKey, prices, roles);
+    private SSESubscriptionPlan(String id, HashSet<SubscriptionPrice> prices, SubscriptionPlanRole... roles) {
+        super(id, prices, roles);
         plansById.put(id, this);
     }
     

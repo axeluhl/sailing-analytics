@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 
 /**
- * User subscription data transfer object {@link SubscriptionService#getSubscription()}
+ * User subscription data transfer object {@link SubscriptionService#getSubscriptions()}
  * 
  * @author Tu Tran
  */

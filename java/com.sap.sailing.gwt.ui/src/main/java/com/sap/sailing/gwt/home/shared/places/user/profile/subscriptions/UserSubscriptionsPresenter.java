@@ -94,7 +94,7 @@ public class UserSubscriptionsPresenter<C extends ClientFactoryWithDispatch & Er
     private void fetchSubscription() {
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
-                    .getSubscription(new AsyncCallback<SubscriptionListDTO>() {
+                    .getSubscriptions(new AsyncCallback<SubscriptionListDTO>() {
                         @Override
                         public void onSuccess(SubscriptionListDTO result) {
                             if (result != null && result.getError() != null && !result.getError().isEmpty()) {

@@ -1,10 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.subscription;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -13,7 +10,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard.Type;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
@@ -56,24 +52,16 @@ public class SubscriptionActivity extends AbstractActivity {
                         }
 
                         private void addIndividual(final EventBus eventBus, final SubscriptionView view) {
-                            final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO(null /* id */,
+                            final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO("individual_subscription_plan" /* id */,
                                     /* isUserSubscribedToPlan */ false,
-                                    new StringMessagesKey("individual_subscription_plan_name"),
-                                    new StringMessagesKey("individual_subscription_plan_description"),
-                                    Collections.emptySet() /* features */, Collections.emptySet() /* prices */,
+                                    Collections.emptySet() /* prices */,
                                     null /* error */);
                             view.addSubscriptionPlan(individualPlan, Type.INDIVIDUAL, eventBus);
                         }
 
                         private void addFreePlan(final SubscriptionView view) {
-                            Set<StringMessagesKey> freeFeatures = new LinkedHashSet<StringMessagesKey>(Arrays.asList(
-                                    new StringMessagesKey("free_feature_1"), new StringMessagesKey("free_feature_2"),
-                                    new StringMessagesKey("free_feature_3"), new StringMessagesKey("free_feature_4")));
-
-                            final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO(null /* id */,
+                            final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO("free_subscription_plan" /* id */,
                                     /* isUserSubscribedToPlan */ false,
-                                    new StringMessagesKey("free_subscription_plan_name"),
-                                    new StringMessagesKey("free_subscription_plan_description"), freeFeatures,
                                     Collections.emptySet() /* prices */, null /* error */);
                             view.addSubscriptionPlan(freePlan, Type.FREE, eventBus);
                         }
