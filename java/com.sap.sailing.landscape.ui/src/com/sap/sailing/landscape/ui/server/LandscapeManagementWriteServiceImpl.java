@@ -1054,6 +1054,21 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 RedirectDTO.toString(defaultRedirect.getPath(), defaultRedirect.getQuery()));
     }
 
+    @Override
+    public Boolean ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion region = new AwsRegion(regionId);
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
+                convertFromApplicationReplicaSetDTO(region, applicationReplicaSet);
+        final String effectiveReplicaReplicationBearerToken = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken :
+            getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
+        final SailingAnalyticsProcess<String> additionalReplicaStarted = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
+                replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
+        return additionalReplicaStarted != null;
+    }
+    
     /**
      * Performs an in-place upgrade for the master service if the replica set has distinct public and master
      * target groups. If no replica exists, one is launched with the master's release, and the method waits
@@ -1087,33 +1102,16 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 convertFromApplicationReplicaSetDTO(region, applicationReplicaSetToUpgrade);
         final String effectiveReplicaReplicationBearerToken = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken :
             getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
-        final SailingAnalyticsProcess<String> additionalReplicaStarted;
         final int oldAutoScalingGroupMinSize;
         if (replicaSet.getAutoScalingGroup() != null) {
             oldAutoScalingGroupMinSize = replicaSet.getAutoScalingGroup().getAutoScalingGroup().minSize();
         } else {
             oldAutoScalingGroupMinSize = -1;
         }
-        final Set<SailingAnalyticsProcess<String>> replicas = new HashSet<>();
-        Util.addAll(replicaSet.getReplicas(), replicas);
-        if (Util.isEmpty(replicaSet.getReplicas())) {
-            logger.info("No replica found for replica set " + replicaSet.getName()
-                    + "; spinning one up and waiting for it to become healthy");
-            additionalReplicaStarted = launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
-                    privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
-            replicas.add(additionalReplicaStarted);
-        } else {
-            additionalReplicaStarted = null;
-        }
-        logger.info("Stopping replication for replica set "+replicaSet.getName());
-        for (final SailingAnalyticsProcess<String> replica : replicas) {
-            logger.info("...asking replica "+replica+" to stop replication");
-            replica.stopReplicatingFromMaster(effectiveReplicaReplicationBearerToken, WAIT_FOR_PROCESS_TIMEOUT);
-        }
-        logger.info("Done stopping replication. Removing master "+replicaSet.getMaster()+" from target groups "+
-                replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
-        replicaSet.getPublicTargetGroup().removeTarget(replicaSet.getMaster().getHost());
-        replicaSet.getMasterTargetGroup().removeTarget(replicaSet.getMaster().getHost());
+        final Set<SailingAnalyticsProcess<String>> replicasToStopAfterUpgradingMaster = new HashSet<>();
+        Util.addAll(replicaSet.getReplicas(), replicasToStopAfterUpgradingMaster);
+        final SailingAnalyticsProcess<String> additionalReplicaStarted = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
+                replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
         if (replicaSet.getAutoScalingGroup() != null) {
             getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(), replicaSet.getName(), release);
         }
@@ -1133,13 +1131,14 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         replicaSet.getMasterTargetGroup().addTarget(replicaSet.getMaster().getHost());
         // if a replica was spun up (replicaToShutDownWhenDone), remove from public target group and terminate:
         if (additionalReplicaStarted != null) {
+            replicasToStopAfterUpgradingMaster.add(additionalReplicaStarted);
             if (replicaSet.getAutoScalingGroup() != null) {
                 getLandscape().updateAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), oldAutoScalingGroupMinSize);
             } // else, the replica was started explicitly, without an auto-scaling group; in any case, all replicas still
             // on the old release will now be stopped:
         }
-        logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicas);
-        for (final SailingAnalyticsProcess<String> replica : replicas) {
+        logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicasToStopAfterUpgradingMaster);
+        for (final SailingAnalyticsProcess<String> replica : replicasToStopAfterUpgradingMaster) {
             replicaSet.getPublicTargetGroup().removeTarget(replica.getHost());
             replica.stopAndTerminateIfLast(WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         }
@@ -1151,6 +1150,40 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         TimePoint.now()),
                 /* replicas won't be up and running yet */ Collections.emptySet(), release.getName(), applicationReplicaSetToUpgrade.getHostname(),
                 applicationReplicaSetToUpgrade.getDefaultRedirectPath());
+    }
+
+    /**
+     * @return a new replica that was started in case no running replica was found in the {@code replicaSet}, otherwise
+     *         {@code null}.
+     */
+    private SailingAnalyticsProcess<String> ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase,
+            final String effectiveReplicaReplicationBearerToken)
+            throws Exception, MalformedURLException, IOException, TimeoutException, InterruptedException,
+            ExecutionException {
+        final Set<SailingAnalyticsProcess<String>> replicasToStopReplicating = new HashSet<>();
+        Util.addAll(replicaSet.getReplicas(), replicasToStopReplicating);
+        final SailingAnalyticsProcess<String> additionalReplicaStarted;
+        if (Util.isEmpty(replicaSet.getReplicas())) {
+            logger.info("No replica found for replica set " + replicaSet.getName()
+                    + "; spinning one up and waiting for it to become healthy");
+            additionalReplicaStarted = launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
+                    privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
+            replicasToStopReplicating.add(additionalReplicaStarted);
+        } else {
+            additionalReplicaStarted = null;
+        }
+        logger.info("Stopping replication for replica set "+replicaSet.getName());
+        for (final SailingAnalyticsProcess<String> replica : replicasToStopReplicating) {
+            logger.info("...asking replica "+replica+" to stop replication");
+            replica.stopReplicatingFromMaster(effectiveReplicaReplicationBearerToken, WAIT_FOR_PROCESS_TIMEOUT);
+        }
+        logger.info("Done stopping replication. Removing master "+replicaSet.getMaster()+" from target groups "+
+                replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
+        replicaSet.getPublicTargetGroup().removeTarget(replicaSet.getMaster().getHost());
+        replicaSet.getMasterTargetGroup().removeTarget(replicaSet.getMaster().getHost());
+        return additionalReplicaStarted;
     }
 
     /**
