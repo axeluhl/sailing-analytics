@@ -267,7 +267,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups ->
                     ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(),
-                        applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups));
+                        Collections.singleton(applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups)));
         applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -284,6 +284,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                 e->upgradeApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(upgradeApplicationReplicaSetButton);
+        final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> stopReplicatingAndUnregisterMasterButton = new SelectedElementsCountingButton<>(
+                stringMessages.stopReplicating(), applicationReplicaSetsTable.getSelectionModel(),
+                e->ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
+                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        applicationReplicaSetsButtonPanel.add(stopReplicatingAndUnregisterMasterButton);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
@@ -336,36 +341,46 @@ public class LandscapeManagementPanel extends SimplePanel {
 
     private void ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
             StringMessages stringMessages, String selectedObject,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups) {
+            Iterable<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups) {
         final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
         new EnsureReplicaStopReplicatingRemoveMasterFromTargetGroupsDialog(stringMessages, errorReporter, new DialogCallback<String>() {
             @Override
             public void ok(String replicaReplicationBearerToken) {
                 applicationReplicaSetsBusy.setBusy(true);
-                landscapeManagementService.ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
-                        selectedRegion, applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups,
-                        sshKeyManagementPanel.getSelectedKeyPair().getName(),
-                        sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
-                        ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                        replicaReplicationBearerToken, new AsyncCallback<Boolean>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                applicationReplicaSetsBusy.setBusy(false);
-                                errorReporter.reportError(caught.getMessage());
-                            }
-                            
-                            @Override
-                            public void onSuccess(Boolean result) {
-                                applicationReplicaSetsBusy.setBusy(false);
-                                Notification.notify(stringMessages.successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups(), NotificationType.SUCCESS);
-                            }
-                        });
+                final int[] howManyMoreToGo = new int[] { Util.size(applicationReplicaSetsForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups) };
+                for (final SailingApplicationReplicaSetDTO<String> applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups :
+                    applicationReplicaSetsForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups) {
+                    landscapeManagementService.ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
+                            selectedRegion, applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups,
+                            sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                            sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                            replicaReplicationBearerToken, new AsyncCallback<Boolean>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
+                                    errorReporter.reportError(caught.getMessage());
+                                }
+                                
+                                @Override
+                                public void onSuccess(Boolean result) {
+                                    decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
+                                    Notification.notify(stringMessages.successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups(), NotificationType.SUCCESS);
+                                }
+                            });
+                }
             }
 
             @Override public void cancel() {}
         }).show();
     }
 
+    private void decrementHowManyMoreToGoAndSetNonBusyIfDone(int[] howManyMoreToGo) {
+        if (--howManyMoreToGo[0] <= 0) {
+            applicationReplicaSetsBusy.setBusy(false);
+        }
+    }
+    
     private void defineLandingPage(StringMessages stringMessages, String selectedRegion,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToDefineLandingPageFor) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
@@ -768,17 +783,13 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                     new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                                         @Override
                                                         public void onFailure(Throwable caught) {
-                                                            if (--howManyMoreToGo[0] == 0) {
-                                                                applicationReplicaSetsBusy.setBusy(false);
-                                                            }
+                                                            decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
                                                             errorReporter.reportError(caught.getMessage());
                                                         }
             
                                                         @Override
                                                         public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
-                                                            if (--howManyMoreToGo[0] == 0) {
-                                                                applicationReplicaSetsBusy.setBusy(false);
-                                                            }
+                                                            decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
                                                             if (result != null) {
                                                                 Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
                                                                                 result.getName(), result.getVersion()), NotificationType.SUCCESS);
