@@ -365,7 +365,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 @Override
                                 public void onSuccess(Boolean result) {
                                     decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
-                                    Notification.notify(stringMessages.successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups(), NotificationType.SUCCESS);
+                                    Notification.notify(stringMessages.successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups(
+                                            applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups.getName()),
+                                            NotificationType.SUCCESS);
                                 }
                             });
                 }

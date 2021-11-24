@@ -112,6 +112,6 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String memoryTotalSizeFactor();
     String launchAnotherReplicaSetOnThisMaster();
     String ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups();
-    String successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups();
+    String successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups(String replicaSetName);
     String stopReplicating();
 }
