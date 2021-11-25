@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -543,7 +544,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             return getEc2Client(getRegion(region))
                     .describeInstances(b->b.filters(Filter.builder().name("private-ip-address").values(inetAddress.getHostAddress()).build())).reservations()
                     .iterator().next().instances().iterator().next();
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException | NoSuchElementException e) {
             logger.warning("IP address for "+privateIpAddress+" not found");
             return null;
         }
