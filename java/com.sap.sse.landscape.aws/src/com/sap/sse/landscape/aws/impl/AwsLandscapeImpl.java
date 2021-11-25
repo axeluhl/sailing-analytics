@@ -805,7 +805,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         logger.info("Found the following MFA devices: "+Util.joinStrings(", ", Util.map(mfaDevices, d->d.serialNumber())));
         final String serialNumberOfMfaDevice = mfaDevices.iterator().next().serialNumber();
         logger.info("Found MFA device "+serialNumberOfMfaDevice+"; using MFA token code "+nonEmptyMfaTokenCode);
-        final Credentials result = StsClient.builder().credentialsProvider(()->basicCredentials).build()
+        final Credentials result = StsClient.builder().region(Region.AWS_GLOBAL).credentialsProvider(()->basicCredentials).build()
             .getSessionToken(b->b.tokenCode(nonEmptyMfaTokenCode).serialNumber(serialNumberOfMfaDevice)).credentials();
         logger.info("Produced valid MFA session credentials for access key ID "+result.accessKeyId());
         return result;
