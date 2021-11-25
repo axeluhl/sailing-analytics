@@ -86,7 +86,7 @@ configure_and_start_server() {
   /usr/local/bin/cp_root_mail_properties "${conf}"
   su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
   pushd ${SERVERS_DIR}/${conf}
-  ./defineReverseProxyMappings.sh" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  ./defineReverseProxyMappings.sh 2>>/var/log/sailing.err >>/var/log/sailing.err
   popd
   RETVAL=$?
   [ $RETVAL -eq 0 ] && success || failure
