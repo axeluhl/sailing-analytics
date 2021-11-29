@@ -1,5 +1,5 @@
 .content {
- padding: 0 6px;
+ padding: 0;
 }
 
 .feature:before {
@@ -48,6 +48,12 @@
   width: 100%;
   margin-right: 5px;
   margin-left: 5px;
+ }
+}
+/* Small screens */
+@media ( max-width: 1212px) {
+ .content {
+  padding: 0 6px;
  }
 }
 
