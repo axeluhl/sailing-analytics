@@ -56,6 +56,8 @@ public class SubscriptionCard extends Composite {
     @UiField
     HeadingElement description;
     @UiField
+    HeadingElement info;
+    @UiField
     FlowPanel prices;
     @UiField
     FlowPanel features;
@@ -165,6 +167,7 @@ public class SubscriptionCard extends Composite {
         final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
         title.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getNameMessageKey()));
         description.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getDescMessageKey()));
+        info.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getInfoMessageKey()));
         final String[] featureStrings = subscriptionStringConstants.getStringArray(subscriptionPlanDTO.getFeatureMessageKey());
         for (String featureString : featureStrings) {
             if(featureString != "") {

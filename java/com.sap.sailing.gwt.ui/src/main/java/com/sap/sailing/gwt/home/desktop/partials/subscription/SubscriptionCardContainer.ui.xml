@@ -1,13 +1,44 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
-  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-  <ui:with field="main" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  <ui:with field="local" type="com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardResources"></ui:with>
+  <ui:with field="i18n"
+    type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="main"
+    type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local"
+    type="com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardResources"></ui:with>
   <ui:style>
   </ui:style>
-  <g:HTMLPanel styleName="{main.mediaCss.stackenblochen}">
-    <h1><ui:text from="{i18n.subscriptionPlanOverview}" /></h1>
-    <g:FlowPanel ui:field="container" styleName="{local.css.container}"></g:FlowPanel>
+  <g:HTMLPanel styleName="{main.mediaCss.stackenblochen} {local.css.content}">
+    <div class="{local.css.subscriptionHeader}">
+      <span class="{local.css.hint}">
+        <g:Button ui:field="businessModelInfoButton">
+          <b>ⓘ </b>
+          <ui:text
+            from="{i18n.subscriptionBusinessModelInfoButton}" />
+        </g:Button>
+      </span>
+    </div>
+    <h1>
+      <ui:text from="{i18n.subscriptionPlanOverview}" />
+    </h1>
+    <g:FlowPanel ui:field="container"
+      styleName="{local.css.container}"></g:FlowPanel>
+    <div class="{local.css.subscriptionHeader}">
+      <span class="{local.css.hint}">
+        <g:Button ui:field="emailContact">
+          <ui:text from="{i18n.contactServicesAndInformation}" />
+          <b> ✉</b>
+        </g:Button>
+      </span>
+      <span>&nbsp;</span>
+    </div>
+    <h1>
+      <ui:text from="{i18n.premiumFeatureList}" />
+    </h1>
+    <h2>
+      <ui:text from="{i18n.premiumFeatureListDescription}" />
+    </h2>
+    <dl ui:field="features" class="{local.css.featureList}"></dl>
   </g:HTMLPanel>
 </ui:UiBinder> 

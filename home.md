@@ -91,6 +91,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Prionet related information|wiki/info/misc/prionet-related-information]]
 * [[TracTrac Workshop 2013|wiki/info/misc/tractracworkshop2013]]
 
+* [[Subscriptions|wiki/info/misc/subscriptions]]
+
 ## HowTo
 
 * [[Onboarding|wiki/howto/onboarding]]
