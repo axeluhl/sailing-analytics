@@ -220,8 +220,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                     addRemoteSailingServerReferenceResultAsJson = new JSONObject();
                     addRemoteSailingServerReferenceResultAsJson.put(RESPONSE_CODE, Status.INTERNAL_SERVER_ERROR.getStatusCode());
                 }
-                // FIXME bug5311 and now remove the event / the leaderboard groups in the base location, but preserve security/ownerships/ACLs in case of shared security! Maybe remember ownerships/ACLs before deleting, then re-establish after deleting...
-                // FIXME bug5311 adjust request routing such that requests targeting the content moved will be routed to the new "dedicatedServer" location
+                // FIXME bug5311: update archive server reverse proxy settings for the event(s) imported, then dismantle the dedicated replica set and consider archiving its DB to "slow" if it was on "live", probably controlling dismantling by an optional parameter that defaults to false; see LandscapeManagementWriteServiceImpl.archiveReplicaSet
                 result.put(MDI, mdiResultAsJson);
                 result.put(COMPARE_SERVERS, compareServersResultAsJson);
                 result.put(REMOTE_SERVER_REFERENCE_ADD, addRemoteSailingServerReferenceResultAsJson);
