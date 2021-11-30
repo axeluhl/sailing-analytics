@@ -42,5 +42,6 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.racelogtrackingadapter,
  com.sap.sailing.shared.server,
  com.sap.sailing.resultimport,
- com.sap.sailing.shared.server.gateway
+ com.sap.sailing.shared.server.gateway,
+ com.sap.sailing.server.gateway.interfaces
 Automatic-Module-Name: com.sap.sailing.server.replication.test
