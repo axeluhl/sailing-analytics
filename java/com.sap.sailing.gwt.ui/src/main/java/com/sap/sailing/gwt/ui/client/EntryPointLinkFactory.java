@@ -5,7 +5,6 @@ import static java.util.Collections.emptyMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
 
 public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
@@ -48,7 +47,7 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     }
 
     public static String createSubscriptionPageLink(final Iterable<String> highlightedPlans) {
-        final StringJoiner joiner = new StringJoiner("&", PlaceTokenPrefixes.Subscription + ":", "");
+        final StringJoiner joiner = new StringJoiner("&", "/subscription/:", "");
         highlightedPlans.forEach(id -> joiner.add("highlight=" + id));
         return createEntryPointLink(HOME_PATH, joiner.toString(), emptyMap());
     }

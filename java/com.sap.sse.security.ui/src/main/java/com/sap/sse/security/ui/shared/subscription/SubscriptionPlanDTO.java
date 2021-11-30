@@ -14,6 +14,7 @@ public class SubscriptionPlanDTO implements IsSerializable {
     private static final String FEATURES_MESSAGE_KEY_SUFFX = "_features";
     private static final String NAME_MESSAGE_KEY_SUFFX = "_name";
     private static final String DESC_MESSAGE_KEY_SUFFX = "_description";
+    private static final String INFO_MESSAGE_KEY_SUFFIX = "_info";
     private static final long serialVersionUID = -1990028347487353679L;
     private String id;
     private HashSet<SubscriptionPrice> prices = new HashSet<SubscriptionPrice>();
@@ -56,6 +57,10 @@ public class SubscriptionPlanDTO implements IsSerializable {
 
     public String getDescMessageKey() {
         return this.id + DESC_MESSAGE_KEY_SUFFX;
+    }
+
+    public String getInfoMessageKey() {
+        return this.id + INFO_MESSAGE_KEY_SUFFIX;
     }
 
     public String getFeatureMessageKey() {

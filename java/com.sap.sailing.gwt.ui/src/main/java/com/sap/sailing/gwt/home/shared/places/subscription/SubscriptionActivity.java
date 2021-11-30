@@ -43,20 +43,11 @@ public class SubscriptionActivity extends AbstractActivity {
                                     view.addSubscriptionPlan(plan, Type.DEFAULT, eventBus);
                                 }
                             });
-                            addIndividual(eventBus, view);
                         }
 
                         @Override
                         public void onFailure(final Throwable caught) {
                             clientFactory.createErrorView("TODO Failed to load subscription plans", caught);
-                        }
-
-                        private void addIndividual(final EventBus eventBus, final SubscriptionView view) {
-                            final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO("individual_subscription_plan" /* id */,
-                                    /* isUserSubscribedToPlan */ false,
-                                    Collections.emptySet() /* prices */,
-                                    null /* error */);
-                            view.addSubscriptionPlan(individualPlan, Type.INDIVIDUAL, eventBus);
                         }
 
                         private void addFreePlan(final SubscriptionView view) {
