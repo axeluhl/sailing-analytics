@@ -41,6 +41,7 @@ import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.server.gateway.deserialization.impl.RemoteSailingServerReferenceJsonDeserializer;
+import com.sap.sailing.server.gateway.interfaces.SailingServerFactory;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.server.gateway.serialization.impl.MasterDataImportResultJsonSerializer;
@@ -104,6 +105,10 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             @FormParam(OVERRIDE) @DefaultValue("false") boolean override) {
         Response response;
         final String effectiveBaseServer = !Util.hasLength(baseServer) ? uriInfo.getBaseUri().getAuthority() : baseServer;
+        final SailingServerFactory sailingServerFactory = getSailingServerFactory();
+        if (sailingServerFactory == null) {
+            throw new IllegalStateException("Couldn't find SailingServerFactory");
+        }
         if (!validateAuthenticationParameters(user1, password1, bearer1)) {
             response = badRequest("Specify "+USER1_FORM_PARAM+" and "+PASSWORD1_FORM_PARAM+" or alternatively "+BEARER1_FORM_PARAM+" or none of them.");
         } else if (!validateAuthenticationParameters(user2, password2, bearer2)) {
@@ -111,21 +116,21 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         } else if (!Util.hasLength(dedicatedServer)) {
             response = badRequest("A target server must be specified with the "+SERVER2_FORM_PARAM+" parameter");
         } else {
-            final String baseServerBearerToken = getService().getOrCreateTargetServerBearerToken(effectiveBaseServer, user1, password1, bearer1);
-            final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer, user2, password2, bearer2);
+            final String baseServerBearerToken = getSecurityService().getOrCreateTargetServerBearerToken(effectiveBaseServer, user1, password1, bearer1);
+            final String dedicatedServerBearerToken = getSecurityService().getOrCreateTargetServerBearerToken(dedicatedServer, user2, password2, bearer2);
             try {
                 final JSONObject result = new JSONObject();
                 final Pair<JSONObject, Number> mdi = doMDI(effectiveBaseServer, dedicatedServer, requestedLeaderboardGroups,
-                        baseServerBearerToken, dedicatedServerBearerToken, override);
+                        baseServerBearerToken, dedicatedServerBearerToken, override); // TODO bug5631: use SailingServer.importMasterData
                 mdi.getA().put(RESPONSE_CODE, mdi.getB());
                 final Pair<JSONObject, Number> compareServers = doCompareServers(effectiveBaseServer, dedicatedServer,
-                        dedicatedServerBearerToken, baseServerBearerToken, requestedLeaderboardGroups);
+                        dedicatedServerBearerToken, baseServerBearerToken, requestedLeaderboardGroups); // TODO bug5631: use SailingServer.compareServers
                 compareServers.getA().put(RESPONSE_CODE, compareServers.getB());
                 // add a remote reference from the base server pointing to the dedicated server
                 final Pair<JSONObject, Number> remoteServerReferenceAdd = doRemoteServerReferenceAdd(effectiveBaseServer,
-                        dedicatedServer, baseServerBearerToken, getIdsOfImportedEvents(mdi.getA()));
+                        dedicatedServer, baseServerBearerToken, getIdsOfImportedEvents(mdi.getA())); // TODO bug5631: use SailingServer.addRemoteServerEventReferences
                 remoteServerReferenceAdd.getA().put(RESPONSE_CODE, remoteServerReferenceAdd.getB());
-                // FIXME bug5311 and now remove the event / the leaderboard groups in the base location, but preserve security/ownerships/ACLs in case of shared security!
+                // FIXME bug5311 and now remove the event / the leaderboard groups in the base location, but preserve security/ownerships/ACLs in case of shared security! Maybe remember ownerships/ACLs before deleting, then re-establish after deleting...
                 // FIXME bug5311 adjust request routing such that requests targeting the content moved will be routed to the new "dedicatedServer" location
                 result.put(MDI, mdi.getA());
                 result.put(COMPARE_SERVERS, compareServers.getA());
@@ -178,18 +183,18 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         } else  if (!validateAuthenticationParameters(user2, password2, bearer2)) {
             response = badRequest("Specify "+USER2_FORM_PARAM+" and "+PASSWORD2_FORM_PARAM+" or alternatively "+BEARER2_FORM_PARAM+" or none of them.");
         } else {
-            final String archiveServerBearerToken = getService().getOrCreateTargetServerBearerToken(
+            final String archiveServerBearerToken = getSecurityService().getOrCreateTargetServerBearerToken(
                     archiveServer, user1, password1, bearer1);
-            final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(
+            final String dedicatedServerBearerToken = getSecurityService().getOrCreateTargetServerBearerToken(
                     dedicatedServer, user2, password2, bearer2);
             try {
                 final JSONObject result = new JSONObject();
                 final Pair<JSONObject, Number> mdi = doMDI(dedicatedServer, archiveServer, requestedLeaderboardGroups,
-                        dedicatedServerBearerToken, archiveServerBearerToken, override);
+                        dedicatedServerBearerToken, archiveServerBearerToken, override); // TODO bug5631: use SailingServer.importMasterData
                 final Pair<JSONObject, Number> compareServers = doCompareServers(dedicatedServer, archiveServer,
-                        archiveServerBearerToken, dedicatedServerBearerToken, requestedLeaderboardGroups);
+                        archiveServerBearerToken, dedicatedServerBearerToken, requestedLeaderboardGroups); // TODO bug5631: use SailingServer.compareServers
                 final Pair<JSONObject, Number> remoteServerReferenceRemove = doRemoteServerReferenceRemove(
-                        archiveServer, dedicatedServer, archiveServerBearerToken, getIdsOfImportedEvents(mdi.getA()));
+                        archiveServer, dedicatedServer, archiveServerBearerToken, getIdsOfImportedEvents(mdi.getA())); // TODO bug5631: use SailingServer.removeRemoteServerEventReferences
                 // FIXME bug5311: update archive server reverse proxy settings for the event(s) imported, then dismantle the dedicated replica set and consider archiving its DB to "slow" if it was on "live", probably controlling dismantling by an optional parameter that defaults to false
                 result.put(MDI, mdi.getA());
                 result.put(COMPARE_SERVERS, compareServers.getA());
