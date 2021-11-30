@@ -144,11 +144,12 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         context = bundleContext;
-        createAndRegisterSubscriptionServices();
+        final SubscriptionPlanProvider subscriptionPlanProvider = createAndOpenSubscriptionPlanProvider(bundleContext);
+        createAndRegisterSubscriptionServices(subscriptionPlanProvider);
         if (testUserStore != null && testAccessControlStore != null) {
-            createAndRegisterSecurityService(bundleContext, testUserStore, testAccessControlStore);
+            createAndRegisterSecurityService(bundleContext, testUserStore, testAccessControlStore, subscriptionPlanProvider);
         } else {
-            waitForUserStoreService(bundleContext);
+            waitForUserStoreService(bundleContext, subscriptionPlanProvider);
         }
         context.registerService(ClearStateTestSupport.class, new ClearStateTestSupport() {
             @Override
@@ -157,12 +158,19 @@ public class Activator implements BundleActivator {
             }
         }, null);
     }
+    
+    private SubscriptionPlanProvider createAndOpenSubscriptionPlanProvider(BundleContext bundleContext) {
+        final ServiceTracker<SubscriptionPlanProvider, SubscriptionPlanProvider> subscriptionPlanProviderTracker = new ServiceTracker<>(
+                bundleContext, SubscriptionPlanProvider.class, /* customizer */ null);
+        subscriptionPlanProviderTracker.open();
+        return new OSGISubscriptionPlanProvider(subscriptionPlanProviderTracker);
+    }
 
-    private void createAndRegisterSubscriptionServices() {
+    private void createAndRegisterSubscriptionServices(SubscriptionPlanProvider subscriptionPlanProvider) {
         final SubscriptionApiRequestProcessor subscriptionApiRequestProcessor = new SubscriptionApiRequestProcessorImpl(
                 ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
         final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(ChargebeeConfiguration.getInstance(),
-                subscriptionApiRequestProcessor);
+                subscriptionApiRequestProcessor, subscriptionPlanProvider);
         final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
         chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY,
                 chargebeeApiService.getProviderName());
@@ -189,18 +197,15 @@ public class Activator implements BundleActivator {
         applyCustomizations();
     }
 
-    private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore userStore, AccessControlStore accessControlStore) {
+    private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore userStore,
+            AccessControlStore accessControlStore, SubscriptionPlanProvider subscriptionPlanProvider) {
         final ServiceTracker<HasPermissionsProvider, HasPermissionsProvider> hasPermissionsProviderTracker = new ServiceTracker<>(
                 bundleContext, HasPermissionsProvider.class, /* customizer */ null);
         hasPermissionsProviderTracker.open();
-        final ServiceTracker<SubscriptionPlanProvider, SubscriptionPlanProvider> subscriptionPlanProviderTracker = new ServiceTracker<>(
-                bundleContext, SubscriptionPlanProvider.class, /* customizer */ null);
-        subscriptionPlanProviderTracker.open();
         SecurityService initialSecurityService = new SecurityServiceImpl(
                 ServiceTrackerFactory.createAndOpen(context, MailService.class), userStore, accessControlStore,
-                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker),
-                new OSGISubscriptionPlanProvider(subscriptionPlanProviderTracker), sharedAcrossSubdomainsOf,
-                baseUrlForCrossDomainStorage);
+                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), subscriptionPlanProvider,
+                sharedAcrossSubdomainsOf, baseUrlForCrossDomainStorage);
         initialSecurityService.initialize();
         securityService.complete(initialSecurityService);
         registration = context.registerService(SecurityService.class, initialSecurityService, null);
@@ -242,7 +247,7 @@ public class Activator implements BundleActivator {
         securityInitializationCustomizerTracker.open();
     }
 
-    private void waitForUserStoreService(BundleContext bundleContext) {
+    private void waitForUserStoreService(BundleContext bundleContext, SubscriptionPlanProvider subscriptionPlanProvider) {
         context = bundleContext;
         userStoreTracker = new ServiceTracker<>(bundleContext, UserStore.class, /* customizer */ null);
         accessControlStoreTracker = new ServiceTracker<>(bundleContext, AccessControlStore.class,
@@ -266,7 +271,7 @@ public class Activator implements BundleActivator {
                     // loading ACLs and Ownerships requires users and UserGroups to be correctly loaded
                     accessControlStore.loadACLsAndOwnerships();
                     // create security service, it will also create a default admin user if no users exist
-                    createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
+                    createAndRegisterSecurityService(bundleContext, userStore, accessControlStore, subscriptionPlanProvider);
                     applyCustomizations();
                     migrate(userStore, securityService.get());
                     startSubscriptionDataUpdateTask(bundleContext);
