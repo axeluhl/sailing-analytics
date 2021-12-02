@@ -55,27 +55,17 @@ public class RestServletContainer extends ServletContainer {
 
     @Override
     public void init(ServletConfig config) throws ServletException {  
-       super.init(config);  
+       super.init(config);
        BundleContext context = (BundleContext) config.getServletContext().getAttribute(OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
        sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
        replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+       sailingServerFactoryTracker = ServiceTrackerFactory.createAndOpen(context, SailingServerFactory.class);
        config.getServletContext().setAttribute(RACING_EVENT_SERVICE_TRACKER_NAME, racingEventServiceTracker);
        config.getServletContext().setAttribute(SHARED_SAILING_DATA_TRACKER_NAME, sharedSailingDataTracker);
        config.getServletContext().setAttribute(REPLICATION_SERVICE_TRACKER_NAME, replicationServiceTracker);
        config.getServletContext().setAttribute(SECURITY_SERVICE_TRACKER_NAME, securityServiceTracker);
        config.getServletContext().setAttribute(SAILING_SERVER_FACTORY_TRACKER_NAME, sailingServerFactoryTracker);
    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        if (racingEventServiceTracker != null) {
-            racingEventServiceTracker.close();
-        }
-        if (securityServiceTracker != null) {
-            securityServiceTracker.close();
-        }
-    }
 }
