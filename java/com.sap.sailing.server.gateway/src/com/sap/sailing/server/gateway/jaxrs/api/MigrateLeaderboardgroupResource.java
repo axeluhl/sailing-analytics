@@ -111,6 +111,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                         compareServersResultAsJson = new CompareServersResultJsonSerializer().serialize(compareServersResult);
                         compareServersResultAsJson.put(RESPONSE_CODE, compareServersResult.hasDiffs() ? Status.CONFLICT.getStatusCode() : Status.OK.getStatusCode());
                         // add a remote reference from the base server pointing to the dedicated server
+                        // TODO shouldn't adding the reference happen only if comparing servers went ok?
                         remoteSailingServerReference = baseSailingServer.addRemoteServerEventReferences(dedicatedSailingServer, mdiResult.getEventIdsImported());
                         if (remoteSailingServerReference != null) {
                             addRemoteSailingServerReferenceResultAsJson = new RemoteSailingServerReferenceJsonSerializer().serialize(remoteSailingServerReference);
@@ -190,7 +191,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                 final JSONObject compareServersResultAsJson;
                 final CompareServersResult compareServersResult;
                 final RemoteSailingServerReference remoteSailingServerReference;
-                final JSONObject addRemoteSailingServerReferenceResultAsJson;
+                final JSONObject removeRemoteSailingServerReferenceResultAsJson;
                 if (mdiResult != null) {
                     mdiResultAsJson = new MasterDataImportResultJsonSerializer().serialize(mdiResult);
                     mdiResultAsJson.put(RESPONSE_CODE, Status.OK.getStatusCode());
@@ -199,16 +200,17 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                     if (compareServersResult != null) {
                         compareServersResultAsJson = new CompareServersResultJsonSerializer().serialize(compareServersResult);
                         compareServersResultAsJson.put(RESPONSE_CODE, compareServersResult.hasDiffs() ? Status.CONFLICT.getStatusCode() : Status.OK.getStatusCode());
+                        // TODO shouldn't the reference removal happen only if comparing servers went ok?
                         // add a remote reference from the base server pointing to the dedicated server
-                        remoteSailingServerReference = dedicatedSailingServer.removeRemoteServerEventReferences(archiveSailingServer, mdiResult.getEventIdsImported());
-                        addRemoteSailingServerReferenceResultAsJson = remoteSailingServerReference == null ? new JSONObject() : new RemoteSailingServerReferenceJsonSerializer().serialize(remoteSailingServerReference);
-                        addRemoteSailingServerReferenceResultAsJson.put(RESPONSE_CODE, Status.OK.getStatusCode());
+                        remoteSailingServerReference = archiveSailingServer.removeRemoteServerEventReferences(dedicatedSailingServer, mdiResult.getEventIdsImported());
+                        removeRemoteSailingServerReferenceResultAsJson = remoteSailingServerReference == null ? new JSONObject() : new RemoteSailingServerReferenceJsonSerializer().serialize(remoteSailingServerReference);
+                        removeRemoteSailingServerReferenceResultAsJson.put(RESPONSE_CODE, Status.OK.getStatusCode());
                     } else {
                         compareServersResultAsJson = new JSONObject();
                         compareServersResultAsJson.put(RESPONSE_CODE, Status.INTERNAL_SERVER_ERROR.getStatusCode());
                         remoteSailingServerReference = null;
-                        addRemoteSailingServerReferenceResultAsJson = new JSONObject();
-                        addRemoteSailingServerReferenceResultAsJson.put(RESPONSE_CODE, Status.INTERNAL_SERVER_ERROR.getStatusCode());
+                        removeRemoteSailingServerReferenceResultAsJson = new JSONObject();
+                        removeRemoteSailingServerReferenceResultAsJson.put(RESPONSE_CODE, Status.INTERNAL_SERVER_ERROR.getStatusCode());
                     }
                 } else {
                     mdiResultAsJson = new JSONObject();
@@ -217,13 +219,13 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
                     compareServersResultAsJson = new JSONObject();
                     compareServersResultAsJson.put(RESPONSE_CODE, Status.INTERNAL_SERVER_ERROR.getStatusCode());
                     remoteSailingServerReference = null;
-                    addRemoteSailingServerReferenceResultAsJson = new JSONObject();
-                    addRemoteSailingServerReferenceResultAsJson.put(RESPONSE_CODE, Status.INTERNAL_SERVER_ERROR.getStatusCode());
+                    removeRemoteSailingServerReferenceResultAsJson = new JSONObject();
+                    removeRemoteSailingServerReferenceResultAsJson.put(RESPONSE_CODE, Status.INTERNAL_SERVER_ERROR.getStatusCode());
                 }
                 // FIXME bug5311: update archive server reverse proxy settings for the event(s) imported, then dismantle the dedicated replica set and consider archiving its DB to "slow" if it was on "live", probably controlling dismantling by an optional parameter that defaults to false; see LandscapeManagementWriteServiceImpl.archiveReplicaSet
                 result.put(MDI, mdiResultAsJson);
                 result.put(COMPARE_SERVERS, compareServersResultAsJson);
-                result.put(REMOTE_SERVER_REFERENCE_ADD, addRemoteSailingServerReferenceResultAsJson);
+                result.put(REMOTE_SERVER_REFERENCE_REMOVED, removeRemoteSailingServerReferenceResultAsJson);
                 if (mdiResult == null || compareServersResult == null) {
                     response = Response.status(Status.CONFLICT).entity(streamingOutput(result)).build();
                 } else {
