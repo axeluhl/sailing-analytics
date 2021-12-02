@@ -1127,12 +1127,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public long getMillisecondsOverWhichToAverageWind() {
-        long result = 0; // default in case there is no competitor
-        for (WindSource windSource : getWindSources()) {
-            WindTrack someTrack = getOrCreateWindTrack(windSource);
-            result = someTrack.getMillisecondsOverWhichToAverageWind();
-        }
-        return result;
+        return windTracks.values().stream().findFirst().map(windTrack->windTrack.getMillisecondsOverWhichToAverageWind()).orElse(0l);
     }
 
     @Override
