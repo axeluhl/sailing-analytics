@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -46,22 +47,22 @@ public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderb
     }
 
     @Override
-    protected Consumer<AsyncCallback<Collection<CompetitorDTO>>> getEliminatedCompetitorsRetriever() {
+    protected Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getEliminatedCompetitorsRetriever() {
         eliminatedCompetitors = null;
         return callback->{
             if (eliminatedCompetitors != null) {
-                callback.onSuccess(eliminatedCompetitors);
+                callback.getB().onSuccess(eliminatedCompetitors);
             } else {
                 sailingServiceWrite.getEliminatedCompetitors(nameTextBox.getValue(), new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        callback.onFailure(caught);
+                        callback.getB().onFailure(caught);
                     }
 
                     @Override
                     public void onSuccess(Collection<CompetitorDTO> result) {
                         eliminatedCompetitors = new HashSet<>(result);
-                        callback.onSuccess(eliminatedCompetitors);
+                        callback.getB().onSuccess(eliminatedCompetitors);
                     }
                 });
             }

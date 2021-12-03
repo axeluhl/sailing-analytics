@@ -111,6 +111,14 @@ public class ImageTransformer {
     }
 
     public void drawToCanvas(Canvas canvas, double angleInDegrees, double scaleFactor) {
+        drawToCanvas(canvas, angleInDegrees, scaleFactor, /* globalAlpha; no transparency */ null);
+    }
+    
+    /**
+     * @param globalAlpha
+     *            0.0 means fully transparent; 1.0 means fully opaque; {@code null} will default to 1.0 (fully opaque).
+     */
+    public void drawToCanvas(Canvas canvas, double angleInDegrees, double scaleFactor, Double globalAlpha) {
         if (imageElement != null) {
             int canvasWidth = (int) Math.round(imageWidth * scaleFactor);
             int canvasHeight = (int) Math.round(imageHeight * scaleFactor);
@@ -125,6 +133,9 @@ public class ImageTransformer {
             context.translate(canvasRadius, canvasRadius);
             context.rotate(angleInRadians);
             context.scale(scaleFactor, scaleFactor);
+            if (globalAlpha != null) {
+                context.setGlobalAlpha(globalAlpha);
+            }
             context.drawImage(imageElement, (-imageWidth/2), (-imageHeight/2));
             context.restore();
         }

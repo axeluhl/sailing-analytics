@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -20,6 +21,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -30,6 +32,7 @@ import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.Cre
 import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
@@ -53,6 +56,7 @@ import com.sap.sse.gwt.client.celltable.ActionsColumn;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -103,6 +107,14 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final AwsMfaLoginWidget mfaLoginWidget;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
+    
+    /**
+     * The time to wait after archiving a replica set and before starting a "compare servers" run for the content
+     * archived. This waiting period is owed to the process of loading the race content which is an asynchronous
+     * process running mainly in the "background" and after the master data import has reported "completion."
+     */
+    private static final Duration DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS = Duration.ONE_MINUTE.times(1);
+    private static final int DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS = 3;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -245,9 +257,17 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_CREATE_LOAD_BALANCER_MAPPING,
                 applicationReplicaSetForWhichToDefineLoadBalancerMapping -> createDefaultLoadBalancerMappings(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLoadBalancerMapping));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER,
+                applicationReplicaSetForWhichToDefineLoadBalancerMapping -> createApplicationReplicaSetWithMasterOnExistingHost(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLoadBalancerMapping.getMaster().getHost()));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_REMOVE,
                 applicationReplicaSetToRemove -> removeApplicationReplicaSet(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToRemove));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_ENSURE_ONE_REPLICA_THEN_STOP_REPLICATING_AND_REMOVE_MASTER_FROM_TARGET_GROUPS,
+                applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups ->
+                    ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(),
+                        Collections.singleton(applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups)));
         applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -264,6 +284,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                 e->upgradeApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(upgradeApplicationReplicaSetButton);
+        final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> stopReplicatingAndUnregisterMasterButton = new SelectedElementsCountingButton<>(
+                stringMessages.stopReplicating(), applicationReplicaSetsTable.getSelectionModel(),
+                e->ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
+                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        applicationReplicaSetsButtonPanel.add(stopReplicatingAndUnregisterMasterButton);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
@@ -310,13 +335,54 @@ public class LandscapeManagementPanel extends SimplePanel {
             storeRegionSelection(userService, selectedRegion);
         });
         // TODO try to identify archive servers
-        // TODO support archiving of an application server cluster
-        // TODO support deploying a new app server process instance onto an existing app server host (multi-instance)
         // TODO support archive server upgrade
-        // TODO support upgrading all app server instances in a region
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
 
+    private void ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
+            StringMessages stringMessages, String selectedObject,
+            Iterable<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups) {
+        final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
+        new EnsureReplicaStopReplicatingRemoveMasterFromTargetGroupsDialog(stringMessages, errorReporter, new DialogCallback<String>() {
+            @Override
+            public void ok(String replicaReplicationBearerToken) {
+                applicationReplicaSetsBusy.setBusy(true);
+                final int[] howManyMoreToGo = new int[] { Util.size(applicationReplicaSetsForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups) };
+                for (final SailingApplicationReplicaSetDTO<String> applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups :
+                    applicationReplicaSetsForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups) {
+                    landscapeManagementService.ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
+                            selectedRegion, applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups,
+                            sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                            sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                            replicaReplicationBearerToken, new AsyncCallback<Boolean>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
+                                    errorReporter.reportError(caught.getMessage());
+                                }
+                                
+                                @Override
+                                public void onSuccess(Boolean result) {
+                                    decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
+                                    Notification.notify(stringMessages.successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups(
+                                            applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups.getName()),
+                                            NotificationType.SUCCESS);
+                                }
+                            });
+                }
+            }
+
+            @Override public void cancel() {}
+        }).show();
+    }
+
+    private void decrementHowManyMoreToGoAndSetNonBusyIfDone(int[] howManyMoreToGo) {
+        if (--howManyMoreToGo[0] <= 0) {
+            applicationReplicaSetsBusy.setBusy(false);
+        }
+    }
+    
     private void defineLandingPage(StringMessages stringMessages, String selectedRegion,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToDefineLandingPageFor) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
@@ -379,7 +445,56 @@ public class LandscapeManagementPanel extends SimplePanel {
                                         sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                                instructions.getReplicationBearerToken(),instructions.getOptionalDomainName(),
+                                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
+                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(),
+                                                instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                 @Override
+                                 public void onFailure(Throwable caught) {
+                                    applicationReplicaSetsBusy.setBusy(false);
+                                    errorReporter.reportError(caught.getMessage());
+                                 }
+                                 
+                                 @Override
+                                 public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                    applicationReplicaSetsBusy.setBusy(false);
+                                    Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
+                                    if (result != null) {
+                                        applicationReplicaSetsTable.getFilterPanel().add(result);
+                                    }
+                                 }
+                              });
+                    }
+                    
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
+            }
+        });
+    }
+
+    private void createApplicationReplicaSetWithMasterOnExistingHost(StringMessages stringMessages, String regionId, AwsInstanceDTO hostToDeployTo) {
+        landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(ArrayList<ReleaseDTO> result) {
+                new CreateApplicationReplicaSetDialog(landscapeManagementService, result.stream().map(r->r.getName())::iterator,
+                        stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
+                    @Override
+                    public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        landscapeManagementService.deployApplicationToExistingHost(regionId, instructions.getName(), hostToDeployTo, 
+                                instructions.getInstanceType(), instructions.isDynamicLoadBalancerMapping(),
+                                        instructions.getReleaseNameOrNullForLatestMaster(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
+                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(), instructions.getOptionalMemoryTotalSizeFactorOrNull(),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {
@@ -428,11 +543,129 @@ public class LandscapeManagementPanel extends SimplePanel {
             });
         }
     }
+    
+    private static class ReplicaSetArchivingParameters {
+        private final String bearerTokenOrNullForApplicationReplicaSetToArchive;
+        private final String bearerTokenOrNullForArchive;
+        private final boolean removeApplicationReplicaSet;
+        private final Duration durationToWaitBeforeAndBetweenCompareServerAttempts;
+        private final int numberOfTimesToTryCompareServers;
+        public ReplicaSetArchivingParameters(String bearerTokenOrNullForApplicationReplicaSetToArchive,
+                String bearerTokenOrNullForArchive, boolean removeApplicationReplicaSet,
+                Duration durationToWaitBeforeAndBetweenCompareServerAttempts,
+                int numberOfTimesToTryCompareServers) {
+            super();
+            this.bearerTokenOrNullForApplicationReplicaSetToArchive = bearerTokenOrNullForApplicationReplicaSetToArchive;
+            this.bearerTokenOrNullForArchive = bearerTokenOrNullForArchive;
+            this.removeApplicationReplicaSet = removeApplicationReplicaSet;
+            this.durationToWaitBeforeAndBetweenCompareServerAttempts = durationToWaitBeforeAndBetweenCompareServerAttempts;
+            this.numberOfTimesToTryCompareServers = numberOfTimesToTryCompareServers;
+        }
+        public String getBearerTokenOrNullForApplicationReplicaSetToArchive() {
+            return bearerTokenOrNullForApplicationReplicaSetToArchive;
+        }
+        public String getBearerTokenOrNullForArchive() {
+            return bearerTokenOrNullForArchive;
+        }
+        public boolean isRemoveApplicationReplicaSet() {
+            return removeApplicationReplicaSet;
+        }
+        public Duration getDurationToWaitBeforeAndBetweenCompareServerAttempts() {
+            return durationToWaitBeforeAndBetweenCompareServerAttempts;
+        }
+        public int getNumberOfTimesToTryCompareServers() {
+            return numberOfTimesToTryCompareServers;
+        }
+    }
 
     private void archiveApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive) {
-        Notification.notify("archiveApplicationReplicaSet not implemented yet", NotificationType.ERROR);
-        // TODO Implement LandscapeManagementPanel.archiveApplicationReplicaSet(...)
+        final MongoEndpointDTO selectedMongoEndpointForDBArchiving = mongoEndpointsTable.getSelectionModel().getSelectedObject();
+        new DataEntryDialog<ReplicaSetArchivingParameters>(stringMessages.createLoadBalancerMapping(), stringMessages.createLoadBalancerMapping(),
+                stringMessages.ok(), stringMessages.cancel(), /* validator */ null, new DialogCallback<ReplicaSetArchivingParameters>() {
+                    @Override
+                    public void ok(ReplicaSetArchivingParameters bearerTokensAndWhetherToRemoveReplicaSet) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        landscapeManagementService.archiveReplicaSet(regionId, applicationReplicaSetToArchive,
+                                bearerTokensAndWhetherToRemoveReplicaSet.getBearerTokenOrNullForApplicationReplicaSetToArchive(),
+                                bearerTokensAndWhetherToRemoveReplicaSet.getBearerTokenOrNullForArchive(),
+                                bearerTokensAndWhetherToRemoveReplicaSet.getDurationToWaitBeforeAndBetweenCompareServerAttempts(),
+                                bearerTokensAndWhetherToRemoveReplicaSet.getNumberOfTimesToTryCompareServers(),
+                                bearerTokensAndWhetherToRemoveReplicaSet.isRemoveApplicationReplicaSet(),
+                                selectedMongoEndpointForDBArchiving, sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                    ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                new AsyncCallback<UUID>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                applicationReplicaSetsBusy.setBusy(false);
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(UUID progressId) {
+                                // TODO try to follow the progress and trigger removing the replica set from the table when complete
+                                applicationReplicaSetsBusy.setBusy(false);
+                                if (bearerTokensAndWhetherToRemoveReplicaSet.isRemoveApplicationReplicaSet()) {
+                                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToArchive);
+                                }
+                                Notification.notify(stringMessages.successfullyArchivedReplicaSet(
+                                        applicationReplicaSetToArchive.getName()), NotificationType.SUCCESS);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+            
+        }) {
+            private final TextBox bearerTokenOrNullForApplicationReplicaSetToArchiveBox = createTextBox("");
+            private final TextBox bearerTokenOrNullForArchiveBox = createTextBox("");
+            private final IntegerBox numberOfMinutesBeforeAndBetweenCompareServersBox = createIntegerBox((int) DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS.asMinutes(), /* visible length */ 3);
+            private final IntegerBox numberOfCompareServersAttemptsBox = createIntegerBox(DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS, /* visible length */ 3);
+            private final CheckBox removeReplicaSetBox = createCheckbox(stringMessages.removeArchivedReplicaSet());
+            
+            @Override
+            protected Widget getAdditionalWidget() {
+                final Grid result = new Grid(5, 2);
+                int row=0;
+                result.setWidget(row, 0, new Label(stringMessages.bearerTokenOrNullForApplicationReplicaSetToArchive(applicationReplicaSetToArchive.getName())));
+                result.setWidget(row++, 1, bearerTokenOrNullForApplicationReplicaSetToArchiveBox);
+                result.setWidget(row, 0, new Label(stringMessages.bearerTokenOrNullForArchive()));
+                result.setWidget(row++, 1, bearerTokenOrNullForArchiveBox);
+                result.setWidget(row, 0, new Label(stringMessages.numberOfMinutesBeforeAndBetweenCompareServers()));
+                result.setWidget(row++, 1, numberOfMinutesBeforeAndBetweenCompareServersBox);
+                result.setWidget(row, 0, new Label(stringMessages.numberOfCompareServersAttempts()));
+                result.setWidget(row++, 1, numberOfCompareServersAttemptsBox);
+                result.setWidget(row++, 0, removeReplicaSetBox);
+                return result;
+            }
+
+            @Override
+            protected FocusWidget getInitialFocusWidget() {
+                return bearerTokenOrNullForApplicationReplicaSetToArchiveBox;
+            }
+
+            @Override
+            protected ReplicaSetArchivingParameters getResult() {
+                return new ReplicaSetArchivingParameters(
+                        Util.hasLength(bearerTokenOrNullForApplicationReplicaSetToArchiveBox.getValue())
+                                ? bearerTokenOrNullForApplicationReplicaSetToArchiveBox.getValue()
+                                : null,
+                        Util.hasLength(bearerTokenOrNullForArchiveBox.getValue())
+                                ? bearerTokenOrNullForArchiveBox.getValue()
+                                : null,
+                        removeReplicaSetBox.getValue(),
+                        numberOfMinutesBeforeAndBetweenCompareServersBox.getValue() == null
+                                ? DEFAULT_DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS
+                                : Duration.ONE_MINUTE
+                                        .times(numberOfMinutesBeforeAndBetweenCompareServersBox.getValue()),
+                        numberOfCompareServersAttemptsBox.getValue() == null
+                                ? DEFAULT_NUMBER_OF_COMPARE_SERVERS_ATTEMPTS
+                                : numberOfCompareServersAttemptsBox.getValue());
+            }
+        }.show();
     }
     
     private void createDefaultLoadBalancerMappings(final StringMessages stringMessages, String regionId,
@@ -548,21 +781,17 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                     sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                             sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                                    upgradeInstructions.getReplicationBearerToken(),
+                                                    upgradeInstructions.getReplicaReplicationBearerToken(),
                                                     new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                                         @Override
                                                         public void onFailure(Throwable caught) {
-                                                            if (--howManyMoreToGo[0] == 0) {
-                                                                applicationReplicaSetsBusy.setBusy(false);
-                                                            }
+                                                            decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
                                                             errorReporter.reportError(caught.getMessage());
                                                         }
             
                                                         @Override
                                                         public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
-                                                            if (--howManyMoreToGo[0] == 0) {
-                                                                applicationReplicaSetsBusy.setBusy(false);
-                                                            }
+                                                            decrementHowManyMoreToGoAndSetNonBusyIfDone(howManyMoreToGo);
                                                             if (result != null) {
                                                                 Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
                                                                                 result.getName(), result.getVersion()), NotificationType.SUCCESS);

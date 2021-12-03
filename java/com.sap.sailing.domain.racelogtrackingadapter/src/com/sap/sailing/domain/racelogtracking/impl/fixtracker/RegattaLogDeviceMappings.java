@@ -170,13 +170,13 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
             Consumer<DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
         LockUtil.executeWithReadLock(mappingsLock, () -> {
             List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDevice = mappingsByDevice.get(device);
-        if (mappingsForDevice != null) {
-            for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : mappingsForDevice) {
-                if (mapping.getTimeRange().includes(timePoint)) {
-                    callback.accept(mapping);
+            if (mappingsForDevice != null) {
+                for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : mappingsForDevice) {
+                    if (mapping.getTimeRange().includes(timePoint)) {
+                        callback.accept(mapping);
+                    }
                 }
             }
-        }
         });
     }
     

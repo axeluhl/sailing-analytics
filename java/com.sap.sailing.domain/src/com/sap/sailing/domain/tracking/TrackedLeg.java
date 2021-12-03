@@ -181,6 +181,8 @@ public interface TrackedLeg extends Serializable {
      */
     Position getMiddleOfLeg(TimePoint at);
     
+    Position getMiddleOfLeg(TimePoint at, MarkPositionAtTimePointCache cache);
+
     /**
      * The positions of the course breaking up of line, connecting the start and the end of leg waypoint's position at
      * time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.

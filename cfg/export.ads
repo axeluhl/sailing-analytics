@@ -20,7 +20,7 @@ assert mavenclient.exists()
 println "mavenclient check passed"
 
 def setup_android_tool(String toolname) {
-  def tool = new File(CODESIGN_TOOL_DIR, "android-8.1.0/" + toolname )
+  def tool = new File(CODESIGN_TOOL_DIR, "android-11/" + toolname )
   //check zipalign in the exploded build-tools dir
   tool.setExecutable(true)
   assert tool.canExecute()
@@ -53,15 +53,15 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
     def apkUnsigned = apkFile.getAbsolutePath()
     def name = apkFile.getName()
     def index = name.indexOf("-")
-    def apkToDeploy = "$repodir/${name.substring(0 , index)}-release-centralsigned.apk"
+    def apkToDeploy = apkUnsigned
 
-    //align the already signed apks
-    assert execute(zipalign.absolutePath, "-v", "4", apkUnsigned, apkToDeploy) == 0
+    //don't align the already signed apks anymore
+    //assert execute(zipalign.absolutePath, "-v", "4", apkUnsigned, apkToDeploy) == 0
     assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
 
     def deployable = new File(apkToDeploy)
     def expectedLocation = new File("$gendir/$name")
-    deployable.renameTo(expectedLocation)
+    expectedLocation << deployable.bytes
   }
 } else {
   // snapshot and milestone builds are not eligible for central signing
@@ -71,7 +71,6 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
 
     println "Execute APK local signing ..."
     assert execute(apksigner.absolutePath, "sign", "--ks", "${CODESIGN_TOOL_DIR}/localSigningKeystore-1.0.0.jks", "--ks-pass", "pass:localSigningPassword", "-in", "${apkToSign}", "-out", "${apkToDeploy}" ) == 0 
-
     assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
   }
 }

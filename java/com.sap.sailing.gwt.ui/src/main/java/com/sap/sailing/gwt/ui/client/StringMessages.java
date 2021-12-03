@@ -1596,6 +1596,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String loadingRegattasAndRaces();
     String selectFromRacesWithOverlappingTimeRange();
     String finishTime(String timeAsString);
+    String finishDuration(String durationAsString);
     String showCompetitorCharts();
     String showWindChart();
     String watchLive();
@@ -2389,4 +2390,24 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSystemLabel();
     String scoringSystemPlaceholder(); 
     String pleaseUseHttpsForImageUrls();
+    String windAndCourse();
+    String zoomIn();
+    String zoomOut();
+    String moreOptions();
+    String confirmDeleteImage();
+    String confirmDeleteVideo();
+    String fileUpload();
+    String or();
+    String noMediaSelected();
+    String fileTypeNotSupported();
+    String noImageOrVideoDetected();
+    String errorWhileUpdatingEvent();
+    String updateEventSuccessfully();
+    String raceUrl();
+    String yellowBrickConfiguration();
+    String addYellowBrickConfiguration();
+    String filterYellowBrickConfigurations();
+    String yellowBrickEvents();
+    String timePointOfLastFix();
+    String copyMarkDeviceMappings();
 }

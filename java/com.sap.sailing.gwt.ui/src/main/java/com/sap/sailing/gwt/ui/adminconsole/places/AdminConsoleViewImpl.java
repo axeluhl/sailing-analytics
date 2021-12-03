@@ -63,6 +63,8 @@ import com.sap.sailing.gwt.ui.adminconsole.UserGroupManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.UserManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.WindPanel;
 import com.sap.sailing.gwt.ui.adminconsole.WindPanelSupplier;
+import com.sap.sailing.gwt.ui.adminconsole.YellowBrickEventManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.YellowBrickEventManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.CourseTemplatePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
@@ -83,6 +85,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SmartphoneTrackingP
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SwissTimingArchivedEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SwissTimingEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.TracTracEventsPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.connectors.YellowBrickEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.CourseTemplatesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkPropertiesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkRolesPlace;
@@ -244,7 +247,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public void refreshAfterBecomingVisible() {
                 if (getWidget() != null) {
-                    getWidget().refreshCompetitorList();
+                    presenter.getCompetitorsRefresher().callFillAndReloadInitially(getWidget().getCompetitorsDisplayer());
                 }
             }
         }, stringMessages.competitors(), new CompetitorsPlace(null),
@@ -255,7 +258,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public void refreshAfterBecomingVisible() {
                 if (getWidget() != null) {
-                    getWidget().refreshBoatList();
+                    presenter.getBoatsRefresher().callFillAndReloadInitially(getWidget().getBoatsDisplayer());
                 }
             }
         }, stringMessages.boats(), new BoatsPlace((String) null /* no place token */),
@@ -314,6 +317,20 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 },
                 stringMessages.tracTracEvents(), new TracTracEventsPlace((String) null /* no place token */),
                 SecuredDomainType.TRACTRAC_ACCOUNT.getPermission(DefaultActions.values()));
+        /* YellowBrick Event Management */
+        final YellowBrickEventManagementPanelSupplier yellowBrickEventManagementPanelSupplier =
+                new YellowBrickEventManagementPanelSupplier(stringMessages, presenter, tableResources);
+        adminConsolePanel.addToTabPanel(connectorsTabPanel,
+                new DefaultRefreshableAdminConsolePanel<YellowBrickEventManagementPanel>(yellowBrickEventManagementPanelSupplier) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        if (getWidget() != null) {
+                            getWidget().refreshYellowBrickConnectors();
+                        }
+                    }
+                },
+                stringMessages.yellowBrickEvents(), new YellowBrickEventsPlace((String) null /* no place token */),
+                SecuredDomainType.YELLOWBRICK_ACCOUNT.getPermission(DefaultActions.values()));
         /* Swiss Timing Replay Connector */
         final SwissTimingReplayConnectorPanelSupplier swissTimingReplayConnectorPanelSupplier =
                 new SwissTimingReplayConnectorPanelSupplier(stringMessages, presenter, tableResources);

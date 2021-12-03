@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="185">
+<target name="Race Analysis Target" sequenceNumber="195">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -63,8 +63,6 @@
 <unit id="org.apache.httpcomponents.httpclient.source" version="4.5.5.v20180409-1525"/>
 <unit id="org.apache.httpcomponents.httpcore" version="4.4.9.v20180409-1525"/>
 <unit id="org.apache.httpcomponents.httpcore.source" version="4.4.9.v20180409-1525"/>
-<unit id="org.jdom" version="1.1.1.v201101151400"/>
-<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
 <unit id="com.jcraft.jsch" version="0.1.54.v20170116-1932"/>
 <unit id="com.jcraft.jsch.source" version="0.1.54.v20170116-1932"/>
 <unit id="org.apache.xalan" version="2.7.1.v201005080400"/>
@@ -260,18 +258,21 @@
 <plugin id="org.hamcrest.library"/>
 <plugin id="org.hamcrest.text"/>
 <plugin id="org.hyperic.sigar"/>
-<plugin id="org.jdom"/>
-<plugin id="org.jdom.source"/>
 <plugin id="org.junit"/>
 <plugin id="org.junit.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
-<plugin id="org.mongodb.mongo-java-driver"/>
-<plugin id="org.mongodb.mongo-java-driver.source"/>
+<plugin id="org.mongodb.bson"/>
+<plugin id="org.mongodb.bson.source"/>
+<plugin id="org.mongodb.driver-core"/>
+<plugin id="org.mongodb.driver-core.source"/>
+<plugin id="org.mongodb.driver-sync"/>
+<plugin id="org.mongodb.driver-sync.source"/>
 <plugin id="org.objenesis"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="com.chargebee.chargebee-java"/>
+<plugin id="com.chargebee.chargebee-java.source"/>
 <plugin id="slf4j.jdk14"/>
 <plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>

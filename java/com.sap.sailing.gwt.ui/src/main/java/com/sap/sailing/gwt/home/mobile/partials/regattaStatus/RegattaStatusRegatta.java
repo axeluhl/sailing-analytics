@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.regattaStatus;
 
+import static com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListDataUtil.getFleetName;
+
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -45,7 +47,10 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection, 
     }
     
     public void addRaces(Set<LiveRaceDTO> races) {
-        races.forEach(race -> itemContainerUi.addContent(new RegattaStatusRace(race, presenter::getRaceViewerURL)));
+        races.stream()
+                .map(race -> new RegattaStatusRace(race, presenter::getRaceViewerURL, r -> presenter
+                        .getMapAndWindChartUrl(r.getLeaderboardName(), r.getRaceName(), getFleetName(race))))
+                .forEach(itemContainerUi::addContent);
         headerUi.setLabelType(LabelType.LIVE);
     }
 

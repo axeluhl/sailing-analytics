@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
@@ -13,6 +14,7 @@ import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
+import com.sap.sse.common.Duration;
 
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
@@ -87,7 +89,9 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
@@ -112,4 +116,101 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void getReleases(AsyncCallback<ArrayList<ReleaseDTO>> asyncCallback);
+
+    /**
+     * Moves the content hosted by a replica set into an archive server. This should usually happen when the content
+     * hosted so far by the {@code applicationReplicaSetToArchive} is no longer live. At this point the workload usually
+     * changes: instead of high ingestion load combined with much read access for live content, content is no longer
+     * actively updated, maybe except for smaller corrections, and read access decreases as the content ages. An archive
+     * server environment provides less CPU and has a memory architecture that provides for a reasonable working set and
+     * lots of fast swap space, allowing for large heap space while taking some initial time to swap in a working set as
+     * a user starts accessing specific content.
+     * <p>
+     * 
+     * During the archiving process, the following steps are performed:
+     * <ul>
+     * <li>A master data import (MDI) fetches all content from the {@code applicationReplicaSetToArchive} into the
+     * {@code archiveReplicaSet}.</li>
+     * <li>The content is compared; the {@code durationToWaitBeforeCompareServers} and
+     * {@code maxNumberOfCompareServerAttempts} parameters control the process.</li>
+     * <li>Only when a comparison has completed successfully, the following steps take place:
+     * <ul>
+     * <li>The central reverse proxy in the region identified by {@code regionId} will be updated with a rule that
+     * reflects the {@code applicationReplicaSetToArchive}'s default redirect for its base URL so that when after
+     * removing the replica set the base URL is handled by the central reverse proxy, it redirects to the same content
+     * that the ALB default redirect rule targeted before.</li>
+     * <li>any remote server reference on the {@code archiveReplicaSet} pointing to the
+     * {@code applicationReplicaSetToArchive} will be removed</li>
+     * <li>if the {@code removeApplicationReplicaSet} parameter is {@code true}, the
+     * {@code applicationReplicaSetToArchive} will be
+     * {@link #removeApplicationReplicaSet(String, SailingApplicationReplicaSetDTO, String, byte[], AsyncCallback)
+     * removed}</li>
+     * <li>if a non-{@code null} {@code moveDatabaseHere} is provided and the {@code removeApplicationReplicaSet} was
+     * {@code true}, the {@code applicationReplicaSetToArchive}'s master database will be moved to the database endpoint
+     * specified by {@code moveDatabaseHere} and if hashed equal to the original database, the original database will be
+     * removed, together with the replicas' database(s).</li>
+     * </ul>
+     * </li>
+     * </ul>
+     * 
+     * @param maxNumberOfCompareServerAttempts
+     *            if 0, no comparison is tried but then <em>none</em> of the follow-up steps such as removing the
+     *            replica set, moving the database, removing a remote reference from the archive to the replica set and
+     *            updating the central reverse proxy will be performed.
+     * @param bearerTokenOrNullForApplicationReplicaSetToArchive
+     *            used to authentication towards the {@code applicationReplicaSetToArchive}; if {@code null}, the
+     *            current user's bearer token will be tried for authentication towards the
+     *            {@code applicationReplicaSetToArchive}, assuming this server and the {@code applicationReplicaSetToArchive}
+     *            share a common security service.
+     * @param bearerTokenOrNullForArchive
+     *            used to authentication towards the {@code archiveReplicaSet}; if {@code null}, the
+     *            current user's bearer token will be tried for authentication towards the
+     *            {@code archiveReplicaSet}, assuming this server and the {@code archiveReplicaSet}
+     *            share a common security service.
+     * @param moveDatabaseHere
+     *            a DB endpoint; if {@code null}, the replica set's database will be left untouched. Otherwise, after
+     *            successful comparison of content archived with the original content and if the
+     *            {@code removeApplicationReplicaSet} parameter was {@code true} and hence the replica set has been
+     *            removed, the replica set's master database will be copied to the database specified by this parameter,
+     *            and if the copy is considered equal to the original, the original and all replica databases are
+     *            removed.
+     * @param callback
+     *            returns a UUID immediately that the client can use to query the progress of this long-running
+     *            operation, as for the MDI architecture, by invoking
+     *            {@code RacingEventService.getDataImportLock().getProgress(id)}. The resulting
+     *            {@code DataImportProgress} object will then tell about progress and a possible error message for the
+     *            operation.
+     */
+    void archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
+            String bearerTokenOrNullForApplicationReplicaSetToArchive,
+            String bearerTokenOrNullForArchive,
+            Duration durationToWaitBeforeCompareServers,
+            int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet,
+            MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption,
+            AsyncCallback<UUID> callback);
+
+    /**
+     * Like {@link #createApplicationReplicaSet(String, String, String, boolean, String, String, byte[], String, String, String, AsyncCallback)},
+     * only that in this case the master is deployed on an already existing host ({@code hostToDeployTo}) using the next available combination
+     * of ports, and only for the replicas an instance type ({@code replicaInstanceType}) can be specified. The minimum number of replicas is
+     * set to 0 (instead of 1), so the resulting application replica set is created in "low availability" ("economy") mode.
+     */
+    void deployApplicationToExistingHost(String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
+            String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    /**
+     * For the given replica set ensures there is at least one healthy replica, then stops replicating on all replicas and
+     * removes the master from the public and master target groups. This can be used as a preparatory action for upgrading
+     * the master while keeping one or more replicas available to handle read traffic.<p>
+     * 
+     * Other than de-registering the master from the replica set's target groups this method does nothing to the master
+     * process/host.
+     */
+    void ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSet, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            AsyncCallback<Boolean> callback);
 }

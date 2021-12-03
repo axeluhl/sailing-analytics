@@ -221,6 +221,14 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/fileupload</url-pattern>
 	</servlet-mapping>
+    <servlet>
+        <servlet-name>ProgressServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.impl.ProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProgressServlet</servlet-name>
+        <url-pattern>/fileupload/progress</url-pattern>
+    </servlet-mapping>
 	<servlet>
 		<servlet-name>ORCCertificateImportServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.orc.ORCCertificateImportServlet</servlet-class>
@@ -232,7 +240,7 @@
 	
 	<servlet>
 		<servlet-name>Jersey REST API</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
@@ -241,6 +249,10 @@
 			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
 			<param-value>com.sap.sse.rest.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>
+                <init-param>
+                        <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+                        <param-value>true</param-value>
+                </init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
@@ -250,7 +262,7 @@
 	
 	<servlet>
 		<servlet-name>Jersey REST SPI</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
@@ -263,6 +275,10 @@
 			<param-name>com.sun.jersey.config.property.packages</param-name>
 			<param-value>com.sap.sailing.server.gateway.jaxrs</param-value>
 		</init-param>
+                <init-param>
+                        <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+                        <param-value>true</param-value>
+                </init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
@@ -281,7 +297,7 @@
 
 	<servlet>
 		<servlet-name>SharingApi</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>com.sap.sailing.server.gateway.jaxrs.sharing.SharingApiApplication</param-value>
@@ -290,6 +306,10 @@
 			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
 			<param-value>com.sap.sse.rest.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>
+                <init-param>
+                        <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+                        <param-value>true</param-value>
+                </init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>

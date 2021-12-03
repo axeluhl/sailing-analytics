@@ -52,6 +52,16 @@ public class ConcurrentHashBag<T> extends AbstractCollection<T> {
     public java.util.Iterator<T> iterator() {
         return new Iterator();
     }
+    
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof ConcurrentHashBag && map.equals(((ConcurrentHashBag<?>) o).map);
+    }
 
     @Override
     public int size() {

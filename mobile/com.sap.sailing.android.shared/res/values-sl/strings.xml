@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    
+    
+    <string name="options_menu_live">"Informacije o povezavi"</string>
+    <string name="remove">"Odstrani"</string>
+    <string name="enter_new_item">"Vnesi nov element"</string>
+    <string name="add">"Dodaj"</string>
+    <string name="there_are_no_items_yet_">"Elementov še ni."</string>
+
+    <!-- SystemInformationActivity -->
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <!-- Generic -->
+    <string name="generic_error">"Napaka"</string>
+    <string name="about">"Informacije"</string>
+
+    <!-- Signal quality -->
+    <string name="signal_accuracy_indicator_view_description">"Natančnost GPS-a"</string>
+    <string name="poor">"Slaba"</string>
+    <string name="good">"Dobra"</string>
+    <string name="great">"Odlična"</string>
+    <string name="no_signal">"Ni signala"</string>
+    <string name="ok">"V redu"</string>
+
+    <!-- Regatta -->
+    <string name="your_regattas">"Vaše regate:"</string>
+    <string name="options_refresh">"Osveži"</string>
+
+    <!-- QR Code -->
+    <string name="notify_user_db_operation_failed">"Napaka: Postopek baze podatkov ni uspel."</string>
+    <string name="no_qr_code_popup_title">"Niste prejeli QR-kode?"</string>
+    <string name="no_qr_code_popup_message">"Če niste prejeli QR-kode, se obrnite na organizatorja tekmovanja."</string>
+    <string name="error_play_store_and_scanning_not_available">"PlayStore in optično branje nista na voljo."</string>
+    <string name="scanning_cancelled">"Optično branje prekinjeno"</string>
+    <string name="error_scanning_qrcode">"Napaka pri optičnem branju QR-kode {koda rezultata}"</string>
+    <string name="notify_user_api_call_failed">"Prišlo je do napake pri vzpostavljanju povezave s strežnikom. Poskusite znova."</string>
+    <string name="please_wait">"Počakajte"</string>
+    <string name="error_invalid_qr_code">"Neveljavna QR-koda"</string>
+    
+    
+    
+
+    <!-- Eula -->
+    <string name="eula_title">"Licenčni pogoji"</string>
+    <string name="eula_message">"S prenosom aplikacije potrjujete, da sprejemate pogoje licenčne pogodbe za končne uporabnike SAP SE. Preberite te licenčne pogoje tukaj."</string>
+    <string name="eula_confirm">"Potrditev"</string>
+    <string name="linked_eula_message_part">"Tukaj"</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">"O aplikaciji"</string>
+    <string name="eula">"Licenčni pogoji"</string>
+    <string name="license_information">"Podatki o licenci"</string>
+
+    <!-- HTTP Requests -->
+    
+    
+    
+    
+
+    <!-- Dialog -->
+    <string name="yes">"Da"</string>
+    <string name="no">"Ne"</string>
+    <string name="warning">"Opozorilo"</string>
+    <string name="enable_gps">"GPS je izklopljen. Ta aplikacija potrebuje položaje GPS. Želite vklopiti GPS v nastavitvah lokacije?"</string>
+
+    <!-- Message Sending -->
+    <string name="connected_to_wp">"Povezava s: %1$s\n%2$s\nVezana storitev:%3$s"</string>
+    <string name="sending_waiting">"Trenutno čaka %1$d dogodkov na pošiljanje. \nČas zadnjega uspešnega pošiljanja %2$s"</string>
+    <string name="sending_no_waiting">"Trenutno noben dogodek ne čaka na pošiljanje."</string>
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">"Več informacij najdete na"</string>
+    <string name="footer_text_link">"https://www.sapsailing.com"</string>
+
+    <string name="yesterday">"Včeraj"</string>
+    <string name="today">"Danes"</string>
+    <string name="tomorrow">"Jutri"</string>
+    
+    
+
+    
+</resources>

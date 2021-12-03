@@ -11,6 +11,7 @@ import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SharedLandscapeConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplicaSetDialog<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions> {
@@ -21,15 +22,20 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         private final String instanceType;
         private final boolean dynamicLoadBalancerMapping;
         private final String optionalDomainName;
+        private final Integer optionalMemoryInMegabytesOrNull;
+        private final Integer optionalMemoryTotalSizeFactorOrNull;
         
         public CreateApplicationReplicaSetInstructions(String name, String instanceType,
                 String releaseNameOrNullForLatestMaster, boolean dynamicLoadBalancerMapping,
-                String securityReplicationBearerToken, String optionalDomainName) {
-            super(releaseNameOrNullForLatestMaster, securityReplicationBearerToken);
+                String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
+                Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) {
+            super(releaseNameOrNullForLatestMaster, masterReplicationBearerToken, replicaReplicationBearerToken);
             this.name = name;
             this.dynamicLoadBalancerMapping = dynamicLoadBalancerMapping;
             this.optionalDomainName = Util.hasLength(optionalDomainName) ? optionalDomainName : null;
             this.instanceType = instanceType;
+            this.optionalMemoryInMegabytesOrNull = optionalMemoryInMegabytesOrNull;
+            this.optionalMemoryTotalSizeFactorOrNull = optionalMemoryTotalSizeFactorOrNull;
         }
         public String getName() {
             return name;
@@ -42,6 +48,12 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         }
         public String getInstanceType() {
             return instanceType;
+        }
+        public Integer getOptionalMemoryInMegabytesOrNull() {
+            return optionalMemoryInMegabytesOrNull;
+        }
+        public Integer getOptionalMemoryTotalSizeFactorOrNull() {
+            return optionalMemoryTotalSizeFactorOrNull;
         }
     }
     
@@ -57,7 +69,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
             final String result;
             if (!Util.hasLength(valueToValidate.getInstanceType())) {
                 result = stringMessages.pleaseSelectInstanceTypeForNewMaster();
-            } else if (!Util.hasLength(valueToValidate.getReplicationBearerToken())) {
+            } else if (!Util.hasLength(valueToValidate.getMasterReplicationBearerToken())) {
                 result = stringMessages.pleaseProvideBearerTokenForSecurityReplication();
             } else if (!Util.hasLength(valueToValidate.getName())) {
                 result = stringMessages.pleaseProvideApplicationReplicaSetName();
@@ -73,6 +85,8 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
     private final CheckBox dynamicLoadBalancerCheckBox;
     private final TextBox domainNameBox;
     private final ListBox instanceTypeListBox;
+    private final IntegerBox memoryInMegabytesBox;
+    private final IntegerBox memoryTotalSizeFactorBox;
 
     public CreateApplicationReplicaSetDialog(LandscapeManagementWriteServiceAsync landscapeManagementService, Iterable<String> releaseNames,
             StringMessages stringMessages, ErrorReporter errorReporter, DialogCallback<CreateApplicationReplicaSetInstructions> callback) {
@@ -82,6 +96,9 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         dynamicLoadBalancerCheckBox = createCheckbox(stringMessages.useDynamicLoadBalancer());
         domainNameBox = createTextBox(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME, 40);
         instanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter);
+        memoryInMegabytesBox = createIntegerBox(null, 7);
+        memoryTotalSizeFactorBox = createIntegerBox(null, 2);
+        memoryInMegabytesBox.addValueChangeHandler(e->memoryTotalSizeFactorBox.setEnabled(e.getValue() == null));
     }
     
     protected ListBox getInstanceTypeListBox() {
@@ -90,7 +107,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(6, 2);
+        final Grid result = new Grid(9, 2);
         int row=0;
         result.setWidget(row, 0, new Label(stringMessages.name()));
         result.setWidget(row++, 1, nameBox);
@@ -101,9 +118,15 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         result.setWidget(row, 0, new Label(stringMessages.useDynamicLoadBalancer()));
         result.setWidget(row++, 1, dynamicLoadBalancerCheckBox);
         result.setWidget(row, 0, new Label(stringMessages.bearerTokenForSecurityReplication()));
-        result.setWidget(row++, 1, getReplicationBearerTokenBox());
+        result.setWidget(row++, 1, getMasterReplicationBearerTokenBox());
+        result.setWidget(row, 0, new Label(stringMessages.replicaReplicationBearerToken()));
+        result.setWidget(row++, 1, getReplicaReplicationBearerTokenBox());
         result.setWidget(row, 0, new Label(stringMessages.domainName()));
         result.setWidget(row++, 1, domainNameBox);
+        result.setWidget(row, 0, new Label(stringMessages.memoryInMegabytes()));
+        result.setWidget(row++, 1, memoryInMegabytesBox);
+        result.setWidget(row, 0, new Label(stringMessages.memoryTotalSizeFactor()));
+        result.setWidget(row++, 1, memoryTotalSizeFactorBox);
         return result;
     }
 
@@ -114,7 +137,10 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
     
     @Override
     protected CreateApplicationReplicaSetInstructions getResult() {
-        return new CreateApplicationReplicaSetInstructions(nameBox.getValue(), getInstanceTypeListBox().getSelectedValue(),
-                getReleaseNameBoxValue(), dynamicLoadBalancerCheckBox.getValue(), getReplicationBearerTokenBox().getValue(), domainNameBox.getValue());
+        return new CreateApplicationReplicaSetInstructions(nameBox.getValue(),
+                getInstanceTypeListBox().getSelectedValue(), getReleaseNameBoxValue(),
+                dynamicLoadBalancerCheckBox.getValue(), getMasterReplicationBearerTokenBox().getValue(),
+                getReplicaReplicationBearerTokenBox().getValue(), domainNameBox.getValue(),
+                memoryInMegabytesBox.getValue(), memoryTotalSizeFactorBox.getValue());
     }
 }

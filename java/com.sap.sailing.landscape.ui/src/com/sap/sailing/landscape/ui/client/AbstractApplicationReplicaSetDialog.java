@@ -15,25 +15,31 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractApplicationReplicaSetDialog<I extends AbstractApplicationReplicaSetDialog.AbstractApplicationReplicaSetInstructions> extends DataEntryDialog<I> {
     public static class AbstractApplicationReplicaSetInstructions {
-        private final String replicationBearerToken;
+        private final String masterReplicationBearerToken;
+        private final String replicaReplicationBearerToken;
         private final String releaseNameOrNullForLatestMaster;
         
-        public AbstractApplicationReplicaSetInstructions(String releaseNameOrNullForLatestMaster, String replicationBearerToken) {
+        public AbstractApplicationReplicaSetInstructions(String releaseNameOrNullForLatestMaster, String masterReplicationBearerToken, String replicaReplicationBearerToken) {
             super();
-            this.replicationBearerToken = replicationBearerToken;
+            this.masterReplicationBearerToken = masterReplicationBearerToken;
+            this.replicaReplicationBearerToken = replicaReplicationBearerToken;
             this.releaseNameOrNullForLatestMaster = releaseNameOrNullForLatestMaster;
         }
         public String getReleaseNameOrNullForLatestMaster() {
             return releaseNameOrNullForLatestMaster;
         }
-        public String getReplicationBearerToken() {
-            return replicationBearerToken;
+        public String getMasterReplicationBearerToken() {
+            return masterReplicationBearerToken;
+        }
+        public String getReplicaReplicationBearerToken() {
+            return replicaReplicationBearerToken;
         }
     }
     
     private final StringMessages stringMessages;
     private final SuggestBox releaseNameBox;
-    private final TextBox replicationBearerTokenBox;
+    private final TextBox masterReplicationBearerTokenBox;
+    private final TextBox replicaReplicationBearerTokenBox;
 
     public AbstractApplicationReplicaSetDialog(String title, LandscapeManagementWriteServiceAsync landscapeManagementService,
             Iterable<String> releaseNames, StringMessages stringMessages, ErrorReporter errorReporter, Validator<I> validator, DialogCallback<I> callback) {
@@ -49,7 +55,8 @@ public abstract class AbstractApplicationReplicaSetDialog<I extends AbstractAppl
             ((MultiWordSuggestOracle) releaseNameBox.getSuggestOracle()).setComparator(newestFirstComaprator);
         }
         releaseNameBox.setValue(stringMessages.latestMasterRelease());
-        replicationBearerTokenBox = createTextBox("", 40);
+        masterReplicationBearerTokenBox = createTextBox("", 40);
+        replicaReplicationBearerTokenBox = createTextBox("", 40);
     }
     
     protected StringMessages getStringMessages() {
@@ -65,7 +72,11 @@ public abstract class AbstractApplicationReplicaSetDialog<I extends AbstractAppl
                 ? null : releaseNameBox.getValue();
     }
     
-    protected TextBox getReplicationBearerTokenBox() {
-        return replicationBearerTokenBox;
+    protected TextBox getMasterReplicationBearerTokenBox() {
+        return masterReplicationBearerTokenBox;
+    }
+    
+    protected TextBox getReplicaReplicationBearerTokenBox() {
+        return replicaReplicationBearerTokenBox;
     }
 }

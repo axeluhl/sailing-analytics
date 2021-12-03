@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -10,6 +11,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -33,24 +36,30 @@ public class PerSeriesResultDiscardingRuleImpl implements ResultDiscardingRule {
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
-        Set<RaceColumn> result = new HashSet<>();
-        for (Series s : regatta.getSeries()) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    @Override
+    public Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
+            Function<RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Set<RaceColumn> result = new HashSet<>();
+        for (final Series s : regatta.getSeries()) {
             if (s.getResultDiscardingRule() != null) {
-                Iterable<RaceColumn> columnsToConsiderInSeries = getColumnsToConsiderInSeries(s, raceColumnsToConsider);
-                result.addAll(s.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard, columnsToConsiderInSeries, timePoint));
+                final Iterable<RaceColumn> columnsToConsiderInSeries = getColumnsToConsiderInSeries(s, raceColumnsToConsider);
+                result.addAll(s.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard, columnsToConsiderInSeries, timePoint, totalPointsSupplier, cache));
             }
         }
         return result;
     }
 
     private Iterable<RaceColumn> getColumnsToConsiderInSeries(Series series, Iterable<RaceColumn> allRaceColumnsToConsider) {
-        Set<RaceColumn> result = new LinkedHashSet<>();
-        for (RaceColumn seriesColumn : series.getRaceColumns()) {
+        final Set<RaceColumn> result = new LinkedHashSet<>();
+        for (final RaceColumn seriesColumn : series.getRaceColumns()) {
             if (Util.contains(allRaceColumnsToConsider, seriesColumn)) {
                 result.add(seriesColumn);
             }
         }
         return result;
     }
-
 }
