@@ -33,20 +33,23 @@
         <td>Request method:</td>
         <td>POST</td>
     </tr>
+    The service requires the requesting user to have permission <tt>SERVER:CONFIGURE_REMOTE_INSTANCES:{SERVER_NAME}</tt> for the
+    server to which the request is sent.
     <tr>
         <td>Example:</td>
         <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/remoteserverreference/remove -d "remoteServerName=MyRemoteServer" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
-          "remoteServerNameRemoved": "MyRemoteServer",
-          "remoteServerUrlRemoved": "http://127.0.0.1:8888",
-          "remoteServerEventsRemoved": [
-            "Old Mug 2020 ",
-            "Mästarnas Mästare 2018",
-            "World Cup Series 2019 - Enoshima, Japan"
+          "remoteServerName": "1",
+          "remoteServerUrl": "http://127.0.0.1:8888",
+          "include": "true",
+          "eventIds": [
+            "0f4a825a-837f-4ea6-a2b6-acb861b410af",
+            "1fc9069a-0ee8-4ca9-ba62-4ab6c410c909"
           ]
         }
         </pre>
+        which describes the server reference that got removed.
         </td>
     </tr>
 </table>

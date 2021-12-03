@@ -134,9 +134,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                         return sb.toString();
                     }
                 }, /* animationEnabled */true, callback);
-        this.currentUuid = courseTemplateToEdit.getUuid();
         this.ensureDebugId("CourseTemplateToEditEditDialog");
         this.stringMessages = stringMessages;
+        this.currentUuid = courseTemplateToEdit.getUuid();
         this.nameTextBox = createTextBox(courseTemplateToEdit.getName());
         this.shortNameTextBox = createTextBox(courseTemplateToEdit.getShortName());
         this.urlTextBox = createTextBox(courseTemplateToEdit.getOptionalImageUrl().orElse(""));

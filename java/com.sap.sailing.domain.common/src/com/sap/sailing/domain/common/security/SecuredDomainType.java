@@ -18,7 +18,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
  */
 public class SecuredDomainType extends HasPermissionsImpl {
     private static final long serialVersionUID = -7072719056136061490L;
-    private static final Set<HasPermissions> allInstances = new HashSet<>();
+    private static final Set<SecuredDomainType> allInstances = new HashSet<>();
     
     public SecuredDomainType(String logicalTypeName, Action... availableActions) {
         super(logicalTypeName, availableActions);
@@ -30,7 +30,7 @@ public class SecuredDomainType extends HasPermissionsImpl {
         allInstances.add(this);
     }
     
-    public static Iterable<HasPermissions> getAllInstances() {
+    public static Iterable<SecuredDomainType> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
 
@@ -85,6 +85,7 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions SWISS_TIMING_ARCHIVE_ACCOUNT = new SecuredDomainType(
             "SWISS_TIMING_ARCHIVE_ACCOUNT");
     public static final HasPermissions TRACTRAC_ACCOUNT = new SecuredDomainType("TRACTRAC_ACCOUNT");
+    public static final HasPermissions YELLOWBRICK_ACCOUNT = new SecuredDomainType("YELLOWBRICK_ACCOUNT");
     public static final HasPermissions WIND_ESTIMATION_MODELS = new SecuredDomainType("WIND_ESTIMATION_MODELS");
     public static final HasPermissions MARK_PROPERTIES = new SecuredDomainType("MARK_PROPERTIES");
     public static final HasPermissions MARK_TEMPLATE = new SecuredDomainType("MARK_TEMPLATE");

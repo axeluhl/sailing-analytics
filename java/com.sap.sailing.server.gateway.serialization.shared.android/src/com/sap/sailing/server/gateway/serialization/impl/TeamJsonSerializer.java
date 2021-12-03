@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.Team;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class TeamJsonSerializer implements JsonSerializer<Team> {
     public static final String FIELD_NAME = "name";

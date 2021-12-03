@@ -26,7 +26,7 @@ public class RaceEndWithCompetitorsBoatsNode extends FiresPlaceNode {
         RaceEndWithCompetitorsBoatsPlace place = new RaceEndWithCompetitorsBoatsPlace();
 
         RegattaAndRaceIdentifier lastRace = cf.getAutoPlayCtxSignalError().getLastRace();
-        place.setLifeRace(lastRace);
+        place.setLiveRace(lastRace);
         setPlaceToGo(place);
 
         cf.getDispatch().execute(new GetSixtyInchStatisticAction(lastRace.getRaceName(), lastRace.getRegattaName()),

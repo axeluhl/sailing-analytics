@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="UTF-8"?><resources>
 
     
     
@@ -19,7 +19,6 @@
     
 
     <!-- Generic -->
-    
     <string name="generic_error">"Error"</string>
     <string name="about">"Info"</string>
 
@@ -73,6 +72,7 @@
     <string name="enable_gps">"El GPS está desactivado. Esta aplicación necesita las posiciones de GPS. ¿Desea activar el GPS en las opciones de ubicación?"</string>
 
     <!-- Message Sending -->
+    <string name="connected_to_wp">"Conectado a: %1$s\n%2$s\nServicio de enlace:%3$s"</string>
     <string name="sending_waiting">"Actualmente existen %1$d eventos a la espera de ser enviados.\nEl último que se envió con éxito fue a las %2$s"</string>
     <string name="sending_no_waiting">"No existe ningún evento a la espera de ser enviado actualmente."</string>
 
@@ -87,5 +87,4 @@
     
 
     
-
 </resources>

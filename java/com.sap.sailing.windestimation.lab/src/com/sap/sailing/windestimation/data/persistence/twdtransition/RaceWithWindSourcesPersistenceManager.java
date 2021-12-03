@@ -12,13 +12,13 @@ import org.json.simple.parser.ParseException;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.client.MongoCollection;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.RaceWithWindSources;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
 import com.sap.sailing.windestimation.data.serialization.RaceWithEstimationDataDeserializer;
 import com.sap.sailing.windestimation.data.serialization.RaceWithWindSourcesDeserializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceManager<RaceWithWindSources> {
 

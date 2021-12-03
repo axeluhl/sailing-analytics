@@ -40,7 +40,8 @@ The role ``lambda-email-forwarder-role`` is created to execute the Lambda. The p
 
 In addition there is an alarm ``Email-Forwarding-Failed-Alarm`` configured, which posts to ``email-forwarder-for-sapsailing-com-alarms`` topic. 
 
-The relevant files have been committed to our git as ``configuration/mail_forward.py`` for the Lambda's code, and as ``configuration/mail_forward_policy.json`` for the security policy for the IAM role used for the Lambda.
+The relevant files have been committed to our git as ``configuration/mail_forward.py`` for the Lambda's code, and as ``configuration/mail_forward_policy.json`` for the security policy for the IAM role used for the Lambda. In addition due to the use of the python-magic package (see [https://pypi.org/project/python-magic/]) you will need to upload ```configuration/mail_forwarder_lambda.zip``` to create a working lambda (see [https://docs.aws.amazon.com/lambda/latest/dg/python-package.html]). The package is used to guess the encoding of an email and therefore support different encodings then utf-8.
+
 
 #### Change the list of recipients
 Go to [https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/email-forwarder-python?tab=configuration](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/email-forwarder-python?tab=configuration) and edit the ``MailRecipientsJSON`` environment variable accordingly. So if you want to change the recipient list for support@sapsailing.com change the JSON array to the desired list.

@@ -52,7 +52,6 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
     private StringMessages stringmessages = StringMessages.INSTANCE;
     private UUID eventId;
     private String leaderboardName;
-    private String leaderboardGroupName;
     private AbstractLeaderboardDTO leaderboardDTO;
     private LeaderboardContextDefinition leaderboardContextDefinition;
 
@@ -66,7 +65,6 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
         eventId = leaderboardContextDefinition.getEventId();
 
         leaderboardName = leaderboardContextDefinition.getLeaderboardName();
-        leaderboardGroupName = leaderboardContextDefinition.getLeaderboardGroupName();
 
         if (leaderboardName != null) {
             if (eventId == null) {
@@ -158,7 +156,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                             final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(
                                                     null, context, rootComponentLifeCycle, defaultSettings,
                                                     sailingServiceFactory, new AsyncActionsExecutor(), timer, null,
-                                                    leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this,
+                                                    leaderboardName, LeaderboardEntryPoint.this,
                                                     getStringMessages(), getActualChartDetailType(defaultSettings),
                                                     result);
                                             createUi(leaderboardViewer, defaultSettings, timer,
@@ -200,8 +198,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                                             final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(
                                                                     null, context, rootComponentLifeCycle,
                                                                     defaultSettings, sailingServiceFactory,
-                                                                    new AsyncActionsExecutor(), timer,
-                                                                    leaderboardGroupName, leaderboardName,
+                                                                    new AsyncActionsExecutor(), timer, leaderboardName,
                                                                     LeaderboardEntryPoint.this, getStringMessages(),
                                                                     getActualChartDetailType(defaultSettings), result);
                                                             createUi(leaderboardViewer, defaultSettings, timer,

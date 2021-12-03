@@ -85,9 +85,10 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
             final ImageDTO imageToValidate = resizingTask.getImage();
             final Integer imageWidth = imageToValidate.getWidthInPx();
             final Integer imageHeight = imageToValidate.getHeightInPx();
-
             if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
+            } else if (imageToValidate.getSourceRef().startsWith("http:")) {
+                errorMessage = stringMessages.pleaseUseHttpsForImageUrls();
             } else if (imageWidth == null || imageHeight == null) {
                 errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
             } else {
@@ -209,7 +210,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
         this.creationDate = creationDate;
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
-        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false);
+        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, true, true, "image/*");
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {

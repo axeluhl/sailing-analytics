@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
@@ -23,9 +24,9 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> {
 
@@ -62,11 +63,13 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
 
     private final JsonSerializer<RepeatablePart> repeatablePartJsonSerializer;
     private final JsonSerializer<CommonMarkProperties> commonMarkPropertiesJsonSerializer;
+    private final JsonSerializer<FreestyleMarkProperties> commonMarkPropertiesWithTagsJsonSerializer;
     private final JsonSerializer<GPSFix> gpsFixJsonSerializer;
 
     public CourseConfigurationJsonSerializer() {
         this.repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
         this.commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
+        this.commonMarkPropertiesWithTagsJsonSerializer = new FreestyleMarkPropertiesJsonSerializer();
         this.gpsFixJsonSerializer = new GPSFixJsonSerializer();
     }
 
@@ -110,7 +113,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
                                 freeStyleMarkConfiguration.getOptionalMarkProperties().getId().toString());
                     }
                     markConfigurationsEntry.put(FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES,
-                            commonMarkPropertiesJsonSerializer
+                            commonMarkPropertiesWithTagsJsonSerializer
                                     .serialize(freeStyleMarkConfiguration.getFreestyleProperties()));
                     return null;
                 }

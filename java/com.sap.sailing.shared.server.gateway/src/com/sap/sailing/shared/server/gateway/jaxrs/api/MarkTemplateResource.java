@@ -18,11 +18,11 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkTemplateJsonSerializer;
 import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.shared.json.JsonSerializer;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/marktemplates")
@@ -46,8 +46,7 @@ public class MarkTemplateResource extends SharedAbstractSailingServerResource {
         for (MarkTemplate markTemplates : markTemplateList) {
             result.add(markTemplateSerializer.serialize(markTemplates));
         }
-        final String json = result.toJSONString();
-        return Response.ok(json).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET

@@ -8,17 +8,18 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
@@ -32,6 +33,7 @@ import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 
@@ -67,7 +69,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         try {
             Document entry = storeMarkPropertiesToDocument(deviceIdentifierServiceFinder, markProperties);
             collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
-                    new UpdateOptions().upsert(true));
+                    new ReplaceOptions().upsert(true));
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not load mark properties because device identifier could not be stored.", e);
         }
@@ -101,7 +103,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             });
         }
         BasicDBList tags = new BasicDBList();
-        markProperties.getTags().forEach(tags::add);
+        if (markProperties.getTags() != null) {
+            markProperties.getTags().forEach(tags::add);
+        }
         result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
         Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedMarkTemplate().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
@@ -132,6 +136,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
+    public static Bson getDeviceQuery(
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
+                            throws TransformationException, NoCorrespondingServiceRegisteredException {
+        final Bson result;
+        if (device == null) {
+            result = null;
+        } else {
+            String type = device.getIdentifierType();
+            DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
+            com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
+            type = pair.getA();
+            Object deviceTypeSpecificId = pair.getB();
+            result = Filters.and(Filters.eq(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation()),
+                                 Filters.eq(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId),
+                                 Filters.eq(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE.name(), type));
+        }
+        return result;
+    }
+    
     private Document storePosition(Position position) {
         final Document result;
         if (position == null) {
@@ -171,7 +194,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
         final Document entry = storeMarkTemplateToDocument(markTemplate);
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
-                new UpdateOptions().upsert(true));
+                new ReplaceOptions().upsert(true));
     }
 
     private Document storeMarkTemplateToDocument(MarkTemplate markTemplate) {
@@ -194,7 +217,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final Document query = new Document(FieldNames.MARK_ROLE_ID.name(), markRole.getId().toString());
         final Document entry = storeMarkRoleToDocument(markRole);
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
-                new UpdateOptions().upsert(true));
+                new ReplaceOptions().upsert(true));
     }
 
     private Document storeMarkRoleToDocument(MarkRole markRole) {
@@ -218,7 +241,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final Document query = new Document(FieldNames.COURSE_TEMPLATE_ID.name(), courseTemplate.getId().toString());
         final Document entry = storeCourseTemplateToDocument(courseTemplate);
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entry,
-                new UpdateOptions().upsert(true));
+                new ReplaceOptions().upsert(true));
     }
 
     private Document storeCourseTemplateToDocument(CourseTemplate courseTemplate) {
@@ -261,7 +284,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(), waypointTemplates);
         // tags
         final BasicDBList tags = new BasicDBList();
-        courseTemplate.getTags().forEach(tags::add);
+        if (courseTemplate.getTags() != null) {
+            courseTemplate.getTags().forEach(tags::add);
+        }
         result.put(FieldNames.COURSE_TEMPLATE_TAGS.name(), tags);
         // repeatable part
         if (courseTemplate.hasRepeatablePart()) {

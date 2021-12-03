@@ -19,6 +19,7 @@ package com.sap.sse.gwt.client.controls.slider;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -46,6 +47,8 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 /**
  * A widget that allows the user to select a value within a range of possible values using a sliding bar that responds
@@ -727,7 +730,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
             onMinMaxValueChanged(fireEvent);
         }
     }
-    
+
     /**
      * Set the minimum and maximum value
      * 
@@ -735,9 +738,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the current value for min
      * @param maxValue
      *            the current value for max
-     * @return whether min or max have changed
+     * @return {@link Pair} of min and max if they have changed
      */
-    public boolean setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+    public Optional<Pair<Double, Double>> setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
         boolean changed = false;
         if (!Util.equalsWithNull(minValue, this.minValue)) {
             this.minValue = minValue;
@@ -749,10 +752,12 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         }
         if (changed) {
             onMinMaxValueChanged(fireEvent);
+            return Optional.of(new Pair<>(this.minValue, this.maxValue));
+        } else {
+            return Optional.empty();
         }
-        return changed;
     }
-    
+
     /**
      * Handle value changes of min and/or max value
      */
@@ -1027,6 +1032,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         markerElem = DOM.createDiv();
                         markerElem.getStyle().setPosition(Position.ABSOLUTE);
                         markerElem.getStyle().setDisplay(Display.NONE);
+                        markerElem.setTitle(formatTickLabel(marker.position, null));
+                        markerElem.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "sliderBarMarker-" + marker.name);
                         DOM.appendChild(getElement(), markerElem);
                         markerElements.add(markerElem);
                     }
@@ -1090,6 +1097,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label.getStyle().setPosition(Position.ABSOLUTE);
                         label.getStyle().setDisplay(Display.NONE);
                         DOM.appendChild(getElement(), label);
+                        label.setTitle(formatTickLabel(marker.position, null));
                         markerLabelElements.add(label);
                     }
                     if (enabled) {

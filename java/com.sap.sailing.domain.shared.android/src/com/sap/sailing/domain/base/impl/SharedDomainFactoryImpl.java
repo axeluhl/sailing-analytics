@@ -5,6 +5,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -182,7 +183,8 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
     public Mark getOrCreateMark(Serializable id, String name, String shortName, MarkType type, Color color, String shape, String pattern) {
         Mark result = markCache.get(id);
         if (result == null) {
-            result = new MarkImpl(id, name, type, color, shape, pattern);
+            result = new MarkImpl(id, name, shortName, type, color, shape, pattern,
+                    /* original mark template ID */ null, /* original mark properties ID */ null);
             cacheMark(id, result);
         }
         return result;
@@ -352,7 +354,7 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
             result = boatClassCache.get(unifiedBoatClassName);
             if (result == null) {
                 if (unifiedBoatClassName != null && boatClassMasterdata != null) {
-                    result = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
+                    result = new BoatClassImpl(boatClassMasterdata);
                     boatClassCache.put(unifiedBoatClassName, result);
                 }
             }
@@ -446,6 +448,11 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
     @Override
     public Mark getExistingMarkByIdAsString(String toStringRepresentationOfID) {
         return markCache.get(markIdCache.get(toStringRepresentationOfID));
+    }
+    
+    @Override
+    public Collection<Mark> getAllMarks() {
+        return markCache.values();
     }
 
     @Override

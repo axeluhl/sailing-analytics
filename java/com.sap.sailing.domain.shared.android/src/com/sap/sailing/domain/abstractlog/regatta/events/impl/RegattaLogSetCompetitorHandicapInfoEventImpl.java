@@ -25,4 +25,9 @@ public abstract class RegattaLogSetCompetitorHandicapInfoEventImpl extends Abstr
     public Competitor getCompetitor() {
         return competitor;
     }
+    
+    @Override
+    public String getShortInfo() {
+        return "competitor: " + competitor;
+    }
 }

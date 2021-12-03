@@ -138,7 +138,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     sailNumber = entry.getValue() == null ? null : entry.getValue().toString();
                     break;
                 case LOA:
-                    length = new MeterDistance(((Number) entry.getValue()).doubleValue());
+                    length = entry.getValue() == null ? null : new MeterDistance(((Number) entry.getValue()).doubleValue());
                     break;
                 case YACHT_NAME:
                     boatName = entry.getValue() == null ? null : entry.getValue().toString();
@@ -147,17 +147,17 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     boatclass = (String) entry.getValue();
                     break;
                 case GPH2:
-                    gph = new SecondsDurationImpl(((Number) entry.getValue()).doubleValue());
+                    gph = entry.getValue() == null ? null : new SecondsDurationImpl(((Number) entry.getValue()).doubleValue());
                     break;
                 case CDL2:
-                    cdl = ((Number) entry.getValue()).doubleValue();
+                    cdl = entry.getValue() == null ? null : ((Number) entry.getValue()).doubleValue();
                     break;
                 case ISSUE_DATE:
                     Date date = DatatypeConverter.parseDateTime((String) entry.getValue()).getTime();
                     issueDate = new MillisecondsTimePoint(date);
                     break;
                 case ALLOWANCES:
-                    final JSONObject allowances = (JSONObject) object.get(ALLOWANCES);
+                    final JSONObject allowances = (JSONObject) entry.getValue();
                     // calculating the TWA and TWS before calculating the other dependent values in allowances object
                     final Object windSpeedsObject = allowances.get(WIND_SPEEDS);
                     if (windSpeedsObject != null) {
@@ -245,20 +245,15 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
             final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
             for (final Speed tws : velocityPredictionPerTrueWindSpeedAndAngle.keySet()) {
-                beatVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
-                        .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws)));
+                beatVMGPredictionPerTrueWindSpeed.put(tws, getSpeedPredictionFromTimeAllowance(predefinedAllowanceDurationsPerTrueWindSpeed, BEAT, tws));
                 beatAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws));
-                runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
-                        .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws)));
+                runVMGPredictionPerTrueWindSpeed.put(tws, getSpeedPredictionFromTimeAllowance(predefinedAllowanceDurationsPerTrueWindSpeed, RUN, tws));
                 runAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws));
-                windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
-                        .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(WINDWARD_LEEWARD).get(tws)));
-                longDistanceSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
-                        .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(LONG_DISTANCE).get(tws)));
-                circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
-                        .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(CIRCULAR_RANDOM).get(tws)));
-                nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
-                        .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
+                windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws, getSpeedPredictionFromTimeAllowance(predefinedAllowanceDurationsPerTrueWindSpeed, WINDWARD_LEEWARD, tws));
+                longDistanceSpeedPredictionPerTrueWindSpeed.put(tws, getSpeedPredictionFromTimeAllowance(predefinedAllowanceDurationsPerTrueWindSpeed, LONG_DISTANCE, tws));
+                circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, getSpeedPredictionFromTimeAllowance(predefinedAllowanceDurationsPerTrueWindSpeed, CIRCULAR_RANDOM, tws));
+                nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, getSpeedPredictionFromTimeAllowance(predefinedAllowanceDurationsPerTrueWindSpeed, NON_SPINNAKER, tws));
+
             }
             final Bearing[] dynamicAllowancesTrueWindAngles = trueWindAngleMap.values().toArray(new Bearing[trueWindAngleMap.values().size()]);
             final Speed[] dynamicAllowancesTrueWindSpeeds = trueWindSpeedMap.values().toArray(new Speed[trueWindSpeedMap.values().size()]);
@@ -279,6 +274,20 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     nonSpinnakerSpeedPredictionPerTrueWindSpeed);
         }
         return result;
+    }
+
+    private Speed getSpeedPredictionFromTimeAllowance(
+            Map<String, Map<Speed, Duration>> predefinedAllowanceDurationsPerTrueWindSpeed, String predictionCategory,
+            Speed tws) {
+        final Map<Speed, Duration> timeAllowances = predefinedAllowanceDurationsPerTrueWindSpeed.get(predictionCategory);
+        final Duration timeAllowance;
+        final Speed speedPrediction;
+        if (timeAllowances != null && (timeAllowance = timeAllowances.get(tws)) != null) {
+            speedPrediction = ORCCertificate.NAUTICAL_MILE.inTime(timeAllowance);
+        } else {
+            speedPrediction = new KnotSpeedImpl(Double.POSITIVE_INFINITY);
+        }
+        return speedPrediction;
     }
 
     private String getId(JSONObject certificateAsJson) {

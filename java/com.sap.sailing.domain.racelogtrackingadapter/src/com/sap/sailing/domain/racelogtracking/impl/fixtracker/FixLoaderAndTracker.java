@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -56,13 +56,18 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -70,7 +75,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * This class listens to RaceLog Events, changes to the race and fix loading events and properly handles mappings and
  * fix loading.<br>
  * The two main responsibility are to 1. load fixes already available in the DB when a race is tracked and 2. add fixes
- * newly send by trackers to {@link Track}s of a {@link TrackedRace} if the fix is relevant for the race. In order to
+ * newly sent by trackers to {@link Track}s of a {@link TrackedRace} if the fix is relevant for the race. In order to
  * save memory we try to keep the set of loaded fixes as constrained as possible. In general the following rules apply:
  * <ul>
  * <li>The fixes loaded to a track for a specific item (Mark, Competitor) are associated to a device that needs to be
@@ -107,7 +112,9 @@ import com.sap.sse.util.ThreadPoolUtil;
  * There is a corner case that is assumed to be acceptable for the specific semantic of a {@link Mark}'s fixes:<br>
  * If a Marks is tracked and not pinged, any new fix transferred from the tracking device is treated as being better
  * than the one before. So all fixes are being recorded starting at the time point when the operator starts tracking for
- * a race and startOfTracking is in the future.<br>
+ * a race and startOfTracking is in the future.<p>
+ * Loading jobs are scheduled with a dedicated thread pool {@link #executor} that has "foreground" priority. With this, the number
+ * of concurrently executing loading jobs is restricted to approximately the number of CPUs on the executing host.<p>
  * Some related classes:
  * <ul>
  * <li>{@link RaceChangeListener}</li>
@@ -189,8 +196,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     };
     private final FixReceivedListener<Timed> listener = new FixReceivedListener<Timed>() {
         @Override
-        public Iterable<RegattaAndRaceIdentifier> fixReceived(DeviceIdentifier device, Timed fix) {
-            Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
+        public Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> fixReceived(DeviceIdentifier device, Timed fix, boolean returnManeuverChanges, boolean returnLiveDelay) {
+            final Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
+            final Map<RegattaAndRaceIdentifier, Duration> delayToLive = new HashMap<>();
             if (!preemptiveStopRequested.get() && trackedRace.getStartOfTracking() != null) {
                 final TimePoint timePoint = fix.getTimePoint();
                 deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(),
@@ -210,9 +218,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 if (competitor != null) {
                                     recordSensorFixForCompetitor(competitor, event);
                                 } else {
-                                    logger.log(Level.WARNING,
-                                            "Could not record fix for boat because no competitor could be determined. Boat: "
-                                                    + boat);
+                                    logger.log(Level.FINE, ()->"Could not record fix for boat because no competitor could be determined. Boat: " + boat);
                                 }
                             }
                             
@@ -224,6 +230,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                     DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace, competitor);
                                     if (track != null && trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
                                         mapper.addFix(track, (DoubleVectorFix) fix);
+                                        if (returnLiveDelay) {
+                                            delayToLive.put(trackedRace.getRaceIdentifier(), new MillisecondsDurationImpl(trackedRace.getDelayToLiveInMillis()));
+                                        }
                                     }
                                 }
                             }
@@ -240,9 +249,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 if (comp != null) {
                                     recordForCompetitor(comp);
                                 } else {
-                                    logger.log(Level.WARNING,
-                                            "Could not record fix for boat because no competitor could be determined. Boat: "
-                                                    + boat);
+                                    // this is not necessarily something to warn of; while a boat tracker may continuously track
+                                    logger.log(Level.FINE,
+                                            ()->"Could not record fix for boat because no competitor could be determined. Boat: " + boat);
                                 }
                             }
                             
@@ -254,9 +263,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                         // by the race or the track, e.g., because the race's end-of-tracking
                                         // comes before the fix's time point
                                         if (trackedRace.recordFix(comp, (GPSFixMoving) fix)) {
-                                            RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(comp);
-                                            if (maneuverChangedAnswer != null) {
-                                                maneuverChanged.add(maneuverChangedAnswer);
+                                            if (returnManeuverChanges) {
+                                                RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(comp);
+                                                if (maneuverChangedAnswer != null) {
+                                                    maneuverChanged.add(maneuverChangedAnswer);
+                                                }
+                                            }
+                                            if (returnLiveDelay) {
+                                                delayToLive.put(trackedRace.getRaceIdentifier(), new MillisecondsDurationImpl(trackedRace.getDelayToLiveInMillis()));
                                             }
                                         }
                                     } else {
@@ -328,18 +342,34 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                         }
                                     }
                                     trackedRace.recordFix(mark, (GPSFix) fix, /* only when in tracking interval */ !forceFix);
+                                    if (returnLiveDelay) {
+                                        delayToLive.put(trackedRace.getRaceIdentifier(), new MillisecondsDurationImpl(trackedRace.getDelayToLiveInMillis()));
+                                    }
                                 }
                             }
                         });
                     }
                 });
             }
-            return maneuverChanged;
+            return mergeManeuverChangedAndLiveDelayResult(maneuverChanged, delayToLive);
+        }
+
+        private Iterable<Triple<RegattaAndRaceIdentifier, Boolean, Duration>> mergeManeuverChangedAndLiveDelayResult(
+                Set<RegattaAndRaceIdentifier> maneuverChanged, Map<RegattaAndRaceIdentifier, Duration> delayToLive) {
+            final Map<RegattaAndRaceIdentifier, Pair<Boolean, Duration>> preResult = new HashMap<>();
+            for (final Entry<RegattaAndRaceIdentifier, Duration> e : delayToLive.entrySet()) {
+                preResult.put(e.getKey(), new Pair<>(maneuverChanged.contains(e.getKey()), e.getValue()));
+            }
+            for (final RegattaAndRaceIdentifier maneuverChanges : maneuverChanged) {
+                if (!preResult.containsKey(maneuverChanges)) {
+                    preResult.put(maneuverChanges, new Pair<>(true, null));
+                }
+            }
+            return Util.map(preResult.entrySet(), e->new Triple<>(e.getKey(), e.getValue().getA(), e.getValue().getB()));
         }
     };
 
     /**
-     * 
      * @param comp
      *            The resolved competitor for wich a gpsfix was just recorded.
      * @return Will return null or an RegattaAndRaceIdentifier, if the last maneuver for the given competitor changed
@@ -663,7 +693,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     private TimeRange getTrackingTimeRange() {
         final TimePoint startOfTracking = trackedRace.getStartOfTracking();
-        final TimePoint endOfTracking = trackedRace.getEndOfTracking();
+        // in case (erroneously) startOfTracking is *after* endOfTracking, return an empty interval starting and ending
+        // at startOfTracking (see also bug 5354).
+        final TimePoint endOfTracking = startOfTracking != null && trackedRace.getEndOfTracking() != null &&
+                startOfTracking.after(trackedRace.getEndOfTracking()) ? startOfTracking : trackedRace.getEndOfTracking();
         return new TimeRangeImpl(startOfTracking == null ? TimePoint.BeginningOfTime : startOfTracking,
                 endOfTracking == null ? TimePoint.EndOfTime : endOfTracking);
     }
@@ -697,11 +730,13 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     private void startTracking() {
-        setStatusAndProgress(TrackedRaceStatusEnum.TRACKING, 0.0);
+        // start out LOADING; if no mappings are found, the final updateStatusAndProgress() will recognize and switch to TRACKING
+        setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.0);
         this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs(),
                 trackedRace.getRace().getName());
         trackedRace.addListener(raceChangeListener);
         this.deviceMappings.updateMappings();
+        updateStatusAndProgress(); // will switch to TRACKING immediately if no loading jobs are running based on the device mappings found
     }
 
     private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {

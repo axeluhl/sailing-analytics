@@ -12,13 +12,13 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 
@@ -38,7 +38,6 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         Number createdAt = (Number) object.get(BaseRaceLogEventSerializer.FIELD_CREATED_AT);
         Number timeStamp = (Number) object.get(BaseRaceLogEventSerializer.FIELD_TIMESTAMP);
         Number passId = (Number) object.get(BaseRaceLogEventSerializer.FIELD_PASS_ID);
-        
         JSONArray jsonCompetitors = Helpers.getNestedArraySafe(object, BaseRaceLogEventSerializer.FIELD_COMPETITORS);
         List<Competitor> competitors = new ArrayList<>();
         for (Object competitorObject : jsonCompetitors) {

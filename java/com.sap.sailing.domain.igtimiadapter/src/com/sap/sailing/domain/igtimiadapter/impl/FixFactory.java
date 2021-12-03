@@ -43,36 +43,46 @@ public class FixFactory {
             JSONArray timePointsMillis = (JSONArray) fixesJson.get("t");
             int fixIndex = 0;
             for (Object timePointMillis : timePointsMillis) {
-                TimePoint timePoint = new MillisecondsTimePoint(((Number) timePointMillis).longValue());
-                Map<Integer, Object> valuesPerSubindex = new HashMap<>();
-                int i=1;
-                JSONArray values;
-                while ((values=(JSONArray) fixesJson.get(""+i)) != null) {
-                    valuesPerSubindex.put(i, values.get(fixIndex));
-                    i++;
-                }
-                Sensor sensor = new SensorImpl(deviceSerialNumber,
-                        fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
-                                : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
-                final Type ft = Type.valueOf(fixType);
-                if (ft != null) {
-                    Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
-                    result.add(fix);
-                    fixIndex++;
+                if (timePointMillis != null) {
+                    TimePoint timePoint = new MillisecondsTimePoint(((Number) timePointMillis).longValue());
+                    Map<Integer, Object> valuesPerSubindex = new HashMap<>();
+                    int i=1;
+                    JSONArray values;
+                    while ((values=(JSONArray) fixesJson.get(""+i)) != null) {
+                        valuesPerSubindex.put(i, values.get(fixIndex));
+                        i++;
+                    }
+                    Sensor sensor = new SensorImpl(deviceSerialNumber,
+                            fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
+                                    : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
+                    final Type ft = Type.valueOf(fixType);
+                    if (ft != null) {
+                        final Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
+                        if (fix != null) {
+                            result.add(fix);
+                            fixIndex++;
+                        }
+                    }
                 }
             }
         }
         return result;
     }
     
+    /**
+     * @return {@code null} in case the fix parser cannot make sense of the {@code valuesPerSubindex}, e.g., because
+     *         it's empty.
+     */
     private Fix createFix(Sensor sensor, Type fixType, TimePoint timePoint, Map<Integer, Object> valuesPerSubindex) {
         try {
             Constructor<? extends Fix> constructor = fixType.getFixClass().getConstructor(TimePoint.class, Sensor.class, Map.class);
             Fix fix = constructor.newInstance(timePoint, sensor, valuesPerSubindex);
             return fix;
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            logger.log(Level.SEVERE, "Internal error trying to find fix constructor for fix type "+fixType+" with class "+fixType.getFixClass());
-            throw new RuntimeException(e);
+            logger.log(Level.SEVERE, "Internal error trying to find fix constructor for fix type "+
+                    fixType+" with class "+fixType.getFixClass()+" or problem creating fix from data "+valuesPerSubindex+": "+
+                    e.getMessage());
+            return null;
         }
     }
 }

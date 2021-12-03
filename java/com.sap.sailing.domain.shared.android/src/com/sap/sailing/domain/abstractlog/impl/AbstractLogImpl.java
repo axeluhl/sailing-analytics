@@ -29,7 +29,7 @@ import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
  * {@link Track} implementation for {@link AbstractLogEvent}s.
@@ -73,7 +73,6 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
      */
     public AbstractLogImpl(String nameForReadWriteLock, Serializable identifier, Comparator<Timed> comparator) {
         super(new ArrayListNavigableSet<Timed>(comparator), nameForReadWriteLock);
-
         this.listeners = new HashSet<VisitorT>();
         this.id = identifier;
     }

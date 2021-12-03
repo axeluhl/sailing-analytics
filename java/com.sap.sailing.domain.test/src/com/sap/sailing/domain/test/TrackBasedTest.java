@@ -218,7 +218,7 @@ public abstract class TrackBasedTest {
     }
 
     public static RegattaImpl createTestRegatta(String regattaName, Iterable<String> raceColumnNames) {
-        final BoatClass boatClass = new BoatClassImpl("boat class name", BoatClassMasterdata._12M);
+        final BoatClass boatClass = new BoatClassImpl(BoatClassMasterdata._12M);
         final TimePoint startDate = MillisecondsTimePoint.now();
         final TimePoint endDate = startDate.plus(MillisecondsDurationImpl.ONE_DAY);
         final boolean isMedal = false;
@@ -226,7 +226,6 @@ public abstract class TrackBasedTest {
         final ScoringScheme scoringScheme = new LowPoint();
         final CourseArea courseArea = new CourseAreaImpl("Course Area", UUID.randomUUID());
         final Serializable regatteId = "regatta id";
-        
         Iterable<? extends Fleet> regattaFleets = Collections.singleton(regattaFleet);
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
         Series series = new SeriesImpl("series name", isMedal, /* isFleetsCanRunInParallel */ true, regattaFleets, raceColumnNames, trackedRegattaRegistry);

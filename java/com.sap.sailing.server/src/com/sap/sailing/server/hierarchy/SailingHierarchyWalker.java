@@ -42,6 +42,7 @@ public final class SailingHierarchyWalker {
                     allLeaderboardsArePartOfEvent = false;
                 }
             }
+            // FIXME bug 5541: if there is only one leaderboard in the leaderboard group of an event series, the leaderboard group representing the series is still visited, leading to an endless recursion
             if (includeLeaderboardGroup || allLeaderboardsArePartOfEvent) {
                 visitor.visit(lg);
                 if (hasOverallLeaderboard) {
@@ -59,7 +60,6 @@ public final class SailingHierarchyWalker {
             final LeaderboardGroupHierarchyVisitor visitor) {
         boolean visitEvents = includeEventsIfLeaderboardGroupHasOverallLeaderboard
                 && leaderboardGroup.hasOverallLeaderboard();
-
         if (visitEvents) {
             for (Event event : service.getAllEvents()) {
                 if (Util.contains(event.getLeaderboardGroups(), leaderboardGroup)) {
@@ -67,7 +67,6 @@ public final class SailingHierarchyWalker {
                 }
             }
         }
-
         for (Leaderboard lb : leaderboardGroup.getLeaderboards()) {
             visitor.visit(lb);
         }

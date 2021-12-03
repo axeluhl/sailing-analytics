@@ -24,6 +24,8 @@ import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -51,7 +53,8 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     private class SecurityServerReplicationTestSetUp extends
             AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp {
         @Override
-        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException, UserGroupManagementException, UserManagementException {
+        protected SecurityServiceImpl createNewMaster()
+                throws MalformedURLException, IOException, InterruptedException, UserStoreManagementException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(masterMailService).when(trackerMock).getService();
@@ -59,19 +62,22 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
+                    SecuredSecurityTypes::getAllInstances);
             result.initialize();
             return result;
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() throws UserGroupManagementException, UserManagementException, MalformedURLException, IOException, InterruptedException {
+        protected SecurityServiceImpl createNewReplica()
+                throws UserStoreManagementException, MalformedURLException, IOException, InterruptedException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(replicaMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
+                    SecuredSecurityTypes::getAllInstances);
             userStore.ensureDefaultRolesExist();
             userStore.ensureServerGroupExists();
             result.initialize();

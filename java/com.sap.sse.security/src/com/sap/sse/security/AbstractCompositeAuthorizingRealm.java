@@ -179,22 +179,18 @@ public abstract class AbstractCompositeAuthorizingRealm extends AuthorizingRealm
             for (final QualifiedObjectIdentifier objectIdentifier : wildcardPermission.getQualifiedObjectIdentifiers()) {
                 final OwnershipAnnotation ownership = getAccessControlStore().getOwnership(objectIdentifier);
                 final AccessControlListAnnotation acl = getAccessControlStore().getAccessControlList(objectIdentifier);
-                allChecksPassed = isPermitted(wildcardPermission, user, ownership, acl);
+                allChecksPassed = isPermittedForUser(wildcardPermission, user, ownership, acl);
                 if (!allChecksPassed) {
                     break;
                 }
             }
             result = allChecksPassed;
         } else {
-            result = isPermitted(wildcardPermission, user, /* ownership */ null, /* acl */ null);
+            result = isPermittedForUser(wildcardPermission, user, /* ownership */ null, /* acl */ null);
         }
         return result;
     }
 
-    private boolean isPermitted(WildcardPermission wildcardPermission, User user, OwnershipAnnotation ownership, AccessControlListAnnotation acl) {
-        return isPermittedForUser(wildcardPermission, user, ownership, acl);
-    }
-    
     private boolean isPermittedForUser(WildcardPermission wildcardPermission, User user, OwnershipAnnotation ownership,
             AccessControlListAnnotation acl) {
         User allUser = getUserStore().getUserByName(SecurityService.ALL_USERNAME);

@@ -9,13 +9,18 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.Displayer;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.common.TimePoint;
@@ -25,6 +30,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.security.ui.client.UserService;
@@ -46,6 +52,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final String leaderboardGroupName;
+    private final UUID leaderboardGroupId;
     protected EventDTO event;
     private RegattaDTO regatta;
     private StrippedLeaderboardDTO leaderboard;
@@ -58,11 +65,16 @@ public class ExpeditionAllInOneAfterImportHandler {
     private Iterable<TimePoint> startTimes;
 
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
-            String leaderboardGroupName, List<Triple<String,  String, String>> raceEntries,
+            String leaderboardGroupName, UUID leaderboardGroupId, List<Triple<String, String, String>> raceEntries,
             List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
-            Iterable<TimePoint> startTimes, final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages) {
+            Iterable<TimePoint> startTimes, final SailingServiceWriteAsync sailingServiceWrite,
+            final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
+            Refresher<BoatDTO> boatsRefresher, Refresher<RegattaDTO> regattasRefresher,
+            Refresher<EventDTO> eventsRefresher, Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
+            Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, Displayer<RegattaDTO> regattaOracleToRefresh) {
         this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
         this.sensorImporterType = sensorImporterType;
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
@@ -76,15 +88,46 @@ public class ExpeditionAllInOneAfterImportHandler {
             @Override
             public void onSuccess(EventDTO result) {
                 event = result;
+                eventsRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<EventDTO>() {
+                    @Override
+                    public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
+                        return dto1.id.equals(dto2.id);
+                    }
+                    @Override
+                    public int hashCode(EventDTO t) {
+                        return t.id.hashCode();
+                    }
+                });
                 sailingServiceWrite.getRegattaByName(regattaName, new DataLoadingCallback<RegattaDTO>() {
                     @Override
                     public void onSuccess(RegattaDTO result) {
                         regatta = result;
-                        sailingServiceWrite.getLeaderboard(leaderboardName,
-                                new DataLoadingCallback<StrippedLeaderboardDTO>() {
+                        regattasRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<RegattaDTO>() {
                             @Override
-                            public void onSuccess(StrippedLeaderboardDTO result) {
+                            public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
+                                return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
+                            }
+                            @Override
+                            public int hashCode(RegattaDTO t) {
+                                return t.getRegattaIdentifier().hashCode();
+                            }
+                        });
+                        regattasRefresher.callFillAndReloadInitially(regattaOracleToRefresh);
+                        sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
+                                new DataLoadingCallback<StrippedLeaderboardDTOWithSecurity>() {
+                            @Override
+                            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
                                 leaderboard = result;
+                                leaderboardsRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<StrippedLeaderboardDTOWithSecurity>() {
+                                    @Override
+                                    public boolean representSameEntity(StrippedLeaderboardDTOWithSecurity dto1, StrippedLeaderboardDTOWithSecurity dto2) {
+                                        return dto1.getName().equals(dto2.getName());
+                                    }
+                                    @Override
+                                    public int hashCode(StrippedLeaderboardDTOWithSecurity t) {
+                                        return t.getName().hashCode();
+                                    }
+                                });
                                 sailingServiceWrite.getTrackFileImportDeviceIds(gpsDeviceIds,
                                     new DataLoadingCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
                                         @Override
@@ -95,7 +138,7 @@ public class ExpeditionAllInOneAfterImportHandler {
                                                 @Override
                                                 public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
                                                     sensorFixesDeviceIDs = result;
-                                                    showCompetitorRegistration();
+                                                    showCompetitorRegistration(competitorsRefresher, boatsRefresher);
                                                 }
                                             });
                                         }
@@ -109,20 +152,25 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
     
     private class RegattaLogCompetitorRegistrationAndSelectionDialog extends RegattaLogCompetitorRegistrationDialog {
-        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass,
+                SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+                Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
                 StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
                 boolean canBoatsOfCompetitorsChangePerRace) {
-            this(boatClass, sailingServiceWrite, userService, stringMessages, errorReporter, editable, leaderboardName,
-                    canBoatsOfCompetitorsChangePerRace, new ValidatorForCompetitorRegistrationDialog(stringMessages),
+            this(boatClass, sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages,
+                    errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace,
+                    new ValidatorForCompetitorRegistrationDialog(stringMessages),
                     new CallbackForCompetitorRegistrationDialog());
         }
-        
-        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass,
+                SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+                Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
                 StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
                 boolean canBoatsOfCompetitorsChangePerRace, ValidatorForCompetitorRegistrationDialog validator,
                 CallbackForCompetitorRegistrationDialog callback) {
-            super(boatClass, sailingServiceWrite, userService, stringMessages, errorReporter, editable, leaderboardName,
-                    canBoatsOfCompetitorsChangePerRace, validator, callback);
+            super(boatClass, sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages,
+                    errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, validator, callback);
             validator.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
             callback.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
         }
@@ -174,10 +222,10 @@ public class ExpeditionAllInOneAfterImportHandler {
         }
     }
 
-    private void showCompetitorRegistration() {
+    private void showCompetitorRegistration(Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher) {
         new RegattaLogCompetitorRegistrationAndSelectionDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
-                sailingServiceWrite, userService, stringMessages, errorReporter, true, leaderboard.getName(),
-                leaderboard.canBoatsOfCompetitorsChangePerRace).show();
+                sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages, errorReporter, true,
+                leaderboard.getName(), leaderboard.canBoatsOfCompetitorsChangePerRace).show();
     }
     
     private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
@@ -259,8 +307,8 @@ public class ExpeditionAllInOneAfterImportHandler {
                             @Override
                             public void onSuccess(Void result) {
                                 new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
-                                        raceNames, leaderboard.getName(),
-                                        leaderboardGroupName).show();
+                                        raceNames, leaderboard.getName(), leaderboardGroupName, leaderboardGroupId)
+                                                .show();
                             }
 
                             @Override
@@ -330,7 +378,6 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
 
     private abstract class DataLoadingCallback<T> implements AsyncCallback<T> {
-
         @Override
         public final void onFailure(Throwable caught) {
             errorReporter.reportError("Failed loading importer data from server!");
@@ -338,7 +385,6 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
 
     private abstract class CancelImportDialogCallback<T> implements DialogCallback<T> {
-
         @Override
         public final void cancel() {
             Notification.notify(stringMessages.importCanceledByUser(), NotificationType.WARNING);

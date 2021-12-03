@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/competitors/{id}</h2>
+<p class="deprecationMessage">This API contains deprecated fields in the result. These fields will be removed in near future.<br>
+  Please see <a href="competitorGetDoc.html">/api/v1/competitors/{id}</a> for detailed information!<br>.<br>
+</p>
+<br>
+<b>Description:</b>
+<p>Updates the details of a competitor. Only optional parameters that are passed by the json payload are updated.</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+    <tr>
+        <td>Input format:</td>
+        <td>Json</td>
+    </tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+        <td>
+        name: Name of Competitor<br>
+        shortName: Short name of the competitor<br>
+        email: EMail-Address of the competitor<br>
+        nationality: Three-letter IOC nationality acronym<br>
+        timeOnTimeFactor: default time-on-time handicap factor<br>
+        timeOnDistanceAllowanceInSecondsPerNauticalMile: default time-on-distance time allowance for this competitor, used in handicap regattas<br>
+        flagImageUri: URI of flag image<br>
+        teamImageUri: URI of team image<br>
+        searchTag: Search tag<br>
+        </td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>PUT</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/competitors/bba11294-9930-11e0-85be-406186cbf87c">http://www.sapsailing.com/sailingserver/api/v1/competitors/bba11294-9930-11e0-85be-406186cbf87c</a><br/>
+    </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

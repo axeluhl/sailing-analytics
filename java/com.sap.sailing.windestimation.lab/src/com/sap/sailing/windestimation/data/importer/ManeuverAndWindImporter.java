@@ -22,19 +22,16 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -50,6 +47,9 @@ import com.sap.sailing.windestimation.data.transformer.CompetitorTrackTransforme
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonSerializer;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 /**
  * 
@@ -102,13 +102,14 @@ public class ManeuverAndWindImporter {
     }
 
     public HttpClient createNewHttpClient() {
-        HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT_MILLIS);
-        HttpClient client = new SystemDefaultHttpClient(httpParams);
-        client.getParams().setParameter("http.socket.timeout", CONNECTION_TIMEOUT_MILLIS);
-        client.getParams().setParameter("http.connection.timeout", CONNECTION_TIMEOUT_MILLIS);
-        client.getParams().setParameter("http.connection-manager.timeout", new Long(CONNECTION_TIMEOUT_MILLIS));
-        client.getParams().setParameter("http.protocol.head-body-timeout", CONNECTION_TIMEOUT_MILLIS);
+        CloseableHttpClient client = HttpClientBuilder.create()
+                .setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes())
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(CONNECTION_TIMEOUT_MILLIS)
+                        .setConnectionRequestTimeout(CONNECTION_TIMEOUT_MILLIS)
+                        .setSocketTimeout(CONNECTION_TIMEOUT_MILLIS)
+                        .build())
+                .build();
         return client;
     }
 

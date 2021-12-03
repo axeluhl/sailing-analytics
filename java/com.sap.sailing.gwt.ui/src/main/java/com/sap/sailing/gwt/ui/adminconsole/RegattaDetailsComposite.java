@@ -35,7 +35,7 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
@@ -62,7 +62,7 @@ public class RegattaDetailsComposite extends Composite {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private final RegattaRefresher regattaRefresher;
+    private final Presenter presenter;
 
     private final Label regattaId;
     private final Label regattaName;
@@ -87,12 +87,11 @@ public class RegattaDetailsComposite extends Composite {
 
     private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public RegattaDetailsComposite(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            final RegattaRefresher regattaRefresher, final ErrorReporter errorReporter,
+    public RegattaDetailsComposite(final Presenter presenter,
             final StringMessages stringMessages) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.regattaRefresher = regattaRefresher;
-        this.errorReporter = errorReporter;
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.presenter = presenter;
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
         regatta = null;
         mainPanel = new CaptionPanel(stringMessages.regatta());
@@ -118,7 +117,7 @@ public class RegattaDetailsComposite extends Composite {
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
         registrationLinkWithQRCodeOpenButton = addRegistrationLinkOpenButton(grid, currentRow++, stringMessages.registrationLink(), "RegistrationLinkWithQRCodeDialog");
-        seriesTable = createRegattaSeriesTable(userService);
+        seriesTable = createRegattaSeriesTable(presenter.getUserService());
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -222,7 +221,6 @@ public class RegattaDetailsComposite extends Composite {
                 return series.getMaximumNumberOfDiscards() == null ? "" : (""+series.getMaximumNumberOfDiscards());
             }
         };
-
         TextColumn<SeriesDTO> racesColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -243,7 +241,6 @@ public class RegattaDetailsComposite extends Composite {
                 return result;
             }
         };
-        
         TextColumn<SeriesDTO> fleetsColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -261,7 +258,6 @@ public class RegattaDetailsComposite extends Composite {
                 return result;
             }
         };
-
         TextColumn<SeriesDTO> discardsColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -284,7 +280,6 @@ public class RegattaDetailsComposite extends Composite {
                 return result;
             }
         };
-
         final AccessControlledActionsColumn<SeriesDTO, SeriesConfigImagesBarCell> actionsColumn = create(
                 new SeriesConfigImagesBarCell(stringMessages), userService, series -> regatta);
         actionsColumn.addAction(SeriesConfigImagesBarCell.ACTION_EDIT, UPDATE,
@@ -302,12 +297,12 @@ public class RegattaDetailsComposite extends Composite {
 
                             @Override
                             public void onSuccess(Void result) {
-                                regattaRefresher.fillRegattas();
+                                presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                             }
                         }));
             }
         });
-        
         table.addColumn(seriesNameColumn, stringMessages.series());
         table.addColumn(isMedalSeriesColumn, stringMessages.medalSeries());
         table.addColumn(racesColumn, stringMessages.races());
@@ -319,7 +314,6 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
         table.addColumn(maximumNumberOfDiscardsColumn, stringMessages.maximumNumberOfDiscards());
         table.addColumn(actionsColumn, stringMessages.actions());
-        
         return table;
     }
     
@@ -410,7 +404,8 @@ public class RegattaDetailsComposite extends Composite {
 
                                         @Override
                                         public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                                            regattaRefresher.fillRegattas();
+                                            presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                            presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                         }
                                     });
                         }
@@ -432,7 +427,8 @@ public class RegattaDetailsComposite extends Composite {
 
                             @Override
                             public void onSuccess(Void result) {
-                                regattaRefresher.fillRegattas();
+                                presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                             }
                         });
             }

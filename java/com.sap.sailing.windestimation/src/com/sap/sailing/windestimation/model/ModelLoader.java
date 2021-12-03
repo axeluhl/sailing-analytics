@@ -128,8 +128,7 @@ public class ModelLoader<InstanceType, MC extends ModelContext<InstanceType>, Mo
      */
     @SuppressWarnings("unchecked")
     public Map<MC, ModelType> loadBestModelsForAllContexts() {
-        List<PersistableModel<?, ?>> loadedModels = modelStore
-                .loadAllPersistedModels(modelFactory.getModelDomainType());
+        List<PersistableModel<?, ?>> loadedModels = modelStore.loadAllPersistedModels(modelFactory.getModelDomainType());
         Map<MC, ModelType> modelsMap = new HashMap<>(loadedModels.size());
         for (PersistableModel<?, ?> model : loadedModels) {
             modelsMap.put((MC) model.getModelContext(), (ModelType) model);

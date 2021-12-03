@@ -70,8 +70,6 @@ public interface DomainFactory {
     
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
 
-    void removeRace(String raceID);
-
     RaceType getRaceTypeFromRaceID(String raceID);
 
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,

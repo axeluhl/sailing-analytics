@@ -8,13 +8,13 @@ import org.bson.Document;
 import org.json.simple.JSONObject;
 
 import com.mongodb.BasicDBObject;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.windestimation.data.SingleDimensionBasedTwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.serialization.SingleDimensionBasedTwdTransitionJsonDeserializer;
 import com.sap.sailing.windestimation.data.serialization.SingleDimensionBasedTwdTransitionJsonSerializer;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class SingleDimensionBasedTwdTransitionPersistenceManager
         extends AbstractPersistenceManager<SingleDimensionBasedTwdTransition> {

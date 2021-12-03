@@ -11,9 +11,8 @@ import com.sap.sailing.server.LeaderboardMXBean;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.util.AbstractMXBeanImpl;
 
-public class LeaderboardMXBeanImpl extends AbstractMXBeanImpl implements LeaderboardMXBean {
+public class LeaderboardMXBeanImpl implements LeaderboardMXBean {
     private static final long serialVersionUID = -8420830339429971378L;
     
     private final Leaderboard leaderboard;
@@ -29,7 +28,7 @@ public class LeaderboardMXBeanImpl extends AbstractMXBeanImpl implements Leaderb
 
     @Override
     public ObjectName getObjectName() throws MalformedObjectNameException {
-        return new ObjectName("com.sap.sailing:type=Leaderboard,name="+escapeIllegalObjectNameCharacters(leaderboard.getName()));
+        return new ObjectName("com.sap.sailing:type=Leaderboard,name="+ObjectName.quote((leaderboard.getName())));
     }
     
     @Override

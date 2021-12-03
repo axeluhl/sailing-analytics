@@ -23,9 +23,9 @@ public class TagSharedURLDialog extends DialogBox {
      * Creates a Dialog which shows the user the URL of the tag he wants to share
      * 
      * @param taggingPanel
-     *            {@link TaggingPanel} which creates this {@link TagSharedURLDialog}.
+     *            {@link TaggingComponent} which creates this {@link TagSharedURLDialog}.
      * @param url
-     *            A URL which if called opens the {@link TaggingPanel} and selects the shared tag.
+     *            A URL which if called opens the {@link TaggingComponent} and selects the shared tag.
      */
     public TagSharedURLDialog(StringMessages stringMessages, String url) {
         Panel mainPanel = new FlowPanel();

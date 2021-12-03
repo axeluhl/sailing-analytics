@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +35,7 @@ import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -61,8 +66,10 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
@@ -101,9 +108,8 @@ public class ImportMasterDataOperation extends
     private final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
     
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
+            User user, UserGroup tenant) {
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
-        this.creationCount.add(existingCreationCount);
         this.masterData = topLevelMasterData;
         this.override = override;
         this.importOperationId = importOperationId;
@@ -111,6 +117,25 @@ public class ImportMasterDataOperation extends
         this.tenant = tenant;
         this.connectivityParametersToRestore = masterData.getConnectivityParametersToRestore();
     }
+
+    
+    /**
+     * Operations of this type are expected to be explicitly sent out <em>before</em> the operation is applied locally on
+     * the master server. This is important because otherwise tracking-related operations may be sent out before the
+     * structures for regattas, events, etc. have been replicated. This also holds for the "reverse" replication direction
+     * from a replica to a master. See also bug5574.
+     */
+    @Override
+    public boolean isRequiresExplicitTransitiveReplication() {
+        return false;
+    }
+
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
 
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
@@ -154,17 +179,21 @@ public class ImportMasterDataOperation extends
             if (masterData.getDeviceConfigurations() != null) {
                 importDeviceConfigurations(toState);
             }
-            
             Collection<MediaTrack> allMediaTracksToImport = masterData.getFilteredMediaTracks();
             for (MediaTrack trackToImport : allMediaTracksToImport) {
                 ensureOwnership(trackToImport.getIdentifier(), securityService);
             }
             toState.mediaTracksImported(allMediaTracksToImport, creationCount, override);
             progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_TRACKED_RACES);
+            progress.setOverAllProgressPct(0.8);
+            progress.setCurrentSubProgressPct(0);
+            final Iterable<TrackedRace> trackedRacesToWaitForLoadingComplete = importTrackedRaces(toState, securityService);            
+            progress.setCurrentSubProgress(DataImportSubProgress.WAITING_FOR_TRACKED_RACES_TO_FINISH_LOADING);
             progress.setOverAllProgressPct(0.9);
             progress.setCurrentSubProgressPct(0);
-            importTrackedRaces(toState, securityService);            
+            waitForTrackedRacesToFinishLoading(trackedRacesToWaitForLoadingComplete);
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
+            progress.setOverAllProgressPct(1.0);
             return creationCount;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error during execution of ImportMasterDataOperation", e);
@@ -174,24 +203,69 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void importDeviceConfigurations(RacingEventService toState) {
-        Iterable<DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
-        for (DeviceConfiguration config : newConfigs) {
-            if (toState.getDeviceConfigurationById(config.getId()) != null) {
-                if (override) {
-                    logger.info(String.format(
-                            "Device configuration [%s] with name \"%s\" already exists. Overwrite because override flag is set.",
-                            config.getId(), config.getName()));
-                    toState.removeDeviceConfiguration(config.getId());
-                    toState.createOrUpdateDeviceConfiguration(config);
-                    // FIXME ownership here!
-                } else {
-                    logger.info(String
-                            .format("Device configuration [%s] with name \"%s\" already exists. Not overwriting because override flag is not set.",
-                                    config.getId(), config.getName()));
+    private void waitForTrackedRacesToFinishLoading(Iterable<TrackedRace> trackedRacesToWaitForLoadingComplete) throws InterruptedException {
+        final int toLoad = Util.size(trackedRacesToWaitForLoadingComplete);
+        logger.info("Waiting for race loading to complete for "+toLoad+" races...");;
+        final Set<TrackedRace> racesStillLoading = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        Util.addAll(trackedRacesToWaitForLoadingComplete, racesStillLoading);
+        final Object sync = new Object(); // on this object we synchronize the waiting and unblocking process
+        for (final TrackedRace trackedRace : trackedRacesToWaitForLoadingComplete) {
+            trackedRace.addListener(new AbstractRaceChangeListener() {
+                @Override
+                public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+                    if ((oldStatus.getStatus() == TrackedRaceStatusEnum.PREPARED || oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING)
+                            && newStatus.getStatus().getOrder() > TrackedRaceStatusEnum.LOADING.getOrder()) {
+                        logger.info("Race "+trackedRace+" has finished loading");
+                        synchronized (progress) {
+                            progress.setCurrentSubProgressPct((double) (toLoad - racesStillLoading.size()) / (double) toLoad);
+                        }
+                        racesStillLoading.remove(trackedRace);
+                        synchronized (sync) {
+                            if (racesStillLoading.isEmpty()) {
+                                sync.notifyAll();
+                            }
+                        }
+                    }
                 }
-            } else {
-                toState.createOrUpdateDeviceConfiguration(config);
+            });
+        }
+        for (Iterator<TrackedRace> i = racesStillLoading.iterator(); i.hasNext(); ) {
+            final TrackedRace trackedRace = i.next();
+            if (trackedRace.getStatus().getStatus().getOrder() > TrackedRaceStatusEnum.LOADING.getOrder()) {
+                logger.info("Race "+trackedRace+" has finished loading");
+                i.remove();
+                progress.setCurrentSubProgressPct((double) (toLoad - racesStillLoading.size()) / (double) toLoad);
+            }
+        }
+        synchronized (sync) {
+            while (!racesStillLoading.isEmpty()) {
+                sync.wait();
+            }
+        }
+        logger.info("All races imported have finished loading");
+    }
+
+
+    private void importDeviceConfigurations(RacingEventService toState) {
+        if (toState.getMasterDescriptor() == null) { // don't do this on a replica's RacingEventService; device config removals/additions are replicated by RacingEventService
+            Iterable<DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
+            for (DeviceConfiguration config : newConfigs) {
+                if (toState.getDeviceConfigurationById(config.getId()) != null) {
+                    if (override) {
+                        logger.info(String.format(
+                                "Device configuration [%s] with name \"%s\" already exists. Overwrite because override flag is set.",
+                                config.getId(), config.getName()));
+                        toState.removeDeviceConfiguration(config.getId());
+                        toState.createOrUpdateDeviceConfiguration(config);
+                        // FIXME ownership here!
+                    } else {
+                        logger.info(String
+                                .format("Device configuration [%s] with name \"%s\" already exists. Not overwriting because override flag is not set.",
+                                        config.getId(), config.getName()));
+                    }
+                } else {
+                    toState.createOrUpdateDeviceConfiguration(config);
+                }
             }
         }
     }
@@ -259,7 +333,7 @@ public class ImportMasterDataOperation extends
             leaderboardNames.add(leaderboard.getName());
             if (existingLeaderboards.containsKey(leaderboard.getName())) {
                 if (creationCount.alreadyAddedLeaderboardWithName(leaderboard.getName())) {
-                    //Has already been added by this operation
+                    // Has already been added by this operation
                     continue;
                 } else if (override) {
                     for (RaceColumn raceColumn : existingLeaderboards.get(leaderboard.getName()).getRaceColumns()) {
@@ -290,14 +364,11 @@ public class ImportMasterDataOperation extends
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
             }
-
         }
-        // TODO bug 1975: as an aftermath of bug 1970, with LeaderboardGroup now implementing WithID, match making could happen by ID
-        LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByName(leaderboardGroup.getName());
+        LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByID(leaderboardGroup.getId());
         if (existingLeaderboardGroup != null && override) {
-            logger.info(String.format("Leaderboard Group with name %1$s already existed and will be overridden.",
-                    leaderboardGroup.getName()));
-            toState.removeLeaderboardGroup(leaderboardGroup.getName());
+            logger.info(String.format("Leaderboard Group with ID %1$s already existed and will be overridden.", leaderboardGroup.getId()));
+            toState.removeLeaderboardGroup(leaderboardGroup.getId());
             existingLeaderboardGroup = null;
         }
         if (existingLeaderboardGroup == null) {
@@ -341,7 +412,7 @@ public class ImportMasterDataOperation extends
     }
 
     private void addAllImportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
-            RaceLog log, RaceLogIdentifier identifier) {
+            final RaceLog log, RaceLogIdentifier identifier) {
         RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
                 .getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
         log.lockForRead();
@@ -381,7 +452,7 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void addAllImportedRegattaEvents(RegattaLogStore regattaLogStore, RegattaLog log,
+    private void addAllImportedRegattaEvents(RegattaLogStore regattaLogStore, final RegattaLog log,
             RegattaLikeIdentifier identifier, RegattaLogEventVisitor storeVisitor) {
         log.lockForRead();
         try {
@@ -410,69 +481,73 @@ public class ImportMasterDataOperation extends
     }
 
     private void createWindTracks(RacingEventService toState) {
-        int numOfWindTracks = masterData.getWindTrackMasterData().size();
-        int i = 0;
-        for (WindTrackMasterData windMasterData : masterData.getWindTrackMasterData()) {
-            DummyTrackedRace trackedRaceWithNameAndId = new DummyTrackedRace(windMasterData.getRaceName(), windMasterData.getRaceId());
-            WindTrack windTrackToWriteTo = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
-            final WindTrack windTrackToReadFrom = windMasterData.getWindTrack();
-            windTrackToReadFrom.lockForRead();
-            try {
-                for (Wind fix : windTrackToReadFrom.getRawFixes()) {
-                    Wind existingFix = windTrackToWriteTo.getFirstRawFixAtOrAfter(fix.getTimePoint());
-                    if (existingFix == null || !(existingFix.equals(fix) && fix.getTimePoint().equals(existingFix.getTimePoint())
-                            && Util.equalsWithNull(fix.getPosition(), existingFix.getPosition()))) {
-                        windTrackToWriteTo.add(fix);
-                    } else {
-                        logger.info("Didn't add wind fix in import, because equal fix was already there.");
+        if (toState.getMasterDescriptor() == null) { // don't do this on a replica's RacingEventService; wind data will be received through the tracked race loading replication
+            int numOfWindTracks = masterData.getWindTrackMasterData().size();
+            int i = 0;
+            for (WindTrackMasterData windMasterData : masterData.getWindTrackMasterData()) {
+                DummyTrackedRace trackedRaceWithNameAndId = new DummyTrackedRace(windMasterData.getRaceName(), windMasterData.getRaceId());
+                WindTrack windTrackToWriteTo = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
+                final WindTrack windTrackToReadFrom = windMasterData.getWindTrack();
+                windTrackToReadFrom.lockForRead();
+                try {
+                    for (Wind fix : windTrackToReadFrom.getRawFixes()) {
+                        Wind existingFix = windTrackToWriteTo.getFirstRawFixAtOrAfter(fix.getTimePoint());
+                        if (existingFix == null || !(existingFix.equals(fix) && fix.getTimePoint().equals(existingFix.getTimePoint())
+                                && Util.equalsWithNull(fix.getPosition(), existingFix.getPosition()))) {
+                            windTrackToWriteTo.add(fix);
+                        } else {
+                            logger.fine("Didn't add wind fix in import, because equal fix was already there.");
+                        }
                     }
+                } finally {
+                    windTrackToReadFrom.unlockAfterRead();
                 }
-            } finally {
-                windTrackToReadFrom.unlockAfterRead();
+                i++;
+                progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
+                progress.setOverAllProgressPct(0.5 + (0.3) * ((double) i / numOfWindTracks));
             }
-            i++;
-            progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
-            progress.setOverAllProgressPct(0.5 + (0.3) * ((double) i / numOfWindTracks));
         }
     }
     
 
     
     private void importRaceLogTrackingGPSFixes(RacingEventService toState) {
-        Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
-        if (raceLogTrackingFixes != null) {
-            SensorFixStore store = toState.getSensorFixStore();
-            int i = 0;
-            final int numberOfDevices = raceLogTrackingFixes.size();
-            for (Entry<DeviceIdentifier, Set<Timed>> entry : raceLogTrackingFixes.entrySet()) {
-                DeviceIdentifier device = entry.getKey();
-                final Collection<Timed> fixesToAddAsBatch = new ArrayList<>(BATCH_SIZE_FOR_IMPORTING_FIXES);
-                for (Timed fixToAdd : entry.getValue()) {
-                    if (fixToAdd instanceof VeryCompactGPSFixMovingImpl) {
-                        VeryCompactGPSFixMovingImpl gpsFix = (VeryCompactGPSFixMovingImpl) fixToAdd;
-                        fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
-                                ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed());
-                    } else if (fixToAdd instanceof VeryCompactGPSFixImpl) {
-                        VeryCompactGPSFixImpl gpsFix = (VeryCompactGPSFixImpl) fixToAdd;
-                        fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
-                    } 
-                    fixesToAddAsBatch.add(fixToAdd);
-                    if (fixesToAddAsBatch.size() == BATCH_SIZE_FOR_IMPORTING_FIXES) {
+        if (toState.getMasterDescriptor() == null) { // don't do this on a replica's RacingEventService; tracking data will be received through the tracked race loading replication
+            Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
+            if (raceLogTrackingFixes != null) {
+                SensorFixStore store = toState.getSensorFixStore();
+                int i = 0;
+                final int numberOfDevices = raceLogTrackingFixes.size();
+                for (Entry<DeviceIdentifier, Set<Timed>> entry : raceLogTrackingFixes.entrySet()) {
+                    DeviceIdentifier device = entry.getKey();
+                    final Collection<Timed> fixesToAddAsBatch = new ArrayList<>(BATCH_SIZE_FOR_IMPORTING_FIXES);
+                    for (Timed fixToAdd : entry.getValue()) {
+                        if (fixToAdd instanceof VeryCompactGPSFixMovingImpl) {
+                            VeryCompactGPSFixMovingImpl gpsFix = (VeryCompactGPSFixMovingImpl) fixToAdd;
+                            fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
+                                    ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed());
+                        } else if (fixToAdd instanceof VeryCompactGPSFixImpl) {
+                            VeryCompactGPSFixImpl gpsFix = (VeryCompactGPSFixImpl) fixToAdd;
+                            fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
+                        } 
+                        fixesToAddAsBatch.add(fixToAdd);
+                        if (fixesToAddAsBatch.size() == BATCH_SIZE_FOR_IMPORTING_FIXES) {
+                            storeFixes(store, device, fixesToAddAsBatch);
+                        }
+                    }
+                    if (!fixesToAddAsBatch.isEmpty()) {
                         storeFixes(store, device, fixesToAddAsBatch);
                     }
+                    i++;
+                    progress.setCurrentSubProgressPct((double) i / numberOfDevices);
                 }
-                if (!fixesToAddAsBatch.isEmpty()) {
-                    storeFixes(store, device, fixesToAddAsBatch);
-                }
-                i++;
-                progress.setCurrentSubProgressPct((double) i / numberOfDevices);
             }
         }
     }
 
     private void storeFixes(SensorFixStore store, DeviceIdentifier device, final Collection<Timed> fixesToAddAsBatch) {
         try {
-            store.storeFixes(device, fixesToAddAsBatch);
+            store.storeFixes(device, fixesToAddAsBatch, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
             fixesToAddAsBatch.clear();
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.severe("Failed to store race log tracking fixes while importing.");
@@ -487,7 +562,6 @@ public class ImportMasterDataOperation extends
             if (leaderboard instanceof RegattaLeaderboard) {
                 RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                 Regatta regatta = regattaLeaderboard.getRegatta();
-
                 Regatta existingRegatta = toState.getRegatta(regatta.getRegattaIdentifier());
                 if (existingRegatta != null) {
                     if (creationCount.alreadyAddedRegattaWithId(existingRegatta.getId().toString())) {
@@ -565,8 +639,7 @@ public class ImportMasterDataOperation extends
             UUID id = event.getId();
             Event existingEvent = toState.getEvent(id);
             if (existingEvent != null && override && !creationCount.alreadyAddedEventWithId(id.toString())) {
-                logger.info(String.format("Event with name %1$s already existed and will be overridden.",
-                        event.getName()));
+                logger.info(String.format("Event with ID %1$s already existed and will be overridden.", event.getId()));
                 toState.removeEvent(existingEvent.getId());
                 existingEvent = null;
             }
@@ -615,9 +688,16 @@ public class ImportMasterDataOperation extends
     
     /**
      * Starts the tracking of imported tracked races.
+     * 
+     * @return the set of tracked races for which loading/tracking has started. A caller may use those, e.g., to observe
+     *         their loading/tracking status. Races that didn't start loading/tracking within a
+     *         {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS timeout} will not be returned as
+     *         part of this set since waiting for them is considered futile.
      */
-    private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
-        if (connectivityParametersToRestore != null) {
+    private Iterable<TrackedRace> importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
+        final Set<TrackedRace> result = new HashSet<>();
+        // only start importing / loading tracked races content if not running on a replica
+        if (connectivityParametersToRestore != null && toState.getMasterDescriptor() == null) {
             int i = 0;
             final int numberOfConnectivityParamsToRestore = connectivityParametersToRestore.size();
             for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
@@ -628,7 +708,9 @@ public class ImportMasterDataOperation extends
                     RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1);
                     final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
                     if (race != null) {
-                        ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(race).getIdentifier(), securityService);
+                        final DynamicTrackedRace trackedRace = raceHandle.getTrackedRegatta().getTrackedRace(race);
+                        result.add(trackedRace);
+                        ensureOwnership(trackedRace.getIdentifier(), securityService);
                         creationCount.addOneTrackedRace(race.getId().toString());
                     } else {
                         logger.severe("Race for handle "+raceHandle+" didn't show in "+RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS+"ms; ownership not set");
@@ -638,5 +720,6 @@ public class ImportMasterDataOperation extends
                 progress.setCurrentSubProgressPct((double) i / numberOfConnectivityParamsToRestore);
             }
         }
+        return result;
     }
 }

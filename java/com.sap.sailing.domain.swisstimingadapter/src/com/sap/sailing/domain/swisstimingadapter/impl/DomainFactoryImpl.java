@@ -6,12 +6,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -67,7 +65,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 import difflib.PatchFailedException;
 
@@ -313,8 +311,10 @@ public class DomainFactoryImpl implements DomainFactory {
         for (Mark mark : course.getMarks()) {
             ControlPoint controlPoint = getOrCreateControlPoint(mark.getDescription(), mark.getDeviceIds(),
                     getMarkType(mark.getMarkType()), mark.getDescription());
-            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
-            waypoints.add(waypoint);
+            if (controlPoint != null) {
+                Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
+                waypoints.add(waypoint);
+            }
         }
         com.sap.sailing.domain.base.Course result = new CourseImpl(courseName, waypoints);
         return result;
@@ -352,11 +352,11 @@ public class DomainFactoryImpl implements DomainFactory {
                             getOrCreateMark(idRight, description), description, shortNameOfPotentialGate);
                     break;
                 default:
-                    throw new RuntimeException(
-                            "Don't know how to handle control points with number of devices neither 1 nor 2. Was "
-                                    + Util.size(deviceIds));
+                    logger.info("Ignoring mark "+description+" because it doesn't have any devices assigned");
                 }
-                controlPointCache.put(deviceIds, result);
+                if (result != null) {
+                    controlPointCache.put(deviceIds, result);
+                }
             }
         }
         return result;
@@ -390,7 +390,9 @@ public class DomainFactoryImpl implements DomainFactory {
             // TODO bug 1043: propagate the mark names to the waypoint names
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDescription(),
                     mark.getDeviceIds(), getMarkType(mark.getMarkType()), mark.getDescription());
-            newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
+            if (domainControlPoint != null) {
+                newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
+            }
         }
         courseToUpdate.update(newDomainControlPoints, courseToUpdate.getAssociatedRoles(),
                 courseToUpdate.getOriginatingCourseTemplateIdOrNull(), baseDomainFactory);
@@ -399,24 +401,6 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, com.sap.sailing.domain.base.Competitor competitor) {
         return baseDomainFactory.createMarkPassing(timePoint, waypoint, competitor);
-    }
-
-    @Override
-    public void removeRace(String raceID) {
-        Regatta regatta = raceIDToRegattaCache.get(raceID);
-        if (regatta != null) {
-            Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-            RaceDefinition race = regatta.getRaceByName(raceID);
-            if (race != null) {
-                toRemove.add(race);
-            }
-            for (RaceDefinition raceToRemove : toRemove) {
-                regatta.removeRace(raceToRemove);
-            }
-            if (Util.isEmpty(regatta.getAllRaces())) {
-                raceIDToRegattaCache.remove(raceID);
-            }
-        }
     }
 
     @Override

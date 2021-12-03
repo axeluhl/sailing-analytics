@@ -13,14 +13,17 @@ import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
@@ -33,7 +36,6 @@ import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.util.ThreadPoolUtil;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Receives {@link OperationWithResult} objects from a message queue and {@link Replicable#apply(OperationWithResult)
@@ -64,8 +66,8 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     private final static Logger logger = Logger.getLogger(ReplicationReceiverImpl.class.getName());
     
-    private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
-    private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
+    private static final long CHECK_INTERVAL_MILLIS = 5000; // how long (milliseconds) to pause before checking connection again
+    private static final int CHECK_COUNT = Integer.MAX_VALUE; // how long to check, value is CHECK_INTERVAL second steps
     
     /**
      * descriptor of the master server from which this replicator receives messages
@@ -93,13 +95,6 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     private boolean suspended;
     
     private boolean stopped = false;
-    
-    /**
-     * When many updates are triggered in a short period of time by a single thread, ensure that the single thread
-     * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
-     * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
-     */
-    private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
 
     /**
      * If permitted by the security manager, this is the <code>_queue</code> field accessor for the {@link QueueingConsumer}
@@ -108,16 +103,41 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     private Field _queue;
     
     private int operationCounter;
+    
+    /**
+     * Keeps the maximum {@link Envelope#getDeliveryTag() delivery tags} received on the {@link Channel} to which the
+     * {@link #consumer} is attached so far. This way, messages can be acknowledged after they have been delivered to
+     * the {@link #run()} method in the background. The background task that is actually sending the acknowledgement
+     * to the RabbitMQ server must {@code synchronize} on this {@link AtomicLong} before reading its value and until
+     * having cleared the {@link #acknowledgeTaskScheduled} flag. Likewise, the {@link #acknowledgeAsync(Channel, Delivery)}
+     * method must synchronize on this {@link AtomicLong} before setting its value to a new delivery tag and until after
+     * having checked the {@link #acknowledgeTaskScheduled} flag and possible having scheduled a new task for sending the
+     * acknowledgement.
+     */
+    private final AtomicLong maximumDeliveryTagSoFar;
+    
+    long maximumDeliveryTagAcknowledged;
+    
+    /**
+     * @see #maximumDeliveryTagSoFar
+     * @see #acknowledgeAsync(Channel, Delivery)
+     */
+    private final AtomicInteger acknowledgeTaskScheduledButNotYetStarted;
 
+    /**
+     * The monitor of this object is acquired by the tasks reading the {@link #maximumDeliveryTagSoFar} value
+     * and sending the acknowledgement for that delivery tag. This way, although an executor is used with these
+     * fine-grained acknowledgement tasks, these tasks cannot run concurrently. The tasks record the last delivery tag
+     * acknowledged so that if a 
+     */
+    private static final Object acknowledgementTaskLock = new Object();
+    
     /**
      * Used for the parallel execution of operations that don't
      * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
      */
-    private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-            /* maximumPoolSize */ THREAD_POOL_SIZE,
-            /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(),
-            /* thread factory */ new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+    private final static Executor executor = ThreadPoolUtil.INSTANCE
+            .createForegroundTaskThreadPoolExecutor(ReplicationReceiverImpl.class.getName());
 
     /**
      * @param master
@@ -132,6 +152,8 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
      */
     public ReplicationReceiverImpl(ReplicationMasterDescriptor master, ReplicablesProvider replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
         this.queueByReplicableIdAsString = new HashMap<>();
+        this.maximumDeliveryTagSoFar = new AtomicLong();
+        this.acknowledgeTaskScheduledButNotYetStarted = new AtomicInteger();
         this.master = master;
         this.replicableProvider = replicableProvider;
         this.suspended = startSuspended;
@@ -163,6 +185,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
            try {
                 Delivery delivery = consumer.nextDelivery();
                 messageCount++;
+                acknowledgeAsync(consumer.getChannel(), delivery);
                 if (_queue != null) {
                     synchronized (this) {
                         if (getInboundMessageQueue().isEmpty()) {
@@ -232,15 +255,16 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                     logger.severe("Application shut down messaging queue for " + this.toString());
                     break;
                 }
-                logger.info(sse.getMessage());
+                logger.severe("RabbitMQ channel was shut down: "+sse.getMessage()+"; trying to re-connect");
                 if (checksPerformed <= CHECK_COUNT) {
                     try {
                         Thread.sleep(CHECK_INTERVAL_MILLIS);
-                        
                         /* isOpen() will return false if the channel has been closed. This
                          * does not hold when the connection is dropped.
                          */
                         if (!this.consumer.getChannel().isOpen()) {
+                            maximumDeliveryTagAcknowledged = 0;
+                            maximumDeliveryTagSoFar.set(0);
                             /* for a reconnection we need to instantiate a new consumer */
                             try {
                                 logger.info("Channel seems to be closed. Trying to reconnect consumer queue...");
@@ -248,12 +272,12 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                                 logger.info("OK - channel reconnected!");
                                 Thread.sleep(CHECK_INTERVAL_MILLIS);
                                 checksPerformed += 1;
-                            } catch (IOException eio) {
+                            } catch (IOException | TimeoutException eio) {
                                 // do not print exceptions known to occur
                             }
                         }
                     } catch (InterruptedException eir) {
-                        eir.printStackTrace();
+                        logger.log(Level.WARNING, "Interrupted while trying to re-connect", eir);
                     }
                     checksPerformed += 1;
                     continue;
@@ -271,6 +295,56 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
         synchronized (this) {
             stopped = true;
             notifyAll();
+        }
+    }
+
+    /**
+     * Acknowledges a delivery asynchronously in the background by scheduling a task that will call {@link Channel#basicAck(long, boolean)}.
+     * If further calls to this method occur, the maximum delivery tag value is recorded such that if the task gets its turn, a cumulative
+     * acknowledgement takes place.<p>
+     * 
+     * Acknowledgements must be sent in strictly monotonous order. Therefore, task scheduling must be synchronized with incrementing
+     * the delivery tag number to acknowledge. With a thread pool, task execution order is generally unpredictable. At the same time,
+     * the synchronous part of acknowledgement handling must stay short in order not to hold up the actual payload processing.
+     * The synchronous part therefore shall only check quickly for the presence of a yet unlaunched task, and this check will have to
+     * be synchronized with the beginning of each task before it reads the latest delivery tag to acknowledge. An {@link AtomicInteger}
+     * is used to count the number of not yet started tasks. This method will first increment the delivery tag to confim, then check
+     * the atomic integer for a yet unstarted task. Since {@link AtomicInteger} guarantees {@code volatile} semantics, if this value is
+     * greater than zero, a task will definitely pick up the new delivery tag. Otherwise, the AtomicInteger is incremented (it may in the
+     * meantime have been incremented by another thread), and a corresponding task is scheduled.<p>
+     * 
+     * The tasks themselves run {@code synchronized} on the {@link #acknowledgementTaskLock}. Therefore, only one can run at a time.
+     * The first thing a task does is decrement the atomic integer counting the tasks yet unstarted. Then it reads the delivery tag to
+     * acknowledge and compares it with the {@link #maximumDeliveryTagAcknowledged deliver tag last acknowledged}. Only if
+     * {@link #maximumDeliveryTagSoFar} is greater than that, an acknowledgement is sent.
+     */
+    private void acknowledgeAsync(final Channel channel, final Delivery delivery) {
+        final long deliveryTag = delivery.getEnvelope().getDeliveryTag();
+        maximumDeliveryTagSoFar.accumulateAndGet(deliveryTag, (lastMaxTag, newTag)->newTag>lastMaxTag?newTag:lastMaxTag);
+        logger.finer(()->"Asynchronously acknowledging message with delivery tag "+deliveryTag);
+        if (acknowledgeTaskScheduledButNotYetStarted.get() == 0) {
+            acknowledgeTaskScheduledButNotYetStarted.incrementAndGet();
+            logger.finer(()->"Scheduling background task to acknowledge delivery tag "+deliveryTag);
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().submit(()->{
+                synchronized (acknowledgementTaskLock) {
+                    acknowledgeTaskScheduledButNotYetStarted.decrementAndGet();
+                    final long deliveryTagToAcknowledge = maximumDeliveryTagSoFar.get();
+                    if (deliveryTagToAcknowledge > maximumDeliveryTagAcknowledged) {
+                        try {
+                            logger.fine(()->"Sending acknowledgement for delivery tag "+deliveryTagToAcknowledge+
+                                    ", scheduled at delivery tag "+deliveryTag);
+                            channel.basicAck(deliveryTagToAcknowledge, /* multiple */ true);
+                            maximumDeliveryTagAcknowledged = deliveryTagToAcknowledge;
+                        } catch (IOException e) {
+                            logger.log(Level.WARNING, "Acknowledging message with delivery tag "+deliveryTagToAcknowledge+
+                                    " cumulatively failed", e);
+                        }
+                    } else {
+                        logger.fine(()->"Not acknowledging "+deliveryTagToAcknowledge+" again because "+
+                                maximumDeliveryTagAcknowledged+" has already been acknowledged");
+                    }
+                }
+            });
         }
     }
 
@@ -319,14 +393,14 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
 
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final O operation, Replicable<S, O> replicable) {
         final int operationCount = ++operationCounter;
-        logger.fine(()->""+operationCount+": Applying "+operation);
+        logger.finer(()->""+operationCount+": Applying "+operation);
         Runnable runnable = () -> replicable.applyReceivedReplicated(operation);
         if (operation.requiresSynchronousExecution()) {
             runnable.run();
         } else {
             executor.execute(runnable);
         }
-        logger.fine(()->""+operationCount+": Done applying "+operation);
+        logger.finer(()->""+operationCount+": Done applying "+operation);
     }
     
     private void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {

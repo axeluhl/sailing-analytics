@@ -15,11 +15,11 @@ public class MarkPassingTimesDTO extends NamedDTO {
 
     public Date lastPassingDate;
 
-    public MarkPassingTimesDTO() {
-    }
+    @Deprecated
+    MarkPassingTimesDTO() {} // for GWT RPC serialization only
 
     public MarkPassingTimesDTO(String name) {
-        this.setName(name);
+        super(name);
     }
 
     @Override

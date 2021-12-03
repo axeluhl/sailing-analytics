@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class PositionJsonSerializer implements JsonSerializer<Position> {
     public static final String FIELD_LATITUDE_DEG = "latitude_deg";

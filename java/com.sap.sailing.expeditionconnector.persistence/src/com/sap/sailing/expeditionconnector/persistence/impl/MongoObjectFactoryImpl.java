@@ -1,5 +1,6 @@
 package com.sap.sailing.expeditionconnector.persistence.impl;
 
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,7 +11,7 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 
@@ -25,14 +26,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         expeditionDeviceConfigurationsCollection.createIndex(index, new IndexOptions().name("uuidindex").unique(true).background(false));
     }
 
-    private Document getExpeditionDeviceConfigurationDBKey(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        final Document basicDBObject = new Document(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfiguration.getDeviceUuid());
+    private Document getExpeditionDeviceConfigurationDBKey(UUID expeditionDeviceConfigurationId) {
+        final Document basicDBObject = new Document(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfigurationId);
         return basicDBObject;
     }
     
     @Override
     public void storeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        final Document key = getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration);
+        final Document key = getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration.getDeviceUuid());
         final Document expeditionDeviceConfigurationDBObject = new Document();
         expeditionDeviceConfigurationDBObject.put(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfiguration.getDeviceUuid());
         expeditionDeviceConfigurationDBObject.put(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_NAME.name(), expeditionDeviceConfiguration.getName());
@@ -42,7 +43,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Exception lastException = null;
         while (attempt < 5 && !success) {
             try {
-                expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, expeditionDeviceConfigurationDBObject, new UpdateOptions().upsert(true));
+                expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, expeditionDeviceConfigurationDBObject, new ReplaceOptions().upsert(true));
                 success = true;
                 attempt++;
             } catch (Exception e) {
@@ -56,7 +57,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration));
+    public void removeExpeditionDeviceConfiguration(UUID expeditionDeviceConfigurationId) {
+        expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfigurationId));
     }
 }

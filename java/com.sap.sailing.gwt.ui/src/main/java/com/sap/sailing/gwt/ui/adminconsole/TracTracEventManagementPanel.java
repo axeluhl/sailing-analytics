@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,9 +29,9 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionTableWrapper;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -42,6 +41,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
@@ -49,6 +49,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -66,7 +67,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Axel Uhl (D043530)
  * 
  */
-public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
+public class TracTracEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<TracTracConfigurationWithSecurityDTO> {
     private final ErrorReporter errorReporter;
     
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
@@ -84,13 +85,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final CellTableWithCheckboxResources tableResources;
     private final SailingServiceWriteAsync sailingServiceWrite;
 
-    public TracTracEventManagementPanel(final SailingServiceWriteAsync sailingService, UserService userService,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
+    public TracTracEventManagementPanel(final Presenter presenter, StringMessages stringMessages,
             final CellTableWithCheckboxResources tableResources) {
-        super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
-        this.sailingServiceWrite = sailingService;
-        this.userService = userService;
-        this.errorReporter = errorReporter;
+        super(presenter, true, stringMessages);
+        this.userService = presenter.getUserService();
+        this.errorReporter = presenter.getErrorReporter();
+        this.sailingServiceWrite = presenter.getSailingService();
         this.tableResources = tableResources;
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
         this.raceList = new ListDataProvider<TracTracRaceRecordDTO>();
@@ -116,7 +116,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsTable = new TracTracConnectionTableWrapper(userService, sailingServiceWrite, stringMessages,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshTracTracConnectionList();
-
         final Grid grid = new Grid(1, 2);
         grid.setWidget(0, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
         final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
@@ -181,13 +180,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedSet().size() == 1;
             listRacesButton.setEnabled(objectSelected);
         });
-
         tableAndConfigurationPanel.add(buttonPanel);
         tableAndConfigurationPanel.add(grid);
         tableAndConfigurationPanel.add(connectionsTable);
-
         connectionsPanel.setContentWidget(tableAndConfigurationPanel);
-
         return connectionsPanel;
     }
     
@@ -378,9 +374,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         CaptionPanel trackedRacesPanel = new CaptionPanel(stringMessages.trackedRaces());
         trackedRacesPanel.ensureDebugId("TrackedRacesSection");
         trackedRacesPanel.setStyleName("bold");
-        
         trackedRacesPanel.setContentWidget(this.trackedRacesListComposite);
-
         return trackedRacesPanel;
     }
     
@@ -454,8 +448,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final Set<TracTracConfigurationWithSecurityDTO> selectedConnections = connectionsTable.getSelectionModel()
                 .getSelectedSet();
         if (selectedConnections.size() == 1) {
-
-            TracTracConfigurationWithSecurityDTO selectedConnection = selectedConnections.iterator().next();            sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
+            TracTracConfigurationWithSecurityDTO selectedConnection = selectedConnections.iterator().next();
+            sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
                     new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
                 new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
                     @Override
@@ -523,7 +517,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         //                                because it may be an accidental omission to select that regatta for loading
         List<TracTracRaceRecordDTO> allRaces = raceList.getList();
         SelectionModel<? super TracTracRaceRecordDTO> selectionModel = racesTable.getSelectionModel();
-        final Set<TracTracRaceRecordDTO> selectedRaces = new LinkedHashSet<>();
+        final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<>();
         for (TracTracRaceRecordDTO race : allRaces) {
             if (selectionModel.isSelected(race)) {
                 selectedRaces.add(race);
@@ -541,14 +535,19 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
+                            TracTracEventManagementPanel.this.presenter.getRegattasRefresher().reloadAndCallFillAll();
                         }
                     }));
         }
     }
-
+    
     public void refreshTracTracConnectors() {
         connectionsTable.refreshTracTracConnectionList();
         raceList.getList().clear();
+    }
+    
+    @Override
+    public AbstractFilterablePanel<TracTracConfigurationWithSecurityDTO> getFilterablePanel() {
+        return connectionsTable.getFilterField();
     }
 }

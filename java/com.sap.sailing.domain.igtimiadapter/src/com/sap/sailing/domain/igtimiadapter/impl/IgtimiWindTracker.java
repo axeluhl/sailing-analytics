@@ -70,13 +70,12 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                 }
                             } catch (Exception e) {
                                 logger.log(Level.SEVERE, "Exception trying to start Igtimi wind tracker for race "
-                                        + getTrackedRace().getRace().getName() + " for account " + account);
+                                        + getTrackedRace().getRace().getName() + " for account " + account, e);
                             }
                         }
                     }
                 }
             }
-
         }.start();
     }
 

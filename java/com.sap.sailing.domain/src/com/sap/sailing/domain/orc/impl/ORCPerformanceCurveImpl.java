@@ -70,8 +70,8 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     /**
      * This PolynomialSplineFunction is created with the array of course specific allowances for the boat which this
      * ORCPerformanceCurve belongs to. This function contains subfunctions for each interval between two given
-     * calculated points. The input for the function is the value of the implied wind (speed in kts) and the output an
-     * allowance in sec/nm.
+     * calculated points. The input for the function is the implied wind speed in knots and the output the expected
+     * average speed over ground in knots.
      */
     private final UnivariateDifferentiableFunction functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse;
     
@@ -162,7 +162,7 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         final LinkedHashMap<Speed, Duration> result = new LinkedHashMap<>();
         final Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
         for (final ORCPerformanceCurveLeg leg : course.getLegs()) {
-            allowancesPerLeg.put(leg, createAllowancePerLeg(leg, certificate));
+            allowancesPerLeg.put(leg, createAllowancePerLeg(leg, certificate, cache));
         }
         for (final Speed tws : certificate.getTrueWindSpeeds()) {
             Duration allowancePerTws = new SecondsDurationImpl(0);
@@ -174,14 +174,6 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return result;
     }
 
-    /**
-     * Computes the durations the boat to which this performance curve belongs is expected to sail to complete the {@code leg},
-     * considering the leg's {@link ORCPerformanceCurveLeg#getLength() length}.
-     */
-    private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg, ORCCertificate certificate) throws FunctionEvaluationException {
-        return createAllowancePerLeg(leg, certificate, new NoCachingWindLegTypeAndLegBearingCache());
-    }
-    
     private Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg, ORCCertificate certificate,
             ORCPerformanceCurveCache cache) throws FunctionEvaluationException {
         Map<Speed, Map<Bearing, Speed>> twaAllowances = certificate.getVelocityPredictionPerTrueWindSpeedAndAngle();
@@ -192,23 +184,23 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         Map<Speed, Speed> runVMGPredictionPerTrueWindSpeed = certificate.getRunVMGPredictions();
         Map<Speed, Duration> runAllowancePerTrueWindSpeed = certificate.getRunAllowances();
         final Map<Speed, Duration> result = new HashMap<>();
-        
         switch (leg.getType()) {
         case TWA:
+            final Bearing absoluteLegTwa = leg.getTwa(cache).abs();
             for (final Speed tws : certificate.getTrueWindSpeeds()) {
                 // Case switching on TWA (0. TWA == 0; 1. TWA < Beat; 2. Beat < TWA < Gybe; 3. Gybe < TWA; 4. TWA == 180)
-                if (leg.getTwa(cache).abs().compareTo(beatAngles.get(tws)) <= 0) {
+                if (absoluteLegTwa.compareTo(beatAngles.get(tws)) <= 0) {
                     // Case 0 & 1 - result = beatVMG * distance * cos(TWA)
-                    result.put(tws, beatAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(leg.getTwa().abs().getRadians())));
-                } else if (leg.getTwa().abs().compareTo(runAngles.get(tws)) >= 0) {
+                    result.put(tws, beatAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(absoluteLegTwa.getRadians())));
+                } else if (absoluteLegTwa.compareTo(runAngles.get(tws)) >= 0) {
                     // Case 3 & 4 - result = runVMG * distance * cos(TWA)
-                    result.put(tws, runAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(Math.PI - leg.getTwa().abs().getRadians())));
+                    result.put(tws, runAllowancePerTrueWindSpeed.get(tws).times(leg.getLength().getNauticalMiles()).times(Math.cos(Math.PI - absoluteLegTwa.getRadians())));
                 } else {
                     // Case 2 - result is given through the laGrange Interpolation, between the Beat and Gybe Angles
                     result.put(tws,
                             getLagrangeSpeedPredictionForTrueWindSpeedAndAngle(twaAllowances, beatAngles,
                                     beatVMGPredictionPerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed, tws,
-                                    leg.getTwa().abs()).getDuration(leg.getLength()));
+                                    absoluteLegTwa).getDuration(leg.getLength()));
                 }
             }
             break;

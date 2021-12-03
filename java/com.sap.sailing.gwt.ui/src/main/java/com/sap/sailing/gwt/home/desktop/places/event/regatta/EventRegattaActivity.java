@@ -57,10 +57,14 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
                     clientFactory.getErrorReporter(), flagImageResolver));
         }
-        
         initNavigationPath(navigationPathDisplay);
     }
-    
+
+    @Override
+    public com.google.web.bindery.event.shared.EventBus getEventBus() {
+        return clientFactory.getEventBus();
+    }
+
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
         final List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
         if (showRegattaMetadata()) {

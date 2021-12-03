@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
@@ -22,8 +23,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.jaxrs.RestServletContainer;
 import com.sap.sailing.server.gateway.serialization.NotJsonSerializableException;
+import com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer;
 import com.sap.sse.common.Distance;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
@@ -38,6 +39,7 @@ import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
+import com.sap.sse.security.SessionUtils;
 
 /**
  * REST-API to run predefined queries and get the result as JSON.
@@ -45,7 +47,7 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
  */
 @Path("/v1/datamining")
 public class DataMiningResource extends AbstractSailingServerResource {
-    
+    private static final Logger logger = Logger.getLogger(DataMiningResource.class.getName());
     private SailingPredefinedQueries predefinedDataMiningQueries;
 
     private static final Function<Distance, Number> distanceMetersExtractor = (distance) -> distance.getMeters();
@@ -129,9 +131,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
             jsonId.put("Description", identifier.getDescription());
             predefinedQueryNames.add(jsonId);
         }
-        
-        String json = predefinedQueryNames.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(predefinedQueryNames)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     public Response avgSpeedPerCompetitorAndLegType(String regattaName) {
@@ -286,9 +286,10 @@ public class DataMiningResource extends AbstractSailingServerResource {
         } else {
             DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
             long requestTimepoint = System.currentTimeMillis();
+            logger.info("Handing query "+query+" to server for processing on behalf of user "+SessionUtils.getPrincipal());
             @SuppressWarnings("unchecked")
             QueryResult<ResultType> result = (QueryResult<ResultType>) dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
-            
+            logger.info("Obtained result for query "+query+" from server on behalf of user "+SessionUtils.getPrincipal());
             if (result == null || result.isEmpty()) {
                 response = getNoDataFoundErrorResponse();
             } else {

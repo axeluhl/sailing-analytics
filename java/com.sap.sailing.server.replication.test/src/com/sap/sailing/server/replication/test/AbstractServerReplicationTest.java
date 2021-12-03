@@ -49,7 +49,6 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
             return new RacingEventServiceImpl((final RaceLogAndTrackedRaceResolver raceLogResolver)-> {
                 return new ConstructorParameters() {
                     private final DomainFactory baseDomainFactory = new DomainFactoryImpl(raceLogResolver);
-                    
                     @Override public DomainObjectFactory getDomainObjectFactory() { return PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, baseDomainFactory); }
                     @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
                     @Override public DomainFactory getBaseDomainFactory() { return baseDomainFactory; }
@@ -59,7 +58,8 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
                     /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false,
                     /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
-                    /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                    /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                    /* resultUrlRegistryServiceTracker */ null);
         }
 
         @Override
@@ -71,7 +71,6 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                                     PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                                             // replica gets its own base DomainFactory:
                                             new DomainFactoryImpl(raceLogResolver));
-
                             @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
                             @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
                             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
@@ -81,7 +80,8 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     EmptySensorFixStore.INSTANCE, /* serviceFinderFactory */ null, null,
                     /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
                     /* restoreTrackedRaces */ false, /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
-                    /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                    /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                    /* resultUrlRegistryServiceTracker */ null);
         }
     }
 }

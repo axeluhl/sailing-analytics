@@ -8,6 +8,8 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -23,7 +25,8 @@ public class PasswordRecoveryViewImpl extends Composite implements PasswordRecov
     
     @UiField TextBox emailUi;
     @UiField TextBox usernameUi;
-    
+    @UiField CheckBox reallyUseLeadingOrTrailingSpacesInUsernameUi;
+    @UiField Button resetPasswordUi;
     @UiField DivElement formErrorUi;
     
     @UiField(provided = true)
@@ -35,6 +38,15 @@ public class PasswordRecoveryViewImpl extends Composite implements PasswordRecov
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        usernameUi.addKeyUpHandler(e->validate());
+        reallyUseLeadingOrTrailingSpacesInUsernameUi.addValueChangeHandler(e->validate());
+    }
+    
+    private void validate() {
+        final String username = usernameUi.getValue();
+        boolean usernameStartsOrEndsWithSpace = username.startsWith(" ") || username.endsWith(" ");
+        reallyUseLeadingOrTrailingSpacesInUsernameUi.setVisible(usernameStartsOrEndsWithSpace);
+        resetPasswordUi.setEnabled(!usernameStartsOrEndsWithSpace || reallyUseLeadingOrTrailingSpacesInUsernameUi.getValue());
     }
     
     @Override

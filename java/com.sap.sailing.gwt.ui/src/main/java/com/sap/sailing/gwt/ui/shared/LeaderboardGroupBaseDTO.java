@@ -14,11 +14,12 @@ public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements Wi
     
     private static final long serialVersionUID = -4276452763988957L;
     private UUID id;
-    public String description;
+    private String description;
     private String displayName;
     private boolean hasOverallLeaderboard;
 
-    protected LeaderboardGroupBaseDTO() {} // for deserialization
+    @Deprecated
+    LeaderboardGroupBaseDTO() {} // for deserialization
     
     public LeaderboardGroupBaseDTO(UUID id, String name, String displayName) {
         super(name);
@@ -66,4 +67,11 @@ public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements Wi
         return new TypeRelativeObjectIdentifier(id.toString());
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

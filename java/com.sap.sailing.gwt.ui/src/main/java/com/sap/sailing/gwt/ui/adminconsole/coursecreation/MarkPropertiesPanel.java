@@ -47,12 +47,14 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -64,7 +66,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class MarkPropertiesPanel extends FlowPanel {
+public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelProvider<MarkPropertiesDTO>{
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     private static final AbstractImagePrototype positionImagePrototype = AbstractImagePrototype
@@ -294,7 +296,6 @@ public class MarkPropertiesPanel extends FlowPanel {
                 return String.join(", ", markProperties.getTags());
             }
         };
-
         Column<MarkPropertiesDTO, AbstractImagePrototype> positioningColumn = new Column<MarkPropertiesDTO, AbstractImagePrototype>(
                 new AbstractCell<AbstractImagePrototype>() {
 
@@ -315,14 +316,12 @@ public class MarkPropertiesPanel extends FlowPanel {
                 }
             }
         };
-
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<MarkPropertiesDTO>() {
             public int compare(MarkPropertiesDTO markProperties1, MarkPropertiesDTO markProperties2) {
                 return markProperties1.getName().compareTo(markProperties2.getName());
             }
         });
-
         markPropertiesTable.addColumn(nameColumn, stringMessages.name());
         markPropertiesTable.addColumn(shortNameColumn, stringMessages.shortName());
         markPropertiesTable.addColumn(colorColumn, stringMessages.color());
@@ -331,19 +330,15 @@ public class MarkPropertiesPanel extends FlowPanel {
         markPropertiesTable.addColumn(typeColumn, stringMessages.type());
         markPropertiesTable.addColumn(positioningColumn, stringMessages.position());
         markPropertiesTable.addColumn(tagsColumn, stringMessages.tags());
-
         SecuredDTOOwnerColumn.configureOwnerColumns(markPropertiesTable, sortHandler, stringMessages);
-
         final HasPermissions type = SecuredDomainType.MARK_PROPERTIES;
-
         final AccessControlledActionsColumn<MarkPropertiesDTO, MarkPropertiesImagesbarCell> actionsColumn = create(
                 new MarkPropertiesImagesbarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkPropertiesDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markProperties -> {
-                    /* no refresh action */}, stringMessages);
-
+                .create(userService.getUserManagementWriteService(), type, markProperties -> 
+                    markPropertiesListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkPropertiesDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, markProperties -> markProperties.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, markProperties -> markProperties.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveMarkProperties(e.getName()))) {
@@ -369,7 +364,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 this::unsetPosition);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markProperties -> configACL.openACLDialog(markProperties));
+                markProperties -> configACL.openDialog(markProperties));
         markPropertiesTable.addColumn(idColumn, stringMessages.id());
         markPropertiesTable.addColumn(actionsColumn, stringMessages.actions());
     }
@@ -533,5 +528,10 @@ public class MarkPropertiesPanel extends FlowPanel {
                     new ImageSpec(ACTION_UNSET_POSITION, stringMessages.unsetPosition(), resources.removePing()),
                     getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec());
         }
+    }
+
+    @Override
+    public AbstractFilterablePanel<MarkPropertiesDTO> getFilterablePanel() {
+        return filterableMarkProperties;
     }
 }

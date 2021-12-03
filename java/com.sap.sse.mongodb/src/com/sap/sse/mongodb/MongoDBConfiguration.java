@@ -1,9 +1,8 @@
 package com.sap.sse.mongodb;
 
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientOptions.Builder;
-import com.mongodb.MongoClientURI;
-import com.mongodb.ReadPreference;
+import org.bson.UuidRepresentation;
+
+import com.mongodb.ConnectionString;
 import com.mongodb.ServerAddress;
 import com.sap.sse.mongodb.internal.MongoDBServiceImpl;
 
@@ -19,7 +18,7 @@ public class MongoDBConfiguration {
     static final String MONGO_DB_NAME = "mongo.dbName";
     
     /**
-     * The system property by this name may contain a MongoClientURI in its string representation:
+     * The system property by this name may contain a {@link ConnectionString} in its string representation:
      * <pre>
      *   mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database[.collection]][?options]]
      * </pre>
@@ -30,12 +29,16 @@ public class MongoDBConfiguration {
     private static String DEFAULT_DB_NAME = "winddb"; 
     private static String DEFAULT_TEST_DB_NAME = "winddbTest"; 
 
-    private final MongoClientURI mongoClientURI;
+    private final ConnectionString mongoClientURI;
 
     public static MongoDBConfiguration getDefaultConfiguration() {
+        return getDefaultConfiguration(DEFAULT_DB_NAME);
+    }
+    
+    private static MongoDBConfiguration getDefaultConfiguration(String dbName) {
         final MongoDBConfiguration result;
         if (System.getProperty(MONGO_URI) != null) {
-            result = new MongoDBConfiguration(new MongoClientURI(System.getProperty(MONGO_URI)));
+            result = new MongoDBConfiguration(new ConnectionString(System.getProperty(MONGO_URI)));
         } else {
             String defaultHostName = "127.0.0.1";
             if (System.getProperty(MONGO_HOSTNAME) != null) {
@@ -45,7 +48,7 @@ public class MongoDBConfiguration {
                     defaultHostName = System.getenv("MONGODB_HOST");
                 }
             }
-            String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_DB_NAME);
+            String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, dbName);
             if (System.getProperty(MONGO_PORT) != null) {
                 result = new MongoDBConfiguration(defaultHostName, Integer.valueOf(System.getProperty(MONGO_PORT).trim()), defaultDatabaseName);
             } else {
@@ -60,46 +63,40 @@ public class MongoDBConfiguration {
     }
 
     public static MongoDBConfiguration getDefaultTestConfiguration() {
-        final MongoDBConfiguration result;
-        if (System.getProperty(MONGO_URI) != null) {
-            result = new MongoDBConfiguration(new MongoClientURI(System.getProperty(MONGO_URI)));
-        } else {
-            String defaultHostName = "127.0.0.1";
-            if (System.getProperty(MONGO_HOSTNAME) != null) {
-                defaultHostName = System.getProperty(MONGO_HOSTNAME);
-            } else {
-                if (System.getenv("MONGODB_HOST") != null) {
-                    defaultHostName = System.getenv("MONGODB_HOST");
-                }
-            }
-            String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_TEST_DB_NAME);
-            if (System.getProperty(MONGO_PORT) != null) {
-                result = new MongoDBConfiguration(defaultHostName, Integer.valueOf(System.getProperty(MONGO_PORT).trim()), defaultDatabaseName);
-            } else {
-                if (System.getenv("MONGODB_PORT") != null) {
-                    result = new MongoDBConfiguration(defaultHostName, Integer.valueOf(System.getenv("MONGODB_PORT").trim()), defaultDatabaseName);
-                } else {
-                    result = new MongoDBConfiguration(defaultHostName, defaultDatabaseName);
-                }
-            }
-        }
-        return result;
+        return getDefaultConfiguration(DEFAULT_TEST_DB_NAME);
     }
 
     public MongoDBConfiguration(String mongoClientURIAsString) {
-        this.mongoClientURI = new MongoClientURI(mongoClientURIAsString, getDefaultOptionsBuilder());
+        this.mongoClientURI = setUuidRepresentationToJavaLegacy(new ConnectionString(mongoClientURIAsString));
     }
 
-    public MongoDBConfiguration(MongoClientURI mongoClientURI) {
-        this.mongoClientURI = mongoClientURI;
+    public MongoDBConfiguration(ConnectionString mongoClientURI) {
+        this.mongoClientURI = setUuidRepresentationToJavaLegacy(mongoClientURI);
     }
 
     public MongoDBConfiguration(String hostName, String databaseName) {
-        this.mongoClientURI = new MongoClientURI("mongodb://"+hostName+"/"+databaseName, getDefaultOptionsBuilder());
+        this.mongoClientURI = setUuidRepresentationToJavaLegacy(new ConnectionString("mongodb://"+hostName+"/"+databaseName));
     }
 
     public MongoDBConfiguration(String hostName, int port, String databaseName) {
-        this.mongoClientURI = new MongoClientURI("mongodb://"+hostName+":"+port+"/"+databaseName);
+        this.mongoClientURI = setUuidRepresentationToJavaLegacy(new ConnectionString("mongodb://"+hostName+":"+port+"/"+databaseName));
+    }
+    
+    private static ConnectionString setUuidRepresentationToJavaLegacy(ConnectionString cs) {
+        final ConnectionString result;
+        if (cs.getUuidRepresentation() == UuidRepresentation.JAVA_LEGACY) {
+            result = cs;
+        } else {
+            final String uuidRepresentationParam = "uuidRepresentation=javaLegacy";
+            final String separator;
+            if (cs.getConnectionString().contains("?")) {
+                separator = "&";
+            } else {
+                separator = "?";
+            }
+            result = new ConnectionString(cs.getConnectionString()+separator+uuidRepresentationParam);
+        }
+        return result;
     }
 
     /**
@@ -109,12 +106,8 @@ public class MongoDBConfiguration {
         return new MongoDBServiceImpl(this);
     }
 
-    public MongoClientURI getMongoClientURI() {
+    public ConnectionString getMongoClientURI() {
         return mongoClientURI;
-    }
-
-    public static MongoClientOptions.Builder getDefaultOptionsBuilder() {
-        return new Builder().readPreference(ReadPreference.primaryPreferred());
     }
 
     public String getDatabaseName() {

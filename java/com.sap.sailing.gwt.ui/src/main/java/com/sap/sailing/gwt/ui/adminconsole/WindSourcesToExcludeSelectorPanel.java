@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,8 +89,8 @@ public class WindSourcesToExcludeSelectorPanel extends VerticalPanel implements 
         });
     }
 
-    private Iterable<WindSource> getWindSourcesToExclude() {
-        Set<WindSource> result = new HashSet<WindSource>();
+    private List<WindSource> getWindSourcesToExclude() {
+        List<WindSource> result = new ArrayList<WindSource>();
         for (Map.Entry<WindSource, CheckBox> e : checkboxesByWindSource.entrySet()) {
             if (!e.getValue().getValue()) {
                 result.add(e.getKey());

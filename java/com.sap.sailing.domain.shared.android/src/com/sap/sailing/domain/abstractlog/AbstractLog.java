@@ -45,7 +45,7 @@ extends Track<EventT>, WithID {
     /**
      * Remove a listener.
      */
-    void removeListener(Object listener);
+    void removeListener(VisitorT listener);
     
     /**
      * Removes all listeners

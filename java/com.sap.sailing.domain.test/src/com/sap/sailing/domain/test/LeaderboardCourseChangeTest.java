@@ -65,7 +65,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LeaderboardCourseChangeTest {
-
     /**
      * See bug 2011
      * 
@@ -75,19 +74,14 @@ public class LeaderboardCourseChangeTest {
      */
     @Test
     public void testLeaderboardDTOCreationForCourseChange() throws NoWindException, InterruptedException, ExecutionException {
-        
         Date date = Calendar.getInstance().getTime();
         TimePoint timePoint = new MillisecondsTimePoint(date);
-        
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
-        
         Fleet fleet = new FleetImpl("TestFleet");
         Series series = createSeries(trackedRegattaRegistry, fleet);
         Set<Series> seriesSet = new HashSet<>();
         seriesSet.add(series);
-        
         BoatClass boatClass = new BoatClassImpl("TestClass", true);
-
         String raceColumnName = "TestRace";
         RaceColumn raceColumn = series.addRaceColumn(raceColumnName, trackedRegattaRegistry);
         ScoringScheme scoringScheme = new LowPoint();
@@ -119,26 +113,20 @@ public class LeaderboardCourseChangeTest {
         raceColumn.setTrackedRace(fleet, mockedTrackedRace);
         Set<String> raceColumnNames = new HashSet<>();
         raceColumnNames.add(raceColumnName);
-        
         int[] ruleRaw = { 5, 3, 2 };
         ThresholdBasedResultDiscardingRule rule = new ThresholdBasedResultDiscardingRuleImpl(ruleRaw);
         Leaderboard leaderboard = createRegattaLeaderboard(mockedRegatta, rule);
-        
         DomainFactory baseDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
                 trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
-
         assertEquals(6, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
-
         course.removeWaypoint(2);
         course.removeWaypoint(3);
-
         leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false, trackedRegattaRegistry,
                 baseDomainFactory, /* fillTotalPointsUncorrected */ false);
         assertEquals(4, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
-
     }
 
     protected RegattaLeaderboard createRegattaLeaderboard(Regatta mockedRegatta,

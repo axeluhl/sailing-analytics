@@ -22,12 +22,17 @@
 
 RETVAL=0
 
-JAVA_START_INSTANCES="server"
 SERVERS_DIR=/home/sailing/servers
+cd "${SERVERS_DIR}"
+JAVA_START_INSTANCES="$(find * -type d -prune)"
 GIT_REPOSITORY=/home/sailing/code
 APACHE_CONFIG_DIR=/etc/httpd/conf.d
+APACHE_INTERNALS_CONFIG_FILE="$APACHE_CONFIG_DIR/001-internals.conf"
+EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
+REBOOT_INDICATOR=/var/run/is-rebooted
+SSH_KEY_READER_BEARER_TOKEN=/root/ssh-key-reader.token
 
-echo "Executing with $1" >>/var/log/sailing.out
+echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
 start_tmux() {
 	su - sailing -c "/home/sailing/bin/tmuxConsole.sh unattended"
@@ -35,47 +40,61 @@ start_tmux() {
 }
 
 start_servers() {
-	su - sailing -c "cd $GIT_REPOSITORY && git fetch && git merge origin/master" 2>>/var/log/sailing.err >>/var/log/sailing.out
-	NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
-	MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 * 0.75 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
-	echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
-	for conf in $JAVA_START_INSTANCES; do
-		echo "Checking for amazon update..." >>/var/log/sailing.out
-		echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>$SERVERS_DIR/$conf/env.sh
-		su - sailing -c "cd $SERVERS_DIR/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.out
-		(
-			# execute env.sh in a subshell which now has the same set of variables that the server will see
-			source $SERVERS_DIR/$conf/env.sh
-			echo "Starting Java server \"$conf\"" >>/var/log/sailing.out
-			su - sailing -c "cd $SERVERS_DIR/$conf && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
-			server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
-                        echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.out
-                        echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
-			echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
-            echo "## EVENT ${server_name}" >>$APACHE_CONFIG_DIR/001-events.conf
-			echo "Use Event-SSL ${server_name}.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
-            # check if an secondary event shall be pasted to 001-events.conf
-            if [[ ${HTTP_SEC_EVENT} && ${HTTP_SEC_EVENT_ID} ]]; then
-                http_sec_event="`echo $HTTP_SEC_EVENT | tr [A-Z] [a-z]`"
-                echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map ${http_sec_event}.sapsailing.com to event with ID ${HTTP_SEC_EVENT_ID} with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
-                echo "## EVENT ${http_sec_event}" >>$APACHE_CONFIG_DIR/001-events.conf
-                echo "Use Event ${http_sec_event}.sapsailing.com \"$HTTP_SEC_EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
-                echo "Use Event-SSL ${http_sec_event}.sapsailing.com \"$HTTP_SEC_EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
-            fi
-			HTTP_LOGROTATE=/etc/logrotate.d/httpd
-			echo "Patching $HTTP_LOGROTATE so that old logs go to /var/log/old/$SERVER_NAME/$INSTANCE_IP4" >>/var/log/sailing.out
-			sed -i -e "s/\/var\/log\/old\/\([^/]*\)\/\([^/ ]*\)/\/var\/log\/old\/$SERVER_NAME\/$INSTANCE_IP4/" $HTTP_LOGROTATE
-			# terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
-		)
-		RETVAL=$?
-		[ $RETVAL -eq 0 ] && success || failure
-	done
-	launch_httpd
+        /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
+	cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
+	chown root /usr/local/bin/cp_root_mail_properties
+	chgrp root /usr/local/bin/cp_root_mail_properties
+	chmod 755 /usr/local/bin/cp_root_mail_properties
+	cp /home/sailing/code/configuration/cp_root_mail_properties_sudoers /etc/sudoers.d
+        if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
+          echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
+          $GIT_REPOSITORY/configuration/imageupgrade.sh
+        else
+          echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceeding with regular server launch..." >>/var/log/sailing.err
+	  echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
+          if [ -f "${REBOOT_INDICATOR}" ]; then
+	    echo "This is a re-boot. No EC2 user data is evaluated for server configuration; no server configuration is performed. Only configured applications are launched." >>/var/log/sailing.err
+	    for conf in ${JAVA_START_INSTANCES}; do
+	      su - sailing -c "cd ${SERVERS_DIR}/${conf} && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+	    done
+	  else
+	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
+	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
+	    if [ "${FIRST_SERVER}" = "" ]; then
+	      echo "No SERVER_NAME provided; defaulting to \"server\" as the server directory name" >>/var/log/sailing.err
+	      FIRST_SERVER=server
+	    fi
+            echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
+	    configure_and_start_server "${FIRST_SERVER}"
+	    create_basic_httpd_config "${FIRST_SERVER}"
+	    reload_httpd
+	    echo 1 >"${REBOOT_INDICATOR}"
+	  fi
+	fi
+}
+
+# Call with the server directory name (not the full path, just a single element from ${JAVA_START_INSTANCE}) as parameter
+# Example:        configure_and_start_server server
+# This is expected to be called only in case there is only one server to configure; otherwise, the same EC2 user data
+# would get applied to all application configurations which would not be a good idea.
+configure_and_start_server() {
+  conf="$1"
+  mkdir -p "${SERVERS_DIR}/${conf}" >/dev/null 2>/dev/null
+  chown sailing "${SERVERS_DIR}/${conf}"
+  chgrp sailing "${SERVERS_DIR}/${conf}"
+  # If there is a secret /root/mail.properties, copy it into the default server's configuration directory:
+  /usr/local/bin/cp_root_mail_properties "${conf}"
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  pushd ${SERVERS_DIR}/${conf}
+  ./defineReverseProxyMappings.sh 2>>/var/log/sailing.err >>/var/log/sailing.err
+  popd
+  RETVAL=$?
+  [ $RETVAL -eq 0 ] && success || failure
 }
 
 stop_servers() {
 	for conf in $JAVA_START_INSTANCES; do
-		echo "Stopping Java server $conf" >> /var/log/sailing.out
+		echo "Stopping Java server $conf" >> /var/log/sailing.err
 		su - sailing -c "cd $SERVERS_DIR/$conf && ./stop"
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
@@ -85,41 +104,47 @@ stop_servers() {
 }
 
 sync_logs() {
-	echo "Executing logrotate followed by a sync to ensure that logs are synchronized" >> /var/log/sailing.out
+	echo "Executing logrotate followed by a sync to ensure that logs are synchronized" >> /var/log/sailing.err
 	logrotate -f /etc/logrotate.conf
 	sync
 }
 
-# launch_httpd(server_name, port, event_id)
-launch_httpd() {
-	echo "Will try to launch httpd so this replica can work with an ELB easily." >>/var/log/sailing.out
+reload_httpd() {
+	echo "Will try to launch httpd so this replica can work with an ELB easily." >>/var/log/sailing.err
 	if [ -x /etc/init.d/httpd ]; then
-		FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
-		source $SERVERS_DIR/$FIRST_SERVER/env.sh
-		# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to $APACHE_CONFIG_DIR/001-events.conf
-		echo "Appending macro usage for $INSTANCE_DNS/internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf" >>/var/log/sailing.out
-		echo "## SERVER STATUS" >>$APACHE_CONFIG_DIR/001-events.conf
-		echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
-		echo "Launching httpd..." >>/var/log/sailing.out
-		service httpd start
+	  echo "Reloading httpd configuration..." >>/var/log/sailing.err
+	  service httpd reload
 	else
-		echo "Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd"
+	  echo "Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd"
 	fi
+}
+
+# Adds a Plain-SSL mapping to the first server's port and a mapping for /internal-server-status, both to 001-internals.conf
+create_basic_httpd_config() {
+    FIRST_SERVER=$1
+    if [ -d $SERVERS_DIR/$FIRST_SERVER ]; then
+      source $SERVERS_DIR/$FIRST_SERVER/env.sh
+    fi
+    echo "Writing macro invocation to ${APACHE_INTERNALS_CONFIG_FILE} to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.err
+    echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >"${APACHE_INTERNALS_CONFIG_FILE}"
+    # Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to "${APACHE_INTERNALS_CONFIG_FILE}"
+    echo "Appending macro usage for $INSTANCE_DNS/internal-server-status URL for mod_status based Apache monitoring to ${APACHE_INTERNALS_CONFIG_FILE}" >>/var/log/sailing.err
+    echo "## SERVER STATUS" >>"${APACHE_INTERNALS_CONFIG_FILE}"
+    echo "Use Status $INSTANCE_DNS internal-server-status" >>"${APACHE_INTERNALS_CONFIG_FILE}"
 }
 
 stop_httpd() {
 	if [ -x /etc/init.d/httpd ]; then
 		service httpd stop
-		echo "Stopped httpd..." >>/var/log/sailing.out
+		echo "Stopped httpd..." >>/var/log/sailing.err
 	fi
 }
 
 # See how we were called.
 case "$1" in
   start)
-	/usr/local/bin/mountnvmeswap
-	/usr/sbin/update-motd
 	start_servers
+	/usr/sbin/update-motd
 	touch /var/lock/subsys/sailing
     ;;
   stop)

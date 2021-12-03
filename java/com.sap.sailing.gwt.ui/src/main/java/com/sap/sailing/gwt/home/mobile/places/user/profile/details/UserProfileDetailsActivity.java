@@ -24,7 +24,7 @@ public class UserProfileDetailsActivity extends AbstractUserProfileActivity impl
         currentView.setAuthenticationContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
 
         userDetailsPresenter = new UserDetailsPresenter(currentView.getUserDetailsView(),
-                clientFactory.getAuthenticationManager(), clientFactory.getUserManagementService(), clientFactory
+                clientFactory.getAuthenticationManager(), clientFactory.getUserManagementWriteService(), clientFactory
                         .getNavigator().getMailVerifiedConfirmationNavigation().getTargetUrl());
         
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {

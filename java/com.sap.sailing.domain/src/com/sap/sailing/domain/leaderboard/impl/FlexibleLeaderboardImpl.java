@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -71,7 +71,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;
-    private String name;
+    private final String name;
     private transient RaceLogStore raceLogStore;
     
     /**
@@ -152,25 +152,6 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public String getName() {
         return name;
-    }
-
-    /**
-     * @param newName must not be <code>null</code>
-     */
-    public void setName(String newName) {
-        if (newName == null) {
-            throw new IllegalArgumentException("A leaderboard's name must not be null");
-        }
-        final String oldName = this.name;
-        this.name = newName;
-        notifyLeaderboardChangeListeners(listener->{
-            try {
-                listener.nameChanged(oldName, newName);
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about the name of leaderboard "+
-                        getName()+" changing from "+oldName+" to "+newName, e);
-            }
-        });
     }
 
     @Override
@@ -364,13 +345,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
     
     @Override
-    public Double getTimeOnTimeFactor(Competitor competitor) {
-        return regattaLikeHelper.getTimeOnTimeFactor(competitor);
+    public Double getTimeOnTimeFactor(Competitor competitor, Optional<Runnable> changeCallback) {
+        return regattaLikeHelper.getTimeOnTimeFactor(competitor, changeCallback);
     }
 
     @Override
-    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
-        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
+    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor, Optional<Runnable> changeCallback) {
+        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor, changeCallback);
     }
 
     private class RaceExecutionOrderCache extends AbstractRaceExecutionOrderProvider {

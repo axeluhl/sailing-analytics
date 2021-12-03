@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -33,7 +34,6 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
      * and then calls {@link #getOrCreateMark(Serializable, String, String)} with the result and the <code>name</code>
      * parameter, or with <code>ToStringRepresentationOfID</code> and <code>name</code> in case the string
      * representation of the ID is not known. So in the latter case, the string is used as the ID for the new mark.
-     * @param shortName TODO
      */
     Mark getOrCreateMark(String toStringRepresentationOfID, String name, String shortName);
 
@@ -106,6 +106,8 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
      */
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
     
+    Collection<Mark> getAllMarks();
+
     Mark getExistingMarkByIdAsString(String toStringRepresentationOfID);
     
     Mark getExistingMarkById(Serializable id);

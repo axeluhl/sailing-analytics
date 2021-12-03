@@ -20,11 +20,14 @@ public class NewAccountValidator {
     }
 
     /**
+     * @param reallyUseLeadingOrTrailingSpacesInUsername
+     *            if the username has leading or trailing spaces this is considered invalid unless this parameter's
+     *            value is {@code true}
      * @return <code>null</code> if the credentials look good, or an end user-readable error message based on the
      *         {@link StringMessages} passed
      */
-    public String validateUsernameAndPassword(String username, String password, String passwordRepeat) {
-        String result = validateUsername(username);
+    public String validateUsernameAndPassword(String username, String password, String passwordRepeat, boolean reallyUseLeadingOrTrailingSpacesInUsername) {
+        String result = validateUsername(username, reallyUseLeadingOrTrailingSpacesInUsername);
         if (result == null) {
             result = validatePasswords(password, passwordRepeat);
         }
@@ -43,10 +46,12 @@ public class NewAccountValidator {
         return result;
     }
 
-    protected String validateUsername(String username) {
+    protected String validateUsername(String username, boolean tolerateLeadingOrTrailingSpacesInUsername) {
         final String result;
         if (username == null || username.length() < MINIMUM_USERNAME_LENGTH) {
             result = stringMessages.usernameMustHaveAtLeastNCharacters(MINIMUM_USERNAME_LENGTH);
+        } else if ((username.startsWith(" ") || username.endsWith(" ")) && !tolerateLeadingOrTrailingSpacesInUsername) {
+            result = stringMessages.usernameShouldNotStartOrEndWithSpaceCharactersUnlessYouExplicitlyWantTo();
         } else {
             result = null;
         }

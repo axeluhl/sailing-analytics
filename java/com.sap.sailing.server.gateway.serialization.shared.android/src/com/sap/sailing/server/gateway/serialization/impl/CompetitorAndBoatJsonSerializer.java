@@ -7,8 +7,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonSerializer;
 
 /** 
  * Serializes a competitor AND a boat as a kind of pair (e.g. in the context of a race)

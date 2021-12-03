@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelogtracking.PlaceHolderDeviceIdentifier;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 
 /**

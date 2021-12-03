@@ -73,7 +73,7 @@ public enum FieldNames {
     BOAT_CLASS_TYPICALLY_STARTS_UPWIND,
     
     // wind:
-    WIND_SOURCE_NAME, WIND_SOURCE_ID, WIND, IS_MAGNETIC,
+    WIND_SOURCES_TO_EXCLUDE, WIND_SOURCE_NAME, WIND_SOURCE_ID, WIND, IS_MAGNETIC,
     
     // SwissTiming configuration parameters:
     ST_CONFIG_NAME, ST_CONFIG_HOSTNAME, ST_CONFIG_PORT,
@@ -133,6 +133,8 @@ public enum FieldNames {
     // remote server reference fields
     SERVER_NAME,
     SERVER_URL,
+    INCLUDE,
+    SELECTED_EVENT_IDS,
     
     // local server instance fields
     SERVER_IS_STANDALONE,

@@ -12,7 +12,7 @@
 <h2>URL: /api/v1/masterdataimport</h2>
 
 <b>Description:</b>
-<p>Triggers a Master Data Import from a remote server. If no target server authentication is provided the master data import will be triggered with the current user context.</p>
+<p>Triggers a Master Data Import from a remote server. If no remote server authentication is provided the master data import will be triggered with the current user context.</p>
 <br/>
 <table>
     <tr>
@@ -26,22 +26,24 @@
     <tr>
         <td>Mandatory parameters:</td>
         <td>
-            <div>targetServerUrlAsString, the remote server from which to import.</div>
-            <div>names[], the names of the leaderboardgroups to be requested from the remote server.</div>
-            <div>override, whether to override a leaderboardgroup already available on the server.</div>
-            <div>compress, use only if remote server instance is at least running with commit 0fbf6071dea125bec4a56dee55d61c99def4a62e.</div>
-            <div>exportWind, if false no wind data will be imported.</div>
-            <div>exportDeviceConfigs, if true exports all the device configurations for the race manager app.</div>
-            <div>exportTrackedRacesAndStartTracking, if true exports all the tracked races and starts the tracking.</div>
+            <div>remoteServerUrl, the remote server from which to import.</div>
+            <div>leaderboardgroupUUID[], the UUIDs of the leaderboardgroups to be requested from the remote server.</div>
         </td>
     </tr>
     <tr>
         <td>Optional parameters:</td>
         <td>
-            <div>targetServerUsername</div>
-            <div>targetServerPassword</div>
-            <div>targetServerBearerToken</div>
+            <div>remoteServerUsername</div>
+            <div>remoteServerPassword</div>
+            <div>remoteServerBearerToken</div>
             Use either username and password or bearer token, not all three parameters.
+            <div>override, whether to override a leaderboardgroup already available on the server. The default is false.</div>
+            <div>compress, use only if remote server instance is at least running with commit 0fbf6071dea125bec4a56dee55d61c99def4a62e. The default is true.</div>
+            <div>exportWind, if false no wind data will be imported. The default is true.</div>
+            <div>exportDeviceConfigs, if true exports all the device configurations for the race manager app. The default is false.</div>
+            <div>exportTrackedRacesAndStartTracking, if true exports all the tracked races and starts the tracking. The default is true.</div>
+            <div>progressTrackingUuid, must be in UUID format, such as 123866298-8b0f-4291-9ab1-6b2a1fa93829; if provided, this can be
+                 used to track the master data import's progress</div>
         </td>
     </tr>
     <tr>
@@ -50,13 +52,20 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/masterdataimport -d "targetServerUrl=127.0.0.1:8888" -d "names[]=xyz" -d "override=false" -d "compress=true" -d "exportWind=false" -d "exportDeviceConfigs=false" -d "exportTrackedRacesAndStartTracking=false" -d "targetServerUsername=admin" -d "targetServerPassword=admin" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/masterdataimport -d "remoteServerUrl=127.0.0.1:8888" -d "leaderboardgroupUUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -d "targetServerUsername=admin" -d "targetServerPassword=admin" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
-        "LeaderboardgroupsImported": [
-            "xyz"
-            ],
-        "ImportedFrom": "127.0.0.1:8888",
+         "leaderboardgroupsImported": [
+           {
+             "id": "75e86618-8b0f-4291-9661-6b2a1fa47dff",
+             "name": "MyTestEventWithStrangeCharact/er*s",
+             "events": [
+               "067c5d3b-2f11-42b4-8897-2b5cfbff3eeb",
+               "8414067e-6be0-4f74-b199-d2c79d01c3c1"
+             ]
+           }
+         ],
+        "importedFrom": "127.0.0.1:8888",
         "override": false,
         "exportWind": false,
         "exportDeviceConfigs": false,

@@ -1,7 +1,9 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,6 +27,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -69,11 +73,11 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.geocoding.ReverseGeocoder;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.exceptions.ExceptionManager;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventRaceStatesSerializer;
@@ -81,11 +85,17 @@ import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJso
 import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
+import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
+import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.security.SailingViewerRole;
@@ -97,16 +107,22 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonSerializer;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
-@Path("/v1/events")
+@Path(EventsResource.V1_EVENTS)
 public class EventsResource extends AbstractSailingServerResource {
+    public static final String V1_EVENTS = "/v1/events";
     private static final Logger logger = Logger.getLogger(EventsResource.class.getName());
     private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
@@ -127,6 +143,88 @@ public class EventsResource extends AbstractSailingServerResource {
     public EventsResource() {
     }
     
+    
+    /**
+     * Method to delete a specified {@link Event}.
+     * 
+     * @param eventId - The UUID of the event to delete
+     * @param withLeaderboardGroups - Boolean whether to delete all associated {@link LeaderboardGroup}s or not. Doing so will also delete the overall {@link Leaderboard}s of each group.
+     * @param withLeaderboards - Boolean whether to delete all associated {@link Leaderboard}s. 
+     * @param withRegattas - Boolean whether to delete all associated {@link Regatta}s. Doing so will also delete all their {@link RegattaLeaderboard}s and {@link TrackedRace}s.
+     * @return A 200 response, if the delete was successful or a 404 response, if the eventId was not found.
+     * @throws ParseException
+    */
+    @DELETE
+    @Path("/{eventId}/")
+    public Response delete(@PathParam("eventId") String eventId,
+            @QueryParam("withLeaderboardGroups") Boolean withLeaderboardGroups,
+            @QueryParam("withLeaderboards") Boolean withLeaderboards, @QueryParam("withRegattas") Boolean withRegattas)
+            throws ParseException {
+        final Serializable eventUUID = UUIDHelper.tryUuidConversion(eventId);
+        final RacingEventService racingEventService = getService();
+        final Event event = racingEventService.getEvent(eventUUID);
+        if (event != null) {
+            final boolean deleteLeaderboardGroups = withLeaderboardGroups == Boolean.TRUE;
+            final boolean deleteLeaderboards = withLeaderboards == Boolean.TRUE;
+            final boolean deleteRegattas = withRegattas == Boolean.TRUE;
+            final SecurityService securityService = getSecurityService();
+            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(event, () -> {
+                racingEventService.apply(new RemoveEvent(event.getId()));
+                if (deleteLeaderboards || deleteLeaderboardGroups || deleteRegattas) {
+                    for (final LeaderboardGroup group : event.getLeaderboardGroups()) {
+                        if (deleteLeaderboards || deleteRegattas) {
+                            for (final Leaderboard leaderboard : group.getLeaderboards()) {
+                                if (deleteRegattas && leaderboard instanceof RegattaLeaderboard) {
+                                    deleteReferencedRegatta(securityService, racingEventService, leaderboard);
+                                }
+                                if (deleteLeaderboards) {
+                                    securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(leaderboard,
+                                            () -> {
+                                                racingEventService.apply(new RemoveLeaderboard(leaderboard.getName()));
+                                            });
+                                }
+                            }
+                        }
+                        if (deleteLeaderboardGroups) {
+                            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(group, () -> {
+                                if (!deleteLeaderboards) {
+                                    deleteReferencedOverallLeaderboard(deleteRegattas, securityService,
+                                            racingEventService, group);
+                                }
+                                racingEventService.apply(new RemoveLeaderboardGroup(group.getId()));
+                            });
+                        }
+                    }
+                }
+            });
+        } else {
+            return getBadEventErrorResponse(eventId);
+        }
+        return Response.ok().build();
+    }
+
+    private void deleteReferencedOverallLeaderboard(final boolean deleteRegattas, final SecurityService securityService,
+            final RacingEventService racingEventService, final LeaderboardGroup group) {
+        final Leaderboard overallLeaderboard = group.getOverallLeaderboard();
+        if (overallLeaderboard != null) {
+            if (deleteRegattas && overallLeaderboard instanceof RegattaLeaderboard) {
+                deleteReferencedRegatta(securityService, racingEventService, overallLeaderboard);
+            }
+            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(overallLeaderboard, () -> {
+                racingEventService.apply(new RemoveLeaderboard(overallLeaderboard.getName()));
+            });
+        }
+    }
+
+    private void deleteReferencedRegatta(final SecurityService securityService,
+            final RacingEventService racingEventService, final Leaderboard leaderboard) {
+        final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+        final Regatta regatta = regattaLeaderboard.getRegatta();
+        securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(regatta, () -> {
+            racingEventService.apply(new RemoveRegatta(regatta.getRegattaIdentifier()));
+        });
+    }
+
     @POST
     @Path("/{eventId}/migrate")
     public Response migrateOwnershipForEvent(@PathParam("eventId") UUID eventId,
@@ -289,19 +387,20 @@ public class EventsResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
+    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic, @QueryParam("include") @DefaultValue("false") Boolean include,
+            @QueryParam("id") List<UUID> eventIds) {
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
                 new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer(),
                 new TrackingConnectorInfoJsonSerializer());
         JSONArray result = new JSONArray();
-        for (Event event : getService().getAllEvents()) {
+        Iterable<Event> events = getService().getEventsSelectively(include, eventIds);
+        for (Event event : events) {
             if (getSecurityService().hasCurrentUserReadPermission(event)
                     && ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic())) {
                 result.add(eventSerializer.serialize(event));
             }
         }
-        String json = result.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(result)).build();
     }
 
     @GET
@@ -481,7 +580,14 @@ public class EventsResource extends AbstractSailingServerResource {
         final TimePoint startDate = parseTimePoint(startDateParam, startDateAsMillis, now());
         final TimePoint endDate = parseTimePoint(endDateParam, endDateAsMillis, new MillisecondsTimePoint(addOneWeek(startDate.asDate())));
         URL officialWebsiteURL = officialWebsiteURLParam == null ? null :  toURL(officialWebsiteURLParam);
-        URL baseURL = baseURLParam == null ? uriInfo.getBaseUri().toURL() : toURL(baseURLParam);
+        final URI baseUri = uriInfo.getBaseUri();
+        final int port = baseUri.getPort();
+        // guess the protocol; when behind an SSL-offloading reverse proxy or load balancer, all we'll see is a regular HTTP
+        // request; yet, we'd likely want the client to make requests using HTTPS, unless we see a dedicated port in the request
+        // that is not the HTTPS default port 443:
+        final String scheme = (port >= 0 && port != 443) ? "http" : "https";
+        URL baseURL = baseURLParam == null ? new URL(scheme+":"+baseUri.getSchemeSpecificPart().
+                substring(0, baseUri.getSchemeSpecificPart().length()-baseUri.getPath().length())) : toURL(baseURLParam);
         List<UUID> leaderboardGroupIds = leaderboardGroupIdsListParam == null ? new ArrayList<UUID>() : toUUIDList(leaderboardGroupIdsListParam);
         UUID eventId = UUID.randomUUID();
         // ignoring sailorsInfoWebsiteURLs, images, videos
@@ -527,7 +633,11 @@ public class EventsResource extends AbstractSailingServerResource {
                             /* leaderboardDiscardThresholdsParam */ leaderboardDiscardThresholdsParam, numberOfRacesParam, canBoatsOfCompetitorsChangePerRace,
                             competitorRegistrationType, localCompetitorRegistrationSecret);
                     if (leaderboardGroup != null) {
-                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
+                        // no security checks for any overall leaderboard required here as we don't manipulate it
+                        // through this service. leaderboardGroup.getOverallLeaderboard() == null will be true, due to
+                        // overallLeaderboardScoringSchemeTypeParam being null in validateAndAddLeaderboardGroup call.
+                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getId(),
+                                leaderboardGroup.getName(),
                                 leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
                                 Collections.singletonList(leaderboard.getName()),
                                 leaderboardGroup.getOverallLeaderboard() == null ? null
@@ -567,23 +677,32 @@ public class EventsResource extends AbstractSailingServerResource {
             boolean displayGroupsInReverseOrder, List<String> leaderboardNamesParam,
             List<Integer> overallLeaderboardDiscardThresholdsParam, String overallLeaderboardScoringSchemeTypeParam)
             throws NotFoundException {
-        UUID leaderboardGroupId = UUID.randomUUID();
-        LeaderboardGroup leaderboardGroup = getSecurityService()
+        final UUID leaderboardGroupId = UUID.randomUUID();
+        final ScoringSchemeType overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeTypeParam == null
+                ? null : getScoringSchemeType(overallLeaderboardScoringSchemeTypeParam);
+        final Callable<LeaderboardGroup> createLeaderboardGroup = ()->{
+            int[] overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholdsParam == null ? new int[0] : overallLeaderboardDiscardThresholdsParam.stream().mapToInt(i -> i).toArray();
+            List<String> leaderboardNames = leaderboardNamesParam == null ? new ArrayList<String>() : leaderboardNamesParam;
+            return getService().apply(new CreateLeaderboardGroup(
+                    leaderboardGroupId, leaderboardGroupName, leaderboardGroupDescription, leaderboardGroupDisplayName, displayGroupsInReverseOrder,
+                    leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType));
+        };
+        final LeaderboardGroup leaderboardGroup;
+        // if an overall leaderboard is requested, establish ownership and check create permission; roll back if not possible;
+        // otherwise, try to establish the leaderboard group's ownership; if that fails with an AuthorizationException,
+        // the overall leaderboard's ownership is removed again, too.
+        if (overallLeaderboardScoringSchemeType != null) {
+            final String overallLeaderboardName = LeaderboardGroupMetaLeaderboard.getOverallLeaderboardName(leaderboardGroupName);
+            leaderboardGroup = getSecurityService()
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD,
+                    new TypeRelativeObjectIdentifier(overallLeaderboardName), overallLeaderboardName,
+                    ()->createLeaderboardGroup.call());
+        } else {
+            leaderboardGroup = getSecurityService()
                 .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
                         LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId), leaderboardGroupName,
-                        new Callable<LeaderboardGroup>() {
-
-            @Override
-            public LeaderboardGroup call() throws Exception {
-                ScoringSchemeType overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeTypeParam == null
-                        ? null : getScoringSchemeType(overallLeaderboardScoringSchemeTypeParam);
-                int[] overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholdsParam == null ? new int[0] : overallLeaderboardDiscardThresholdsParam.stream().mapToInt(i -> i).toArray();
-                List<String> leaderboardNames = leaderboardNamesParam == null ? new ArrayList<String>() : leaderboardNamesParam;
-                        return getService().addLeaderboardGroup(leaderboardGroupId, leaderboardGroupName,
-                        leaderboardGroupDescription, leaderboardGroupDisplayName, displayGroupsInReverseOrder, leaderboardNames,
-                        overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
-            }
-        });
+                        createLeaderboardGroup);
+        }
         updateEvent(getEvent(eventId), leaderboardGroup);
         return leaderboardGroup;
     }
@@ -591,7 +710,9 @@ public class EventsResource extends AbstractSailingServerResource {
     private String getDefaultEventName() {
         final String username;
         username = getCurrentUser().getName();
+        synchronized (dateTimeFormat) {
         return "Session "+username+" "+dateTimeFormat.format(new Date());
+    }
     }
 
     private User getCurrentUser() {
@@ -676,8 +797,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 ThresholdBasedResultDiscardingRule resultDiscardingRule = (ThresholdBasedResultDiscardingRule) rule;
                 overallLeaderboardDiscardThresholds = resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces();
             }
-            
-            getService().updateLeaderboardGroup(defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
+            getService().updateLeaderboardGroup(defaultLeaderboardGroup.getId(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
                     defaultLeaderboardGroup.getDisplayName(), leaderboards, overallLeaderboardDiscardThresholds, 
                     defaultLeaderboardGroup.getOverallLeaderboard()==null?null:defaultLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
         }

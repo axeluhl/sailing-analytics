@@ -14,8 +14,9 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -66,14 +67,14 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     }
     
     private MongoClient newMongo() throws UnknownHostException, MongoException {
-        return new MongoClient(dbConfiguration.getMongoClientURI());
+        return MongoClients.create(dbConfiguration.getMongoClientURI());
     }
     
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException {
         mongo = newMongo();
         assertNotNull(mongo);
-        mongo.dropDatabase(dbConfiguration.getMongoClientURI().getDatabase());
+        mongo.getDatabase(dbConfiguration.getMongoClientURI().getDatabase()).drop();
         db = mongo.getDatabase(dbConfiguration.getMongoClientURI().getDatabase());
         assertNotNull(db);
     }

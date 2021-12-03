@@ -1,5 +1,9 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
+import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceRemotePath;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,11 +12,12 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPlace;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
@@ -25,6 +30,7 @@ public abstract class AutoPlayClientFactoryBase
     private final SailingServiceAsync sailingService;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final AutoPlayPlaceNavigator navigator;
 
     private final Map<String, SailingServiceAsync> services = new HashMap<>();
@@ -36,11 +42,13 @@ public abstract class AutoPlayClientFactoryBase
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         mediaService = GWT.create(MediaService.class);
+        mediaServiceWrite = GWT.create(MediaServiceWrite.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService,
                 RemoteServiceMappingConstants.sailingServiceRemotePath);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
-                RemoteServiceMappingConstants.mediaServiceRemotePath);
-        getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
+                HEADER_FORWARD_TO_REPLICA);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath,
+                HEADER_FORWARD_TO_MASTER);
     }
 
     @Override
@@ -78,6 +86,10 @@ public abstract class AutoPlayClientFactoryBase
     @Override
     public MediaServiceAsync getMediaService() {
         return mediaService;
+    }
+    
+    public MediaServiceWriteAsync getMediaServiceWrite() {
+        return mediaServiceWrite;
     }
 
     @Override

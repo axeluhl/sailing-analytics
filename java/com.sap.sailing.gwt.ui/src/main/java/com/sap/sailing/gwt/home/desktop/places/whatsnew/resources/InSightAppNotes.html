@@ -2,135 +2,138 @@
 <html>
 <body>
 <div id="mainContent">
-    <h4 class="articleHeadline">What's New - SAP Sail InSight</h4>
+    <h4 class="articleHeadline">What's New - Sail Insight powered by SAP</h4>
     <div class="innerContent">
-        <h5 class="articleSubheadline">08.04.2020 - Version 2.3.8</h5>
+        See <a target="_blank" href="https://support.sapsailing.com/hc/en-us/articles/360017506480-Release-Notes">here</a>
+        <h5 class="articleSubheadline">06.10.2020 - Version 2.7.11</h5>
         <ul class="bulletList">
-            <li>Added MTCP communications module.</li>
-            <li>Fixed the bug that allowed you to get the waypoint name editing form field on start/finish waypoints.</li>
-            <li>Fixed issue with first character being capitalized on password input on Android devices.</li>
-            <li>Swap the order of first two steps in Event Overview page.</li>
-            <li>Changed mark tracking screen to make binding marks visually more comprehensible.</li>
-            <li>Added splash screen on Android.</li>
-            <li>Fixed navigation issue when quickly pressing sub-sections one by one on Account page.</li>
-            <li>Fixed issue with events become unresponsive after starting tracking for an invited event.</li>
-            <li>Fixed issue with anonymous users loses joined events after restarting the app.</li>
-        </ul>
-		
-        <h5 class="articleSubheadline">18.03.2020 - Version 2.2.0</h5>
-        <ul class="bulletList">
-            <li>Regatta details and races are now refreshed when selecting an event.</li>
-            <li>Fixed an issue with updating competitor ACL on the settings specified server instead of event server when joining an event.</li>
-            <li>Fixed an issue that prevented anonymous users from joining events due to an unnecessary call to update competitor ACL.</li>
-            <li>Course creator is now updated showing the new device binding when coming out of the ‘Scan QR Code’ screen for mark.</li>
-            <li>Display time gaps in the format 'DD:HH:mm:ss' in the leaderboard. Layout fixes to leaderboard screen.</li>
-            <li>Fixed a layout issue in course creator to extend the mark background to the lower edge of the screen.</li>
-            <li>Complete refactor of app navigation code, fixing various navigation issues.</li>
-            <li>Fixed an issue that showed an empty boat class field for owners in handicap based events.</li>
-            <li>Registration form is now cleared after a successful register.</li>
-            <li>Fixed an issue that hides the 'New team' button in teams screen when scrolling.</li>
+            <li>Fixed an issue with the tracking timer stopping after tracking in the background for a while.</li>
+            <li>Development improvement by addressing console warnings and errors.</li>
+            <li>Fixed an issue with popup messages being truncated when changing a race time which falls outside of the event time range.</li>
+            <li>Fixed an issue for anonymous users trying to join an event twice.</li>
+            <li>Re-enabled the metrics dropdown on the leaderboard tracking screen.</li>
+            <li>Gates from current event offered as waypoint options when defining a course.</li>
+            <li>The app now checks if device time or timezone are not set to automatic and presents a corresponding message to the user in the welcome tracking screen. This only applies for Android devices.</li>
+            <li>Fixed an issue with the splash screen being shown for a moment when opening the keyboard, on Android.</li>
+            <li>Pop-up disclaimer added on the button for the edit results page and copy link.</li>
+            <li>User is presented with a toast message about network connectivity when trying to do an action that requires network on the first contact screen.</li>
         </ul>
 
-        <h5 class="articleSubheadline">06.03.2020 - Version 2.1.1</h5>
+        <h5 class="articleSubheadline">21.09.2020 - Version 2.7.1</h5>
         <ul class="bulletList">
-            <li>Fixed an issue that stopped tracking when tapping on tracking tab while being in leaderboard view.</li>
-            <li>Fixed an issue that made the Android back button not working properly in screens other than tracking.</li>
-            <li>Fixed an issue where the app didn't navigate properly after registering a new user.</li>
+            <li>Fixed a typing issue on the create new event page on Android.</li>
+            <li>Fixed an issue on Android where the app background goes black when choosing the “Share SAP” Analytics" option for an event.</li>
+            <li>Fixed an issue where the app crashes when a non event owner taps on a competitor on the event details page.</li>
+            <li>Fixed setup of race time on Android.</li>
+            <li>Fixed wrong tracking behaviour.</li>
+            <li>User no longer returns to registration screen when swiping left on welcome page on iOS.</li>
+            <li>Fixed an issue where the typing indicator was jumping while typing on “Create New Event” form fields on iOS.</li>
+            <li>Mark bindings are now propagated to the mark inventory if the current user has write permissions for the event.</li>
+            <li>Landscape mode enabled for results page in iOS.</li>
+            <li>Added a pop-up disclaimer on the button for the edit results page and copy link.</li>
+			<li>Prevent automatic capitalisation of email addresses.</li>
+            <li>Updated regular expression used to detect email addresses for forgot password feature.</li>
+            <li>Ended events should not appear in the tracking events list.</li>
+            <li>Inventory tab is not shown in the tab bar until a first course is defined by a user and his marks are created.</li>
+            <li>Restrict race date and time to be within the dates of the parent event.</li>
+            <li>New icon for SAP button in Event Details screen.</li>
         </ul>
+
+		<h5 class="articleSubheadline">07.09.2020 - Version 2.7.0</h5>
+        <ul class="bulletList">
+			<li>Fixed an issued with the app crashing when opening the course creator on Android.</li>
+			<li>Fixed an issue with the app crashing when opening the “Create new event” form on Android.</li>
+			<li>Fixed an issue with the app crashing when attempting to enter boat class.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">01.09.2020 - Version 2.6.6</h5>
+        <ul class="bulletList">
+			<li>Text changes for boat registry screen.</li>
+			<li>Add text on the “Add boat” page, when no records are added yet.</li>
+			<li>Fix for tracking races status in isCurrentLeaderboardTracking selector.</li>
+			<li>Hermes engine added for Android devices.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">24.08.2020 - Version 2.6.5</h5>
+        <ul class="bulletList">
+			<li>Adjusts batch size for the Transistorsoft module in battery saving mode. When Battery saving mode is engaged, Sail Insight sends the GPS fixes to the server once every 30 seconds, compared to each second in the normal mode. Also, the battery saving switch now takes immediate effect, even if tracking is currently engaged.</li>
+			<li>Enable Landscape mode for results correction page. (Android only)</li>
+			<li>Increased font size of login link on create account screen.</li>
+			<li>Transistorsoft module is now engaged in the course creator screen, making mark pings instant.</li>
+			<li>Creating an event with an existing name no longer throws an error.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">07.08.2020 - Version 2.6.4</h5>
+        <ul class="bulletList">
+			<li>Fixed an error when saving the edit competitor form, if the user has joined an event with this competitor.</li>
+			<li>We now prevent the user from entering 0 as a yardstick handicap value.</li>
+			<li>Assigning the same mark on both sides of a gate locks the gate to a single mark on both sides onwards.</li>
+			<li>Fixed unwanted conversion for a entered handicap value when switching between yardstick and time on time.</li>
+			<li>Added an edit icon next to the course overview on the race overview screens.</li>
+		</ul>
 	
-        <h5 class="articleSubheadline">03.03.2020 - Version 2.0.2</h5>
+		<h5 class="articleSubheadline">05.08.2020 - Version 2.6.1</h5>
         <ul class="bulletList">
-            <li>React Navigation dependency upgraded to the latest version.</li>
-            <li>Visual fixes in leaderboard screen.</li>
-            <li>Added localized text for undefined course or missing start times in race details.</li>
-        </ul>
-
-        <h5 class="articleSubheadline">02.03.2020 - Version 2.0.0</h5>
+			<li>Edit results page added for the event organizer, with an extra button to copy the link to the clipboard.</li>
+			<li>Improvements prevent the user from entering 0 as yardstick handicap values on the “Team Details” screen.</li>
+			<li>Allow event organizers to change the handicap values and display name of the event competitors.</li>
+		</ul>	
+	
+		<h5 class="articleSubheadline">31.07.2020 - Version 2.6.0</h5>
         <ul class="bulletList">
-            <li>Fixed leaderboard layout issues on certain devices.</li>
-            <li>Competitors and boats are assigned ‘READ_ALL’ permissions when joining an event.</li>
-            <li>Removed deletion of locally stored gps fixes when tracking is started. This fixes scenarios related to tracking being interrupted and restarted.</li>
-            <li>Fixed an issue that prevented start tracking while offline.</li>
-            <li>Color code other competitors in the leaderboard based on whether they're ahead or behind my competitor.</li>
-            <li>Reduce the length of the mantissa to 1 when converting between handicap value types.</li>
-            <li>Fixed issue with Scan QR Code button overlapping the last item in Tracking screen.</li>
-            <li>Fixed issue with first save of a new course with mark position change of existing marks from inventory.</li>
-            <li>Fixed issue that sometimes prevented start time being set on races while tracking was active.</li>
-        </ul>
+			<li>Fixed issue with line passing instructions (instead of Gate) used in course creator for start and finish lines.</li>
+			<li>Fixed issue with event does not re-appear in the events list when archiving and joining again.</li>
+			<li>Removed the ‘Select and item’ option from the boat drop down, on ‘Join Race’ page.</li>
+			<li>Improvements for the “Forgot Password” page.</li>
+			<li>Fixed the order of latitude and longitude inputs in course editor map.</li>
+			<li>Marks are now ordered by name in course editor.</li>
+			<li>‘Share Event’ button added below invite competitors in event details page.</li>
+		</ul>
+	
+		<h5 class="articleSubheadline">14.07.2020 - Version 2.5.1</h5>
+        <ul class="bulletList">
+			<li>Start Tracking’ button from event details now correctly navigates to tracking screen and shows the correct tracking state.</li>
+			<li>Improvement with account settings link removed from join race screen.</li>
+			<li>Fixed issue SAP logo link from tracking screen now points to the correct latest race.</li>
+			<li>Improvement with ‘Start Tracking’ button hidden in event details screen for event organizer or when current device is bound as a mark.</li>
+		</ul>
+	
+		<h5 class="articleSubheadline">08.07.2020 - Version 2.5.0</h5>
+        <ul class="bulletList">
+			<li>Fixed issue with localized keyboards having only comma shown for coordinates input in geolocation.</li>
+			<li>Fixed issue with close button not being reachable for tap on tracking and join event screens.</li>
+			<li>Fixed issue with boat class label not being displayed when focusing on the input (add team and create event screens).</li>
+			<li>Added ‘Cancel’ and ‘Save’ buttons to course creator and geolocation views.</li>
+			<li>Races and race times are now refreshed at 15 seconds intervals on the race overview screen.</li>
+			<li>Onboarding process improvements (including overall design upgrades and fixes).</li>
+		</ul>
+	
+		<h5 class="articleSubheadline">30.06.2020 - Version 2.4.11</h5>
+        <ul class="bulletList">
+			<li>Fixed stale timer in tracking screen.</li>
+			<li>Fixed an issue where tracking screen was shown when tracking was not really in progress.</li>
+		</ul>
+	
+		<h5 class="articleSubheadline">29.06.2020 - Version 2.4.10</h5>
+        <ul class="bulletList">
+			<li>Fixed an iOS issue where tracking tab didn’t show the correct screen.</li>
+			<li>Changed setting that makes tracking more reliable on older Android devices.</li>
+		</ul>
+	
+		<h5 class="articleSubheadline">22.06.2020 - Version 2.4.8</h5>
+        <ul class="bulletList">
+			<li>Fixed issue with logging into the previous user.</li>
+			<li>Fixed issue with coordinates not saved when backing out of mark location screen while being focused on a input.</li>
+			<li>Improvement making stop tracking faster.</li>
+			<li>Fixed issue asking the user to save the course changes, if pressing the events button on bottom tab.</li>
+			<li>Fixed issue with deleted mark binding gets reinstated after opening and saving course creator.</li>
+			<li>Optimisation of leaderboard/rank fetch data.</li>
+			<li>Fixed issue with location tab is selected by default for a mark that has a location assigned.</li>
+			<li>Improved map view by positioning the location icon.</li>
+			<li>Improvement with ‘Start Tracking’ button displayed in event details screen if current time falls within the current race start and end time.</li>
+		</ul>
 		
-        <h5 class="articleSubheadline">20.02.2020 - Version 1.0.64</h5>
-        <ul class="bulletList">
-            <li>Fixed visuals for boat handicap style selector in Team details.</li>
-            <li>Default generated event names are now only placeholders in Event Creation screen, applied only if the input is left empty.</li>
-            <li>Default generated event names are now only placeholders in Event Creation screen, applied only if the input is left empty.</li>
-            <li>Fixed issue with fixed gps position overriding a tracker binding when saving a course right after binding was successfully made.</li>
-            <li>Fixed issue with ‘Join As Competitor’ button not being removed after an organizer joins an event he created.</li>
-            <li>Fixed issue where ‘Scan QR Code’ button overlapped the last event card in events list, making it hard to tap on the event.</li>
-            <li>Fixed issue where app was crashing when clicking on leaderboard dropdown.</li>
-            <li>Fixed issue with competitors not being able to see each other in the leaderboard due to permissions.</li>
-            <li>Fixed issue with missing multidex support on Android, making certain devices crash on app start.</li>
-            <li>Replaced hard to read font in event organizer view.</li>
-        </ul>
-		
-        <h5 class="articleSubheadline">19.02.2020 - Version 1.0.63</h5>
-        <ul class="bulletList">
-            <li>Fixed issue with tracking screen being closed when tapping multiple times on the tracking tab.</li>
-            <li>Added loading indicator on the button when creating a new event.</li>
-            <li>Added link to SAP race board for current tracked race from tracking screen.</li>
-            <li>Main tab bar hidden while device keyboard is shown.</li>
-            <li>Improved back button handling in Android devices.</li>
-            <li>Removed the modal popup presented to the user that blocked joining an event which is already added to the user's device.</li>
-        </ul>
-		
-        <h5 class="articleSubheadline">March 2018</h5>
-        <ul class="bulletList">
-            <li>Made app robust against events that have no start/end dates set</li>
-        </ul>
-
-        <h5 class="articleSubheadline">November 2016</h5>
-        <ul class="bulletList">
-            <li>Improved tracking status and accuracy reporting</li>
-        </ul>
-
-        <h5 class="articleSubheadline">October 2016</h5>
-        <ul class="bulletList">
-            <li>Improved tracking reliability and accuracy,
-            especially when the app is in background by using a more reliable and controllable API:
-            The app will now only use true GPS signals instead of accepting
-            positions acquired through network triangulation.</li>
-            <li>There now is a more detailed energy saving option,
-            and the automatic overriding of user preferences has been removed.</li>
-            <li>In some rare situations the app crashed, if you want to scan a QR-Code.</li>
-        </ul>
-		
-		<h5 class="articleSubheadline">October 2016 - SAP Sail InSight (iOS)</h5>
-		<ul class="bulletList">
-            <li>This release introduces an entirely new design.</li>
-            <li>The landscape mode is optimized for small devices.</li>
-            <li>Unsent GPS-fixes will be sent automatically after a sudden reboot of the device.</li>
-            <li>Fixed an issue where a login could be done twice.</li>
-            <li>Fixed an issue where an invalid login is handled as a successful one.</li>
-        </ul>
-
-        <h5 class="articleSubheadline">August 2016</h5>
-
-        <ul class="bulletList">
-            <li>The GPS fix sending was optimize to send all data in a bulk. Instead of sending
-                every fix separately. This will reduce the battery consumption and minimize the
-                used traffic overhead.</li>
-            <li>Fixed an issue, where the app stopped tracking, if the app was in background and
-                killed by the system in case of low memory. Now the tracking will not stop, because
-                the system can't stop the service.</li>
-        </ul>
-
-        <h5 class="articleSubheadline">July 2016</h5>
-
-        <ul class="bulletList">
-            <li>It is possible to track buoys for multiple regattas. Scan all buoy QR-codes and
-                start tracking for one buoy. It will track all buoys.</li>
-        </ul>
     </div>
-
 </div>
 </body>
 </html>

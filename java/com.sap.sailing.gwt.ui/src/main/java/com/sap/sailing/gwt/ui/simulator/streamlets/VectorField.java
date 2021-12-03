@@ -35,7 +35,13 @@ public interface VectorField {
      *            position in the map's coordinate system; needs to be mapped backwards through a
      *            {@link CoordinateSystem} to produce a real-world {@link Position}
      * @param at
-     *            the time at which to query the vector field
+     *            the time at which to query the vector field. This vector field and its client(s) may agree on how to
+     *            handle the time ranges. For example, a vector field implementation may buffer data for a larger time
+     *            range, and clients can then query this vector field for different time points successfully. Or
+     *            this vector field and its client(s) agree what a valid time range or even single time point may be,
+     *            and this vector field then buffers only the data for a very short time range or even a single time
+     *            point and then basically ignores this argument, knowing that its client(s) already make an assumption
+     *            about the time for which this vector field will hold and deliver data.
      * 
      * @return the speed/direction vector that tells how a particle will fly at this position in the vector field, or
      *         <code>null</code> if there should not be a flying particle, e.g., because the field does not know how a

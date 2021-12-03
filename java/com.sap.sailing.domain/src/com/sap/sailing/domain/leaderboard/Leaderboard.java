@@ -337,10 +337,12 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
-     * A possibly corrected number of points for the race specified. Defaults to the result of calling
-     * {@link #getTotalPoints(Competitor, TrackedRace, TimePoint)} but may be corrected by the regatta rules for
-     * discarding results. If {@link #isDiscarded(Competitor, RaceColumn, TimePoint) discarded}, the points returned
-     * will be 0.
+     * A possibly corrected number of points for the race specified, multiplied with a column factor which defaults to
+     * 1.0, may be overridden by an {@link RaceColumn#getExplicitFactor() explicit factor on the race column} and by the
+     * {@link ScoringScheme#getScoreFactor(RaceColumn) scoring scheme} which may apply rules, e.g., for doubling medal
+     * race scores. Defaults to the result of calling {@link #getTotalPoints(Competitor, TrackedRace, TimePoint)} but
+     * may be corrected by the regatta rules for discarding results. If
+     * {@link #isDiscarded(Competitor, RaceColumn, TimePoint) discarded}, the points returned will be 0.
      * 
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
@@ -349,8 +351,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return <code>null</code> if the <code>competitor<code> obtained no score (yet?) in <code>race</code>. This may
      *         happen if the competitor has no score correction for <code>race</code> in this leaderboard and there is
      *         no tracked rank available for the competitor (e.g., because the race hasn't started yet) or the
-     *         competitor doesn't appear in any of the race column's attached tracked races. A 0.0 score is returned
-     *         if the competitor's result for <code>race</code> is discarded.
+     *         competitor doesn't appear in any of the race column's attached tracked races. A 0.0 score is returned if
+     *         the competitor's result for <code>race</code> is discarded.
      */
     Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
@@ -789,4 +791,6 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
             Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
             boolean allowRaceDefaultsByOrder, boolean allowPartialImport);
+
+    boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet);
 }

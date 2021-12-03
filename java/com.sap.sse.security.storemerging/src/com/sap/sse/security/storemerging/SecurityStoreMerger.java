@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.mongodb.MongoDBConfiguration;
@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
@@ -43,7 +44,7 @@ public class SecurityStoreMerger {
     private final UserStore targetUserStore;
     private final AccessControlStore targetAccessControlStore;
 
-    public SecurityStoreMerger(MongoDBConfiguration cfgForTarget, String targetDefaultCreationGroupName) throws UserGroupManagementException, UserManagementException {
+    public SecurityStoreMerger(MongoDBConfiguration cfgForTarget, String targetDefaultCreationGroupName) throws UserStoreManagementException {
         final PersistenceFactory targetPf = PersistenceFactory.create(cfgForTarget.getService());
         logger.info("Loading target user store from "+cfgForTarget);
         this.targetUserStore = loadUserStore(targetPf, targetDefaultCreationGroupName);
@@ -58,7 +59,7 @@ public class SecurityStoreMerger {
     }
 
     private UserStoreImpl loadUserStore(final PersistenceFactory targetPf, String defaultTenantName)
-            throws UserGroupManagementException, UserManagementException {
+            throws UserStoreManagementException {
         final UserStoreImpl userStore = new UserStoreImpl(targetPf.getDefaultDomainObjectFactory(),
                 targetPf.getDefaultMongoObjectFactory(), defaultTenantName);
         userStore.ensureDefaultRolesExist();
@@ -95,23 +96,23 @@ public class SecurityStoreMerger {
      * @param args
      *            pairs of MongoDB URI and default creation group names for the stores from which to import
      */
-    public static void main(String[] args) throws UserGroupManagementException, UserManagementException {
+    public static void main(String[] args) throws UserStoreManagementException {
         final MongoDBConfiguration cfgForTarget = MongoDBConfiguration.getDefaultConfiguration();
         final SecurityStoreMerger instance = new SecurityStoreMerger(cfgForTarget, System.getProperty(TARGET_DEFAULT_TENANT_NAME_SYSTEM_PROPERTY_NAME));
         for (int i=0; i<args.length/2; i++) {
-            final MongoDBConfiguration cfgForSource = new MongoDBConfiguration(new MongoClientURI(args[2*i]));
+            final MongoDBConfiguration cfgForSource = new MongoDBConfiguration(new ConnectionString(args[2*i]));
             instance.importStores(cfgForSource, args[2*i+1]);
         }
     }
 
-    public Pair<UserStore, AccessControlStore> importStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserGroupManagementException, UserManagementException {
+    public Pair<UserStore, AccessControlStore> importStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserStoreManagementException {
         final Pair<UserStore, AccessControlStore> sourceStores = readStores(cfgForSource, defaultCreationGroupNameForSource);
         logger.info("Importing user store and access control store read from "+cfgForSource);
         importStores(sourceStores.getA(), sourceStores.getB());
         return sourceStores;
     }
     
-    Pair<UserStore, AccessControlStore> readStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserGroupManagementException, UserManagementException {
+    Pair<UserStore, AccessControlStore> readStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserStoreManagementException {
         logger.info("Reading user store and access control store from "+cfgForSource);
         final PersistenceFactory sourcePf = PersistenceFactory.create(cfgForSource.getService());
         final UserStore sourceUserStore = loadUserStore(sourcePf, defaultCreationGroupNameForSource);
@@ -119,7 +120,7 @@ public class SecurityStoreMerger {
         return new Pair<>(sourceUserStore, sourceAccessControlStore);
     }
     
-    void importStores(final UserStore sourceUserStore, final AccessControlStore sourceAccessControlStore) throws UserGroupManagementException, UserManagementException {
+    void importStores(final UserStore sourceUserStore, final AccessControlStore sourceAccessControlStore) throws UserStoreManagementException {
         logger.info("Importing user store and access control store");
         // the following maps work like this: The keys are source objects to be imported.
         // If the key object is to be added to the target, it is its own value;
@@ -251,8 +252,8 @@ public class SecurityStoreMerger {
                             (qualifiedForUser != userQualifierInTarget || qualifiedForGroup != groupQualifierInTarget)) {
                         logger.info("Qualifying user/group for role "+role+" on user "+sourceUser.getName()+
                                 " merged to target. Updating role");
-                        rolesToReplaceDueToChangingQualifierObject.put(role,
-                                new Role(targetRoleDefinition, groupQualifierInTarget, userQualifierInTarget));
+                        rolesToReplaceDueToChangingQualifierObject.put(role, new Role(targetRoleDefinition,
+                                groupQualifierInTarget, userQualifierInTarget, role.isTransitive()));
                     }
                 }
             }

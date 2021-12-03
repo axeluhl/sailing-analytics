@@ -1,6 +1,15 @@
 #!/bin/bash
-
-source `pwd`/env.sh
+ENV_SH="`pwd`/env.sh"
+ENV_SH_DEFAULTS="`pwd`/env-default-rules.sh"
+if [ -f "${ENV_SH}" ]; then
+  chmod a+x "${ENV_SH}"
+  source "${ENV_SH}"
+fi
+if [ -f "${ENV_SH_DEFAULTS}" ]; then
+  chmod a+x "${ENV_SH_DEFAULTS}"
+  source "${ENV_SH_DEFAULTS}"
+fi
+ON_AMAZON=`command -v ec2-metadata`
 DATE_OF_EXECUTION=`date`
 
 # The following temporary file may be used by this script to dump EC2-provided user data
@@ -13,18 +22,15 @@ find_project_home ()
         echo ""
         return 0
     fi
-
     if [ ! -d "$1/.git" ]; then
         PARENT_DIR=`cd $1/..;pwd`
         OUTPUT=$(find_project_home $PARENT_DIR)
-
         if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY/.git" ]; then
             OUTPUT="$PARENT_DIR/$CODE_DIRECTORY"
         fi
         echo $OUTPUT
         return 0
     fi
-
     echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
 }
 
@@ -33,12 +39,10 @@ checks ()
     USER_HOME=~
     START_DIR=`pwd`
     PROJECT_HOME=$(find_project_home $START_DIR)
-
     # needed for maven on sapsailing.com to work correctly
     if [ -f $USER_HOME/.bash_profile ]; then
         source $USER_HOME/.bash_profile
     fi
-
     JAVA_BINARY=$JAVA_HOME/bin/java
     if [[ ! -d "$JAVA_HOME" ]]; then
         echo "Could not find $JAVA_BINARY set in env.sh. Trying to find the correct one..."
@@ -50,22 +54,11 @@ checks ()
         JAVA_BINARY=`which java`
         echo "Using Java from $JAVA_BINARY"
     fi
-
-    # make sure to set email adresses
-    if [[ $BUILD_COMPLETE_NOTIFY == "" ]]; then
-        export BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-    fi
-
-    if [[ $SERVER_STARTUP_NOTIFY == "" ]]; then
-        export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
-    fi
-
     if [[ $DEPLOY_TO == "" ]]; then
-        DEPLOY_TO=server
+        SERVER_HOME=.
+    else
+        SERVER_HOME=$USER_HOME/servers/$DEPLOY_TO
     fi
-
-    SERVER_HOME=$USER_HOME/servers/$DEPLOY_TO
-
     if [[ ! -d $SERVER_HOME ]]; then
         SERVER_HOME=`pwd`/../../servers/$DEPLOY_TO
         if [[ ! -d $SERVER_HOME ]]; then
@@ -77,13 +70,10 @@ checks ()
 
 copy_user_data_to_tmp_file ()
 {
-    echo "Reading user-data provided by Amazon instance data to $ec2EnvVars_tmpFile"
-
+    echo "Reading user-data provided by Amazon instance data to ${ec2EnvVars_tmpFile}"
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
     if [[ "$VARS" != "not available" ]]; then
-        for var in $VARS; do
-          echo $var >>"$ec2EnvVars_tmpFile"
-        done
+        ec2-metadata -d | sed "s/user-data\: //g" >>"${ec2EnvVars_tmpFile}"
     else
         echo "No user data has been provided."
     fi
@@ -93,47 +83,67 @@ copy_user_data_to_tmp_file ()
 activate_user_data ()
 {
     # make sure to reload data
-    source "$ec2EnvVars_tmpFile"
+    source "${ec2EnvVars_tmpFile}"
     INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d " "`
     INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
     INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d " "`
     INSTANCE_ID="$INSTANCE_NAME ($INSTANCE_IP4)"
 }
 
+append_default_envsh_rules()
+{
+    echo "
+# Default rules: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+    cat "${SERVER_HOME}/env-default-rules.sh" >>$SERVER_HOME/env.sh
+    echo "
+# Default rules: END" >> $SERVER_HOME/env.sh
+    echo "Updated env.sh with data from env-default-rules.sh file!"
+}
+
 append_user_data_to_envsh ()
 {
+    mkdir -p $SERVER_HOME/environment 2>/dev/null >/dev/null
     # make backup of original file
     cp $SERVER_HOME/env.sh $SERVER_HOME/environment/env.sh.backup
 
-    echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+    echo "
+# User-Data: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
     echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
-
-    for var in `cat "$ec2EnvVars_tmpFile"`; do
-        echo $var >> $SERVER_HOME/env.sh
-        echo "Activated: $var"
-    done
+    # Append EC2 user data to env.sh file:
+    cat "${ec2EnvVars_tmpFile}" >>$SERVER_HOME/env.sh
 
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
     echo "# User-Data: END" >> $SERVER_HOME/env.sh
     echo "Updated env.sh with data from user-data field!"
-    echo ""
 }
 
 install_environment ()
 {
     if [[ $USE_ENVIRONMENT != "" ]]; then
         # clean up directory to really make sure that there are no files left
-        rm -rf $SERVER_HOME/environment
-        mkdir $SERVER_HOME/environment
-        echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
-        wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
-        echo "# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
-        cat $SERVER_HOME/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
-        echo "# Environment: END" >> $SERVER_HOME/env.sh
-
+        rm -rf ${SERVER_HOME}/environment
+        mkdir ${SERVER_HOME}/environment
+        if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
+            SCP_PORT=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^[^:]*:\?\([0-9]*\)\?$/\1/' )
+            if [ -n "${SCP_PORT}" ]; then
+                SCP_PORT_OPTION="-P ${SCP_PORT}"
+            fi
+            SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
+	    echo "Using environment ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT}"
+	    mkdir -p ./environment
+            scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT} ./environment
+        else
+	    echo "Using environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
+	    wget -P environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT
+	fi
+        echo "
+# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+        cat ${SERVER_HOME}/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
+        echo "
+# Environment: END" >> ${SERVER_HOME}/env.sh
         echo "Updated env.sh with data from environment file!"
     else
         echo "No environment file specified!"
@@ -142,42 +152,49 @@ install_environment ()
 
 load_from_release_file ()
 {
-    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
-        echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
-        cd $SERVER_HOME
-        rm -f $SERVER_HOME/$INSTALL_FROM_RELEASE.tar.gz*
-        rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
-        echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
-        wget http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
-        mv env.sh env.sh.preserved
-	mv configuration/mail.properties configuration/mail.properties.preserved
-	mv configuration/debug.properties configuration/debug.properties.preserved
-        tar xvzf $INSTALL_FROM_RELEASE.tar.gz
-        mv env.sh.preserved env.sh
-	mv configuration/mail.properties.preserved configuration/mail.properties
-	mv configuration/debug.properties.preserved configuration/debug.properties
-        echo "Configuration for this server is unchanged - just binaries have been changed."
-    else
-        echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
+    if [[ ${INSTALL_FROM_RELEASE} == "" ]]; then
+        INSTALL_FROM_RELEASE="$(wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
+        echo "You didn't provide a release. Defaulting to latest master build https://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
     fi
+    if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+      echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
+    fi
+    RELEASE_FILE_NAME=${INSTALL_FROM_RELEASE}.tar.gz
+    cd ${SERVER_HOME}
+    rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
+    rm -rf *.tar.gz
+    if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
+            SCP_PORT=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^[^:]*:\?\([0-9]*\)\?$/\1/' )
+        if [ -n "${SCP_PORT}" ]; then
+            SCP_PORT_OPTION="-P ${SCP_PORT}"
+        fi
+        SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
+        scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME} .
+    else
+        echo "Loading from release file https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}"
+        wget https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}
+    fi
+    load_from_local_release_file
 }
 
 load_from_local_release_file ()
 {
-    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
-        cd $SERVER_HOME
+    if [[ ${INSTALL_FROM_RELEASE} != "" ]]; then
+        cd ${SERVER_HOME}
         rm -rf plugins start stop status native-libraries org.eclipse.osgi
-        echo "Loading from release file $INSTALL_FROM_RELEASE"
+        echo "Loading from release file ${INSTALL_FROM_RELEASE}"
         mv env.sh env.sh.preserved
-	mv configuration/mail.properties configuration/mail.properties.preserved
-	mv configuration/debug.properties configuration/debug.properties.preserved
-        tar xvzf $INSTALL_FROM_RELEASE
+        mv configuration/mail.properties configuration/mail.properties.preserved
+        mv configuration/debug.properties configuration/debug.properties.preserved
+        tar xvzf ${INSTALL_FROM_RELEASE}.tar.gz
         mv env.sh.preserved env.sh
-	mv configuration/mail.properties.preserved configuration/mail.properties
-	mv configuration/debug.properties.preserved configuration/debug.properties
+        mv configuration/mail.properties.preserved configuration/mail.properties
+        mv configuration/debug.properties.preserved configuration/debug.properties
+        # Try to create the symbolic links to the /home/scores directories where uploaded results are mounted through NFS if in the right region
+        find /home/scores/* -type d -prune -exec ln -s {} \; 2>/dev/null >/dev/null
         echo "Configuration for this server is unchanged - just binaries have been changed."
     else
-        echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
+        echo "The variable INSTALL_FROM_RELEASE has not been set, therefore no release file will be installed!"
     fi
 }
 
@@ -200,7 +217,9 @@ build ()
     MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
     if [ $MEM_TOTAL -lt 924 ]; then
         echo "Could not start build process with less than 1GB of RAM!"
-        echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | mail -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+          echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | mail -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
+        fi
     else
         if [[ $BUILD_BEFORE_START == "True" ]]; then
             cd $PROJECT_HOME
@@ -237,11 +256,63 @@ deploy ()
     STATUS=$?
     if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        echo "OK - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
+        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+          echo "OK - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" ${BUILD_COMPLETE_NOTIFY}
+        fi
     else
         echo "Deployment Failed"
-        echo "ERROR - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+          echo "ERROR - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
+        fi
     fi 
+}
+
+auto_install ()
+{
+        # activate everything found in user data
+        activate_user_data
+        # Now build or fetch the correct release, based on activated user data:
+        if [[ $BUILD_BEFORE_START = "True" ]]; then
+            checkout_code
+            build
+            deploy
+        else
+            load_from_release_file
+        fi
+        # then download and install environment and append to env.sh
+        install_environment
+        # then append user data to env.sh as it shall take precedence over the installed environment's defaults
+        append_user_data_to_envsh
+        # then append the rules that compute defaults for variables not set elsewhere; this has to come last:
+        append_default_envsh_rules
+        # make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
+        source `pwd`/env.sh
+        # Append mail-related environment variables to configuration/mail.properties to override defaults
+        echo "mail.enabled = true" >>configuration/mail.properties
+        if [ -n "$MAIL_FROM" ]; then
+          echo "mail.from = $MAIL_FROM" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_HOST" ]; then
+          echo "mail.smtp.host = $MAIL_SMTP_HOST" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_PORT" ]; then
+          echo "mail.smtp.port = $MAIL_SMTP_PORT" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_AUTH" ]; then
+          echo "mail.smtp.auth = $MAIL_SMTP_AUTH" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_USER" ]; then
+          echo "mail.smtp.user = $MAIL_SMTP_USER" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_PASSWORD" ]; then
+          echo "mail.smtp.password = $MAIL_SMTP_PASSWORD" >>configuration/mail.properties
+        fi
+        echo ""
+        echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
+        echo "DEPLOY_TO: $DEPLOY_TO"
+        echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
+        echo "USE_ENVIRONMENT: $USE_ENVIRONMENT"
+        echo ""
 }
 
 OPERATION=$1
@@ -251,47 +322,23 @@ checks
 if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
-	copy_user_data_to_tmp_file
-        activate_user_data
-        # then download and install environment and append to env.sh
-        install_environment
-	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
-	append_user_data_to_envsh
-
-        # make sure to reload data
-        source `pwd`/env.sh
-
-        if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
-            echo "I could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
-            exit 1
-        fi
-
-        echo ""
-        echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
-        echo "DEPLOY_TO: $DEPLOY_TO"
-        echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
-        echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
-        echo ""
-
-        if [[ $INSTALL_FROM_RELEASE != "" ]]; then
-            load_from_release_file
-        else
-            checkout_code
-            build
-            deploy
-        fi
+        copy_user_data_to_tmp_file
+        auto_install
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."
         exit 1
     fi
+    rm "${ec2EnvVars_tmpFile}"
+
+elif [[ $OPERATION == "auto-install-from-stdin" ]]; then
+    # copy stdin to user data tmp file,
+    cat >"${ec2EnvVars_tmpFile}"
+    # then auto-install
+    auto_install
+    rm "${ec2EnvVars_tmpFile}"
 
 elif [[ $OPERATION == "install-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM
-    if [[ $INSTALL_FROM_RELEASE == "" ]]; then
-	INSTALL_FROM_RELEASE=$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
-        echo "You didn't provide a release. Picking latest master build from http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
-    fi
-
     # Honor the no-overrite setting if there is one
     if [ -f $SERVER_HOME/no-overwrite ]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
@@ -303,7 +350,7 @@ elif [[ $OPERATION == "install-release" ]]; then
 elif [[ $OPERATION == "install-local-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM
     if [[ $INSTALL_FROM_RELEASE == "" ]]; then
-        echo "You need to provide the file of a release without tar.gz"
+        echo "You need to provide the file of a tar.gz release file, without the .tar.gz suffix"
         exit 1
     fi
 
@@ -318,7 +365,7 @@ elif [[ $OPERATION == "install-local-release" ]]; then
 elif [[ $OPERATION == "install-env" ]]; then
     USE_ENVIRONMENT=$PARAM
     if [[ $USE_ENVIRONMENT == "" ]]; then
-        echo "You need to provide the name of an environment from http://releases.sapsailing.com/environments"
+        echo "You need to provide the name of an environment from https://releases.sapsailing.com/environments"
         exit 1
     fi
 
@@ -337,6 +384,7 @@ elif [[ $OPERATION == "install-env" ]]; then
         echo "TELNET_PORT: $TELNET_PORT"
         echo "MONGODB_HOST: $MONGODB_HOST"
         echo "MONGODB_PORT: $MONGODB_PORT"
+        echo "MONGODB_URI: $MONGODB_URI"
         echo "EXPEDITION_PORT: $EXPEDITION_PORT"
         echo "REPLICATION_HOST: $REPLICATION_HOST"
         echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
@@ -352,12 +400,20 @@ elif [[ $OPERATION == "install-env" ]]; then
         echo ""
         echo "ATTENTION: This new configuration is not active yet. Make sure to restart the server if it is running!"
     fi
+elif [[ $OPERATION == "install-user-data" ]]; then
+    if [ -f $SERVER_HOME/no-overwrite ]; then
+        echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
+    else
+        append_user_data_to_envsh
+    fi
 else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
+    echo "auto-install: downloads, builds, or takes from a local file a release, unpacks it in the current directory and applies the environment, user data, and environment defaults to the env.sh file"
+    echo "auto-install-from-stdin: like auto-install, only that the additional configuration data is sourced from standard input (stdin), not the AWS EC2 instance's user data."
     echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
     echo "install-local-release <release-file>: Installs the release file specified by the second option and overwrites all code for this server. Preserves env.sh."
     echo "install-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
+    echo "install-user-data: appends the user data set for the EC2 instance to the env.sh file"
     exit 0
 fi
-

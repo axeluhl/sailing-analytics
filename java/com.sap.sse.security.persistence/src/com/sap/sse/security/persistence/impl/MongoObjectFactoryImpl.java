@@ -12,7 +12,7 @@ import org.bson.Document;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sse.security.persistence.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
@@ -66,7 +66,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         sessionAsDocument.append(FieldNames.SESSION_ATTRIBUTES.name(), sessionAttributes);
         final Document key = getKey(cacheName, session);
-        sessionCollection.replaceOne(key, sessionAsDocument, new UpdateOptions().upsert(true));
+        sessionCollection.replaceOne(key, sessionAsDocument, new ReplaceOptions().upsert(true));
     }
     
     private List<Document> storePrincipalCollection(PrincipalCollection principalCollection) {

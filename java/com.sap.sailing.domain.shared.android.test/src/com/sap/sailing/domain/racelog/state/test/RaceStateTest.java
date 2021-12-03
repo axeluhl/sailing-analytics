@@ -197,11 +197,15 @@ public class RaceStateTest {
     
     @Test
     public void testGetRacingProcedure() throws InterruptedException {
-        
         state.setRacingProcedure(nowMock, RacingProcedureType.RRS26);
-        
         GateStartRacingProcedure procedure = state.getTypedRacingProcedure(GateStartRacingProcedure.class);
         assertNull(procedure);
     }
 
+    @Test
+    public void testResultsAreOfficial() {
+        assertFalse(state.isResultsAreOfficial());
+        state.setResultsAreOfficial(TimePoint.now());
+        assertTrue(state.isResultsAreOfficial());
+    }
 }

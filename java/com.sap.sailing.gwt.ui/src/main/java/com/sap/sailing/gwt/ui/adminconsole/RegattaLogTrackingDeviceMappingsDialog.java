@@ -122,7 +122,6 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         }));
         buttonPanel.add(busyIndicator);
         mainPanel.add(buttonPanel);
-        
         deviceMappingTable = new DeviceMappingTableWrapper(sailingServiceWrite, stringMessages, errorReporter);
         deviceMappingTable.getTable().addCellPreviewHandler(new CellPreviewEvent.Handler<DeviceMappingDTO>() {
             @Override
@@ -136,10 +135,8 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 new RaceLogTrackingDeviceMappingsImagesBarCell(stringMessages));
         actionCol.setFieldUpdater(getActionColFieldUpdater());
         deviceMappingTable.getTable().addColumn(actionCol, stringMessages.actions());
-        
         final HorizontalPanel deviceMappingPanel = new HorizontalPanel();
         mainPanel.add(deviceMappingPanel);
-        
         chart = new Chart()
         .setType(Series.Type.COLUMN_RANGE)
         .setChartTitleText(stringMessages.deviceMappings())
@@ -187,11 +184,12 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 new ArrayList<DeviceMappingDTO>(), deviceMappingTable.getDataProvider(), stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(DeviceMappingDTO t) {
-                List<String> string = new ArrayList<String>();
-                string.add(t.mappedTo.toString());
-                string.add(t.deviceIdentifier.deviceType);
-                string.add(t.deviceIdentifier.deviceId);
-                return string;
+                List<String> strings = new ArrayList<String>();
+                strings.add(MappableToDeviceFormatter.formatType(t.mappedTo, stringMessages));
+                strings.add(MappableToDeviceFormatter.formatName(t.mappedTo));
+                strings.add(t.deviceIdentifier.deviceType);
+                strings.add(t.deviceIdentifier.deviceId);
+                return strings;
             }
 
             @Override

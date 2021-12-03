@@ -30,7 +30,6 @@ import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.impl.FixedPositioningImpl;
 import com.sap.sailing.domain.coursetemplate.impl.TrackingDeviceBasedPositioningImpl;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkPropertiesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
@@ -39,6 +38,7 @@ import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerRe
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.shared.json.JsonSerializer;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/markproperties")
@@ -59,7 +59,7 @@ public class MarkPropertiesResource extends SharedAbstractSailingServerResource 
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getMarkProperties(@QueryParam("tag") List<String> tags) throws Exception {
+    public Response getMarkProperties(@QueryParam("tags") List<String> tags) throws Exception {
         Iterable<MarkProperties> markPropertiesList = getSharedSailingData().getAllMarkProperties(tags);
         JSONArray result = new JSONArray();
         for (MarkProperties markProperties : markPropertiesList) {
@@ -85,7 +85,7 @@ public class MarkPropertiesResource extends SharedAbstractSailingServerResource 
     public Response createMarkProperties(@FormParam("name") final String name,
             @FormParam("shortName") final String shortName, @FormParam("deviceUuid") String deviceUuid,
             @FormParam("color") String rgbColor, @FormParam("shape") String shape, @FormParam("pattern") String pattern,
-            @FormParam("markType") final String markType, @FormParam("tag") List<String> tags,
+            @FormParam("markType") final String markType, @FormParam("tags") List<String> tags,
             @FormParam("latDeg") Double latDeg, @FormParam("lonDeg") Double lonDeg) throws Exception {
         if (name == null || name.isEmpty()) {
             return getBadMarkPropertiesValidationErrorResponse("name must be given");
@@ -161,7 +161,7 @@ public class MarkPropertiesResource extends SharedAbstractSailingServerResource 
             @FormParam("name") final String name,
             @FormParam("shortName") final String shortName,
             @FormParam("color") String rgbColor, @FormParam("shape") String shape, @FormParam("pattern") String pattern,
-            @FormParam("markType") final String markType, @FormParam("tag") List<String> tags,
+            @FormParam("markType") final String markType, @FormParam("tags") List<String> tags,
             @FormParam("deviceUuid") String deviceUuid, @FormParam("latDeg") Double latDeg,
             @FormParam("lonDeg") Double lonDeg) throws Exception {
         final UUID markPropertiesUUID = UUID.fromString(markPropertiesId);

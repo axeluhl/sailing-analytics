@@ -27,30 +27,28 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.ExpeditionAllInOneConstants;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.common.client.suggestion.RegattaSuggestOracle;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResponse;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResultsDialog;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
-import com.sap.sse.security.ui.client.UserService;
 
 /**
  * The UI form to upload data for expedition all in one import.
  */
-public class ExpeditionAllInOneImportPanel extends Composite implements RegattasDisplayer {
+public class ExpeditionAllInOneImportPanel extends Composite {
     private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
 
     private final RegattaSuggestOracle regattaOracle;
+    private final Displayer<RegattaDTO> regattasDisplayer;
 
-    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher) {
+    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final Presenter presenter) {
+        regattasDisplayer = result->fillRegattas(result);
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
         final Button uploadButton = new Button(stringMessages.upload());
@@ -70,7 +68,6 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
         contentPanel.add(fileUpload);
-
         final FlowPanel importModePanel = new FlowPanel();
         contentPanel.add(importModePanel);
         final HorizontalPanel regattaNamePanel = new HorizontalPanel();
@@ -112,7 +109,6 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
         regattaNamePanel.setCellVerticalAlignment(regattaNameLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         final TextBox regattaName = new TextBox();
         regattaName.setName(ExpeditionAllInOneConstants.REQUEST_PARAMETER_REGATTA_NAME);
-
         regattaOracle = new RegattaSuggestOracle();
         final SuggestBox regattaSuggestBox = new SuggestBox(regattaOracle, regattaName);
         regattaSuggestBox.getValueBox().getElement().getStyle().setProperty("minWidth", 30, Unit.EM);
@@ -158,11 +154,13 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
                 Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
             } else if (response.hasEventId()) {
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
-                        response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getRaceEntries(),
-                        response.getGpsDeviceIds(), response.getSensorDeviceIds(), response.getSensorFixImporterType(),
-                        response.getStartTimes(), sailingServiceWrite, userService,
-                        errorReporter, stringMessages);
-                regattaRefresher.fillRegattas();
+                        response.getLeaderboardName(), response.getLeaderboardGroupName(),
+                        response.getLeaderboardGroupId(), response.getRaceEntries(), response.getGpsDeviceIds(),
+                        response.getSensorDeviceIds(), response.getSensorFixImporterType(), response.getStartTimes(),
+                        presenter.getSailingService(), presenter.getUserService(), presenter.getCompetitorsRefresher(),
+                        presenter.getBoatsRefresher(), presenter.getRegattasRefresher(), presenter.getEventsRefresher(),
+                        presenter.getLeaderboardsRefresher(), presenter.getLeaderboardGroupsRefresher(),
+                        presenter.getErrorReporter(), stringMessages, getRegattasDisplayer());
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);
             }
@@ -172,7 +170,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             public void onSelection(SelectionEvent<Suggestion> event) {
                 final String selected = event.getSelectedItem().getReplacementString();
                 if (selected != null) {
-                    sailingServiceWrite.getRegattaByName(selected, new AsyncCallback<RegattaDTO>() {
+                    presenter.getSailingService().getRegattaByName(selected, new AsyncCallback<RegattaDTO>() {
                         @Override
                         public void onSuccess(RegattaDTO result) {
                             validation.run();
@@ -180,7 +178,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Could not determine Regatta " + selected);
+                            presenter.getErrorReporter().reportError("Could not determine Regatta " + selected);
                         }
                     });
                 }
@@ -193,8 +191,11 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
         validation.run();
         initWidget(formPanel);
     }
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
 
-    @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         regattaOracle.fillRegattas(regattas);
     }

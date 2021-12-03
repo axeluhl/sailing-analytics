@@ -43,14 +43,6 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         regatta.addRaceColumnListener(this);
     }
 
-    /**
-     * Updates the display name of this regatta leaderboard so that the regatta's name is no longer used as the default name.
-     */
-    @Override
-    public void setName(String newName) {
-        setDisplayName(newName);
-    }
-
     @Override
     public Regatta getRegatta() {
         return regatta;
