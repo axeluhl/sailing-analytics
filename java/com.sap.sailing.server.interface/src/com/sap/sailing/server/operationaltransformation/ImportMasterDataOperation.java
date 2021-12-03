@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +35,7 @@ import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -61,8 +66,10 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
@@ -178,9 +185,13 @@ public class ImportMasterDataOperation extends
             }
             toState.mediaTracksImported(allMediaTracksToImport, creationCount, override);
             progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_TRACKED_RACES);
+            progress.setOverAllProgressPct(0.8);
+            progress.setCurrentSubProgressPct(0);
+            final Iterable<TrackedRace> trackedRacesToWaitForLoadingComplete = importTrackedRaces(toState, securityService);            
+            progress.setCurrentSubProgress(DataImportSubProgress.WAITING_FOR_TRACKED_RACES_TO_FINISH_LOADING);
             progress.setOverAllProgressPct(0.9);
             progress.setCurrentSubProgressPct(0);
-            importTrackedRaces(toState, securityService);            
+            waitForTrackedRacesToFinishLoading(trackedRacesToWaitForLoadingComplete);
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             progress.setOverAllProgressPct(1.0);
             return creationCount;
@@ -191,6 +202,49 @@ public class ImportMasterDataOperation extends
             LockUtil.unlockAfterWrite(dataImportLock);
         }
     }
+
+    private void waitForTrackedRacesToFinishLoading(Iterable<TrackedRace> trackedRacesToWaitForLoadingComplete) throws InterruptedException {
+        final int toLoad = Util.size(trackedRacesToWaitForLoadingComplete);
+        logger.info("Waiting for race loading to complete for "+toLoad+" races...");;
+        final Set<TrackedRace> racesStillLoading = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        Util.addAll(trackedRacesToWaitForLoadingComplete, racesStillLoading);
+        final Object sync = new Object(); // on this object we synchronize the waiting and unblocking process
+        for (final TrackedRace trackedRace : trackedRacesToWaitForLoadingComplete) {
+            trackedRace.addListener(new AbstractRaceChangeListener() {
+                @Override
+                public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+                    if ((oldStatus.getStatus() == TrackedRaceStatusEnum.PREPARED || oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING)
+                            && newStatus.getStatus().getOrder() > TrackedRaceStatusEnum.LOADING.getOrder()) {
+                        logger.info("Race "+trackedRace+" has finished loading");
+                        synchronized (progress) {
+                            progress.setCurrentSubProgressPct((double) (toLoad - racesStillLoading.size()) / (double) toLoad);
+                        }
+                        racesStillLoading.remove(trackedRace);
+                        synchronized (sync) {
+                            if (racesStillLoading.isEmpty()) {
+                                sync.notifyAll();
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        for (Iterator<TrackedRace> i = racesStillLoading.iterator(); i.hasNext(); ) {
+            final TrackedRace trackedRace = i.next();
+            if (trackedRace.getStatus().getStatus().getOrder() > TrackedRaceStatusEnum.LOADING.getOrder()) {
+                logger.info("Race "+trackedRace+" has finished loading");
+                i.remove();
+                progress.setCurrentSubProgressPct((double) (toLoad - racesStillLoading.size()) / (double) toLoad);
+            }
+        }
+        synchronized (sync) {
+            while (!racesStillLoading.isEmpty()) {
+                sync.wait();
+            }
+        }
+        logger.info("All races imported have finished loading");
+    }
+
 
     private void importDeviceConfigurations(RacingEventService toState) {
         if (toState.getMasterDescriptor() == null) { // don't do this on a replica's RacingEventService; device config removals/additions are replicated by RacingEventService
@@ -634,8 +688,14 @@ public class ImportMasterDataOperation extends
     
     /**
      * Starts the tracking of imported tracked races.
+     * 
+     * @return the set of tracked races for which loading/tracking has started. A caller may use those, e.g., to observe
+     *         their loading/tracking status. Races that didn't start loading/tracking within a
+     *         {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS timeout} will not be returned as
+     *         part of this set since waiting for them is considered futile.
      */
-    private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
+    private Iterable<TrackedRace> importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
+        final Set<TrackedRace> result = new HashSet<>();
         // only start importing / loading tracked races content if not running on a replica
         if (connectivityParametersToRestore != null && toState.getMasterDescriptor() == null) {
             int i = 0;
@@ -648,7 +708,9 @@ public class ImportMasterDataOperation extends
                     RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1);
                     final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
                     if (race != null) {
-                        ensureOwnership(raceHandle.getTrackedRegatta().getTrackedRace(race).getIdentifier(), securityService);
+                        final DynamicTrackedRace trackedRace = raceHandle.getTrackedRegatta().getTrackedRace(race);
+                        result.add(trackedRace);
+                        ensureOwnership(trackedRace.getIdentifier(), securityService);
                         creationCount.addOneTrackedRace(race.getId().toString());
                     } else {
                         logger.severe("Race for handle "+raceHandle+" didn't show in "+RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS+"ms; ownership not set");
@@ -658,5 +720,6 @@ public class ImportMasterDataOperation extends
                 progress.setCurrentSubProgressPct((double) i / numberOfConnectivityParamsToRestore);
             }
         }
+        return result;
     }
 }
