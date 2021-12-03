@@ -5,7 +5,7 @@
       version="1.0.0.qualifier"
       provider-name="SAP">
 
-   <description url="http://www.sap.com">
+   <description url="https://www.sap.com?campaigncode=CRM-XH21-OSP-Sailing">
       The SAP Sailing Server.
 
 Provides connectivity to a TracTrac live GPS feed as well as a live feed from an Expedition system.
@@ -221,15 +221,14 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
-         id="com.sap.sse.jettyextensions"
+         id="com.sap.sse.replication.persistence"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
          unpack="false"/>
 
    <plugin
-         id="com.sap.sse.replication.persistence"
+         id="com.sap.sse.landscape.common"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -250,7 +249,28 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
+         id="com.sap.sse.landscape.aws.common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="com.sap.sse.landscape.aws.persistence"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.debranding"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="elemental2"
          download-size="0"
          install-size="0"
          version="0.0.0"

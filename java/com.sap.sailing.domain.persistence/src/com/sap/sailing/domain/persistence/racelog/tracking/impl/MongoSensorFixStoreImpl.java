@@ -17,13 +17,13 @@ import java.util.logging.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
@@ -37,6 +37,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -72,16 +73,16 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, WriteConcern.UNACKNOWLEDGED);
+        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, ReadConcern.DEFAULT, WriteConcern.UNACKNOWLEDGED);
     }
     
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
-            TypeBasedServiceFinderFactory serviceFinderFactory, WriteConcern writeConcern) {
+            TypeBasedServiceFinderFactory serviceFinderFactory, ReadConcern readConcern, WriteConcern writeConcern) {
         super(serviceFinderFactory != null ? createFixServiceFinder(serviceFinderFactory) : null,
               serviceFinderFactory != null ? serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class) : null);
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
         fixesCollection = mongoOF.getGPSFixCollection();
-        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, writeConcern);
+        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, readConcern, writeConcern);
         this.writeConcern = writeConcern;
     }
 
@@ -123,13 +124,11 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
             boolean ascending, boolean onlyOneResult)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         progressConsumer.accept(0d);
-
         final TimePoint loadFixesFrom = from == null ? TimePoint.BeginningOfTime : from;
         final TimePoint loadFixesTo = to == null ? TimePoint.EndOfTime : to;
-
-        Document dbDeviceId = storeDeviceId(deviceServiceFinder, device);
+        Bson dbDeviceId = com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, device);
         final List<Bson> filters = new ArrayList<>();
-        filters.add(Filters.eq(FieldNames.DEVICE_ID.name(), dbDeviceId));
+        filters.add(dbDeviceId);
         filters.add(Filters.gte(FieldNames.TIME_AS_MILLIS.name(), loadFixesFrom.asMillis()));
         if (inclusive) {
             filters.add(Filters.lte(FieldNames.TIME_AS_MILLIS.name(), loadFixesTo.asMillis()));
@@ -138,7 +137,7 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
         }
         Bson query = Filters.and(filters);
         FindIterable<Document> result = fixesCollection.find(query);
-        result.sort(new Document(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
+        result.batchSize(100000).sort(new Document(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
         if (onlyOneResult) {
             result.limit(1);
         }

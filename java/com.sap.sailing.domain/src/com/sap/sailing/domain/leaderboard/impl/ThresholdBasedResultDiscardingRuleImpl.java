@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -21,6 +22,8 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -78,19 +81,26 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    @Override
+    public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
+                Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint,
+                Function<RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
         final Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
             final Map<RaceColumn, Double> totalPointsForCompetitorPerColumn = new HashMap<>();
-            List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
-            for (RaceColumn raceColumn : raceColumnsToConsider) {
+            final List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
+            for (final RaceColumn raceColumn : raceColumnsToConsider) {
                 if (raceColumn.isDiscardable()) {
                     sortedRaces.add(raceColumn);
-                    totalPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
+                    totalPointsForCompetitorPerColumn.put(raceColumn, totalPointsSupplier.apply(raceColumn));
                 }
             }
             result = new HashSet<RaceColumn>();
-            Comparator<RaceColumn> comparator = new Comparator<RaceColumn>() {
+            final Comparator<RaceColumn> comparator = new Comparator<RaceColumn>() {
                 @Override
                 public int compare(RaceColumn raceColumn1, RaceColumn raceColumn2) {
                     // invert to get bad races first; have the score comparator sort null scores as "better" so they end
@@ -103,7 +113,7 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
                 }
             };
             Collections.sort(sortedRaces, comparator);
-            Iterator<RaceColumn> badRacesIter = sortedRaces.iterator();
+            final Iterator<RaceColumn> badRacesIter = sortedRaces.iterator();
             while (badRacesIter.hasNext() && result.size()<resultsToDiscard) {
                 final RaceColumn badRace = badRacesIter.next();
                 final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, badRace, timePoint);

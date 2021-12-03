@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.util.ThreadPoolUtil;
-import com.sap.sse.util.impl.ApproximateTime;
 
 /**
  * Caches entries and ensures that the entries only remain in the cache if they are hit at least one time in the

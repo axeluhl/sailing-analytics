@@ -257,7 +257,6 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     @Test
     public void testTrackingDeviceStatus() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-
         Event event = eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, OPEN_UNMODERATED, "default");
         final UUID competitor1DeviceID = UUID.randomUUID();
         final Competitor competitor1 = regattaApi.createAndAddCompetitorWithSecret(ctx, EVENT_NAME, BOAT_CLASS, "test@de", "Max",
@@ -270,16 +269,13 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         gpsFixApi.postGpsFix(ctx, competitor1DeviceID, createFix(49.121, 8.5987, timeMillisCompetitor1, 10.0, 180.0));
         final long timeMillisCompetitor2 = System.currentTimeMillis() - 50;
         gpsFixApi.postGpsFix(ctx, competitor2DeviceID, createFix(49.120, 8.5988, timeMillisCompetitor2, 10.0, 180.0));
-
         final RegattaDeviceStatus trackingDeviceStatus = regattaApi.getTrackingDeviceStatus(ctx, EVENT_NAME);
-
         final List<CompetitorDeviceStatus> competitorsTrackingDeviceStatus = trackingDeviceStatus.getCompetitors();
         assertEquals(2, competitorsTrackingDeviceStatus.size());
         final Map<UUID, List<DeviceStatus>> statusByCompetitorUUID = competitorsTrackingDeviceStatus.stream()
                 .collect(Collectors.toMap(c -> UUID.fromString(c.getCompetitorId()), c -> c.getDeviceStatuses()));
         assertTrue(statusByCompetitorUUID.containsKey(competitor1.getId()));
         assertTrue(statusByCompetitorUUID.containsKey(competitor2.getId()));
-
         List<DeviceStatus> competitor1DeviceStatuses = statusByCompetitorUUID.get(competitor1.getId());
         assertEquals(1, competitor1DeviceStatuses.size());
         DeviceStatus competitor1DeviceStatus = competitor1DeviceStatuses.iterator().next();

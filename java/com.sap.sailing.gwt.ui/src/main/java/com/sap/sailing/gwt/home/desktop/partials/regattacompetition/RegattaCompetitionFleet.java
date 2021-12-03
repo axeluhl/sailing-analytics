@@ -35,8 +35,9 @@ public class RegattaCompetitionFleet extends AbstractRegattaCompetitionFleet {
     }
     
     @Override
-    public RegattaCompetitionRaceView addRaceView(SimpleRaceMetadataDTO race, RegattaCompetitionPresenter presenter) {
-        RegattaCompetitionFleetRace raceView = new RegattaCompetitionFleetRace(race, presenter);
+    public RegattaCompetitionRaceView addRaceView(SimpleRaceMetadataDTO race, String fleetName,
+            RegattaCompetitionPresenter presenter) {
+        RegattaCompetitionFleetRace raceView = new RegattaCompetitionFleetRace(race, fleetName, presenter);
         racesContainerUi.add(raceView);
         return raceView;
     }

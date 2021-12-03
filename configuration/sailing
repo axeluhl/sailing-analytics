@@ -30,6 +30,7 @@ APACHE_CONFIG_DIR=/etc/httpd/conf.d
 APACHE_INTERNALS_CONFIG_FILE="$APACHE_CONFIG_DIR/001-internals.conf"
 EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
 REBOOT_INDICATOR=/var/run/is-rebooted
+SSH_KEY_READER_BEARER_TOKEN=/root/ssh-key-reader.token
 
 echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
@@ -39,14 +40,18 @@ start_tmux() {
 }
 
 start_servers() {
+        /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
+	cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
+	chown root /usr/local/bin/cp_root_mail_properties
+	chgrp root /usr/local/bin/cp_root_mail_properties
+	chmod 755 /usr/local/bin/cp_root_mail_properties
+	cp /home/sailing/code/configuration/cp_root_mail_properties_sudoers /etc/sudoers.d
         if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
           echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
           $GIT_REPOSITORY/configuration/imageupgrade.sh
         else
           echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceeding with regular server launch..." >>/var/log/sailing.err
 	  echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
-	  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
-          FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
           if [ -f "${REBOOT_INDICATOR}" ]; then
 	    echo "This is a re-boot. No EC2 user data is evaluated for server configuration; no server configuration is performed. Only configured applications are launched." >>/var/log/sailing.err
 	    for conf in ${JAVA_START_INSTANCES}; do
@@ -54,11 +59,14 @@ start_servers() {
 	    done
 	  else
 	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
-	    if [ ${NUMBER_OF_INSTANCES} -gt 1 ]; then
-	      echo "More than one server cannot be configured from user data; only configuring ${FIRST_SERVER}" >>/var/log/sailing.err
+	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
+	    if [ "${FIRST_SERVER}" = "" ]; then
+	      echo "No SERVER_NAME provided; defaulting to \"server\" as the server directory name" >>/var/log/sailing.err
+	      FIRST_SERVER=server
 	    fi
+            echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
 	    configure_and_start_server "${FIRST_SERVER}"
-	    create_basic_httpd_config
+	    create_basic_httpd_config "${FIRST_SERVER}"
 	    reload_httpd
 	    echo 1 >"${REBOOT_INDICATOR}"
 	  fi
@@ -72,8 +80,14 @@ start_servers() {
 configure_and_start_server() {
   conf="$1"
   mkdir -p "${SERVERS_DIR}/${conf}" >/dev/null 2>/dev/null
-  local ENV_SH="${SERVERS_DIR}/$conf/env.sh"
-  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start; ./defineReverseProxyMappings.sh" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  chown sailing "${SERVERS_DIR}/${conf}"
+  chgrp sailing "${SERVERS_DIR}/${conf}"
+  # If there is a secret /root/mail.properties, copy it into the default server's configuration directory:
+  /usr/local/bin/cp_root_mail_properties "${conf}"
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  pushd ${SERVERS_DIR}/${conf}
+  ./defineReverseProxyMappings.sh 2>>/var/log/sailing.err >>/var/log/sailing.err
+  popd
   RETVAL=$?
   [ $RETVAL -eq 0 ] && success || failure
 }
@@ -107,8 +121,10 @@ reload_httpd() {
 
 # Adds a Plain-SSL mapping to the first server's port and a mapping for /internal-server-status, both to 001-internals.conf
 create_basic_httpd_config() {
-    FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
-    source $SERVERS_DIR/$FIRST_SERVER/env.sh
+    FIRST_SERVER=$1
+    if [ -d $SERVERS_DIR/$FIRST_SERVER ]; then
+      source $SERVERS_DIR/$FIRST_SERVER/env.sh
+    fi
     echo "Writing macro invocation to ${APACHE_INTERNALS_CONFIG_FILE} to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.err
     echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >"${APACHE_INTERNALS_CONFIG_FILE}"
     # Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to "${APACHE_INTERNALS_CONFIG_FILE}"

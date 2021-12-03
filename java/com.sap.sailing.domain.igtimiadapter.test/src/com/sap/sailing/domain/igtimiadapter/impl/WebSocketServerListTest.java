@@ -24,13 +24,13 @@ public class WebSocketServerListTest {
     public void testWebSocketServerList() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         final ClientImpl testAppClient = new ClientImpl("7fcdd217e0aa16090edb4ad55b09ec43b2021090e209541fc9b7003c2a2b70c6",
                 "aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a", "http", "127.0.0.1", "8888", "/igtimi/oauth/v1/authorizationcallback");
-        MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
-        MongoDBService mongoTestService = mongoTestConfig.getService();
+        final MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
+        final MongoDBService mongoTestService = mongoTestConfig.getService();
         final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
-        Iterable<URI> serverUris = igtimiConnectionFactory.getWebsocketServers();
+        final Iterable<URI> serverUris = igtimiConnectionFactory.getWebsocketServers();
         assertFalse(Util.isEmpty(serverUris));
-        for (URI uri : serverUris) {
+        for (final URI uri : serverUris) {
             uri.getScheme().startsWith("ws");
         }
     }

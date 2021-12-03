@@ -22,6 +22,7 @@ import javax.security.auth.Subject;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
+import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -54,7 +55,6 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -64,6 +64,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
@@ -101,6 +102,7 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -189,12 +191,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint);
 
     /**
-     * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races of this regatta.
-     * See {@link #stopTrackingWind(Regatta, RaceDefinition)}. If there were multiple calls to
-     * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link TracTracRaceTracker}
-     * already tracking the race was re-used. The trackers will be stopped by this call regardless of how many calls
-     * were made that ensured they were tracking.
-     * @param willBeRemoved TODO
+     * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races tracked by any
+     * {@link RaceTracker} associated with this {@code regatta}. See {@link #stopTrackingWind(Regatta, RaceDefinition)}.
+     * If there were multiple calls to {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal
+     * combination of URLs/URIs, the {@link TracTracRaceTracker} already tracking the race was re-used. The trackers
+     * will be stopped by this call regardless of how many calls were made that ensured they were tracking.
      */
     void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
 
@@ -269,6 +270,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void updateStoredRegatta(Regatta regatta);
 
+    /**
+     * Stops all {@link RaceTracker}s associated with the {@code regatta} which also stops their wind tracking.
+     */
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     /**
@@ -294,7 +298,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
-     * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
+     * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database. If the
+     * {@code overallLeaderboardScoringSchemeType} is not {@code null}, an overall leaderboard will be created
+     * and set as the new leaderboard group's {@link LeaderboardGroup#getOverallLeaderboard() overall leaderboard}.
+     * Callers shall manage the security aspects of the overall leaderboard.
+     * 
      * @param groupName
      *            The name of the new group
      * @param description
@@ -309,7 +317,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
-     * Removes the group with the name <code>groupName</code> from the service and the database.
+     * Removes the group with the name <code>groupName</code> from the service and the database. This leaves
+     * any {@link LeaderboardGroup#getOverallLeaderboard() overall leaderboard} untouched. Callers have to
+     * ensure to maintain the overall leaderboard, if it exists, accordingly.
      * 
      * @param leaderboardGroupId
      *            The ID of the group which shall be removed.
@@ -366,6 +376,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
+    /**
+     * Updates the leaderboard group identified by {@code leaderboardGroupId}. If
+     * {@code overallLeaderboardScoringSchemeType} is {@code null} and the leaderboard group currently
+     * has an overall leaderboard, that overall leaderboard is removed from the group and deleted.
+     * Conversely, if {@code overallLeaderboardScoringSchemeType} is not {@code null} but the
+     * leaderboard group currently has no overall leaderboard set, it is created. Callers have to
+     * manage all security aspects around this.
+     */
     void updateLeaderboardGroup(UUID leaderboardGroupId, String newName, String description, String displayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
@@ -442,6 +460,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void renameEvent(UUID id, String newEventName);
 
+    /**
+     * Does not replicate automatically; see {@link RemoveEvent} for the replicable operation that calls this method.
+     */
     void removeEvent(UUID id);
 
     
@@ -511,7 +532,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * overwritten with the values from the track to be imported.
      * @param mediaTrack
      */
-    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creatingCount, boolean override) throws Exception;
+    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCountImpl creatingCount, boolean override) throws Exception;
     
     Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
     
@@ -576,14 +597,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DeviceConfiguration getDeviceConfigurationByName(String deviceConfigurationName);
     
     /**
-     * Adds a device configuration.
-     * @param matcher defining for which the configuration applies.
-     * @param configuration of the device.
+     * Adds a device configuration. The effect is replicated.
+     * 
+     * @param matcher
+     *            defining for which the configuration applies.
+     * @param configuration
+     *            of the device.
      */
     void createOrUpdateDeviceConfiguration(DeviceConfiguration configuration);
     
     /**
-     * Removes a configuration by its ID.
+     * Removes a configuration by its ID. The effect is replicated.
      */
     void removeDeviceConfiguration(UUID id);
 
@@ -703,8 +727,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * For the reference to a remote sailing server, updates its events cache and returns the event list or, if fetching
-     * the event list from the remote server did fail, the exception for which it failed. If {@link forceUpdate}
-     * parameter is <code>true</code> then remote server will be replaced in cache
+     * the event list from the remote server did fail, the exception for which it failed. If the {@link forceUpdate}
+     * parameter is <code>true</code> then the remote server will be replaced in cache
      */
     Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
             RemoteSailingServerReference ref, boolean forceUpdate);
@@ -739,7 +763,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences();
 
+    /**
+     * Obtains all remote sailing server references, regardless their "live" state
+     */
+    Map<String, RemoteSailingServerReference> getAllRemoteServerReferences();
+
+    /**
+     * @return {@code null} if no remote server reference by the name specified exists
+     */
     RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName);
+
+    /**
+     * @return {@code null} if no remote server reference with that URL specified exists
+     */
+    RemoteSailingServerReference getRemoteServerReferenceByUrl(URL remoteServerReferenceUrl);
 
     void addRegattaWithoutReplication(Regatta regatta);
 
@@ -978,23 +1015,19 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Import MasterData from a remote server URL. A caller might provide either targetServerUsername and
      * targetServerPassword or targetServerBearerToken. If neither of those are provided the method will try to create
      * or get the bearer token for the current user.
+     * 
+     * @return the leaderboard groups imported as the keys, and the events belonging to those leaderboard groups as
+     *         values
      */
-    void importMasterData(final String urlAsString, final UUID[] leaderboardGroupIds, final boolean override,
-            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
-            String targetServerUsername, String targetServerPassword, String targetServerBearerToken,
-            final boolean exportTrackedRacesAndStartTracking, final UUID importOperationId) throws IllegalArgumentException;
+    Map<LeaderboardGroup, ? extends Iterable<Event>> importMasterData(final String urlAsString,
+            final UUID[] leaderboardGroupIds, final boolean override, final boolean compress, final boolean exportWind,
+            final boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
+            String targetServerBearerToken, final boolean exportTrackedRacesAndStartTracking,
+            final UUID importOperationId) throws IllegalArgumentException;
 
     void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
 
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
-    
-    /**
-     * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
-     * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
-     * only username and password or bearer token, not the three of them.
-     */
-    String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
-            String targetServerPassword, String targetServerBearerToken);
     
     /**
      * Returns the number of tracked races that are not {@link TrackedRace#hasFinishedLoading() done with loading}.
@@ -1005,6 +1038,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link TrackedRace#hasFinishedLoading() done with loading}.
      */
     int getNumberOfTrackedRacesRestoredDoneLoading();
+
+    /**
+     * Short for {@link #findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard, Iterable)
+     * findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, getAllEvents())}.
+     */
+    Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard);
 
     /**
      * Identifies all Events, that use the given {@link Leaderboard}'s {@link CourseArea}s and contain it in their
@@ -1022,4 +1061,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Pair<Boolean, String> checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName,
             String fleetName, Set<String> markIds);
+
+    Iterable<CompetitorProvider> getAllCompetitorProviders();
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="accuracy">"Nøjagtighed"</string>
+    <string name="distance">"Distance"</string>
+    <string name="accuracy_detail">"for GPS-placering"</string>
+    <string name="distance_detail">"til gammel bøje"</string>
+</resources>

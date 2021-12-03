@@ -51,13 +51,11 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
         this.editableLeaderboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new EditableLeaderboardContextDefinition());
         leaderboardName = editableLeaderboardContextDefinition.getLeaderboardName();
-        
         getSailingService().getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
                 new GetLeaderboardNamesCallback()));
     }
     
     private class GetLeaderboardNamesCallback implements AsyncCallback<List<String>> {
-
         @Override
         public void onSuccess(List<String> leaderboardNames) {
             if (leaderboardNames.contains(leaderboardName)) {
@@ -76,7 +74,6 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     }
     
     private class GetAvailableDetailTypesForLeaderboardCallback implements AsyncCallback<Iterable<DetailType>> {
-        
         @Override
         public void onFailure(Throwable caught) {
             reportError(getStringMessages().getAvailableDetailTypesForLeaderboardError());
@@ -131,7 +128,6 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
                     leaderboardWithSecurity, DefaultActions.UPDATE);
             
             context.getInitialSettings(new OnSettingsLoadedCallback<EditableLeaderboardSettings>() {
-                
                 @Override
                 public void onSuccess(EditableLeaderboardSettings settings) {
                     authorizedContentDecorator

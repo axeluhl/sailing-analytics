@@ -58,7 +58,7 @@ public class GpsFixesWithEstimationDataJsonSerializer implements CompetitorTrack
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
         ManeuverDetectorWithEstimationDataSupportDecoratorImpl estimationDataSupportDecoratorImpl = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
                 maneuverDetector, null);
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         track.lockForRead();
         try {
             for (GPSFixMoving gpsFix : track.getFixes(from, true, to, true)) {

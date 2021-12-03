@@ -1,10 +1,12 @@
 package com.sap.sse.security.interfaces;
 
+import java.util.Map;
+
 import com.sap.sse.security.shared.BasicUserStore;
-import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -28,8 +30,8 @@ public interface UserStore extends BasicUserStore {
 
     /**
      * <p>
-     * In an OSGi environment, this shouldn't be called manually, but instead automatically managed by setting a
-     * {@link PreferenceConverterRegistrationManager} up. {@link PreferenceConverter}s should be registered in the OSGi
+     * In an OSGi environment, this shouldn't be called manually, but instead automatically managed by setting up a
+     * {@link PreferenceConverterRegistrationManager}. {@link PreferenceConverter}s should be registered in the OSGi
      * service registry with {@link PreferenceConverter#KEY_PARAMETER_NAME} containing the associated preference key
      * added as property of the service registration.
      * </p>
@@ -66,6 +68,11 @@ public interface UserStore extends BasicUserStore {
      * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
      */
     <T> T getPreferenceObject(String username, String key);
+    
+    /**
+     * Gets all preference objects resolving to a certain key mapped by the users they belong to. Always returns a valid map. Might be empty
+     */
+    <T> Map<String, T> getPreferenceObjectsByKey(String key);
     
     /**
      * Sets a preference as Object. This converts the given Object to a preference {@link String} using a
@@ -105,10 +112,8 @@ public interface UserStore extends BasicUserStore {
      */
     UserGroup ensureServerGroupExists() throws UserGroupManagementException;
 
-    void removeAllQualifiedRolesForUser(User user);
-
     RoleDefinition getRoleDefinitionByPrototype(RolePrototype rolePrototype);
-
+    
     void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
 
     void setDefaultTennantForUserAndUpdate(User user, UserGroup newDefaultTenant, String serverName);

@@ -12,6 +12,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.windestimation.util.LoggingUtil;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class PolarDataImporter {
 
@@ -42,7 +43,7 @@ public class PolarDataImporter {
     }
 
     protected InputStream getContentFromResponse() throws IOException, ParseException {
-        HttpClient client = HttpClientBuilder.create().build();
+        HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         HttpGet getProcessor = new HttpGet(getAPIString());
         HttpResponse processorResponse = client.execute(getProcessor);
         return processorResponse.getEntity().getContent();

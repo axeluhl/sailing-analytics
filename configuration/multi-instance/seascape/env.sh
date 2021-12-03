@@ -211,7 +211,7 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=seascape
 SERVER_NAME=SEASCAPE
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/seascape?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/seascape?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2057
 SERVER_PORT=8935
 TELNET_PORT=14935

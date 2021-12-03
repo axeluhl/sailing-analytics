@@ -7,9 +7,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -100,7 +100,18 @@ public class MetadataUpdater {
                     MetadataUpdater.this.notifyAll();
                 }
                 if (theNextUpdate != null) {
-                    metadataCollection.update(theNextUpdate);
+                    boolean success = false;
+                    int retryCount = 3;
+                    do {
+                        try {
+                            metadataCollection.update(theNextUpdate);
+                            success = true;
+                        } catch (Exception e) {
+                            logger.severe("Unable to write update "+theNextUpdate+" to the metadata collection for device "+forDevice+
+                                    ": "+e.getMessage()+"; retrying "+retryCount+" more times.");
+                            Thread.sleep(3000);
+                        }
+                    } while (!success && retryCount-- > 0);
                 }
             } while (theNextUpdate != null);
             logger.fine(()->"Terminating metadata updater task for device "+forDevice);

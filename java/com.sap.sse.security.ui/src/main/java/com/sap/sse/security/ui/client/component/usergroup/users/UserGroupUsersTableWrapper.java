@@ -2,6 +2,9 @@ package com.sap.sse.security.ui.client.component.usergroup.users;
 
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 
+import java.util.Collections;
+import java.util.Optional;
+
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -12,7 +15,7 @@ import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.celltable.TableWrapper;
+import com.sap.sse.gwt.client.celltable.TableWrapperWithFilter;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -20,12 +23,12 @@ import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class UserGroupUsersTableWrapper extends
-        TableWrapper<StrippedUserDTO, RefreshableMultiSelectionModel<StrippedUserDTO>, StringMessages, CellTableWithCheckboxResources> {
-
+        TableWrapperWithFilter<StrippedUserDTO, RefreshableMultiSelectionModel<StrippedUserDTO>, StringMessages, CellTableWithCheckboxResources> {
     public UserGroupUsersTableWrapper(StringMessages stringMessages, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources, UserService userService,
             MultiSelectionModel<UserGroupDTO> userGroupSelectionModel, Runnable refresher) {
-        super(stringMessages, errorReporter, true, true, new EntityIdentityComparator<StrippedUserDTO>() {
+        super(stringMessages, errorReporter, /* multiSelection */ true, /* pager */ true,
+                Optional.of(new EntityIdentityComparator<StrippedUserDTO>() {
             @Override
             public boolean representSameEntity(StrippedUserDTO user1, StrippedUserDTO user2) {
                 return user1.getId().equals(user2.getId());
@@ -35,15 +38,15 @@ public class UserGroupUsersTableWrapper extends
             public int hashCode(StrippedUserDTO user) {
                 return user.getId().hashCode();
             }
-        }, tableResources);
-
+        }), tableResources, /* updatePermissionFilter */ Optional.empty(), Optional.of(stringMessages.filterUsers()),
+                /* filter checkbox label */ null);
         final TextColumn<StrippedUserDTO> usernameColumn = new AbstractSortableTextColumn<StrippedUserDTO>(
                 StrippedUserDTO::getName, getColumnSortHandler());
         final AccessControlledActionsColumn<StrippedUserDTO, UserGroupUsersImagesBarCell> actionColumns = AccessControlledActionsColumn
                 .create(new UserGroupUsersImagesBarCell(stringMessages), userService,
-                        user -> getSingleSelectedUserGroup(userGroupSelectionModel));
+                        user -> getSingleSelectedObjectOrNull(userGroupSelectionModel));
         actionColumns.addAction(UserGroupUsersImagesBarCell.ACTION_DELETE, UPDATE, user -> {
-            final UserGroupDTO tenant = getSingleSelectedUserGroup(userGroupSelectionModel);
+            final UserGroupDTO tenant = getSingleSelectedObjectOrNull(userGroupSelectionModel);
             if (tenant != null) {
                 final String username = user.getName();
                 userService.getUserManagementWriteService().removeUserFromUserGroup(tenant.getId().toString(), username,
@@ -76,4 +79,8 @@ public class UserGroupUsersTableWrapper extends
         table.addColumn(actionColumns);
     }
 
+    @Override
+    protected Iterable<String> getSearchableStrings(StrippedUserDTO t) {
+        return Collections.singleton(t.getName());
+    }
 }

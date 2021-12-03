@@ -1,0 +1,80 @@
+{
+  "BoatClass": {
+    "target": {
+      "object": "BoatClass",
+      "schema": "SAILING"
+    }
+  },
+  "Competitor": {
+    "target": {
+      "object": "Competitor",
+      "schema": "SAILING"
+    }
+  },
+  "CompetitorRace": {
+    "target": {
+      "object": "CompetitorRace",
+      "schema": "SAILING"
+    }
+  },
+  "Event": {
+    "target": {
+      "object": "Event",
+      "schema": "SAILING"
+    }
+  },
+  "IRM": {
+    "target": {
+      "object": "IRM",
+      "schema": "SAILING"
+    }
+  },
+  "Leg": {
+    "target": {
+      "object": "Leg",
+      "schema": "SAILING"
+    }
+  },
+  "LegStats": {
+    "target": {
+      "object": "LegStats",
+      "schema": "SAILING"
+    }
+  },
+  "Maneuver": {
+    "target": {
+      "object": "Maneuver",
+      "schema": "SAILING"
+    }
+  },
+  "Race": {
+    "target": {
+      "object": "Race",
+      "schema": "SAILING"
+    }
+  },
+  "RaceResult": {
+    "target": {
+      "object": "RaceResult",
+      "schema": "SAILING"
+    }
+  },
+  "RaceStats": {
+    "target": {
+      "object": "RaceStats",
+      "schema": "SAILING"
+    }
+  },
+  "Regatta": {
+    "target": {
+      "object": "Regatta",
+      "schema": "SAILING"
+    }
+  },
+  "ScoringScheme": {
+    "target": {
+      "object": "ScoringScheme",
+      "schema": "SAILING"
+    }
+  }
+}

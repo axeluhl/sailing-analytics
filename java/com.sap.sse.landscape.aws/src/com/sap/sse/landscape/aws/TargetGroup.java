@@ -5,8 +5,8 @@ import java.util.Map;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
 /**
@@ -15,24 +15,53 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
  * @author Axel Uhl (D043530)
  *
  */
-public interface TargetGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Named {
+public interface TargetGroup<ShardingKey> extends Named {
     Region getRegion();
     
-    Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getRegisteredTargets();
+    Map<AwsInstance<ShardingKey>, TargetHealth> getRegisteredTargets();
     
-    default void addTarget(AwsInstance<ShardingKey, MetricsT> target) {
+    default void addTarget(AwsInstance<ShardingKey> target) {
         addTargets(Collections.singleton(target));
     }
     
-    void addTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+    void addTargets(Iterable<AwsInstance<ShardingKey>> targets);
     
-    default void removeTarget(AwsInstance<ShardingKey, MetricsT> target) {
+    default void removeTarget(AwsInstance<ShardingKey> target) {
         removeTargets(Collections.singleton(target));
     }
     
-    void removeTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
-
+    void removeTargets(Iterable<AwsInstance<ShardingKey>> targets);
+    
+    /**
+     * @return the traffic port
+     */
+    Integer getPort();
+    
+    /**
+     * @return the traffic protocol; usually either one of {@link ProtocolEnum#HTTP} or {@link ProtocolEnum#HTTPS}
+     */
+    ProtocolEnum getProtocol();
+    
+    Integer getHealthCheckPort();
+    
+    String getHealthCheckPath();
+    
+    ProtocolEnum getHealthCheckProtocol();
+    
     String getTargetGroupArn();
 
-    ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer();
+    default String getId() {
+        return getTargetGroupArn().substring(getTargetGroupArn().lastIndexOf('/')+1);
+    }
+
+    /**
+     * Obtains the load balancer based on the {@link #getLoadBalancerArn() load balancer ARN}. Note that this
+     * will not lead to a dynamic discovery of this target group's load balancer; if this object was created
+     * without explicitly assigning a load balancer ARN and at that time the target group was not the target of
+     * any load balancer's rule, no load balancer ARN will be set, and hence no load balancer will be returned
+     * by this method.
+     */
+    ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
+
+    String getLoadBalancerArn();
 }

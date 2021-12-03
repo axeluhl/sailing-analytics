@@ -51,31 +51,28 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
     
     public TabletAndDesktopWhatsNewView(WhatsNewNavigationTabs navigationTab, DesktopPlacesNavigator placesNavigator) {
         super();
-    
         WhatsNewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-    
+        // set notes texts
         sailingAnalyticsNotes.setHTML(WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml().getText());
         sailingSimulatorNotes.setHTML(WhatsNewResources.INSTANCE.getSailingSimulatorNotesHtml().getText());
         raceCommitteeAppNotes.setHTML(WhatsNewResources.INSTANCE.getRaceCommitteeAppNotesHtml().getText());
         inSightAppNotes.setHTML(WhatsNewResources.INSTANCE.getInSightAppNotesHtml().getText());
         buoyPingerAppNotes.setHTML(WhatsNewResources.INSTANCE.getBuoyPingerAppNotesHtml().getText());
-
+        // set notes navigation
         sailingAnalyticNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics); 
         sailingSimulatorNoteNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator); 
         raceCommitteeAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
         inSightAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.InSightApp);
         buoyPingerAppNotesNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.BuoyPingerApp);
-
+        // set notes URLs
         sailingAnalyticsNotesAnchor.setHref(sailingAnalyticNotesNavigation.getTargetUrl());
         sailingSimulatorNotesAnchor.setHref(sailingSimulatorNoteNavigation.getTargetUrl());
         raceCommitteeAppNotesAnchor.setHref(raceCommitteeAppNotesNavigation.getTargetUrl());
         inSightAppNotesAnchor.setHref(inSightAppNotesNavigation.getTargetUrl());
         buoyPingerAppNotesAnchor.setHref(buoyPingerAppNotesNavigation.getTargetUrl());
-
         links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, sailingSimulatorNotesAnchor, raceCommitteeAppNotesAnchor, inSightAppNotesAnchor, buoyPingerAppNotesAnchor });
         contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, sailingSimulatorNotes, raceCommitteeAppNotes, inSightAppNotes, buoyPingerAppNotes });
-
         switch(navigationTab) {
             case BuoyPingerApp:
                 setActiveContent(buoyPingerAppNotes, buoyPingerAppNotesAnchor);

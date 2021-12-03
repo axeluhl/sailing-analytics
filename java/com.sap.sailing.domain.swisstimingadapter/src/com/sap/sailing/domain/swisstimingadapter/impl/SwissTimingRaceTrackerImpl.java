@@ -79,7 +79,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
 
-public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
+public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl<SwissTimingTrackingConnectivityParameters>
         implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
 
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
@@ -585,7 +585,6 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) throws URISyntaxException {
-        
         Course oldCourse = this.course;
         if (trackedRace == null) {
             if (oldCourse == null && startList != null) {

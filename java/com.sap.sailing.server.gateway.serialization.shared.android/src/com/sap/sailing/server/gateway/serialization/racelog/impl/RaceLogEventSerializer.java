@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
@@ -35,7 +37,6 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFro
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
@@ -46,6 +47,7 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSer
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, RaceLogEventVisitor {
     public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer) {
@@ -90,7 +92,9 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogORCLegDataEventSerializer(competitorSerializer),
                 new RaceLogORCCertificateAssignmentEventSerializer(competitorSerializer),
                 new RaceLogORCScratchBoatEventSerializer(competitorSerializer),
-                new RaceLogORCImpliedWindSourceEventSerializer(competitorSerializer));
+                new RaceLogORCImpliedWindSourceEventSerializer(competitorSerializer),
+                new RaceLogResultsAreOfficialEventSerializer(competitorSerializer),
+                new RaceLogExcludeWindSourceEventSerializer(competitorSerializer));
     }
 
     private final JsonSerializer<RaceLogEvent> flagEventSerializer;
@@ -121,6 +125,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> orcCertificateAssignmentEventSerializer;
     private final JsonSerializer<RaceLogEvent> orcScratchBoatEventSerializer;
     private final JsonSerializer<RaceLogEvent> orcImpliedWindSourceEventSerializer;
+    private final JsonSerializer<RaceLogEvent> resultsAreOfficialEventSerializer;
+    private final JsonSerializer<RaceLogEvent> excludeWindSourceEventSerializer;
 
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -153,7 +159,9 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> orcLegDataEventSerializer,
             JsonSerializer<RaceLogEvent> orcCertificateAssignmentEventSerializer,
             JsonSerializer<RaceLogEvent> orcScratchBoatEventSerializer,
-            JsonSerializer<RaceLogEvent> orcImpliedWindSourceEventSerializer) {
+            JsonSerializer<RaceLogEvent> orcImpliedWindSourceEventSerializer,
+            JsonSerializer<RaceLogEvent> resultsAreOfficialEventSerializer,
+            JsonSerializer<RaceLogEvent> excludeWindSourceEventSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
@@ -182,6 +190,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.orcCertificateAssignmentEventSerializer = orcCertificateAssignmentEventSerializer;
         this.orcScratchBoatEventSerializer = orcScratchBoatEventSerializer;
         this.orcImpliedWindSourceEventSerializer = orcImpliedWindSourceEventSerializer;
+        this.resultsAreOfficialEventSerializer = resultsAreOfficialEventSerializer;
+        this.excludeWindSourceEventSerializer = excludeWindSourceEventSerializer;
         this.chosenSerializer = null;
     }
 
@@ -337,5 +347,15 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     @Override
     public void visit(RaceLogORCImpliedWindSourceEvent event) {
         chosenSerializer = orcImpliedWindSourceEventSerializer;
+    }
+
+    @Override
+    public void visit(RaceLogResultsAreOfficialEvent event) {
+        chosenSerializer = resultsAreOfficialEventSerializer;
+    }
+
+    @Override
+    public void visit(RaceLogExcludeWindSourcesEvent event) {
+        chosenSerializer = excludeWindSourceEventSerializer;
     }
 }

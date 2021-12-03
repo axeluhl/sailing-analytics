@@ -18,7 +18,9 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -112,12 +114,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
     @Override
     protected void drawWindField(List<SimulatorWindDTO> windDTOList) {
-
         int numPoints = windDTOList.size();
         if (numPoints < 1) {
             return;
         }
-        long totalTime = windDTOList.get(numPoints - 1).timepoint - windDTOList.get(0).timepoint;
+        Duration totalDuration = windDTOList.get(0).timepoint.until(windDTOList.get(numPoints - 1).timepoint);
         double distance = SphericalUtils.computeDistanceBetween(startPoint, endPoint) / Mile.METERS_PER_NAUTICAL_MILE;
         if (windDTOList != null && windDTOList.size() > 0) {
             Context2d context2d = canvas.getContext2d();
@@ -133,7 +134,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
             }
             windDTOIter = windDTOList.iterator();
             int index = 0;
-            long startTime = windDTOList.get(0).timepoint;
+            final TimePoint startTime = windDTOList.get(0).timepoint;
             prevWindDTO = null; // For the last time arrow was displayed
             while (windDTOIter.hasNext()) {
                 SimulatorWindDTO windDTO = windDTOIter.next();
@@ -146,12 +147,12 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
                 }
                 index++;
                 long timeStep = windParams.getTimeStep().asMillis();
-                if ((windDTO.timepoint - startTime) % (timeStep) == 0) {
+                if (startTime.until(windDTO.timepoint).asMillis() % timeStep == 0) {
                     drawPoint(windDTO);
                 }
             }
             context2d.setGlobalAlpha(1.0);
-            Date timeDiffDate = new Date(totalTime);
+            final Date timeDiffDate = new Date(totalDuration.asMillis());
             TimeZone gmt = TimeZone.createTimeZone(0);
             getCanvas().setTitle(StringMessages.INSTANCE.pathCanvasOverlayTitle(numPoints,
                     NumberFormat.getFormat("0.00").format(distance),
@@ -223,14 +224,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         return mixedLeg;
     }
     
-    public long getPathTime() {
+    public long getPathDurationMillis() {
         if (totalTimeIsGiven) {
             return totalTimeMilliseconds;
         } else {
             List<SimulatorWindDTO> windDTOList = windFieldDTO.getMatrix();
             int numPoints = windDTOList.size();
-            long totalTime = windDTOList.get(numPoints - 1).timepoint - windDTOList.get(0).timepoint;
-            return totalTime;
+            final Duration totalTime = windDTOList.get(0).timepoint.until(windDTOList.get(numPoints - 1).timepoint);
+            return totalTime.asMillis();
         }
     }
 

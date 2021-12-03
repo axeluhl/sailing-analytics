@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -84,7 +85,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
         regattaLog = new RegattaLogImpl("regattalog");
         dropPersistedData();
         store = new MongoSensorFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
-                serviceFinderFactory, WriteConcern.MAJORITY);
+                serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
     }
 
     @After
@@ -135,7 +136,10 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
         track.lockForRead();
-        assertEquals(expected, size(track.getRawFixes()));
-        track.unlockAfterRead();
+        try {
+            assertEquals(expected, size(track.getRawFixes()));
+        } finally {
+            track.unlockAfterRead();
+        }
     }
 }

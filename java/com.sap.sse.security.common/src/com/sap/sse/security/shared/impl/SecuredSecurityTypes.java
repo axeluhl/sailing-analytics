@@ -16,7 +16,7 @@ import com.sap.sse.security.shared.RoleDefinition;
  */
 public class SecuredSecurityTypes extends HasPermissionsImpl {
     private static final long serialVersionUID = -5052828472297142038L;
-    private static Set<HasPermissions> allInstances = new HashSet<>();
+    private static Set<SecuredSecurityTypes> allInstances = new HashSet<>();
     
     public SecuredSecurityTypes(String logicalTypeName, Action... availableActions) {
         super(logicalTypeName, availableActions);
@@ -28,7 +28,7 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         allInstances.add(this);
     }
 
-    public static Iterable<HasPermissions> getAllInstances() {
+    public static Iterable<SecuredSecurityTypes> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
 
@@ -95,11 +95,15 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         /**
          * Secures the replication information provided through ReplicationServlet as well as AdminConsole.
          */
-        READ_REPLICATOR;
+        READ_REPLICATOR,
+        /**
+         * Access to the {@code ThreadManager} API, e.g., as RESTlet under {@code /threadmanager/api/threads}
+         */
+        THREADS;
 
         private static final Action[] ALL_ACTIONS = new Action[] { CONFIGURE_FILE_STORAGE, CONFIGURE_LOCAL_SERVER,
                 CONFIGURE_REMOTE_INSTANCES, CREATE_OBJECT, CAN_IMPORT_MASTERDATA, CAN_EXPORT_MASTERDATA, DATA_MINING,
-                REPLICATE, START_REPLICATION, READ_REPLICATOR,
+                REPLICATE, START_REPLICATION, READ_REPLICATOR, THREADS,
                 DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL, DefaultActions.UPDATE };
     }
 

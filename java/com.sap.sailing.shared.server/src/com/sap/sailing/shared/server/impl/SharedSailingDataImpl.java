@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,19 +56,16 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.OperationsToMasterSender;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
-import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
-public class SharedSailingDataImpl implements ReplicatingSharedSailingData, ClearStateTestSupport {
+public class SharedSailingDataImpl
+extends AbstractReplicableWithObjectInputStream<ReplicatingSharedSailingData, OperationWithResult<ReplicatingSharedSailingData, ?>>
+implements ReplicatingSharedSailingData, ClearStateTestSupport {
     private final DomainObjectFactory domainObjectFactory;
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -81,24 +77,9 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
-    // Replication related methods and fields
-    private final ConcurrentHashMap<OperationExecutionListener<ReplicatingSharedSailingData>, OperationExecutionListener<ReplicatingSharedSailingData>> operationExecutionListeners = new ConcurrentHashMap<>();
-    private volatile boolean currentlyFillingFromInitialLoad;
-    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
-    private final Set<OperationWithResultWithIdWrapper<ReplicatingSharedSailingData, ?>> operationsSentToMasterForReplication = new HashSet<>();
-    private ReplicationMasterDescriptor master;
-
-    /**
-     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable. The
-     * {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)} method.
-     */
-    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
-
     public SharedSailingDataImpl(final DomainObjectFactory domainObjectFactory,
             final MongoObjectFactory mongoObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory,
             FullyInitializedReplicableTracker<SecurityService> securityServiceTracker) {
-        this.currentlyFillingFromInitialLoad = false;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
         this.deviceIdentifierServiceFinder = serviceFinderFactory
@@ -568,72 +549,6 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     }
 
     @Override
-    public Serializable getId() {
-        return getClass().getName();
-    }
-
-    @Override
-    public ReplicationMasterDescriptor getMasterDescriptor() {
-        return master;
-    }
-
-    @Override
-    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.master = master;
-    }
-
-    @Override
-    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.master = null;
-    }
-
-    @Override
-    public Iterable<OperationExecutionListener<ReplicatingSharedSailingData>> getOperationExecutionListeners() {
-        return operationExecutionListeners.keySet();
-    }
-
-    @Override
-    public void addOperationExecutionListener(OperationExecutionListener<ReplicatingSharedSailingData> listener) {
-        this.operationExecutionListeners.put(listener, listener);
-    }
-
-    @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<ReplicatingSharedSailingData> listener) {
-        this.operationExecutionListeners.remove(listener);
-    }
-
-    @Override
-    public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
-        return currentlyApplyingOperationReceivedFromMaster.get();
-    }
-
-    @Override
-    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
-        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
-    }
-
-    @Override
-    public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<ReplicatingSharedSailingData, ?> operationWithResultWithIdWrapper) {
-        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
-    }
-
-    @Override
-    public boolean hasSentOperationToMaster(OperationWithResult<ReplicatingSharedSailingData, ?> operation) {
-        return operationsSentToMasterForReplication.remove(operation);
-    }
-
-    @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
         return new ObjectInputStreamResolvingAgainstCache<MarkTemplateResolver>(is,
                 mt -> markTemplatesById.computeIfAbsent(mt.getId(), id -> mt), null) {
@@ -661,18 +576,5 @@ public class SharedSailingDataImpl implements ReplicatingSharedSailingData, Clea
     @Override
     public synchronized void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         removeAll();
-    }
-
-    @Override
-    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
-        this.unsentOperationsToMasterSender = service;
-    }
-
-    @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            O operationWithResult, OperationsToMasterSender<S, O> sender) {
-        if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
-        }
     }
 }

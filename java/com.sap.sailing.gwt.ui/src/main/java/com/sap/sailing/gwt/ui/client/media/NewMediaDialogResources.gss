@@ -1,0 +1,144 @@
+.field-group {
+ display: flex;
+}
+
+.textfield-size input[type=text], .textfield-size input[type=search], .textfield-size select, .button-size {
+    width: 15rem;
+}
+
+.datepicker-styling input[type=datetime-local]{
+    border: 1px solid rgb(118, 118, 118);
+    width: 15rem;
+    margin: 3px 3px 3px 0;
+    height: 1.469rem;
+}
+
+.datepicker-styling input[type=date], .datepicker-styling input[type=time] {
+    border: 1px solid rgb(118, 118, 118);
+    width: 7.4rem;
+    margin: 3px 3px 3px 0;
+    height: 1.469rem;
+}
+
+.resetButton {
+    outline: none;
+    width: 1.5rem;
+    height: 1.469rem;
+    position: relative;
+    margin: 3px 3px 3px -4px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: #efaa00;
+}
+
+.resetButton::after {
+    outline: none;
+    background-image: resourceUrl("reset");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 67%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.resetNameButton {
+    outline: none;
+    width: 1.5rem;
+    height: 1.469rem;
+    position: relative;
+    margin: 3px 3px 3px -4px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: #efaa00;
+}
+
+.resetNameButton::after {
+    outline: none;
+    background-image: resourceUrl("close");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 67%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.startTime-textbox {
+    width: 13.5rem !important;
+}
+
+.nameBox {
+    width: 13.5rem !important;
+    margin: 3px 3px 3px 0;
+    height: 1.469rem;
+}
+
+.progress-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(16, 16, 16, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn ease 1s;
+}
+
+.progress-spinner {
+    border: 10px solid #f3f3f3;
+    border-top: 10px solid #555555;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    transform: scale(1);
+    animation: pulse 4s infinite, spin 2s linear infinite;
+    -webkit-animation: pulse 4s infinite, spin 2s linear infinite;
+}
+
+.progress-counter {
+    position: absolute;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@-webkit-keyframes spin {
+    0% {-webkit-transform: rotate(0deg);}
+    100% {-webkit-transform: rotate(360deg);}
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(16, 16, 16, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+@keyframes fadeIn {
+  0% {
+    opacity:0;
+  }
+  100% {
+    opacity:1;
+  }
+}

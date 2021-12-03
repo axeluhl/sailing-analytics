@@ -77,14 +77,19 @@
         </property>
       </activation>
       <modules>
+        <module>elemental2</module>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
+        <module>com.sap.sse.landscape.common</module>
 	<module>com.sap.sse.landscape</module>
         <module>com.sap.sse.landscape.aws</module>
+        <module>com.sap.sse.landscape.aws.common</module>
         <module>com.sap.sse.landscape.aws.test</module>
         <module>com.sap.sse.landscape.aws.persistence</module>
         <module>com.sap.sailing.landscape</module>
         <module>com.sap.sailing.landscape.test</module>
+        <module>com.sap.sailing.landscape.common</module>
+        <module>com.sap.sailing.landscape.ui</module>
         <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
         <module>com.sap.sse.mail</module>
@@ -121,6 +126,10 @@
         <module>com.sap.sailing.datamining.shared</module>
         <module>com.sap.sailing.domain.persistence</module>
         <module>com.sap.sailing.domain.deckmanadapter</module>
+        <module>com.sap.sailing.domain.oceanraceadapter</module>
+        <module>com.sap.sailing.domain.yellowbrickadapter</module>
+        <module>com.sap.sailing.domain.yellowbrickadapter.test</module>
+        <module>com.sap.sailing.domain.yellowbrickadapter.persistence</module>
         <module>com.sap.sailing.domain.bravoadapter</module>
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>
@@ -143,13 +152,14 @@
         <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
         <module>com.sap.sailing.server.interface</module>
+        <module>com.sap.sailing.server.gateway.interfaces</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
         <module>com.sap.sailing.shared.persistence</module>
         <module>com.sap.sailing.shared.server</module>
         <module>com.sap.sailing.shared.server.gateway</module>
         <module>com.sap.sailing.www</module>
-        <module>com.sap.sailing.xmlexport</module>
+        <module>com.sap.sailing.hanaexport</module>
         <module>com.google.gwt.user</module>
         <module>com.google.gwt.dev</module>
         <module>com.google.gwt.servlet</module>
@@ -197,7 +207,6 @@
         <module>com.sap.sailing.domain.deckmanadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter.test</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
-        <module>com.sap.sailing.xmlexport.test</module>
         <module>com.sap.sailing.xrr.resultimport.test</module>
         <module>com.sap.sailing.domain.shared.android.test</module>
         <module>com.sap.sailing.geocoding.test</module>
@@ -515,8 +524,12 @@
       <groupId>org.eclipse.tycho</groupId>
       <artifactId>tycho-compiler-plugin</artifactId>
       <version>${tycho-version}</version>
+      <configuration>
+        <compilerArgs>
+          <arg>-parameters</arg>
+        </compilerArgs>
+      </configuration>
     </plugin>
-
 
     <plugin>
       <groupId>org.codehaus.mojo</groupId>
@@ -526,7 +539,7 @@
         <!-- GWT version detected from dependencyManagement -->
         <execution>
           <configuration>
-            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP} -Dgwt.watchFileChanges=false</extraJvmArgs>
+            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx4g -Djava.io.tmpdir=${env.TMP} -Dgwt.watchFileChanges=false</extraJvmArgs>
              <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>

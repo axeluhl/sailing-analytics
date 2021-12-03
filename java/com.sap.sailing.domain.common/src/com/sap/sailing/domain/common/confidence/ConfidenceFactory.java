@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.confidence;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.impl.ConfidenceBasedAveragerFactoryImpl;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public interface ConfidenceFactory {
@@ -32,6 +33,8 @@ public interface ConfidenceFactory {
     Weigher<TimePoint> createExponentialTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds, double minimumConfidence);
 
     Weigher<TimePoint> createHyperbolicTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds);
+
+    Weigher<TimePoint> createStandardDistributionTimeDifferenceWeigher(Duration standardDeviation);
 
     Weigher<TimePoint> createHyperbolicSquaredTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds);
 

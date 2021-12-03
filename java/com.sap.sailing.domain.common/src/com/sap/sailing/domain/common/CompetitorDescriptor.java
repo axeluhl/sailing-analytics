@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.common;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sse.common.CountryCode;
@@ -15,8 +15,8 @@ import com.sap.sse.common.impl.NamedImpl;
 public class CompetitorDescriptor extends NamedImpl implements Named {
     private static final long serialVersionUID = -6645726854552711646L;
     
-    private final UUID competitorUUID;
-    private final UUID boatUUID;
+    private final Serializable competitorId;
+    private final Serializable boatId;
     private final String shortName;
     private final String eventName;
     private final String regattaName;
@@ -32,23 +32,23 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
     private final Duration timeOnDistanceAllowancePerNauticalMile;
 
     public CompetitorDescriptor(String eventName, String regattaName, String raceName, String fleetName,
-            UUID competitorUUID, String fullName, String shortName, String teamName, Iterable<PersonDTO> persons,
+            Serializable competitorId, String fullName, String shortName, String teamName, Iterable<PersonDTO> persons,
             CountryCode countryCode, Double timeOnTimeFactor,
-            Duration timeOnDistanceAllowancePerNauticalMile, UUID boatUUID, String boatName, String boatClassName, String sailNumber) {
+            Duration timeOnDistanceAllowancePerNauticalMile, Serializable boatId, String boatName, String boatClassName, String sailNumber) {
         super(fullName);
         this.shortName = shortName;
         this.eventName = eventName;
         this.regattaName = regattaName;
         this.raceName = raceName;
         this.fleetName = fleetName;
-        this.competitorUUID = competitorUUID; 
+        this.competitorId = competitorId; 
         this.teamName = teamName;
         this.countryCode = countryCode;
         this.persons = new ArrayList<>();
         Util.addAll(persons, this.persons);
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
-        this.boatUUID = boatUUID;
+        this.boatId = boatId;
         this.boatName = boatName;
         this.boatClassName = boatClassName;
         this.sailNumber = sailNumber;
@@ -106,12 +106,12 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
         return timeOnDistanceAllowancePerNauticalMile;
     }
 
-    public UUID getCompetitorUUID() {
-        return competitorUUID;
+    public Serializable getCompetitorId() {
+        return competitorId;
     }
 
-    public UUID getBoatUUID() {
-        return boatUUID;
+    public Serializable getBoatId() {
+        return boatId;
     }
     
     @Override

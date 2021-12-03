@@ -14,7 +14,7 @@ if [ -n "$AUTO_REPLICATE" ]; then
     # for which to trigger replication. If you activate this make sure to
     # set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
     # same channel the master is using in its REPLICATION_CHANNEL variable
-    REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
+    REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl,com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl
   fi
 fi
 # Message Queue hostname where to
@@ -89,4 +89,18 @@ if [ -z "${BUILD_COMPLETE_NOTIFY}" ]; then
 fi
 if [ -z "${SERVER_STARTUP_NOTIFY}" ]; then
   export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+fi
+if [ -z "${MEMORY}" ]; then
+  # Compute a default amount of memory based on available physical RAM, with a minimum of 2GB:
+  MINIMUM_MEMORY_IN_MB=2000
+  MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
+  MEMORY_FOR_APPLICATIONS=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
+  if [ -z "${TOTAL_MEMORY_SIZE_FACTOR}" ]; then
+    # All of the MEMORY_FOR_APPLICATIONS goes to this application
+    MEMORY_PER_INSTANCE_IN_MB=$(( ${MEMORY_FOR_APPLICATIONS} < ${MINIMUM_MEMORY_IN_MB} ? ${MINIMUM_MEMORY_IN_MB} : ${MEMORY_FOR_APPLICATIONS} ))
+  else
+    # Only a fraction (1/${TOTAL_MEMORY_SIZE_FACTOR}) goes to this application:
+    MEMORY_PER_INSTANCE_IN_MB=$(( ${MEMORY_FOR_APPLICATIONS} / ${TOTAL_MEMORY_SIZE_FACTOR} < ${MINIMUM_MEMORY_IN_MB} ? ${MINIMUM_MEMORY_IN_MB} : ${MEMORY_FOR_APPLICATIONS} / ${TOTAL_MEMORY_SIZE_FACTOR} ))
+  fi
+  export MEMORY="${MEMORY_PER_INSTANCE_IN_MB}m"
 fi

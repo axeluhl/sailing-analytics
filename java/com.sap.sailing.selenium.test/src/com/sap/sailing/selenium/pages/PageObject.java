@@ -319,6 +319,30 @@ public class PageObject {
     
     /**
      * <p>
+     * Waits until an element with the specified selenium id cannot be found any more in the given search context.
+     * </p>
+     * 
+     * @param context
+     *            The search context to use for the search.
+     * @param id
+     *            The selenium id of the element.
+     */
+    protected void waitForElementNotExistsBySeleniumId(SearchContext context, String id) {
+        FluentWait<SearchContext> wait = createFluentWait(context, DEFAULT_WAIT_TIMEOUT_SECONDS, DEFAULT_POLLING_INTERVAL);
+        wait.until(new Function<SearchContext, Boolean>() {
+            @Override
+            public Boolean apply(SearchContext context) {
+                try {
+                    return context.findElement(new BySeleniumId(id)) == null;
+                } catch (Exception e) {
+                    return Boolean.TRUE;
+                }
+            }
+        });
+    }
+    
+    /**
+     * <p>
      * Finds and returns the first element with the specified selenium id in the given search context. If multiple
      * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
      * returned.
@@ -493,6 +517,11 @@ public class PageObject {
         waitUntil((driver) -> supplier.getAsBoolean());
     }
     
+    protected void waitUntilAlertIsPresent() {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(ExpectedConditions.alertIsPresent());
+    }
+    
     /**
      * Returns a {@link PageArea} instance representing the element with the specified selenium id using the
      * {@link WebDriver} as search context.
@@ -588,9 +617,13 @@ public class PageObject {
         WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
         waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
         tab.click();
+        return waitForWebElement(tabPanel, id);      
+    }
+    
+    protected WebElement waitForWebElement (WebElement webElement, String seleniumId) {
         // Wait for the tab to become visible due to the used animations.
-        FluentWait<WebElement> wait = createFluentWait(tabPanel);
-        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
+        FluentWait<WebElement> wait = createFluentWait(webElement);
+        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(seleniumId)));
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {

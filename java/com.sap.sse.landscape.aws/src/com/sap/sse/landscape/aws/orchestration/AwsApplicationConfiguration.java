@@ -60,6 +60,9 @@ implements UserDataProvider {
      * <li>The {@link #setMailSmtpUser(String) mail SMTP user} defaults to {@code AKIAIHCQEFAZDLIK7SUQ} which is the
      * project's AWS SES (Simple e-Mail Service) username. The {@link #setMailSmtpPassword(String) password}, however,
      * must explicitly be provided and does not default to any non-{@code null}, non-empty value.</li>
+     * <li>The {@link #setMemoryInMegabytes(int) memory size} allocated to the process defaults to what {@link #setMemoryTotalSizeFactor(int)}
+     * sets, or, if {@link #setMemoryTotalSizeFactor(int)} isn't used either, to 3/4 of the physical memory available
+     * on the host running the application, minus some baseline allocated to the operating system.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -71,7 +74,7 @@ implements UserDataProvider {
     extends com.sap.sse.common.Builder<BuilderT, T> {
         BuilderT setRegion(AwsRegion region);
         
-        BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape);
+        BuilderT setLandscape(AwsLandscape<ShardingKey> landscape);
         
         BuilderT setRelease(Release release);
 
@@ -98,6 +101,35 @@ implements UserDataProvider {
         BuilderT setMailSmtpUser(String mailSmtpUser);
         
         BuilderT setMailSmtpPassword(String mailSmtpPassword);
+        
+        /**
+         * If used, it supersedes any call to {@link #setMemoryTotalSizeFactor(int)} and provides an explicit memory size
+         * in megabytes. For Java application processes this can be expected to set the maximum heap size; as such, it
+         * doesn't exactly define the amount of memory consumed by or allocated for the Java VM process as such (which
+         * will be greater, given that besides the heap the VM needs several other memory areas).
+         */
+        BuilderT setMemoryInMegabytes(int megabytes);
+        
+        /**
+         * If {@link #setMemoryInMegabytes(int)} isn't used, this method can be used to define the application process
+         * memory as a share of the total physical memory available on the host running the process, minus some baseline
+         * used by the operating system.
+         * <p>
+         * 
+         * If not specified, and if {@link #setMemoryInMegabytes(int)} isn't used either, the application's environment
+         * set-up script ({@code env.sh} and {@code env-default-rules.sh}) will calculate the
+         * {@link DefaultProcessConfigurationVariables#MEMORY MEMORY} variable such that the process will be granted
+         * approximately 3/4 of the physical memory available next to what is assumed to be used by the operating
+         * system, aiming at a set-up where the application process has a fair chance of fitting into physical memory
+         * without the need for excessive swapping / paging activity.
+         * 
+         * @param totalMemoryAvailableToApplicationsDividedByMemoryForThisProcess
+         *            used to define a ratio of memory sizes; the number provided is interpreted as the intended ratio
+         *            of total physical memory size minus some space for the operating system, divided by the memory to
+         *            allocate for the application. It roughly represents the number of application memory sizes that
+         *            would fit into the physical memory concurrently, in addition to the operation system.
+         */
+        BuilderT setMemoryTotalSizeFactor(int totalMemoryAvailableToApplicationsDividedByMemoryForThisProcess);
     }
     
     /**
@@ -115,7 +147,7 @@ implements UserDataProvider {
         private static final String DEFAULT_SMTP_HOSTNAME_PATTERN = "email-smtp.%s.amazonaws.com";
         private static final String DEFAULT_SMTP_USER = "AKIAIHCQEFAZDLIK7SUQ";
         private static final Integer DEFAULT_SMTP_PORT = 25;
-        private AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
+        private AwsLandscape<ShardingKey> landscape;
         private AwsRegion region;
         private Optional<Release> release = Optional.empty();
         private String serverName;
@@ -130,6 +162,8 @@ implements UserDataProvider {
         private Boolean mailSmtpAuth;
         private String mailSmtpUser;
         private String mailSmtpPassword;
+        private Optional<Integer> memoryInMegabytes = Optional.empty();
+        private Optional<Integer> memoryTotalSizeFactor = Optional.empty();
 
         @Override
         public BuilderT setRegion(AwsRegion region) {
@@ -142,12 +176,12 @@ implements UserDataProvider {
         }
         
         @Override
-        public BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
+        public BuilderT setLandscape(AwsLandscape<ShardingKey> landscape) {
             this.landscape = landscape;
             return self();
         }
         
-        protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
+        protected AwsLandscape<ShardingKey> getLandscape() {
             return landscape;
         }
 
@@ -161,7 +195,7 @@ implements UserDataProvider {
 
         @Override
         public BuilderT setRelease(Release release) {
-            this.release = release == null ? Optional.empty() : Optional.of(release);
+            this.release = Optional.ofNullable(release);
             return self();
         }
 
@@ -179,6 +213,10 @@ implements UserDataProvider {
             return databaseName == null ? getServerName() : databaseName;
         }
         
+        protected boolean isDatabaseNameSet() {
+            return databaseName != null;
+        }
+        
         @Override
         public BuilderT setDatabaseName(String databaseName) {
             this.databaseName = databaseName;
@@ -186,13 +224,37 @@ implements UserDataProvider {
         }
 
         protected Database getDatabaseConfiguration() {
-            return databaseConfiguration == null ? getLandscape().getDatabase(getRegion(), getDatabaseName()) : databaseConfiguration;
+            return isDatabaseConfigurationSet() ? databaseConfiguration : getLandscape().getDatabase(getRegion(), getDatabaseName());
+        }
+        
+        protected boolean isDatabaseConfigurationSet() {
+            return databaseConfiguration != null;
         }
 
         @Override
         public BuilderT setDatabaseConfiguration(Database databaseConfiguration) {
             this.databaseConfiguration = databaseConfiguration;
             return self();
+        }
+        
+        @Override
+        public BuilderT setMemoryInMegabytes(int megabytes) {
+            this.memoryInMegabytes = Optional.of(megabytes);
+            return self();
+        }
+        
+        protected Optional<Integer> getMemoryInMegabytes() {
+            return this.memoryInMegabytes;
+        }
+
+        @Override
+        public BuilderT setMemoryTotalSizeFactor(int totalMemoryAvailableToApplicationsDividedByMemoryForThisProcess) {
+            this.memoryTotalSizeFactor = Optional.of(totalMemoryAvailableToApplicationsDividedByMemoryForThisProcess);
+            return self();
+        }
+
+        protected Optional<Integer> getMemoryTotalSizeFactor() {
+            return this.memoryTotalSizeFactor;
         }
 
         protected boolean isOutboundReplicationExchangeNameSet() {
@@ -321,6 +383,11 @@ implements UserDataProvider {
             if (mailSmtpPassword != null) {
                 userData.put(DefaultProcessConfigurationVariables.MAIL_SMTP_PASSWORD, mailSmtpPassword);
             }
+            if (getMemoryInMegabytes().isPresent()) {
+                userData.put(DefaultProcessConfigurationVariables.MEMORY, ""+getMemoryInMegabytes().get()+"m");
+            } else if (getMemoryTotalSizeFactor().isPresent()) {
+                userData.put(DefaultProcessConfigurationVariables.TOTAL_MEMORY_SIZE_FACTOR, ""+getMemoryTotalSizeFactor().get());
+            }
             return userData;
         }
 
@@ -330,13 +397,25 @@ implements UserDataProvider {
     }
 
     private final Map<ProcessConfigurationVariable, String> userData;
+    private final String serverName;
+    private final Optional<Release> release;
     
     protected AwsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT> builder) {
         this.userData = Collections.unmodifiableMap(builder.getUserData());
+        this.serverName = builder.getServerName();
+        this.release = builder.getRelease();
     }
 
     @Override
     public Map<ProcessConfigurationVariable, String> getUserData() {
         return userData;
+    }
+    
+    protected String getServerName() {
+        return serverName;
+    }
+
+    public Optional<Release> getRelease() {
+        return release;
     }
 }

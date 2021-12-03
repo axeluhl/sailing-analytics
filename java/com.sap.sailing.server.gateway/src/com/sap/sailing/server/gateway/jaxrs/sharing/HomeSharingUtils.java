@@ -30,7 +30,7 @@ public class HomeSharingUtils {
     private static final String REPLACEMENT_KEY_DESCRIPTION = "description";
     private static final String REPLACEMENT_KEY_TITLE = "title";
     private static final Logger logger = Logger.getLogger(HomeSharingUtils.class.getName());
-    private static final String DEFAULT_TEASER_URL = "http://media.sapsailing.com/2014/505Worlds/Images_Homepage/505Worlds2014_eventteaser.jpg";
+    private static final String DEFAULT_TEASER_URL = "https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/2014/505Worlds/Images_Homepage/505Worlds2014_eventteaser.jpg";
     private static final String SHARED_PROXY_RESOURCE = "/SharedProxy.html";
     private static final String DEFAULT_TITLE = "SAP Sailing";
     private static final String DEFAULT_DESCRIPTION = "Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action "

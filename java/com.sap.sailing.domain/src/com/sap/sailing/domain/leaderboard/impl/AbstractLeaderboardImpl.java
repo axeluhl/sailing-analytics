@@ -10,6 +10,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ResultsAreOfficialFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
@@ -115,7 +116,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
 
     @Override
     public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
-        return raceColumn.getAllCompetitorsAndTheirBoats(fleet).get(competitor);
+        return fleet == null ? null : raceColumn.getAllCompetitorsAndTheirBoats(fleet).get(competitor);
     }
 
     @Override
@@ -282,5 +283,10 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         RegattaLogBoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new RegattaLogBoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForAbstractLeaderboard);
         deregisterer.deregister(deregisterer.analyze());
     }
-    
+
+    @Override
+    public boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
+        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        return new ResultsAreOfficialFinder(raceLog).analyze() != null;
+    }
 }

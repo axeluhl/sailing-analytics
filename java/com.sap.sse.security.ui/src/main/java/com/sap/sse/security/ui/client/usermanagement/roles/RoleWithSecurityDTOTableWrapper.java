@@ -69,6 +69,8 @@ public class RoleWithSecurityDTOTableWrapper extends
         // users table
         final TextColumn<RoleWithSecurityDTO> userGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<RoleWithSecurityDTO>(
                 dto -> dto.toString(), userColumnListHandler);
+        final TextColumn<RoleWithSecurityDTO> userGroupWithSecurityDTOTransitiveColumn = new AbstractSortableTextColumn<RoleWithSecurityDTO>(
+                dto -> dto.isTransitive() ? stringMessages.yes() : stringMessages.no(), userColumnListHandler);
         // add action column
         final AccessControlledActionsColumn<RoleWithSecurityDTO, PermissionAndRoleImagesBarCell> userActionColumn = create(
                 new PermissionAndRoleImagesBarCell(stringMessages), userService);
@@ -81,7 +83,7 @@ public class RoleWithSecurityDTOTableWrapper extends
                         qualifiedForUser != null ? qualifiedForUser.getName() : null,
                         selectedRole.getRoleDefinition().getId(),
                         qualifiedForTenant == null ? null : qualifiedForTenant.getName(),
-                        new AsyncCallback<SuccessInfo>() {
+                        selectedRole.isTransitive(), new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.couldNotRemoveRoleFromUser(selectedObject.getName(),
@@ -131,6 +133,7 @@ public class RoleWithSecurityDTOTableWrapper extends
         // setup table
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());
+        table.addColumn(userGroupWithSecurityDTOTransitiveColumn, stringMessages.transitive());
         table.addColumn(userActionColumn);
         table.ensureDebugId("RoleWithSecurityDTOTable");
     }

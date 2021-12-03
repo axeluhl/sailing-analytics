@@ -1,9 +1,13 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.Comparator;
+import java.util.function.Function;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -12,6 +16,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
@@ -19,12 +24,16 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 /**
  * The {@link #getTable() table} created and wrapped by this object offers already a {@link ListHandler} for sorting.
  * Subclasses can obtain the table's default column sort handler created by this class's constructor by calling
- * {@link #getColumnSortHandler}. The table is wrapped by a panel that can be obtained using {@link #asWidget()}
+ * {@link #getColumnSortHandler}. This may not even be necessary when adding sortable columns by using the
+ * {@link #addColumn(Column, String, Comparator)} method which provides the comparator and sets the column
+ * as {@link Column#setSortable(boolean) sortable}.<p>
+ * 
+ * The table is wrapped by a panel that can be obtained using {@link #asWidget()}
  * and which contains, if requested, the pager widget underneath the table.
  */
 public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM extends StringMessages, TR extends CellTableWithCheckboxResources> implements IsWidget {
     /**
-     * If the {@code enablePager} constructur argument is set to {@code true} then this many entries are shown
+     * If the {@code enablePager} constructor argument is set to {@code true} then this many entries are shown
      * at most on one page, and users will have to flip through the pages one by one.
      */
     private static final int PAGING_SIZE = 100;
@@ -107,6 +116,57 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
     public void addColumn(Column<T, ?> column, String header) {
         table.addColumn(column, header);
     }
+    
+    /**
+     * Sets the {@code column} as {@link Column#setSortable(boolean) sortable}, assigns the comparator for the
+     * {@code column} in the {@link #getColumnSortHandler() sort handler} and {@link #addColumn(Column, String) adds the
+     * column}.
+     */
+    public void addColumnWithNaturalComparatorOnStringRepresentation(Column<T, ?> column, String header) {
+        addColumn(column, header,
+                (t1, t2)->new NaturalComparator(/* case sensitive */ false)
+                    .compare(""+column.getValue(t1), ""+column.getValue(t2)));
+    }
+    
+    /**
+     * Sets the {@code column} as {@link Column#setSortable(boolean) sortable}, assigns the comparator for the
+     * {@code column} in the {@link #getColumnSortHandler() sort handler} and {@link #addColumn(Column, String) adds the
+     * column}.
+     */
+    public void addColumn(Column<T, ?> column, String header, Comparator<T> comparator) {
+        ListHandler<T> boatColumnListHandler = getColumnSortHandler();
+        column.setSortable(true);
+        boatColumnListHandler.setComparator(column, comparator);
+        addColumn(column, header);
+    }
+    
+    /**
+     * Adds a sortable {@link TextColumn} whose {@link TextColumn#getValue(Object)} method is based on the {@code valueMapper}
+     * and whose sorting is based on a {@link NaturalComparator}.
+     */
+    public void addColumn(Function<T, String> valueMapper, String header) {
+        final TextColumn<T> textColumn = new TextColumn<T>() {
+            @Override
+            public String getValue(T object) {
+                return valueMapper.apply(object);
+            }
+        };
+        addColumn(textColumn, header, Comparator.comparing(t->textColumn.getValue(t), new NaturalComparator()));
+    }
+
+    /**
+     * Adds a sortable {@link TextColumn} whose {@link TextColumn#getValue(Object)} method is based on the {@code valueMapper}
+     * and whose sorting is based on the comparator passed.
+     */
+    public void addColumn(Function<T, String> valueMapper, String header, Comparator<T> comparator) {
+        final TextColumn<T> textColumn = new TextColumn<T>() {
+            @Override
+            public String getValue(T object) {
+                return valueMapper.apply(object);
+            }
+        };
+        addColumn(textColumn, header, comparator);
+    }
 
     public void setEmptyTableWidget(Widget widget) {
         table.setEmptyTableWidget(widget);
@@ -118,6 +178,18 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
     
     public ListDataProvider<T> getDataProvider() {
         return dataProvider;
+    }
+    
+    public void add(T t) {
+        getDataProvider().getList().add(t);
+    }
+    
+    public void remove(T t) {
+        getDataProvider().getList().remove(t);
+    }
+    
+    public void clear() {
+        getDataProvider().getList().clear();
     }
     
     public void refresh(Iterable<T> newItems) {
@@ -174,8 +246,13 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
      * @return {@code null} if no or multiple objects are currently selected; the single selected object otherwise; this
      *         can be useful if certain actions are enabled with this table only if a single object is selected.
      */
-    public static <X> X getSingleSelectedUserGroup(MultiSelectionModel<X> selectionModel) {
+    public static <X> X getSingleSelectedObjectOrNull(MultiSelectionModel<X> selectionModel) {
         return selectionModel.getSelectedSet() != null && selectionModel.getSelectedSet().size() == 1 ?
                 selectionModel.getSelectedSet().iterator().next() : null;
+    }
+
+    public void refresh() {
+        // TODO Implement TableWrapper.refresh(...)
+        
     }
 }

@@ -27,7 +27,11 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     
     public enum RaceColumnLiveState { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE };
 
-    public RaceColumnDTO() {
+    @Deprecated
+    RaceColumnDTO() {} // for GWT RPC serialization only
+    
+    public RaceColumnDTO(String name) {
+        super(name);
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();

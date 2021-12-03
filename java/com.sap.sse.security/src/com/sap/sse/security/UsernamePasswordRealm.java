@@ -35,11 +35,9 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         UsernamePasswordToken userPassToken = (UsernamePasswordToken) token;
         final String username = userPassToken.getUsername();
-
         if (username == null) {
             return null;
         }
-
         // read password hash and salt from db
         String saltedPassword = null;
         byte[] salt = null;
@@ -59,7 +57,6 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
         if (salt == null) {
             return null;
         }
-        
         // return salted credentials
         SaltedAuthenticationInfo sai = new SimpleSaltedAuthenticationInfo(username, saltedPassword, salt);
         return sai;

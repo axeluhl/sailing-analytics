@@ -223,7 +223,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                 public void raceAdded(TrackedRace trackedRace) {
                     synchronized (mutex) { // TODO possible improvement: only notify if trackedRace.getRace() == race; otherwise it cannot have made a difference for getExistingTrackedRace(race)...
                         mutex.notifyAll();
-                    }
+                    } // TODO can't we remove the listener again here?
                 }
             };
             addRaceListener(listener, Optional.empty(), /* synchronous */ false);

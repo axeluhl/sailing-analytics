@@ -41,6 +41,9 @@
       <plugin id="com.sap.sailing.domain.expeditionadapter" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.domain.igtimiadapter" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.igtimiadapter.gateway" autoStart="true" startLevel="5" />
+      <plugin id="com.sap.sailing.domain.oceanraceadapter" autoStart="true" startLevel="5" />
+      <plugin id="com.sap.sailing.domain.yellowbrickadapter" autoStart="true" startLevel="5" />
+      <plugin id="com.sap.sailing.domain.yellowbrickadapter.persistence" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.racelogtrackingadapter" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.swisstimingadapter" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.domain.swisstimingadapter.persistence" autoStart="true" startLevel="4" />
@@ -64,35 +67,28 @@
       <plugin id="com.sap.sailing.server.gateway" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.shared.server" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.shared.server.gateway" autoStart="true" startLevel="5" />
+      <plugin id="com.sap.sailing.hanaexport" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.velum.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.windestimation" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="5" />
-      <plugin id="com.sap.sailing.xmlexport" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.yachtscoring.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sse.filestorage" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sse.landscape.aws" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sse.mail" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sse.replication" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sse.security.ui" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sse.security.userstore.mongodb" autoStart="true" startLevel="4" />
-      <plugin id="org.apache.felix.shell" autoStart="true" startLevel="0" />
-      <plugin id="org.apache.felix.shell.remote" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
-      <plugin id="org.eclipse.jetty.deploy" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.http" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.io" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.jmx" autoStart="true" startLevel="4" />
+      <plugin id="org.eclipse.jetty.apache-jsp" autoStart="true" startLevel="4"/>
+      <plugin id="org.eclipse.jetty.annotations" autoStart="true" startLevel="4"/>
+      <plugin id="org.eclipse.jetty.http" autoStart="true" startLevel="3"/>
       <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />
-      <plugin id="org.eclipse.jetty.security" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.server" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.servlet" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.util" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.webapp" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.xml" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.osgi" autoStart="true" startLevel="-1" />
-      <property name="eclipse.ignoreApp" value="true" />
       <property name="osgi.noShutdown" value="true" />
+      <property name="eclipse.ignoreApp" value="true" />
    </configurations>
 
    <preferencesInfo>

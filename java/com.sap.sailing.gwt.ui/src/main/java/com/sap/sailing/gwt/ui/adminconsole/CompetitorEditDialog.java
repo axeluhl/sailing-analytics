@@ -10,9 +10,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
+import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -32,6 +34,8 @@ import com.sap.sse.gwt.client.dialog.DoubleBox;
  * 
  */
 public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO> extends DataEntryDialog<CompetitorType> {
+    private static final double YARDSTICK_100 = 100.0;
+    private static final double YARDSTICK_1000 = 1000.0;
     private final CompetitorType competitorToEdit;
     private final TextBox name;
     private final TextBox shortName;
@@ -46,7 +50,7 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
     private final Label yardstickLabel;
     private final FlowPanel yardstickPanel;
     private final DoubleBox yardstickNumber;
-    private double yardstickScale = 100;
+    private double yardstickScale = YARDSTICK_100;
     private boolean enableYardstickScaleDetection = true;
     private boolean yardstickLastModified = true;
     private final DoubleBox timeOnTimeFactor;
@@ -111,19 +115,15 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         this.displayColorTextBox = createColorTextBox(competitorToEdit.getColor()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         DialogUtils.makeCountrySelection(this.threeLetterIocCountryCode, competitorToEdit.getThreeLetterIocCountryCode());
-        this.flagImageURL = new URLFieldWithFileUpload(stringMessages);
+        this.flagImageURL = new URLFieldWithFileUpload(stringMessages, "image/*");
         this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
-        this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages, "image/*");
         this.imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
         this.yardstickLabel = new Label(stringMessages.yardstickNumber(yardstickScale));
         this.yardstickNumber = createDoubleBox(competitorToEdit.getTimeOnTimeFactor() == null ? null
                 : convertYardstickTimeOnTime(competitorToEdit.getTimeOnTimeFactor(), yardstickScale), 10);
         Button yardstickScaleButton = new Button(SafeHtmlUtils.fromSafeConstant(stringMessages.changeScale()));
         yardstickScaleButton.getElement().getStyle().setMarginLeft(3, Unit.PX);
-        yardstickScaleButton.addClickHandler(event -> {
-            enableYardstickScaleDetection = false;
-            setYardstickScale(yardstickScale == 1000 ? 100 : 1000, /* convertYardstickNumber */ !yardstickLastModified);
-        });
         this.yardstickPanel = new FlowPanel();
         this.yardstickPanel.add(yardstickNumber);
         this.yardstickPanel.add(yardstickScaleButton);
@@ -133,9 +133,7 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
                 enableYardstickScaleDetection = true;
             }
             detectAndSetYardstickScale();
-            if (yardstickNumber.getValue() != null) {
-                timeOnTimeFactor.setValue(convertYardstickTimeOnTime(yardstickNumber.getValue(), yardstickScale), /* fireEvents */ false);
-            }
+            convertYardstickToToT();
             yardstickLastModified = true;
         });
         this.timeOnTimeFactor.addChangeHandler(event -> {
@@ -144,9 +142,20 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
             }
             yardstickLastModified = false;
         });
+        yardstickScaleButton.addClickHandler(event -> {
+            enableYardstickScaleDetection = false;
+            setYardstickScale(yardstickScale == YARDSTICK_1000 ? YARDSTICK_100 : YARDSTICK_1000, /* convertYardstickNumber */ !yardstickLastModified);
+            convertYardstickToToT();
+        });
         this.timeOnDistanceAllowanceInSecondsPerNauticalMile = createDoubleBox(
                 competitorToEdit.getTimeOnDistanceAllowancePerNauticalMile() == null ? null : competitorToEdit
                         .getTimeOnDistanceAllowancePerNauticalMile().asSeconds(), 10);
+    }
+
+    private void convertYardstickToToT() {
+        if (yardstickNumber.getValue() != null) {
+            timeOnTimeFactor.setValue(convertYardstickTimeOnTime(yardstickNumber.getValue(), yardstickScale), /* fireEvents */ false);
+        }
     }
 
     @Override
@@ -237,9 +246,9 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
             Double number = yardstickNumber.getValue();
             if (number != null) {
                 if (number < 550) {
-                    setYardstickScale(100, false);
+                    setYardstickScale(YARDSTICK_100, false);
                 } else {
-                    setYardstickScale(1000, false);
+                    setYardstickScale(YARDSTICK_1000, false);
                 }
             }
         }
@@ -275,7 +284,8 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         result.setWidget(8, 1, yardstickPanel);
         result.setWidget(9, 0, new Label(stringMessages.timeOnTimeFactor()));
         result.setWidget(9, 1, timeOnTimeFactor);
-        result.setWidget(10, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
+        result.setWidget(10, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile() +
+                " ["+DetailTypeFormatter.getUnit(DetailType.OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE)+"]"));
         result.setWidget(10, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
         return result;
     }

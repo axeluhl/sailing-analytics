@@ -105,7 +105,7 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
         this.preferReplayIfAvailable = preferReplayIfAvailable;
     }
 
-    private boolean isReplayRace(IRace tractracRace) {
+    public boolean isReplayRace(IRace tractracRace) {
         return tractracRace.getStoredURI() != null && tractracRace.getStoredURI().toString().toLowerCase().endsWith(".mtb");
     }
     

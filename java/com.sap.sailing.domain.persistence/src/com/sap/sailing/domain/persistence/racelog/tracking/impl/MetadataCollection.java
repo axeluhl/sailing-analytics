@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
-import static com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,10 +11,8 @@ import org.bson.conversions.Bson;
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
@@ -25,6 +21,7 @@ import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
@@ -48,13 +45,15 @@ public class MetadataCollection extends MongoFixHandler {
     private final MongoCollection<Document> metadataCollection;
     private final ConcurrentHashMap<DeviceIdentifier, MetadataUpdater> metadataUpdaters;
     private final WriteConcern writeConcern;
+    private final ReadConcern readConcern;
 
     public MetadataCollection(MongoObjectFactoryImpl mongoOF,
             TypeBasedServiceFinder<FixMongoHandler<?>> fixServiceFinder,
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder, WriteConcern writeConcern) {
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder, ReadConcern readConcern, WriteConcern writeConcern) {
         super(fixServiceFinder, deviceServiceFinder);
         this.metadataCollection = mongoOF.getGPSFixMetadataCollection();
         this.metadataUpdaters = new ConcurrentHashMap<>();
+        this.readConcern = readConcern;
         this.writeConcern = writeConcern;
     }
 
@@ -73,16 +72,9 @@ public class MetadataCollection extends MongoFixHandler {
      * metadata object directly from the DB
      */
     private Document findMetadataObjectInternal(DeviceIdentifier device) throws TransformationException {
-        Bson query = getDeviceQuery(device);
-        Document result = metadataCollection.withReadConcern(ReadConcern.MAJORITY).find(query).first();
+        Bson query = com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, device);
+        Document result = metadataCollection.withReadConcern(readConcern).find(query).first();
         return result;
-    }
-
-    private Bson getDeviceQuery(DeviceIdentifier device)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Document dbDeviceId = storeDeviceId(deviceServiceFinder, device);
-        Bson query = Filters.eq(FieldNames.DEVICE_ID.name(), dbDeviceId);
-        return query;
     }
 
     TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device)
@@ -165,6 +157,6 @@ public class MetadataCollection extends MongoFixHandler {
         MongoObjectFactoryImpl.storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
         updateOperation.append("$set", newMetadata);
         updateOperation.append("$inc", new Document(FieldNames.NUM_FIXES.name(), update.getNrOfTotalFixes()));
-        metadataCollection.withWriteConcern(writeConcern).updateOne(getDeviceQuery(update.getDevice()), updateOperation, new UpdateOptions().upsert(true));
+        metadataCollection.withWriteConcern(writeConcern).updateOne(com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, update.getDevice()), updateOperation, new UpdateOptions().upsert(true));
     }
 }
