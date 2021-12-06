@@ -142,7 +142,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             @Override
             public String getValue(final SubscriptionDTO object) {
                 final SubscriptionPlanDTO plan = getSubscriptionPlan(object);
-                return plan == null ? "-" : stringConstants.getString(plan.getNameMessageKey());
+                return plan == null ? "-" : stringConstants.getString(plan.getSubscriptionPlanNameMessageKey());
             }
         }, i18n.name());
 
@@ -205,7 +205,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             @Override
             public void update(final int index, final SubscriptionDTO object, final String value) {
                 // FIXME: Implement "Cancel subscription" operation abstracted for all Providers
-                presenter.cancelSubscription(object.getPlanId(), "chargebee");
+                presenter.cancelSubscription(object.getSubscriptionPlanId(), "chargebee");
                 Window.alert("[TODO] Cancelling ...");
             }
         });
@@ -213,7 +213,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     }
 
     private SubscriptionPlanDTO getSubscriptionPlan(final SubscriptionDTO subscription) {
-        return subscription != null ? presenter.getPlanById(subscription.getPlanId()) : null;
+        return subscription != null ? presenter.getPlanById(subscription.getSubscriptionPlanId()) : null;
     }
 
     private String getTrialRemainingText(final SubscriptionDTO subscription) {

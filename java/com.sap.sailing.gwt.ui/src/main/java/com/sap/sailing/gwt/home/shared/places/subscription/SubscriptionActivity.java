@@ -37,7 +37,7 @@ public class SubscriptionActivity extends AbstractActivity {
                             result.forEach(plan -> {
                                 if (checkIfUserIsOwnerOfThePlan(plan)) {
                                     view.addSubscriptionPlan(plan, Type.OWNER, eventBus);
-                                } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getId())) {
+                                } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getSubscriptionPlanId())) {
                                     view.addSubscriptionPlan(plan, Type.HIGHLIGHT, eventBus);
                                 } else {
                                     view.addSubscriptionPlan(plan, Type.DEFAULT, eventBus);

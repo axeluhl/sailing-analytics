@@ -40,7 +40,7 @@ class UserSubscriptionItem extends Composite {
     private final Runnable cancelCallback;
 
     UserSubscriptionItem(final SubscriptionDTO subscription, final UserSubscriptionsView.Presenter presenter) {
-        this.cancelCallback = () -> presenter.cancelSubscription(subscription.getPlanId(), subscription.getProvider());
+        this.cancelCallback = () -> presenter.cancelSubscription(subscription.getSubscriptionPlanId(), subscription.getProvider());
         final MobileSection mobileSection = uiBinder.createAndBindUi(this);
         mobileSection.setEdgeToEdgeContent(true);
         initWidget(mobileSection);
@@ -68,8 +68,8 @@ class UserSubscriptionItem extends Composite {
     }
 
     private String getPlanName(final SubscriptionDTO subscription, final UserSubscriptionsView.Presenter presenter) {
-        final SubscriptionPlanDTO plan = subscription != null ? presenter.getPlanById(subscription.getPlanId()) : null;
-        return plan == null ? "-" : stringConstants.getString(plan.getNameMessageKey());
+        final SubscriptionPlanDTO plan = subscription != null ? presenter.getPlanById(subscription.getSubscriptionPlanId()) : null;
+        return plan == null ? "-" : stringConstants.getString(plan.getSubscriptionPlanNameMessageKey());
     }
 
     private String getStatus(final SubscriptionDTO object) {

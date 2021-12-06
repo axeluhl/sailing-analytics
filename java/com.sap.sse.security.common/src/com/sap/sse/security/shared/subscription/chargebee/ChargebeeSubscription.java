@@ -21,8 +21,8 @@ public class ChargebeeSubscription extends Subscription {
     public static Subscription createEmptySubscription(String planId, TimePoint latestEventTime,
             TimePoint manualUpdatedAt) {
         return new ChargebeeSubscription(null, planId, null, Subscription.emptyTime(), Subscription.emptyTime(), null,
-                null, null, null, null, null, Subscription.emptyTime(), Subscription.emptyTime(), latestEventTime,
-                manualUpdatedAt);
+                null, null, null, null, null, null, null, null, null, null, Subscription.emptyTime(),
+                Subscription.emptyTime(), latestEventTime, manualUpdatedAt);
     }
 
     /**
@@ -65,12 +65,14 @@ public class ChargebeeSubscription extends Subscription {
 
     public ChargebeeSubscription(String subscriptionId, String planId, String customerId, TimePoint trialStart,
             TimePoint trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
-            String transactionStatus, String invoiceId, String invoiceStatus, TimePoint subscriptionCreatedAt,
-            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt) {
+            String transactionStatus, String invoiceId, String invoiceStatus, Integer reoccuringPaymentValue,
+            TimePoint subscriptionCreatedAt, TimePoint subscriptionUpdatedAt, TimePoint subscriptionActivatedAt,
+            TimePoint nextBillingAt, TimePoint currentTermEnd, TimePoint cancelledAt, TimePoint latestEventTime,
+            TimePoint manualUpdatedAt) {
         super(subscriptionId, planId, customerId, trialStart, trialEnd, subscriptionStatus, paymentStatus,
-                transactionType, transactionStatus, invoiceId, invoiceStatus, subscriptionCreatedAt,
-                subscriptionUpdatedAt, latestEventTime, manualUpdatedAt,
-                ChargebeeSubscriptionProvider.PROVIDER_NAME);
+                transactionType, transactionStatus, invoiceId, invoiceStatus, reoccuringPaymentValue,
+                subscriptionCreatedAt, subscriptionUpdatedAt, subscriptionActivatedAt, nextBillingAt, cancelledAt,
+                currentTermEnd, latestEventTime, manualUpdatedAt, ChargebeeSubscriptionProvider.PROVIDER_NAME);
     }
 
     @Override

@@ -30,7 +30,7 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
     private static final String YEARLY_PLAN_ID = "yearly_premium";
     private static final String WEEKLY_PLAN_ID = "weekly_premium";
     private static final String WEEKLY_PLAN_ITEMPRICE_ID = "weekly_premium_usd_weekly";
-    private static final String YEARLY_PLAN_ITEMPRICE_ID = "weekly_premium_usd_yearly";
+    private static final String YEARLY_PLAN_ITEMPRICE_ID = "yearly_premium_usd_yearly";
     private static final Map<String, SubscriptionPlan> plansById = new HashMap<>();
 
     private SailingSubscriptionPlan(String id, Set<SubscriptionPrice> prices, SubscriptionPlanRole... roles) {

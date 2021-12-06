@@ -10,11 +10,7 @@ import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 /**
  * SubscriptionPlan data transfer object {@link SubscriptionService#getAllSubscriptionPlans()}
  */
-public class SubscriptionPlanDTO implements IsSerializable {
-    private static final String FEATURES_MESSAGE_KEY_SUFFX = "_features";
-    private static final String NAME_MESSAGE_KEY_SUFFX = "_name";
-    private static final String DESC_MESSAGE_KEY_SUFFX = "_description";
-    private static final String INFO_MESSAGE_KEY_SUFFIX = "_info";
+public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerializable {
     private static final long serialVersionUID = -1990028347487353679L;
     private String id;
     private HashSet<SubscriptionPrice> prices = new HashSet<SubscriptionPrice>();
@@ -39,7 +35,8 @@ public class SubscriptionPlanDTO implements IsSerializable {
         return serialVersionUID;
     }
 
-    public String getId() {
+    @Override
+    public String getSubscriptionPlanId() {
         return id;
     }
 
@@ -49,22 +46,6 @@ public class SubscriptionPlanDTO implements IsSerializable {
 
     public void setUserSubscribedToPlan(boolean isUserSubscribedToPlan) {
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
-    }
-
-    public String getNameMessageKey() {
-        return this.id + NAME_MESSAGE_KEY_SUFFX;
-    }
-
-    public String getDescMessageKey() {
-        return this.id + DESC_MESSAGE_KEY_SUFFX;
-    }
-
-    public String getInfoMessageKey() {
-        return this.id + INFO_MESSAGE_KEY_SUFFIX;
-    }
-
-    public String getFeatureMessageKey() {
-        return this.id + FEATURES_MESSAGE_KEY_SUFFX;
     }
 
     public String getError() {

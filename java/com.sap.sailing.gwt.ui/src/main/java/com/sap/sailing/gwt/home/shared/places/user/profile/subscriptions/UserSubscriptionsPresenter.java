@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -130,6 +131,7 @@ public class UserSubscriptionsPresenter<C extends ClientFactoryWithDispatch & Er
                 @Override
                 public void onSuccess(ArrayList<SubscriptionPlanDTO> result) {
                     updateSubscriptionPlanMap(result);
+                    GWT.debugger();
                     view.updateView(subscription, result);
                 }
             });
@@ -140,7 +142,7 @@ public class UserSubscriptionsPresenter<C extends ClientFactoryWithDispatch & Er
 
     private void updateSubscriptionPlanMap(Iterable<SubscriptionPlanDTO> updatedPlans) {
         subscriptionPlans.clear();
-        updatedPlans.forEach(plan -> subscriptionPlans.put(plan.getId(), plan));
+        updatedPlans.forEach(plan -> subscriptionPlans.put(plan.getSubscriptionPlanId(), plan));
     }
 
     private void showError(String message) {

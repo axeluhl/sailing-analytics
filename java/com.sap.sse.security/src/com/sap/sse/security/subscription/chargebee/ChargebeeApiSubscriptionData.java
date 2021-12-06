@@ -44,17 +44,14 @@ public class ChargebeeApiSubscriptionData {
         }
         String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
                 invoiceStatus);
-        final Timestamp trialStart = subscription.trialStart();
-        final Timestamp trialEnd = subscription.trialEnd();
-         String planId = getPlanId(subscriptionPlanProvider);
-         return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
-                 trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
-                         : TimePoint.of(trialStart),
-                 trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
-                         : TimePoint.of(trialEnd),
-                 subscriptionStatus, paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus,
-                 TimePoint.of(subscription.createdAt()), TimePoint.of(subscription.updatedAt()), TimePoint.now(),
-                 com.sap.sse.security.shared.subscription.Subscription.emptyTime());
+        String planId = getPlanId(subscriptionPlanProvider);
+        return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
+                getTime(subscription.trialStart()), getTime(subscription.trialEnd()), subscriptionStatus,
+                paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus, subscription.mrr(),
+                getTime(subscription.createdAt()), getTime(subscription.updatedAt()),
+                getTime(subscription.activatedAt()), getTime(subscription.nextBillingAt()),
+                getTime(subscription.currentTermEnd()), getTime(subscription.cancelledAt()),
+                TimePoint.now(), com.sap.sse.security.shared.subscription.Subscription.emptyTime());
     }
     
     private String getPlanId(SubscriptionPlanProvider subscriptionPlanProvider) {
@@ -72,6 +69,11 @@ public class ChargebeeApiSubscriptionData {
             }
         }
         return planId;
+    }
+    
+    private TimePoint getTime(Timestamp millis) {
+        return millis == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
+                : TimePoint.of(millis);
     }
 
     private String stringToLowerCase(String str) {

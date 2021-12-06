@@ -64,24 +64,26 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                 invoiceId = null;
                 invoiceStatus = null;
             }
-            final Timestamp trialStart = content.subscription().trialStart();
-            final Timestamp trialEnd = content.subscription().trialEnd();
+            com.chargebee.models.Subscription contentSubscription = content.subscription();
+            final Timestamp trialStart = contentSubscription.trialStart();
+            final Timestamp trialEnd = contentSubscription.trialEnd();
             //TODO: bug5510 this ignores potential Addons or Charges contained in the Subscription
             SubscriptionPlan plan = null;
-            for(SubscriptionItem item : content.subscription().subscriptionItems()) {
+            for(SubscriptionItem item : contentSubscription.subscriptionItems()) {
                 if(item.itemType().equals(ItemType.PLAN)) {
                     final String itemPriceId = item.itemPriceId();
                     plan = getSecurityService().getSubscriptionPlanByItemPriceId(itemPriceId);
                     break;
                 }
             }
-            final Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
-                    plan.getId(), customerId,
-                    trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
+            final Subscription subscription = new ChargebeeSubscription(contentSubscription.id(), plan.getId(),
+                    customerId, trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialEnd),
-                    content.subscription().status().name().toLowerCase(), null, transactionType, transactionStatus,
-                    invoiceId, invoiceStatus, TimePoint.of(content.subscription().createdAt()),
-                    TimePoint.of(content.subscription().updatedAt()), Subscription.emptyTime(), Subscription.emptyTime());
+                    contentSubscription.status().name().toLowerCase(), null, transactionType, transactionStatus,
+                    invoiceId, invoiceStatus, contentSubscription.mrr(), getTime(contentSubscription.createdAt()),
+                    getTime(contentSubscription.updatedAt()), getTime(contentSubscription.activatedAt()),
+                    getTime(contentSubscription.nextBillingAt()), getTime(contentSubscription.currentTermEnd()),
+                    getTime(contentSubscription.cancelledAt()), Subscription.emptyTime(), Subscription.emptyTime());
             updateUserSubscription(user, subscription);
             subscriptionDto = getSubscriptions();
         } catch (Exception e) {
@@ -89,6 +91,11 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
         }
         return subscriptionDto;
+    }
+    
+    private TimePoint getTime(Timestamp timeStamp) {
+        return timeStamp == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
+                : TimePoint.of(timeStamp);
     }
 
     @Override

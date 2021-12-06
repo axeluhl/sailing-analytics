@@ -165,10 +165,10 @@ public class SubscriptionCard extends Composite {
             break;
         }
         final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
-        title.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getNameMessageKey()));
-        description.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getDescMessageKey()));
-        info.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getInfoMessageKey()));
-        final String[] featureStrings = subscriptionStringConstants.getStringArray(subscriptionPlanDTO.getFeatureMessageKey());
+        title.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanNameMessageKey()));
+        description.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanDescMessageKey()));
+        info.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanInfoMessageKey()));
+        final String[] featureStrings = subscriptionStringConstants.getStringArray(subscriptionPlanDTO.getSubscriptionPlanFeatureMessageKey());
         for (String featureString : featureStrings) {
             if(featureString != "") {
                 FlowPanel feature = new FlowPanel();

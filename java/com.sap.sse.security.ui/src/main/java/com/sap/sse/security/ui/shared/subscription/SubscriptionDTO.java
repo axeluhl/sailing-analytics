@@ -3,7 +3,7 @@ package com.sap.sse.security.ui.shared.subscription;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.TimePoint;
 
-public abstract class SubscriptionDTO implements IsSerializable {
+public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsSerializable {
     public static final String PAYMENT_STATUS_SUCCESS = "success";
     public static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
 
@@ -11,7 +11,7 @@ public abstract class SubscriptionDTO implements IsSerializable {
      * User current subscription plan id
      */
     private String planId;
-
+    
     /**
      * Subscription status: active or trial
      */
@@ -22,7 +22,7 @@ public abstract class SubscriptionDTO implements IsSerializable {
      * {@code SubscriptionItem#PAYMENT_STATUS_NO_SUCCESS}
      */
     private String paymentStatus;
-
+    
     /**
      * Subscription transaction type: payment or refund
      */
@@ -76,8 +76,9 @@ public abstract class SubscriptionDTO implements IsSerializable {
     public boolean isPaymentSuccess() {
         return paymentStatus != null && paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
     }
-
-    public String getPlanId() {
+    
+    @Override
+    public String getSubscriptionPlanId() {
         return planId;
     }
 
@@ -132,4 +133,5 @@ public abstract class SubscriptionDTO implements IsSerializable {
     public void setCreatedAt(TimePoint createdAt) {
         this.createdAt = createdAt;
     }
+
 }
