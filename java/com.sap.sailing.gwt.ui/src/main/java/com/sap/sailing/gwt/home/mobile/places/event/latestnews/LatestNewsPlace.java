@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.place.shared.Prefix;
+import com.sap.sailing.gwt.common.client.navigation.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
-import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;

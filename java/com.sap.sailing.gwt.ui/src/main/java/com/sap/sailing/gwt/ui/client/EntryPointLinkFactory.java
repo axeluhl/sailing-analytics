@@ -5,11 +5,11 @@ import static java.util.Collections.emptyMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import com.sap.sailing.gwt.common.client.navigation.PlaceTokenPrefixes;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
 
 public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     public static final String LEADERBOARD_PATH = "/gwt/Leaderboard.html";
-    public static final String AUTOPLAY_PATH = "/gwt/AutoPlay.html";
     private static final String HOME_PATH = "/gwt/Home.html";
 
     public static String createSimulatorLink(final Map<String, String> parameters) {
@@ -47,7 +47,7 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     }
 
     public static String createSubscriptionPageLink(final Iterable<String> highlightedPlans) {
-        final StringJoiner joiner = new StringJoiner("&", "/subscription/:", "");
+        final StringJoiner joiner = new StringJoiner("&", PlaceTokenPrefixes.Subscription + ":", "");
         highlightedPlans.forEach(id -> joiner.add("highlight=" + id));
         return createEntryPointLink(HOME_PATH, joiner.toString(), emptyMap());
     }
