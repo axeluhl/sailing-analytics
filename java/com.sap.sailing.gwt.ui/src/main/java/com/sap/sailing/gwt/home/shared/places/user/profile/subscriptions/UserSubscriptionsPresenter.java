@@ -1,159 +1,107 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
-import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
-import com.sap.sse.security.ui.client.subscription.SubscriptionServiceAsync;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
+import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * Implementation presenter of {@link UserSubscriptionsView.Presenter}
  *
  * @author Tu Tran
  */
-public class UserSubscriptionsPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & WithAuthenticationManager & WithUserService & WithSecurity>
+public class UserSubscriptionsPresenter<C extends WithUserService & WithSecurity>
         implements UserSubscriptionsView.Presenter {
 
-    private final C clientFactory;
-    private UserSubscriptionsView view;
-    private final Map<Serializable, SubscriptionPlanDTO> subscriptionPlans = new HashMap<>();
+    private final SubscriptionServiceFactory factory;
+    private final UserService userService;
     private final PlaceNavigation<SubscriptionPlace> subscribePlaceNavigation;
 
-    public UserSubscriptionsPresenter(final C clientFactory,
-            final PlaceNavigation<SubscriptionPlace> subscribePlaceNavigation) {
-        this.clientFactory = clientFactory;
+    private UserSubscriptionsView view;
+
+    public UserSubscriptionsPresenter(final C clientFactory, final PlaceNavigation<SubscriptionPlace> subscribePlaceNavigation) {
+        this.factory = clientFactory.getSubscriptionServiceFactory();
+        this.userService = clientFactory.getUserService();
         this.subscribePlaceNavigation = subscribePlaceNavigation;
     }
 
     @Override
     public void init() {
-        clientFactory.getSubscriptionServiceFactory().initializeProviders();
+        factory.initializeProviders();
     }
 
     @Override
     public void loadSubscription() {
-        view.onStartLoadSubscription();
         fetchSubscription();
     }
 
     @Override
-    public void setView(UserSubscriptionsView view) {
+    public void setView(final UserSubscriptionsView view) {
         this.view = view;
     }
 
     @Override
-    public void openCheckout(String planId) {
+    public void cancelSubscription(final String planId, final String providerName) {
         try {
-            clientFactory.getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
-                    .startCheckout(planId, view, () -> clientFactory.getUserService().updateUser(true));
-        } catch (InvalidSubscriptionProviderException e) {
-            onInvalidSubscriptionProviderError(e);
-        }
-    }
+            final SubscriptionWriteServiceAsync<?, ?, ?> service = factory.getWriteAsyncServiceByProvider(providerName);
+            service.cancelSubscription(planId, new AsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(final Boolean result) {
+                    if (!result) {
+                        showError(StringMessages.INSTANCE.failedCancelSubscription());
+                    } else {
+                        userService.updateUser(true);
+                        fetchSubscription();
+                    }
+                }
 
-    @Override
-    public void cancelSubscription(String planId, String providerName) {
-        try {
-            clientFactory.getSubscriptionServiceFactory().getWriteAsyncServiceByProvider(providerName)
-                    .cancelSubscription(planId, new AsyncCallback<Boolean>() {
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            if (!result) {
-                                showError(StringMessages.INSTANCE.failedCancelSubscription());
-                            } else {
-                                clientFactory.getUserService().updateUser(true);
-                                fetchSubscription();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
-                        }
-                    });
-        } catch (InvalidSubscriptionProviderException e) {
+                @Override
+                public void onFailure(final Throwable caught) {
+                    showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
+                }
+            });
+        } catch (final InvalidSubscriptionProviderException e) {
             onInvalidSubscriptionProviderError(e);
         }
     }
 
     private void fetchSubscription() {
         try {
-            clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
-                    .getSubscriptions(new AsyncCallback<SubscriptionListDTO>() {
-                        @Override
-                        public void onSuccess(SubscriptionListDTO result) {
-                            if (result != null && result.getError() != null && !result.getError().isEmpty()) {
-                                showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
-                            } else {
-                                updateView(result);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            showError(StringMessages.INSTANCE.errorLoadingUserSubscription(caught.getMessage()));
-                        }
-                    });
-        } catch (InvalidSubscriptionProviderException e) {
-            onInvalidSubscriptionProviderError(e);
-        }
-    }
-
-    private void updateView(SubscriptionListDTO subscription) {
-        try {
-            final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionServiceFactory()
-                    .getDefaultAsyncService();
-
-            defaultAsyncService.getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
+            factory.getDefaultAsyncService().getSubscriptions(new AsyncCallback<SubscriptionListDTO>() {
                 @Override
-                public void onFailure(Throwable caught) {
-                    // This will simply not refresh the SubscriptionPlan list in the view.
-                    // Not critical, since the case of a changed set of SubscriptionPlans is highly unlikely.
-                    view.updateView(subscription, null);
+                public void onSuccess(final SubscriptionListDTO result) {
+                    if (result != null && result.getError() != null && !result.getError().isEmpty()) {
+                        showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
+                    } else {
+                        view.updateView(result);
+                    }
                 }
 
                 @Override
-                public void onSuccess(ArrayList<SubscriptionPlanDTO> result) {
-                    updateSubscriptionPlanMap(result);
-                    view.updateView(subscription, result);
+                public void onFailure(final Throwable caught) {
+                    showError(StringMessages.INSTANCE.errorLoadingUserSubscription(caught.getMessage()));
                 }
             });
-        } catch (InvalidSubscriptionProviderException e) {
+        } catch (final InvalidSubscriptionProviderException e) {
             onInvalidSubscriptionProviderError(e);
         }
     }
 
-    private void updateSubscriptionPlanMap(Iterable<SubscriptionPlanDTO> updatedPlans) {
-        subscriptionPlans.clear();
-        updatedPlans.forEach(plan -> subscriptionPlans.put(plan.getId(), plan));
-    }
-
-    private void showError(String message) {
+    private void showError(final String message) {
         Notification.notify(message, NotificationType.ERROR);
     }
 
-    private void onInvalidSubscriptionProviderError(InvalidSubscriptionProviderException e) {
+    private void onInvalidSubscriptionProviderError(final InvalidSubscriptionProviderException e) {
         showError(StringMessages.INSTANCE.errorInvalidSubscritionProvider(e.getMessage()));
-    }
-
-    @Override
-    public SubscriptionPlanDTO getPlanById(String planId) {
-        return subscriptionPlans.get(planId);
     }
 
     @Override

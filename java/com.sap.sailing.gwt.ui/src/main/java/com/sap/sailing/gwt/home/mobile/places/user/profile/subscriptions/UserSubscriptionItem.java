@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 class UserSubscriptionItem extends Composite {
 
@@ -68,8 +67,8 @@ class UserSubscriptionItem extends Composite {
     }
 
     private String getPlanName(final SubscriptionDTO subscription, final UserSubscriptionsView.Presenter presenter) {
-        final SubscriptionPlanDTO plan = subscription != null ? presenter.getPlanById(subscription.getPlanId()) : null;
-        return plan == null ? "-" : stringConstants.getString(plan.getNameMessageKey());
+        return subscription != null ? "-" : "[TODO]";
+        // FIXME return subscription != null ? "-" : stringConstants.getString(object.getSubscriptionPlanNameMessageKey());
     }
 
     private String getStatus(final SubscriptionDTO object) {

@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab;
 
 import com.google.gwt.place.shared.Prefix;
+import com.sap.sailing.gwt.common.client.navigation.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
-import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 

@@ -11,7 +11,7 @@
         <ms:content>
             <g:HTMLPanel ui:field="contentContainerUi" addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
                 <div ui:field="subscriptionInfoUi" class="{res.mediaCss.small12}"/>
-                <g:Button ui:field="cancelControlUi" text="{i18n.delete}"
+                <g:Button ui:field="cancelControlUi" text="{i18n.cancelSubscription}"
                           addStyleNames="{res.mediaCss.small12} {res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonred}" />
             </g:HTMLPanel>
         </ms:content>

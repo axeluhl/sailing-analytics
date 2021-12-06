@@ -35,8 +35,6 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.AuthenticationViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
@@ -46,9 +44,6 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> {
@@ -56,20 +51,20 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private final AuthenticationPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
     private final FlyoutAuthenticationPresenter flyoutAuthenticationPresenter;
-    
-    public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
+
+    public TabletAndDesktopApplicationClientFactory(final boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
     }
-    
-    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, boolean isStandaloneServer) {
+
+    private TabletAndDesktopApplicationClientFactory(final EventBus eventBus, final boolean isStandaloneServer) {
         this(eventBus, new PlaceController(eventBus), isStandaloneServer);
     }
 
-    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, boolean isStandaloneServer) {
+    private TabletAndDesktopApplicationClientFactory(final EventBus eventBus, final PlaceController placeController, final boolean isStandaloneServer) {
         this(eventBus, placeController, new DesktopPlacesNavigator(placeController, isStandaloneServer));
     }
 
-    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
+    private TabletAndDesktopApplicationClientFactory(final EventBus eventBus, final PlaceController placeController, final DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
         final AuthenticationViewDesktop userManagementDisplay = new AuthenticationViewDesktop();
         WhatsNewDialogFactory.register(getUserService(), placeController);
@@ -90,14 +85,14 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
         new DesktopLoginHintPopup(authenticationManager, placesNavigator);
     }
-    
+
     @Override
     public DesktopResettableNavigationPathDisplay getNavigationPathDisplay() {
         return getTopLevelView().getNavigationPathDisplay();
     }
 
     @Override
-    public TabletAndDesktopErrorView createErrorView(String errorMessage, Throwable errorReason) {
+    public TabletAndDesktopErrorView createErrorView(final String errorMessage, final Throwable errorReason) {
         return new TabletAndDesktopErrorView(errorMessage, errorReason, null);
     }
 
@@ -117,35 +112,22 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public SolutionsView createSolutionsView(SolutionsNavigationTabs navigationTab) {
+    public SolutionsView createSolutionsView(final SolutionsNavigationTabs navigationTab) {
         return new TabletAndDesktopSolutionsView(navigationTab, getHomePlacesNavigator());
     }
-    
+
     @Override
     public SubscriptionView createSubscriptionsView() {
         getSubscriptionServiceFactory().initializeProviders();
-        return new SubscriptionViewImpl(new SubscriptionView.Presenter() {
+        final SubscriptionView view = new SubscriptionViewImpl();
+        final SubscriptionView.Presenter presenter = new SubscriptionView.Presenter() {
             @Override
-            public void startSubscription(String priceId) {
+            public void startSubscription(final String priceId) {
                 try {
                     getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
-                            .startCheckout(priceId, new BaseUserSubscriptionView() {
-                                
-                                @Override
-                                public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
-                                }
-                                
-                                @Override
-                                public void onOpenCheckoutError(String error) {
-                                    Notification.notify(error, NotificationType.ERROR);
-                                }
-                                
-                                @Override
-                                public void onCloseCheckoutModal() {
-                                }
-                            }, () -> getUserService().updateUser(true));
-                } catch (InvalidSubscriptionProviderException e) {
-                    Notification.notify(e.toString(), NotificationType.ERROR);
+                            .startCheckout(priceId, view, () -> getUserService().updateUser(true));
+                } catch (final InvalidSubscriptionProviderException e) {
+                    view.onOpenCheckoutError(e.toString());
                 }
             }
             @Override
@@ -164,7 +146,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             public SubscriptionClientFactory getClientFactory() {
                 return TabletAndDesktopApplicationClientFactory.this;
             }
-        });
+        };
+        view.setPresenter(presenter);
+        return view;
     }
 
     @Override
@@ -173,7 +157,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public WhatsNewView createWhatsNewView(WhatsNewNavigationTabs navigationTab) {
+    public WhatsNewView createWhatsNewView(final WhatsNewNavigationTabs navigationTab) {
         return new TabletAndDesktopWhatsNewView(navigationTab, getHomePlacesNavigator());
     }
 
@@ -191,19 +175,19 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     public AuthenticationManager getAuthenticationManager() {
         return authenticationManager;
     }
-    
+
     @Override
     public ConfirmationView createConfirmationView() {
         return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
-    
+
     @Override
     public PasswordResetView createPasswordResetView() {
         return new PasswordResetViewImpl();
     }
-    
+
     @Override
-    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(final String username) {
         return getHomePlacesNavigator().getPasswordResettedConfirmationNavigation(username);
     }
 }

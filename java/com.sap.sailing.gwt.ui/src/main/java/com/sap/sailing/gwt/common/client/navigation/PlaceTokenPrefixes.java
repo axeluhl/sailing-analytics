@@ -1,6 +1,8 @@
-package com.sap.sailing.gwt.home.shared.places;
+package com.sap.sailing.gwt.common.client.navigation;
 
 public class PlaceTokenPrefixes {
+
+    // Prefixes for place fragments on /Home.html
 
     public static final String Subscription = "/subscription/";
 

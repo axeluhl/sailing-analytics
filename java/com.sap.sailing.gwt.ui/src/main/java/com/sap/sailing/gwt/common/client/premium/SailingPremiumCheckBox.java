@@ -31,5 +31,4 @@ public class SailingPremiumCheckBox extends PremiumCheckBox {
         Window.open(EntryPointLinkFactory.createSubscriptionPageLink(unlockingPlans), "_blank", "");
     }
 
-
 }
