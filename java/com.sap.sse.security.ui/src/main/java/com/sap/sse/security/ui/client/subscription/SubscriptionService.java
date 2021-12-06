@@ -32,4 +32,6 @@ public interface SubscriptionService<C, P> extends RemoteService {
     
     public ArrayList<String> getUnlockingSubscriptionplans(WildcardPermission permission) throws UserManagementException;
 
+    SubscriptionPlanDTO getSubscriptionPlanById(String planId);
+
 }

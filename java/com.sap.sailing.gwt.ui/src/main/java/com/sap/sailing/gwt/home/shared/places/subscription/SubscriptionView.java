@@ -4,11 +4,14 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.client.subscription.SubscribeView;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public interface SubscriptionView extends IsWidget {
+public interface SubscriptionView extends SubscribeView, IsWidget {
 
     void addSubscriptionPlan(SubscriptionPlanDTO plan, final SubscriptionCard.Type type, final EventBus eventBus);
+
+    void setPresenter(SubscriptionView.Presenter presenter);
 
     public interface Presenter {
 
@@ -19,7 +22,7 @@ public interface SubscriptionView extends IsWidget {
         void toggleAuthenticationFlyout();
 
         AuthenticationContext getAuthenticationContext();
-        
+
         SubscriptionClientFactory getClientFactory();
     }
 

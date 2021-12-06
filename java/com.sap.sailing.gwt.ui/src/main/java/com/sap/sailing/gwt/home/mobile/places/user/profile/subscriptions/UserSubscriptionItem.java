@@ -68,8 +68,14 @@ class UserSubscriptionItem extends Composite {
     }
 
     private String getPlanName(final SubscriptionDTO subscription, final UserSubscriptionsView.Presenter presenter) {
-        final SubscriptionPlanDTO plan = subscription != null ? presenter.getPlanById(subscription.getSubscriptionPlanId()) : null;
-        return plan == null ? "-" : stringConstants.getString(plan.getSubscriptionPlanNameMessageKey());
+        SubscriptionPlanDTO plan;
+        try {
+            plan = subscription != null ? presenter.getPlanById(subscription.getSubscriptionPlanId()).get() : null;
+            return plan == null ? "-" : stringConstants.getString(plan.getSubscriptionPlanNameMessageKey());
+        } catch (Exception e) {
+            // TODO handle error
+            return null;
+        }
     }
 
     private String getStatus(final SubscriptionDTO object) {

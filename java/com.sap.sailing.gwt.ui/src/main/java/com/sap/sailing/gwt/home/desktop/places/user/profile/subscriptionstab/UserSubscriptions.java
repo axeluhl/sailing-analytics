@@ -31,8 +31,6 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserSubscriptionsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
@@ -43,6 +41,7 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
  * Implementation view for {@link UserSubscriptionsView}
  */
 public class UserSubscriptions extends Composite implements UserSubscriptionsView {
+
     interface MyUiBinder extends UiBinder<Widget, UserSubscriptions> {
     }
 
@@ -59,13 +58,13 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     SortedCellTable<SubscriptionDTO> subscriptionsUi = new SortedCellTable<>(0, DesignedCellTableResources.INSTANCE);
 
     private final Presenter presenter;
-    private final SubscriptionStringConstants stringConstants;
+    private final SubscriptionStringConstants stringConstants = SubscriptionStringConstants.INSTANCE;
 
     public UserSubscriptions(final UserSubscriptionsView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
+        local_res.css().ensureInjected();
         initSubscriptionsTable(presenter);
         presenter.setView(this);
-        stringConstants = SubscriptionStringConstants.INSTANCE;
         this.presenter = presenter;
     }
 
@@ -75,29 +74,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     }
 
     @Override
-    protected void onLoad() {
-        super.onLoad();
-        UserProfileSubscriptionsResources.INSTANCE.css().ensureInjected();
-    }
-
-    @Override
-    public void onStartLoadSubscription() {
-        setVisible(false);
-    }
-
-    @Override
-    public void onOpenCheckoutError(final String error) {
-        subscribeButtonUi.setEnabled(true);
-        Notification.notify(error, NotificationType.ERROR);
-    }
-
-    @Override
-    public void onCloseCheckoutModal() {
-        subscribeButtonUi.setEnabled(true);
-    }
-
-    @Override
-    public void updateView(final SubscriptionListDTO subscriptions, final Iterable<SubscriptionPlanDTO> planList) {
+    public void updateView(final SubscriptionListDTO subscriptions) {
         subscribeButtonUi.setEnabled(true);
         if (subscriptions == null) {
             subscriptionsUi.setPageSize(0);
@@ -213,7 +190,12 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     }
 
     private SubscriptionPlanDTO getSubscriptionPlan(final SubscriptionDTO subscription) {
-        return subscription != null ? presenter.getPlanById(subscription.getSubscriptionPlanId()) : null;
+        try {
+            return subscription != null ? presenter.getPlanById(subscription.getSubscriptionPlanId()).get() : null;
+        } catch (Exception e) {
+            // TODO handle error
+            return null;
+        }
     }
 
     private String getTrialRemainingText(final SubscriptionDTO subscription) {

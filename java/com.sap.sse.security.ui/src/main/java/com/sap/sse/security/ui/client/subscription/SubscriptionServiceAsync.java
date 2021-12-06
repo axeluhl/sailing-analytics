@@ -17,4 +17,6 @@ public interface SubscriptionServiceAsync<C, P> {
     public void getAllSubscriptionPlans(AsyncCallback<ArrayList<SubscriptionPlanDTO>> callback);
     
     public void getUnlockingSubscriptionplans(WildcardPermission permission, AsyncCallback<ArrayList<String>> callback);
+
+    public void getSubscriptionPlanById(String planId, AsyncCallback<SubscriptionPlanDTO> callback);
 }

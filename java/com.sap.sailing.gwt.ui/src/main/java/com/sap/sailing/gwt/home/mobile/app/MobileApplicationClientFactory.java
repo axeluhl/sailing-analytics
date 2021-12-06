@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.mobile.app;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -31,8 +30,6 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
@@ -42,12 +39,9 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.login.LoginHintContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
- * 
+ *
  * @author pgtaboada
  *
  */
@@ -60,28 +54,28 @@ public class MobileApplicationClientFactory extends
     private final AuthenticationManager authenticationManager;
     private final SailingServiceAsync sailingService;
 
-    public MobileApplicationClientFactory(boolean isStandaloneServer, SailingServiceAsync sailingService) {
+    public MobileApplicationClientFactory(final boolean isStandaloneServer, final SailingServiceAsync sailingService) {
         this(new SimpleEventBus(), isStandaloneServer, sailingService);
     }
 
-    private MobileApplicationClientFactory(SimpleEventBus eventBus, boolean isStandaloneServer,
-            SailingServiceAsync sailingService) {
+    private MobileApplicationClientFactory(final SimpleEventBus eventBus, final boolean isStandaloneServer,
+            final SailingServiceAsync sailingService) {
         this(eventBus, new PlaceController(eventBus), isStandaloneServer, sailingService);
     }
 
-    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController,
-            boolean isStandaloneServer, SailingServiceAsync sailingService) {
+    private MobileApplicationClientFactory(final EventBus eventBus, final PlaceController placeController,
+            final boolean isStandaloneServer, final SailingServiceAsync sailingService) {
         this(eventBus, placeController, new MobilePlacesNavigator(placeController, isStandaloneServer), sailingService);
     }
 
-    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController,
-            MobilePlacesNavigator navigator, SailingServiceAsync sailingService) {
+    private MobileApplicationClientFactory(final EventBus eventBus, final PlaceController placeController,
+            final MobilePlacesNavigator navigator, final SailingServiceAsync sailingService) {
         this(new MobileApplicationView(navigator, eventBus), eventBus, placeController, navigator, sailingService);
     }
 
-    public MobileApplicationClientFactory(final MobileApplicationView root, EventBus eventBus,
-            PlaceController placeController, final MobilePlacesNavigator navigator,
-            SailingServiceAsync sailingService) {
+    public MobileApplicationClientFactory(final MobileApplicationView root, final EventBus eventBus,
+            final PlaceController placeController, final MobilePlacesNavigator navigator,
+            final SailingServiceAsync sailingService) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         this.sailingService = sailingService;
@@ -89,7 +83,7 @@ public class MobileApplicationClientFactory extends
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
         WhatsNewDialogFactory.register(getUserService(), placeController);
-        
+
         authenticationManager.checkNewUserPopup(() -> root.setSubHeaderContent(null), dismissCallback -> {
             final LoginHintContent content = new LoginHintContent(() -> {
                 root.setSubHeaderContent(null);
@@ -109,6 +103,7 @@ public class MobileApplicationClientFactory extends
         return navigator;
     }
 
+    @Override
     public SailingDispatchSystem getDispatch() {
         return dispatch;
     }
@@ -127,32 +122,19 @@ public class MobileApplicationClientFactory extends
     public ErrorView createErrorView(final String errorMessage, final Throwable errorReason) {
         return new ErrorViewImpl(errorMessage, errorReason, null);
     }
-    
+
     @Override
     public SubscriptionView createSubscriptionsView() {
         getSubscriptionServiceFactory().initializeProviders();
-        return new SubscriptionViewImpl(new SubscriptionView.Presenter() {
+        final SubscriptionView subscriptionView = new SubscriptionViewImpl();
+        final SubscriptionView.Presenter presenter = new SubscriptionView.Presenter() {
             @Override
-            public void startSubscription(String priceId) {
+            public void startSubscription(final String priceId) {
                 try {
                     getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
-                            .startCheckout(priceId, new BaseUserSubscriptionView() {
-                                
-                                @Override
-                                public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
-                                }
-                                
-                                @Override
-                                public void onOpenCheckoutError(String error) {
-                                    Notification.notify(error, NotificationType.ERROR);
-                                }
-                                
-                                @Override
-                                public void onCloseCheckoutModal() {
-                                }
-                            }, () -> getUserService().updateUser(true));
-                } catch (InvalidSubscriptionProviderException e) {
-                    Notification.notify(e.toString(), NotificationType.ERROR);
+                            .startCheckout(priceId, subscriptionView, () -> getUserService().updateUser(true));
+                } catch (final InvalidSubscriptionProviderException e) {
+                    subscriptionView.onOpenCheckoutError(e.toString());
                 }
             }
             @Override
@@ -161,7 +143,6 @@ public class MobileApplicationClientFactory extends
             }
             @Override
             public void toggleAuthenticationFlyout() {
-                GWT.log("toggle authentication flyout");
                 navigator.goToPlace(navigator.getSignInNavigation());
             }
             @Override
@@ -172,9 +153,11 @@ public class MobileApplicationClientFactory extends
             public SubscriptionClientFactory getClientFactory() {
                 return MobileApplicationClientFactory.this;
             }
-        });
+        };
+        subscriptionView.setPresenter(presenter);
+        return subscriptionView;
     }
-    
+
     @Override
     public SearchResultView createSearchResultView() {
         return new SearchResultViewImpl(navigator);
@@ -183,7 +166,7 @@ public class MobileApplicationClientFactory extends
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
         return getTopLevelView().getNavigationPathDisplay();
     }
-    
+
     @Override
     public AuthenticationManager getAuthenticationManager() {
         return authenticationManager;
@@ -193,14 +176,14 @@ public class MobileApplicationClientFactory extends
     public ConfirmationView createConfirmationView() {
         return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
-    
+
     @Override
     public PasswordResetView createPasswordResetView() {
         return new PasswordResetViewImpl();
     }
-    
+
     @Override
-    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(final String username) {
         return getNavigator().getPasswordResettedConfirmationNavigation(username);
     }
 

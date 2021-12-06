@@ -128,4 +128,10 @@ public class ChargebeeSubscriptionServiceImpl extends
                 && subscription.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
     }
 
+    @Override
+    public SubscriptionPlanDTO getSubscriptionPlanById(String planId) {
+        SubscriptionPlan subscriptionPlanById = getSecurityService().getSubscriptionPlanById(planId);
+        return subscriptionPlanById == null ? null : convertToDto(subscriptionPlanById);
+    }
+
 }

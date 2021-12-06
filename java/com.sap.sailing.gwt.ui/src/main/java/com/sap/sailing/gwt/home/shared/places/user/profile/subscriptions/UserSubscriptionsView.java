@@ -1,57 +1,34 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
+import com.sap.sse.security.ui.client.subscription.SubscriptionsView;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
- * View for displaying user subscription information like plan, subscription status...In this view user is able to
- * subscribe to a plan or cancel current subscription.
+ * View to display an overview of user subscriptions including information like plan, subscription status, etc. as well
+ * as the possibility to cancel currently active subscription if desired.
  *
  * @author Tu Tran
  */
-public interface UserSubscriptionsView extends BaseUserSubscriptionView, IsWidget {
-    /**
-     * Called on start loading subscription data
-     */
-    public void onStartLoadSubscription();
+public interface UserSubscriptionsView extends SubscriptionsView, IsWidget {
 
     /**
      * Presenter for {@link UserSubscriptionsView}
      */
     public interface Presenter {
-        /**
-         * Initialize
-         */
-        public void init();
 
-        /**
-         * Load user's subscription data
-         */
-        public void loadSubscription();
+        void init();
 
-        /**
-         * Open checkout modal from which user can create new subscription or change current subscription
-         *
-         * @param planId
-         *            Id of plan to subscribe to
-         */
-        public void openCheckout(String planId);
+        void loadSubscription();
 
-        public void setView(UserSubscriptionsView view);
+        void setView(UserSubscriptionsView view);
 
-        /**
-         * Request to cancel current user's subscription
-         *
-         * @param planId
-         *            Id of plan to cancel
-         * @param providerName
-         *            subscription provider name
-         */
-        public void cancelSubscription(String planId, String providerName);
+        void cancelSubscription(String planId, String providerName);
 
-        public SubscriptionPlanDTO getPlanById(String planId);
+        CompletableFuture<SubscriptionPlanDTO> getPlanById(String planId);
 
-        public void navigateToSubscribe();
+        void navigateToSubscribe();
     }
 }
