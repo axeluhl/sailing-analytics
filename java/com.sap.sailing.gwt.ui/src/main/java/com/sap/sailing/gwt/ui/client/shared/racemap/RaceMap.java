@@ -591,11 +591,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider,
-            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId, isSImulationEnabled) {
+            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId, boolean isSimulationEnabled) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null, isSimulationEnabled);
-                }, leaderboardName, leaderboardGroupName, isSimulationEnabled);
+                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName,
+                leaderboardGroupId, /* shareLinkAction */ null, isSimulationEnabled);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -603,8 +603,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId, Runnable shareLinkAction, boolean isSimulationEnabled) {
-            String leaderboardName, String leaderboardGroupName, boolean isSimulationEnabled) {
+            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName,
+            String leaderboardGroupName, UUID leaderboardGroupId, Runnable shareLinkAction, boolean isSimulationEnabled) {
         super(parent, context);
         this.shareLinkAction = shareLinkAction;
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
