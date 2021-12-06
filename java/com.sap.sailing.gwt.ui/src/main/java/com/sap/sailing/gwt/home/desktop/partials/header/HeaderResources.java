@@ -45,5 +45,6 @@ public interface HeaderResources extends AuthenticationResources {
         String header_navigation_icon();
         String header_navigation_iconactive();
         String subscriptions();
+        String premium();
     }
 }

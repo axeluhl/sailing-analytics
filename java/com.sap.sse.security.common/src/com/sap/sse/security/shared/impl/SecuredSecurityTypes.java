@@ -41,7 +41,7 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
 
     public static enum UserActions implements Action {
         /** Update a user's password without knowing the old password. */
-        FORCE_OVERWRITE_PASSWORD, ADD_SUBSCRIPTION
+        FORCE_OVERWRITE_PASSWORD, ADD_SUBSCRIPTION, BE_PREMIUM
     };
     /**
      * type-relative identifier is the {@link User#getName() username}.
