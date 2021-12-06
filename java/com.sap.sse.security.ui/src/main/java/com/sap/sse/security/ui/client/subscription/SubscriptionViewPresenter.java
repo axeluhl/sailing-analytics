@@ -5,8 +5,9 @@ package com.sap.sse.security.ui.client.subscription;
  * handling UI regarding subscription actions
  */
 public interface SubscriptionViewPresenter {
+
     /**
      * Start checkout process for a plan
      */
-    public void startCheckout(String planId, BaseUserSubscriptionView view, Runnable runnable);
+    public void startCheckout(String planId, SubscribeView view, Runnable runnable);
 }

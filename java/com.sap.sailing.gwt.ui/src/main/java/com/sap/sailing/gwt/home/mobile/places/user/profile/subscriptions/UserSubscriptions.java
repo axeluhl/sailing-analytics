@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserSub
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * Implementation of {@link UserSettingsView} where users can change their preferred selections and notifications.
@@ -46,7 +45,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     }
 
     @Override
-    public void updateView(final SubscriptionListDTO subscription, final Iterable<SubscriptionPlanDTO> planList) {
+    public void updateView(final SubscriptionListDTO subscription) {
         subscriptionsContainerUi.clear();
         if (subscription != null) {
             final List<SubscriptionDTO> subscriptionItems = asList(subscription.getSubscriptionItems());
@@ -67,21 +66,4 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         presenter.navigateToSubscribe();
     }
 
-    @Override
-    public void onCloseCheckoutModal() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onOpenCheckoutError(final String error) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onStartLoadSubscription() {
-        // TODO Auto-generated method stub
-
-    }
 }

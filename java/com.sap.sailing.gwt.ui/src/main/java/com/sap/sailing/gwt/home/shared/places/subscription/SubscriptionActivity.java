@@ -63,7 +63,7 @@ public class SubscriptionActivity extends AbstractActivity {
         panel.setWidget(view);
     }
 
-    private boolean checkIfUserIsOwnerOfThePlan(SubscriptionPlanDTO plan) {
+    private boolean checkIfUserIsOwnerOfThePlan(final SubscriptionPlanDTO plan) {
         return plan.isUserSubscribedToPlan();
     }
 
