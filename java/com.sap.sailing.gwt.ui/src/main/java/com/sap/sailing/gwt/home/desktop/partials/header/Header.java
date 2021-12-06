@@ -290,7 +290,7 @@ public class Header extends Composite implements HeaderConstants {
                 menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
             }
             menuItemVisibilityHandler.refreshVisibilityDeferred();
-            if (authContext.hasServerPermission(UserActions.BE_PREMIUM)) {
+            if (authContext.hasPermission(authContext.getCurrentUser(), UserActions.BE_PREMIUM)) {
                 usermenuPremium.getStyle().setDisplay(Display.BLOCK);
             } else {
                 usermenuPremium.getStyle().setDisplay(Display.NONE);

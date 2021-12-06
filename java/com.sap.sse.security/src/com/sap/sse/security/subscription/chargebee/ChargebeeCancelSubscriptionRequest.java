@@ -32,7 +32,7 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
     @Override
     protected ChargebeeInternalApiRequestWrapper createRequest() {
         logger.info(() -> "Cancel Chargebee subscription, subscription id: " + subscriptionId);
-        CancelForItemsRequest request = Subscription.cancelForItems(subscriptionId);
+        CancelForItemsRequest request = Subscription.cancelForItems(subscriptionId).endOfTerm(true);
         return new ChargebeeInternalApiRequestWrapper(request);
     }
 
