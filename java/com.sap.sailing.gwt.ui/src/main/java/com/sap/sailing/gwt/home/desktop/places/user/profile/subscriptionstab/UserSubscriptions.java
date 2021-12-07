@@ -35,7 +35,6 @@ import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * Implementation view for {@link UserSubscriptionsView}
@@ -118,8 +117,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         subscriptionsUi.addColumn(new TextColumn<SubscriptionDTO>() {
             @Override
             public String getValue(final SubscriptionDTO object) {
-                final SubscriptionPlanDTO plan = getSubscriptionPlan(object);
-                return plan == null ? "-" : stringConstants.getString(plan.getSubscriptionPlanNameMessageKey());
+                return object == null ? "-" : stringConstants.getString(object.getSubscriptionPlanNameMessageKey());
             }
         }, i18n.name());
 
@@ -187,15 +185,6 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             }
         });
         subscriptionsUi.addColumn(cancelColumn);
-    }
-
-    private SubscriptionPlanDTO getSubscriptionPlan(final SubscriptionDTO subscription) {
-        try {
-            return subscription != null ? presenter.getPlanById(subscription.getSubscriptionPlanId()).get() : null;
-        } catch (Exception e) {
-            // TODO handle error
-            return null;
-        }
     }
 
     private String getTrialRemainingText(final SubscriptionDTO subscription) {

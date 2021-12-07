@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
@@ -15,7 +13,6 @@ import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * Implementation presenter of {@link UserSubscriptionsView.Presenter}
@@ -110,25 +107,5 @@ public class UserSubscriptionsPresenter<C extends WithUserService & WithSecurity
     @Override
     public void navigateToSubscribe() {
         subscribePlaceNavigation.goToPlace();
-    }
-
-    @Override
-    public CompletableFuture<SubscriptionPlanDTO> getPlanById(String planId) {
-        CompletableFuture<SubscriptionPlanDTO> plan = new CompletableFuture<>();
-        try {
-            factory.getDefaultAsyncService().getSubscriptionPlanById(planId, new AsyncCallback<SubscriptionPlanDTO>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    showError(StringMessages.INSTANCE.errorLoadingUserSubscription(caught.getMessage()));
-                }
-                @Override
-                public void onSuccess(SubscriptionPlanDTO result) {
-                    plan.complete(result);
-                }
-            });
-        } catch (InvalidSubscriptionProviderException e) {
-            showError(StringMessages.INSTANCE.errorLoadingUserSubscription(e.getMessage()));
-        }
-        return plan;
     }
 }

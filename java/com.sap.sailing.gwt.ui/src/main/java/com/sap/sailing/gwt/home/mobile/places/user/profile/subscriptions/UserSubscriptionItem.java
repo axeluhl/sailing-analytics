@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 class UserSubscriptionItem extends Composite {
 
@@ -44,8 +43,8 @@ class UserSubscriptionItem extends Composite {
         final MobileSection mobileSection = uiBinder.createAndBindUi(this);
         mobileSection.setEdgeToEdgeContent(true);
         initWidget(mobileSection);
-
-        sectionHeaderUi.setSectionTitle(getPlanName(subscription, presenter));
+        sectionHeaderUi.setSectionTitle(subscription == null ? "-"
+                : stringConstants.getString(subscription.getSubscriptionPlanNameMessageKey()));
         sectionHeaderUi.setSubtitle(getStatus(subscription));
         addInfo(create(i18n.paymentStatus(), getPaymentStatus(subscription))
                 .highlightValue(subscription.isPaymentSuccess() && !subscription.isRefunded()));
@@ -65,17 +64,6 @@ class UserSubscriptionItem extends Composite {
 
     private void addInfo(final UIObject child) {
         subscriptionInfoUi.appendChild(child.getElement());
-    }
-
-    private String getPlanName(final SubscriptionDTO subscription, final UserSubscriptionsView.Presenter presenter) {
-        SubscriptionPlanDTO plan;
-        try {
-            plan = subscription != null ? presenter.getPlanById(subscription.getSubscriptionPlanId()).get() : null;
-            return plan == null ? "-" : stringConstants.getString(plan.getSubscriptionPlanNameMessageKey());
-        } catch (Exception e) {
-            // TODO handle error
-            return null;
-        }
     }
 
     private String getStatus(final SubscriptionDTO object) {
