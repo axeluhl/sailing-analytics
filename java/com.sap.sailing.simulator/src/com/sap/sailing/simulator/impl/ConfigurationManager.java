@@ -23,8 +23,8 @@ public enum ConfigurationManager {
     private static final String CONFIG_FILE_LOCATION = "STG_configuration.csv";
     private static final String RACES_FILE_LOCATION = "races.csv";
 
-    private List<BoatClassProperties> _boatClassesInfo = new ArrayList<BoatClassProperties>();
-    private List<RaceProperties> _racesInfo = new ArrayList<RaceProperties>();
+    private List<BoatClassProperties> _boatClassesInfo = new ArrayList<>();
+    private List<RaceProperties> _racesInfo = new ArrayList<>();
 
     private ReadingConfigurationFileStatus status = ReadingConfigurationFileStatus.SUCCESS;
     private String errorMessage = "";

@@ -306,11 +306,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     @Override
     public BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException {
-
         List<BoatClassDTO> boatClassesDTOs = new ArrayList<BoatClassDTO>();
-
         BoatClassDTOsAndNotificationMessage result = new BoatClassDTOsAndNotificationMessage();
-
         ConfigurationManager config = ConfigurationManager.INSTANCE;
         if (config.getStatus() == ReadingConfigurationFileStatus.IO_ERROR) {
             throw new ConfigurationException(config.getErrorMessage());
@@ -318,28 +315,21 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 || config.getStatus() == ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE) {
             result.setNotificationMessage(config.getErrorMessage());
         }
-
         for (BoatClassProperties tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
             boatClassesDTOs.add(new BoatClassDTO(tuple.getName(), null, tuple.getLength()));
         }
-
         result.setBoatClassDTOs(boatClassesDTOs.toArray(new BoatClassDTO[boatClassesDTOs.size()]));
-
         return result;
     }
 
     @Override
     public PolarDiagramDTOAndNotificationMessage getPolarDiagram(Double bearingStep, int boatClassIndex)
             throws ConfigurationException {
-
         Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
-
         NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = polarDiagramAndNotificationMessage.getA()
                 .polarDiagramPlot(bearingStep);
-
         Set<Speed> validSpeeds = navMap.keySet();
         validSpeeds.remove(Speed.NULL);
-
         Number[][] series = new Number[validSpeeds.size()][];
         int i = 0;
         for (Speed s : validSpeeds) {
@@ -353,11 +343,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
         PolarDiagramDTO dto = new PolarDiagramDTO();
         dto.setNumberSeries(series);
-
         PolarDiagramDTOAndNotificationMessage result = new PolarDiagramDTOAndNotificationMessage();
         result.setPolarDiagramDTO(dto);
         result.setNotificationMessage(polarDiagramAndNotificationMessage.getB());
-
         return result;
     }
 
