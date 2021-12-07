@@ -21,8 +21,9 @@ public class ChargebeeSubscription extends Subscription {
     public static Subscription createEmptySubscription(String planId, TimePoint latestEventTime,
             TimePoint manualUpdatedAt) {
         return new ChargebeeSubscription(null, planId, null, Subscription.emptyTime(), Subscription.emptyTime(), null,
-                null, null, null, null, null, null, null, null, null, null, Subscription.emptyTime(),
-                Subscription.emptyTime(), latestEventTime, manualUpdatedAt);
+                null, null, null, null, null, null, Subscription.emptyTime(), Subscription.emptyTime(),
+                Subscription.emptyTime(), Subscription.emptyTime(), Subscription.emptyTime(), Subscription.emptyTime(),
+                latestEventTime, manualUpdatedAt);
     }
 
     /**
