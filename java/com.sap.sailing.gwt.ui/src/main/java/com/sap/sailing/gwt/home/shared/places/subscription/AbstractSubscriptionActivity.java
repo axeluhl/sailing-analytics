@@ -11,22 +11,26 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard.Type;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public class SubscriptionActivity extends AbstractActivity {
+public abstract class AbstractSubscriptionActivity extends AbstractActivity implements SubscriptionView.Presenter {
 
     private final SubscriptionClientFactory clientFactory;
     private final SubscriptionPlace subscriptionsPlace;
+    private final SubscriptionView view;
 
-    public SubscriptionActivity(final SubscriptionPlace place, final SubscriptionClientFactory clientFactory) {
+    protected AbstractSubscriptionActivity(final SubscriptionPlace place,
+            final SubscriptionClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.subscriptionsPlace = place;
+        this.view = clientFactory.createSubscriptionsView();
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         Window.setTitle(subscriptionsPlace.getTitle());
-        final SubscriptionView view = clientFactory.createSubscriptionsView();
+        view.setPresenter(this);
 
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
@@ -37,7 +41,8 @@ public class SubscriptionActivity extends AbstractActivity {
                             result.forEach(plan -> {
                                 if (checkIfUserIsOwnerOfThePlan(plan)) {
                                     view.addSubscriptionPlan(plan, Type.OWNER, eventBus);
-                                } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getSubscriptionPlanId())) {
+                                } else if (subscriptionsPlace.getPlansToHighlight()
+                                        .contains(plan.getSubscriptionPlanId())) {
                                     view.addSubscriptionPlan(plan, Type.HIGHLIGHT, eventBus);
                                 } else {
                                     view.addSubscriptionPlan(plan, Type.DEFAULT, eventBus);
@@ -51,8 +56,8 @@ public class SubscriptionActivity extends AbstractActivity {
                         }
 
                         private void addFreePlan(final SubscriptionView view) {
-                            final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO("free_subscription_plan" /* id */,
-                                    /* isUserSubscribedToPlan */ false,
+                            final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO(
+                                    "free_subscription_plan" /* id */, /* isUserSubscribedToPlan */ false,
                                     Collections.emptySet() /* prices */, null /* error */);
                             view.addSubscriptionPlan(freePlan, Type.FREE, eventBus);
                         }
@@ -61,6 +66,21 @@ public class SubscriptionActivity extends AbstractActivity {
             onInvalidSubscriptionProviderError(exc);
         }
         panel.setWidget(view);
+    }
+
+    @Override
+    public void startSubscription(final String priceId) {
+        try {
+            clientFactory.getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
+                    .startCheckout(priceId, view, () -> clientFactory.getUserService().updateUser(true));
+        } catch (final InvalidSubscriptionProviderException e) {
+            view.onOpenCheckoutError(e.toString());
+        }
+    }
+
+    @Override
+    public AuthenticationContext getAuthenticationContext() {
+        return clientFactory.getAuthenticationManager().getAuthenticationContext();
     }
 
     private boolean checkIfUserIsOwnerOfThePlan(final SubscriptionPlanDTO plan) {

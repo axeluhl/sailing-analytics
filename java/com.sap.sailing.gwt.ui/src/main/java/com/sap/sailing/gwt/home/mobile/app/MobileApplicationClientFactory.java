@@ -31,11 +31,9 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientF
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.gwt.client.mvp.ErrorView;
-import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.login.LoginHintContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -126,36 +124,7 @@ public class MobileApplicationClientFactory extends
     @Override
     public SubscriptionView createSubscriptionsView() {
         getSubscriptionServiceFactory().initializeProviders();
-        final SubscriptionView subscriptionView = new SubscriptionViewImpl();
-        final SubscriptionView.Presenter presenter = new SubscriptionView.Presenter() {
-            @Override
-            public void startSubscription(final String priceId) {
-                try {
-                    getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
-                            .startCheckout(priceId, subscriptionView, () -> getUserService().updateUser(true));
-                } catch (final InvalidSubscriptionProviderException e) {
-                    subscriptionView.onOpenCheckoutError(e.toString());
-                }
-            }
-            @Override
-            public void manageSubscriptions() {
-                navigator.goToPlace(navigator.getUserSubscriptionsNavigation());
-            }
-            @Override
-            public void toggleAuthenticationFlyout() {
-                navigator.goToPlace(navigator.getSignInNavigation());
-            }
-            @Override
-            public AuthenticationContext getAuthenticationContext() {
-                return authenticationManager.getAuthenticationContext();
-            }
-            @Override
-            public SubscriptionClientFactory getClientFactory() {
-                return MobileApplicationClientFactory.this;
-            }
-        };
-        subscriptionView.setPresenter(presenter);
-        return subscriptionView;
+        return new SubscriptionViewImpl();
     }
 
     @Override

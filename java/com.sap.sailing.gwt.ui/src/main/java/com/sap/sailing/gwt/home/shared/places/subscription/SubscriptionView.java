@@ -15,7 +15,7 @@ public interface SubscriptionView extends SubscribeView, IsWidget {
 
     public interface Presenter {
 
-        void startSubscription(String planId);
+        void startSubscription(String priceId);
 
         void manageSubscriptions();
 
@@ -23,7 +23,6 @@ public interface SubscriptionView extends SubscribeView, IsWidget {
 
         AuthenticationContext getAuthenticationContext();
 
-        SubscriptionClientFactory getClientFactory();
     }
 
 }

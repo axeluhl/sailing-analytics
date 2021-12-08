@@ -36,8 +36,7 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
                         presenter.startSubscription(price.getPriceId());
                     }
                 } else {
-                    presenter.getClientFactory().createErrorView(StringMessages.INSTANCE.notLoggedIn(),
-                            new RuntimeException("User not logged in."));
+                    onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
                     presenter.toggleAuthenticationFlyout();
                 }
             }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));

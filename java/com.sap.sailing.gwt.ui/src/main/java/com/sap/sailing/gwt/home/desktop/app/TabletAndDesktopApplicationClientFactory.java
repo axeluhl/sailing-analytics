@@ -24,7 +24,6 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew.WhatsNewDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
-import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionClientFactory;
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionView;
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
@@ -35,12 +34,10 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.AuthenticationViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
-import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -119,36 +116,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public SubscriptionView createSubscriptionsView() {
         getSubscriptionServiceFactory().initializeProviders();
-        final SubscriptionView view = new SubscriptionViewImpl();
-        final SubscriptionView.Presenter presenter = new SubscriptionView.Presenter() {
-            @Override
-            public void startSubscription(final String priceId) {
-                try {
-                    getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
-                            .startCheckout(priceId, view, () -> getUserService().updateUser(true));
-                } catch (final InvalidSubscriptionProviderException e) {
-                    view.onOpenCheckoutError(e.toString());
-                }
-            }
-            @Override
-            public void manageSubscriptions() {
-                getHomePlacesNavigator().goToPlace(getHomePlacesNavigator().getUserSubscriptionsNavigation());
-            }
-            @Override
-            public void toggleAuthenticationFlyout() {
-                flyoutAuthenticationPresenter.toggleFlyout();
-            }
-            @Override
-            public AuthenticationContext getAuthenticationContext() {
-                return authenticationManager.getAuthenticationContext();
-            }
-            @Override
-            public SubscriptionClientFactory getClientFactory() {
-                return TabletAndDesktopApplicationClientFactory.this;
-            }
-        };
-        view.setPresenter(presenter);
-        return view;
+        return new SubscriptionViewImpl();
     }
 
     @Override
