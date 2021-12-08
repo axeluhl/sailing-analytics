@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPla
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserProfileSubscriptionPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserProfileSubscriptionsPlace;
 
 public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -127,8 +127,8 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createLocalPlaceNavigation(new SailorProfilePlace());
     }
 
-    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileSubscriptionPlace() {
-        return createLocalPlaceNavigation(new UserProfileSubscriptionPlace());
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserSubscriptionsNavigation() {
+        return createLocalPlaceNavigation(new UserProfileSubscriptionsPlace());
     }
 
 }

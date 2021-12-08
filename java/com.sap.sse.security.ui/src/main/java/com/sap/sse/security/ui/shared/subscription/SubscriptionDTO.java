@@ -3,7 +3,7 @@ package com.sap.sse.security.ui.shared.subscription;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.TimePoint;
 
-public abstract class SubscriptionDTO implements IsSerializable {
+public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsSerializable {
     public static final String PAYMENT_STATUS_SUCCESS = "success";
     public static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
 
@@ -11,17 +11,7 @@ public abstract class SubscriptionDTO implements IsSerializable {
      * User current subscription plan id
      */
     private String planId;
-
-    /**
-     * Trial start time
-     */
-    private TimePoint trialStart;
-
-    /**
-     * Trial end time
-     */
-    private TimePoint trialEnd;
-
+    
     /**
      * Subscription status: active or trial
      */
@@ -32,7 +22,7 @@ public abstract class SubscriptionDTO implements IsSerializable {
      * {@code SubscriptionItem#PAYMENT_STATUS_NO_SUCCESS}
      */
     private String paymentStatus;
-
+    
     /**
      * Subscription transaction type: payment or refund
      */
@@ -42,15 +32,18 @@ public abstract class SubscriptionDTO implements IsSerializable {
      * Subscription provider name
      */
     private String provider;
+    
+    private TimePoint currentEnd;
+    private TimePoint createdAt;
 
     public SubscriptionDTO() {
     }
 
-    public SubscriptionDTO(String planId, TimePoint trialStart, TimePoint trialEnd, String subscriptionStatus,
+    public SubscriptionDTO(String planId, TimePoint startedAt, TimePoint currentEnd, String subscriptionStatus,
             String paymentStatus, String transactionType, String provider) {
         this.planId = planId;
-        this.trialStart = trialStart;
-        this.trialEnd = trialEnd;
+        this.createdAt = startedAt;
+        this.currentEnd = currentEnd;
         this.subscriptionStatus = subscriptionStatus;
         this.paymentStatus = paymentStatus;
         this.transactionType = transactionType;
@@ -83,17 +76,10 @@ public abstract class SubscriptionDTO implements IsSerializable {
     public boolean isPaymentSuccess() {
         return paymentStatus != null && paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
     }
-
-    public String getPlanId() {
+    
+    @Override
+    public String getSubscriptionPlanId() {
         return planId;
-    }
-
-    public TimePoint getTrialStart() {
-        return trialStart;
-    }
-
-    public TimePoint getTrialEnd() {
-        return trialEnd;
     }
 
     public String getSubscriptionStatus() {
@@ -106,14 +92,6 @@ public abstract class SubscriptionDTO implements IsSerializable {
 
     public void setPlanId(String planId) {
         this.planId = planId;
-    }
-
-    public void setTrialStart(TimePoint trialStart) {
-        this.trialStart = trialStart;
-    }
-
-    public void setTrialEnd(TimePoint trialEnd) {
-        this.trialEnd = trialEnd;
     }
 
     public void setSubscriptionStatus(String subscriptionStatus) {
@@ -139,4 +117,21 @@ public abstract class SubscriptionDTO implements IsSerializable {
     public void setProvider(String provider) {
         this.provider = provider;
     }
+
+    public TimePoint getCurrentEnd() {
+        return currentEnd;
+    }
+
+    public void setCurrentEnd(TimePoint currentEnd) {
+        this.currentEnd = currentEnd;
+    }
+
+    public TimePoint getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(TimePoint createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.places.subscription.SailingSubscriptionStringConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -56,6 +55,8 @@ public class SubscriptionCard extends Composite {
     HeadingElement title;
     @UiField
     HeadingElement description;
+    @UiField
+    HeadingElement info;
     @UiField
     FlowPanel prices;
     @UiField
@@ -164,13 +165,17 @@ public class SubscriptionCard extends Composite {
             break;
         }
         final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
-        title.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getNameMessageKey()));
-        description.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getDescMessageKey()));
-        for (StringMessagesKey featureKey : subscriptionPlanDTO.getFeatures()) {
-            FlowPanel feature = new FlowPanel();
-            feature.addStyleName(FEATURE_STYLE);
-            feature.add(new Label(subscriptionStringConstants.getString(featureKey)));
-            features.add(feature);
+        title.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanNameMessageKey()));
+        description.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanDescMessageKey()));
+        info.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanInfoMessageKey()));
+        final String[] featureStrings = subscriptionStringConstants.getStringArray(subscriptionPlanDTO.getSubscriptionPlanFeatureMessageKey());
+        for (String featureString : featureStrings) {
+            if(featureString != "") {
+                FlowPanel feature = new FlowPanel();
+                feature.addStyleName(FEATURE_STYLE);
+                feature.add(new Label(featureString));
+                features.add(feature);
+            }
         }
     }
 

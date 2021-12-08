@@ -87,6 +87,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.common.client.sharing.FloatingSharingButtonsResources;
@@ -830,7 +831,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             }
                         }
                         if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
-                                && settings.isShowWindStreamletOverlay()) {
+                                && settings.isShowWindStreamletOverlay()
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
                         }
                     }
@@ -860,14 +862,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         settings = new RaceMapSettings(settings, clearedZoomSettings);
                         currentlyDragging = false;
                         refreshMapWithoutAnimation();
-                        if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
+                        if (streamletOverlay != null 
+                                && settings.isShowWindStreamletOverlay()
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                             streamletOverlay.onDragEnd();
                         }
                     }
                 });
                 map.addDragStartHandler(event -> {
                     currentlyDragging = true;
-                    if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
+                    if (streamletOverlay != null 
+                            && settings.isShowWindStreamletOverlay()
+                            && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                         streamletOverlay.onDragStart();
                     }
                 });
@@ -885,7 +891,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             map.panTo(autoZoomLatLngBounds.getCenter());
                             autoZoomOut = false;
                         }
-                        if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
+                        if (streamletOverlay != null 
+                                && settings.isShowWindStreamletOverlay()
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                             streamletOverlay.setCanvasSettings();
                         }
                         if (!currentlyDragging) {
@@ -929,7 +937,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
                 streamletOverlay.addToMap();
                 streamletOverlay.setColors(settings.isShowWindStreamletColors());
-                if (settings.isShowWindStreamletOverlay()) {
+                if (settings.isShowWindStreamletOverlay()
+                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                     streamletOverlay.setVisible(true);
                 }
                 if (isSimulationEnabled) {
@@ -3142,7 +3151,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             estimatedDurationOverlay.removeFromParent();
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
-            streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
+            streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay() 
+                    && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS));
             streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {

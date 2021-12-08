@@ -90,11 +90,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
     @Override
     protected void onUserPermissionUpdate(final boolean isPermitted) {
         checkBox.setValue(getValue());
-        if (isEnabled() && isPermitted) {
-            checkBox.getElement().removeAttribute("readonly");
-        } else {
-            checkBox.getElement().setAttribute("readonly", "readonly");
-        }
+        checkBox.setEnabled(isEnabled() && isPermitted);
         container.setStyleName(style.premiumPermitted(), isPermitted);
     }
 
@@ -121,12 +117,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
     @Override
     public void setEnabled(final boolean enabled) {
         super.setEnabled(enabled);
-
-        if (hasPermission() && enabled) {
-            checkBox.getElement().removeAttribute("readonly");
-        } else {
-            checkBox.getElement().setAttribute("readonly", "readonly");
-        }
+        checkBox.setEnabled(enabled);
     }
 
     @Override

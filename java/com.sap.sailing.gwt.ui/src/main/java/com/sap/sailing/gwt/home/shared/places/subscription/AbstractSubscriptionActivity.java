@@ -1,10 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.subscription;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -13,24 +10,27 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard.Type;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.security.shared.StringMessagesKey;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
-public class SubscriptionActivity extends AbstractActivity {
+public abstract class AbstractSubscriptionActivity extends AbstractActivity implements SubscriptionView.Presenter {
 
     private final SubscriptionClientFactory clientFactory;
     private final SubscriptionPlace subscriptionsPlace;
+    private final SubscriptionView view;
 
-    public SubscriptionActivity(final SubscriptionPlace place, final SubscriptionClientFactory clientFactory) {
+    protected AbstractSubscriptionActivity(final SubscriptionPlace place,
+            final SubscriptionClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.subscriptionsPlace = place;
+        this.view = clientFactory.createSubscriptionsView();
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         Window.setTitle(subscriptionsPlace.getTitle());
-        final SubscriptionView view = clientFactory.createSubscriptionsView();
+        view.setPresenter(this);
 
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
@@ -41,13 +41,13 @@ public class SubscriptionActivity extends AbstractActivity {
                             result.forEach(plan -> {
                                 if (checkIfUserIsOwnerOfThePlan(plan)) {
                                     view.addSubscriptionPlan(plan, Type.OWNER, eventBus);
-                                } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getId())) {
+                                } else if (subscriptionsPlace.getPlansToHighlight()
+                                        .contains(plan.getSubscriptionPlanId())) {
                                     view.addSubscriptionPlan(plan, Type.HIGHLIGHT, eventBus);
                                 } else {
                                     view.addSubscriptionPlan(plan, Type.DEFAULT, eventBus);
                                 }
                             });
-                            addIndividual(eventBus, view);
                         }
 
                         @Override
@@ -55,25 +55,9 @@ public class SubscriptionActivity extends AbstractActivity {
                             clientFactory.createErrorView("TODO Failed to load subscription plans", caught);
                         }
 
-                        private void addIndividual(final EventBus eventBus, final SubscriptionView view) {
-                            final SubscriptionPlanDTO individualPlan = new SubscriptionPlanDTO(null /* id */,
-                                    /* isUserSubscribedToPlan */ false,
-                                    new StringMessagesKey("individual_subscription_plan_name"),
-                                    new StringMessagesKey("individual_subscription_plan_description"),
-                                    Collections.emptySet() /* features */, Collections.emptySet() /* prices */,
-                                    null /* error */);
-                            view.addSubscriptionPlan(individualPlan, Type.INDIVIDUAL, eventBus);
-                        }
-
                         private void addFreePlan(final SubscriptionView view) {
-                            Set<StringMessagesKey> freeFeatures = new LinkedHashSet<StringMessagesKey>(Arrays.asList(
-                                    new StringMessagesKey("free_feature_1"), new StringMessagesKey("free_feature_2"),
-                                    new StringMessagesKey("free_feature_3"), new StringMessagesKey("free_feature_4")));
-
-                            final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO(null /* id */,
-                                    /* isUserSubscribedToPlan */ false,
-                                    new StringMessagesKey("free_subscription_plan_name"),
-                                    new StringMessagesKey("free_subscription_plan_description"), freeFeatures,
+                            final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO(
+                                    "free_subscription_plan" /* id */, /* isUserSubscribedToPlan */ false,
                                     Collections.emptySet() /* prices */, null /* error */);
                             view.addSubscriptionPlan(freePlan, Type.FREE, eventBus);
                         }
@@ -84,7 +68,22 @@ public class SubscriptionActivity extends AbstractActivity {
         panel.setWidget(view);
     }
 
-    private boolean checkIfUserIsOwnerOfThePlan(SubscriptionPlanDTO plan) {
+    @Override
+    public void startSubscription(final String priceId) {
+        try {
+            clientFactory.getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
+                    .startCheckout(priceId, view, () -> clientFactory.getUserService().updateUser(true));
+        } catch (final InvalidSubscriptionProviderException e) {
+            view.onOpenCheckoutError(e.toString());
+        }
+    }
+
+    @Override
+    public AuthenticationContext getAuthenticationContext() {
+        return clientFactory.getAuthenticationManager().getAuthenticationContext();
+    }
+
+    private boolean checkIfUserIsOwnerOfThePlan(final SubscriptionPlanDTO plan) {
         return plan.isUserSubscribedToPlan();
     }
 

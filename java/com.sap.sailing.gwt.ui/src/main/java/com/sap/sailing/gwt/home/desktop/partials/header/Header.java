@@ -62,6 +62,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
@@ -91,6 +92,7 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Element centerMenuPanel;
     @UiField Anchor usermenu;
     @UiField ImageElement logoImage;
+    @UiField Element usermenuPremium;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     private final List<Anchor> links;
@@ -310,6 +312,11 @@ public class Header extends Composite implements HeaderConstants {
                 menuItemVisibilityHandler.addIgnore(strategySimulatorPageLink);
             }
             menuItemVisibilityHandler.refreshVisibilityDeferred();
+            if (authContext.hasPermission(authContext.getCurrentUser(), UserActions.BE_PREMIUM)) {
+                usermenuPremium.getStyle().setDisplay(Display.BLOCK);
+            } else {
+                usermenuPremium.getStyle().setDisplay(Display.NONE);
+            }
         });
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addFocusHandler((focusEvent) -> menuItemVisibilityHandler.refreshVisibility(370));

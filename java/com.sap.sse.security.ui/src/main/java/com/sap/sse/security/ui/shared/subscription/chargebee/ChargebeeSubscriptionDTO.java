@@ -8,15 +8,14 @@ public class ChargebeeSubscriptionDTO extends SubscriptionDTO {
     public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
     public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
-
     public static final String TRANSACTION_TYPE_REFUND = "refund";
 
     public ChargebeeSubscriptionDTO() {
     }
 
-    public ChargebeeSubscriptionDTO(String planId, TimePoint trialStart, TimePoint trialEnd, String subscriptionStatus,
+    public ChargebeeSubscriptionDTO(String planId, TimePoint startedAt, TimePoint currentEnd, String subscriptionStatus,
             String paymentStatus, String transactionType) {
-        super(planId, trialStart, trialEnd, subscriptionStatus, paymentStatus, transactionType,
+        super(planId, startedAt, currentEnd, subscriptionStatus, paymentStatus, transactionType,
                 ChargebeeSubscriptionClientProvider.PROVIDER_NAME);
     }
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptionstab;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -10,12 +10,12 @@ import com.sap.sse.gwt.resources.CommonControlsCSS;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
- * Implementation view of {@link UserProfileSubscriptionView}
+ * Implementation view of {@link UserProfileSubscriptionsView}
  *
  * @author Tu Tran
  */
-public class UserProfileSubscriptionViewImpl extends Composite implements UserProfileSubscriptionView {
-    interface MyBinder extends UiBinder<Widget, UserProfileSubscriptionViewImpl> {
+public class UserProfileSubscriptionsViewImpl extends Composite implements UserProfileSubscriptionsView {
+    interface MyBinder extends UiBinder<Widget, UserProfileSubscriptionsViewImpl> {
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -23,12 +23,12 @@ public class UserProfileSubscriptionViewImpl extends Composite implements UserPr
     @UiField(provided = true)
     AuthorizedContentDecoratorDesktop decoratorUi;
     @UiField(provided = true)
-    UserSubscription userSubscriptionUi;
+    UserSubscriptions userSubscriptionUi;
 
     @Override
     public void setPresenter(final Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
-        userSubscriptionUi = new UserSubscription(presenter.getUserSubscriptionPresenter());
+        userSubscriptionUi = new UserSubscriptions(presenter.getUserSubscriptionPresenter());
         initWidget(uiBinder.createAndBindUi(this));
     }
 

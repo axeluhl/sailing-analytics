@@ -13,6 +13,7 @@
       <h1 ui:field="title" class="{local.css.title}"></h1>
       <g:FlowPanel ui:field="prices" styleName="{local.css.prices}"></g:FlowPanel>
       <h4 ui:field="description" class="{local.css.description}"></h4>
+      <h5 ui:field="info" class="{local.css.info}"></h5>
       <g:FlowPanel ui:field="features" styleName="{local.css.features}"></g:FlowPanel>
     </div>
     <div class="{local.css.subscriptionFooter}">

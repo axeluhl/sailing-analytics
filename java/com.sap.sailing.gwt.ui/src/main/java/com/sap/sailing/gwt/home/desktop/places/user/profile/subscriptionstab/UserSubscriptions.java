@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptionstab;
 
 import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.formatDateAndTime;
 
@@ -28,22 +28,20 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
-import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserSubscriptionsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
- * Implementation view for {@link UserSubscriptionView}
+ * Implementation view for {@link UserSubscriptionsView}
  */
-public class UserSubscription extends Composite implements UserSubscriptionView {
-    interface MyUiBinder extends UiBinder<Widget, UserSubscription> {
+public class UserSubscriptions extends Composite implements UserSubscriptionsView {
+
+    interface MyUiBinder extends UiBinder<Widget, UserSubscriptions> {
     }
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -59,53 +57,30 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     SortedCellTable<SubscriptionDTO> subscriptionsUi = new SortedCellTable<>(0, DesignedCellTableResources.INSTANCE);
 
     private final Presenter presenter;
-    private final SubscriptionStringConstants stringConstants;
+    private final SubscriptionStringConstants stringConstants = SubscriptionStringConstants.INSTANCE;
 
-    public UserSubscription(final UserSubscriptionView.Presenter presenter) {
+    public UserSubscriptions(final UserSubscriptionsView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
+        local_res.css().ensureInjected();
         initSubscriptionsTable(presenter);
         presenter.setView(this);
-        stringConstants = SubscriptionStringConstants.INSTANCE;
         this.presenter = presenter;
     }
 
     @UiHandler("subscribeButtonUi")
-    public void handleUpdateSubscriptionClick(final ClickEvent e) {
-        // FIXME: Implement navigation to subscribe site
-        Window.alert("[TODO] Go to subscribe site ...");
+    public void onSubscribeClicked(final ClickEvent event) {
+        presenter.navigateToSubscribe();
     }
 
     @Override
-    protected void onLoad() {
-        super.onLoad();
-        UserProfileSubscriptionsResources.INSTANCE.css().ensureInjected();
-    }
-
-    @Override
-    public void onStartLoadSubscription() {
-        setVisible(false);
-    }
-
-    @Override
-    public void onOpenCheckoutError(final String error) {
+    public void updateView(final SubscriptionListDTO subscriptions) {
         subscribeButtonUi.setEnabled(true);
-        Notification.notify(error, NotificationType.ERROR);
-    }
-
-    @Override
-    public void onCloseCheckoutModal() {
-        subscribeButtonUi.setEnabled(true);
-    }
-
-    @Override
-    public void updateView(final SubscriptionListDTO subscription, final Iterable<SubscriptionPlanDTO> planList) {
-        subscribeButtonUi.setEnabled(true);
-        if (subscription == null) {
+        if (subscriptions == null) {
             subscriptionsUi.setPageSize(0);
             subscriptionsUi.setList(new ArrayList<SubscriptionDTO>());
         } else {
-            subscriptionsUi.setPageSize(subscription.getSubscriptionItems().length);
-            subscriptionsUi.setList(Arrays.asList(subscription.getSubscriptionItems()));
+            subscriptionsUi.setPageSize(subscriptions.getSubscriptionItems().length);
+            subscriptionsUi.setList(Arrays.asList(subscriptions.getSubscriptionItems()));
         }
         setVisible(true);
     }
@@ -125,7 +100,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
                     td.className(cellTable.getResources().style().cell());
                     final DivBuilder div = td.startDiv();
                     div.text(i18n.trialText(getTrialRemainingText(rowValue),
-                            formatDateAndTime(rowValue.getTrialEnd().asDate())));
+                            formatDateAndTime(rowValue.getCurrentEnd().asDate())));
                     div.endDiv();
                     td.endTD();
                     tr.endTR();
@@ -142,8 +117,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         subscriptionsUi.addColumn(new TextColumn<SubscriptionDTO>() {
             @Override
             public String getValue(final SubscriptionDTO object) {
-                final SubscriptionPlanDTO plan = getSubscriptionPlan(object);
-                return plan == null ? "-" : stringConstants.getString(plan.getNameMessageKey());
+                return object == null ? "-" : stringConstants.getString(object.getSubscriptionPlanNameMessageKey());
             }
         }, i18n.name());
 
@@ -206,19 +180,15 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
             @Override
             public void update(final int index, final SubscriptionDTO object, final String value) {
                 // FIXME: Implement "Cancel subscription" operation abstracted for all Providers
-                presenter.cancelSubscription(object.getPlanId(), "chargebee");
+                presenter.cancelSubscription(object.getSubscriptionPlanId(), "chargebee");
                 Window.alert("[TODO] Cancelling ...");
             }
         });
         subscriptionsUi.addColumn(cancelColumn);
     }
 
-    private SubscriptionPlanDTO getSubscriptionPlan(final SubscriptionDTO subscription) {
-        return subscription != null ? presenter.getPlanById(subscription.getPlanId()) : null;
-    }
-
     private String getTrialRemainingText(final SubscriptionDTO subscription) {
-        long remainingSecs = Math.round(TimePoint.now().until(subscription.getTrialEnd()).asSeconds());
+        long remainingSecs = Math.round(TimePoint.now().until(subscription.getCurrentEnd()).asSeconds());
         final StringBuilder remainText = new StringBuilder();
         if (remainingSecs <= 0) {
             remainText.append(i18n.numHours(0));

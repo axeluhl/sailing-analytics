@@ -42,7 +42,7 @@ public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptio
         if (subscriptions != null) {
             List<Subscription> subscriptionList = new ArrayList<Subscription>();
             for (ChargebeeApiSubscriptionData sub : subscriptions) {
-                subscriptionList.add(sub.toSubscription());
+                subscriptionList.add(sub.toSubscription(chargebeeApiServiceParams.getSubscriptionPlanProvider()));
             }
             // Sort subscription list by created date, so newest item goes first in the list
             Collections.sort(subscriptionList, (s1, s2) -> {

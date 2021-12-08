@@ -86,6 +86,39 @@ public abstract class Subscription implements Serializable {
      * Record the creating time of the subscription
      */
     private final TimePoint subscriptionCreatedAt;
+    
+    /*
+     * The Value of the reocurring payment in cents. Depends on the currency type.
+     */
+    private final Integer reoccuringPaymentValue;
+    
+    /*
+     * TIme at which the subscription status was last changed to cancelled or will be changed to cancelled, 
+     * if it is planned for cancellation.
+     */
+    private final TimePoint cancelledAt;
+    
+    /**
+     * Time at which the subscription status last changed to  active. 
+     * For example, this value is updated when an in_trial or  cancelled subscription activates.
+     * optional
+     */
+    
+    private final TimePoint subscriptionActivatedAt;
+    
+    /**
+     * The date/time at which the next billing for the subscription happens. 
+     * This is usually right after current_term_end unless multiple subscription terms 
+     * were invoiced in advance using the terms_to_charge parameter. 
+     * optional
+     */
+    private final TimePoint nextBillingAt;
+    
+    /**
+     * End of the current billing period of the subscription. Subscription is renewed immediately after this.
+     * optional
+     */
+    private final TimePoint currentTermEnd;
 
     /**
      * Record the updating time of the subscription
@@ -113,23 +146,30 @@ public abstract class Subscription implements Serializable {
 
     public Subscription(String subscriptionId, String planId, String customerId, TimePoint trialStart,
             TimePoint trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
-            String transactionStatus, String invoiceId, String invoiceStatus, TimePoint subscriptionCreatedAt,
-            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt, String providerName) {
+            String transactionStatus, String invoiceId, String invoiceStatus, Integer reoccuringPaymentValue,
+            TimePoint subscriptionCreatedAt, TimePoint subscriptionUpdatedAt, TimePoint subscriptionActivatedAt,
+            TimePoint nextBillingAt, TimePoint currentTermEnd, TimePoint cancelledAt, TimePoint latestEventTime,
+            TimePoint manualUpdatedAt, String providerName) {
         this.subscriptionId = subscriptionId;
         this.planId = planId;
         this.customerId = customerId;
-        this.trialStart = trialStart;
-        this.trialEnd = trialEnd;
+        this.subscriptionActivatedAt = subscriptionActivatedAt;
+        this.nextBillingAt = nextBillingAt;
+        this.currentTermEnd = currentTermEnd;
+        this.reoccuringPaymentValue = reoccuringPaymentValue;
+        this.cancelledAt = cancelledAt;
+        this.trialStart = trialStart == null ? emptyTime() : trialStart;
+        this.trialEnd = trialEnd == null ? emptyTime() : trialEnd;
         this.subscriptionStatus = subscriptionStatus;
         this.paymentStatus = paymentStatus;
         this.transactionType = transactionType;
         this.transactionStatus = transactionStatus;
         this.invoiceId = invoiceId;
         this.invoiceStatus = invoiceStatus;
-        this.subscriptionCreatedAt = subscriptionCreatedAt;
-        this.subscriptionUpdatedAt = subscriptionUpdatedAt;
-        this.latestEventTime = latestEventTime;
-        this.manualUpdatedAt = manualUpdatedAt;
+        this.subscriptionCreatedAt = subscriptionCreatedAt == null ? emptyTime() : subscriptionCreatedAt;
+        this.subscriptionUpdatedAt = subscriptionUpdatedAt == null ? emptyTime() : subscriptionUpdatedAt;
+        this.latestEventTime = latestEventTime == null ? emptyTime() : latestEventTime;
+        this.manualUpdatedAt = manualUpdatedAt == null ? emptyTime() : manualUpdatedAt;
         this.providerName = providerName;
     }
 
@@ -196,6 +236,18 @@ public abstract class Subscription implements Serializable {
     public String getProviderName() {
         return providerName;
     }
+    
+    public TimePoint getSubscriptionActivatedAt() {
+        return subscriptionActivatedAt;
+    }
+
+    public TimePoint getNextBillingAt() {
+        return nextBillingAt;
+    }
+
+    public TimePoint getCurrentTermEnd() {
+        return currentTermEnd;
+    }
 
     public boolean hasPlan() {
         return planId != null && !planId.isEmpty();
@@ -232,11 +284,12 @@ public abstract class Subscription implements Serializable {
                 .append(getStringFieldValue(paymentStatus)).append(separator).append("transactionType: ")
                 .append(getStringFieldValue(transactionType)).append(separator).append("transactionStatus: ")
                 .append(getStringFieldValue(transactionStatus)).append(separator).append("trialStart: ")
-                .append(trialStart.asMillis()).append(separator).append("trialEnd: ").append(trialEnd.asMillis())
-                .append(separator).append("invoiceId: ").append(getStringFieldValue(invoiceId)).append(separator)
-                .append("invoiceStatus: ").append(getStringFieldValue(invoiceStatus)).append(separator)
-                .append("latestEventTime: ").append(latestEventTime.asMillis()).append(separator)
-                .append("manualUpdatedAt: ").append(manualUpdatedAt.asMillis()).append(separator)
+                .append(trialStart.asMillis()).append(separator).append("trialEnd: ")
+                .append(trialEnd.asMillis()).append(separator).append("invoiceId: ")
+                .append(getStringFieldValue(invoiceId)).append(separator).append("invoiceStatus: ")
+                .append(getStringFieldValue(invoiceStatus)).append(separator).append("latestEventTime: ")
+                .append(latestEventTime.asMillis()).append(separator).append("manualUpdatedAt: ")
+                .append(manualUpdatedAt.asMillis()).append(separator)
                 .append("subscriptionCreatedAt: ").append(subscriptionCreatedAt.asMillis()).append(separator)
                 .append("subscriptionUpdatedAt: ").append(subscriptionUpdatedAt.asMillis());
         return builder.toString();
@@ -245,4 +298,13 @@ public abstract class Subscription implements Serializable {
     private String getStringFieldValue(String value) {
         return (value == null || value.equals("")) ? "empty" : value;
     }
+
+    public TimePoint getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public Integer getReoccuringPaymentValue() {
+        return reoccuringPaymentValue;
+    }
+
 }

@@ -755,5 +755,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Will resolve potential roles, which a user would inherit, when given a specific subscription plan.
      */
     Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan);
+
+    SubscriptionPlan getSubscriptionPlanByItemPriceId(String itemPriceId);
     
 }

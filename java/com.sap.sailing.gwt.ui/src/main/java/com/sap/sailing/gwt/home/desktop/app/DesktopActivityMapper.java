@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.start.StartActivity;
+import com.sap.sailing.gwt.home.desktop.places.subscription.SubscriptionActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
@@ -33,7 +34,6 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;

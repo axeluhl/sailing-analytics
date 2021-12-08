@@ -76,7 +76,9 @@
             <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
             <g:Button ui:field="searchButton" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
           </span>
-          <g:Anchor addStyleNames="{local_res.css.sitenavigation_link} {local_res.css.user_menu_button}" ui:field="usermenu"/>
+          <g:Anchor addStyleNames="{local_res.css.sitenavigation_link} {local_res.css.user_menu_button}" ui:field="usermenu">
+            <span ui:field="usermenuPremium" class="{local_res.css.premium}"><ui:text from='{i18n.premium}' /></span>
+          </g:Anchor>
           <div id="usrMngmtFlyover" />
           <!--  -->
         </nav>

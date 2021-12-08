@@ -10,11 +10,13 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 public interface SubscriptionServiceAsync<C, P> {
     public void prepareCheckout(String planId, AsyncCallback<P> data);
 
-    public void getSubscription(AsyncCallback<SubscriptionListDTO> subscription);
+    public void getSubscriptions(AsyncCallback<SubscriptionListDTO> subscription);
 
     public void getConfiguration(AsyncCallback<C> callback);
     
     public void getAllSubscriptionPlans(AsyncCallback<ArrayList<SubscriptionPlanDTO>> callback);
     
     public void getUnlockingSubscriptionplans(WildcardPermission permission, AsyncCallback<ArrayList<String>> callback);
+
+    public void getSubscriptionPlanById(String planId, AsyncCallback<SubscriptionPlanDTO> callback);
 }

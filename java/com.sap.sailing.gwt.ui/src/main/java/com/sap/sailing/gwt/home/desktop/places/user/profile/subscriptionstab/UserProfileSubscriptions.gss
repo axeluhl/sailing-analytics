@@ -1,7 +1,3 @@
-.hideText {
-    display: none;
-}
-
 .textColorBlue {
     color: #008fcc;
 }

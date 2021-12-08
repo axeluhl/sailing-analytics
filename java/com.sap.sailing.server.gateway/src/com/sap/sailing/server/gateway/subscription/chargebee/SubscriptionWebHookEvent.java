@@ -46,6 +46,12 @@ public class SubscriptionWebHookEvent {
     private static final String INVOICE_CUSTOMER_ID = "customer_id";
     private static final String INVOICE_SUBSCRIPTION_ID = "subscription_id";
     private static final String INVOICE_STATUS = "status";
+    
+    private static final String NEXT_BILLING_AT = "next_billing_at";
+    private static final String CURRENT_TERM_END = "current_term_end";
+    private static final String CANCELLED_AT = "cancelled_at";
+    private static final String SUBSCRIPTION_ACTIVATED_AT = "subscription_activated_at";
+    private static final String REOCURRING_PAYMENT_VALUE = "reocurring_payment_value";
 
     private final JSONObject eventJSON;
     private final String eventId;
@@ -95,19 +101,21 @@ public class SubscriptionWebHookEvent {
     }
 
     public String getPlanId() {
-        final String planId = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_PLAN_ID);
-        if(planId == null) {
-            final JSONArray subscriptionItems = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, "subscription_items");
-            if(subscriptionItems != null) {
-                for (int i = 0; i < subscriptionItems.size(); i++) {
-                    final String itemType = getJsonValue((JSONObject) subscriptionItems.get(i), "item_type");
-                    if("plan".equals(itemType)) {
-                        return getJsonValue((JSONObject) subscriptionItems.get(i), "item_id");
-                    }
+        return getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_PLAN_ID);
+    }
+    
+    public String getItemPriceId() {
+        String itemPriceId = null;
+        final JSONArray subscriptionItems = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, "subscription_items");
+        if(subscriptionItems != null) {
+            for (int i = 0; i < subscriptionItems.size(); i++) {
+                final String itemType = getJsonValue((JSONObject) subscriptionItems.get(i), "item_type");
+                if("plan".equals(itemType)) {
+                    itemPriceId = getJsonValue((JSONObject) subscriptionItems.get(i), "item_price_id");
                 }
             }
         }
-        return planId;
+        return itemPriceId;
     }
  
     public String getSubscriptionId() {
@@ -124,12 +132,12 @@ public class SubscriptionWebHookEvent {
 
     public TimePoint getSubscriptionTrialStart() {
         final Long jsonValue = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_TRIAL_START);
-        return jsonValue != null ? getTime(jsonValue) : null;
+        return getTime(jsonValue);
     }
 
     public TimePoint getSubscriptionTrialEnd() {
         final Long jsonValue = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_TRIAL_END);
-        return jsonValue != null ? getTime(jsonValue) : null;
+        return getTime(jsonValue);
     }
 
     public TimePoint getSubscriptionCreatedAt() {
@@ -163,13 +171,33 @@ public class SubscriptionWebHookEvent {
     public String getInvoiceSubscriptionId() {
         return getJsonValue(content, INVOICE_JSON_OBJECT, INVOICE_SUBSCRIPTION_ID);
     }
-
+    
     public String getInvoiceStatus() {
         return toLowerCase(getJsonValue(content, INVOICE_JSON_OBJECT, INVOICE_STATUS));
     }
+    
+    public TimePoint getBillingAt() {
+        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, NEXT_BILLING_AT));
+    }
+    
+    public TimePoint getCurrentTermEnd() {
+        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, CURRENT_TERM_END));
+    }
+    
+    public TimePoint getCancelledAt() {
+        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, CANCELLED_AT));
+    }
+    
+    public TimePoint getActivatedAt() {
+        return getTime(getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, SUBSCRIPTION_ACTIVATED_AT));
+    }
+    
+    public Integer getReocurringPaymentValue() {
+        return getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, REOCURRING_PAYMENT_VALUE);
+    }
 
-    private TimePoint getTime(long timestamp) {
-        return Subscription.getTime(timestamp * 1000);
+    private TimePoint getTime(Long timestamp) {
+        return timestamp == null ? Subscription.emptyTime() : Subscription.getTime(timestamp * 1000);
     }
 
     @SuppressWarnings("unchecked")

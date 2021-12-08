@@ -4,7 +4,7 @@
             xmlns:c="urn:import:com.google.gwt.user.cellview.client">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab.UserProfileSubscriptionsResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptionstab.UserProfileSubscriptionsResources" />
         
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
         <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmedium}">
