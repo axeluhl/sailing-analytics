@@ -414,8 +414,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private DetailTypeMetricOverlay metricOverlay;
     
-    private final boolean isSimulationEnabled;
-    
     private static final String GET_POLAR_CATEGORY = "getPolar";
     
     /**
@@ -598,7 +596,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
                 showHeaderPanel, quickRanksDTOProvider, visible -> {
-                }, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null, paywallResolver, isSimulationEnabled);
+                }, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null, paywallResolver);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -608,7 +606,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
             boolean showHeaderPanel, QuickFlagDataProvider quickFlagDataProvider,
             Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName,
-            UUID leaderboardGroupId, Runnable shareLinkAction, PaywallResolver paywallResolver, boolean isSimulationEnabled) {
+            UUID leaderboardGroupId, Runnable shareLinkAction, PaywallResolver paywallResolver) {
         super(parent, context);
         this.shareLinkAction = shareLinkAction;
         this.paywallResolver = paywallResolver;
@@ -623,7 +621,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
-        this.isSimulationEnabled = isSimulationEnabled;
         this.showWindChartForProvider = showWindChartForProvider;
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;
@@ -843,7 +840,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             @Override
                             public void run() {
                                 if (zoomingAnimationsInProgress == 1) {
-                                    simulationOverlay.setVisible(settings.isShowSimulationOverlay());
+                                    simulationOverlay.setVisible(settings.isShowSimulationOverlay()
+                                            && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR));
                                 }
                                 zoomingAnimationsInProgress--;
                             }
@@ -941,16 +939,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
                     streamletOverlay.setVisible(true);
                 }
-                if (isSimulationEnabled) {
-                    // determine availability of polar diagram
-                    setHasPolar();
-                    // initialize simulation canvas
-                    simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier,
-                            sailingService, stringMessages, asyncActionsExecutor, coordinateSystem,
-                            () -> updateSettings(new RaceMapSettings(settings, false)));
-                    simulationOverlay.addToMap();
-                    showSimulationOverlay(settings.isShowSimulationOverlay());
-                }
+                // determine availability of polar diagram
+                setHasPolar();
+                // initialize simulation canvas
+                simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier,
+                        sailingService, stringMessages, asyncActionsExecutor, coordinateSystem,
+                        () -> updateSettings(new RaceMapSettings(settings, false)));
+                simulationOverlay.addToMap();
+                showSimulationOverlay(settings.isShowSimulationOverlay()
+                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR));
                 metricOverlay = new DetailTypeMetricOverlay(getMap(), 0, coordinateSystem, stringMessages);
                 metricOverlay.setVisible(false);
                 metricOverlay.addToMap();
@@ -1519,7 +1516,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             }
                         }
                         quickFlagDataProvider.quickRanksReceivedFromServer(raceMapDataDTO.quickRanks);
-                        if (isSimulationEnabled && settings.isShowSimulationOverlay()) {
+                        if (settings.isShowSimulationOverlay() && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR)) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                             simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
@@ -3095,8 +3092,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent(RaceMapSettings settings) {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar, hasPolar,
-                paywallResolver);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, hasPolar, paywallResolver);
     }
 
     @Override
@@ -3105,11 +3101,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         boolean showManeuverLossChanged = false;
         boolean requiresRedraw = false;
         boolean requiresUpdateCoordinateSystem = false;
-
         if (newSettings.isShowSatelliteLayer() != settings.isShowSatelliteLayer()) {
             requiresUpdateCoordinateSystem = true;
         }
-
         if (newSettings.isShowManeuverLossVisualization() != settings.isShowManeuverLossVisualization()) {
             showManeuverLossChanged = true;
         }
@@ -3159,7 +3153,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
-            showSimulationOverlay(newSettings.isShowSimulationOverlay());
+            showSimulationOverlay(newSettings.isShowSimulationOverlay()
+                    && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR));
         }
         if (newSettings.isWindUp() != settings.isWindUp()) {
             requiresUpdateCoordinateSystem = true;

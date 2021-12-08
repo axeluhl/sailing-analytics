@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.subscription;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -18,7 +19,11 @@ public class StreamletViewerRole extends RolePrototype {
     StreamletViewerRole() {
         super("streamletViewer", ROLE_ID.toString(),
                 WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
-                        .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build());
+                        .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build(),
+                WildcardPermission.builder().withTypes(SecuredDomainType.SIMULATOR)
+                        .withActions(DefaultActions.READ).build(),
+                WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
+                        .withActions(SecuredDomainType.TrackedRaceActions.SIMULATOR).build());
     }
 
     public static StreamletViewerRole getInstance() {

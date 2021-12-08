@@ -46,7 +46,6 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.common.client.NavigatorUtil;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
@@ -300,13 +299,12 @@ public class RaceBoardPanel
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
         quickFlagDataProvider = new QuickFlagDataFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
-        final boolean isSimulationPermitted = userService.hasPermission(raceDTO, TrackedRaceActions.SIMULATOR);
         final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, raceDTO);
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
                 raceMapResources, /* showHeaderPanel */ true, quickFlagDataProvider, this::showInWindChart,
-                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction, paywallResolver, isSimulationPermitted) {
+                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction, paywallResolver) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
