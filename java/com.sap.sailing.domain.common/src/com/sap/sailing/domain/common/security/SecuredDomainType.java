@@ -34,6 +34,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
         return Collections.unmodifiableSet(allInstances);
     }
 
+    public static final HasPermissions SIMULATOR = new SecuredDomainType("SIMULATOR");
+
     public static final HasPermissions FILE_STORAGE = new SecuredDomainType("FILE_STORAGE");
     
     // AdminConsole permissions
@@ -53,8 +55,11 @@ public class SecuredDomainType extends HasPermissionsImpl {
         DETAIL_TIMER,
         EXPORT, SIMULATOR;
 
-        private static final Action[] ALL_ACTIONS = DefaultActions.plus(CAN_REPLAY_DURING_LIVE_RACES, DETAIL_TIMER,
-                EXPORT, SIMULATOR);
+        private static final Action[] ALL_ACTIONS = DefaultActions.plus(
+                CAN_REPLAY_DURING_LIVE_RACES,
+                DETAIL_TIMER,
+                EXPORT,
+                SIMULATOR);
 
         public static final Action[] MUTATION_ACTIONS = new Action[] { EXPORT, DefaultActions.DELETE,
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,

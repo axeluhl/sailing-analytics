@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
@@ -56,6 +57,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -69,12 +73,14 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Anchor solutionsPageLinkMenu;
     @UiField Anchor adminConsolePageLinkMenu;
     @UiField Anchor dataMiningPageLinkMenu;
+    @UiField Anchor strategySimulatorPageLinkMenu;
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
     @UiField AnchorElement logoAnchor;
     @UiField Anchor adminConsolePageLink;
     @UiField Anchor dataMiningPageLink;
+    @UiField Anchor strategySimulatorPageLink;
     @UiField TextBox searchText;
     @UiField Button searchButton;
     @UiField Anchor hamburgerMenuIcon;
@@ -228,6 +234,7 @@ public class Header extends Composite implements HeaderConstants {
         menuToDropDownItemMap.put(solutionsPageLink, solutionsPageLinkMenu);
         menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
         menuToDropDownItemMap.put(dataMiningPageLink, dataMiningPageLinkMenu);
+        menuToDropDownItemMap.put(strategySimulatorPageLink, strategySimulatorPageLinkMenu);
 
         headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
         final DropdownHandler dropdownHandler = new DropdownHandler(hamburgerMenuIcon, headerNavigationDropDownMenuContainer);
@@ -243,9 +250,11 @@ public class Header extends Composite implements HeaderConstants {
         // make the Admin and DataMining links visible only for signed-in users
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
         dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
-        // initially hide admin console and data mining in hamburger menu
+        strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.NONE);
+        // initially hide admin console, data mining and strategy simulator in hamburger menu
         menuItemVisibilityHandler.addIgnore(adminConsolePageLink);
         menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
+        menuItemVisibilityHandler.addIgnore(strategySimulatorPageLink);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
             // make it point to the current server if the user has CREATE_OBJECT permission there
@@ -279,6 +288,19 @@ public class Header extends Composite implements HeaderConstants {
             } else {
                 dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
                 menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
+            }
+            if (authContext.hasPermission(NamedSecuredObjectDTO.create(authContext.getServerInfo().getName(),
+                    SecuredDomainType.SIMULATOR, new TypeRelativeObjectIdentifier(authContext.getServerInfo().getName())),
+                    DefaultActions.READ)) {
+                strategySimulatorPageLinkMenu.setHref(STRATEGY_SIMULATOR_PATH);
+                strategySimulatorPageLinkMenu.setTarget(STRATEGY_SIMULATOR_WINDOW);
+                strategySimulatorPageLink.setHref(STRATEGY_SIMULATOR_PATH);
+                strategySimulatorPageLink.setTarget(STRATEGY_SIMULATOR_WINDOW);
+                strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                menuItemVisibilityHandler.removeIgnore(strategySimulatorPageLink);
+            } else {
+                strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.NONE);
+                menuItemVisibilityHandler.addIgnore(strategySimulatorPageLink);
             }
             menuItemVisibilityHandler.refreshVisibilityDeferred();
         });

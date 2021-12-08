@@ -57,7 +57,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private DoubleBox startCountDownFontSizeScalingBox;
     private CheckBox maneuverLossVisualizationCheckBox;
     
-    private boolean isSimulationEnabled;
+    private boolean isSimulationPermitted;
+    private boolean hasPolar;
     
     private final StringMessages stringMessages;
     private final RaceMapSettings initialSettings;
@@ -65,8 +66,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
     private CheckBox showEstimatedDuration;
     
-    public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean isSimulationEnabled) {
-        this.isSimulationEnabled = isSimulationEnabled;
+    public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean isSimulationPermitted, boolean hasPolar) {
+        this.isSimulationPermitted = isSimulationPermitted;
+        this.hasPolar = hasPolar;
         this.stringMessages = stringMessages;
         initialSettings = settings;
     }
@@ -107,17 +109,16 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 showWindStreamletColorsCheckbox.setEnabled(showWindStreamletOverlayCheckbox.getValue());
             }
         });
-        
-        if (isSimulationEnabled) {
+        if (hasPolar) {
             showEstimatedDuration = dialog.createCheckbox(stringMessages.showEstimatedDuration());
             showEstimatedDuration.ensureDebugId("showEstimatedDurationCheckBox");
             showEstimatedDuration.setValue(initialSettings.isShowEstimatedDuration());
             vp.add(showEstimatedDuration);
-        
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
             showSimulationOverlayCheckbox.ensureDebugId("showSimulationOverlayCheckBox");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
             vp.add(showSimulationOverlayCheckbox);
+            showSimulationOverlayCheckbox.setEnabled(isSimulationPermitted);
         }
 
         Label competitorsLabel = dialog.createHeadlineLabel(stringMessages.competitors());
@@ -302,8 +303,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         RaceMapHelpLinesSettings helpLinesSettings = getHelpLinesSettings();
         RaceMapZoomSettings zoomSettings = getZoomSettings();
 
-        boolean estimatedDuration = isSimulationEnabled ? showEstimatedDuration.getValue() : false;
-        boolean showSimulationOverlay = isSimulationEnabled ? showSimulationOverlayCheckbox.getValue() : false;
+        boolean estimatedDuration = isSimulationPermitted ? showEstimatedDuration.getValue() : false;
+        boolean showSimulationOverlay = isSimulationPermitted ? showSimulationOverlayCheckbox.getValue() : false;
         long tailLengthInMilliseconds = initialSettings.getTailLengthInMilliseconds(); 
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             tailLengthInMilliseconds = tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l;

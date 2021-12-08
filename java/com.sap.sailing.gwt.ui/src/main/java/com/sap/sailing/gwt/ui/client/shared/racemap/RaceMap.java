@@ -3082,7 +3082,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent(RaceMapSettings settings) {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar, hasPolar);
     }
 
     @Override

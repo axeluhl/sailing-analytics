@@ -159,7 +159,6 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             zoomTypes.add(ZoomTypes.BUOYS);
         }
         RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
-        
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ false,
@@ -175,8 +174,6 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 defaultRaceMapSettings.isShowDouglasPeuckerPoints(), defaultRaceMapSettings.isShowEstimatedDuration(),
                 defaultRaceMapSettings.getStartCountDownFontSizeScaling(), defaultRaceMapSettings.isShowManeuverLossVisualization(),
                 defaultRaceMapSettings.isShowSatelliteLayer());
-
-        
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, errorReporter,
                 Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
@@ -195,7 +192,6 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
          * Needs to resize the map because google maps are not shown loaded fully when they are hidden.
          * */
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            
             @Override
             public void execute() {
                 raceMap.onResize();

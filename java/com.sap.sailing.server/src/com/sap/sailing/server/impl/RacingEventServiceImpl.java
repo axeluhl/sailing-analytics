@@ -333,8 +333,10 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.util.RemoteServerUtil;
@@ -1101,6 +1103,25 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             }
         }
         securityService.assumeOwnershipMigrated(SecuredDomainType.RESULT_IMPORT_URL.getName());
+        securityService.migrateOwnership(new WithQualifiedObjectIdentifier() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getName() {
+                return "Simulator of server "+ServerInfo.getName();
+            }
+            
+            @Override
+            public HasPermissions getPermissionType() {
+                return SecuredDomainType.SIMULATOR;
+            }
+            
+            @Override
+            public QualifiedObjectIdentifier getIdentifier() {
+                return SecuredDomainType.SIMULATOR.getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+            }
+        });
+        securityService.assumeOwnershipMigrated(SecuredDomainType.SIMULATOR.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.FILE_STORAGE.getName());
         for (DeviceConfiguration device : getAllDeviceConfigurations()) {
             securityService.migrateOwnership(device);

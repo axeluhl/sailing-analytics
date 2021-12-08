@@ -27,6 +27,8 @@
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.manageEvents}" target="adminConsoleWindow"/>
           <g:Anchor ui:field="dataMiningPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.dataMining}" target="dataMiningWindow"/>
+          <g:Anchor ui:field="strategySimulatorPageLink"
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.simulator}" target="strategySimulatorWindow"/>
         </nav>
         <nav class="{local_res.css.sitenavigation_fixed}">
         <!-- -->
@@ -55,6 +57,11 @@
                     <g:Anchor ui:field="dataMiningPageLinkMenu"
                         styleName="{local_res.css.sitenavigation_link}"
                         text="{i18n.dataMining}" target="dataMiningWindow" />
+                </li>
+                <li>
+                    <g:Anchor ui:field="strategySimulatorPageLinkMenu"
+                        styleName="{local_res.css.sitenavigation_link}"
+                        text="{i18n.simulator}" target="strategySimulatorWindow" />
                 </li>
             </ul>
             </div>

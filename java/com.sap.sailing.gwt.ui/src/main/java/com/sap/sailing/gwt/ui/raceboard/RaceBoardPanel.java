@@ -296,9 +296,7 @@ public class RaceBoardPanel
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
         quickFlagDataProvider = new QuickFlagDataFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
-
-        boolean isSimulationPermitted = userService.hasPermission(raceDTO, TrackedRaceActions.SIMULATOR);
-
+        final boolean isSimulationPermitted = userService.hasPermission(raceDTO, TrackedRaceActions.SIMULATOR);
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 

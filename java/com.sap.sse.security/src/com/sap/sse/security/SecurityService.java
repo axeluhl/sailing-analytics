@@ -526,13 +526,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void assumeOwnershipMigrated(String typeName);
 
     /**
+     * If {@code object} doesn't have an ownership then it will be assigned the {@link #getServerGroup() server group}
+     * as its group owner.
      * 
-     * @param object
      * @return {@code true} if the object required ownership migration
      */
     boolean migrateOwnership(WithQualifiedObjectIdentifier object);
 
     /**
+     * If {@code object} doesn't have an ownership then it will be assigned the {@link #getServerGroup() server group}
+     * as its group owner.
+     * 
      * @return {@code true} if the object required ownership migration
      */
     boolean migrateOwnership(QualifiedObjectIdentifier object, String displayName);
