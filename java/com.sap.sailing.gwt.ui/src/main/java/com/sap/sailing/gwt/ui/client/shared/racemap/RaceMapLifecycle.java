@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * This lifecycle corresponds with the RaceMap
@@ -11,9 +12,11 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
     public static final String ID = "rm";
 
     private final StringMessages stringMessages;
+    private final PaywallResolver paywallResolver;
     
-    public RaceMapLifecycle(StringMessages stringMessages) {
+    public RaceMapLifecycle(StringMessages stringMessages, PaywallResolver paywallResolver) {
         this.stringMessages = stringMessages;
+        this.paywallResolver = paywallResolver;
     }
     
     @Override
@@ -21,7 +24,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
         return new RaceMapSettingsDialogComponent(settings, stringMessages,
                 /* isSimulationEnabled: enable simulation because we don't know the boat class
                  * here yet and therefore cannot reasonably judge whether polar data is
-                 * available; if in doubt, rather enable selecting it */ true, /* hasPolar */ true);
+                 * available; if in doubt, rather enable selecting it */ true, /* hasPolar */ true, paywallResolver);
     }
 
     @Override

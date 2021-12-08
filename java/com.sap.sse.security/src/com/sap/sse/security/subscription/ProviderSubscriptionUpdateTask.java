@@ -61,7 +61,6 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
             // No subscriptions so we need to remove all current subscriptions of user for the provider
             Subscription emptySubscription = createEmptySubscription(provider, null);
             getSecurityService().updateUserSubscription(user.getName(), emptySubscription);
-            // getSecurityService().removeProviderUserSubscriptions(user.getName(), providerName);
         } else if (userSubscriptions != null) {
             if (currentSubscriptions != null) {
                 Map<String, Boolean> existingPlans = getExistingPlans(userSubscriptions);
@@ -75,7 +74,6 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
                     }
                 }
             }
-
             for (Subscription subscription : userSubscriptions) {
                 getSecurityService().updateUserSubscription(user.getName(), subscription);
             }

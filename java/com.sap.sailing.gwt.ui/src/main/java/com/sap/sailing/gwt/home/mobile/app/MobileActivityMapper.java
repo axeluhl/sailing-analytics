@@ -29,6 +29,8 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionActivityProxy;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetActivityProxy;
@@ -40,14 +42,14 @@ public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
     private final ApplicationPlaceUpdater placeUpdater = new ApplicationPlaceUpdater();
 
-    public MobileActivityMapper(MobileApplicationClientFactory clientFactory) {
+    public MobileActivityMapper(final MobileApplicationClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
     }
 
     @Override
-    public Activity getActivity(Place rawPlace) {
-        Place place = placeUpdater.getRealPlace(rawPlace);
+    public Activity getActivity(final Place rawPlace) {
+        final Place place = placeUpdater.getRealPlace(rawPlace);
         if (!SwitchingEntryPoint.hasMobileVersion(place)) {
             GWT.log("Place has no mobile view: " + place.getClass().getName());
             SwitchingEntryPoint.reloadApp();
@@ -70,6 +72,8 @@ public class MobileActivityMapper implements ActivityMapper {
             return new SearchResultActivityProxy((SearchResultPlace) place, clientFactory);
         } else if (place instanceof SolutionsPlace) {
             return new SolutionsActivityProxy((SolutionsPlace) place, clientFactory);
+        } else if (place instanceof SubscriptionPlace) {
+            return new SubscriptionActivityProxy((SubscriptionPlace) place, clientFactory);
         } else if (place instanceof AbstractUserProfilePlace) {
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
         } else if (place instanceof AuthenticationPlace) {

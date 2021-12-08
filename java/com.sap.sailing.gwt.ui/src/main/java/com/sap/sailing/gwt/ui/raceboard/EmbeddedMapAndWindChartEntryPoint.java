@@ -68,6 +68,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryPoint implements ProvidesLeaderboardRouting {
     
@@ -208,11 +209,13 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         } else {
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider, competitorsAndBoats); // show no competitors
         }
-        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
+        final PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), 
+                /* FIXME: 5510 Premium features wont work without raceDTO context */ null);
+        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages(), paywallResolver), raceMapSettings,
                 getSailingService(), asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
-                raceMapResources, /* showHeaderPanel */ false, new DefaultQuickFlagDataProvider(),
-                /* isSimulationEnabled */false) {
+                raceMapResources, /* showHeaderPanel */ false, new DefaultQuickFlagDataProvider(), paywallResolver,
+                /* isSimulationEnabled */ false) {
             @Override
             protected void showAdditionalControls(MapWidget map) {
                 backToLivePlayButton.removeFromParent();

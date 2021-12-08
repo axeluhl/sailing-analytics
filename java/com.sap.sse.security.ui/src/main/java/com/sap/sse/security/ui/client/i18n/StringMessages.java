@@ -17,6 +17,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String signIn();
     String invalidUsername();
     String signUp();
+    String signInOrUp();
     String signOut();
     String couldNotSignOut(String message);
     String createUser();
@@ -187,9 +188,24 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterPermission();
     String permission();
     String nullUserGroup();
-
+    String failGeneratingHostedPageObject();
+    String errorOpenCheckout(String errMessage);
+    String errorSaveSubscription(String errMessage);
     String editRolesAndPermissionsForUser(String username);
     String permissionType();
     String couldNotLoadMarkTemplates();
     String transitive();
+    String unlockWithSubscription();
+    String selectOption();
+    String currentlyUnableToSubscribe();
+    String subscriptionPlanOverview();
+    String selectSubscriptionPlan();
+    String features();
+    String price();
+    String pleaseSubscribeToUse();
+    String pleaseSubscribeToUseSpecific(String actionName);
+    String notLoggedIn();
+    String streamletsOverlayFeature();
+    String subscriptionSuggestionTitle(); 
+    String takeMeToSubscriptions();
 }

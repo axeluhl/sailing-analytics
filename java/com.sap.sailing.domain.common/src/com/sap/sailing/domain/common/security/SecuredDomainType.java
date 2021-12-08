@@ -53,7 +53,9 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static enum TrackedRaceActions implements Action {
         CAN_REPLAY_DURING_LIVE_RACES,
         DETAIL_TIMER,
-        EXPORT, SIMULATOR;
+        EXPORT,
+        SIMULATOR,
+        VIEWSTREAMLETS;
 
         private static final Action[] ALL_ACTIONS = DefaultActions.plus(
                 CAN_REPLAY_DURING_LIVE_RACES,

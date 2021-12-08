@@ -27,6 +27,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -38,6 +39,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessorImpl;
 import com.sap.sse.security.subscription.SubscriptionApiService;
@@ -191,9 +193,14 @@ public class Activator implements BundleActivator {
         final ServiceTracker<HasPermissionsProvider, HasPermissionsProvider> hasPermissionsProviderTracker = new ServiceTracker<>(
                 bundleContext, HasPermissionsProvider.class, /* customizer */ null);
         hasPermissionsProviderTracker.open();
+        final ServiceTracker<SubscriptionPlanProvider, SubscriptionPlanProvider> subscriptionPlanProviderTracker = new ServiceTracker<>(
+                bundleContext, SubscriptionPlanProvider.class, /* customizer */ null);
+        subscriptionPlanProviderTracker.open();
         SecurityService initialSecurityService = new SecurityServiceImpl(
                 ServiceTrackerFactory.createAndOpen(context, MailService.class), userStore, accessControlStore,
-                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), sharedAcrossSubdomainsOf, baseUrlForCrossDomainStorage);
+                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker),
+                new OSGISubscriptionPlanProvider(subscriptionPlanProviderTracker), sharedAcrossSubdomainsOf,
+                baseUrlForCrossDomainStorage);
         initialSecurityService.initialize();
         securityService.complete(initialSecurityService);
         registration = context.registerService(SecurityService.class, initialSecurityService, null);
@@ -203,6 +210,7 @@ public class Activator implements BundleActivator {
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         context.registerService(HasPermissionsProvider.class, SecuredSecurityTypes::getAllInstances, null);
+        context.registerService(SubscriptionPlanProvider.class, SSESubscriptionPlan::getAllInstances, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
     

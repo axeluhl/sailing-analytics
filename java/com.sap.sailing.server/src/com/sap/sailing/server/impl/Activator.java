@@ -31,6 +31,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan;
+import com.sap.sailing.domain.common.subscription.StreamletViewerRole;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -74,6 +76,7 @@ import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.util.GenericJSONPreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -224,9 +227,12 @@ public class Activator implements BundleActivator {
         final Dictionary<String, String> sailingSecurityUrlPathProviderProperties = new Hashtable<>();
         sailingSecurityUrlPathProviderProperties.put(TypeBasedServiceFinder.TYPE,
                 SecurityUrlPathProviderSailingImpl.APPLICATION);
-        context.registerService(SecurityUrlPathProvider.class, new SecurityUrlPathProviderSailingImpl(),
-                sailingSecurityUrlPathProviderProperties);
-        registrations.add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
+        registrations.add(context.registerService(SecurityUrlPathProvider.class,
+                new SecurityUrlPathProviderSailingImpl(), sailingSecurityUrlPathProviderProperties));
+        registrations
+                .add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
+        registrations.add(context.registerService(SubscriptionPlanProvider.class,
+                SailingSubscriptionPlan::getAllInstances, null));
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final Thread backgroundThread = new Thread(()->{
@@ -256,6 +262,9 @@ public class Activator implements BundleActivator {
                     }, "Waiting for replication service to tell whether this SecurityService will become a replica");
                     backgroundThread.setDaemon(true);
                     backgroundThread.start();
+                    // TODO: Registering SubscriptionPlan specific RoleDefinitions here requires additional maintenance. Consider
+                    // implementing another Construct like OSGIHasPermissionsProvider
+                    securityService.getOrCreateRoleDefinitionFromPrototype(StreamletViewerRole.getInstance());
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),

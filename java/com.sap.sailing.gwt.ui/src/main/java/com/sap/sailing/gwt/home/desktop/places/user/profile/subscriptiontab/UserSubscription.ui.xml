@@ -4,21 +4,20 @@
             xmlns:c="urn:import:com.google.gwt.user.cellview.client">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res"
-        type="com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab.SubscriptionProfileDesktopResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab.UserProfileSubscriptionsResources" />
+        
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-      <div ui:field="rootUi" class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmedium}">
-        <div class="{local_res.css.sectionLabel}">Your subscriptions</div>
-        <c:CellList ui:field="subscriptionListUi"></c:CellList>
-        <div class="{res.mediaCss.medium4} {res.mediaCss.small12} {local_res.css.planInputContainer}">
-          <label class="{local_res.css.sectionLabel}">
-            <ui:text from="{i18n.plans}" />
-          </label>
-          <g:ListBox ui:field="planListUi" addStyleNames="{local_res.css.plansInput}" />
-        </div> 
-        <g:Button ui:field="subscribeButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {local_res.css.bottomButton}">
-          <ui:text from="{i18n.subscribe}" />
-        </g:Button>
-      </div>
+        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmedium}">
+            <c:CellTable ui:field="subscriptionsUi" addStyleNames="{local_res.css.overviewTable}">
+                <c:emptyTableWidget>
+                    <g:Label text="{i18n.noDataFound}" addStyleNames="{local_res.css.overviewTableEmpty}" />
+                </c:emptyTableWidget>
+            </c:CellTable>
+            <g:FlowPanel addStyleNames="{local_res.css.overviewTableFooter}" ui:field="footerUi">
+                 <g:Button ui:field="subscribeButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}">
+                    <ui:text from="{i18n.subscribe}" />
+                </g:Button>
+            </g:FlowPanel>
+        </div>
     </g:HTMLPanel>
 </ui:UiBinder>

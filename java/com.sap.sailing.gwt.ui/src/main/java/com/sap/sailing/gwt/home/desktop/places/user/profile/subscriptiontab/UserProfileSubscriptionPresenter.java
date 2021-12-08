@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptiontab;
 
-import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
@@ -9,7 +8,7 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 /**
  * Implementation presenter for {@link UserProfileSubscriptionView}
- * 
+ *
  * @author Tu Tran
  */
 public class UserProfileSubscriptionPresenter implements UserProfileSubscriptionView.Presenter {
@@ -22,9 +21,8 @@ public class UserProfileSubscriptionPresenter implements UserProfileSubscription
             final UserProfileView.Presenter userProfilePresenter) {
         this.view = view;
         this.userProfilePresenter = userProfilePresenter;
-        userSubscriptionPresenter = new UserSubscriptionPresenter<UserProfileClientFactory>(
-                userProfilePresenter.getClientFactory());
-        userSubscriptionPresenter.init();
+        this.userSubscriptionPresenter = new UserSubscriptionPresenter<>(userProfilePresenter.getClientFactory());
+        this.userSubscriptionPresenter.init();
         view.setPresenter(this);
     }
 
@@ -34,7 +32,7 @@ public class UserProfileSubscriptionPresenter implements UserProfileSubscription
     }
 
     @Override
-    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+    public void setAuthenticationContext(final AuthenticationContext authenticationContext) {
         view.getDecorator().setAuthenticationContext(authenticationContext);
         if (authenticationContext.isLoggedIn()) {
             userSubscriptionPresenter.loadSubscription();

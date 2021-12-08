@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> {
@@ -31,9 +32,9 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
             Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService,
-            Iterable<DetailType> availableDetailTypes, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            Iterable<DetailType> availableDetailTypes, final RaceWithCompetitorsAndBoatsDTO raceDTO, PaywallResolver paywallResolver) {
         this.stringMessages = stringMessages;
-        raceMapLifecycle = new RaceMapLifecycle(stringMessages);
+        raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolver);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         maneuverTableLifecycle = new ManeuverTableLifecycle(stringMessages);
         leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages, availableDetailTypes,
@@ -41,7 +42,6 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, competitorChartAllowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages, userService, raceDTO);
-        
         addLifeCycle(raceMapLifecycle);
         addLifeCycle(windChartLifecycle);
         addLifeCycle(leaderboardPanelLifecycle);

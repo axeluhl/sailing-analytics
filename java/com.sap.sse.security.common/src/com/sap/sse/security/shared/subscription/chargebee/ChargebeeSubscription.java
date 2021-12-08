@@ -73,6 +73,7 @@ public class ChargebeeSubscription extends Subscription {
                 ChargebeeSubscriptionProvider.PROVIDER_NAME);
     }
 
+    @Override
     public boolean isActiveSubscription() {
         String subscriptionStatus = getSubscriptionStatus();
         String paymentStatus = getPaymentStatus();

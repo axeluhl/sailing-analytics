@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.app;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -17,6 +18,9 @@ import com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew.WhatsNewDialogFa
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionClientFactory;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionView;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
@@ -27,13 +31,20 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.mvp.ErrorView;
+import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.login.LoginHintContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.subscription.BaseUserSubscriptionView;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
+import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * 
@@ -42,8 +53,8 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  */
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
-        SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory, WithAuthenticationManager,
-        ClientFactoryWithDispatchAndErrorAndUserService {
+        SubscriptionClientFactory, SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory,
+        WithAuthenticationManager, ClientFactoryWithDispatchAndErrorAndUserService {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationManager authenticationManager;
@@ -115,6 +126,53 @@ public class MobileApplicationClientFactory extends
     @Override
     public ErrorView createErrorView(final String errorMessage, final Throwable errorReason) {
         return new ErrorViewImpl(errorMessage, errorReason, null);
+    }
+    
+    @Override
+    public SubscriptionView createSubscriptionsView() {
+        getSubscriptionServiceFactory().initializeProviders();
+        return new SubscriptionViewImpl(new SubscriptionView.Presenter() {
+            @Override
+            public void startSubscription(String priceId) {
+                try {
+                    getSubscriptionServiceFactory().getDefaultProvider().getSubscriptionViewPresenter()
+                            .startCheckout(priceId, new BaseUserSubscriptionView() {
+                                
+                                @Override
+                                public void updateView(SubscriptionListDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
+                                }
+                                
+                                @Override
+                                public void onOpenCheckoutError(String error) {
+                                    Notification.notify(error, NotificationType.ERROR);
+                                }
+                                
+                                @Override
+                                public void onCloseCheckoutModal() {
+                                }
+                            }, () -> getUserService().updateUser(true));
+                } catch (InvalidSubscriptionProviderException e) {
+                    Notification.notify(e.toString(), NotificationType.ERROR);
+                }
+            }
+            @Override
+            public void manageSubscriptions() {
+                navigator.goToPlace(navigator.getUserProfileSubscriptionPlace());
+            }
+            @Override
+            public void toggleAuthenticationFlyout() {
+                GWT.log("toggle authentication flyout");
+                navigator.goToPlace(navigator.getSignInNavigation());
+            }
+            @Override
+            public AuthenticationContext getAuthenticationContext() {
+                return authenticationManager.getAuthenticationContext();
+            }
+            @Override
+            public SubscriptionClientFactory getClientFactory() {
+                return MobileApplicationClientFactory.this;
+            }
+        });
     }
     
     @Override

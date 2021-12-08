@@ -53,6 +53,7 @@ public class TabletAndDesktopUserProfileView extends Composite
 
     public TabletAndDesktopUserProfileView(FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
+        UserProfileResources.INSTANCE.css().ensureInjected();
     }
 
     @Override

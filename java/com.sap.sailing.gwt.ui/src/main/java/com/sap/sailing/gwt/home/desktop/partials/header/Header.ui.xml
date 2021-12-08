@@ -23,6 +23,8 @@
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
           <g:Anchor ui:field="solutionsPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
+          <g:Anchor ui:field="subscriptionsPageLink"
+            styleName="{local_res.css.sitenavigation_link} {local_res.css.subscriptions}" text="{i18n.subscriptions}" />
           <g:Anchor ui:field="adminConsolePageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.manageEvents}" target="adminConsoleWindow"/>
           <g:Anchor ui:field="dataMiningPageLink"
@@ -47,6 +49,11 @@
                     <g:Anchor ui:field="solutionsPageLinkMenu"
                         styleName="{local_res.css.sitenavigation_link}"
                         text="{i18n.solutions}" />
+                </li>
+                <li>
+                    <g:Anchor ui:field="subscriptionsPageLinkMenu"
+                        styleName="{local_res.css.sitenavigation_link}"
+                        text="{i18n.subscriptions}" />
                 </li>
                 <li>
                     <g:Anchor ui:field="adminConsolePageLinkMenu"

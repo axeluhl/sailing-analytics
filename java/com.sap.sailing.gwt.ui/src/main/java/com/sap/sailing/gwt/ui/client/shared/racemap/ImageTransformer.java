@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.ImageData;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
@@ -55,11 +56,12 @@ public class ImageTransformer {
         return canvas;
     }
     
-    private void scale(double scaleFactor) {
+    public void scale(double scaleFactor) {
         if (scaleFactor != currentScale) {
             canvasWidth = (int) Math.round(imageWidth * scaleFactor);
             canvasHeight = (int) Math.round(imageHeight * scaleFactor);
             canvasRadius = (int) Math.sqrt(canvasWidth * canvasWidth / 4 + canvasHeight * canvasHeight / 4);
+            GWT.log("canvas radius: " + canvasRadius + "(h:" + canvasHeight + "/w:" + canvasWidth + ")");
             canvas.setSize("" + 2 * canvasRadius + "px", "" + 2 * canvasRadius + "px");
             canvas.setCoordinateSpaceWidth(2 * canvasRadius);
             canvas.setCoordinateSpaceHeight(2 * canvasRadius);

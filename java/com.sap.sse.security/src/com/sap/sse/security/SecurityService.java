@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -49,6 +50,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -729,6 +731,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     Iterable<? extends HasPermissions> getAllHasPermissions();
     
     /**
+     * Obtains all {@link SubscriptionPlan} subscription plans managed by this security service. In an OSGi environment, those
+     * are obtained from all {@link SubscriptionPlanProvider}s registered as an OSGi service by any active bundle.
+     */
+    Map<Serializable, SubscriptionPlan> getAllSubscriptionPlans();
+    
+    SubscriptionPlan getSubscriptionPlanById(String planId);
+    
+    /**
      * Tries to find a {@link HasPermissions secured type} in the {@link #getAllHasPermissions() set of secured types
      * known by this security service} based on its name, like it is used in the first
      * {@link WildcardPermission#getParts() part} of a permission specification, as in {@code USER:READ:*}.
@@ -740,4 +750,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     default HasPermissions getHasPermissionsByName(String securedTypeName) {
         return Util.first(Util.filter(getAllHasPermissions(), hp->hp.getName().equals(securedTypeName)));
     }
+
+    /*
+     * Will resolve potential roles, which a user would inherit, when given a specific subscription plan.
+     */
+    Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan);
+    
 }
