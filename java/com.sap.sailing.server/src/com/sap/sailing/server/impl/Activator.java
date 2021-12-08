@@ -33,7 +33,6 @@ import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.subscription.PremiumRole;
 import com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan;
-import com.sap.sailing.domain.common.subscription.StreamletViewerRole;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -265,7 +264,6 @@ public class Activator implements BundleActivator {
                     backgroundThread.start();
                     // TODO: Registering SubscriptionPlan specific RoleDefinitions here requires additional maintenance. Consider
                     // implementing another Construct like OSGIHasPermissionsProvider
-                    securityService.getOrCreateRoleDefinitionFromPrototype(StreamletViewerRole.getInstance());
                     securityService.getOrCreateRoleDefinitionFromPrototype(PremiumRole.getInstance());
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();

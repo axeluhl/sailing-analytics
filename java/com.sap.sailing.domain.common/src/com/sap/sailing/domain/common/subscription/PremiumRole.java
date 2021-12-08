@@ -2,8 +2,10 @@ package com.sap.sailing.domain.common.subscription;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
@@ -17,7 +19,13 @@ public class PremiumRole extends RolePrototype {
     
     PremiumRole() {
         super("premium", ROLE_ID.toString(),
-                WildcardPermission.builder().withTypes(SecuredSecurityTypes.USER)
+                WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
+                .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build(),
+        WildcardPermission.builder().withTypes(SecuredDomainType.SIMULATOR)
+                .withActions(DefaultActions.READ).build(),
+        WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
+                .withActions(SecuredDomainType.TrackedRaceActions.SIMULATOR).build(),
+        WildcardPermission.builder().withTypes(SecuredSecurityTypes.USER)
                 .withActions(SecuredSecurityTypes.UserActions.BE_PREMIUM).build());
     }
 
