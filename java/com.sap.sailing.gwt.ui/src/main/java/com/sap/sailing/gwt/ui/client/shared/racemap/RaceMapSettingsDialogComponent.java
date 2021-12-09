@@ -286,9 +286,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         }
         RaceMapHelpLinesSettings helpLinesSettings = getHelpLinesSettings();
         RaceMapZoomSettings zoomSettings = getZoomSettings();
-
-        boolean estimatedDuration = showEstimatedDuration.getValue();
-        boolean showSimulationOverlay = showSimulationOverlayCheckbox.getValue();
+        boolean estimatedDuration = showEstimatedDuration != null ? showEstimatedDuration.getValue() : false;
+        boolean showSimulationOverlay = showSimulationOverlayCheckbox != null ? showSimulationOverlayCheckbox.getValue() : false;
         long tailLengthInMilliseconds = initialSettings.getTailLengthInMilliseconds(); 
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             tailLengthInMilliseconds = tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l;
