@@ -141,7 +141,6 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
 
     @Override
     public PolynomialFunction getOrCreatePolynomialFunction() throws NotEnoughDataHasBeenAddedException {
-
         PolynomialFunction resultFunction;
         if (!functionNeedsUpdate.get()) {
             LockUtil.lockForRead(cacheLock);
@@ -199,7 +198,6 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             if (nanChecker.hasNaNEntry()) {
                 throw new NotEnoughDataHasBeenAddedException("Matrix singular, all x input equal?");
             }
-
         }
         RealVector coeffs = inversedMatrix.operate(vectorOfXYMultSumsCopy);
         if (!hasIntercept) {

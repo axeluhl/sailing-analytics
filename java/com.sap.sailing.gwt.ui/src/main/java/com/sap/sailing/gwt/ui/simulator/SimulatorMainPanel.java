@@ -58,6 +58,7 @@ import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting.SettingName;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -75,7 +76,9 @@ public class SimulatorMainPanel extends SimplePanel {
     private class ResizableFlowPanel extends FlowPanel implements RequiresResize {
         @Override
         public void onResize() {
-            simulatorMap.getMap().triggerResize();
+            if (simulatorMap != null && simulatorMap.getMap() != null) {
+                simulatorMap.getMap().triggerResize();
+            }
         }
     }
 	
@@ -769,7 +772,6 @@ public class SimulatorMainPanel extends SimplePanel {
     }    
     
     private void loadPolarDiagramData(final int selectedBoatClass) {
-
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
             @Override
             public void onFailure(Throwable error) {
@@ -778,17 +780,14 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onSuccess(BoatClassDTOsAndNotificationMessage boatClassesAndMsg) {
                 String notificationMessage = boatClassesAndMsg.getNotificationMessage();
-                if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                if (Util.hasLength(notificationMessage) && !warningAlreadyShown) {
                     errorReporter.reportError(boatClassesAndMsg.getNotificationMessage(), true);
                     warningAlreadyShown = true;
                 }
-
                 boatClasses = boatClassesAndMsg.getBoatClassDTOs();
                 chart.setChartTitleText(boatClasses[selectedBoatClass].getName());
             }
         });
-
-
         if (this.chart != null) {
             this.polarDiv.remove(this.chart);
         }
@@ -814,7 +813,7 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onSuccess(PolarDiagramDTOAndNotificationMessage polar) {
                 String notificationMessage = polar.getNotificationMessage();
-                if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                if (Util.hasLength(notificationMessage) && warningAlreadyShown == false) {
                     errorReporter.reportError(polar.getNotificationMessage(), true);
                     warningAlreadyShown = true;
                 }
@@ -917,42 +916,29 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     private void initPolarDiagramButton() {
-
     	this.polarDiagramButton =  new Button(stringMessages.polarDiagramButton());
     	this.polarDiagramButton.addClickHandler(new ClickHandler() {
     		@Override
     		public void onClick(ClickEvent arg0) {
-
-    			boolean checked = polarDiv.isVisible(); //((CheckBox) event.getSource()).getValue();
-
-    			if (!checked) {
-
-    				polarDiv.setVisible(true);
-
-    				//TODO: change the hardcoded values bellow...
-
-    				polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
-    					@Override
-    					public void setPosition(int offsetWidth, int offsetHeight) {
-
-    						int width = (Window.getClientWidth() - 492)/2;
-    						int height = (Window.getClientHeight() - 608)/2;
-
-    						polarDiagramDialogBox.setPopupPosition(width, height);
-    					}
-    				});
-
-    				polarDiagramDialogCloseButton.setFocus(true);
-    				//cb.setValue(false);
-
-    			}
+    		    boolean checked = polarDiv.isVisible();
+    		    if (!checked) {
+    		        polarDiv.setVisible(true);
+    		        //TODO: change the hardcoded values below...
+    		        polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
+    		            @Override
+    		            public void setPosition(int offsetWidth, int offsetHeight) {
+    		                int width = (Window.getClientWidth() - 492)/2;
+    		                int height = (Window.getClientHeight() - 608)/2;
+    		                polarDiagramDialogBox.setPopupPosition(width, height);
+    		            }
+    		        });
+    		        polarDiagramDialogCloseButton.setFocus(true);
+    		    }
     		}
     	});
-
     }	
 
     private void initDisplayOptions(Panel mapOptions) {
-
     	this.summaryButton = new RadioButton(RADIOBOX_GROUP_MAP_DISPLAY_OPTIONS, stringMessages.summary());
         this.summaryButton.getElement().setClassName("MapDisplayOptions");
         this.summaryButton.addClickHandler(new ClickHandler() {
@@ -964,7 +950,6 @@ public class SimulatorMainPanel extends SimplePanel {
                 simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, false);
             }
         });
-
         this.replayButton = new RadioButton(RADIOBOX_GROUP_MAP_DISPLAY_OPTIONS, stringMessages.replay());
         this.replayButton.getElement().setClassName("MapDisplayOptions");
         this.replayButton.addClickHandler(new ClickHandler() {
@@ -976,7 +961,6 @@ public class SimulatorMainPanel extends SimplePanel {
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selection, false);
             }
         });
-
         this.windDisplayButton = new RadioButton(RADIOBOX_GROUP_MAP_DISPLAY_OPTIONS, stringMessages.windDisplay());
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
@@ -987,7 +971,6 @@ public class SimulatorMainPanel extends SimplePanel {
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, false);
             }
         });
-
         HorizontalPanel p = new HorizontalPanel();
         p.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         p.add(busyIndicator);
@@ -999,17 +982,13 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     private DialogBox createPolarDiagramDialogBox() {
-
         final DialogBox dialogBox = new DialogBox();
         dialogBox.getElement().getStyle().setZIndex(10); // put polardiagram on-top of sapsailing header and parameter sliders
         dialogBox.setText("Polar Diagram");
         dialogBox.setAnimationEnabled(true);
         dialogBox.setAutoHideEnabled(false);
         dialogBox.setModal(false);
-
         dialogBox.setWidget(this.polarDiv);
-
-
         this.polarDiagramDialogCloseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -1017,14 +996,12 @@ public class SimulatorMainPanel extends SimplePanel {
                 dialogBox.hide();
             }
         });
-
         return dialogBox;
     }
 
     public char getEvent() {
     	return this.event;
     }
-    
     
     public int getSelectedBoatClassIndex() {
         return this.boatClassSelector.getSelectedIndex();
@@ -1043,35 +1020,27 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     private void loadRaceData(int selectedRaceIndex) {
-
         if (selectedRaceIndex < 0) {
             selectedRaceIndex = 0;
         }
-
         this.loadCompetitors(selectedRaceIndex);
-
         this.loadLegs(selectedRaceIndex);
     }
 
     private void loadLegData(int selectedLegIndex) {
-
     }
 
     private void loadCompetitorData(int selectedCompetitorIndex) {
-
     }
 
     private Panel getRacesSelector() {
         Label raceLabel = new Label(this.stringMessages.raceLabel());
         raceLabel.getElement().setClassName("boatClassLabel");
-
         HorizontalPanel panel = new HorizontalPanel();
         panel.getElement().setClassName("boatClassPanel");
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         panel.add(raceLabel);
-
         this.simulatorSvc.getRacesNames(new AsyncCallback<List<String>>() {
-
             @Override
             public void onFailure(Throwable error) {
                 errorReporter.reportError(stringMessages.errorLoadingRaceNames(error.getMessage()));
@@ -1079,90 +1048,66 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onSuccess(List<String> response) {
-
                 for (String raceName : response) {
                     raceSelector.addItem(raceName);
                 }
-
                 raceSelector.setItemSelected(0, true); // first race
                 loadRaceData(0);
             }
-
         });
-
         this.raceSelector.addChangeHandler(new ChangeHandler() {
-
             @Override
             public void onChange(ChangeEvent arg0) {
                 loadRaceData(raceSelector.getSelectedIndex());
             }
         });
-
         panel.add(this.raceSelector);
-
         return panel;
     }
 
     private Panel getLegsSelector() {
-
         Label legLabel = new Label(this.stringMessages.legLabel());
         legLabel.getElement().setClassName("boatClassLabel");
-
         HorizontalPanel panel = new HorizontalPanel();
         panel.getElement().setClassName("boatClassPanel");
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         panel.add(legLabel);
-
         this.loadLegs(this.raceSelector.getSelectedIndex());
-
         this.legSelector.addChangeHandler(new ChangeHandler() {
-
             @Override
             public void onChange(ChangeEvent arg0) {
                 loadLegData(legSelector.getSelectedIndex());
             }
         });
-
         panel.add(this.legSelector);
-
         return panel;
     }
 
     private Panel getCompetitorsSelector() {
-
         Label competitorLabel = new Label(this.stringMessages.competitorLabel());
         competitorLabel.getElement().setClassName("boatClassLabel");
-
         HorizontalPanel panel = new HorizontalPanel();
         panel.getElement().setClassName("boatClassPanel");
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         panel.add(competitorLabel);
-
         this.loadCompetitors(this.raceSelector.getSelectedIndex());
-
         this.competitorSelector.addChangeHandler(new ChangeHandler() {
-
             @Override
             public void onChange(ChangeEvent arg0) {
                 loadCompetitorData(competitorSelector.getSelectedIndex());
             }
         });
-
         panel.add(this.competitorSelector);
-
         return panel;
     }
 
     private Panel getBoatClassesSelector() {
-
         Label boatClassLabel = new Label(this.stringMessages.boatClass());
         boatClassLabel.getElement().setClassName("boatClassLabel");
-
         HorizontalPanel panel = new HorizontalPanel();
         panel.getElement().setClassName("boatClassPanel");
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         panel.add(boatClassLabel);
-
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
             @Override
             public void onFailure(Throwable error) {
@@ -1172,11 +1117,10 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onSuccess(BoatClassDTOsAndNotificationMessage response) {
                 String notificationMessage = response.getNotificationMessage();
-                if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                if (Util.hasLength(notificationMessage) && !warningAlreadyShown) {
                     errorReporter.reportError(response.getNotificationMessage(), true);
                     warningAlreadyShown = true;
                 }
-
                 boatClasses = response.getBoatClassDTOs();
                 for (int i = 0; i < boatClasses.length; ++i) {
                     boatClassSelector.addItem(boatClasses[i].getName());
@@ -1185,7 +1129,6 @@ public class SimulatorMainPanel extends SimplePanel {
                 loadPolarDiagramData(3);
             }
         });
-
         this.boatClassSelector.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent evnet) {
@@ -1193,16 +1136,12 @@ public class SimulatorMainPanel extends SimplePanel {
                 loadPolarDiagramData(selectedIndex);
             }
         });
-
         panel.add(boatClassSelector);
-
         return panel;
     }
 
     private void loadLegs(int selectedRaceIndex) {
-
         this.simulatorSvc.getLegsNames(selectedRaceIndex, new AsyncCallback<List<String>>() {
-
             @Override
             public void onFailure(Throwable error) {
                 errorReporter.reportError(stringMessages.errorLoadingLegInformation(error.getMessage()));
@@ -1210,16 +1149,13 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onSuccess(List<String> response) {
-
                 legSelector.clear();
-
                 int index = 0;
                 for (String legName : response) {
                     legSelector.addItem(legName + ((index % 2 == 0) ? " (" + stringMessages.upWind() + ")"
                             : " (" + stringMessages.downWind() + ")"));
                     index++;
                 }
-
                 legSelector.setItemSelected(0, true); // first leg
                 loadLegData(0);
             }
@@ -1227,9 +1163,7 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     private void loadCompetitors(int selectedRaceIndex) {
-
         this.simulatorSvc.getCompetitorsNames(selectedRaceIndex, new AsyncCallback<List<String>>() {
-
             @Override
             public void onFailure(Throwable error) {
                 errorReporter.reportError(stringMessages.errorLoadingCompetitors(error.getMessage()));
@@ -1237,13 +1171,10 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onSuccess(List<String> response) {
-
                 competitorSelector.clear();
-
                 for (String competitorName : response) {
                     competitorSelector.addItem(competitorName);
                 }
-
                 competitorSelector.setItemSelected(0, true); // first competitor
                 loadCompetitorData(0);
             }

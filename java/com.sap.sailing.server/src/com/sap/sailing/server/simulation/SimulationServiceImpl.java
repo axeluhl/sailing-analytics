@@ -111,6 +111,27 @@ public class SimulationServiceImpl implements SimulationService {
             this.cache = null;
         }
     }
+    
+    @Override
+    public Iterable<BoatClass> getBoatClassesWithPolarData() {
+        return racingEventService.getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
+    }
+    
+    @Override
+    public BoatClass getBoatClass(String name) {
+        return racingEventService.getBaseDomainFactory().getBoatClass(name);
+    }
+
+    @Override
+    public PolarDiagram getPolarDiagram(BoatClass boatClass) {
+        try {
+            return new PolarDiagramGPS(boatClass, racingEventService.getPolarDataService());
+        } catch (SparseSimulationDataException e) {
+            logger.warning("Request for polar diagram of boat class " + boatClass.getName()
+                    + " failed due to sparse polar data. Was it really returned by getBoatClassesWithPolarData()?");
+            return null;
+        }
+    }
 
     private void expireCacheEntries() {
         final TimePoint expireAllOlderThan = TimePoint.now().minus(CACHE_ENTRY_EXPIRY_DURATION);
