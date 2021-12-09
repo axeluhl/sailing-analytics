@@ -295,7 +295,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         Grid bd = new CurvedGrid(start, end);
 
         controlParameters.resetBlastRandomStream = params.isKeepState();
-        retreiveWindControlParameters(pattern);
+        retrieveWindControlParameters(pattern);
         LOGGER.info("Boundary south direction " + bd.getSouth());
         controlParameters.baseWindBearing += bd.getSouth().getDegrees();
 
@@ -355,7 +355,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         Duration timeStep = params.getTimeStep();
 
         this.controlParameters.resetBlastRandomStream = params.isKeepState();
-        this.retreiveWindControlParameters(pattern);
+        this.retrieveWindControlParameters(pattern);
         if (rcDirection == SailingSimulatorConstants.LegTypeDownwind) {
             this.controlParameters.baseWindBearing += 180.0;
         }
@@ -420,26 +420,31 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public PolarDiagramDTOAndNotificationMessage getPolarDiagram(Double bearingStep, int boatClassIndex)
             throws ConfigurationException {
         Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
-        NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = polarDiagramAndNotificationMessage.getA()
-                .polarDiagramPlot(bearingStep);
-        Set<Speed> validSpeeds = navMap.keySet();
-        validSpeeds.remove(Speed.NULL);
-        Number[][] series = new Number[validSpeeds.size()][];
-        int i = 0;
-        for (Speed s : validSpeeds) {
-            Collection<Speed> boatSpeeds = navMap.get(s).values();
-            series[i] = new Number[boatSpeeds.size()];
-            int j = 0;
-            for (Speed boatSpeed : boatSpeeds) {
-                series[i][j++] = new Double(boatSpeed.getKnots());
+        final PolarDiagramDTOAndNotificationMessage result;
+        if (polarDiagramAndNotificationMessage != null && polarDiagramAndNotificationMessage.getA() != null) {
+            NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = polarDiagramAndNotificationMessage.getA()
+                    .polarDiagramPlot(bearingStep);
+            Set<Speed> validSpeeds = navMap.keySet();
+            validSpeeds.remove(Speed.NULL);
+            Number[][] series = new Number[validSpeeds.size()][];
+            int i = 0;
+            for (Speed s : validSpeeds) {
+                Collection<Speed> boatSpeeds = navMap.get(s).values();
+                series[i] = new Number[boatSpeeds.size()];
+                int j = 0;
+                for (Speed boatSpeed : boatSpeeds) {
+                    series[i][j++] = new Double(boatSpeed.getKnots());
+                }
+                i++;
             }
-            i++;
+            PolarDiagramDTO dto = new PolarDiagramDTO();
+            dto.setNumberSeries(series);
+            result = new PolarDiagramDTOAndNotificationMessage();
+            result.setPolarDiagramDTO(dto);
+            result.setNotificationMessage(polarDiagramAndNotificationMessage.getB());
+        } else {
+            result = null;
         }
-        PolarDiagramDTO dto = new PolarDiagramDTO();
-        dto.setNumberSeries(series);
-        PolarDiagramDTOAndNotificationMessage result = new PolarDiagramDTOAndNotificationMessage();
-        result.setPolarDiagramDTO(dto);
-        result.setNotificationMessage(polarDiagramAndNotificationMessage.getB());
         return result;
     }
 
@@ -694,14 +699,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return simulator.getCompetitorsNames(selectedRaceIndex);
     }
 
-    private void retreiveWindControlParameters(WindPatternDisplay pattern) {
+    private void retrieveWindControlParameters(WindPatternDisplay pattern) {
         controlParameters.setDefaults();
         for (WindPatternSetting<?> s : pattern.getSettings()) {
             Field f;
             try {
                 f = controlParameters.getClass().getField(s.getName());
                 try {
-                    LOGGER.info("Setting " + f.getName() + " to " + s.getName() + " value : " + s.getValue());
+                    LOGGER.fine("Setting " + f.getName() + " to " + s.getName() + " value : " + s.getValue());
                     f.set(controlParameters, s.getValue());
                 } catch (IllegalArgumentException e) {
                     LOGGER.warning("SimulatorServiceImpl => IllegalArgumentException with message " + e.getMessage());
@@ -900,19 +905,19 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private SimulatedPathsEvenTimedResultDTO getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf,
             char mode, SimulatorUISelectionDTO selection, boolean showOmniscient, boolean showOpportunist)
             throws ConfigurationException {
-        LOGGER.info("Retrieving simulated paths");
+        LOGGER.fine("Retrieving simulated paths");
         Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(selection.boatClassIndex);
         PolarDiagram pd = polarDiagramAndNotificationMessage.getA();
         int[] gridRes = wf.getGridResolution();
         Position[] gridArea = wf.getGridAreaGps();
-        LOGGER.info("showOmniscient : "+showOmniscient);
-        LOGGER.info("showOpportunist: "+showOpportunist);        
+        LOGGER.fine("showOmniscient : "+showOmniscient);
+        LOGGER.fine("showOpportunist: "+showOpportunist);        
         if (gridArea != null) {
             // initialize grid of supporting location for windfield
             Grid bd = new CurvedGrid(gridArea[0], gridArea[1]);
             // set base wind bearing
             wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
-            LOGGER.info("base wind: " + pd.getWind().getKnots() + " kn, "
+            LOGGER.fine("base wind: " + pd.getWind().getKnots() + " kn, "
                     + ((wf.getWindParameters().baseWindBearing) % 360.0) + "\u00B0");
             // set water current
             SpeedWithBearing current = new KnotSpeedWithBearingImpl(wf.getWindParameters().curSpeed, new DegreeBearingImpl(wf.getWindParameters().curBearing));
@@ -921,7 +926,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             }
             pd.setCurrent(current);
             if (pd.getCurrent() != null) {
-                LOGGER.info("water current: " + pd.getCurrent().getKnots() + " kn, "
+                LOGGER.fine("water current: " + pd.getCurrent().getKnots() + " kn, "
                         + pd.getCurrent().getBearing().getDegrees() + "\u00B0");
             }
             wf.setBoundary(bd);
@@ -951,7 +956,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get(null), pathsAndNames.get(null)); // TODO bug4427: the above expressions evaluate to null anyway, provoking an NPE; however, mode=m fails much earlier because the SimulatorMap.regattaAreaCanvasOverlay field is null, causing an NPE even earlier
         }
         for (Entry<PathType, Path> entry : pathsAndNames.entrySet()) {
-            LOGGER.info("Path " + entry.getKey().getTxtId());
+            LOGGER.fine("Path " + entry.getKey().getTxtId());
             // NOTE: pathName convention is: sort-digit + "#" + path-name
             // pathsAndNames is TreeMap which ensures sorting
             pathDTOs[index] = new PathDTO(entry.getKey());

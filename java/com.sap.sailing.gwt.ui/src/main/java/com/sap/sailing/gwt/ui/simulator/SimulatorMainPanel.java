@@ -807,53 +807,52 @@ public class SimulatorMainPanel extends SimplePanel {
         this.simulatorSvc.getPolarDiagram(5.0, selectedBoatClass, new AsyncCallback<PolarDiagramDTOAndNotificationMessage>() {
             @Override
             public void onFailure(Throwable error) {
-
-                errorReporter.reportError(stringMessages.errorLoadingBoatClasses(error.getMessage()));
+                errorReporter.reportError(stringMessages.errorLoadingPolarDataForBoatClass(boatClasses[selectedBoatClass].getName(), error.getMessage()));
             }
+            
             @Override
             public void onSuccess(PolarDiagramDTOAndNotificationMessage polar) {
-                String notificationMessage = polar.getNotificationMessage();
-                if (Util.hasLength(notificationMessage) && warningAlreadyShown == false) {
-                    errorReporter.reportError(polar.getNotificationMessage(), true);
-                    warningAlreadyShown = true;
-                }
-
-                Number[][] Nseries = polar.getPolarDiagramDTO().getNumberSeries();
-                int[] windSpeedCatalog = new int[] { 6, 8, 10, 12, 14, 16, 20 };
-                PolarChartColorRange cc = new PolarChartColorRange(Nseries.length + 1);
-                ArrayList<String> windSpeedColor = cc.GetColors();
-                Series ser = chart.createSeries();
-
-                for (int i = 0; i < Nseries.length; i++) {
-                    ser = chart.createSeries();
-                    ser.setName("" + windSpeedCatalog[i] + " kn");
-                    ser.setPoints(Nseries[i]);
-                    ser.setOption("color", windSpeedColor.get(i));
-                    chart.addSeries(ser);
-                }
-
-                chart.getXAxis().setTickInterval(10);
-                chart.getYAxis().setMin(0);
-                chart.setOption("plotOptions/series/pointInterval", 360.0 / (Nseries[0].length));
-                chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
-                    @Override
-                    public String format(AxisLabelsData axisLabelsData) {
-                        String labelD = "";
-                        if (axisLabelsData.getValueAsLong() % 30 == 0) {
-                            labelD = axisLabelsData.getValueAsLong() + "\u00B0";
-                        }
-                        return labelD;
+                if (polar == null) {
+                    errorReporter.reportError(stringMessages.errorLoadingPolarDataForBoatClass(boatClasses[selectedBoatClass].getName(), ""));
+                } else {
+                    String notificationMessage = polar.getNotificationMessage();
+                    if (Util.hasLength(notificationMessage) && warningAlreadyShown == false) {
+                        errorReporter.reportError(polar.getNotificationMessage(), true);
+                        warningAlreadyShown = true;
                     }
-                }));
-
-                polarDiv.add(chart);
-                polarDiv.add(polarDiagramDialogCloseButton);
+                    Number[][] Nseries = polar.getPolarDiagramDTO().getNumberSeries();
+                    int[] windSpeedCatalog = new int[] { 6, 8, 10, 12, 14, 16, 20 };
+                    PolarChartColorRange cc = new PolarChartColorRange(Nseries.length + 1);
+                    ArrayList<String> windSpeedColor = cc.GetColors();
+                    Series ser = chart.createSeries();
+                    for (int i = 0; i < Nseries.length; i++) {
+                        ser = chart.createSeries();
+                        ser.setName("" + windSpeedCatalog[i] + " kn");
+                        ser.setPoints(Nseries[i]);
+                        ser.setOption("color", windSpeedColor.get(i));
+                        chart.addSeries(ser);
+                    }
+                    chart.getXAxis().setTickInterval(10);
+                    chart.getYAxis().setMin(0);
+                    chart.setOption("plotOptions/series/pointInterval", 360.0 / (Nseries[0].length));
+                    chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
+                        @Override
+                        public String format(AxisLabelsData axisLabelsData) {
+                            String labelD = "";
+                            if (axisLabelsData.getValueAsLong() % 30 == 0) {
+                                labelD = axisLabelsData.getValueAsLong() + "\u00B0";
+                            }
+                            return labelD;
+                        }
+                    }));
+                    polarDiv.add(chart);
+                    polarDiv.add(polarDiagramDialogCloseButton);
+                }
             }
         });
     }
 
     private void initUpdateButton() {
-
         this.updateButton = new Button(stringMessages.simulateButton());
         this.updateButton.getElement().getStyle().setProperty("marginLeft", "6px");
         if (mode == SailingSimulatorConstants.ModeEvent) {
@@ -888,7 +887,7 @@ public class SimulatorMainPanel extends SimplePanel {
         // int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
         int selectedLegIndex = legSelector.getSelectedIndex();
 
-        SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(),
+        SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(getSelectedBoatClassIndex(),
                 raceSelector.getSelectedIndex(), competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
 
         if (windDisplayButton.getValue()) {
@@ -945,7 +944,7 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 showTimePanel(false);
-                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
+                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(getSelectedBoatClassIndex(), raceSelector.getSelectedIndex(),
                         competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
                 simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, false);
             }
@@ -956,7 +955,7 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 showTimePanel(true);
-                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
+                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(getSelectedBoatClassIndex(), raceSelector.getSelectedIndex(),
                         competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selection, false);
             }
@@ -966,7 +965,7 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 showTimePanel(true);
-                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
+                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(getSelectedBoatClassIndex(), raceSelector.getSelectedIndex(),
                         competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, false);
             }
@@ -1004,7 +1003,7 @@ public class SimulatorMainPanel extends SimplePanel {
     }
     
     public int getSelectedBoatClassIndex() {
-        return this.boatClassSelector.getSelectedIndex();
+        return Integer.valueOf(boatClassSelector.getSelectedValue());
     }
 
     public int getSelectedRaceIndex() {
@@ -1143,7 +1142,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.boatClassSelector.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent evnet) {
-                int selectedIndex = Integer.valueOf(boatClassSelector.getSelectedValue());
+                int selectedIndex = getSelectedBoatClassIndex();
                 loadPolarDiagramData(selectedIndex);
             }
         });

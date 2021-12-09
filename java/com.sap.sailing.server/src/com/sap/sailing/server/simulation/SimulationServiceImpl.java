@@ -528,7 +528,7 @@ public class SimulationServiceImpl implements SimulationService {
             Map<PathType, Path> paths = null;
             if (polarDiagram != null) {
                 double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
-                        / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
+                        / ((PolarDiagramGPS) polarDiagram).getAvgSpeedInKnots() * 3600 / 100;
                 Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
                 SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, endLine, polarDiagram,
                         windField, simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
