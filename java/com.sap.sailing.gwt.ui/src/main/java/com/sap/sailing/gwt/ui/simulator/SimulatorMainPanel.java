@@ -1122,17 +1122,28 @@ public class SimulatorMainPanel extends SimplePanel {
                     warningAlreadyShown = true;
                 }
                 boatClasses = response.getBoatClassDTOs();
+                final Map<BoatClassDTO, Integer> boatClassIndices = new HashMap<>();
                 for (int i = 0; i < boatClasses.length; ++i) {
-                    boatClassSelector.addItem(boatClasses[i].getName());
+                    final BoatClassDTO boatClass = boatClasses[i];
+                    boatClassIndices.put(boatClass, i);
+                    
                 }
-                boatClassSelector.setItemSelected(3, true); // polar diagram 49er STG
-                loadPolarDiagramData(3);
+                int[] index = new int[1];
+                boatClassIndices.keySet().stream().sorted().forEach(bc->{
+                    final Integer boatClassIndex = boatClassIndices.get(bc);
+                    boatClassSelector.addItem(bc.getName(), ""+boatClassIndex);
+                    if (bc.getName().equals("49er STG")) {
+                        boatClassSelector.setSelectedIndex(index[0]);
+                        loadPolarDiagramData(boatClassIndex);
+                    }
+                    index[0]++;
+                });
             }
         });
         this.boatClassSelector.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent evnet) {
-                int selectedIndex = boatClassSelector.getSelectedIndex();
+                int selectedIndex = Integer.valueOf(boatClassSelector.getSelectedValue());
                 loadPolarDiagramData(selectedIndex);
             }
         });
