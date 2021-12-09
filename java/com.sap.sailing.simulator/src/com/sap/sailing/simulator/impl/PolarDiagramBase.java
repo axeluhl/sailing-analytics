@@ -227,7 +227,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
                 hiDouble = map.ceilingKey(crValue-360);
             }
         }
-        double hiValue = hiDouble.doubleValue();
+        double hiValue = hiDouble == null ? 0.0 : hiDouble.doubleValue();
         double hiResult = 0.0;
         if (level < (values.length-1)) {
             tmp = (NavigableMap<Double,Object>)map.get(hiValue);
