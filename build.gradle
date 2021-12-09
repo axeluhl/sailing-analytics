@@ -68,7 +68,7 @@ ext {
     isXmakeBuild = project.hasProperty("xmake")
     isReleaseBuild = Boolean.parseBoolean(System.env.XMAKE_RELEASE_BUILD)
 
-    destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
+    destinationFolder = project.rootDir.absolutePath + "/java/com.sap.sailing.www/apps/"
 }
 
 apply plugin: "org.ajoberstar.grgit"
