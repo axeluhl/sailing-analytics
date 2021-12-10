@@ -350,19 +350,14 @@ public class SimulatorMainPanel extends SimplePanel {
                 }
             }
         });
-        
         mainPanel = new DockLayoutPanel(Unit.PX);
-        
         mainPanel.setSize("100%", "100%");        
         mainPanel.addWest(leftPanel, 470);
         mainPanel.addSouth(fullTimePanel, 67);
         mainPanel.setWidgetHidden(fullTimePanel, true);
-        
         createMapOptionsPanel(); // add map-options to mainPanel-North
-
         mainPanel.add(rightPanel);
         this.setWidget(mainPanel);        
-
         this.polarDiagramDialogBox = this.createPolarDiagramDialogBox();
     }
 
@@ -404,7 +399,6 @@ public class SimulatorMainPanel extends SimplePanel {
     private void createOptionsPanelTop() {
         HorizontalPanel optionsPanel = new HorizontalPanel();
         optionsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-
         optionsPanel.setTitle(stringMessages.optionsBar());
         optionsPanel.getElement().setClassName("optionsPanel");
         Label options = new Label(stringMessages.optionsBar());
@@ -412,16 +406,11 @@ public class SimulatorMainPanel extends SimplePanel {
         optionsPanel.setSize("100%", "45px");
         optionsPanel.add(options);
         optionsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-
         HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setWidth("0px");
-        
         initPolarDiagramButton();
         buttonPanel.add(polarDiagramButton);        
-
         initUpdateButton();
         buttonPanel.add(updateButton);
-        
         optionsPanel.add(buttonPanel);        
         leftPanel.add(optionsPanel);
     }
@@ -575,28 +564,21 @@ public class SimulatorMainPanel extends SimplePanel {
         mapOptions.setSize("100%", "45px");
         mapOptions.setTitle(stringMessages.maps());
         mapOptions.getElement().setClassName("mapOptions");
-
         Label mapsLabel = new Label(stringMessages.maps());
         mapsLabel.getElement().setClassName("sectorHeadline");
         mapOptions.add(mapsLabel);
-
         mapOptions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-
-        if ((mode != SailingSimulatorConstants.ModeMeasured)&&(mode != SailingSimulatorConstants.ModeEvent)) {
-        	initCourseInputButton();
+        if ((mode != SailingSimulatorConstants.ModeMeasured) && (mode != SailingSimulatorConstants.ModeEvent)) {
+            initCourseInputButton();
             mapOptions.add(courseInputButton);
         }
-        
-        //rightPanel.add(mapOptions);
         mainPanel.addNorth(mapOptions, 45);
-
         initDisplayOptions(mapOptions);
         if (mode == SailingSimulatorConstants.ModeEvent) {
-        	summaryButton.setValue(true);
-        	replayButton.setValue(false);
-        	windDisplayButton.setValue(false);
+            summaryButton.setValue(true);
+            replayButton.setValue(false);
+            windDisplayButton.setValue(false);
         }
-
     }
 
     // initialize timer with a default time span based on windParams
@@ -609,7 +591,6 @@ public class SimulatorMainPanel extends SimplePanel {
 
     private void initCourseInputButton() {
         courseInputButton = new Button(stringMessages.startEnd());
-
         courseInputButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
@@ -622,7 +603,6 @@ public class SimulatorMainPanel extends SimplePanel {
                 windDisplayButton.setValue(false);
             }
         });
-
     }
 
     private Panel createRaceDirectionSelector() {
@@ -871,25 +851,13 @@ public class SimulatorMainPanel extends SimplePanel {
     }
     
     private void update() {
-
     	if (this.windParams.isShowStreamlets()) {
-
     		this.setMapInstance(this.simulatorMap.getMap().getJso());
     		this.setCanvasProjectionInstance(this.simulatorMap.getRegattaAreaCanvasOverlay().getMapProjection());
-
-    		//this.setDefaultTimeSettings();
-    		//this.simulatorMap.generateWindField(this.getWindPatternDisplay(), true);
-
     	}
-
-        // int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
-        // int selectedRaceIndex = raceSelector.getSelectedIndex();
-        // int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
         int selectedLegIndex = legSelector.getSelectedIndex();
-
         SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(getSelectedBoatClassIndex(),
                 raceSelector.getSelectedIndex(), competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
-
         if (windDisplayButton.getValue()) {
             showTimePanel(true);
             simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, true);
@@ -902,7 +870,6 @@ public class SimulatorMainPanel extends SimplePanel {
             simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selection, true);
         } else {
             if (mode == SailingSimulatorConstants.ModeMeasured) {
-
                 if (selectedLegIndex % 2 != 0) {
                     errorReporter.reportError(stringMessages.downwindLegsNotSupported());
                 } else {
@@ -915,7 +882,7 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     private void initPolarDiagramButton() {
-    	this.polarDiagramButton =  new Button(stringMessages.polarDiagramButton());
+    	this.polarDiagramButton = new Button(stringMessages.polarDiagramButton());
     	this.polarDiagramButton.addClickHandler(new ClickHandler() {
     		@Override
     		public void onClick(ClickEvent arg0) {

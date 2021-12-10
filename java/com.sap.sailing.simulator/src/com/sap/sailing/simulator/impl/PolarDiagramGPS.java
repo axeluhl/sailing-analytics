@@ -59,7 +59,12 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                 final Bearing portBearing = new DegreeBearingImpl(-twaInDegrees);
                 final List<Speed> boatSpeedLineForWindSpeedPort = speeds.computeIfAbsent(portBearing, key->new ArrayList<>());
                 try {
-                    boatSpeedLineForWindSpeedPort.add(polarData.getSpeed(boatClass, windSpeed, portBearing).getObject());
+                    Speed portSpeed = polarData.getSpeed(boatClass, windSpeed, portBearing).getObject();
+                    if (portSpeed.getKnots() < 0) {
+                        boatSpeedLineForWindSpeedPort.add(Speed.NULL);
+                    } else {
+                        boatSpeedLineForWindSpeedPort.add(portSpeed);
+                    }
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     logger.fine(()->"No polar data for boat class "+boatClass.getName()+" for wind speed "+windSpeed+
                             " at true wind angle "+portBearing);
@@ -68,7 +73,12 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                 final Bearing starboardBearing = new DegreeBearingImpl(twaInDegrees);
                 final List<Speed> boatSpeedLineForWindSpeedStarboard = speeds.computeIfAbsent(starboardBearing, key->new ArrayList<>());
                 try {
-                    boatSpeedLineForWindSpeedStarboard.add(polarData.getSpeed(boatClass, windSpeed, starboardBearing).getObject());
+                    Speed starboardSpeed = polarData.getSpeed(boatClass, windSpeed, starboardBearing).getObject();
+                    if (starboardSpeed.getKnots() < 0) {
+                        boatSpeedLineForWindSpeedStarboard.add(Speed.NULL);
+                    } else {
+                        boatSpeedLineForWindSpeedStarboard.add(starboardSpeed);
+                    }
                 } catch (NotEnoughDataHasBeenAddedException e) {
                     logger.fine(()->"No polar data for boat class "+boatClass.getName()+" for wind speed "+windSpeed+
                             " at true wind angle "+starboardBearing);
