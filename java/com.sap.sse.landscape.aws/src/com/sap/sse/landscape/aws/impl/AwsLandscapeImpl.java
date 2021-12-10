@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -543,7 +544,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             return getEc2Client(getRegion(region))
                     .describeInstances(b->b.filters(Filter.builder().name("private-ip-address").values(inetAddress.getHostAddress()).build())).reservations()
                     .iterator().next().instances().iterator().next();
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException | NoSuchElementException e) {
             logger.warning("IP address for "+privateIpAddress+" not found");
             return null;
         }
@@ -805,7 +806,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         logger.info("Found the following MFA devices: "+Util.joinStrings(", ", Util.map(mfaDevices, d->d.serialNumber())));
         final String serialNumberOfMfaDevice = mfaDevices.iterator().next().serialNumber();
         logger.info("Found MFA device "+serialNumberOfMfaDevice+"; using MFA token code "+nonEmptyMfaTokenCode);
-        final Credentials result = StsClient.builder().credentialsProvider(()->basicCredentials).build()
+        final Credentials result = StsClient.builder().region(Region.AWS_GLOBAL).credentialsProvider(()->basicCredentials).build()
             .getSessionToken(b->b.tokenCode(nonEmptyMfaTokenCode).serialNumber(serialNumberOfMfaDevice)).credentials();
         logger.info("Produced valid MFA session credentials for access key ID "+result.accessKeyId());
         return result;

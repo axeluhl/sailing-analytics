@@ -5094,8 +5094,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             throw e;
         }
         final User user = getSecurityService().getCurrentUser();
-        final String token = getOrCreateTargetServerBearerToken(urlAsString, targetServerUsername, targetServerPassword,
-                targetServerBearerToken);
+        final String token = getSecurityService().getOrCreateTargetServerBearerToken(urlAsString, targetServerUsername, targetServerPassword, targetServerBearerToken);
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
         // Create a progress indicator for as long as the server gets data from the other server.
@@ -5210,32 +5209,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
             return super.read(b, off, len);
         }
-    }
-    
-    @Override
-    public String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
-            String targetServerPassword, String targetServerBearerToken) {
-        if ((Util.hasLength(targetServerUsername) || Util.hasLength(targetServerPassword))
-                && Util.hasLength(targetServerBearerToken)) {
-            IllegalArgumentException e = new IllegalArgumentException(
-                    "Please use either username/password or bearer token, not both.");
-            logger.log(Level.WARNING, e.getMessage(), e);
-            throw e;
-        }
-        final User user = getSecurityService().getCurrentUser();
-        // Default to current user's token
-        final String effectiveTargetServerBearerToken;
-        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword) && !Util.hasLength(targetServerBearerToken)) {
-            effectiveTargetServerBearerToken = user == null ? null : getSecurityService().getOrCreateAccessToken(user.getName());
-        } else {
-            effectiveTargetServerBearerToken = targetServerBearerToken;
-        }
-        final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
-                ? targetServerUsername != null ?
-                        RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername, targetServerPassword) :
-                        null // in case no effective bearer token has been provided but no user name either
-                : effectiveTargetServerBearerToken);
-        return token;
     }
     
     @Override

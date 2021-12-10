@@ -157,8 +157,8 @@ public class CompareServersResource extends AbstractSailingServerResource {
         if (!validateParameters(server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
             response = badRequest("Specify two server names and optionally a set of valid leaderboardgroup UUIDs.");
         } else {
-            final String token1 = getService().getOrCreateTargetServerBearerToken(effectiveServer1, user1, password1, bearer1);
-            final String token2 = getService().getOrCreateTargetServerBearerToken(server2, user2, password2, bearer2);
+            final String token1 = getSecurityService().getOrCreateTargetServerBearerToken(effectiveServer1, user1, password1, bearer1);
+            final String token2 = getSecurityService().getOrCreateTargetServerBearerToken(server2, user2, password2, bearer2);
             result.put(effectiveServer1, new HashSet<>());
             result.put(server2, new HashSet<>());
             try {

@@ -15,6 +15,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
     static final String ACTION_DEFINE_LANDING_PAGE = "DEFINE_LANDING_PAGE";
     static final String ACTION_CREATE_LOAD_BALANCER_MAPPING = "CREATE_LOAD_BALANGER_MAPPING";
     public static final String ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER = "LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER";
+    public static final String ACTION_ENSURE_ONE_REPLICA_THEN_STOP_REPLICATING_AND_REMOVE_MASTER_FROM_TARGET_GROUPS = "ACTION_ENSURE_ONE_REPLICA_THEN_STOP_REPLICATING_AND_REMOVE_MASTER_FROM_TARGET_GROUPS";
 
     private final StringMessages stringMessages;
 
@@ -42,7 +43,9 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
                 new ImageSpec(ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER, stringMessages.launchAnotherReplicaSetOnThisMaster(),
                         IconResources.INSTANCE.launchAnotherReplicaSetOnThisMasterIcon()),
                 new ImageSpec(ACTION_UPGRADE, stringMessages.upgrade(),
-                        IconResources.INSTANCE.refreshIcon())
+                        IconResources.INSTANCE.refreshIcon()),
+                new ImageSpec(ACTION_ENSURE_ONE_REPLICA_THEN_STOP_REPLICATING_AND_REMOVE_MASTER_FROM_TARGET_GROUPS, stringMessages.ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(),
+                        IconResources.INSTANCE.unlinkIcon())
                 );
     }
 }

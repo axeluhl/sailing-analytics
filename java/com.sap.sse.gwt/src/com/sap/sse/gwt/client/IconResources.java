@@ -43,4 +43,7 @@ public interface IconResources extends ClientBundle {
 
     @Source("images/launch-another-replica-set-on-this-master.png")
     ImageResource launchAnotherReplicaSetOnThisMasterIcon();
+
+    @Source("images/unlink.png")
+    ImageResource unlinkIcon();
 }

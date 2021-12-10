@@ -200,4 +200,17 @@ public interface LandscapeManagementWriteServiceAsync {
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
             String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
             Integer optionalMemoryTotalSizeFactorOrNull, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    /**
+     * For the given replica set ensures there is at least one healthy replica, then stops replicating on all replicas and
+     * removes the master from the public and master target groups. This can be used as a preparatory action for upgrading
+     * the master while keeping one or more replicas available to handle read traffic.<p>
+     * 
+     * Other than de-registering the master from the replica set's target groups this method does nothing to the master
+     * process/host.
+     */
+    void ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSet, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            AsyncCallback<Boolean> callback);
 }

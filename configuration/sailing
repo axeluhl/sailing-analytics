@@ -40,7 +40,7 @@ start_tmux() {
 }
 
 start_servers() {
-        /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com 2>&1 >>/var/log/sailing.err
+        /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
 	cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
 	chown root /usr/local/bin/cp_root_mail_properties
 	chgrp root /usr/local/bin/cp_root_mail_properties
@@ -84,7 +84,10 @@ configure_and_start_server() {
   chgrp sailing "${SERVERS_DIR}/${conf}"
   # If there is a secret /root/mail.properties, copy it into the default server's configuration directory:
   /usr/local/bin/cp_root_mail_properties "${conf}"
-  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start; ./defineReverseProxyMappings.sh" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  pushd ${SERVERS_DIR}/${conf}
+  ./defineReverseProxyMappings.sh 2>>/var/log/sailing.err >>/var/log/sailing.err
+  popd
   RETVAL=$?
   [ $RETVAL -eq 0 ] && success || failure
 }

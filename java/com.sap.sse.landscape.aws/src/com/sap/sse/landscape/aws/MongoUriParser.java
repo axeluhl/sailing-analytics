@@ -59,22 +59,29 @@ public class MongoUriParser<ShardingKey> {
         if (replicaSetName != null) {
             MongoReplicaSet replicaSet = new MongoReplicaSetImpl(replicaSetName);
             for (final String hostnameAndOptionalPort : hostnamesAndOptionalPorts) {
-                replicaSet.addReplica(getMongoProcessInReplicaSet(replicaSet, hostnameAndOptionalPort));
+                final MongoProcessInReplicaSet mongoProcessInReplicaSet = getMongoProcessInReplicaSet(replicaSet, hostnameAndOptionalPort);
+                if (mongoProcessInReplicaSet != null) {
+                    replicaSet.addReplica(mongoProcessInReplicaSet);
+                }
             }
             endpoint = replicaSet;
         } else {
             endpoint = getMongoProcess(hostnamesAndOptionalPorts[0]);
         }
-        return endpoint.getDatabase(dbName);
+        return endpoint == null ? null : endpoint.getDatabase(dbName);
     }
 
     private MongoEndpoint getMongoProcess(final String hostnameAndOptionalPort) throws UnknownHostException {
         final MongoEndpoint endpoint;
         Pair<AwsInstance<ShardingKey>, Integer> hostAndOptionalPort = getHostAndPort(hostnameAndOptionalPort);
-        if (hostAndOptionalPort.getB() != null) {
-            endpoint = new MongoProcessImpl(hostAndOptionalPort.getA(), hostAndOptionalPort.getB());
-        } else {
-            endpoint = new MongoProcessImpl(hostAndOptionalPort.getA());
+        if (hostAndOptionalPort.getA() != null) {
+            if (hostAndOptionalPort.getB() != null) {
+                endpoint = new MongoProcessImpl(hostAndOptionalPort.getA(), hostAndOptionalPort.getB());
+            } else {
+                endpoint = new MongoProcessImpl(hostAndOptionalPort.getA());
+            }
+        } else { // host not found in landscape anymore; maybe replica set was re-configured
+            endpoint = null;
         }
         return endpoint;
     }
@@ -82,24 +89,25 @@ public class MongoUriParser<ShardingKey> {
     private MongoProcessInReplicaSet getMongoProcessInReplicaSet(final MongoReplicaSet replicaSet, final String hostnameAndOptionalPort) throws UnknownHostException {
         final MongoProcessInReplicaSet endpoint;
         Pair<AwsInstance<ShardingKey>, Integer> hostAndOptionalPort = getHostAndPort(hostnameAndOptionalPort);
-        if (hostAndOptionalPort.getB() != null) {
-            endpoint = new MongoProcessInReplicaSetImpl(replicaSet, hostAndOptionalPort.getB(), hostAndOptionalPort.getA());
-        } else {
-            endpoint = new MongoProcessInReplicaSetImpl(replicaSet, hostAndOptionalPort.getA());
+        if (hostAndOptionalPort.getA() != null) {
+            if (hostAndOptionalPort.getB() != null) {
+                endpoint = new MongoProcessInReplicaSetImpl(replicaSet, hostAndOptionalPort.getB(), hostAndOptionalPort.getA());
+            } else {
+                endpoint = new MongoProcessInReplicaSetImpl(replicaSet, hostAndOptionalPort.getA());
+            }
+        } else { // host not found in landscape anymore; maybe replica set was re-configured
+            endpoint = null;
         }
         return endpoint;
     }
     
+    /**
+     * If the host isn't found in the landscape, the {@link Pair#getA()} component of the pair returned will be {@code null}.
+     */
     private Pair<AwsInstance<ShardingKey>, Integer> getHostAndPort(String hostnameAndOptionalPort) throws UnknownHostException {
         final String[] hostnameAndOptionalPortSplit = hostnameAndOptionalPort.split(":");
         final InetAddress address = InetAddress.getByName(hostnameAndOptionalPortSplit[0]);
-        final AwsInstance<ShardingKey> hostByPublicIp = landscape.getHostByPrivateIpAddress(region, address.getHostAddress(), AwsInstanceImpl::new);
-        final AwsInstance<ShardingKey> host;
-        if (hostByPublicIp != null) {
-            host = hostByPublicIp;
-        } else {
-            host = landscape.getHostByPrivateIpAddress(region, address.getHostAddress(), AwsInstanceImpl::new);
-        }
-        return new Pair<>(host, hostnameAndOptionalPortSplit.length<2?null:Integer.valueOf(hostnameAndOptionalPortSplit[1]));
+        final AwsInstance<ShardingKey> hostByPrivateIp = landscape.getHostByPrivateIpAddress(region, address.getHostAddress(), AwsInstanceImpl::new);
+        return new Pair<>(hostByPrivateIp, hostnameAndOptionalPortSplit.length<2?null:Integer.valueOf(hostnameAndOptionalPortSplit[1]));
     }
 }
