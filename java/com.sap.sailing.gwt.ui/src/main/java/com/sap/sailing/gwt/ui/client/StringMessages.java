@@ -2384,4 +2384,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String yellowBrickEvents();
     String timePointOfLastFix();
     String copyMarkDeviceMappings();
+    String errorLoadingPolarDataForBoatClass(String boatClass, String message);
 }
