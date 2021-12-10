@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
@@ -135,7 +136,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         public void onSuccess(SimulatorResultsDTO result) {
 
             String notificationMessage = result.getNotificationMessage();
-            if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+            if (Util.hasLength(notificationMessage) && warningAlreadyShown == false) {
                 errorReporter.reportError(notificationMessage, true);
                 warningAlreadyShown = true;
             }
@@ -1006,7 +1007,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private PathPolyline createPathPolyline(final PathDTO pathDTO) {
         SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(parent.getSelectedBoatClassIndex(), parent.getSelectedRaceIndex(),
                 parent.getSelectedCompetitorIndex(), parent.getSelectedLegIndex());
-
         return PathPolyline.createPathPolyline(pathDTO.getPoints(), errorReporter, simulatorService, map, this, parent, selection, coordinateSystem);
     }
 

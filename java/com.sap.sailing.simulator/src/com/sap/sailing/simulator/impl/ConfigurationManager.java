@@ -14,7 +14,6 @@ import com.sap.sailing.simulator.BoatClassProperties;
 import com.sap.sailing.simulator.RaceProperties;
 
 public enum ConfigurationManager {
-
     INSTANCE;
 
     private static final String ENVIRONMENT_VARIABLE_NAME = "STG_CONFIG";
@@ -36,7 +35,6 @@ public enum ConfigurationManager {
 
     private void initFromResources(String envKeyName, String fileLocation, boolean polarDiagramConfig) {
         String configFileLocation = System.getenv(envKeyName);
-
         InputStream inputStream = null;
         try {
             if (configFileLocation == null || configFileLocation == "") {
@@ -55,21 +53,17 @@ public enum ConfigurationManager {
                 this.status = ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE;
                 this.errorMessage = "Invalid configuration file path ( " + configFileLocation + ")! Using default configuration values!";
             }
-
             final InputStreamReader reader = new InputStreamReader(inputStream);
             final BufferedReader buffer = new BufferedReader(reader);
             String line = null;
             String[] elements = null;
             int index = 0;
-
             while (true) {
                 line = buffer.readLine();
                 if (line == null) {
                     break;
                 }
-
                 elements = line.split(",");
-
                 if (polarDiagramConfig) {
                     this._boatClassesInfo
                     .add(new BoatClassPropertiesImpl(elements[0], new MeterDistance(Double.parseDouble(elements[1])), elements[2], index++));
@@ -77,7 +71,6 @@ public enum ConfigurationManager {
                     this._racesInfo.add(new RacePropertiesImpl(elements[0], elements[1], elements[2], index++));
                 }
             }
-
             buffer.close();
             reader.close();
             inputStream.close();
@@ -108,6 +101,9 @@ public enum ConfigurationManager {
         return this._racesInfo.get(index).getURL();
     }
 
+    /**
+     * @param index relative to the list returned by {@link #getBoatClassesInfo()}, starting with 0
+     */
     public String getPolarDiagramFileLocation(int index) {
         return this._boatClassesInfo.get(index).getPolar();
     }
