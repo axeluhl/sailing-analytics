@@ -1575,7 +1575,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         BearingWithConfidenceDTO result = null;
         if (boatClassDto != null && maneuverType != null && (maneuverType == ManeuverType.TACK
                 || maneuverType == ManeuverType.JIBE) && windSpeed != null) {
-            BoatClass boatClass = new BoatClassImpl(boatClassDto.getName(), /* typicallyStartsUpwind */ true);
+            BoatClass boatClass = baseDomainFactory.getBoatClass(boatClassDto.getName());
             final PolarDataService polarDataService = getService().getPolarDataService();
             result = new BearingWithConfidenceDTO(polarDataService.getManeuverAngle(boatClass, maneuverType,
                     windSpeed));
