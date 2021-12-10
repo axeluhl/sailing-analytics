@@ -83,14 +83,47 @@ public class ManeuverAngleCache {
         this.overrideAngle = overrideAngle;
     }
 
+    /**
+     * Sets the default maneuver angle to use when there is not enough data available or when {@link #isOverrideAngle()}
+     * is {@code true}.
+     * @see #getDefaultAngle()
+     */
+    public void setDefaultAngle(Bearing defaultAngle) {
+        this.defaultAngle = defaultAngle;
+    }
+
+    /**
+     * @see #setDefaultAngle(Bearing)
+     */
+    public Bearing getDefaultAngle() {
+        return defaultAngle;
+    }
+
+    /**
+     * When set to {@code true} {@link #getManeuverAngle(BoatClassDTO, ManeuverType, Speed)} will always return the
+     * value of {@link #getDefaultAngle()} and no requests against the server will be made.
+     * @see #isOverrideAngle()
+     */
     public void setOverrideAngle(boolean override) {
         this.overrideAngle = override;
     }
 
+    /**
+     * @see #setOverrideAngle(boolean)
+     */
     public boolean isOverrideAngle() {
         return overrideAngle;
     }
 
+    /**
+     * <p>Fetches the maneuver angle for a given boat class, maneuver type and wind speed.</p>
+     * <p>The wind speed key is split over buckets of size {@link #WIND_BUCKET_RESOLUTION}. If no data for the requested
+     * bucket is available a value from the closest adjacent bucket will be returned and a request to the server will be
+     * fired off.</p>
+     * <p> If any of the parameters are {@code null} or there is no data available {@link #getDefaultAngle()} will be
+     * returned.<br/>
+     * If {@link #isOverrideAngle()} is {@code true} {@link #getDefaultAngle()} will always be returned.</p>
+     */
     public Bearing getManeuverAngle(BoatClassDTO boatClass, ManeuverType maneuverType, Speed windSpeed) {
         Triple<Long, Bearing, Double> entry = null;
         if (!overrideAngle) {
