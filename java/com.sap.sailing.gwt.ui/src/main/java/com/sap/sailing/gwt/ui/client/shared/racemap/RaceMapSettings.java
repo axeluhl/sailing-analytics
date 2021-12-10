@@ -182,7 +182,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showSatelliteLayer */ showSatelliteLayer,
                 /* showWindLadder */ false,
                 /* windLadderOverride */ false,
-                /* windLadderManeuverAngle */ 90d);
+                /* windLadderManeuverAngle */ 45d);
     }
     
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
