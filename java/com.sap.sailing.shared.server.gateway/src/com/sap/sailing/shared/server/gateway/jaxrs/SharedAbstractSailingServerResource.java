@@ -18,6 +18,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.gateway.interfaces.SailingServerFactory;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.InvalidDateException;
@@ -84,6 +85,12 @@ public abstract class SharedAbstractSailingServerResource extends StreamingOutpu
     protected ReplicationService getReplicationService() {
         @SuppressWarnings("unchecked")
         ServiceTracker<ReplicationService, ReplicationService> tracker = (ServiceTracker<ReplicationService, ReplicationService>) servletContext.getAttribute(RestServletContainer.REPLICATION_SERVICE_TRACKER_NAME);
+        return tracker.getService(); 
+    }
+    
+    protected SailingServerFactory getSailingServerFactory() {
+        @SuppressWarnings("unchecked")
+        ServiceTracker<SailingServerFactory, SailingServerFactory> tracker = (ServiceTracker<SailingServerFactory, SailingServerFactory>) servletContext.getAttribute(RestServletContainer.SAILING_SERVER_FACTORY_TRACKER_NAME);
         return tracker.getService(); 
     }
     

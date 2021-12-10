@@ -111,6 +111,27 @@ public class SimulationServiceImpl implements SimulationService {
             this.cache = null;
         }
     }
+    
+    @Override
+    public Iterable<BoatClass> getBoatClassesWithPolarData() {
+        return racingEventService.getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
+    }
+    
+    @Override
+    public BoatClass getBoatClass(String name) {
+        return racingEventService.getBaseDomainFactory().getBoatClass(name);
+    }
+
+    @Override
+    public PolarDiagram getPolarDiagram(BoatClass boatClass) {
+        try {
+            return new PolarDiagramGPS(boatClass, racingEventService.getPolarDataService());
+        } catch (SparseSimulationDataException e) {
+            logger.warning("Request for polar diagram of boat class " + boatClass.getName()
+                    + " failed due to sparse polar data. Was it really returned by getBoatClassesWithPolarData()?");
+            return null;
+        }
+    }
 
     private void expireCacheEntries() {
         final TimePoint expireAllOlderThan = TimePoint.now().minus(CACHE_ENTRY_EXPIRY_DURATION);
@@ -507,7 +528,7 @@ public class SimulationServiceImpl implements SimulationService {
             Map<PathType, Path> paths = null;
             if (polarDiagram != null) {
                 double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
-                        / ((PolarDiagramGPS) polarDiagram).getAvgSpeed() * 3600 / 100;
+                        / ((PolarDiagramGPS) polarDiagram).getAvgSpeedInKnots() * 3600 / 100;
                 Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
                 SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, endLine, polarDiagram,
                         windField, simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
@@ -522,86 +543,81 @@ public class SimulationServiceImpl implements SimulationService {
 
     public Map<PathType, Path> getAllPaths(SimulationParameters simulationParameters) throws InterruptedException,
             ExecutionException {
-
-        Simulator simulator = new SimulatorImpl(simulationParameters);
-        Map<PathType, Path> result = new HashMap<PathType, Path>();
-
-        Future<Path> taskOmniscient = null;
-        if (simulationParameters.showOmniscient()) {
-            // schedule omniscient task
-            taskOmniscient = executor.submit(() -> simulator.getPath(PathType.OMNISCIENT));
-        }
-
-        Future<Path> task1TurnerLeft = null;
-        Future<Path> task1TurnerRight = null;
-        if (simulationParameters.getLegType() != LegType.REACHING) {
-            // schedule 1-turner tasks
-            task1TurnerLeft = executor.submit(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
-            task1TurnerRight = executor.submit(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
-        }
-
-        Future<Path> taskOpportunistLeft = null;
-        Future<Path> taskOpportunistRight = null;
-        if (simulationParameters.showOpportunist()) {        
-            // schedule opportunist tasks (which depend on 1-turner results)
-            taskOpportunistLeft = executor.submit(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT));
-            taskOpportunistRight = executor.submit(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT));
-        }
-
-        Path path1TurnerLeft = null;
-        Path path1TurnerRight = null;
-        if (simulationParameters.getLegType() != LegType.REACHING) {
-            // collect 1-turner results
-            path1TurnerLeft = task1TurnerLeft.get();
-            result.put(PathType.ONE_TURNER_LEFT, path1TurnerLeft);
-            path1TurnerRight = task1TurnerRight.get();
-            result.put(PathType.ONE_TURNER_RIGHT, path1TurnerRight);
-        }
-        
-        Path pathOpportunistLeft = null;
-        Path pathOpportunistRight = null;
-        if (simulationParameters.showOpportunist()) {
-            // collect opportunist results
-            pathOpportunistLeft = taskOpportunistLeft.get();
-            if (path1TurnerLeft != null) {
-                if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOpportunistLeft.getTurnCount() == 1)) {
-                    pathOpportunistLeft = path1TurnerLeft;
-                }
+        final Map<PathType, Path> result = new HashMap<>();
+        if (simulationParameters.getBoatPolarDiagram() != null) {
+            Simulator simulator = new SimulatorImpl(simulationParameters);
+            Future<Path> taskOmniscient = null;
+            if (simulationParameters.showOmniscient()) {
+                // schedule omniscient task
+                taskOmniscient = executor.submit(() -> simulator.getPath(PathType.OMNISCIENT));
             }
-            result.put(PathType.OPPORTUNIST_LEFT, pathOpportunistLeft);
-            pathOpportunistRight = taskOpportunistRight.get();
-            if (path1TurnerRight != null) {
-                if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOpportunistRight.getTurnCount() == 1)) {
-                    pathOpportunistRight = path1TurnerRight;
-                }
+            Future<Path> task1TurnerLeft = null;
+            Future<Path> task1TurnerRight = null;
+            if (simulationParameters.getLegType() != LegType.REACHING) {
+                // schedule 1-turner tasks
+                task1TurnerLeft = executor.submit(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
+                task1TurnerRight = executor.submit(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
             }
-            result.put(PathType.OPPORTUNIST_RIGHT, pathOpportunistRight);
-        }
-
-        if (simulationParameters.showOmniscient()) {
-            // collect omniscient result (last, since usually slowest calculation)
-            Path pathOmniscient = taskOmniscient.get();
-            if (path1TurnerLeft != null) {
-                if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerLeft.getFinalTime()))) {
-                    pathOmniscient = path1TurnerLeft;
-                }
+            Future<Path> taskOpportunistLeft = null;
+            Future<Path> taskOpportunistRight = null;
+            if (simulationParameters.showOpportunist()) {        
+                // schedule opportunist tasks (which depend on 1-turner results)
+                taskOpportunistLeft = executor.submit(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT));
+                taskOpportunistRight = executor.submit(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT));
             }
-            if (path1TurnerRight != null) {
-                if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerRight.getFinalTime()))) {
-                    pathOmniscient = path1TurnerRight;
-                }
+            Path path1TurnerLeft = null;
+            Path path1TurnerRight = null;
+            if (simulationParameters.getLegType() != LegType.REACHING) {
+                // collect 1-turner results
+                path1TurnerLeft = task1TurnerLeft.get();
+                result.put(PathType.ONE_TURNER_LEFT, path1TurnerLeft);
+                path1TurnerRight = task1TurnerRight.get();
+                result.put(PathType.ONE_TURNER_RIGHT, path1TurnerRight);
             }
-            if (pathOpportunistLeft != null) {
-                if (!pathOpportunistLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(pathOpportunistLeft.getFinalTime()))) {
-                    pathOmniscient = pathOpportunistLeft;
+            Path pathOpportunistLeft = null;
+            Path pathOpportunistRight = null;
+            if (simulationParameters.showOpportunist()) {
+                // collect opportunist results
+                pathOpportunistLeft = taskOpportunistLeft.get();
+                if (path1TurnerLeft != null) {
+                    if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOpportunistLeft.getTurnCount() == 1)) {
+                        pathOpportunistLeft = path1TurnerLeft;
+                    }
                 }
-            }
-            if (pathOpportunistRight != null) {
-                if (!pathOpportunistRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(pathOpportunistRight.getFinalTime()))) {
-                    pathOmniscient = pathOpportunistRight;
+                result.put(PathType.OPPORTUNIST_LEFT, pathOpportunistLeft);
+                pathOpportunistRight = taskOpportunistRight.get();
+                if (path1TurnerRight != null) {
+                    if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOpportunistRight.getTurnCount() == 1)) {
+                        pathOpportunistRight = path1TurnerRight;
+                    }
                 }
+                result.put(PathType.OPPORTUNIST_RIGHT, pathOpportunistRight);
             }
-            result.put(PathType.OMNISCIENT, pathOmniscient);
+            if (simulationParameters.showOmniscient()) {
+                // collect omniscient result (last, since usually slowest calculation)
+                Path pathOmniscient = taskOmniscient.get();
+                if (path1TurnerLeft != null) {
+                    if (!path1TurnerLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerLeft.getFinalTime()))) {
+                        pathOmniscient = path1TurnerLeft;
+                    }
+                }
+                if (path1TurnerRight != null) {
+                    if (!path1TurnerRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(path1TurnerRight.getFinalTime()))) {
+                        pathOmniscient = path1TurnerRight;
+                    }
+                }
+                if (pathOpportunistLeft != null) {
+                    if (!pathOpportunistLeft.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(pathOpportunistLeft.getFinalTime()))) {
+                        pathOmniscient = pathOpportunistLeft;
+                    }
+                }
+                if (pathOpportunistRight != null) {
+                    if (!pathOpportunistRight.getAlgorithmTimedOut() && (pathOmniscient.getFinalTime().after(pathOpportunistRight.getFinalTime()))) {
+                        pathOmniscient = pathOpportunistRight;
+                    }
+                }
+                result.put(PathType.OMNISCIENT, pathOmniscient);
+            }
         }
         // return combined result
         return result;
