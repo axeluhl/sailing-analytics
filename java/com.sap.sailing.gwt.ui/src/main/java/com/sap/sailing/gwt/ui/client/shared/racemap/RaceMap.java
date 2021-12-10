@@ -80,12 +80,14 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
@@ -2092,8 +2094,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void showWindLadder(RaceMapDataDTO raceMapDataDTO) {
-        // TODO Check settings
-        if (map != null && raceMapDataDTO != null && lastCombinedWindTrackInfoDTO != null) {
+        if (settings.isShowWindLadder() && map != null && raceMapDataDTO != null && lastCombinedWindTrackInfoDTO != null) {
             Pair<Integer, CompetitorDTO> bestVisibleCompetitor = getBestVisibleCompetitorWithOneBasedLegNumber(
                     raceMapDataDTO.boatPositions.keySet());
             if (bestVisibleCompetitor != null) {
@@ -2110,12 +2111,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     if (windTrackDTO != null && windTrackDTO.windFixes != null && !windTrackDTO.windFixes.isEmpty()) {
                         windFix = windTrackDTO.windFixes.get(0);
                     }
+                    final BoatClassDTO boatClass = competitorSelection.getBoat(leadingCompetitor).getBoatClass(); //TODO Get overall boat class
+                    final ManeuverType maneuverType = legType == LegType.UPWIND ? ManeuverType.TACK : ManeuverType.JIBE;
+                    final double maneuverAngle = maneuverAngleCache.getManeuverAngle(boatClass, maneuverType,
+                            new MeterPerSecondSpeedImpl(windFix.dampenedTrueWindSpeedInMetersPerSecond)).getRadians();
+                    GWT.log("MA: " + Math.toDegrees(maneuverAngle) + "°");
+                    final Position leadingCompetitorPosition = fixes.get(fixes.size() - 1).position;
                     if (windLadderOverlay == null) {
-                        windLadderOverlay = new WindLadderOverlay(maneuverAngleCache, map, 0 /* TODO z-index */,
-                                coordinateSystem);
+                        windLadderOverlay = new WindLadderOverlay(map, 0 /* TODO z-index */, coordinateSystem);
                         windLadderOverlay.addToMap();
                     }
-                    windLadderOverlay.update(legStart, legEnd, windFix);
+                    windLadderOverlay.update(legStart, legEnd, legType, windFix, maneuverAngle, leadingCompetitorPosition);
                     if (!windLadderOverlay.isVisible()) {
                         windLadderOverlay.setVisible(true);
                     }
@@ -3201,6 +3207,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 countDownOverlay = null;
             }
             requiresRedraw = true;
+        }
+        if (newSettings.isWindLadderOverride() != settings.isWindLadderOverride()) {
+            maneuverAngleCache.setOverrideAngle(newSettings.isWindLadderOverride());
+        }
+        if (newSettings.getWindLadderManeuverAngle() != settings.getWindLadderManeuverAngle()) {
+            maneuverAngleCache.setDefaultAngle(new DegreeBearingImpl(newSettings.getWindLadderManeuverAngle()));
         }
         this.settings = newSettings;
         if (maneuverTypeSelectionChanged || showManeuverLossChanged) {
