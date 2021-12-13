@@ -47,7 +47,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
-    private final FlyoutAuthenticationPresenter flyoutAuthenticationPresenter;
 
     public TabletAndDesktopApplicationClientFactory(final boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -78,7 +77,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE),
                 new AuthenticationCallbackImpl(getHomePlacesNavigator().getUserProfileNavigation(),
                         signInSuccesfulNavigation), userManagementDisplay, getEventBus());
-        this.flyoutAuthenticationPresenter = new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
+        new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
         new DesktopLoginHintPopup(authenticationManager, placesNavigator);
     }

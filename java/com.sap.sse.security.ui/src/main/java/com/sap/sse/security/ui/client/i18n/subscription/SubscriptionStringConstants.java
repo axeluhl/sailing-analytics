@@ -13,7 +13,7 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String payment_interval_WEEK();
     String payment_interval_DAY();
     String businessModelTitle();
-    String businessModelDescription();    
+    String businessModelDescription();
     String free_subscription_plan_name();
     String free_subscription_plan_description();
     String free_subscription_plan_info();
@@ -26,10 +26,15 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String weekly_premium_description();
     String weekly_premium_info();
     String[] weekly_premium_features();
+    String free_subscription_plan_shortname();
+    String premium_subscription_plan_shortname();
+    String datamining_subscription_plan_shortname();
 
-    String features_live_analytics_title();
-    String features_live_analytics_description();
-    String features_live_analytics_link();
+    String features_limited_live_analytics_title();
+    String features_limited_live_analytics_description();
+    String features_full_live_analytics_title();
+    String features_full_live_analytics_description();
+    String features_full_live_analytics_link();
     String features_organize_events_title();
     String features_organize_events_description();
     String features_organize_events_link();
