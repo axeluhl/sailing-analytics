@@ -27,6 +27,7 @@ import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConsta
 
 public class SubscriptionCardContainer extends Composite {
 
+    private static final String SUPPORT_EMAIL = "support@sapsailing.com";
     private static SubscriptionContainerUiBinder uiBinder = GWT.create(SubscriptionContainerUiBinder.class);
 
     @UiField
@@ -73,7 +74,7 @@ public class SubscriptionCardContainer extends Composite {
         emailContact.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.Location.assign("mailto:john.doe@mail.com");
+                Window.Location.assign("mailto:" + SUPPORT_EMAIL);
             }
         });
     }
