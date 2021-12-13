@@ -4,25 +4,25 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.TimePoint;
 
 public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsSerializable {
-    public static final String PAYMENT_STATUS_SUCCESS = "success";
-    public static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
+
+    protected static final String PAYMENT_STATUS_SUCCESS = "success";
+    private static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
 
     /**
      * User current subscription plan id
      */
     private String planId;
-    
+
     /**
      * Subscription status: active or trial
      */
     private String subscriptionStatus;
 
     /**
-     * Subscription payment status: {@code SubscriptionItem#PAYMENT_STATUS_SUCCESS} or
-     * {@code SubscriptionItem#PAYMENT_STATUS_NO_SUCCESS}
+     * Subscription payment status: {@link #PAYMENT_STATUS_SUCCESS} or {@link #PAYMENT_STATUS_NO_SUCCESS}
      */
     private String paymentStatus;
-    
+
     /**
      * Subscription transaction type: payment or refund
      */
@@ -32,15 +32,16 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
      * Subscription provider name
      */
     private String provider;
-    
+
     private TimePoint currentEnd;
     private TimePoint createdAt;
 
-    public SubscriptionDTO() {
+    protected SubscriptionDTO() {
     }
 
-    public SubscriptionDTO(String planId, TimePoint startedAt, TimePoint currentEnd, String subscriptionStatus,
-            String paymentStatus, String transactionType, String provider) {
+    protected SubscriptionDTO(final String planId, final TimePoint startedAt, final TimePoint currentEnd,
+            final String subscriptionStatus, final String paymentStatus, final String transactionType,
+            final String provider) {
         this.planId = planId;
         this.createdAt = startedAt;
         this.currentEnd = currentEnd;
@@ -71,67 +72,46 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
     public abstract boolean isRefunded();
 
     /**
-     * Return true if subscription is active and payment status is successful
+     * Returns {@code true} if subscription is active and payment status is successful, {@code false} otherwise
      */
     public boolean isPaymentSuccess() {
-        return paymentStatus != null && paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
+        return PAYMENT_STATUS_SUCCESS.equals(paymentStatus);
     }
-    
+
+    /**
+     * Returns {@code true} if subscription is active but payment was not successful, {@code false} otherwise
+     */
+    public boolean isPaymentNoSuccess() {
+        return PAYMENT_STATUS_NO_SUCCESS.equals(paymentStatus);
+    }
+
     @Override
     public String getSubscriptionPlanId() {
         return planId;
-    }
-
-    public String getSubscriptionStatus() {
-        return subscriptionStatus;
-    }
-
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPlanId(String planId) {
-        this.planId = planId;
-    }
-
-    public void setSubscriptionStatus(String subscriptionStatus) {
-        this.subscriptionStatus = subscriptionStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(String transactionType) {
-        this.transactionType = transactionType;
     }
 
     public String getProvider() {
         return provider;
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
     public TimePoint getCurrentEnd() {
         return currentEnd;
-    }
-
-    public void setCurrentEnd(TimePoint currentEnd) {
-        this.currentEnd = currentEnd;
     }
 
     public TimePoint getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(TimePoint createdAt) {
-        this.createdAt = createdAt;
+    protected String getSubscriptionStatus() {
+        return subscriptionStatus;
+    }
+
+    protected String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    protected String getTransactionType() {
+        return transactionType;
     }
 
 }
