@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sse.landscape.aws;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -10,6 +10,7 @@ import java.util.function.Function;
  *
  */
 public abstract class RedirectWithIdDTO extends HomeRedirectDTO {
+    private static final long serialVersionUID = 1165523752906668340L;
     private UUID id;
     
     @Deprecated

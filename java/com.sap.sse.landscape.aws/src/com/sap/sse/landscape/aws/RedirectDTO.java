@@ -1,12 +1,12 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sse.landscape.aws;
 
+import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
 
-public interface RedirectDTO extends IsSerializable {
+public interface RedirectDTO extends Serializable {
     /**
      * Each literal represents one distinct concrete subtype implementing this interface.
      * Each one provides a parser that accepts a redirect path/query combination and tries

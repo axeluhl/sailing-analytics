@@ -2,15 +2,15 @@ package com.sap.sailing.landscape.ui.server;
 
 import java.util.Optional;
 
-import com.sap.sailing.landscape.ui.shared.EventRedirectDTO;
-import com.sap.sailing.landscape.ui.shared.EventSeriesRedirectDTO;
-import com.sap.sailing.landscape.ui.shared.HomeRedirectDTO;
-import com.sap.sailing.landscape.ui.shared.PlainRedirectDTO;
-import com.sap.sailing.landscape.ui.shared.RedirectDTO;
-import com.sap.sailing.landscape.ui.shared.RedirectVisitor;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.aws.EventRedirectDTO;
+import com.sap.sse.landscape.aws.EventSeriesRedirectDTO;
+import com.sap.sse.landscape.aws.HomeRedirectDTO;
+import com.sap.sse.landscape.aws.PlainRedirectDTO;
+import com.sap.sse.landscape.aws.RedirectDTO;
+import com.sap.sse.landscape.aws.RedirectVisitor;
 import com.sap.sse.landscape.aws.ReverseProxy;
 
 /**

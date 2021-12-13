@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sse.landscape.aws;
 
 /**
  * Redirects users to the {@code "/gwt/Home.html"} entry point. Not parameterized further.
@@ -7,6 +7,8 @@ package com.sap.sailing.landscape.ui.shared;
  *
  */
 public class HomeRedirectDTO extends AbstractRedirectDTO {
+    private static final long serialVersionUID = 3487537611111235833L;
+
     public HomeRedirectDTO() {
         this(Type.HOME);
     }

@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sailing.landscape;
 
 import com.sap.sse.common.TimePoint;
 

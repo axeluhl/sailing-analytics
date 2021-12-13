@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sse.landscape.aws;
 
 public interface RedirectVisitor {
     void visit(PlainRedirectDTO plainRedirectDTO) throws Exception;

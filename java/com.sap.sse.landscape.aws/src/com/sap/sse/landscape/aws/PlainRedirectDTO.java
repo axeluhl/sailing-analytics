@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sse.landscape.aws;
 
 /**
  * Represents a redirect to the {@code "/index.html"} landing page. Not parameterized further.
@@ -7,6 +7,8 @@ package com.sap.sailing.landscape.ui.shared;
  *
  */
 public class PlainRedirectDTO extends AbstractRedirectDTO {
+    private static final long serialVersionUID = -921945852175238474L;
+
     public PlainRedirectDTO() {
         super(RedirectDTO.Type.PLAIN);
     }

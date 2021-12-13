@@ -15,7 +15,9 @@ Require-Bundle: com.sap.sse.landscape,
  org.apache.httpcomponents.httpcore;bundle-version="4.4.0",
  org.json.simple,
  org.apache.httpcomponents.httpclient,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sse.replication.interfaces,
+ com.sap.sse.security
 Export-Package: com.sap.sailing.landscape,
  com.sap.sailing.landscape.impl,
  com.sap.sailing.landscape.procedures

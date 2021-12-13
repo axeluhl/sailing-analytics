@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sse.landscape.aws;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -10,6 +10,7 @@ import java.util.UUID;
  *
  */
 public class EventRedirectDTO extends RedirectWithIdDTO {
+    private static final long serialVersionUID = 3518358222589013410L;
     // TODO _=_ is a workaround only; see https://console.aws.amazon.com/support/home#/case/?displayId=8094019001&language=en
     private static final String QUERY_PREFIX = "_=_&#{query}#/event/:eventId=";
 

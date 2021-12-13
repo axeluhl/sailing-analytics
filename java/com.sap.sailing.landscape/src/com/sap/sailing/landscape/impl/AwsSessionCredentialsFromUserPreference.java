@@ -1,5 +1,6 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sailing.landscape.impl;
 
+import com.sap.sailing.landscape.AwsSessionCredentialsWithExpiry;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.LongSetting;

@@ -1,6 +1,7 @@
-package com.sap.sailing.landscape.ui.shared;
+package com.sap.sse.landscape.aws;
 
 public abstract class AbstractRedirectDTO implements RedirectDTO {
+    private static final long serialVersionUID = -7412244909720631505L;
     private RedirectDTO.Type type;
     @Deprecated
     AbstractRedirectDTO() {} // for GWT serialization only

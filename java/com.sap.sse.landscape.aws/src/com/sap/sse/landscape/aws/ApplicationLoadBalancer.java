@@ -97,6 +97,10 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     void deleteListener(Listener listener);
 
     Listener getListener(ProtocolEnum protocol);
+    
+    default Rule setDefaultRedirect(String hostname, RedirectDTO redirect) {
+        return setDefaultRedirect(hostname, redirect.getPath(), redirect.getQuery());
+    }
 
     /**
      * {@link #createDefaultRedirectRule(String, String, Optional) Creates} or updates a default re-direct rule in this
@@ -109,12 +113,4 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     Rule setDefaultRedirect(String hostname, String path, Optional<String> query);
 
     RuleCondition createHostHeaderRuleCondition(String hostname);
-
-    /**
-     * Creates a new rule in the HTTPS listener of this load balancer. The rule fires when {@code "/"} is
-     * the path ("empty" path) and the hostname header matches the value provided by the {@code hostname}
-     * parameter. It sends a redirecting response with status code 302, redirecting to the same host, same
-     * protocol and port and the path specified by the {@code pathWithLeadingSlash} parameter.<p>
-     */
-    Rule createDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query);
 }

@@ -8,15 +8,15 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
-import com.sap.sailing.landscape.ui.shared.EventRedirectDTO;
-import com.sap.sailing.landscape.ui.shared.EventSeriesRedirectDTO;
-import com.sap.sailing.landscape.ui.shared.HomeRedirectDTO;
-import com.sap.sailing.landscape.ui.shared.PlainRedirectDTO;
-import com.sap.sailing.landscape.ui.shared.RedirectDTO;
-import com.sap.sailing.landscape.ui.shared.RedirectWithIdDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.landscape.aws.EventRedirectDTO;
+import com.sap.sse.landscape.aws.EventSeriesRedirectDTO;
+import com.sap.sse.landscape.aws.HomeRedirectDTO;
+import com.sap.sse.landscape.aws.PlainRedirectDTO;
+import com.sap.sse.landscape.aws.RedirectDTO;
+import com.sap.sse.landscape.aws.RedirectWithIdDTO;
 
 public class DefineRedirectDialog extends DataEntryDialog<RedirectDTO> {
     private final String RADIO_BUTTON_GROUP_NAME = "redirect-choice";
