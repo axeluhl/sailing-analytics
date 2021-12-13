@@ -16,7 +16,7 @@ import com.sap.sailing.landscape.gateway.jaxrs.AbstractLandscapeResource;
 @Path("/landscape")
 public class LandscapeResource extends AbstractLandscapeResource {
     @GET
-    @Produces("application/octet-stream;charset=UTF-8")
+    @Produces("application/text;charset=UTF-8")
     public Response getRegressions() throws IOException {
         return Response.ok(new StreamingOutput() {
             @Override
@@ -24,6 +24,6 @@ public class LandscapeResource extends AbstractLandscapeResource {
                 LandscapeService landscapeService = getLandscapeService();
                 output.write(landscapeService.helloWorld().getBytes());
             }
-        }).header("Content-Type", "application/octet-stream").build();
+        }).header("Content-Type", "application/text").build();
     }
 }

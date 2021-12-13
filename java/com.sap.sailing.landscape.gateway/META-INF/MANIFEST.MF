@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Automatic-Module-Name: com.sap.sailing.landscape.gateway
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Web-ContextPath: /landscape
+Web-ContextPath: /sailinglandscape
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sun.jersey.spi.container.servlet;version="1.17.0",
  javax.servlet;version="3.1.0",
@@ -17,4 +17,7 @@ Import-Package: com.sun.jersey.spi.container.servlet;version="1.17.0",
 Bundle-Activator: com.sap.sailing.landscape.gateway.impl.Activator
 Require-Bundle: com.sap.sailing.landscape,
  com.sap.sse,
- com.sap.sse.security
+ com.sap.sse.security,
+ org.apache.shiro.core;bundle-version="1.7.1",
+ org.apache.shiro.ehcache;bundle-version="1.7.1",
+ org.apache.shiro.web;bundle-version="1.7.1"
