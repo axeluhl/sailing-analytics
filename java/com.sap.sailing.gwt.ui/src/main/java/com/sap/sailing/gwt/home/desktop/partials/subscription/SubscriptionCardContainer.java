@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.home.desktop.partials.subscription;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -74,7 +78,8 @@ public class SubscriptionCardContainer extends Composite {
         emailContact.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.Location.assign("mailto:" + SUPPORT_EMAIL);
+                Window.Location.assign("mailto:" + SUPPORT_EMAIL
+                        + "?subject=" + UriUtils.encode(SubscriptionStringConstants.INSTANCE.support_subject()));
             }
         });
     }
@@ -143,6 +148,18 @@ public class SubscriptionCardContainer extends Composite {
 
     public void addSubscription(SubscriptionCard subscription) {
         container.add(subscription);
+    }
+    
+    public void resetSubscriptions() {
+        List<SubscriptionCard> subscriptionCardsToRemove = new ArrayList<>();
+        for (int i = 0; i < container.getWidgetCount(); i++) {
+            if (container.getWidget(i) instanceof SubscriptionCard) {
+                subscriptionCardsToRemove.add((SubscriptionCard) container.getWidget(i));
+            }
+        }
+        for (SubscriptionCard card: subscriptionCardsToRemove) {
+            container.remove(card);
+        }
     }
 
     @UiHandler("businessModelInfoButton")
