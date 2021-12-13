@@ -34,6 +34,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
@@ -175,12 +176,15 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     private final ServiceTracker<SailingServerFactory, SailingServerFactory> sailingServerFactoryTracker;
 
+    private final ServiceTracker<LandscapeService, LandscapeService> landscapeServiceTracker;
+
     private final ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory;
     
     public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
         BundleContext context = Activator.getContext();
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+        landscapeServiceTracker = ServiceTrackerFactory.createAndOpen(context, LandscapeService.class);
         sailingServerFactoryTracker = ServiceTrackerFactory.createAndOpen(context, SailingServerFactory.class);
         processFactoryFromHostAndServerDirectory =
                 (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
@@ -197,6 +201,14 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     protected SecurityService getSecurityService() {
         try {
             return securityServiceTracker.getInitializedService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    protected LandscapeService getLandscapeService() {
+        try {
+            return landscapeServiceTracker.waitForService(0);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
