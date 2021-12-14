@@ -53,18 +53,37 @@ To add, remove or edit a feature of the feature list
 	- `<FEATURE-ID>_description`
   		- A description of the feature
 	- `<FEATURE-ID>_link`
-  		- An optional link to an external resource like picture, video or homepage
+  		- An __optional__ link to an external resource like picture, video or homepage
 
 2. Register feateure with the &lt;FEATURE-ID&gt; in class
 
 		com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardContainer
 	
-	as pure textual feature or feature with link. 
+	as pure textual feature or feature with link. The boolean values activate or deactivate the checkboxes for the FREE and PREMIUM diff view.
 
 	    public SubscriptionCardContainer() {
 	        initWidget(uiBinder.createAndBindUi(this));
-	        addFeature("features_live_analytics");
-	        addFeatureWithLink("features_organize_events");
+	        addFeature("features_live_analytics", true, true);
+	        addFeatureWithLink("features_organize_events", false, true);
+
+Short names for the diff view can be defined with following keys
+
+ - `free_subscription_plan_shortname`
+ - `premium_subscription_plan_shortname`
+ 
+ They will be displayed in uppercase letters.
+
+### Support Link
+
+The "service and information request" function is opening the default mail program (mailto:) to 
+
+	support@sapsailing.com
+	
+This is hard coded as String constant in `SubscriptionCardContainer.java`.
+
+The subject text can be changed in `SubscriptionStringConstants.properties` with key 
+
+ - `support_subject`
 
 ### Further Resources
 

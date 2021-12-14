@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard.Type;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
@@ -31,7 +32,15 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         Window.setTitle(subscriptionsPlace.getTitle());
         view.setPresenter(this);
-
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, event-> {
+            renderSubscriptions(eventBus);
+        });
+        
+        panel.setWidget(view);
+    }
+    
+    private void renderSubscriptions(final EventBus eventBus) {
+        view.resetSubscriptions();
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
                     .getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
@@ -65,7 +74,6 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
         } catch (final InvalidSubscriptionProviderException exc) {
             onInvalidSubscriptionProviderError(exc);
         }
-        panel.setWidget(view);
     }
 
     @Override

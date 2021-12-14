@@ -12,6 +12,8 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String payment_interval_MONTH();
     String payment_interval_WEEK();
     String payment_interval_DAY();
+    String support_subject();
+    
     String businessModelTitle();
     String businessModelDescription();
     String free_subscription_plan_name();
