@@ -12,6 +12,8 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
      * User current subscription plan id
      */
     private String planId;
+    
+    private String subscriptionId;
 
     /**
      * Subscription status: active or trial
@@ -27,28 +29,62 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
      * Subscription transaction type: payment or refund
      */
     private String transactionType;
+    
+    /*
+     * The Value of the reocurring payment in cents. Depends on the currency type.
+     */
+    private Integer reoccuringPaymentValue;
+    
+    /*
+     * TIme at which the subscription status was last changed to cancelled or will be changed to cancelled, 
+     * if it is planned for cancellation.
+     */
+    private TimePoint cancelledAt;
 
+    
+    /**
+     * The date/time at which the next billing for the subscription happens. 
+     * This is usually right after current_term_end unless multiple subscription terms 
+     * were invoiced in advance using the terms_to_charge parameter. 
+     * optional
+     */
+    
+    private TimePoint nextBillingAt;
+    
+    /**
+     * End of the current billing period of the subscription. Subscription is renewed immediately after this.
+     * optional
+     */
+    private TimePoint currentTermEnd;
+    
+    /**
+     * End of the current trial period of the subscription. Subscription is billed immediately after this.
+     * optional
+     */
+    private TimePoint trialEnd;
+    
     /**
      * Subscription provider name
      */
     private String provider;
 
-    private TimePoint currentEnd;
-    private TimePoint createdAt;
+    protected SubscriptionDTO() {}
 
-    protected SubscriptionDTO() {
-    }
-
-    protected SubscriptionDTO(final String planId, final TimePoint startedAt, final TimePoint currentEnd,
-            final String subscriptionStatus, final String paymentStatus, final String transactionType,
-            final String provider) {
+    protected SubscriptionDTO(final String planId, final String subscriptionId, final String subscriptionStatus, 
+            final String paymentStatus, final String transactionType, final Integer reoccuringPaymentValue, 
+            final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt, 
+            final TimePoint nextBillingAt, final String provider) {
         this.planId = planId;
-        this.createdAt = startedAt;
-        this.currentEnd = currentEnd;
+        this.subscriptionId = subscriptionId;
+        this.trialEnd = trialEnd;
         this.subscriptionStatus = subscriptionStatus;
         this.paymentStatus = paymentStatus;
         this.transactionType = transactionType;
         this.provider = provider;
+        this.reoccuringPaymentValue = reoccuringPaymentValue;
+        this.cancelledAt = cancelledAt;
+        this.nextBillingAt = nextBillingAt;
+        this.currentTermEnd = currentTermEnd;
     }
 
     /**
@@ -94,12 +130,8 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
         return provider;
     }
 
-    public TimePoint getCurrentEnd() {
-        return currentEnd;
-    }
-
-    public TimePoint getCreatedAt() {
-        return createdAt;
+    public TimePoint getTrialEnd() {
+        return trialEnd;
     }
 
     protected String getSubscriptionStatus() {
@@ -112,6 +144,26 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
 
     protected String getTransactionType() {
         return transactionType;
+    }
+
+    public Integer getReoccuringPaymentValue() {
+        return reoccuringPaymentValue;
+    }
+
+    public TimePoint getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public TimePoint getNextBillingAt() {
+        return nextBillingAt;
+    }
+
+    public TimePoint getCurrentTermEnd() {
+        return currentTermEnd;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
     }
 
 }

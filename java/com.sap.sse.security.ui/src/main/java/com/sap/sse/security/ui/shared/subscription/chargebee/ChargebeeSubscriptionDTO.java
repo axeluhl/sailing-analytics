@@ -14,9 +14,12 @@ public class ChargebeeSubscriptionDTO extends SubscriptionDTO {
     protected ChargebeeSubscriptionDTO() {
     }
 
-    public ChargebeeSubscriptionDTO(final String planId, final TimePoint startedAt, final TimePoint currentEnd,
-            final String subscriptionStatus, final String paymentStatus, final String transactionType) {
-        super(planId, startedAt, currentEnd, subscriptionStatus, paymentStatus, transactionType,
+    public ChargebeeSubscriptionDTO(final String planId, final String subscriptionId, final String subscriptionStatus, 
+            final String paymentStatus, final String transactionType, final Integer reoccuringPaymentValue, 
+            final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt, 
+            final TimePoint nextBillingAt) {
+        super(planId, subscriptionId, subscriptionStatus, paymentStatus, transactionType, reoccuringPaymentValue, 
+                trialEnd, currentTermEnd, cancelledAt, nextBillingAt,
                 ChargebeeSubscriptionClientProvider.PROVIDER_NAME);
     }
 

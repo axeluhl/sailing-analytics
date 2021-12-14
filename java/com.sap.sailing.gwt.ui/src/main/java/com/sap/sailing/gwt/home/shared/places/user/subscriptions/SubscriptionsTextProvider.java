@@ -50,7 +50,7 @@ public class SubscriptionsTextProvider {
 
     // FIXME: Refactor and move to date/time util class or use existing formatter method instead
     public String getTrialRemainingText(final SubscriptionDTO subscription) {
-        long remainingSecs = Math.round(TimePoint.now().until(subscription.getCurrentEnd()).asSeconds());
+        long remainingSecs = Math.round(TimePoint.now().until(subscription.getTrialEnd()).asSeconds());
         final StringBuilder remainText = new StringBuilder();
         if (remainingSecs <= 0) {
             remainText.append(i18n.numHours(0));

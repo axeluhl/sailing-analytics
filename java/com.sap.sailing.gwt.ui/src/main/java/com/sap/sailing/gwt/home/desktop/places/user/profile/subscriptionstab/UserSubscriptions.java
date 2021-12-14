@@ -99,7 +99,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
                     td.className(cellTable.getResources().style().cell());
                     final DivBuilder div = td.startDiv();
                     div.text(i18n.trialText(textProvider.getTrialRemainingText(rowValue),
-                            formatDateAndTime(rowValue.getCurrentEnd().asDate())));
+                            formatDateAndTime(rowValue.getTrialEnd().asDate())));
                     div.endDiv();
                     td.endTD();
                     tr.endTR();

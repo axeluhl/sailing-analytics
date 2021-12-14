@@ -101,9 +101,11 @@ public class ChargebeeSubscriptionServiceImpl extends
                 for (Subscription subscription : subscriptions) {
                     if (subscription.hasSubscriptionId() && !isSubscriptionCancelled(subscription)) {
                         itemList.add(
-                                new ChargebeeSubscriptionDTO(subscription.getPlanId(), subscription.getSubscriptionUpdatedAt(),
-                                        subscription.getTrialEnd(), subscription.getSubscriptionStatus(),
-                                        subscription.getPaymentStatus(), subscription.getTransactionType()));
+                                new ChargebeeSubscriptionDTO(subscription.getPlanId(), subscription.getSubscriptionId(),
+                                        subscription.getSubscriptionStatus(), subscription.getPaymentStatus(),
+                                        subscription.getTransactionType(), subscription.getReoccuringPaymentValue(),
+                                        subscription.getTrialEnd(), subscription.getCurrentTermEnd(),
+                                        subscription.getCancelledAt(), subscription.getNextBillingAt()));
                     }
                 }
                 if (!itemList.isEmpty()) {

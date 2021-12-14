@@ -51,7 +51,7 @@ class UserSubscriptionItem extends Composite {
 
         if (subscription.isInTrial()) {
             addInfo("", i18n.trialText(textProvider.getTrialRemainingText(subscription),
-                    formatDateAndTime(subscription.getCurrentEnd().asDate()))).highlightValue(false);
+                    formatDateAndTime(subscription.getTrialEnd().asDate()))).highlightValue(false);
         }
 
         sectionHeaderUi.initCollapsibility(contentContainerUi.getElement(), false);
