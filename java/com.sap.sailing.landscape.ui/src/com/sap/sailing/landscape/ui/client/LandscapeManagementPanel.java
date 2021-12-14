@@ -11,7 +11,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -60,7 +64,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.landscape.aws.RedirectDTO;
+import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
@@ -232,16 +236,67 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         };
         applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name());
-        applicationReplicaSetsTable.addColumn(rs->rs.getVersion(), stringMessages.versionHeader());
-        applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHost().getPublicIpAddress(), stringMessages.masterHostName());
+        final SafeHtmlCell versionCell = new SafeHtmlCell();
+        final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> versionColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(versionCell) {
+            @Override
+            public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                final String version = replicaSet.getVersion();
+                final String releaseNotesLink = getReleaseNotesLink(version);
+                builder.appendHtmlConstant("<a target=\"_blank\" href=\""+releaseNotesLink+"\">");
+                builder.appendEscaped(version);
+                builder.appendHtmlConstant("</a>");
+                return builder.toSafeHtml();
+            }
+        };
+        applicationReplicaSetsTable.addColumn(versionColumn, stringMessages.versionHeader(), (rs1, rs2)->new NaturalComparator().compare(rs1.getVersion(), rs2.getVersion()));
+        final SafeHtmlCell masterCell = new SafeHtmlCell();
+        final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> masterColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(masterCell) {
+            @Override
+            public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                final String gwtStatusLink = getGwtStatusLink(replicaSet.getMaster().getHost().getPublicIpAddress(), replicaSet.getMaster().getPort());
+                builder.appendHtmlConstant("<a target=\"_blank\" href=\""+gwtStatusLink+"\">");
+                builder.appendEscaped(replicaSet.getMaster().getHost().getPublicIpAddress());
+                builder.appendHtmlConstant("</a>");
+                return builder.toSafeHtml();
+            }
+        };
+        applicationReplicaSetsTable.addColumn(masterColumn, stringMessages.masterHostName(), (rs1, rs2)->new NaturalComparator().compare(rs1.getMaster().getHost().getPublicIpAddress(), rs2.getMaster().getHost().getPublicIpAddress()));
         applicationReplicaSetsTable.addColumn(rs->Integer.toString(rs.getMaster().getPort()), stringMessages.masterPort());
-        applicationReplicaSetsTable.addColumn(rs->rs.getHostname(), stringMessages.hostname());
+        final SafeHtmlCell hostnameCell = new SafeHtmlCell();
+        final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> hostnameColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(hostnameCell) {
+            @Override
+            public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                final String hostnameLink = "https://"+replicaSet.getHostname();
+                builder.appendHtmlConstant("<a target=\"_blank\" href=\""+hostnameLink+"\">");
+                builder.appendEscaped(replicaSet.getHostname());
+                builder.appendHtmlConstant("</a>");
+                return builder.toSafeHtml();
+            }
+        };
+        applicationReplicaSetsTable.addColumn(hostnameColumn, stringMessages.hostname(), (rs1, rs2)->new NaturalComparator().compare(rs1.getHostname(), rs2.getHostname()));
         applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHost().getInstanceId(), stringMessages.masterInstanceId());
         applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint(),
                 (rs1, rs2)->rs1.getMaster().getStartTimePoint().compareTo(rs2.getMaster().getStartTimePoint()));
-        applicationReplicaSetsTable.addColumn(rs->Util.joinStrings(", ", Util.map(rs.getReplicas(),
-                r->r.getHost().getPublicIpAddress()+":"+r.getPort()+" ("+r.getServerName()+", "+r.getHost().getInstanceId()+")")),
-                stringMessages.replicas());
+        final SafeHtmlCell replicasCell = new SafeHtmlCell();
+        final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> replicasColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(replicasCell) {
+            @Override
+            public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                for (final SailingAnalyticsProcessDTO replica : replicaSet.getReplicas()) {
+                    final String gwtStatusLink = getGwtStatusLink(replica.getHost().getPublicIpAddress(), replica.getPort());
+                    builder.appendHtmlConstant("<a target=\"_blank\" href=\""+gwtStatusLink+"\">");
+                    builder.appendEscaped(replica.getHost().getPublicIpAddress()+":"+replica.getPort());
+                    builder.appendHtmlConstant("</a>");
+                    builder.appendEscaped(" ("+replica.getServerName()+", "+replica.getHost().getInstanceId()+")");
+                    builder.appendHtmlConstant("<br>");
+                }
+                return builder.toSafeHtml();
+            }
+        };
+        applicationReplicaSetsTable.addColumn(replicasColumn, stringMessages.replicas());
         applicationReplicaSetsTable.addColumn(rs->rs.getDefaultRedirectPath(), stringMessages.defaultRedirectPath());
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
                 new ApplicationReplicaSetsImagesBarCell(stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
@@ -337,6 +392,14 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+    }
+    
+    private String getGwtStatusLink(final String host, int port) {
+        return (port == 443 ? "https" : "http") + "://" + host + ":" + port + "/gwt/status";
+    }
+
+    private String getReleaseNotesLink(final String version) {
+        return "https://releases.sapsailing.com/"+version+"/release-notes.txt";
     }
 
     private void ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(

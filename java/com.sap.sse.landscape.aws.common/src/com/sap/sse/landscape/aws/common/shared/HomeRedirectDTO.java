@@ -1,4 +1,4 @@
-package com.sap.sse.landscape.aws;
+package com.sap.sse.landscape.aws.common.shared;
 
 /**
  * Redirects users to the {@code "/gwt/Home.html"} entry point. Not parameterized further.

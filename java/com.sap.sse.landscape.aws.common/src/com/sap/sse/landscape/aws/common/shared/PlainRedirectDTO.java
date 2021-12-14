@@ -1,4 +1,4 @@
-package com.sap.sse.landscape.aws;
+package com.sap.sse.landscape.aws.common.shared;
 
 /**
  * Represents a redirect to the {@code "/index.html"} landing page. Not parameterized further.

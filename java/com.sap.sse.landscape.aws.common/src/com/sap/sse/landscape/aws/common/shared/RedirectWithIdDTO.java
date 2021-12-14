@@ -1,4 +1,4 @@
-package com.sap.sse.landscape.aws;
+package com.sap.sse.landscape.aws.common.shared;
 
 import java.util.UUID;
 import java.util.function.Function;

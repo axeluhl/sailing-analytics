@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.aws.RedirectDTO;
+import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSerializable {
     private static final long serialVersionUID = 8449684019896974806L;

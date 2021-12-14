@@ -5,9 +5,9 @@ import java.util.Optional;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.aws.RedirectDTO;
-import com.sap.sse.landscape.aws.RedirectVisitor;
 import com.sap.sse.landscape.aws.ReverseProxy;
+import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
+import com.sap.sse.landscape.aws.common.shared.RedirectVisitor;
 
 /**
  * From the respective {@link RedirectDTO} produces a corresponding {@link ReverseProxy} redirect that uses a process's

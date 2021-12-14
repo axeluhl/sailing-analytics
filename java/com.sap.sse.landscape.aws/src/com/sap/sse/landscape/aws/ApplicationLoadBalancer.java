@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;

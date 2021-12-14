@@ -1,4 +1,4 @@
-package com.sap.sse.landscape.aws;
+package com.sap.sse.landscape.aws.common.shared;
 
 public abstract class AbstractRedirectDTO implements RedirectDTO {
     private static final long serialVersionUID = -7412244909720631505L;

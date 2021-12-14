@@ -16,8 +16,8 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
