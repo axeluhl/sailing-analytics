@@ -63,8 +63,6 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
         Response response = null;
         if (!Util.hasLength(remoteServerUrlAsString)) {
             response = badRequest("Remote server URL parameter "+REMOTE_SERVER_URL_FORM_PARAM+" must be present and non-empty");
-        } else if (requestedLeaderboardGroupIds.isEmpty()) {
-            response = badRequest("You must specify one or more leaderboard groups by their ID using parameter "+MasterDataImportResultJsonSerializer.LEADERBOARDGROUP_UUID_FORM_PARAM);
         } else if (!validateAuthenticationParameters(remoteServerUsername, remoteServerPassword, remoteServerBearerToken)) {
             response = badRequest("Specify "+REMOTE_SERVER_USERNAME_FORM_PARAM+" and "+REMOTE_SERVER_PASSWORD_FORM_PARAM+" or alternatively "+REMOTE_SERVER_BEARER_TOKEN_FORM_PARAM+" or none of them.");
         } else {
