@@ -240,7 +240,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> versionColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(versionCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
                 final String version = replicaSet.getVersion();
                 final String releaseNotesLink = getReleaseNotesLink(version);
                 builder.appendHtmlConstant("<a target=\"_blank\" href=\""+releaseNotesLink+"\">");
@@ -254,7 +254,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> masterColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(masterCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
                 final String gwtStatusLink = getGwtStatusLink(replicaSet.getMaster().getHost().getPublicIpAddress(), replicaSet.getMaster().getPort());
                 builder.appendHtmlConstant("<a target=\"_blank\" href=\""+gwtStatusLink+"\">");
                 builder.appendEscaped(replicaSet.getMaster().getHost().getPublicIpAddress());
@@ -268,7 +268,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> hostnameColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(hostnameCell) {
             @Override
             public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
                 final String hostnameLink = "https://"+replicaSet.getHostname();
                 builder.appendHtmlConstant("<a target=\"_blank\" href=\""+hostnameLink+"\">");
                 builder.appendEscaped(replicaSet.getHostname());
@@ -276,8 +276,18 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return builder.toSafeHtml();
             }
         };
-        applicationReplicaSetsTable.addColumn(hostnameColumn, stringMessages.hostname(), (rs1, rs2)->new NaturalComparator().compare(rs1.getHostname(), rs2.getHostname()));
-        applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHost().getInstanceId(), stringMessages.masterInstanceId());
+        applicationReplicaSetsTable.addColumn(hostnameColumn, stringMessages.hostname(), (rs1, rs2)->new NaturalComparator().compare(rs1.getMaster().getHost().getInstanceId(), rs2.getMaster().getHost().getInstanceId()));
+        final SafeHtmlCell masterInstanceIdCell = new SafeHtmlCell();
+        final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> masterInstanceIdColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(masterInstanceIdCell) {
+            @Override
+            public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
+                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                final String instanceId = replicaSet.getMaster().getHost().getInstanceId();
+                appendEc2InstanceLink(builder, instanceId);
+                return builder.toSafeHtml();
+            }
+        };
+        applicationReplicaSetsTable.addColumn(masterInstanceIdColumn, stringMessages.masterInstanceId());
         applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint(),
                 (rs1, rs2)->rs1.getMaster().getStartTimePoint().compareTo(rs2.getMaster().getStartTimePoint()));
         final SafeHtmlCell replicasCell = new SafeHtmlCell();
@@ -290,7 +300,12 @@ public class LandscapeManagementPanel extends SimplePanel {
                     builder.appendHtmlConstant("<a target=\"_blank\" href=\""+gwtStatusLink+"\">");
                     builder.appendEscaped(replica.getHost().getPublicIpAddress()+":"+replica.getPort());
                     builder.appendHtmlConstant("</a>");
-                    builder.appendEscaped(" ("+replica.getServerName()+", "+replica.getHost().getInstanceId()+")");
+                    final String replicaInstanceId = replica.getHost().getInstanceId();
+                    builder.appendEscaped(" (");
+                    builder.appendEscaped(replica.getServerName());
+                    builder.appendEscaped(", ");
+                    appendEc2InstanceLink(builder, replicaInstanceId);
+                    builder.appendEscaped(")");
                     builder.appendHtmlConstant("<br>");
                 }
                 return builder.toSafeHtml();
@@ -1122,5 +1137,18 @@ public class LandscapeManagementPanel extends SimplePanel {
         EntryPointHelper.registerASyncService((ServiceDefTarget) result,
                 RemoteServiceMappingConstants.landscapeManagementServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         return result;
+    }
+
+    private String getEc2ConsoleLinkForInstanceId(String instanceId) {
+        return "https://"+regionsTable.getSelectionModel().getSelectedObject()+
+                ".console.aws.amazon.com/ec2/v2/home?region="+regionsTable.getSelectionModel().getSelectedObject()+
+                "#Instances:search="+instanceId;
+    }
+
+    private void appendEc2InstanceLink(final SafeHtmlBuilder builder, final String instanceId) {
+        final String ec2Link = getEc2ConsoleLinkForInstanceId(instanceId);
+        builder.appendHtmlConstant("<a target=\"_blank\" href=\""+ec2Link+"\">");
+        builder.appendEscaped(instanceId);
+        builder.appendHtmlConstant("</a>");
     }
 }
