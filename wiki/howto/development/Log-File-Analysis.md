@@ -84,9 +84,9 @@ Our central web server at `www.sapsailing.com` does this periodically every day,
 
 We have now started to analyze those ALB logs using Amazon Athena. See [https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query](https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query) for details. CloudWatch and Lambda are being used to automatically trigger some form of log analysis every month. See the CloudWatch event rule ``RunALBLogAnalysis`` and how it triggers the Lambda named [RunALBLogAnalysis](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) and the [Lambda function](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) containing the queries and configuration.
 
-In order to cope with the data volume in our logs, a technique called "partition projection" is required. For each bucket containing ALB logs (usually one per region) a database table must be created, like this:
+In order to cope with the data volume in our logs, a technique called "partition projection" is required. Another annoyance is that AWS extended the ALB log format somewhen in 2019, adding six more fields (redirect_url, lambda_error_reason, target_port_list, target_status_code_list, classification, classification_reason) to each log entry. Therefore, table definitions that span this format change need to handle the additional six fields as optional. For each bucket containing ALB logs (usually one per region) a database table must be created, like this:
 <pre>
-CREATE EXTERNAL TABLE IF NOT EXISTS alb_log_partition_projection (
+CREATE EXTERNAL TABLE IF NOT EXISTS alb_log_partition_projection_old_and_new (
 type string,
 time string,
 elb string,
@@ -126,7 +126,7 @@ ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
 WITH SERDEPROPERTIES (
 'serialization.format' = '1',
 'input.regex' =
-'([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) \"([^ ]*) ([^ ]*) (- |[^ ]*)\" \"([^\"]*)\" ([A-Z0-9-]+) ([A-Za-z0-9.-]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" ([-.0-9]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^ ]*)\" \"([^\s]+?)\" \"([^\s]+)\" \"([^ ]*)\" \"([^ ]*)\"')
+'([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) \"([^ ]*) ([^ ]*) (- |[^ ]*)\" \"([^\"]*)\" ([A-Z0-9-]+) ([A-Za-z0-9.-]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" ([-.0-9]*) ([^ ]*) \"([^\"]*)\"(.*)(.*)(.*)(.*)(.*)(.*)')
 LOCATION 's3://sapsailing-access-logs/AWSLogs/017363970217/elasticloadbalancing/eu-west-1'
 TBLPROPERTIES (
 'has_encrypted_data'='false',
@@ -143,16 +143,13 @@ TBLPROPERTIES (
 "storage.location.template" = "s3://sapsailing-access-logs/AWSLogs/017363970217/elasticloadbalancing/eu-west-1/${year}/${month}/${day}"
 )
 </pre>
-Replace the bucket and region name in the ``s3://`` URL as well as the table name accordingly. The partitions may be created using something like
-<pre>
-  MSCK REPAIR TABLE alb_log_tokyo2020_ap_northeast_1_partition_projection;
-</pre>
-for the respective table. (Note: the queries I tried so far seem to return only about one year of data although there are about five years worth of data... see https://console.aws.amazon.com/support/home#/case/?displayId=9239915061&language=en).
+Replace the bucket and region name in the ``s3://`` URL as well as the table name accordingly. Note how the optional trailing six fields are "matched" by the trailing combination ``(.*)(.*)(.*)(.*)(.*)(.*)`` in the regular expression. It will inaccurately and greedily match all trailing fields into the ``redirect_url`` field, including any quotes, and the five remaining fields can be expected to remain empty. (The challenge in modeling these optional components properly in the regular expression is that the match groups need to correspond to the table fields exactly; so nesting parenthesized match groups is not an option here. Also, all tables united with the ``union all`` construct need to expose exactly the same set of fields.)
+
 The queries then have to unite the tables to consider in the query. Example:
 <pre>
 with union_table AS 
     (select *
-    from alb_log_partition_projection
+    from alb_log_partition_projection_old_and_new
     union all
     select *
     from alb_log_tokyo2020_ap_northeast_1_partition_projection
