@@ -625,6 +625,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final SailingServer from = sailingServerFactory.getSailingServer(new URL("https", hostnameFromWhichToArchive, "/"), bearerTokenOrNullForApplicationReplicaSetToArchive);
         final SailingServer archive = sailingServerFactory.getSailingServer(new URL("https", hostnameOfArchive, "/"), bearerTokenOrNullForArchive);
         logger.info("Importing master data from "+from+" to "+archive);
+        // Note: if from.getLeaderboardGroupIds() returns an empty set, "all" leaderboards will be imported by the MDI which again is the empty set.
+        // In this case, no comparison is required; in fact it wouldn't even work because passing an empty set to the archive into which the import
+        // was done would implicitly compare all leaderboard groups, resulting in the entire archive server content being the "diff."
         final MasterDataImportResult mdiResult = archive.importMasterData(from, from.getLeaderboardGroupIds(), /* override */ true, /* compress */ true,
                 /* import wind */ true, /* import device configurations */ false, /* import tracked races and start tracking */ true, Optional.of(idForProgressTracking));
         if (mdiResult == null) {
@@ -634,14 +637,20 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final DataImportProgress mdiProgress = waitForMDICompletionOrError(archive, idForProgressTracking, /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
         if (mdiProgress != null && !mdiProgress.failed() && mdiProgress.getResult() != null) {
             logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Waiting "+durationToWaitBeforeCompareServers+" before starting to compare content...");
-            Thread.sleep(durationToWaitBeforeCompareServers.asMillis());
-            logger.info("Comparing contents now...");
-            final CompareServersResult compareServersResult = Wait.wait(()->from.compareServers(Optional.empty(), archive, Optional.of(from.getLeaderboardGroupIds())),
-                    csr->!csr.hasDiffs(), /* retryOnException */ true, Optional.of(durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)),
-                    durationToWaitBeforeCompareServers, Level.INFO, "Comparing leaderboard groups with IDs "+Util.joinStrings(", ", from.getLeaderboardGroupIds())+
-                    " between importing server "+hostnameOfArchive+" and exporting server "+hostnameFromWhichToArchive);
-            if (compareServersResult != null) {
-                if (!compareServersResult.hasDiffs()) {
+            final CompareServersResult compareServersResult;
+            if (Util.isEmpty(from.getLeaderboardGroupIds())) {
+                logger.info("Empty set of leaderboard groups imported. Not making any comparison.");
+                compareServersResult = null;
+            } else {
+                Thread.sleep(durationToWaitBeforeCompareServers.asMillis());
+                logger.info("Comparing contents now...");
+                compareServersResult = Wait.wait(()->from.compareServers(Optional.empty(), archive, Optional.of(from.getLeaderboardGroupIds())),
+                        csr->!csr.hasDiffs(), /* retryOnException */ true, Optional.of(durationToWaitBeforeCompareServers.times(maxNumberOfCompareServerAttempts)),
+                        durationToWaitBeforeCompareServers, Level.INFO, "Comparing leaderboard groups with IDs "+Util.joinStrings(", ", from.getLeaderboardGroupIds())+
+                        " between importing server "+hostnameOfArchive+" and exporting server "+hostnameFromWhichToArchive);
+            }
+            if (Util.isEmpty(from.getLeaderboardGroupIds()) || compareServersResult != null) {
+                if (Util.isEmpty(from.getLeaderboardGroupIds()) || !compareServersResult.hasDiffs()) {
                     logger.info("No differences found during comparing server contents. Moving on...");
                     final Set<UUID> eventIDs = new HashSet<>();
                     for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
