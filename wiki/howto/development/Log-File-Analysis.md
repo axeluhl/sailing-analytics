@@ -143,7 +143,12 @@ TBLPROPERTIES (
 "storage.location.template" = "s3://sapsailing-access-logs/AWSLogs/017363970217/elasticloadbalancing/eu-west-1/${year}/${month}/${day}"
 )
 </pre>
-Replace the bucket and region name in the ``s3://`` URL as well as the table name accordingly. The queries then have to unite the tables to consider in the query. Example:
+Replace the bucket and region name in the ``s3://`` URL as well as the table name accordingly. The partitions may be created using something like
+<pre>
+  MSCK REPAIR TABLE alb_log_tokyo2020_ap_northeast_1_partition_projection;
+</pre>
+for the respective table. (Note: the queries I tried so far seem to return only about one year of data although there are about five years worth of data... see https://console.aws.amazon.com/support/home#/case/?displayId=9239915061&language=en).
+The queries then have to unite the tables to consider in the query. Example:
 <pre>
 with union_table AS 
     (select *
