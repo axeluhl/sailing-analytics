@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.ui.server;
+package com.sap.sailing.landscape;
 
 import java.util.Optional;
 
