@@ -177,7 +177,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
             @FormParam(DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS_IN_MILLISECONDS_FORM_PARAM) @DefaultValue("300000") long durationToWaitBeforeCompareServersInMillis,
             @FormParam(MAX_NUMBER_OF_COMPARE_SERVER_ATTEMPTS_FORM_PARAM) @DefaultValue("5") int maxNumberOfCompareServerAttempts,
-            @FormParam(REMOVE_APPLICATION_REPLICA_SET_FORM_PARAM) @DefaultValue("false") boolean removeApplicationReplicaSet,
+            @FormParam(REMOVE_APPLICATION_REPLICA_SET_FORM_PARAM) @DefaultValue("true") boolean removeApplicationReplicaSet,
             @FormParam(MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM) String mongoUriToArchiveDbTo) {
         checkLandscapeManageAwsPermission();
         Response response;

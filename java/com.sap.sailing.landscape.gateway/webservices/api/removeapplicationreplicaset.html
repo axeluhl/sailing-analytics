@@ -9,19 +9,16 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/compareservers</h2>
+<h2>URL: /api/removoeapplicationreplicaset</h2>
 
 <b>Description:</b>
- <p>Compares two SAP Sailing Analytics servers based on the content.
-  The response contains either the missing leaderboardgroup name and id or
-  if the leaderboardgroupnames match on both servers the missing parts
-  within the leaderboardgroups. If the servers contain the exact same
-  content the return will just have the given server hostnames in it.
-  You may also query for a specific leaderboardgroup id; there the same
-  logic applies. The HTTP return code will be 409 if a mismatch is
-  detected in your query, if equal content is present on both servers
-  the response code will be 200. Authorization must be provided in case
-  content is to be compared that is not publicly readable.</p>
+ <p>Removes an application replica set without archiving its contents and without touching its
+ database. The master and replica processes are stopped, and if they were the last on their nodes then
+ the node is terminated. The load balancing rules and the corresponding target groups are removed.
+ If this turns a load balancer empty (other than its default rule), the load balancer is removed too,
+ unless it was the dynamic load balancer. Any DNS record for the replica set (in case of a DNS-mapped
+ load balancer being used) is removed, too, and so are the launch configuration and auto-scaling group
+ in case they exist.</p>
  <br />
  <table>
     <tr>
@@ -35,24 +32,19 @@
     <tr>
         <td>Mandatory query parameters:</td>
         <td>
-            <div>server2, the hostname for the second server.</div>
+            <div><tt>regionId</tt>, region where to set up the replica set, e.g., eu-west-1</div>
+            <div><tt>replicaSetName</tt>, name of the replica set; used as the hostname to which the domain name is appended, as well as
+                                 for the database and RabbitMQ exchange name</div>
+            <div><tt>keyName</tt>, the name of the SSH key to use; must identify an existing SSH key by that name in the region specified
+                          and will be used to log on to existing and new instances using a root ssh connection.</div>
+            <div><tt>privateKeyEncryptionPassphrase</tt>, the pass phrase to decrypt the private key for the key specified by the keyName parameter</div>
         </td>
     </tr>
     <tr>
-        <td>Optional form parameters:</td>
+        <td>Optional query parameters:</td>
         <td>
-            <div><tt>server1</tt>, the hostname for the first server. Defaults to the target of your request</div>
-            <div><tt>leaderboardgroupUUID[]</tt>, the leaderboardgroup UUID you want to compare.
-             Use multiple times if you need to compare more than one leaderboardgroup. Don't specify if you'd like
-             to compare <em>all</em> leaderboard groups of both servers with each other.</div>
-            <div><tt>user1</tt>, the user to authenticate against server1. If provided, <tt>password1</tt> must be provided, too.</div>
-            <div><tt>password1</tt>, password for <tt>user1</tt>.</div>
-            <div><tt>bearer1</tt>, you might provide a bearer token instead of <tt>user1</tt> and <tt>password1</tt>. If neither this
-                 bearer token nor user/password is provided, the request's authentication information is used to infer
-                 user credentials. If no user can be authenticated, only publicly readable content will be considered.</div>
-            <div><tt>user2</tt>, see <tt>user1</tt>.</div>
-            <div><tt>password2</tt>, see <tt>password1</tt>.</div>
-            <div><tt>bearer2</tt>, see <tt>bearer1</tt>.</div>
+            <div><tt>timeoutInMilliseconds</tt>, timeout in milliseconds to wait for responses from nodes when analyzing the replica sets
+                                        existing in the region; if not specified, waiting will not time out.</div>
         </td>
     </tr>
     <tr>
@@ -61,91 +53,10 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
-        produces output:<pre>
-        {
-          "localhost:8888": [
-            {
-              "name": "World Cup Series 2019 - Genoa, Italy",
-              "id": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68",
-              "leaderboards": [
-                {
-                  "name": "WCS 2019 Genoa - 49er",
-                  "series": [
-                    {
-                      "name": "Qualifying Series",
-                      "fleets": [
-                        {
-                          "name": "Blue",
-                          "races": [
-                            {
-                              "name": "R1",
-                              "isTracked": true,
-                              "regattaName": "WCS 2019 Genoa - 49er",
-                              "trackedRaceName": "R1 Blue (49er)",
-                              "hasGpsData": true,
-                              "hasWindData": true
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "75e86618-8b0f-4291-9661-6b2a1fa47dff",
-              "name": "MyTestEventWithStrangeCharact/er*s"
-            }
-          ],
-          "localhost:8889": [
-            {
-              "name": "World Cup Series 2019 - Genoa, Italy",
-              "id": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68",
-              "leaderboards": [
-                {
-                  "name": "WCS 2019 Genoa - 49er",
-                  "series": [
-                    {
-                      "name": "Qualifying Series",
-                      "fleets": [
-                        {
-                          "name": "Blue",
-                          "races": [
-                            {
-                              "name": "R1",
-                              "isTracked": false,
-                              "trackedRaceName": null,
-                              "hasGpsData": false,
-                              "hasWindData": false
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-        </pre>
+        <td>curl -X POST -d 'regionId=eu-west-2' -d 'replicaSetName=mynewevent' -d 'keyName=Horst' --data-urlencode 'privateKeyEncryptionPassphrase=HorstsSuperSecretPassword' -H 'Authorization: Bearer RwGK+DV38LKjeuDu+Bx87/3blLJHD7Ff+NCLeud9nRQ=' "https://sapsailing.com/sailinglandscape/api/landscape/removeapplicationreplicaset"<br>
+        produces no output and a 200 status code if things worked.
         </td>
     </tr>
-    <tr>
-        <td>Example:</td>
-        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -d
-        "leaderboardgroupUUID[]=1f07d1cf-0652-4fc3-83bc-a79612a5aa68" -d
-        "leaderboardgroupUUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -H "Authorization:
-        Basic YWRtaW46YWRtaW4="<br> produces output:<pre>
-        {
-         "localhost:8888": [],
-         "localhost:8889": []
-        }
-        </pre>
-   </td>
-  </tr>
 </table>
 <div style="height: 1em;"></div>
 <a href="index.html">Back to Web Service Overview</a> 

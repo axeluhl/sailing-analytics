@@ -9,19 +9,13 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/compareservers</h2>
+<h2>URL: /api/createapplicationreplicaset</h2>
 
 <b>Description:</b>
- <p>Compares two SAP Sailing Analytics servers based on the content.
-  The response contains either the missing leaderboardgroup name and id or
-  if the leaderboardgroupnames match on both servers the missing parts
-  within the leaderboardgroups. If the servers contain the exact same
-  content the return will just have the given server hostnames in it.
-  You may also query for a specific leaderboardgroup id; there the same
-  logic applies. The HTTP return code will be 409 if a mismatch is
-  detected in your query, if equal content is present on both servers
-  the response code will be 200. Authorization must be provided in case
-  content is to be compared that is not publicly readable.</p>
+ <p>Creates an application replica set with an auto-scaling group and corresponding launch configuration, load
+ balancer rules and corresponding target groups, hooking up to the region's default MongoDB replica set and
+ RabbitMQ and replicating the security service and shared sailing data from the security-service.sapsailing.com
+ server by default.</p>
  <br />
  <table>
     <tr>
@@ -35,24 +29,41 @@
     <tr>
         <td>Mandatory query parameters:</td>
         <td>
-            <div>server2, the hostname for the second server.</div>
+            <div><tt>regionId</tt>, region where to set up the replica set, e.g., eu-west-1</div>
+            <div><tt>replicaSetName</tt>, name of the replica set; used as the hostname to which the domain name is appended, as well as
+                                 for the database and RabbitMQ exchange name</div>
+            <div><tt>masterInstanceType</tt>, instance type to use in the hyperscaler for master and replica nodes, e.g., C5_4_XLARGE;
+                                     see <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/ec2/model/InstanceType.html">here</a></div>
+            <div><tt>keyName</tt>, the name of the SSH key to use; must identify an existing SSH key by that name in the region specified
+                          and will be used to log on to existing and new instances using a root ssh connection.</div>
+            <div><tt>privateKeyEncryptionPassphrase</tt>, the pass phrase to decrypt the private key for the key specified by the keyName parameter</div>
         </td>
     </tr>
     <tr>
         <td>Optional form parameters:</td>
         <td>
-            <div><tt>server1</tt>, the hostname for the first server. Defaults to the target of your request</div>
-            <div><tt>leaderboardgroupUUID[]</tt>, the leaderboardgroup UUID you want to compare.
-             Use multiple times if you need to compare more than one leaderboardgroup. Don't specify if you'd like
-             to compare <em>all</em> leaderboard groups of both servers with each other.</div>
-            <div><tt>user1</tt>, the user to authenticate against server1. If provided, <tt>password1</tt> must be provided, too.</div>
-            <div><tt>password1</tt>, password for <tt>user1</tt>.</div>
-            <div><tt>bearer1</tt>, you might provide a bearer token instead of <tt>user1</tt> and <tt>password1</tt>. If neither this
-                 bearer token nor user/password is provided, the request's authentication information is used to infer
-                 user credentials. If no user can be authenticated, only publicly readable content will be considered.</div>
-            <div><tt>user2</tt>, see <tt>user1</tt>.</div>
-            <div><tt>password2</tt>, see <tt>password1</tt>.</div>
-            <div><tt>bearer2</tt>, see <tt>bearer1</tt>.</div>
+            <div><tt>dynamicLoadBalancerMappingionId</tt>, boolean value (false or true; defaulting to false); if true, the rules will be entered
+                                                  into the region's default dynamic load balancer without a specific DNS mapping. In this
+                                                  case the domain must not be specified or must be "sapsailing.com", and the region must
+                                                  be the default region (eu-west-1), or an error status will result.</div>
+            <div><tt>releaseName</tt>, the release name, such as build-202108091125; if not provided, the latest master build is used by default.</div>
+            <div><tt>masterReplicationBearerToken</tt>, the bearer token the new replica set's master will use to replicate the security service and
+                                               shared sailing data from the central security-service.sapsailing.com server; defaults to the
+                                               bearer token of the user authenticated for this request. Note that this requires the
+                                               server processing this request to share the security information from security-service.sapsailing.com, too.</div>
+            <div><tt>replicaReplicationBearerToken</tt>, the bearer token the new replica set's replicas will use to replicate their master server; defaults to the
+                                               bearer token of the user authenticated for this request. Note that this requires the
+                                               server processing this request to share the security information from security-service.sapsailing.com, too.</div>
+            <div><tt>domainName</tt>, the domain name to use for the DNS entry that points to the load balancer holding the rules for the new replica set.
+                             Defaults to sapsailing.com. If dynamic load balancing is used, this parameter must either not be provided or must
+                             use the default domain sapsailing.com.</div>
+            <div><tt>memoryInMegabytes</tt>, can be used to specify the absolute amount of heap size used for the Java VM running the applications, both, on master
+                                    and replicas; if not specified, memoryTotalSizeFactor may be used (see below); if that isn't used either, heap size
+                                    is computed based on the amount of memory available on the instance, not considering any swap space available.</div>
+            <div><tt>memoryTotalSizeFactor</tt>, can be used if memoryInMegabytes is not used; it roughly specifies how many processes are intended to be run on the
+                                        host; e.g., if 4 is specified, approximately 1/4 of the physical memory available (not considering swap space) is
+                                        assigned as the process's heap space. If neither memoryInMegabytes nor memoryTotalSizeFactor are specified then
+                                        the amount of memory is calculated automatically based on the amount of physical memory available on the host.</div>
         </td>
     </tr>
     <tr>
@@ -61,91 +72,16 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        <td>curl -X POST -d 'regionId=eu-west-2' -d 'replicaSetName=mynewevent' -d 'masterInstanceType=C5_4_XLARGE' -d 'keyName=Horst' --data-urlencode 'privateKeyEncryptionPassphrase=HorstsSuperSecretPassword' --data-urlencode 'masterReplicationBearerToken=DE7x+W/dwFKRAxFbJkC/IMafEnJ8kTQF+MUHNVhEwsD4=' --data-urlencode 'replicaReplicationBearerToken=CHxGpF0nr78Z4m/f28/MgiYhdRB3xoDCYd+rLc37rTt=' -H 'Authorization: Bearer RwGK+DV38LKjeuDu+Bx87/3blLJHD7Ff+NCLeud9nRQ=' "https://sapsailing.com/sailinglandscape/api/landscape/createapplicationreplicaset"
+        <br>
         produces output:<pre>
-        {
-          "localhost:8888": [
             {
-              "name": "World Cup Series 2019 - Genoa, Italy",
-              "id": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68",
-              "leaderboards": [
-                {
-                  "name": "WCS 2019 Genoa - 49er",
-                  "series": [
-                    {
-                      "name": "Qualifying Series",
-                      "fleets": [
-                        {
-                          "name": "Blue",
-                          "races": [
-                            {
-                              "name": "R1",
-                              "isTracked": true,
-                              "regattaName": "WCS 2019 Genoa - 49er",
-                              "trackedRaceName": "R1 Blue (49er)",
-                              "hasGpsData": true,
-                              "hasWindData": true
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "75e86618-8b0f-4291-9661-6b2a1fa47dff",
-              "name": "MyTestEventWithStrangeCharact/er*s"
+              "name": "mynewevent",
+              "version": "build-202112151552"
             }
-          ],
-          "localhost:8889": [
-            {
-              "name": "World Cup Series 2019 - Genoa, Italy",
-              "id": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68",
-              "leaderboards": [
-                {
-                  "name": "WCS 2019 Genoa - 49er",
-                  "series": [
-                    {
-                      "name": "Qualifying Series",
-                      "fleets": [
-                        {
-                          "name": "Blue",
-                          "races": [
-                            {
-                              "name": "R1",
-                              "isTracked": false,
-                              "trackedRaceName": null,
-                              "hasGpsData": false,
-                              "hasWindData": false
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
         </pre>
         </td>
     </tr>
-    <tr>
-        <td>Example:</td>
-        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -d
-        "leaderboardgroupUUID[]=1f07d1cf-0652-4fc3-83bc-a79612a5aa68" -d
-        "leaderboardgroupUUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -H "Authorization:
-        Basic YWRtaW46YWRtaW4="<br> produces output:<pre>
-        {
-         "localhost:8888": [],
-         "localhost:8889": []
-        }
-        </pre>
-   </td>
-  </tr>
 </table>
 <div style="height: 1em;"></div>
 <a href="index.html">Back to Web Service Overview</a> 
