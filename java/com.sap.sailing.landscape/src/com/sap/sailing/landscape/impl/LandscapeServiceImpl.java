@@ -85,6 +85,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class LandscapeServiceImpl implements LandscapeService {
     private static final Logger logger = Logger.getLogger(LandscapeServiceImpl.class.getName());
@@ -98,11 +99,6 @@ public class LandscapeServiceImpl implements LandscapeService {
         sailingServerFactoryTracker = ServiceTrackerFactory.createAndOpen(context, SailingServerFactory.class);
     }
     
-    @Override
-    public String helloWorld() {
-        return "Hello world";
-    }
-
     @Override
     public AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createApplicationReplicaSet(
             String regionId, String name, String masterInstanceType, boolean dynamicLoadBalancerMapping,
@@ -390,6 +386,28 @@ public class LandscapeServiceImpl implements LandscapeService {
         return result;
     }
     
+    
+    @Override
+    public void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode) {
+        final Credentials credentials = AwsLandscape.obtain(awsAccessKey, awsSecret).getMfaSessionCredentials(mfaTokenCode);
+        final AwsSessionCredentialsWithExpiryImpl result = new AwsSessionCredentialsWithExpiryImpl(
+                credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken(),
+                TimePoint.of(credentials.expiration().toEpochMilli()));
+        final AwsSessionCredentialsFromUserPreference credentialsPreferences = new AwsSessionCredentialsFromUserPreference(result);
+        getSecurityService().setPreferenceObject(
+                getSecurityService().getCurrentUser().getName(), LandscapeService.USER_PREFERENCE_FOR_SESSION_TOKEN, credentialsPreferences);
+    }
+
+    @Override
+    public boolean hasValidSessionCredentials() {
+        return getSessionCredentials() != null;
+    }
+
+    @Override
+    public void clearSessionCredentials() {
+        getSecurityService().unsetPreference(getSecurityService().getCurrentUser().getName(), LandscapeService.USER_PREFERENCE_FOR_SESSION_TOKEN);
+    }
+
     /**
      * The "internal" method exists in order to declare a few type parameters which wouldn't be possible on the GWT RPC
      * interface method as some of these types are not seen by clients.

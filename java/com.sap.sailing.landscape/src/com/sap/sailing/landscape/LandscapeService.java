@@ -32,8 +32,25 @@ public interface LandscapeService {
     String USER_PREFERENCE_FOR_SESSION_TOKEN = "___aws.session.token___";
     public String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
 
-    String helloWorld();
+    /**
+     * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
+     * credentials and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. Callers shall ensure that the current user has the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode);
+    
+    boolean hasValidSessionCredentials();
 
+    AwsSessionCredentialsWithExpiry getSessionCredentials();
+
+    /**
+     * For the current user who has to have the {@code LANDSCAPE:MANAGE:AWS} permission, clears the preference in the
+     * user's preference store which holds any session credentials created previously using
+     * {@link #createMfaSessionCredentials(String, String, String)}.
+     */
+    void clearSessionCredentials();
+    
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createApplicationReplicaSet(
             String regionId, String name, String masterInstanceType, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
@@ -68,8 +85,6 @@ public interface LandscapeService {
      * @param optionalDomainName defaults to {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME}.
      */
     String getFullyQualifiedHostname(String unqualifiedHostname, Optional<String> optionalDomainName);
-
-    AwsSessionCredentialsWithExpiry getSessionCredentials();
 
     AwsLandscape<String> getLandscape();
 

@@ -28,15 +28,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.jcraft.jsch.JSchException;
-import com.sap.sailing.landscape.AwsSessionCredentialsWithExpiry;
 import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.SharedLandscapeConstants;
-import com.sap.sailing.landscape.impl.AwsSessionCredentialsFromUserPreference;
-import com.sap.sailing.landscape.impl.AwsSessionCredentialsWithExpiryImpl;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
@@ -109,7 +106,6 @@ import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
-import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
@@ -158,17 +154,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     /**
-     * For the logged-in user checks the LANDSCAPE:MANAGE:AWS permission, and if present, tries to obtain the user preference
-     * named like {@link #USER_PREFERENCE_FOR_SESSION_TOKEN}. If found and not yet expired, they are returned. Otherwise,
-     * {@code null} is returned, indicating to the caller that new session credentials shall be obtained which shall then be
-     * stored to the user preference again for future reference.
-     */
-    private AwsSessionCredentialsWithExpiry getSessionCredentials() {
-        checkLandscapeManageAwsPermission();
-        return getLandscapeService().getSessionCredentials();
-    }
-    
-    /**
      * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
      * credentials and stores them in the user's preference store from where they can be obtained again using
      * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
@@ -177,13 +162,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode) {
         checkLandscapeManageAwsPermission();
-        final Credentials credentials = AwsLandscape.obtain(awsAccessKey, awsSecret).getMfaSessionCredentials(mfaTokenCode);
-        final AwsSessionCredentialsWithExpiryImpl result = new AwsSessionCredentialsWithExpiryImpl(
-                credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken(),
-                TimePoint.of(credentials.expiration().toEpochMilli()));
-        final AwsSessionCredentialsFromUserPreference credentialsPreferences = new AwsSessionCredentialsFromUserPreference(result);
-        getSecurityService().setPreferenceObject(
-                getSecurityService().getCurrentUser().getName(), LandscapeService.USER_PREFERENCE_FOR_SESSION_TOKEN, credentialsPreferences);
+        getLandscapeService().createMfaSessionCredentials(awsAccessKey, awsSecret, mfaTokenCode);
     }
     
     /**
@@ -194,12 +173,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public void clearSessionCredentials() {
         checkLandscapeManageAwsPermission();
-        getSecurityService().unsetPreference(getSecurityService().getCurrentUser().getName(), LandscapeService.USER_PREFERENCE_FOR_SESSION_TOKEN);
+        getLandscapeService().clearSessionCredentials();
     }
 
     @Override
     public boolean hasValidSessionCredentials() {
-        return getSessionCredentials() != null;
+        return getLandscapeService().hasValidSessionCredentials();
     }
 
     private void checkLandscapeManageAwsPermission() {

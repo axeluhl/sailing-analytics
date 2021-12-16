@@ -1,5 +1,6 @@
 package com.sap.sailing.landscape.gateway.jaxrs.api;
 
+import java.text.SimpleDateFormat;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -8,16 +9,19 @@ import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.landscape.AwsSessionCredentialsWithExpiry;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SharedLandscapeConstants;
@@ -57,11 +61,73 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String BEARER_TOKEN_FOR_REPLICA_SET_TO_ARCHIVE_FORM_PARAM = "bearerTokenForReplicaSetToArchive";
     private static final String BEARER_TOKEN_FOR_ARCHIVE_FORM_PARAM = "bearerTokenForArchive";
     private static final String MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM = "mongoUriToArchiveDbTo";
+    private static final String AWS_KEY_ID_FORM_PARAM = "awsKeyId";
+    private static final String AWS_KEY_SECRET_FORM_PARAM = "awsKeySecret";
+    private static final String AWS_MFA_TOKEN_FORM_PARAM = "awsMfaToken";
+    private static final String SESSION_TOKEN_EXPIRY_UNIX_TIME_MILLIS = "sessionTokenExpiryMillis";
+    private static final String SESSION_TOKEN_EXPIRY_ISO = "sessionTokenExpiryISO";
 
     @Context
     UriInfo uriInfo;
-
-    @Path ("/createapplicationreplicaset")
+    
+    @Path("/createsessioncredentials")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response createSessionCredentials(
+            @FormParam(AWS_KEY_ID_FORM_PARAM) String awsKeyId,
+            @FormParam(AWS_KEY_SECRET_FORM_PARAM) String awsKeySecret,
+            @FormParam(AWS_MFA_TOKEN_FORM_PARAM) String mfaToken
+            ) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        try {
+            getLandscapeService().createMfaSessionCredentials(awsKeyId, awsKeySecret, mfaToken);
+            response = Response.ok().build();
+        } catch (Exception e) {
+            response = Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        return response;
+    }
+    
+    @Path("/getsessioncredentials")
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response getSessionCredentials() {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        try {
+            final AwsSessionCredentialsWithExpiry sessionCredentials = getLandscapeService().getSessionCredentials();
+            if (sessionCredentials == null) {
+                response = Response.status(Status.NOT_FOUND).entity("No session credentials found for user "+getSecurityService().getCurrentUser().getName()).build();
+            } else {
+                final JSONObject result = new JSONObject();
+                result.put(SESSION_TOKEN_EXPIRY_UNIX_TIME_MILLIS, sessionCredentials.getExpiration().asMillis());
+                result.put(SESSION_TOKEN_EXPIRY_ISO, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(sessionCredentials.getExpiration().asDate()));
+                response = Response.ok().entity(streamingOutput(result)).build();
+            }
+        } catch (Exception e) {
+            response = Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        return response;
+    }
+    
+    @Path("/clearsessioncredentials")
+    @POST
+    @Produces("application/json;charset=UTF-8")
+    public Response clearSessionCredentials() {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        try {
+            getLandscapeService().clearSessionCredentials();
+            response = Response.ok().build();
+        } catch (Exception e) {
+            response = Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        return response;
+    }
+    
+    @Path("/createapplicationreplicaset")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
@@ -97,7 +163,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         return response;
     }
     
-    @Path ("/movetoarchiveserver")
+    @Path("/movetoarchiveserver")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
