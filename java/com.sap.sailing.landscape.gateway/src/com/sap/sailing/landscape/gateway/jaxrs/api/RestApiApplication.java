@@ -12,7 +12,7 @@ public class RestApiApplication extends Application {
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
         // RESTlets
-        classes.add(LandscapeResource.class);
+        classes.add(SailingLandscapeResource.class);
         
         // Exception Mapper
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);

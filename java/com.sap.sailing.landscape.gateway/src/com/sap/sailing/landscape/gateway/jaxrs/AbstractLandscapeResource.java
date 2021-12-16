@@ -6,8 +6,9 @@ import javax.ws.rs.core.Context;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.landscape.LandscapeService;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 
-public abstract class AbstractLandscapeResource {
+public abstract class AbstractLandscapeResource extends AbstractSailingServerResource {
     @Context
     ServletContext servletContext;
 

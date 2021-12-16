@@ -25,9 +25,9 @@ import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.dto.MasterDataImportResultImpl;
 import com.sap.sailing.server.gateway.interfaces.MasterDataImportResult;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.DataImportProgressJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MasterDataImportResultJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 

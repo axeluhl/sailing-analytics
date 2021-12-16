@@ -30,11 +30,11 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.impl.preferences.model.SailingPreferences;
 import com.sap.sailing.server.impl.preferences.model.TrackedElementWithDeviceId;
 import com.sap.sailing.server.impl.preferences.model.TrackedEventPreference;
 import com.sap.sailing.server.impl.preferences.model.TrackedEventPreferences;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.shared.json.JsonDeserializationException;
 

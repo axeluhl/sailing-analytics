@@ -6,7 +6,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 
 @Path("/v1/ping")
 public class PingResource extends AbstractSailingServerResource {

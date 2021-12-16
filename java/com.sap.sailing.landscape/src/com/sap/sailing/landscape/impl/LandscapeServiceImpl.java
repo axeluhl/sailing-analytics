@@ -491,6 +491,12 @@ public class LandscapeServiceImpl implements LandscapeService {
             final Optional<AmazonMachineImage<String>> replicaMachineImage,
             final String bearerTokenUsedByReplicas, Optional<Integer> minimumNumberOfReplicas, Optional<Integer> maximumNumberOfReplicas)
             throws Exception, JSchException, IOException, InterruptedException, SftpException, TimeoutException {
+        if (dynamicLoadBalancerMapping && !region.getId().equals(SharedLandscapeConstants.REGION_WITH_DEFAULT_LOAD_BALANCER)) {
+            // see bug5669:
+            throw new IllegalArgumentException("You must not request dynamic load balancer mapping in regions other than "+
+                    SharedLandscapeConstants.REGION_WITH_DEFAULT_LOAD_BALANCER+
+                    "; you tried it for region "+region.getId());
+        }
         final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder =
                 dynamicLoadBalancerMapping ? CreateDynamicLoadBalancerMapping.builder() : CreateDNSBasedLoadBalancerMapping.builder();
         final String domainName = Optional.ofNullable(optionalDomainName).orElse(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);

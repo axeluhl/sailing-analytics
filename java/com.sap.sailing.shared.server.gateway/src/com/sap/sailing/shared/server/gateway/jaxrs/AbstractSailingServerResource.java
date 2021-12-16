@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs;
+package com.sap.sailing.shared.server.gateway.jaxrs;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
 import com.sap.sse.common.Util;
 
 public abstract class AbstractSailingServerResource extends SharedAbstractSailingServerResource {

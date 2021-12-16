@@ -18,9 +18,9 @@ import javax.ws.rs.core.Response;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.statistics.Statistics;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.StatisticsByYearJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.StatisticsJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util.Pair;
 
 @Path("/v1/statistics")
