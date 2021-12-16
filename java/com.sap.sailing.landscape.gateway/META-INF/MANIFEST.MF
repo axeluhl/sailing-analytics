@@ -30,4 +30,5 @@ Require-Bundle: com.sap.sailing.landscape,
  com.sap.sailing.shared.server.gateway,
  com.sap.sailing.server.gateway.interfaces,
  com.sap.sailing.server.gateway.serialization,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse.landscape.common

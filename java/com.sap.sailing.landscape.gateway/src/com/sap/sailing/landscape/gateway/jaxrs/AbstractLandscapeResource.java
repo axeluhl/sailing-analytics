@@ -3,10 +3,13 @@ package com.sap.sailing.landscape.gateway.jaxrs;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
+import org.apache.shiro.SecurityUtils;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public abstract class AbstractLandscapeResource extends AbstractSailingServerResource {
     @Context
@@ -19,5 +22,10 @@ public abstract class AbstractLandscapeResource extends AbstractSailingServerRes
         ServiceTracker<LandscapeService, LandscapeService> tracker = (ServiceTracker<LandscapeService, LandscapeService>) servletContext
                 .getAttribute(RestServletContainer.LANDSCAPE_SERVICE_TRACKER_NAME);
         return tracker.getService();
+    }
+    
+    protected void checkLandscapeManageAwsPermission() {
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
+                new TypeRelativeObjectIdentifier("AWS")));
     }
 }

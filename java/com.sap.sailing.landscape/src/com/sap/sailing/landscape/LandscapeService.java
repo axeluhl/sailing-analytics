@@ -3,6 +3,7 @@ package com.sap.sailing.landscape;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
@@ -46,6 +47,10 @@ public interface LandscapeService {
             String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
             Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
     
+    /**
+     * @return the UUID that can be used to track the master data import progress; see
+     *         {@link SailingServer#getMasterDataImportProgress(UUID)}.
+     */
     UUID archiveReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive, String bearerTokenOrNullForArchive,

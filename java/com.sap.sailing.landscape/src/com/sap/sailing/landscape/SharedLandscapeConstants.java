@@ -27,4 +27,16 @@ public interface SharedLandscapeConstants {
      * the region.
      */
     String REGION_WITH_DEFAULT_LOAD_BALANCER = "eu-west-1";
+
+    /**
+     * The tag value used to identify host images that can be launched in order to run one or more Sailing Analytics
+     * server processes on it.
+     */
+    String IMAGE_TYPE_TAG_VALUE_SAILING = "sailing-analytics-server";
+    
+    /**
+     * The tag attached to hosts running zero or more Sailing Analytics processes. Can be used to discover
+     * application replica sets in a landscape.
+     */
+    String SAILING_ANALYTICS_APPLICATION_HOST_TAG = "sailing-analytics-server";
 }

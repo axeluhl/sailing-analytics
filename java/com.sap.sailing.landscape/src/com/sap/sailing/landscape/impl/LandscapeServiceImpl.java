@@ -158,11 +158,12 @@ public class LandscapeServiceImpl implements LandscapeService {
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet, MongoEndpoint moveDatabaseHere,
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
-        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> archiveReplicaSet =
-                getLandscape().getApplicationReplicaSetByTagValue(new AwsRegion(regionId),
-                    "sailing-analytics-server", "ARCHIVE", new SailingAnalyticsHostSupplier<String>(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
-                    Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-        logger.info("Found ARCHIVE replica set "+archiveReplicaSet+" with master "+archiveReplicaSet.getMaster());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> archiveReplicaSet = getLandscape()
+                .getApplicationReplicaSetByTagValue(new AwsRegion(regionId),
+                        SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, "ARCHIVE",
+                        new SailingAnalyticsHostSupplier<String>(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
+                        Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+        logger.info("Found ARCHIVE replica set " + archiveReplicaSet + " with master " + archiveReplicaSet.getMaster());
         final UUID idForProgressTracking = UUID.randomUUID();
         final RedirectDTO defaultRedirect = RedirectDTO.from(getDefaultRedirectPath(applicationReplicaSetToArchive.getDefaultRedirectRule()));
         final String hostnameFromWhichToArchive = applicationReplicaSetToArchive.getHostname();
@@ -536,7 +537,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         createLaunchConfigurationAndAutoScalingGroupBuilder
             .setInstanceType(InstanceType.valueOf(replicaInstanceType))
             .setTags(Tags.with(StartAwsHost.NAME_TAG_NAME, StartSailingAnalyticsHost.INSTANCE_NAME_DEFAULT_PREFIX+replicaSetName+" (Auto-Replica)")
-                         .and(SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG, replicaSetName))
+                         .and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, replicaSetName))
             .setOptionalTimeout(LandscapeService.WAIT_FOR_HOST_TIMEOUT)
             .setReplicaConfiguration(replicaConfigurationBuilder.build()); // use the default scaling parameters (currently 1/30/30000)
         minimumNumberOfReplicas.ifPresent(minNumberOfReplicas->createLaunchConfigurationAndAutoScalingGroupBuilder.setMinReplicas(minNumberOfReplicas));
