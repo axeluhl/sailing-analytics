@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API for Landscape Management - Overview</h1>
+
+<p>
+The services listed herein can be used to automatically manage aspects of a system landscape
+running the SAP Sailing Analytics. This includes creating a new application server replica set
+for a server name, archive and remove such a replica set's contents, as well as managing the
+AWS credentials including MFA token handling that allow accessing the hyperscaler infrastructure
+in the first place.
+</p>
+<p>
+<b>ATTRIBUTION / BRANDING:</b> If you make use of this API, SAP requires you to include SAP branding in any
+end-user facing interface or document that is based on the data, information and insights you obtain through
+the use of this API. A good place to get started regarding SAP branding tips is
+<a href="https://www.sapbrandtools.com/">www.sapbrandtools.com</a>. Please also note that those APIs granting
+access to the original position and weather data requires the accessing user account to have special permissions.
+</p>
+<p>
+For questions and support please get in touch through <a href="mailto:support@sapsailing.com">support@sapsailing.com</a>.
+</p>
+<div style="height: 1em;"></div>
+<table>
+<thead>
+	<tr>
+		<td>Webservice URL</td>
+		<td>Description</td>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+		<td><a href="createsessioncredentials.html">/sailinglandscape/api/createsessioncredentials</a></td>
+		<td>Creates AWS session credentials, including MFA support</td>
+	</tr>
+	   <tr>
+        <td><a href="getsessioncredentials.html">/sailinglandscape/api/getsessioncredentials</a></td>
+        <td>Gets information about active AWS session credentials, telling their expiry time.</td>
+    </tr>
+	<tr>
+		<td><a href="clearsessioncredentials.html">/sailinglandscape/api/clearsessioncredentials</a></td>
+		<td>Clears any active AWS session credentials</td>
+	</tr>
+    <tr>
+        <td><a href="createapplicationreplicaset.html">/sailinglandscape/api/createapplicationreplicaset</a></td>
+        <td>Creates a new application server replica set</td>
+    </tr>
+	<tr>
+		<td><a href="movetoarchiveserver.html">/sailinglandscape/api/movetoarchiveserver</a></td>
+		<td>Archives an existing application server replica set's contents</td>
+	</tr>
+	<tr>
+		<td><a href="removeapplicationreplicaset.html">/sailinglandscape/api/removeapplicationreplicaset</a></td>
+		<td>Removes an application server replica set without archiving it</td>
+	</tr>
+</tbody>
+</table>
+<div style="height: 1em;"></div>
+<a href="../../index.html">Back to Web Services Home</a> 
+</body>
+</html>

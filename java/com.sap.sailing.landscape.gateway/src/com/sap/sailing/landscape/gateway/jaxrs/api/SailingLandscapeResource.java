@@ -210,4 +210,39 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         }
         return response;
     }
+
+    @Path("/removeapplicationreplicaset")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response removeApplicationServerReplicaSet(
+            @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
+            @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
+            @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
+            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        final AwsRegion region = new AwsRegion(regionId);
+        byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
+        final AwsLandscape<String> landscape = getLandscapeService().getLandscape();
+        try {
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToRemove = Util.first(Util.filter(
+                    landscape.getApplicationReplicaSetsByTag(region,
+                        SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, new SailingAnalyticsHostSupplier<String>(),
+                        Optional.ofNullable(optionalTimeoutInMilliseconds).map(Duration::ofMillis), Optional.ofNullable(optionalKeyName),
+                        passphraseForPrivateKeyDecryption),
+                    rs->rs.getName().equals(replicaSetName)));
+            if (applicationReplicaSetToRemove == null) {
+                response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
+            } else {
+                getLandscapeService().removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, optionalKeyName, passphraseForPrivateKeyDecryption);
+                response = Response.ok().build();
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage(), e);
+            response = badRequest("Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage());
+        }
+        return response;
+    }
 }
