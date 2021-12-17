@@ -732,7 +732,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().addTarget(replicaSet.getMaster().getHost());
         replicaSet.getMasterTargetGroup().addTarget(replicaSet.getMaster().getHost());
-        // if a replica was spun up (replicaToShutDownWhenDone), remove from public target group and terminate:
+        // if a replica was spun up (additionalReplicaStarted), remove from public target group and terminate:
         if (additionalReplicaStarted != null) {
             replicasToStopAfterUpgradingMaster.add(additionalReplicaStarted);
             if (replicaSet.getAutoScalingGroup() != null) {
