@@ -263,17 +263,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final ScheduledExecutorService backgroundThreadPool = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Constructing SailingApplicationReplicaSetDTOs "+UUID.randomUUID());
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
             getLandscape().getApplicationReplicaSetsByTag(region, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
-                hostSupplier, LandscapeService.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
+                hostSupplier, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
             resultFutures.add(backgroundThreadPool.submit(()->
                 convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)));
         }
-        Util.addAll(Util.map(resultFutures, future->{
+        Util.addAll(Util.filter(Util.map(resultFutures, future->{
             try {
-                return future.get(LandscapeService.WAIT_FOR_HOST_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS);
+                return future.get(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException(e);
+                logger.log(Level.WARNING, "Problem waiting for a replica set; ignoring that replica set", e);
+                return null;
             }
-        }), result);
+        }), r->r!=null), result);
         backgroundThreadPool.shutdown();
         return result;
     }
