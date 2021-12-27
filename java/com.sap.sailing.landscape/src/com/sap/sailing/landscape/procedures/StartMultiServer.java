@@ -9,6 +9,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
@@ -72,7 +73,7 @@ implements StartFromSailingAnalyticsImage {
 
         @Override
         protected String getImageType() {
-            return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
+            return super.getImageType() == null ? SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
         }
         
         @Override

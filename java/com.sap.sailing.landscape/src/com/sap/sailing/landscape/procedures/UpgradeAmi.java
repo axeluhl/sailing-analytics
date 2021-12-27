@@ -15,6 +15,7 @@ import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
@@ -150,9 +151,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         
         @Override
         protected String getImageType() {
-            return super.getImageType() == null ? getMachineImage() == null ? IMAGE_TYPE_TAG_VALUE_SAILING :
+            return super.getImageType() == null ? getMachineImage() == null ? SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING :
                 Util.stream(getMachineImage().getTags()).filter(tag->tag.key().equals(AwsLandscape.IMAGE_TYPE_TAG_NAME)).findAny()
-                    .map(tag->tag.value()).orElse(IMAGE_TYPE_TAG_VALUE_SAILING)
+                    .map(tag->tag.value()).orElse(SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING)
                 : super.getImageType();
         }
 

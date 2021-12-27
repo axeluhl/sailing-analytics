@@ -88,58 +88,60 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
         final String SERVER_NAME_JSON_PROPERTY = "servername";
         final Set<ProcessT> result = new HashSet<>();
         final SshCommandChannel sshChannel = createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        try {
-            final StringBuilder commandLine = new StringBuilder("cd "+DEFAULT_SERVERS_PATH+"; ")
-                .append("echo -n \"[\"; ")
-                .append("find * -type d -prune -exec bash -c 'cd '{}'; . env.sh >/dev/null; echo \"{ ")
-                    .append("\\\""+SERVER_DIRECTORY_JSON_PROPERTY+"\\\":\\\"'{}'\\\", ")
-                    .append("\\\""+SERVER_PORT_JSON_PROPERTY+"\\\":${SERVER_PORT} ")
-                    .append("\\\""+TELNET_PORT_JSON_PROPERTY+"\\\":${TELNET_PORT}, ")
-                    .append("\\\""+SERVER_NAME_JSON_PROPERTY+"\\\":\\\"${SERVER_NAME}\\\", ");
-            // query the additional environment properties as specified by getAdditionalEnvironmentPropertiesAndWhetherStringTyped()
-            for (final Entry<String, Boolean> additionalEntryAndWhetherStringTyped : getAdditionalEnvironmentPropertiesAndWhetherStringTyped().entrySet()) {
-                commandLine.append("\\\""+additionalEntryAndWhetherStringTyped.getKey().toLowerCase()+"\\\":");
-                if (additionalEntryAndWhetherStringTyped.getValue()) {
-                    commandLine.append("\\\"");
-                }
-                commandLine.append("${");
-                commandLine.append(additionalEntryAndWhetherStringTyped.getKey());
-                commandLine.append("}");
-                if (additionalEntryAndWhetherStringTyped.getValue()) {
-                    commandLine.append("\\\"");
-                }
-                commandLine.append(", ");
-            }
-            commandLine.append("},\"' \\; ; echo \"{}]\"");
-            final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
-                    commandLine.toString(),
-                    "Error(s) during evaluating server processes", Level.SEVERE);
-            final JSONArray serverDirectoriesAndPorts = (JSONArray) new JSONParser().parse(stdout);
-            for (final Object serverDirectoryAndPort : serverDirectoriesAndPorts) {
-                final JSONObject serverDirectoryAndPortObject = (JSONObject) serverDirectoryAndPort;
-                ProcessT process;
-                final String relativeServerDirectory = (String) serverDirectoryAndPortObject.get(SERVER_DIRECTORY_JSON_PROPERTY);
-                if (relativeServerDirectory != null) { // null means we got the empty "terminator" record
-                    final String serverDirectory = DEFAULT_SERVERS_PATH+"/"+relativeServerDirectory;
-                    final int port = ((Number) serverDirectoryAndPortObject.get(SERVER_PORT_JSON_PROPERTY)).intValue();
-                    final int telnetPort = ((Number) serverDirectoryAndPortObject.get(TELNET_PORT_JSON_PROPERTY)).intValue();
-                    final String serverName = (String) serverDirectoryAndPortObject.get(SERVER_NAME_JSON_PROPERTY);
-                    final Map<String, Object> additionalProperties = new HashMap<>();
-                    for (final Entry<String, Boolean> additionalEntryAndWhetherStringTyped : getAdditionalEnvironmentPropertiesAndWhetherStringTyped().entrySet()) {
-                        additionalProperties.put(additionalEntryAndWhetherStringTyped.getKey(), serverDirectoryAndPortObject.get(additionalEntryAndWhetherStringTyped.getKey().toLowerCase()));
+        if (sshChannel != null) { // could, e.g., have timed out
+            try {
+                final StringBuilder commandLine = new StringBuilder("cd "+DEFAULT_SERVERS_PATH+"; ")
+                    .append("echo -n \"[\"; ")
+                    .append("find * -type d -prune -exec bash -c 'cd '{}'; . env.sh >/dev/null; echo \"{ ")
+                        .append("\\\""+SERVER_DIRECTORY_JSON_PROPERTY+"\\\":\\\"'{}'\\\", ")
+                        .append("\\\""+SERVER_PORT_JSON_PROPERTY+"\\\":${SERVER_PORT} ")
+                        .append("\\\""+TELNET_PORT_JSON_PROPERTY+"\\\":${TELNET_PORT}, ")
+                        .append("\\\""+SERVER_NAME_JSON_PROPERTY+"\\\":\\\"${SERVER_NAME}\\\", ");
+                // query the additional environment properties as specified by getAdditionalEnvironmentPropertiesAndWhetherStringTyped()
+                for (final Entry<String, Boolean> additionalEntryAndWhetherStringTyped : getAdditionalEnvironmentPropertiesAndWhetherStringTyped().entrySet()) {
+                    commandLine.append("\\\""+additionalEntryAndWhetherStringTyped.getKey().toLowerCase()+"\\\":");
+                    if (additionalEntryAndWhetherStringTyped.getValue()) {
+                        commandLine.append("\\\"");
                     }
-                    try {
-                        process = processFactoryFromHostAndServerDirectory.createProcess(self(), port, serverDirectory, telnetPort, serverName, additionalProperties);
-                        result.add(process);
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "Problem creating application process from directory "+serverDirectory+" on host "+this+"; skipping", e);
+                    commandLine.append("${");
+                    commandLine.append(additionalEntryAndWhetherStringTyped.getKey());
+                    commandLine.append("}");
+                    if (additionalEntryAndWhetherStringTyped.getValue()) {
+                        commandLine.append("\\\"");
+                    }
+                    commandLine.append(", ");
+                }
+                commandLine.append("},\"' \\; ; echo \"{}]\"");
+                final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
+                        commandLine.toString(),
+                        "Error(s) during evaluating server processes", Level.SEVERE);
+                final JSONArray serverDirectoriesAndPorts = (JSONArray) new JSONParser().parse(stdout);
+                for (final Object serverDirectoryAndPort : serverDirectoriesAndPorts) {
+                    final JSONObject serverDirectoryAndPortObject = (JSONObject) serverDirectoryAndPort;
+                    ProcessT process;
+                    final String relativeServerDirectory = (String) serverDirectoryAndPortObject.get(SERVER_DIRECTORY_JSON_PROPERTY);
+                    if (relativeServerDirectory != null) { // null means we got the empty "terminator" record
+                        final String serverDirectory = DEFAULT_SERVERS_PATH+"/"+relativeServerDirectory;
+                        final int port = ((Number) serverDirectoryAndPortObject.get(SERVER_PORT_JSON_PROPERTY)).intValue();
+                        final int telnetPort = ((Number) serverDirectoryAndPortObject.get(TELNET_PORT_JSON_PROPERTY)).intValue();
+                        final String serverName = (String) serverDirectoryAndPortObject.get(SERVER_NAME_JSON_PROPERTY);
+                        final Map<String, Object> additionalProperties = new HashMap<>();
+                        for (final Entry<String, Boolean> additionalEntryAndWhetherStringTyped : getAdditionalEnvironmentPropertiesAndWhetherStringTyped().entrySet()) {
+                            additionalProperties.put(additionalEntryAndWhetherStringTyped.getKey(), serverDirectoryAndPortObject.get(additionalEntryAndWhetherStringTyped.getKey().toLowerCase()));
+                        }
+                        try {
+                            process = processFactoryFromHostAndServerDirectory.createProcess(self(), port, serverDirectory, telnetPort, serverName, additionalProperties);
+                            result.add(process);
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "Problem creating application process from directory "+serverDirectory+" on host "+this+"; skipping", e);
+                        }
                     }
                 }
+            } finally {
+                sshChannel.disconnect();
             }
-            return result;
-        } finally {
-            sshChannel.disconnect();
         }
+        return result;
     }
 
     private HostT self() {
