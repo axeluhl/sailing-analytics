@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
@@ -82,6 +83,7 @@ public class UserSubscriptionsPresenter<C extends WithUserService & WithSecurity
                     if (result != null && result.getError() != null && !result.getError().isEmpty()) {
                         showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
                     } else {
+                        GWT.debugger();
                         view.updateView(result);
                     }
                 }

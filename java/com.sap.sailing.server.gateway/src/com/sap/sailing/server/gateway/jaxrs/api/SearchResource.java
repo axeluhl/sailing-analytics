@@ -14,7 +14,6 @@ import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
@@ -22,6 +21,7 @@ import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResult
 import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.shared.json.JsonSerializer;

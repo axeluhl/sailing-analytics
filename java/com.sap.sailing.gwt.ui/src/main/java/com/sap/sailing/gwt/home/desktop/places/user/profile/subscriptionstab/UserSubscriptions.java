@@ -22,17 +22,15 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DefaultCellTableBuilder;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserSubscriptionsView;
+import com.sap.sailing.gwt.home.shared.places.user.subscriptions.SubscriptionsTextProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.client.celltable.SortedCellTable;
-import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionListDTO;
 
@@ -57,7 +55,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     SortedCellTable<SubscriptionDTO> subscriptionsUi = new SortedCellTable<>(0, DesignedCellTableResources.INSTANCE);
 
     private final Presenter presenter;
-    private final SubscriptionStringConstants stringConstants = SubscriptionStringConstants.INSTANCE;
+    private final SubscriptionsTextProvider textProvider;
 
     public UserSubscriptions(final UserSubscriptionsView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -65,6 +63,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         initSubscriptionsTable(presenter);
         presenter.setView(this);
         this.presenter = presenter;
+        this.textProvider = new SubscriptionsTextProvider(i18n);
     }
 
     @UiHandler("subscribeButtonUi")
@@ -99,8 +98,8 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
                     td.colSpan(cellTable.getColumnCount());
                     td.className(cellTable.getResources().style().cell());
                     final DivBuilder div = td.startDiv();
-                    div.text(i18n.trialText(getTrialRemainingText(rowValue),
-                            formatDateAndTime(rowValue.getCurrentEnd().asDate())));
+                    div.text(i18n.trialText(textProvider.getTrialRemainingText(rowValue),
+                            formatDateAndTime(rowValue.getTrialEnd().asDate())));
                     div.endDiv();
                     td.endTD();
                     tr.endTR();
@@ -117,21 +116,14 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         subscriptionsUi.addColumn(new TextColumn<SubscriptionDTO>() {
             @Override
             public String getValue(final SubscriptionDTO object) {
-                return object == null ? "-" : stringConstants.getString(object.getSubscriptionPlanNameMessageKey());
+                return textProvider.getSubscriptionName(object);
             }
         }, i18n.name());
 
         subscriptionsUi.addColumn(new TextColumn<SubscriptionDTO>() {
             @Override
             public String getValue(final SubscriptionDTO object) {
-                if (object.isInTrial()) {
-                    return i18n.inTrial();
-                } else if (object.isActive()) {
-                    return i18n.active();
-                } else if (object.isPaused()) {
-                    return i18n.paused();
-                }
-                return "-";
+                return textProvider.getSubscriptionStatus(object);
             }
         }, i18n.status());
 
@@ -149,18 +141,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
 
             @Override
             public String getValue(final SubscriptionDTO object) {
-                if (object.isActive() && object.getPaymentStatus() != null) {
-                    if (object.isPaymentSuccess()) {
-                        if (object.isRefunded()) {
-                            return i18n.refunded();
-                        } else {
-                            return i18n.paymentStatusSuccess();
-                        }
-                    } else {
-                        return i18n.paymentStatusNoSuccess();
-                    }
-                }
-                return "-";
+                return textProvider.getPaymentStatus(object);
             }
         }, i18n.paymentStatus());
 
@@ -179,49 +160,11 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         cancelColumn.setFieldUpdater(new FieldUpdater<SubscriptionDTO, String>() {
             @Override
             public void update(final int index, final SubscriptionDTO object, final String value) {
-                // FIXME: Implement "Cancel subscription" operation abstracted for all Providers
-                presenter.cancelSubscription(object.getSubscriptionPlanId(), "chargebee");
-                Window.alert("[TODO] Cancelling ...");
+                // FIXME: Maybe integrate a confirmation dialog to avoid unintended canceling
+                presenter.cancelSubscription(object.getSubscriptionPlanId(), object.getProvider());
             }
         });
         subscriptionsUi.addColumn(cancelColumn);
-    }
-
-    private String getTrialRemainingText(final SubscriptionDTO subscription) {
-        long remainingSecs = Math.round(TimePoint.now().until(subscription.getCurrentEnd()).asSeconds());
-        final StringBuilder remainText = new StringBuilder();
-        if (remainingSecs <= 0) {
-            remainText.append(i18n.numHours(0));
-        } else {
-            final int days = (int) (remainingSecs / 86400);
-            if (days > 0) {
-                remainText.append(i18n.numDays(days));
-            }
-            remainingSecs = remainingSecs % 86400;
-            final int hours = (int) (remainingSecs / 3600);
-            if (hours > 0) {
-                if (remainText.length() > 0) {
-                    remainText.append(" ");
-                }
-                remainText.append(i18n.numHours(hours));
-            }
-            if (days == 0) {
-                remainingSecs = remainingSecs % 3600;
-                final int mins = (int) (remainingSecs / 60);
-                if (mins > 0) {
-                    if (remainText.length() > 0) {
-                        remainText.append(" ");
-                    }
-                    remainText.append(i18n.numMinutes(mins));
-                }
-            }
-        }
-
-        if (remainText.length() == 0) {
-            remainText.append(i18n.numHours(0));
-        }
-
-        return remainText.toString();
     }
 
 }

@@ -5,37 +5,41 @@ import com.sap.sse.security.ui.client.subscription.chargebee.ChargebeeSubscripti
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 
 public class ChargebeeSubscriptionDTO extends SubscriptionDTO {
-    public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
-    public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
-    public static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
-    public static final String TRANSACTION_TYPE_REFUND = "refund";
 
-    public ChargebeeSubscriptionDTO() {
+    private static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
+    private static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
+    private static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
+    private static final String TRANSACTION_TYPE_REFUND = "refund";
+
+    protected ChargebeeSubscriptionDTO() {
     }
 
-    public ChargebeeSubscriptionDTO(String planId, TimePoint startedAt, TimePoint currentEnd, String subscriptionStatus,
-            String paymentStatus, String transactionType) {
-        super(planId, startedAt, currentEnd, subscriptionStatus, paymentStatus, transactionType,
+    public ChargebeeSubscriptionDTO(final String planId, final String subscriptionId, final String subscriptionStatus, 
+            final String paymentStatus, final String transactionType, final Integer reoccuringPaymentValue, 
+            final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt, 
+            final TimePoint nextBillingAt) {
+        super(planId, subscriptionId, subscriptionStatus, paymentStatus, transactionType, reoccuringPaymentValue, 
+                trialEnd, currentTermEnd, cancelledAt, nextBillingAt,
                 ChargebeeSubscriptionClientProvider.PROVIDER_NAME);
     }
 
     @Override
     public boolean isInTrial() {
-        return getSubscriptionStatus() != null && getSubscriptionStatus().equals(SUBSCRIPTION_STATUS_TRIAL);
+        return SUBSCRIPTION_STATUS_TRIAL.equals(getSubscriptionStatus());
     }
 
     @Override
     public boolean isActive() {
-        return getSubscriptionStatus() != null && getSubscriptionStatus().equals(SUBSCRIPTION_STATUS_ACTIVE);
-    }
-
-    @Override
-    public boolean isRefunded() {
-        return getTransactionType() != null && getTransactionType().equals(TRANSACTION_TYPE_REFUND);
+        return SUBSCRIPTION_STATUS_ACTIVE.equals(getSubscriptionStatus());
     }
 
     @Override
     public boolean isPaused() {
-        return getSubscriptionStatus() != null && getSubscriptionStatus().equals(SUBSCRIPTION_STATUS_PAUSED);
+        return SUBSCRIPTION_STATUS_PAUSED.equals(getSubscriptionStatus());
+    }
+
+    @Override
+    public boolean isRefunded() {
+        return TRANSACTION_TYPE_REFUND.equals(getTransactionType());
     }
 }

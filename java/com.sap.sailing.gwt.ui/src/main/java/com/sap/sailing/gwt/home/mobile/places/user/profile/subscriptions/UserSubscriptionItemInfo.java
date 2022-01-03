@@ -9,10 +9,6 @@ import com.google.gwt.user.client.ui.UIObject;
 
 class UserSubscriptionItemInfo extends UIObject {
 
-    static UserSubscriptionItemInfo create(final String label, final String value) {
-        return new UserSubscriptionItemInfo(label, value);
-    }
-
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     interface MyUiBinder extends UiBinder<Element, UserSubscriptionItemInfo> {
@@ -30,7 +26,7 @@ class UserSubscriptionItemInfo extends UIObject {
     @UiField
     Element labelUi, valueUi;
 
-    private UserSubscriptionItemInfo(final String label, final String value) {
+    UserSubscriptionItemInfo(final String label, final String value) {
         setElement(uiBinder.createAndBindUi(this));
         labelUi.setInnerText(label);
         valueUi.setInnerText(value);

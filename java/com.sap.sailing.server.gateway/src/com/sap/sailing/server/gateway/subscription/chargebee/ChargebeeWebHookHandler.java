@@ -36,10 +36,12 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             event = (SubscriptionWebHookEvent) request.getAttribute("event");
             logger.log(Level.INFO, "Handling Webhook Event of type:" + event.getEventType());
             final User user = getUser(event.getCustomerId());
-            if (user != null && !isOutdatedEvent(event, user)) {
-                processEvent(event, user);
+            if (user != null) {
+                if (!isOutdatedEvent(event, user)) {
+                    processEvent(event, user);
+                }
+                sendSuccess(response);
             }
-            sendSuccess(response);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to proccess Chargebee subscription webhook event "
                     + (event != null ? event.getEventType().getName() : ""), e);

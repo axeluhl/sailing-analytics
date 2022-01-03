@@ -685,3 +685,33 @@ See the introduction of this main section. Synopsis:
 	-t Instance type; defaults to
 	-s Skip release download
 </pre>
+
+## Log File Analysis
+
+Athena table definitions and queries have been provided in region ``eu-west-3`` (Paris) where we hosted our EU part during the event after a difficult start in ``eu-west-1`` with the single MongoDB live replica set not scaling well for all the replicas that were required in the region.
+
+The key to the Athena set-up is to have a table definition per bucket, with a dedicated S3 bucket per region where ALB logs were recorded. An example of a query based on the many tables the looks like this:
+<pre>
+    with union_table AS 
+        (select *
+        from alb_logs_ap_northeast_1
+        union all
+        select *
+        from alb_logs_ap_southeast_2
+        union all
+        select *
+        from alb_logs_eu_west_3
+        union all
+        select *
+        from alb_logs_us_east_1
+        union all
+        select *
+        from alb_logs_us_west_1)
+    select date_trunc('day', parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z')), count(distinct concat(client_ip,user_agent))
+    from union_table
+    where (parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z')
+        between parse_datetime('2021-07-21-00:00:00','yyyy-MM-dd-HH:mm:ss')
+            and parse_datetime('2021-08-08-02:00:00','yyyy-MM-dd-HH:mm:ss'))
+    group by date_trunc('day', parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z'))
+</pre>
+It defines a ``union_table`` which unites all contents from all buckets scanned.

@@ -4,50 +4,87 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.TimePoint;
 
 public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsSerializable {
-    public static final String PAYMENT_STATUS_SUCCESS = "success";
-    public static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
+
+    protected static final String PAYMENT_STATUS_SUCCESS = "success";
+    private static final String PAYMENT_STATUS_NO_SUCCESS = "no_success";
 
     /**
      * User current subscription plan id
      */
     private String planId;
     
+    private String subscriptionId;
+
     /**
      * Subscription status: active or trial
      */
     private String subscriptionStatus;
 
     /**
-     * Subscription payment status: {@code SubscriptionItem#PAYMENT_STATUS_SUCCESS} or
-     * {@code SubscriptionItem#PAYMENT_STATUS_NO_SUCCESS}
+     * Subscription payment status: {@link #PAYMENT_STATUS_SUCCESS} or {@link #PAYMENT_STATUS_NO_SUCCESS}
      */
     private String paymentStatus;
-    
+
     /**
      * Subscription transaction type: payment or refund
      */
     private String transactionType;
+    
+    /*
+     * The Value of the reocurring payment in cents. Depends on the currency type.
+     */
+    private Integer reoccuringPaymentValue;
+    
+    /*
+     * TIme at which the subscription status was last changed to cancelled or will be changed to cancelled, 
+     * if it is planned for cancellation.
+     */
+    private TimePoint cancelledAt;
 
+    
+    /**
+     * The date/time at which the next billing for the subscription happens. 
+     * This is usually right after current_term_end unless multiple subscription terms 
+     * were invoiced in advance using the terms_to_charge parameter. 
+     * optional
+     */
+    
+    private TimePoint nextBillingAt;
+    
+    /**
+     * End of the current billing period of the subscription. Subscription is renewed immediately after this.
+     * optional
+     */
+    private TimePoint currentTermEnd;
+    
+    /**
+     * End of the current trial period of the subscription. Subscription is billed immediately after this.
+     * optional
+     */
+    private TimePoint trialEnd;
+    
     /**
      * Subscription provider name
      */
     private String provider;
-    
-    private TimePoint currentEnd;
-    private TimePoint createdAt;
 
-    public SubscriptionDTO() {
-    }
+    protected SubscriptionDTO() {}
 
-    public SubscriptionDTO(String planId, TimePoint startedAt, TimePoint currentEnd, String subscriptionStatus,
-            String paymentStatus, String transactionType, String provider) {
+    protected SubscriptionDTO(final String planId, final String subscriptionId, final String subscriptionStatus, 
+            final String paymentStatus, final String transactionType, final Integer reoccuringPaymentValue, 
+            final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt, 
+            final TimePoint nextBillingAt, final String provider) {
         this.planId = planId;
-        this.createdAt = startedAt;
-        this.currentEnd = currentEnd;
+        this.subscriptionId = subscriptionId;
+        this.trialEnd = trialEnd;
         this.subscriptionStatus = subscriptionStatus;
         this.paymentStatus = paymentStatus;
         this.transactionType = transactionType;
         this.provider = provider;
+        this.reoccuringPaymentValue = reoccuringPaymentValue;
+        this.cancelledAt = cancelledAt;
+        this.nextBillingAt = nextBillingAt;
+        this.currentTermEnd = currentTermEnd;
     }
 
     /**
@@ -71,67 +108,62 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
     public abstract boolean isRefunded();
 
     /**
-     * Return true if subscription is active and payment status is successful
+     * Returns {@code true} if subscription is active and payment status is successful, {@code false} otherwise
      */
     public boolean isPaymentSuccess() {
-        return paymentStatus != null && paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
+        return PAYMENT_STATUS_SUCCESS.equals(paymentStatus);
     }
-    
+
+    /**
+     * Returns {@code true} if subscription is active but payment was not successful, {@code false} otherwise
+     */
+    public boolean isPaymentNoSuccess() {
+        return PAYMENT_STATUS_NO_SUCCESS.equals(paymentStatus);
+    }
+
     @Override
     public String getSubscriptionPlanId() {
         return planId;
-    }
-
-    public String getSubscriptionStatus() {
-        return subscriptionStatus;
-    }
-
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPlanId(String planId) {
-        this.planId = planId;
-    }
-
-    public void setSubscriptionStatus(String subscriptionStatus) {
-        this.subscriptionStatus = subscriptionStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(String transactionType) {
-        this.transactionType = transactionType;
     }
 
     public String getProvider() {
         return provider;
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public TimePoint getTrialEnd() {
+        return trialEnd;
     }
 
-    public TimePoint getCurrentEnd() {
-        return currentEnd;
+    protected String getSubscriptionStatus() {
+        return subscriptionStatus;
     }
 
-    public void setCurrentEnd(TimePoint currentEnd) {
-        this.currentEnd = currentEnd;
+    protected String getPaymentStatus() {
+        return paymentStatus;
     }
 
-    public TimePoint getCreatedAt() {
-        return createdAt;
+    protected String getTransactionType() {
+        return transactionType;
     }
 
-    public void setCreatedAt(TimePoint createdAt) {
-        this.createdAt = createdAt;
+    public Integer getReoccuringPaymentValue() {
+        return reoccuringPaymentValue;
+    }
+
+    public TimePoint getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public TimePoint getNextBillingAt() {
+        return nextBillingAt;
+    }
+
+    public TimePoint getCurrentTermEnd() {
+        return currentTermEnd;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
     }
 
 }

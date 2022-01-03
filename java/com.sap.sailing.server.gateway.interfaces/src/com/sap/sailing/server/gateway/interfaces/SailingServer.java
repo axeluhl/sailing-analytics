@@ -26,6 +26,8 @@ import com.sap.sse.shared.json.JsonDeserializationException;
  * authenticated session and then uses that session user's bearer token, assuming that the server to be represented by
  * this object shares its security service with the server where this object is constructed.
  * <p>
+ * 
+ * @author Axel Uhl (d043530)
  */
 public interface SailingServer {
     /**
