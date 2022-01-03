@@ -9,12 +9,12 @@ import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
-import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
@@ -89,8 +89,9 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
@@ -187,4 +188,29 @@ public interface LandscapeManagementWriteServiceAsync {
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet,
             MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption,
             AsyncCallback<UUID> callback);
+
+    /**
+     * Like {@link #createApplicationReplicaSet(String, String, String, boolean, String, String, byte[], String, String, String, AsyncCallback)},
+     * only that in this case the master is deployed on an already existing host ({@code hostToDeployTo}) using the next available combination
+     * of ports, and only for the replicas an instance type ({@code replicaInstanceType}) can be specified. The minimum number of replicas is
+     * set to 0 (instead of 1), so the resulting application replica set is created in "low availability" ("economy") mode.
+     */
+    void deployApplicationToExistingHost(String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
+            String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    /**
+     * For the given replica set ensures there is at least one healthy replica, then stops replicating on all replicas and
+     * removes the master from the public and master target groups. This can be used as a preparatory action for upgrading
+     * the master while keeping one or more replicas available to handle read traffic.<p>
+     * 
+     * Other than de-registering the master from the replica set's target groups this method does nothing to the master
+     * process/host.
+     */
+    void ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSet, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            AsyncCallback<Boolean> callback);
 }

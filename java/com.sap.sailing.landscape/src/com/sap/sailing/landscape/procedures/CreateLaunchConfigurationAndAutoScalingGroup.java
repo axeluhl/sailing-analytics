@@ -34,9 +34,9 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 public class CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
 extends AbstractProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
-    private static final int MIN_REPLICAS = 1;
-    private static final int MAX_REPLICAS = 30;
-    private static final int MAX_REQUESTS_PER_TARGET = 30000;
+    private static final int DEFAULT_MIN_REPLICAS = 1;
+    private static final int DEFAULT_MAX_REPLICAS = 30;
+    private static final int DEFAULT_MAX_REQUESTS_PER_TARGET = 30000;
     
     /**
      * 
@@ -53,12 +53,28 @@ implements Procedure<ShardingKey> {
         BuilderT setImage(AmazonMachineImage<ShardingKey> image);
         
         BuilderT setTags(Tags tags);
+        
+        /**
+         * Set the minimum number of replicas. Defaults to 1 (see {@link CreateLaunchConfigurationAndAutoScalingGroup#DEFAULT_MIN_REPLICAS}).
+         */
+        BuilderT setMinReplicas(int minReplicas);
+
+        /**
+         * Set the maximum number of replicas. Defaults to 30 (see {@link CreateLaunchConfigurationAndAutoScalingGroup#DEFAULT_MAX_REPLICAS}).
+         */
+        BuilderT setMaxReplicas(int maxReplicas);
+
+        /**
+         * Defines the scaling threshold based on the number of requests per target per minute. Defaults to 30,000 (see
+         * {@link CreateLaunchConfigurationAndAutoScalingGroup#DEFAULT_MAX_REQUESTS_PER_TARGET}).
+         */
+        BuilderT setMaxRequestsPerTarget(int maxRequestsPerTarget);
     }
     
     protected static class BuilderImpl<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     extends AbstractProcedureImpl.BuilderImpl<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey>
     implements Builder<ShardingKey, BuilderT, MetricsT, ProcessT> {
-        private final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet;
+        private final String replicaSetName;
         private final TargetGroup<ShardingKey> targetGroup;
         private final Region region;
         private String keyName;
@@ -66,10 +82,13 @@ implements Procedure<ShardingKey> {
         private InstanceType instanceType;
         private AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration;
         private Optional<Tags> tags;
+        private int minReplicas = DEFAULT_MIN_REPLICAS;
+        private int maxReplicas = DEFAULT_MAX_REPLICAS;
+        private int maxRequestsPerTarget = DEFAULT_MAX_REQUESTS_PER_TARGET;
 
-        public BuilderImpl(AwsLandscape<ShardingKey> landscape, Region region, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet,
+        public BuilderImpl(AwsLandscape<ShardingKey> landscape, Region region, String replicaSetName,
                 TargetGroup<ShardingKey> targetGroup) {
-            this.applicationReplicaSet = applicationReplicaSet;
+            this.replicaSetName = replicaSetName;
             this.targetGroup = targetGroup;
             this.region = region;
             setLandscape(landscape);
@@ -99,8 +118,38 @@ implements Procedure<ShardingKey> {
             return self();
         }
 
-        protected ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet() {
-            return applicationReplicaSet;
+        protected String getReplicaSetName() {
+            return replicaSetName;
+        }
+
+        protected int getMinReplicas() {
+            return minReplicas;
+        }
+
+        @Override
+        public BuilderT setMinReplicas(int minReplicas) {
+            this.minReplicas = minReplicas;
+            return self();
+        }
+
+        protected int getMaxReplicas() {
+            return maxReplicas;
+        }
+
+        @Override
+        public BuilderT setMaxReplicas(int maxReplicas) {
+            this.maxReplicas = maxReplicas;
+            return self();
+        }
+
+        protected int getMaxRequestsPerTarget() {
+            return maxRequestsPerTarget;
+        }
+
+        @Override
+        public BuilderT setMaxRequestsPerTarget(int maxRequestsPerTarget) {
+            this.maxRequestsPerTarget = maxRequestsPerTarget;
+            return self();
         }
 
         protected TargetGroup<ShardingKey> getTargetGroup() {
@@ -143,7 +192,7 @@ implements Procedure<ShardingKey> {
         }
     }
     
-    private final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet;
+    private final String replicaSetName;
     private final TargetGroup<ShardingKey> targetGroup;
     private final Region region;
     private final String keyName;
@@ -151,26 +200,32 @@ implements Procedure<ShardingKey> {
     private final String imageId;
     private final AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration;
     private final Optional<Tags> tags;
+    private final int minReplicas;
+    private final int maxReplicas;
+    private final int maxRequestsPerTarget;
     
     public static <ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     Builder<ShardingKey, BuilderT, MetricsT, ProcessT> builder(
             AwsLandscape<ShardingKey> landscape, Region region,
-            ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet,
+            String replicaSetName,
             TargetGroup<ShardingKey> targetGroup) {
-        return new BuilderImpl<>(landscape, region, applicationReplicaSet, targetGroup);
+        return new BuilderImpl<>(landscape, region, replicaSetName, targetGroup);
     }
     
     protected <BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>>
     CreateLaunchConfigurationAndAutoScalingGroup(BuilderImpl<ShardingKey, BuilderT, MetricsT, ProcessT> builder) {
         super(builder);
         this.region = builder.getRegion();
-        this.applicationReplicaSet = builder.getApplicationReplicaSet();
+        this.replicaSetName = builder.getReplicaSetName();
         this.targetGroup = builder.getTargetGroup();
         this.keyName = builder.getKeyName();
         this.imageId = builder.getImage().getId();
         this.instanceType = builder.getInstanceType();
         this.replicaConfiguration = builder.getReplicaConfiguration();
         this.tags = builder.getTags();
+        this.minReplicas = builder.getMinReplicas();
+        this.maxReplicas = builder.getMaxReplicas();
+        this.maxRequestsPerTarget = builder.getMaxRequestsPerTarget();
     }
     
     @Override
@@ -180,7 +235,7 @@ implements Procedure<ShardingKey> {
 
     @Override
     public void run() throws Exception {
-        getLandscape().createLaunchConfigurationAndAutoScalingGroup(region, applicationReplicaSet.getName(), tags,
-                targetGroup, keyName, instanceType, imageId, replicaConfiguration, MIN_REPLICAS, MAX_REPLICAS, MAX_REQUESTS_PER_TARGET);
+        getLandscape().createLaunchConfigurationAndAutoScalingGroup(region, replicaSetName, tags,
+                targetGroup, keyName, instanceType, imageId, replicaConfiguration, minReplicas, maxReplicas, maxRequestsPerTarget);
     }
 }

@@ -40,4 +40,10 @@ public interface IconResources extends ClientBundle {
 
     @Source("images/load-balancer.png")
     ImageResource loadBalancerIcon();
+
+    @Source("images/launch-another-replica-set-on-this-master.png")
+    ImageResource launchAnotherReplicaSetOnThisMasterIcon();
+
+    @Source("images/unlink.png")
+    ImageResource unlinkIcon();
 }

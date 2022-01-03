@@ -28,6 +28,14 @@ public interface Duration extends Serializable, Comparable<Duration> {
     static final Duration ONE_YEAR = ONE_DAY.times(365); // well, leap years have 366 days, but this should be close enough...
     static final Duration FOREVER = new MillisecondsDurationImpl(Long.MAX_VALUE);
     
+    static Duration ofMillis(long millis) {
+        return new MillisecondsDurationImpl(millis);
+    }
+    
+    static Duration ofSeconds(double seconds) {
+        return new SecondsDurationImpl(seconds);
+    }
+    
     long asMillis();
     
     double asSeconds();

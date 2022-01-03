@@ -250,8 +250,8 @@ implements Procedure<ShardingKey> {
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         {
-            logger.info("Deploying process to multi-server "+getHostToDeployTo()+" into directory "+serverDirectory+" with configuration:\n"+
-                    applicationConfiguration.getAsEnvironmentVariableAssignments());
+            logger.info("Deploying process to multi-server "+getHostToDeployTo()+" into directory "+serverDirectory);
+            logger.fine("Using configuration:\n"+applicationConfiguration.getAsEnvironmentVariableAssignments());
             final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
                     "su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
@@ -259,8 +259,10 @@ implements Procedure<ShardingKey> {
                     "sudo /usr/local/bin/cp_root_mail_properties "+applicationConfiguration.getServerName()+"; "+
                     "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
                     "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments().replaceAll("\"", "\\\\\"")+
-                    "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; ./defineReverseProxyMappings.sh"+
-                    "\"",
+                    "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start\";"+ // SAILING_USER ends here
+                    // from here on as root:
+                    "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
+                    "./defineReverseProxyMappings.sh",
                     "stderr: ", Level.WARNING);
             logger.info("stdout: "+stdout);
         }

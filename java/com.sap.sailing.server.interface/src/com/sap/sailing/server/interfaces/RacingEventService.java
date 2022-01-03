@@ -191,12 +191,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint);
 
     /**
-     * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races of this regatta.
-     * See {@link #stopTrackingWind(Regatta, RaceDefinition)}. If there were multiple calls to
-     * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link TracTracRaceTracker}
-     * already tracking the race was re-used. The trackers will be stopped by this call regardless of how many calls
-     * were made that ensured they were tracking.
-     * @param willBeRemoved TODO
+     * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races tracked by any
+     * {@link RaceTracker} associated with this {@code regatta}. See {@link #stopTrackingWind(Regatta, RaceDefinition)}.
+     * If there were multiple calls to {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal
+     * combination of URLs/URIs, the {@link TracTracRaceTracker} already tracking the race was re-used. The trackers
+     * will be stopped by this call regardless of how many calls were made that ensured they were tracking.
      */
     void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
 
@@ -271,6 +270,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void updateStoredRegatta(Regatta regatta);
 
+    /**
+     * Stops all {@link RaceTracker}s associated with the {@code regatta} which also stops their wind tracking.
+     */
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     /**
@@ -1026,15 +1028,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
 
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
-    
-    /**
-     * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
-     * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
-     * only username and password or bearer token, not the three of them. If none is provided but there is no user
-     * currently authenticated, {@code null} will be returned.<p>
-     */
-    String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
-            String targetServerPassword, String targetServerBearerToken);
     
     /**
      * Returns the number of tracked races that are not {@link TrackedRace#hasFinishedLoading() done with loading}.

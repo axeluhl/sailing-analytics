@@ -1020,6 +1020,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
             }
+            TimePoint finishingTime = state.getFinishingTime();
+            if (finishingTime != null) {
+                raceInfoDTO.finishingTime = finishingTime.asDate();
+            } else {
+                raceInfoDTO.finishingTime = null;
+            }
             TimePoint finishedTime = state.getFinishedTime();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
@@ -1598,18 +1604,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
                 rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
                 rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
-                result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(), legIdentifier.getLegNumber()+1, simulationResults.getStartTime(), simulationResults.getTimeStep(),
-                        simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
+                result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(),
+                        legIdentifier.getOneBasedLegIndex(), simulationResults.getStartTime(),
+                        simulationResults.getTimeStep(), simulationResults.getLegDuration(), rcDTO, pathDTOs, null,
+                        null);
             }
         return result;
     }
     
     private SimulatorWindDTO createSimulatorWindDTO(TimedPositionWithSpeed timedPositionWithSpeed) {
-
         Position position = timedPositionWithSpeed.getPosition();
         SpeedWithBearing speedWithBearing = timedPositionWithSpeed.getSpeed();
         TimePoint timePoint = timedPositionWithSpeed.getTimePoint();
-
         SimulatorWindDTO result = new SimulatorWindDTO();
         if (speedWithBearing == null) {
                 result.trueWindBearingDeg = 0.0;
@@ -1618,15 +1624,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 result.trueWindBearingDeg = speedWithBearing.getBearing().getDegrees();
                 result.trueWindSpeedInKnots = speedWithBearing.getKnots();
         }
-
         if (position != null) {
             result.position = position;
         }
-
         if (timePoint != null) {
-            result.timepoint = timePoint.asMillis();
+            result.timepoint = timePoint;
         }
-
         return result;
     }
 

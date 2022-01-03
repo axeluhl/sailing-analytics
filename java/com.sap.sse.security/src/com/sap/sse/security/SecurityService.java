@@ -347,6 +347,15 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String getOrCreateAccessToken(String username);
 
     /**
+     * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
+     * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
+     * only username and password or bearer token, not the three of them. If none is provided but there is no user
+     * currently authenticated, {@code null} will be returned.<p>
+     */
+    String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
+            String targetServerPassword, String targetServerBearerToken);
+
+    /**
      * Looks up a user by an access token that was created before using {@link #createAccessToken(String)} for same user name.
      * 
      * @return <code>null</code> in case the access token is unknown or was deleted / invalidated

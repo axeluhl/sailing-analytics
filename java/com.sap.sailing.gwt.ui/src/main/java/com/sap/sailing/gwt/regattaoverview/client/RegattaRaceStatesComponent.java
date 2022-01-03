@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -64,6 +65,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.DateTimeUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -112,6 +114,8 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
     private Column<RegattaOverviewEntryDTO, SafeHtml> raceCourseColumn;
     private TextColumn<RegattaOverviewEntryDTO> boatClass;
     private TextColumn<RegattaOverviewEntryDTO> startTimeColumn;
+    private TextColumn<RegattaOverviewEntryDTO> finishingTimeColumn;
+    private TextColumn<RegattaOverviewEntryDTO> finishedTimeColumn;
     private SimplePanel tableHolder = new SimplePanel();
     private final long _1_HOUR = 60 /* seconds */* 60 /* minutes */* 1 /* hour */;
     private final long HIDE_COL_TIME_THRESHOLD = _1_HOUR;
@@ -182,11 +186,21 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         boolean canRemoveBoatClass = true;
         boolean canRemoveLastUpdate = true;
         boolean canRemoveProtestTime = true;
+        boolean canRemoveFinishingTime = true;
+        boolean canRemoveFinishedTime = true;
         boolean first = true;
         for (RegattaOverviewEntryDTO loopEntryDTO : allEntries) {
             final RaceInfoDTO loopRaceInfo = loopEntryDTO.raceInfo;
             if (canRemoveLastUpdate && timePassedInSeconds(loopRaceInfo.lastUpdateTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveLastUpdate = false;
+            }
+            if (canRemoveFinishingTime && loopRaceInfo.finishingTime != null
+                    && timePassedInSeconds(loopRaceInfo.finishingTime) <= HIDE_COL_TIME_THRESHOLD) {
+                canRemoveFinishingTime = false;
+                canRemoveFinishedTime = false;
+            }
+            if (canRemoveFinishedTime && loopRaceInfo.finishedTime != null) {
+                canRemoveFinishedTime = false;
             }
             if (canRemoveProtestTime && loopRaceInfo.protestFinishTime != null
                     && timePassedInSeconds(loopRaceInfo.protestFinishTime) <= HIDE_COL_TIME_THRESHOLD) {
@@ -292,6 +306,10 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
             table.addColumn(lastUpdateColumn, stringMessages.lastUpdate());
         }
         table.addColumn(startTimeColumn, stringMessages.startTime());
+        if (!canRemoveFinishingTime) {
+            table.addColumn(finishingTimeColumn, stringMessages.finishingTime());
+        }
+        table.addColumn(finishedTimeColumn, stringMessages.finishTimeString());
         if (!canRemoveProtestTime) {
             table.addColumn(endOfProtestTime, stringMessages.protestTime());
         }
@@ -509,6 +527,52 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                 return result;
             }
         });
+        finishingTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                return formatTime(entryDTO.raceInfo.finishingTime);
+            }
+        };
+        finishingTimeColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(finishingTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                int result = 0;
+                if (left.raceInfo.finishingTime != null && right.raceInfo.finishingTime != null) {
+                    result = left.raceInfo.finishingTime.compareTo(right.raceInfo.finishingTime);
+                } else if (left.raceInfo.finishingTime == null && right.raceInfo.finishingTime == null) {
+                    result = 0;
+                } else if (left.raceInfo.finishingTime == null) {
+                    result = 1;
+                } else if (right.raceInfo.finishingTime == null) {
+                    result = -1;
+                }
+                return result;
+            }
+        });
+        finishedTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                return formatTime(entryDTO.raceInfo.finishedTime);
+            }
+        };
+        finishedTimeColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(finishedTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                int result = 0;
+                if (left.raceInfo.finishedTime != null && right.raceInfo.finishedTime != null) {
+                    result = left.raceInfo.finishedTime.compareTo(right.raceInfo.finishedTime);
+                } else if (left.raceInfo.finishedTime == null && right.raceInfo.finishedTime == null) {
+                    result = 0;
+                } else if (left.raceInfo.finishedTime == null) {
+                    result = 1;
+                } else if (right.raceInfo.finishedTime == null) {
+                    result = -1;
+                }
+                return result;
+            }
+        });
         raceStatusColumn = new Column<RegattaOverviewEntryDTO, SafeHtml>(new ClickableSafeHtmlCell()) {
             @Override
             public SafeHtml getValue(final RegattaOverviewEntryDTO entryDTO) {
@@ -686,7 +750,15 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                     if (isInfoBefore) {
                         additionalInformation.append("  /  ");
                     }
-                    additionalInformation.append(stringMessages.finishTime((timeFormatter.format(entryDTO.raceInfo.finishedTime))));
+                    final Duration finishDuration;
+                    if (entryDTO.raceInfo.finishingTime != null) {
+                        finishDuration = new MillisecondsDurationImpl(
+                                entryDTO.raceInfo.finishedTime.getTime()
+                                        - entryDTO.raceInfo.finishingTime.getTime());
+                    } else {
+                        finishDuration = new MillisecondsDurationImpl(0);
+                    }
+                    additionalInformation.append(stringMessages.finishDuration(formatDuration(finishDuration)));
                     isInfoBefore = true;
                 }
                 return additionalInformation.toString();
@@ -872,6 +944,36 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         if (dateTime == null)
             return 0;
         return (new Date().getTime() - dateTime.getTime()) / 1000;
+    }
+
+    private String formatDuration(Duration duration) {
+        long seconds = (long) Math.round(duration.asSeconds());
+        final long days = seconds / (long) Duration.ONE_DAY.asSeconds();
+        seconds %= 24 * 3600;
+        final long hours = seconds / (long) Duration.ONE_HOUR.asSeconds();
+        seconds %= 3600;
+        final long minutes = seconds / (long) Duration.ONE_MINUTE.asSeconds();
+        seconds %= 60;
+        final StringJoiner sj = new StringJoiner(":");
+        if (days > 0) {
+            sj.add(String.valueOf(days));
+        }
+        if (days > 0 && hours < 10) {
+            sj.add("0" + String.valueOf(hours));
+        } else {
+            sj.add(String.valueOf(hours));
+        }
+        if (minutes < 10) {
+            sj.add("0" + String.valueOf(minutes));
+        } else {
+            sj.add(String.valueOf(minutes));
+        }
+        if (seconds < 10) {
+            sj.add("0" + String.valueOf(seconds));
+        } else {
+            sj.add(String.valueOf(seconds));
+        }
+        return sj.toString();
     }
 
     @Override

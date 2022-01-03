@@ -13,7 +13,15 @@ import java.net.URL;
  * any form of authentication, restricting the services that can be invoked to those that are publicly accessible.
  * <p>
  * 
- * The "base URL" needs to contain protocol, host and port specification and an empty path or only "/" as path.
+ * The "base URL" needs to contain protocol, host and port specification and an empty path or only "/" as path. A
+ * utility for creating such a URL if only a hostname is known is {@code RemoteServerUtil.createBaseUrl(String)} in the
+ * {@code com.sap.sse.security} bundle.
+ * <p>
+ * 
+ * Another convenience for obtaining a bearer token in case an optional parameter triple of username/password and bearer
+ * token is provided is the {@code SecurityService.getOrCreateTargetServerBearerToken(...)} method which defaults to the
+ * current user's local bearer token in case neither a username/password combination nor an explicit bearer token are
+ * provided.
  * <p>
  * 
  * The intended use is through the OSGi service registry: clients are expected to discover and track an implementation

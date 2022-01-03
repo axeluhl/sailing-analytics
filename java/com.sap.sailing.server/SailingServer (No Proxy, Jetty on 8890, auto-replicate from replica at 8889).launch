@@ -231,6 +231,7 @@
 <setEntry value="com.sap.sailing.shared.server.gateway@5:true"/>
 <setEntry value="com.sap.sailing.shared.persistence@default:default"/>
 <setEntry value="com.sap.sailing.landscape@default:default"/>
+<setEntry value="com.sap.sailing.landscape.gateway@5:true"/>
 <setEntry value="com.sap.sailing.landscape.common@default:default"/>
 <setEntry value="com.sap.sailing.landscape.ui@default:default"/>
 <setEntry value="com.sap.sailing.hanaexport@5:true"/>

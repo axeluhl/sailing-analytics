@@ -9,6 +9,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
@@ -33,22 +34,18 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
      */
     @Override
     public void timeChanged(final Date newTime, Date oldTime) {
-
         if (windFieldDTO == null) {
             return;
         }
-        
         canvas.getContext2d().clearRect(0/* canvas.getAbsoluteLeft() */, 0/* canvas.getAbsoluteTop() */,
                 canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
-
         windDTOToDraw = new ArrayList<SimulatorWindDTO>();
         for (final SimulatorWindDTO windDTO : windFieldDTO.getMatrix()) {
-            if (windDTO.timepoint <= newTime.getTime()) {
+            if (!windDTO.timepoint.after(TimePoint.of(newTime))) {
                 windDTOToDraw.add(windDTO);
             }
         }
         logger.info("In ReplayPathCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points");
-
         drawWindField(windDTOToDraw);
     }
 

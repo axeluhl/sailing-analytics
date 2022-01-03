@@ -176,6 +176,7 @@ import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
+import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -1717,6 +1718,31 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         return result;
     }
 
+    @Override
+    public String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
+            String targetServerPassword, String targetServerBearerToken) {
+        if ((Util.hasLength(targetServerUsername) || Util.hasLength(targetServerPassword))
+                && Util.hasLength(targetServerBearerToken)) {
+            final IllegalArgumentException e = new IllegalArgumentException("Please use either username/password or bearer token, not both.");
+            logger.log(Level.WARNING, e.getMessage(), e);
+            throw e;
+        }
+        final User user = getCurrentUser();
+        // Default to current user's token
+        final String effectiveTargetServerBearerToken;
+        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword) && !Util.hasLength(targetServerBearerToken)) {
+            effectiveTargetServerBearerToken = user == null ? null : getOrCreateAccessToken(user.getName());
+        } else {
+            effectiveTargetServerBearerToken = targetServerBearerToken;
+        }
+        final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
+                ? targetServerUsername != null ?
+                        RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername, targetServerPassword) :
+                        null // in case no effective bearer token has been provided but no user name either
+                : effectiveTargetServerBearerToken);
+        return token;
+    }
+    
     @Override
     public Void internalRemoveAccessToken(String username) {
         store.removeAccessToken(username);

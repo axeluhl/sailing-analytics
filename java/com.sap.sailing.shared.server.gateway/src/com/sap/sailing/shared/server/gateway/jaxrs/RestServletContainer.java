@@ -6,11 +6,12 @@ import javax.ws.rs.core.Application;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-
+import com.sap.sailing.server.gateway.interfaces.SailingServerFactory;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.util.ServiceTrackerFactory;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 public class RestServletContainer extends ServletContainer {
@@ -27,6 +28,8 @@ public class RestServletContainer extends ServletContainer {
     public static final String DATA_MINING_SERVER_TRACKER_NAME = "dataMiningServerTracker";
 
     public static final String SECURITY_SERVICE_TRACKER_NAME = "securityServiceTracker";
+    
+    public static final String SAILING_SERVER_FACTORY_TRACKER_NAME = "sailingServerFactoryTracker";
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
@@ -35,6 +38,8 @@ public class RestServletContainer extends ServletContainer {
     private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    
+    private ServiceTracker<SailingServerFactory, SailingServerFactory> sailingServerFactoryTracker;
     
     public RestServletContainer() {
         super();
@@ -50,30 +55,17 @@ public class RestServletContainer extends ServletContainer {
 
     @Override
     public void init(ServletConfig config) throws ServletException {  
-       super.init(config);  
+       super.init(config);
        BundleContext context = (BundleContext) config.getServletContext().getAttribute(OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
-       racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
-       racingEventServiceTracker.open();
-       sharedSailingDataTracker = new ServiceTracker<SharedSailingData, SharedSailingData>(context, SharedSailingData.class.getName(), null);
-       sharedSailingDataTracker.open();
-       replicationServiceTracker = new ServiceTracker<ReplicationService, ReplicationService>(context, ReplicationService.class.getName(), null);
-       replicationServiceTracker.open();
-       securityServiceTracker = new ServiceTracker<SecurityService, SecurityService>(context, SecurityService.class, null);
-       securityServiceTracker.open();
+       racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+       sharedSailingDataTracker = ServiceTrackerFactory.createAndOpen(context, SharedSailingData.class);
+       replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
+       securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+       sailingServerFactoryTracker = ServiceTrackerFactory.createAndOpen(context, SailingServerFactory.class);
        config.getServletContext().setAttribute(RACING_EVENT_SERVICE_TRACKER_NAME, racingEventServiceTracker);
        config.getServletContext().setAttribute(SHARED_SAILING_DATA_TRACKER_NAME, sharedSailingDataTracker);
        config.getServletContext().setAttribute(REPLICATION_SERVICE_TRACKER_NAME, replicationServiceTracker);
        config.getServletContext().setAttribute(SECURITY_SERVICE_TRACKER_NAME, securityServiceTracker);
+       config.getServletContext().setAttribute(SAILING_SERVER_FACTORY_TRACKER_NAME, sailingServerFactoryTracker);
    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        if (racingEventServiceTracker != null) {
-            racingEventServiceTracker.close();
-        }
-        if (securityServiceTracker != null) {
-            securityServiceTracker.close();
-        }
-    }
 }

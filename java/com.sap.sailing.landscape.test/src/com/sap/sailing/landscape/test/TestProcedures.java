@@ -27,6 +27,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
@@ -102,7 +103,7 @@ public class TestProcedures {
     @Test
     public void testGetImageTypes() {
         final Iterable<String> imageTypes = landscape.getMachineImageTypes(region);
-        assertTrue(Util.contains(imageTypes, "sailing-analytics-server"));
+        assertTrue(Util.contains(imageTypes, SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING));
         assertTrue(Util.contains(imageTypes, "mongodb-server"));
     }
     
@@ -127,7 +128,7 @@ public class TestProcedures {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName, privateKeyEncryptionPassphrase);
         final StartMultiServer.Builder<?, String> builder = StartMultiServer.builder();
-        final String sailingAnalyticsServerTag = "sailing-analytics-server";
+        final String sailingAnalyticsServerTag = SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG;
         final StartMultiServer<String> startEmptyMultiServer = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
