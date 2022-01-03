@@ -1,36 +1,45 @@
 package com.sap.sailing.gwt.home.shared.places.user.subscriptions;
 
+import static com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil.renderLabelType;
 import static com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants.INSTANCE;
 
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 
 /**
- * Utility class providing convenient {@link String text values} to be used by UI components showing information about
- * user {@link SubscriptionDTO subscriptions}.
+ * Utility class providing convenient values to be used by UI components showing information about user
+ * {@link SubscriptionDTO subscriptions}.
  */
-public class SubscriptionsTextProvider {
+public class SubscriptionsValueProvider {
 
     private final StringMessages i18n;
 
-    public SubscriptionsTextProvider(final StringMessages i18n) {
+    public SubscriptionsValueProvider(final StringMessages i18n) {
         this.i18n = i18n;
     }
 
     public String getSubscriptionName(final SubscriptionDTO subscription) {
-        return subscription == null ? "-" : INSTANCE.getString(subscription.getSubscriptionPlanNameMessageKey());
+        return subscription == null ? "---" : INSTANCE.getString(subscription.getSubscriptionPlanNameMessageKey());
     }
 
-    public String getSubscriptionStatus(final SubscriptionDTO subscription) {
-        if (subscription.isInTrial()) {
-            return i18n.inTrial();
-        } else if (subscription.isActive()) {
-            return i18n.active();
-        } else if (subscription.isPaused()) {
-            return i18n.paused();
-        }
-        return "-";
+    public LabelType getSubscriptionStatusLabelType(final SubscriptionDTO subscription) {
+        if (subscription.isCancelled()) return LabelType.CANCELLED;
+        if (subscription.isInTrial()) return LabelType.IN_TRIAL;
+        if (subscription.isActive()) return LabelType.ACTIVE;
+        return LabelType.UNKNOWN;
+    }
+
+    public SafeHtml getSubscriptionStatusLabel(final SubscriptionDTO subscription) {
+        final Element labelElement = Document.get().createDivElement();
+        labelElement.addClassName(SharedResources.INSTANCE.mainCss().label());
+        renderLabelType(labelElement, getSubscriptionStatusLabelType(subscription));
+        return () -> labelElement.getString();
     }
 
     public String getPaymentStatus(final SubscriptionDTO subscription) {
@@ -45,7 +54,7 @@ public class SubscriptionsTextProvider {
                 return i18n.paymentStatusNoSuccess();
             }
         }
-        return "-";
+        return "---";
     }
 
     // FIXME: Refactor and move to date/time util class or use existing formatter method instead

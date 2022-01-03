@@ -1,3 +1,15 @@
+.fontWeightBold {
+    font-weight: bold;
+}
+
+.fontStyleItalic {
+    font-style: italic;
+}
+
+.textAlignRight {
+    text-align: right !important;
+}
+
 .textColorBlue {
     color: #008fcc;
 }

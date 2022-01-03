@@ -16,6 +16,12 @@ public interface UserProfileSubscriptionsResources extends ClientBundle {
 
     public interface SubscriptionProfileCss extends UserProfileResources.UserProfileStyle {
 
+        String fontWeightBold();
+
+        String fontStyleItalic();
+
+        String textAlignRight();
+
         String textColorBlue();
 
         String textColorRed();

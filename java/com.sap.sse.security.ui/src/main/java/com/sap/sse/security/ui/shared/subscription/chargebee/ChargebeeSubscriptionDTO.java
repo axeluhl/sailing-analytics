@@ -9,16 +9,17 @@ public class ChargebeeSubscriptionDTO extends SubscriptionDTO {
     private static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
     private static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     private static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
+    private static final String SUBSCRIPTION_STATUS_CANCELLED = "cancelled";
     private static final String TRANSACTION_TYPE_REFUND = "refund";
 
     protected ChargebeeSubscriptionDTO() {
     }
 
-    public ChargebeeSubscriptionDTO(final String planId, final String subscriptionId, final String subscriptionStatus, 
-            final String paymentStatus, final String transactionType, final Integer reoccuringPaymentValue, 
-            final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt, 
+    public ChargebeeSubscriptionDTO(final String planId, final String subscriptionId, final String subscriptionStatus,
+            final String paymentStatus, final String transactionType, final Integer reoccuringPaymentValue,
+            final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt,
             final TimePoint nextBillingAt) {
-        super(planId, subscriptionId, subscriptionStatus, paymentStatus, transactionType, reoccuringPaymentValue, 
+        super(planId, subscriptionId, subscriptionStatus, paymentStatus, transactionType, reoccuringPaymentValue,
                 trialEnd, currentTermEnd, cancelledAt, nextBillingAt,
                 ChargebeeSubscriptionClientProvider.PROVIDER_NAME);
     }
@@ -36,6 +37,11 @@ public class ChargebeeSubscriptionDTO extends SubscriptionDTO {
     @Override
     public boolean isPaused() {
         return SUBSCRIPTION_STATUS_PAUSED.equals(getSubscriptionStatus());
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return SUBSCRIPTION_STATUS_CANCELLED.equals(getSubscriptionStatus());
     }
 
     @Override
