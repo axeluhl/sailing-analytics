@@ -32,6 +32,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         Window.setTitle(subscriptionsPlace.getTitle());
         view.setPresenter(this);
+        renderSubscriptions(eventBus);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event-> {
             renderSubscriptions(eventBus);
         });
@@ -40,12 +41,12 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     }
     
     private void renderSubscriptions(final EventBus eventBus) {
-        view.resetSubscriptions();
         try {
             clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
                     .getAllSubscriptionPlans(new AsyncCallback<ArrayList<SubscriptionPlanDTO>>() {
                         @Override
                         public void onSuccess(final ArrayList<SubscriptionPlanDTO> result) {
+                            view.resetSubscriptions();
                             addFreePlan(view);
                             result.forEach(plan -> {
                                 if (checkIfUserIsOwnerOfThePlan(plan)) {
