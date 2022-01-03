@@ -127,7 +127,7 @@ public class ChargebeeSubscriptionServiceImpl extends
 
     protected boolean isSubscriptionCancelled(Subscription subscription) {
         return subscription != null
-                && subscription.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
+                && subscription.getSubscriptionStatus().equalsIgnoreCase(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
     }
 
     @Override
