@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -18,6 +20,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -30,9 +33,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.subscriptionstab.UserProfileSubscriptionsResources.SubscriptionProfileCss;
-import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserSubscriptionsView;
 import com.sap.sailing.gwt.home.shared.places.user.subscriptions.SubscriptionsValueProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -115,14 +117,18 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
 
         addDateTimeColumn(i18n.createdAt(), s -> null);
 
-        addDateTimeColumn("[Term end]", s -> s.isInTrial() ? s.getTrialEnd() : s.getCurrentTermEnd());
+        addDateTimeColumn(i18n.currentTermEnd(), s -> s.isInTrial() ? s.getTrialEnd() : s.getCurrentTermEnd());
 
-        final Column<SubscriptionDTO, String> cancelColumn = new Column<SubscriptionDTO, String>(new ButtonCell() {
+        final Column<SubscriptionDTO, String> cancelColumn = new Column<SubscriptionDTO, String>(new ButtonCell()) {
+
             @Override
-            public void render(final Context context, final SafeHtml data, final SafeHtmlBuilder sb) {
-                sb.append(SailorProfileDesktopResources.TEMPLATE.removeButtonCell(data));
+            public void render(final Context context, final SubscriptionDTO object, final SafeHtmlBuilder sb) {
+                final UnaryOperator<SafeHtml> template = object.isCancelled()
+                        ? UserProfileResources.TEMPLATE::disabledButtonCell
+                        : UserProfileResources.TEMPLATE::removeButtonCell;
+                sb.append(template.apply(SimpleSafeHtmlRenderer.getInstance().render(getValue(object))));
             }
-        }) {
+
             @Override
             public String getValue(final SubscriptionDTO object) {
                 return i18n.cancelSubscription();
@@ -132,8 +138,10 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         cancelColumn.setFieldUpdater(new FieldUpdater<SubscriptionDTO, String>() {
             @Override
             public void update(final int index, final SubscriptionDTO object, final String value) {
-                // FIXME: Maybe integrate a confirmation dialog to avoid unintended canceling
-                presenter.cancelSubscription(object.getSubscriptionPlanId(), object.getProvider());
+                if (!object.isCancelled()) {
+                    // FIXME: Maybe integrate a confirmation dialog to avoid unintended canceling
+                    presenter.cancelSubscription(object.getSubscriptionPlanId(), object.getProvider());
+                }
             }
         });
         subscriptionsUi.addColumn(cancelColumn);
@@ -142,35 +150,25 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             @Override
             public void buildRowImpl(final SubscriptionDTO rowValue, final int absRowIndex) {
                 super.buildRowImpl(rowValue, absRowIndex);
-
                 final SubscriptionProfileCss css = local_res.css();
 
                 final TableRowBuilder tr = startRow();
                 tr.className(local_res.css().borderTableRow());
-                addTextCell(tr, i18n.paymentStatus() + ":", css.fontStyleItalic());
 
-                if (rowValue.isActive()) {
-                    if (rowValue.isPaymentSuccess()) {
-                        if (rowValue.isRefunded()) {
-                            addTextCell(tr, i18n.refunded());
-                        } else {
-                            addImageCell(tr, SharedHomeResources.INSTANCE.greenCheck());
-                        }
-                    } else if (rowValue.isPaymentNoSuccess()) {
-                        addImageCell(tr, SharedHomeResources.INSTANCE.redDash());
-                    }
-                } else {
-                    addTextCell(tr, "---");
-                }
+                addTextCell(tr, i18n.paymentStatus() + ":", css.fontStyleItalic());
+                valueProvider.configurePaymentStatusElement(rowValue, (label, value) -> addTextCell(tr, value),
+                        (label, value) -> addImageCell(tr, value));
 
                 if (rowValue.isCancelled()) {
-                    addTextCell(tr, "[Cancelled at]" + ":", css.textAlignRight());
+                    addTextCell(tr, i18n.cancelledAt() + ":", css.textAlignRight());
                     addTextCell(tr, formatDateAndTime(rowValue.getCancelledAt().asDate()), css.textAlignRight());
                 } else if (rowValue.isRenewing()) {
-                    addTextCell(tr, "[Next billing at]" + ":", css.fontStyleItalic(), css.textAlignRight());
+                    addTextCell(tr, i18n.nextBillingAt() + ":", css.fontStyleItalic(), css.textAlignRight());
                     addTextCell(tr, formatDateAndTime(rowValue.getNextBillingAt().asDate()), css.textAlignRight());
-                    addTextCell(tr, rowValue.getReoccuringPaymentValue() + "$", css.textAlignRight());
+                    addTextCell(tr, i18n.currencyValue(rowValue.getReoccuringPaymentValue() / 100, "$"),
+                            css.textAlignRight());
                 }
+
                 tr.endTR();
             }
 

@@ -5,9 +5,11 @@ import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.form
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -16,6 +18,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions.UserSubscriptionsView;
 import com.sap.sailing.gwt.home.shared.places.user.subscriptions.SubscriptionsValueProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 
 class UserSubscriptionItem extends Composite {
@@ -31,6 +34,7 @@ class UserSubscriptionItem extends Composite {
     @UiField SectionHeaderContent sectionHeaderUi;
     @UiField HTMLPanel contentContainerUi;
     @UiField Element subscriptionInfoUi;
+    @UiField Button cancelControlUi;
 
     private final SubscriptionsValueProvider valueProvider;
     private final Runnable cancelCallback;
@@ -40,18 +44,28 @@ class UserSubscriptionItem extends Composite {
         mobileSection.setEdgeToEdgeContent(true);
         initWidget(mobileSection);
 
-        this.cancelCallback = () -> presenter.cancelSubscription(subscription.getSubscriptionPlanId(),
-                subscription.getProvider());
         this.valueProvider = new SubscriptionsValueProvider(i18n);
+        if (subscription.isCancelled()) {
+            this.cancelCallback = () -> {};
+            cancelControlUi.setEnabled(false);
+        } else {
+            this.cancelCallback = () -> presenter.cancelSubscription(subscription.getSubscriptionPlanId(),
+                    subscription.getProvider());
+        }
 
         sectionHeaderUi.setSectionTitle(valueProvider.getSubscriptionName(subscription));
         sectionHeaderUi.setLabelType(valueProvider.getSubscriptionStatusLabelType(subscription));
-        addInfo(i18n.paymentStatus(), valueProvider.getPaymentStatus(subscription))
-                .highlightValue(subscription.isPaymentSuccess() && !subscription.isRefunded());
 
-        if (subscription.isInTrial()) {
-            addInfo("", i18n.trialText(valueProvider.getTrialRemainingText(subscription),
-                    formatDateAndTime(subscription.getTrialEnd().asDate()))).highlightValue(false);
+        addInfo(i18n.createdAt(), "???"); // formatDateAndTime(subscription.getCreatedAt()));
+        addInfo(i18n.currentTermEnd(), subscription.getCurrentTermEnd());
+
+        valueProvider.configurePaymentStatusElement(subscription, this::addInfo, this::addInfo);
+
+        if (subscription.isCancelled()) {
+            addInfo(i18n.cancelledAt(), subscription.getCancelledAt());
+        } else if (subscription.isRenewing()) {
+            addInfo(i18n.nextBillingAt(), subscription.getNextBillingAt());
+            addInfo("", i18n.currencyValue(subscription.getReoccuringPaymentValue() / 100, "$"));
         }
 
         sectionHeaderUi.initCollapsibility(contentContainerUi.getElement(), false);
@@ -62,10 +76,16 @@ class UserSubscriptionItem extends Composite {
         this.cancelCallback.run();
     }
 
-    private UserSubscriptionItemInfo addInfo(final String label, final String value) {
-        final UserSubscriptionItemInfo info = new UserSubscriptionItemInfo(label, value);
-        subscriptionInfoUi.appendChild(info.getElement());
-        return info;
+    private void addInfo(final String label, final String value) {
+        subscriptionInfoUi.appendChild(new UserSubscriptionItemInfo(label, value).getElement());
+    }
+
+    private void addInfo(final String label, final DataResource value) {
+        subscriptionInfoUi.appendChild(new UserSubscriptionItemInfo(label, value).getElement());
+    }
+
+    private void addInfo(final String label, final TimePoint value) {
+        addInfo(label, formatDateAndTime(value.asDate()));
     }
 
 }
