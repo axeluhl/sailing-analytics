@@ -12,6 +12,8 @@
 - Terminate old fail-over EC2 instance
 - adjust Name tags for what is now the fail-over and what is now the primary archive server in EC2 console
 
+[[_TOC_]]
+
 ## Details
 
 ### Landscape Overview
