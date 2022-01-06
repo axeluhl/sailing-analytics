@@ -38,6 +38,15 @@ The [archive server environment](https://releases.sapsailing.com/environments/ar
 
 The archive servers use a dedicated MongoDB replica set ``mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true&readPreference=secondaryPreferred``. Obviously, loading an archive server will put some stress on this replica set which by default runs only a single MongoDB instance on the ``dbserver.internal.sapsailing.com`` host. To accelerate the loading process it is a good idea to fire up a MongoDB replica for this replica set. Based on the ``secondaryPreferred`` read preference the new archive server candidate will read from a ``SECONDARY`` replica which can be set up to have enough memory and CPUs to make the loading process quicker. Again ``i3.2xlarge`` is a good choice for now.
 
+To check the state of your new MongoDB replica, try this:
+```
+  $ ssh -A trac@sapsailing.com
+  $ ssh -A ec2-user@dbserver.internal.sapsailing.com
+  $ mongo "mongodb://localhost:10201/?replicaSet=archive&retryWrites=true"
+  archive:PRIMARY> rs.status()
+```
+This will show you the replica set configuration from MongoDB's perspective. In the ``members`` array you should see two instances, one of which being the ``dbserver.internal.sapsailing.com:10201`` primary. Your to-be secondary server will likely be listed as the second member (index 1) in that array, and you will continue to see a ``stateStr`` of ``STARTUP2`` for a few hours until it changes to ``SECONDARY``.
+
 ### Launching the EC2 Instance
 
 When the MongoDB replica is available (in state ``SECONDARY`` after going through the lengthy ``STARTUP2`` phase) a new archive server candidate can be launched. A quick approach is to select the existing primary archive server in the [EC2 instances list](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Instances:instanceState=running;search=SL%20Archive;sort=tag:Name) and choose "Launch more like this" from the context menu, then adjust the instance's user data for the correct release and set the ``Name`` tag from "SL Archive" to something like "SL Archive (New Candidate)" so you can discern it from the production and fail-over archive and launch the new instance.
