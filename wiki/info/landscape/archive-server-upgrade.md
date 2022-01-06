@@ -63,15 +63,19 @@ that will keep repeating. Watch out for the ``queued tasks`` count. It should be
 
 ### Comparing Contents with Primary ARCHIVE Server
 
+This is when you can move on to comparing the new candidate's contents with the primary archive server. Two ways are currently possible.
+
 #### ``compareServers`` Script
 
-This is when you can move on to comparing the new candidate's contents with the primary archive server. Two ways are currently possible. The first uses the ``compareServers`` script that you find in the Git repository in the ``java/target/`` directory. Start it like this:
+The first uses the ``compareServers`` script that you find in the Git repository in the ``java/target/`` directory. The script will fetch various documents, so it is a good idea to create a new empty directory and change into that new directory before starting the script. Start it like this:
 ```
-    compareServers -el https://www.sapsailing.com http://1.2.3.4:8888
+    mkdir compareServers
+    cd compareServers
+    ${GIT_ROOT}/java/target/compareServers -el https://www.sapsailing.com http://1.2.3.4:8888
 ```
 where ``1.2.3.4`` is assumed to be the external IP address of your new archive server candidate. The script will fetch the leaderboard groups available on both servers and then compare their contents one by one. Should a difference be observed, the difference is printed to the standard error stream and the comparison stops. You must then fix the problem and continue the comparison, starting at the previously different leaderboard group, with the following command, adding the ``-c`` option ("continue"):
 ```
-    compareServers -cel https://www.sapsailing.com http://1.2.3.4:8888
+    ${GIT_ROOT}/java/target/compareServers -cel https://www.sapsailing.com http://1.2.3.4:8888
 ```
 Repeat until no differences are found anymore.
 
