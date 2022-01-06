@@ -88,11 +88,11 @@ curl https://www.sapsailing.com/sailingserver/api/v1/compareservers -d "server2=
 Differences are reported in a JSON response document. If no differences are found, you will see a response document like this:
 ```
         {
-         "www.sapsailing.com:443": [],
+         "34.242.227.113:8888": [],
          "1.2.3.4:8888": []
         }
 ```
-The response status will be ``200`` if the comparison was ok, and ``409`` otherwise. Handle differences are described for the ``compareServers`` script above.
+In this example, ``34.242.227.113`` would be the public IP address of the server that responded to the ``www.sapsailing.com`` request (the current primary archive server), and ``1.2.3.4`` would be the public IP address of your new candidate archive server. The response status will be ``200`` if the comparison was ok, and ``409`` otherwise. Handle differences are described for the ``compareServers`` script above.
 
 ### Manual Spot Checks
 
