@@ -101,19 +101,19 @@ Following the mandatory automated content comparison you should do a few spot ch
 ### Switching in Reverse Proxy
 
 Once you are content with the quality of the new archive server candidate's contents it's time to switch. Technically, switching archive servers is done by adjusting the corresponding configuration in the central Apache reverse proxy server. You find this in ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf`` in the definition of the macro ``ArchiveRewrite`` defined usually at the top of the file. You'll find a macro definition that looks like this:
-```<Macro ArchiveRewrite>
+```&lt;Macro ArchiveRewrite&gt;
 # ARCHIVE, based on i3.2xlarge, 64GB RAM and 1.9TB swap
 #       Use Rewrite 172.31.4.106 8888
         Use Rewrite 172.31.9.176 8888
-</Macro>
+&lt;/Macro&gt;
 ```
 Copy the uncommented ``Use Rewrite`` line and in the new copy adjust the internal IP to match the internal IP of your new archive server candidate. Then comment the line that pointed to the currently active primary archive server. Your macro definition then would look something like this, assuming that ``172.31.8.7`` were the IP address of your new archive server candidate:
-```<Macro ArchiveRewrite>
+```&lt;Macro ArchiveRewrite&gt;
 # ARCHIVE, based on i3.2xlarge, 64GB RAM and 1.9TB swap
 #       Use Rewrite 172.31.4.106 8888
 #        Use Rewrite 172.31.9.176 8888
         Use Rewrite 172.31.8.7 8888
-</Macro>
+&lt;/Macro&gt;
 ```
 Exit your editor and reload the reverse proxy configuration by issuing the following command:
 ```
