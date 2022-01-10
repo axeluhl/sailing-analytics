@@ -53,9 +53,6 @@
 	display: flex;
 	align-items: center;
 }
-.sectionheader_item_title_label div {
-	width: 100%
-}
 .sectionheader_item_title_label div:last-child {
     width: auto;
 }
@@ -66,7 +63,7 @@
   color: #0a0a0a;
   font-size: 1.066666666666667em;
 }
-.sectionheader_item_label {
+.sectionheader_item .sectionheader_item_label {
   display: inline-block;
   margin-left: 1.666666666666667em;
   text-transform: capitalize;

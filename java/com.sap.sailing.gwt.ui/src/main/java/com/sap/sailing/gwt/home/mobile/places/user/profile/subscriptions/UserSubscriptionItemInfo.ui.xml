@@ -4,7 +4,7 @@
              xmlns:sh="urn:import:com.sap.sailing.gwt.home.mobile.partials.sectionHeader">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style field ="style" type="com.sap.sailing.gwt.home.mobile.places.user.profile.subscriptions.UserSubscriptionItemInfo.Style">
+    <ui:style>
         .container {
             display: flex;
             justify-content: space-between;
@@ -12,16 +12,13 @@
         .label {
             font-weight: bold;
         }
-        .textColorBlue {
-            color: #008fcc;
-        }
-        
-        .textColorRed {
-            color: #e94a1b;
+        .image {
+            width: 24px;
         }
     </ui:style>
     <div class="{res.mainCss.spacermarginbottomsmall} {style.container}">
         <span ui:field="labelUi" class="{style.label}"/>
         <span ui:field="valueUi"/>
+        <img ui:field="imageUi" />
     </div>
 </ui:UiBinder> 
