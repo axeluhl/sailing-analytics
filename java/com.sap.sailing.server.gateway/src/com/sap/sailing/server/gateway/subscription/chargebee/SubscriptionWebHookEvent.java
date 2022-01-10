@@ -52,6 +52,7 @@ public class SubscriptionWebHookEvent {
     private static final String CANCELLED_AT = "cancelled_at";
     private static final String SUBSCRIPTION_ACTIVATED_AT = "subscription_activated_at";
     private static final String REOCURRING_PAYMENT_VALUE = "reocurring_payment_value";
+    private static final String CURRENCY_CODE = "currency_code";
 
     private final JSONObject eventJSON;
     private final String eventId;
@@ -194,6 +195,10 @@ public class SubscriptionWebHookEvent {
     
     public Integer getReocurringPaymentValue() {
         return getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, REOCURRING_PAYMENT_VALUE);
+    }
+    
+    public String getCurrencyCode() {
+        return getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, CURRENCY_CODE);
     }
 
     private TimePoint getTime(Long timestamp) {

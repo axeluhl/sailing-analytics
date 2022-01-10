@@ -72,7 +72,7 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
 
     protected SubscriptionDTO(final String planId, final String subscriptionId, final String subscriptionStatus,
             final String paymentStatus, final String transactionType, final Integer reoccuringPaymentValue,
-            final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt,
+            String currencyCode, final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt,
             final TimePoint nextBillingAt, final String provider) {
         this.planId = planId;
         this.subscriptionId = subscriptionId;

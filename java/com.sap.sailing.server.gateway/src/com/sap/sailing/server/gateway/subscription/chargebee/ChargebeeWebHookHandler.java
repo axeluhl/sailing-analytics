@@ -202,8 +202,9 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         }
         return new ChargebeeSubscription(event.getSubscriptionId(), getPlanIdFromEvent(event), event.getCustomerId(),
                 event.getSubscriptionTrialStart(), event.getSubscriptionTrialEnd(), subscriptionStatus, paymentStatus,
-                transactionType, transactionStatus, invoiceId, invoiceStatus, event.getReocurringPaymentValue(), event.getSubscriptionCreatedAt(),
-                event.getSubscriptionUpdatedAt(), event.getActivatedAt(), event.getBillingAt(), event.getCurrentTermEnd(),event.getCancelledAt(),
+                transactionType, transactionStatus, invoiceId, invoiceStatus, event.getReocurringPaymentValue(),
+                event.getCurrencyCode(), event.getSubscriptionCreatedAt(), event.getSubscriptionUpdatedAt(),
+                event.getActivatedAt(), event.getBillingAt(), event.getCurrentTermEnd(), event.getCancelledAt(),
                 event.getEventOccurredAt(),
                 currentSubscription != null ? currentSubscription.getManualUpdatedAt() : Subscription.emptyTime());
     }
@@ -228,10 +229,11 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                     currentSubscription.getSubscriptionStatus(), paymentStatus,
                     currentSubscription.getTransactionType(), currentSubscription.getTransactionStatus(), invoiceId,
                     invoiceStatus, currentSubscription.getReoccuringPaymentValue(),
-                    currentSubscription.getSubscriptionCreatedAt(), currentSubscription.getSubscriptionUpdatedAt(),
-                    currentSubscription.getSubscriptionActivatedAt(), currentSubscription.getNextBillingAt(),
-                    currentSubscription.getCurrentTermEnd(), currentSubscription.getCancelledAt(),
-                    event.getEventOccurredAt(), currentSubscription.getManualUpdatedAt());
+                    currentSubscription.getCurrencyCode(), currentSubscription.getSubscriptionCreatedAt(),
+                    currentSubscription.getSubscriptionUpdatedAt(), currentSubscription.getSubscriptionActivatedAt(),
+                    currentSubscription.getNextBillingAt(), currentSubscription.getCurrentTermEnd(),
+                    currentSubscription.getCancelledAt(), event.getEventOccurredAt(),
+                    currentSubscription.getManualUpdatedAt());
             updateUserSubscription(user, newSubscription);
         }
     }
