@@ -641,6 +641,8 @@ public class LandscapeServiceImpl implements LandscapeService {
             } // else, the replica was started explicitly, without an auto-scaling group; in any case, all replicas still
             // on the old release will now be stopped:
         }
+        // TODO bug5674: start up as many new replicas as there were old replicas without hooking up to target group, then replace atomically, shut down old replicas, wait for auto-scaling to provide new ones, then terminate explicit upgrade replicas
+        // TODO bug5676: consider the possibility of a combination of explicit replicas on shared hosts not managed by auto-scaling and auto-scaling replicas; find out if launching a replica explicitly on a shared host is desired; see tag aws:autoscaling:groupName
         logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicasToStopAfterUpgradingMaster);
         for (final SailingAnalyticsProcess<String> replica : replicasToStopAfterUpgradingMaster) {
             replicaSet.getPublicTargetGroup().removeTarget(replica.getHost());
