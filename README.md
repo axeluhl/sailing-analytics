@@ -24,6 +24,8 @@ The default server name is taken to be your current branch name, e.g., ``master`
 
 ## Downloading, Installing and Running an Official Release
 
+You need to have Java 8 installed. Get one from [here](https://tools.eu1.hana.ondemand.com/#cloud). Either ensure that this JVM's ``java`` executable in on the ``PATH`` or set ``JAVA_HOME`` appropriately.
+
 At [https://releases.sapsailing.com](https://releases.sapsailing.com) you find official product builds. To fetch and install one of them, make an empty directory, change into it and run the ``refreshInstance.sh`` command, e.g., like this:
 ```
     mkdir sailinganalytics
@@ -31,6 +33,15 @@ At [https://releases.sapsailing.com](https://releases.sapsailing.com) you find o
     echo "MONGODB_URI=mongodb://localhost/winddb" | ${GIT_ROOT}/java/target/refreshInstance.sh auto-install-from-stdin
 ```
 This will download and install the latest release and configure it such that it will connect to a MongoDB server running locally (``localhost``) and listening on the default port ``27017``, using the database called ``winddb``.
+
+Launch the server from the directory to which you just installed it:
+```
+    ./start
+```
+See the server logs like this:
+```
+    tail -f logs/sailing0.log.0
+```
 
 ## Docker
 
