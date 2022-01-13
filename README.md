@@ -10,6 +10,8 @@ SAP has a longstanding involvement with sailing and has established a portfolio 
 
 Start contributing: [https://wiki.sapsailing.com/wiki/howto/onboarding](https://wiki.sapsailing.com/wiki/howto/onboarding)
 
+## Building and Running
+
 To build, invoke
 ```
     configuration/buildAndUpdateProduct.sh build
@@ -20,7 +22,7 @@ If the build was successful you can install the product locally by invoking
 ```
 The default server name is taken to be your current branch name, e.g., ``master``. The install goes to ``${HOME}/servers/{server-name}``. You will find a ``start`` script there which you can use to launch the product.
 
-# Docker
+## Docker
 
 To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default (private) Dockerhub repository will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``donaldduck70/sapsailing:...`` result from the build. To run that docker image, try something like
 ```
@@ -36,7 +38,7 @@ In this example, find your web application at http://localhost:32779 which is wh
 ```
 to connect to the server's OSGi console.
 
-# Docker Compose
+## Docker Compose
 
 If you have built or obtained the ``donaldduck70/sapsailing:latest`` image, try this:
 ```
