@@ -22,6 +22,16 @@ If the build was successful you can install the product locally by invoking
 ```
 The default server name is taken to be your current branch name, e.g., ``master``. The install goes to ``${HOME}/servers/{server-name}``. You will find a ``start`` script there which you can use to launch the product.
 
+## Downloading, Installing and Running an Official Release
+
+At [https://releases.sapsailing.com](https://releases.sapsailing.com) you find official product builds. To fetch and install one of them, make an empty directory, change into it and run the ``refreshInstance.sh`` command, e.g., like this:
+```
+    mkdir sailinganalytics
+    cd sailinganalytics
+    echo "MONGODB_URI=mongodb://localhost/winddb" | ${GIT_ROOT}/java/target/refreshInstance.sh auto-install-from-stdin
+```
+This will download and install the latest release and configure it such that it will connect to a MongoDB server running locally (``localhost``) and listening on the default port ``27017``, using the database called ``winddb``.
+
 ## Docker
 
 To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default (private) Dockerhub repository will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``donaldduck70/sapsailing:...`` result from the build. To run that docker image, try something like
