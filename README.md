@@ -1,4 +1,4 @@
-# SAPSailingAnalytics
+# SAP Sailing Analytics
 The SAP Sailing Analytics platform as seen on [sapsailing.com](https://sapsailing.com)
 
 Sailing provides the perfect platform for SAP to showcase solutions and help the sport run like never before. SAP’s involvement in the sport has transformed the sailing experience by providing tools, which:
@@ -6,13 +6,7 @@ Sailing provides the perfect platform for SAP to showcase solutions and help the
 Help sailors analyze performance and optimize strategy
 Bring fans closer to the action
 Provide the media with information and insights to deliver a greater informed commentary
-SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas, including:
-
-Technical Partner of the European Sailing Leagues
-Partner of the world’s largest regatta, Kieler Woche (Kiel Week)
-Technical Partner of the Sailing Champions League
-Title sponsor of the SAP 5O5 World Championships
-Official Technology Partner of WORLD SAILING
+SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas.
 
 Start contributing: [https://wiki.sapsailing.com/wiki/howto/onboarding](https://wiki.sapsailing.com/wiki/howto/onboarding)
 
@@ -20,7 +14,15 @@ To build, invoke
 ```
     configuration/buildAndUpdateProduct.sh build
 ```
-To build a docker image, try ``docker/makeImageForLatestRelease``. To run that docker image, try something like
+If the build was successful you can install the product locally by invoking
+```
+    configuration/buildAndUpdateProduct.sh install [ -s <server-name> ]
+```
+The default server name is taken to be your current branch name, e.g., ``master``. The install goes to ``${HOME}/servers/{server-name}``. You will find a ``start`` script there which you can use to launch the product.
+
+# Docker
+
+To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default (private) Dockerhub repository will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``donaldduck70/sapsailing:...`` result from the build. To run that docker image, try something like
 ```
     docker run -d -e "MEMORY=4g" -e "MONGODB_URI=mongodb://my.mongohost.org?replicaSet=rs0&retryWrites=true" -P <yourimage>
 ```
@@ -33,3 +35,17 @@ In this example, find your web application at http://localhost:32779 which is wh
     telnet localhost 32778
 ```
 to connect to the server's OSGi console.
+
+# Docker Compose
+
+If you have built or obtained the ``donaldduck70/sapsailing:latest`` image, try this:
+```
+    cd docker
+    docker-compose up
+```
+Based on the ``docker/docker-compose.yml`` definition you should end up with three running Docker containers:
+- a MongoDB server, listening on default port 27017
+- a RabbitMQ server, listening on default port
+- a Sailing Analytics server, listening for HTTP requests on port 8888 and for telnet connections to the OSGi console on port 14888
+
+Try a request to [``http://127.0.0.1:8888/index.html``](http://127.0.0.1:8888/index.html) or [``http://127.0.0.1:8888/gwt/status``](http://127.0.0.1:8888/gwt/status) to see if things worked.
