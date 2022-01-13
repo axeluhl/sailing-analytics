@@ -72,3 +72,9 @@ Based on the ``docker/docker-compose.yml`` definition you should end up with thr
 - a Sailing Analytics server, listening for HTTP requests on port 8888 and for telnet connections to the OSGi console on port 14888
 
 Try a request to [``http://127.0.0.1:8888/index.html``](http://127.0.0.1:8888/index.html) or [``http://127.0.0.1:8888/gwt/status``](http://127.0.0.1:8888/gwt/status) to see if things worked.
+
+## Configuration Options, Environment Variables
+
+The server process can be configured in various ways. The corresponding environment variables you may use during installation with ``refreshInstance.sh`` and for setting up your Docker environment can be found in the following files:
+- [DefaultProcessConfigurationVariables.java](java/com.sap.sse.landscape/src/com/sap/sse/landscape/DefaultProcessConfigurationVariables.java)
+- [SailingProcessConfigurationVariables.java](java/com.sap.sailing.landscape/src/com/sap/sailing/landscape/procedures/SailingProcessConfigurationVariables.java)
