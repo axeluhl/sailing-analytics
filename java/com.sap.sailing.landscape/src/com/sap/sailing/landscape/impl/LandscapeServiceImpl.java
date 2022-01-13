@@ -128,7 +128,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder =
-                createMasterConfigurationBuilder(name, masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull, landscape, region, release);
+                createMasterConfigurationBuilder(name, masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull, region, release);
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         masterHostBuilder
             .setInstanceType(InstanceType.valueOf(masterInstanceType))
@@ -447,7 +447,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(replicaSetName);
         final AppConfigBuilderT masterConfigurationBuilder = createMasterConfigurationBuilder(replicaSetName,
                 masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
-                landscape, region, release);
+                region, release);
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
                 DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> builder(
                         masterConfigurationBuilder);
@@ -496,12 +496,11 @@ public class LandscapeServiceImpl implements LandscapeService {
 
     private <AppConfigBuilderT extends com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>> AppConfigBuilderT createMasterConfigurationBuilder(
             String replicaSetName, String masterReplicationBearerToken, Integer optionalMemoryInMegabytesOrNull,
-            Integer optionalMemoryTotalSizeFactorOrNull, final AwsLandscape<String> landscape, final AwsRegion region,
-            final Release release) {
+            Integer optionalMemoryTotalSizeFactorOrNull, final AwsRegion region, final Release release) {
         final AppConfigBuilderT masterConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
         final String bearerTokenUsedByMaster = Util.hasLength(masterReplicationBearerToken) ? masterReplicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         masterConfigurationBuilder
-            .setLandscape(landscape)
+            .setLandscape(getLandscape())
             .setServerName(replicaSetName)
             .setRelease(release)
             .setRegion(region)
@@ -510,14 +509,14 @@ public class LandscapeServiceImpl implements LandscapeService {
         return masterConfigurationBuilder;
     }
 
-    private Builder<?, String> createReplicaConfigurationBuilder(final AwsLandscape<String> landscape,
-            final AwsRegion region, String replicaSetName, final int masterPort,
-            final Release release, final String bearerTokenUsedByReplicas, final String masterHostname) {
+    private Builder<?, String> createReplicaConfigurationBuilder(final AwsRegion region,
+            String replicaSetName, final int masterPort, final Release release,
+            final String bearerTokenUsedByReplicas, final String masterHostname) {
         final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
         // no specific memory configuration is made here; replicas are currently launched on a dedicated host and hence can
         // grab as much memory as they can get on that host
         replicaConfigurationBuilder
-            .setLandscape(landscape)
+            .setLandscape(getLandscape())
             .setRegion(region)
             .setServerName(replicaSetName)
             .setRelease(release)
@@ -565,7 +564,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .build();
         createLoadBalancerMapping.run();
         // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
-        final Builder<?, String> replicaConfigurationBuilder = createReplicaConfigurationBuilder(landscape, region, replicaSetName, master.getPort(), release, bearerTokenUsedByReplicas, masterHostname);
+        final Builder<?, String> replicaConfigurationBuilder = createReplicaConfigurationBuilder(region, replicaSetName, master.getPort(), release, bearerTokenUsedByReplicas, masterHostname);
         final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
@@ -727,7 +726,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AwsRegion region = replicaSet.getMaster().getHost().getRegion();
         final Release release = replicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase);
         final com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder<?, String> replicaConfigurationBuilder =
-                createReplicaConfigurationBuilder(getLandscape(), region, replicaSet.getServerName(), replicaSet.getMaster().getPort(), release, replicationBearerToken, replicaSet.getHostname());
+                createReplicaConfigurationBuilder(region, replicaSet.getServerName(), replicaSet.getMaster().getPort(), release, replicationBearerToken, replicaSet.getHostname());
         final InstanceType masterInstanceType = getLandscape().getInstance(replicaSet.getMaster().getHost().getInstanceId(), region).instanceType();
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
         replicaHostBuilder
