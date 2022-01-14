@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutionException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.Release;
 
@@ -59,16 +58,6 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
     default int getPort() throws InterruptedException, ExecutionException {
         return getMaster().getPort();
     }
-    
-    /**
-     * Checks whether the {@code host} is eligible for accepting a deployment of a process that belongs to this
-     * application replica set, either its master or a replica. In order to be eligible, the host must
-     * <ul>
-     * <li>not run any other application process on the HTTP port used by this application replica set</li>
-     * <li>not have a process already deployed under the same {@link #getServerName() server name} used by this replica set</li>
-     * </ul>
-     */
-    boolean isEligibleForDeployment(Host host);
     
     /**
      * @return the scopes that are currently hosted by this application replica set; note that a scope may be "in

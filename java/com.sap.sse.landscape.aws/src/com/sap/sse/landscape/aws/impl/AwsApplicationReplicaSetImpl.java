@@ -11,11 +11,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
@@ -266,6 +268,18 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             }
         }
         return null;
+    }
+    
+    @Override
+    public boolean isEligibleForDeployment(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host,
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final Iterable<ProcessT> applicationProcesses = host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        for (final ProcessT applicationProcess : applicationProcesses) {
+            if (applicationProcess.getPort() == getPort() || applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase).equals(getServerName())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean hasPublicRuleForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> publicTargetGroupCandidate) {

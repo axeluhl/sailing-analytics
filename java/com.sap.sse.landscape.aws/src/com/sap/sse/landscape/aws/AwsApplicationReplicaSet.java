@@ -1,7 +1,9 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -72,6 +74,17 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * be returned.
      */
     AwsAutoScalingGroup getAutoScalingGroup() throws InterruptedException, ExecutionException;
+    
+    /**
+     * Checks whether the {@code host} is eligible for accepting a deployment of a process that belongs to this
+     * application replica set, either its master or a replica. In order to be eligible, the host must
+     * <ul>
+     * <li>not run any other application process on the {@link #getPort() HTTP port} used by this application replica set</li>
+     * <li>not have a process already deployed under the same {@link #getServerName() server name} used by this replica set</li>
+     * </ul>
+     */
+    boolean isEligibleForDeployment(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host,
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * In addition to what the super-interface does (checking the {@link #getMaster() master's} {@link Process#getPort()
