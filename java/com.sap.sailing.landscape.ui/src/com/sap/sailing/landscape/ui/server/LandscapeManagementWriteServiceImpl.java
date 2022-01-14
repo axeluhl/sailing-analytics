@@ -507,11 +507,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         checkLandscapeManageAwsPermission();
         final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result =
-                getLandscapeService().deployApplicationToExistingHost(regionId, replicaSetName,
-                    getHostFromInstanceDTO(hostToDeployTo), replicaInstanceType, dynamicLoadBalancerMapping,
-                    release.getName(), optionalKeyName, privateKeyEncryptionPassphrase,
-                    masterReplicationBearerToken, replicaReplicationBearerToken, optionalDomainName,
-                    optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+                getLandscapeService().deployApplicationToExistingHost(replicaSetName, getHostFromInstanceDTO(hostToDeployTo),
+                    replicaInstanceType, dynamicLoadBalancerMapping, release.getName(),
+                    optionalKeyName, privateKeyEncryptionPassphrase, masterReplicationBearerToken,
+                    replicaReplicationBearerToken, optionalDomainName, optionalMemoryInMegabytesOrNull,
+                    optionalMemoryTotalSizeFactorOrNull);
         return new SailingApplicationReplicaSetDTO<String>(result.getName(),
                 convertToSailingAnalyticsProcessDTO(result.getMaster(), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
                 /* replicas won't be up and running yet */ Collections.emptySet(), release.getName(),

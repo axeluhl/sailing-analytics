@@ -2,6 +2,7 @@ package com.sap.sse.landscape.aws;
 
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -71,4 +72,21 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * be returned.
      */
     AwsAutoScalingGroup getAutoScalingGroup() throws InterruptedException, ExecutionException;
+    
+    /**
+     * In addition to what the super-interface does (checking the {@link #getMaster() master's} {@link Process#getPort()
+     * port}), in case a master instance currently cannot be found, this implementation can resort to checking the
+     * {@link #getMasterTargetGroup() master target group's} {@link TargetGroup#getPort() port} setting.
+     */
+    @Override
+    default int getPort() throws InterruptedException, ExecutionException {
+        final int port;
+        if (getMaster() != null) {
+            port = getMaster().getPort();
+        } else {
+            port = getMasterTargetGroup().getPort();
+        }
+        return port;
+    }
+
 }
