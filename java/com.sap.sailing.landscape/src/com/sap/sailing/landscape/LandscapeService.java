@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Release;
@@ -109,4 +111,20 @@ public interface LandscapeService {
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String effectiveReplicaReplicationBearerToken) throws Exception, MalformedURLException, IOException,
             TimeoutException, InterruptedException, ExecutionException;
+
+    /**
+     * For an existing replica set deploys a new replica onto an existing host. The host may be shared by multiple
+     * application processes. As a precondition, the host must be
+     * {@link AwsApplicationReplicaSet#isEligibleForDeployment(com.sap.sse.landscape.aws.ApplicationProcessHost, Optional, Optional, byte[])
+     * eligible} for deploying a process of the replica set to it. In particular, the directory as derived from the
+     * replica set name and the HTTP port must not be used by any other application already deployed on that host.
+     */
+    <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
+     MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
+    SailingAnalyticsProcess<String> deployReplicaToExistingHost(
+                    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+                    SailingAnalyticsHost<String> hostToDeployTo, String optionalKeyName,
+                    byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+                    Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull)
+                    throws Exception;
 }
