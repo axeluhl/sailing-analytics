@@ -192,9 +192,10 @@ public class LandscapeServiceImpl implements LandscapeService {
                 region, release);
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
                 DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> builder(
-                        masterConfigurationBuilder);
-        multiServerAppDeployerBuilder.setHostToDeployTo(hostToDeployTo)
-                .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase).setOptionalTimeout(LandscapeService.WAIT_FOR_HOST_TIMEOUT);
+                        masterConfigurationBuilder, hostToDeployTo);
+        multiServerAppDeployerBuilder
+                .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
+                .setOptionalTimeout(LandscapeService.WAIT_FOR_HOST_TIMEOUT);
         final DeployProcessOnMultiServer<String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> deployer = multiServerAppDeployerBuilder.build();
         deployer.run();
         final SailingAnalyticsProcess<String> master = deployer.getProcess();
