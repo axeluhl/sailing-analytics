@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -70,7 +71,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         @Override
         protected String getImageType() {
-            return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
+            return super.getImageType() == null ? SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
         }
         
         @Override
@@ -85,7 +86,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         
         @Override
         protected Optional<Tags> getTags() {
-            return Optional.of(super.getTags().orElse(Tags.empty()).and(SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG, getApplicationConfigurationBuilder().getServerName()));
+            return Optional.of(super.getTags().orElse(Tags.empty()).and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, getApplicationConfigurationBuilder().getServerName()));
         }
 
         @Override

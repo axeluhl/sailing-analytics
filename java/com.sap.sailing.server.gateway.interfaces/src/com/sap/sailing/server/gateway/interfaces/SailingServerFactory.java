@@ -3,9 +3,9 @@ package com.sap.sailing.server.gateway.interfaces;
 import java.net.URL;
 
 /**
- * A factory service that obtains {@link SailingServer} instances which represent (usually remote) server processes,
- * identified by a {@link URL} that is used as the base to construct the REST API URLs, plus the authentication
- * information necessary to authenticate calls.
+ * A factory service that obtains {@link SailingServer} instances which represent (usually remote) server processes or
+ * entire application replica sets, identified by a {@link URL} that is used as the base to construct the REST API URLs,
+ * plus the authentication information necessary to authenticate calls.
  * <p>
  * 
  * Using {@link #getSailingServer(URL)} may be used to try authentication with the bearer token of the current local

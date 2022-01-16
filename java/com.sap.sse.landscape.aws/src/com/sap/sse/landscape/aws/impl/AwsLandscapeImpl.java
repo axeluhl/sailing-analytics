@@ -1402,7 +1402,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         // wait for all application processes on all hosts to be discovered
         Future<?> taskToWaitFor;
         while ((taskToWaitFor=tasksToWaitFor.poll()) != null) {
-            waitForFuture(taskToWaitFor, optionalTimeout);
+            try {
+                waitForFuture(taskToWaitFor, optionalTimeout);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Problem waiting for "+taskToWaitFor, e);
+            }
         }
         backgroundExecutor.shutdown();
         final Set<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
@@ -1447,20 +1451,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return replicaSet;
     }
     
-    private <T> void waitForFuture(Future<T> future, Optional<Duration> optionalTimeout) {
-        optionalTimeout.map(timeout->{
-            try {
-                return future.get(timeout.asMillis(), TimeUnit.MILLISECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e1) {
-                throw new RuntimeException(e1);
-            }
-        }).orElseGet(()->{
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        });
+    private <T> void waitForFuture(Future<T> future, Optional<Duration> optionalTimeout)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        if (optionalTimeout.isPresent()) {
+            future.get(optionalTimeout.get().asMillis(), TimeUnit.MILLISECONDS);
+        } else {
+            future.get();
+        }
     }
     
     /**
