@@ -87,3 +87,6 @@ http:
     Access-Control-Expose-Headers: ['Docker-Content-Digest']
 
 ```
+
+The Hudson build slave AWS image (AMI) has a set of valid credentials in the ``hudson`` user's account to
+push to the registry.
