@@ -46,6 +46,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
 * [[sail-insight.com website|wiki/info/landscape/sail-insight.com-website]]
+* [[Docker Registry|wiki/info/landscape/docker-registry]]
 
 ### Mobile
 
