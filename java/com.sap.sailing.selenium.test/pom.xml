@@ -92,7 +92,7 @@
                 <exclude>**/core/**</exclude>
               </excludes>
 
-              <argLine>@{argLine} ${tycho.tests.argLine}</argLine>
+              <argLine>${argLine} ${tycho.tests.argLine}</argLine>
               <appArgLine>-consoleLog -console -clean</appArgLine>
 
               <product>raceanalysis.product</product>
