@@ -512,7 +512,7 @@
       <artifactId>tycho-surefire-plugin</artifactId>
       <version>${tycho-version}</version>
       <configuration>
-        <argLine>${tycho.build.argLine}</argLine>
+        <argLine>@{argLine} ${tycho.build.argLine}</argLine>
         <excludes>
           <!-- Exclude inner classes -->
           <exclude>**/*$*</exclude>
