@@ -9,7 +9,16 @@
 
 # TOKEN_FILE can be generated using obtainToken.sh
 TOKEN_FILE=~/.docker/.token
-TOKEN=$(cat "${TOKEN_FILE}")
+if [ -f "${TOKEN_FILE}" ]; then
+  TOKEN=$(cat "${TOKEN_FILE}")
+  AUTH_HEADER="Authorization: JWT ${TOKEN}"
+else
+  # set username, password, and organization
+  read -p "Username: " UNAME
+  read -s -p "Password: " UPASS
+  echo
+  AUTH_HEADER="Authorization: Basic $( echo -n "${UNAME}:${UPASS}" | base64 )"
+fi
 REPO=$1
 if [ "$REPO" = "" ]; then
   echo "Usage: $0 account/repository [ <regexp1> \[ <regexp2> ... ] ]"
@@ -22,8 +31,7 @@ fi
 shift
 
 # -------
-
-IMAGE_TAGS=$(curl -s -H "Authorization: JWT ${TOKEN}" https://hub.docker.com/v2/repositories/${REPO}/tags/?page_size=1000 | jq -r '.results|.[]|.name')
+IMAGE_TAGS=$(curl -s -H "${AUTH_HEADER}" https://docker.sapsailing.com/v2/${REPO}/tags/list | jq -r '.tags|.[]')
 for j in ${IMAGE_TAGS}
 do
   if [ "$#" = "0" ]; then
