@@ -170,6 +170,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     SailingAnalyticsProcess<String> deployReplicaToExistingHost(final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             SailingAnalyticsHost<String> hostToDeployTo, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception {
+        logger.info("Deploying replica for application replica set "+replicaSet.getName()+" to host "+hostToDeployTo);
         return spinUpReplicaAndRegisterInPublicTargetGroup(hostToDeployTo.getRegion(), replicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase, replicaReplicationBearerToken,
                 /* processLauncher: */ (AppConfigBuilderT replicaConfigurationBuilder)->{
                     // the process launcher uses the DeployProcessOnMultiServer procedure to launch the process based on the replica config 
