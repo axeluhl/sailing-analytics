@@ -8,8 +8,8 @@ import com.sap.sse.filestorage.impl.BaseFileStorageServiceImpl;
 import com.sap.sse.security.SecurityService;
 
 public class AmazonS3TestSupport {
-    public static final String s3AccessId = "AKIAJOX7PZ6ACI2FQU4A";
-    public static final String s3AccessKey = "NkijH2DfhWgb9fmESPjpeIbpUF+tC220KyTOfvGJ";
+    public static final String s3AccessId = System.getProperty("aws.s3.test.s3AccessId");
+    public static final String s3AccessKey = System.getProperty("aws.s3.test.s3AccessKey");
     private static final String s3BucketName = "sapsailing-automatic-upload-test";
     
     public static BaseFileStorageServiceImpl createService(final SecurityService securityService) throws InvalidPropertiesException, IOException {
