@@ -127,4 +127,23 @@ public interface LandscapeService {
                     byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
                     Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull)
                     throws Exception;
+
+    /**
+     * In the {@code region} specified, searches through all hosts tagged with the
+     * {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} tag (regardless the tag's value) for
+     * hosts that are
+     * {@link AwsApplicationReplicaSet#isEligibleForDeployment(com.sap.sse.landscape.aws.ApplicationProcessHost, Optional, Optional, byte[])
+     * eligible} for receiving a deployment of a process that belongs to the {@code replicaSet}. This could be a master
+     * or a replica; both will require the same set of resources that the eligibility check is looking for: the HTTP
+     * port and the server directory must be available on the host.
+     * 
+     * @return the hosts eligible for receiving a process deployment for the {@code replicaSet}.
+     */
+    Iterable<SailingAnalyticsHost<String>> getEligibleHostsForReplicaSet(AwsRegion region,
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase);
+
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> getApplicationReplicaSet(
+            AwsRegion region, String replicaSetName, Long optionalTimeoutInMilliseconds, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDecryption) throws Exception;
 }

@@ -690,6 +690,32 @@ public class LandscapeServiceImpl implements LandscapeService {
         return release;
     }
     
+    @Override
+    public Iterable<SailingAnalyticsHost<String>> getEligibleHostsForReplicaSet(AwsRegion region,
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) {
+        return Util.filter(getLandscape().getHostsWithTag(region, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, new SailingAnalyticsHostSupplier<String>()),
+                h->{
+                    try {
+                        return replicaSet.isEligibleForDeployment(h, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+    
+    @Override
+    public AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> getApplicationReplicaSet(
+            final AwsRegion region, String replicaSetName, Long optionalTimeoutInMilliseconds, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDecryption) throws Exception {
+        return Util.first(Util.filter(
+                getLandscape().getApplicationReplicaSetsByTag(region,
+                    SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, new SailingAnalyticsHostSupplier<String>(),
+                    Optional.ofNullable(optionalTimeoutInMilliseconds).map(Duration::ofMillis), Optional.ofNullable(optionalKeyName),
+                    passphraseForPrivateKeyDecryption),
+                rs->rs.getName().equals(replicaSetName)));
+    }
+    
     /**
      * @return a new replica that was started in case no running replica was found in the {@code replicaSet}, otherwise
      *         {@code null}.
@@ -802,8 +828,6 @@ public class LandscapeServiceImpl implements LandscapeService {
         registerReplicaInReplicaSetPublicTargetGroup(sailingAnalyticsProcess, replicaSet);
         return sailingAnalyticsProcess;
     }
-    
-    
     
     /**
      * Waits for the process to become ready (see {@link SailingAnalyticsProcess#waitUntilReady(Optional)}),
