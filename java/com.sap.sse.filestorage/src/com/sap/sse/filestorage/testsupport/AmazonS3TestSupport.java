@@ -7,6 +7,15 @@ import com.sap.sse.filestorage.impl.AmazonS3FileStorageServiceImpl;
 import com.sap.sse.filestorage.impl.BaseFileStorageServiceImpl;
 import com.sap.sse.security.SecurityService;
 
+/**
+ * Provide the S3 credentials for an IAM account that has access to the "sapsailing-automatic-upload-test" bucket
+ * in the system properties {@code aws.s3.test.s3AccessId} and {@code aws.s3.test.s3AccessKey}. For the build
+ * script in {@code configuration/buildAndUpdateProduct.sh} this can be done by setting the {@code APP_PARAMETERS}
+ * environment variable for the script like this: {@code APP_PARAMETERS="-Daws.s3.test.s3AccessId=... -Daws.s3.test.s3AccessKey=..."}
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class AmazonS3TestSupport {
     public static final String s3AccessId = System.getProperty("aws.s3.test.s3AccessId");
     public static final String s3AccessKey = System.getProperty("aws.s3.test.s3AccessKey");
