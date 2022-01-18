@@ -7,17 +7,16 @@
 
 # set username, password, and organization
 
-# TOKEN_FILE can be generated using obtainToken.sh
-TOKEN_FILE=~/.docker/.token
-if [ -f "${TOKEN_FILE}" ]; then
-  TOKEN=$(cat "${TOKEN_FILE}")
-  AUTH_HEADER="Authorization: JWT ${TOKEN}"
-else
+# TOKEN can be generated using docker login docker.sapsailing.com:443
+TOKEN=$( cat ~/.docker/config.json | jq -r '.auths."docker.sapsailing.com:443".auth' )
+if [ "${TOKEN}" = "null" ]; then
   # set username, password, and organization
   read -p "Username: " UNAME
   read -s -p "Password: " UPASS
   echo
   AUTH_HEADER="Authorization: Basic $( echo -n "${UNAME}:${UPASS}" | base64 )"
+else
+  AUTH_HEADER="Authorization: Basic ${TOKEN}"
 fi
 REPO=$1
 if [ "$REPO" = "" ]; then
