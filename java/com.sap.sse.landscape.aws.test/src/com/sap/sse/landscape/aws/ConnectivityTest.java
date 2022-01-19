@@ -33,8 +33,8 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
-import com.sap.sailing.landscape.procedures.StartFromSailingAnalyticsImage;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -243,7 +243,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     }
 
     private AmazonMachineImage<String> getLatestSailingImage() {
-        return landscape.getLatestImageWithTag(region, "image-type", StartFromSailingAnalyticsImage.IMAGE_TYPE_TAG_VALUE_SAILING);
+        return landscape.getLatestImageWithTag(region, "image-type", SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING);
     }
     
     @Test

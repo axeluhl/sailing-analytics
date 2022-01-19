@@ -1,34 +1,35 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.util.Date;
-
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 
 public class SimulatorResultsDTO implements IsSerializable {
 
     private long version;
     private int leg;
-    private Date startTime;
-    private long timeStep;
-    private long legDuration;
+    private TimePoint startTime;
+    private Duration timeStep;
+    private Duration legDuration;
     private RaceMapDataDTO raceCourse;
     private WindFieldDTO windField;
     private PathDTO[] paths;
     private String notificationMessage;
 
-    public SimulatorResultsDTO(){
+    @Deprecated
+    SimulatorResultsDTO() { // for GWT RPC serialization only
         this.version = 0;
         this.leg = 0;
         this.startTime = null;
-        this.timeStep = 0;
-        this.legDuration = 0;
+        this.timeStep = null;
+        this.legDuration = null;
         this.raceCourse = null;
         this.windField = null;
         this.paths = null;
         this.notificationMessage = "";
     }
 
-    public SimulatorResultsDTO(final long version, final int leg, final Date startTime, final long timeStep, final long legDuration, final RaceMapDataDTO raceCourse, final PathDTO[] paths, final WindFieldDTO windField, final String notificationMessage) {
+    public SimulatorResultsDTO(final long version, final int leg, final TimePoint startTime, final Duration timeStep, final Duration legDuration, final RaceMapDataDTO raceCourse, final PathDTO[] paths, final WindFieldDTO windField, final String notificationMessage) {
         this.version = version;
         this.leg = leg;
         this.startTime = startTime;
@@ -48,63 +49,31 @@ public class SimulatorResultsDTO implements IsSerializable {
         return this.leg;
     }
     
-    public void setVersion(int version) {
-        this.version = version;
-    }
-    
-    public Date getStartTime() {
+    public TimePoint getStartTime() {
         return this.startTime;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public long getTimeStep() {
+    public Duration getTimeStep() {
         return this.timeStep;
     }
 
-    public void setTimeStep(long timeStep) {
-        this.timeStep = timeStep;
-    }
-
-    public long getLegDuration() {
+    public Duration getLegDuration() {
         return this.legDuration;
     }
 
-    public void setLegDuration(long legDuration) {
-        this.legDuration = legDuration;
-    }
-    
     public RaceMapDataDTO getRaceCourse() {
         return this.raceCourse;
-    }
-
-    public void setRaceCourse(final RaceMapDataDTO raceCourse) {
-        this.raceCourse = raceCourse;
     }
 
     public WindFieldDTO getWindField() {
         return this.windField;
     }
 
-    public void setWindField(final WindFieldDTO windField) {
-        this.windField = windField;
-    }
-
     public PathDTO[] getPaths() {
         return this.paths;
     }
 
-    public void setPaths(final PathDTO[] paths) {
-        this.paths = paths;
-    }
-
     public String getNotificationMessage() {
         return this.notificationMessage;
-    }
-
-    public void setNotificationMessage(final String notificationMessage) {
-        this.notificationMessage = notificationMessage;
     }
 }

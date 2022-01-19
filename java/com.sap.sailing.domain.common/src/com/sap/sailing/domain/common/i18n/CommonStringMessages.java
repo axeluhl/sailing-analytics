@@ -17,6 +17,6 @@ public interface CommonStringMessages {
     String competitorRegistrationTypeClosed();
     String competitorRegistrationTypeOpenModerated();
     String competitorRegistrationTypeOpenUnmoderated();
-    String importTrackedRaces();
-
+    String importTrackedRaces();        
+    String waitingForTrackedRacesToFinishLoading();
 }

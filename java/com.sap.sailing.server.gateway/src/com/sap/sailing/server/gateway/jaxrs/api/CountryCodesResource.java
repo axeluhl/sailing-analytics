@@ -7,8 +7,8 @@ import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.CountryCodeJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
 import com.sap.sse.shared.json.JsonSerializer;

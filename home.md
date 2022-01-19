@@ -31,6 +31,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
 * Amazon
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
+  * [[Upgrading ARCHIVE server|wiki/info/landscape/archive-server-upgrade]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
   * [[Upgrading an EC2 image|wiki/info/landscape/upgrading-ec2-image]]
@@ -45,6 +46,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
 * [[sail-insight.com website|wiki/info/landscape/sail-insight.com-website]]
+* [[Docker Registry|wiki/info/landscape/docker-registry]]
 
 ### Mobile
 

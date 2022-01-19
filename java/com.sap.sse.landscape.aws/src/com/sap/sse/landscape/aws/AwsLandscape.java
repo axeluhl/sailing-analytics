@@ -659,7 +659,9 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     /**
      * Like {@link #getApplicationReplicaSetsByTag(Region, String, HostSupplier, Optional, Optional, byte[])}, only that the tag's
      * value can also be constrained using this method. This way, callers can, e.g., search for a specific replica set as long as
-     * the master runs on a dedicated host with only this replica set name in the {@code sailing-analytics-server} tag.
+     * the master runs on a dedicated host with only this replica set name in the {@code sailing-analytics-server} tag.<p>
+     * 
+     * If multiple replica sets matching the tag/value criterion are found, one of them is returned randomly.
      */
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
