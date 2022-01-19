@@ -87,6 +87,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
+import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -215,6 +216,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
                 DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> builder(
                         masterConfigurationBuilder, hostToDeployTo);
+        if (optionalKeyName != null) {
+            multiServerAppDeployerBuilder.setKeyName(optionalKeyName);
+        }
         multiServerAppDeployerBuilder
                 .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
                 .setOptionalTimeout(LandscapeService.WAIT_FOR_HOST_TIMEOUT);
@@ -343,6 +347,16 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         final CompletableFuture<Void> autoScalingGroupRemoval;
         if (autoScalingGroup != null) {
+            // only terminate replica if not running on host created by auto-scaling group
+            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
+                final Instance instance = getLandscape().getInstance(replica.getHost().getInstanceId(), replica.getHost().getRegion());
+                instance.tags().stream().filter(tag->tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG) && tag.value().equals(autoScalingGroup.getName())).findAny()
+                    .orElseGet(()->{
+                        logger.info("Found replica "+replica+" running on an instance not managed by auto-scaling group "+autoScalingGroup.getName()+". Stopping...");
+                        replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+                        return null;
+                    });
+            }
             // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
             // this will also terminate all replicas spun up by the auto-scaling group
             autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
