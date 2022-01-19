@@ -69,4 +69,9 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
         Notification.notify(error, NotificationType.ERROR);
     }
 
+    @Override
+    public void resetSubscriptions() {
+        container.resetSubscriptions();
+    }
+
 }

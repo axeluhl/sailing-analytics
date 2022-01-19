@@ -318,7 +318,7 @@ public class UserService {
                 consumer.accept(getServerInfo());
                 removeUserStatusEventHandler(this);
             }
-        }, true);
+        }, /* fireIfUserIsAlreadyAvailable */ true);
     }
 
     public void removeUserStatusEventHandler(UserStatusEventHandler handler) {

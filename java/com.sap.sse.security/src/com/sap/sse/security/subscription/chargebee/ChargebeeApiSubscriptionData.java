@@ -46,12 +46,12 @@ public class ChargebeeApiSubscriptionData {
                 invoiceStatus);
         String planId = getPlanId(subscriptionPlanProvider);
         return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
-                getTime(subscription.trialStart()), getTime(subscription.trialEnd()), subscriptionStatus,
-                paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus, subscription.mrr(),
-                getTime(subscription.createdAt()), getTime(subscription.updatedAt()),
+                getTime(subscription.trialStart()), getTime(subscription.trialEnd()), subscriptionStatus, paymentStatus,
+                transactionType, transactionStatus, invoiceId, invoiceStatus, subscription.mrr(),
+                subscription.currencyCode(), getTime(subscription.createdAt()), getTime(subscription.updatedAt()),
                 getTime(subscription.activatedAt()), getTime(subscription.nextBillingAt()),
-                getTime(subscription.currentTermEnd()), getTime(subscription.cancelledAt()),
-                TimePoint.now(), com.sap.sse.security.shared.subscription.Subscription.emptyTime());
+                getTime(subscription.currentTermEnd()), getTime(subscription.cancelledAt()), TimePoint.now(),
+                com.sap.sse.security.shared.subscription.Subscription.emptyTime());
     }
     
     private String getPlanId(SubscriptionPlanProvider subscriptionPlanProvider) {

@@ -27,8 +27,7 @@
     <div class="{local.css.subscriptionHeader}">
       <span class="{local.css.hint}">
         <g:Button ui:field="emailContact">
-          <ui:text from="{i18n.contactServicesAndInformation}" />
-          <b> ✉</b>
+          <b>✉ </b><ui:text from="{i18n.contactServicesAndInformation}" />
         </g:Button>
       </span>
       <span>&nbsp;</span>
@@ -36,9 +35,9 @@
     <h1>
       <ui:text from="{i18n.premiumFeatureList}" />
     </h1>
-    <h2>
+    <span>
       <ui:text from="{i18n.premiumFeatureListDescription}" />
-    </h2>
-    <dl ui:field="features" class="{local.css.featureList}"></dl>
+    </span>
+    <g:FlowPanel ui:field="features" styleName="{local.css.featureList}"></g:FlowPanel>
   </g:HTMLPanel>
 </ui:UiBinder> 

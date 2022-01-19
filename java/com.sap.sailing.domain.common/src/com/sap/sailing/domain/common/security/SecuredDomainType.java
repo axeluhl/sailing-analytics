@@ -54,10 +54,14 @@ public class SecuredDomainType extends HasPermissionsImpl {
         CAN_REPLAY_DURING_LIVE_RACES,
         DETAIL_TIMER,
         EXPORT,
+        SIMULATOR,
         VIEWSTREAMLETS;
 
-        private static final Action[] ALL_ACTIONS = DefaultActions.plus(CAN_REPLAY_DURING_LIVE_RACES, DETAIL_TIMER,
-                EXPORT);
+        private static final Action[] ALL_ACTIONS = DefaultActions.plus(
+                CAN_REPLAY_DURING_LIVE_RACES,
+                DETAIL_TIMER,
+                EXPORT,
+                SIMULATOR);
 
         public static final Action[] MUTATION_ACTIONS = new Action[] { EXPORT, DefaultActions.DELETE,
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,

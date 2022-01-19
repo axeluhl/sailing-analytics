@@ -175,8 +175,8 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
-import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.util.RemoteServerUtil;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 

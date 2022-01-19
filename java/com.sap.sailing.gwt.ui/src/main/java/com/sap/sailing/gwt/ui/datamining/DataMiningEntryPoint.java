@@ -88,7 +88,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
     }
 
     private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {
-        removeUrlParameter();;
+        removeUrlParameter();
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());

@@ -222,6 +222,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -1568,47 +1569,49 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
-        if (!getSecurityService()
-                .hasCurrentUserAnyPermission(SecuredDomainType.SIMULATOR.getPermission(DefaultActions.READ))) {
-            throw new UnauthorizedException("Not permitted to see simulator results.");
+        DynamicTrackedRace trackedRace = getService().getTrackedRace(legIdentifier.getRaceIdentifier());
+        if (trackedRace == null) {
+            throw new IllegalArgumentException("Race for leg " + legIdentifier + " not found!");
         }
+        SecurityUtils.getSubject()
+                .checkPermission(trackedRace.getIdentifier().getStringPermission(TrackedRaceActions.SIMULATOR));
         // get simulation-results from smart-future-cached simulation-service
         SimulatorResultsDTO result = null;
         SimulationService simulationService = getService().getSimulationService();
         if (simulationService == null) 
             return result;
         SimulationResults simulationResults = simulationService.getSimulationResults(legIdentifier);
-        if (simulationResults == null) 
+        if (simulationResults == null) {
             return result;
             // prepare simulator-results-dto
+        }
         Map<PathType, Path> paths = simulationResults.getPaths();
         if (paths != null) {
             int noOfPaths = paths.size();
-                PathDTO[] pathDTOs = new PathDTO[noOfPaths];
-                int index = noOfPaths - 1;
+            PathDTO[] pathDTOs = new PathDTO[noOfPaths];
+            int index = noOfPaths - 1;
             for (Entry<PathType, Path> entry : paths.entrySet()) {
                 pathDTOs[index] = new PathDTO(entry.getKey());
-                    // fill pathDTO with path points where speed is true wind speed
-                    List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
-                    for (TimedPositionWithSpeed p : entry.getValue().getPathPoints()) {
-                        wList.add(createSimulatorWindDTO(p));
-                    }
-                    pathDTOs[index].setPoints(wList);
+                // fill pathDTO with path points where speed is true wind speed
+                List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
+                for (TimedPositionWithSpeed p : entry.getValue().getPathPoints()) {
+                    wList.add(createSimulatorWindDTO(p));
+                }
+                pathDTOs[index].setPoints(wList);
                 pathDTOs[index].setAlgorithmTimedOut(entry.getValue().getAlgorithmTimedOut());
                 pathDTOs[index].setMixedLeg(entry.getValue().getMixedLeg());
-                    index--;
-                }
-                RaceMapDataDTO rcDTO;
-                rcDTO = new RaceMapDataDTO();
-                rcDTO.coursePositions = new CoursePositionsDTO();
-                rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
-                rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
-                rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
-                result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(),
-                        legIdentifier.getOneBasedLegIndex(), simulationResults.getStartTime(),
-                        simulationResults.getTimeStep(), simulationResults.getLegDuration(), rcDTO, pathDTOs, null,
-                        null);
+                index--;
             }
+            RaceMapDataDTO rcDTO;
+            rcDTO = new RaceMapDataDTO();
+            rcDTO.coursePositions = new CoursePositionsDTO();
+            rcDTO.coursePositions.waypointPositions = new ArrayList<Position>();
+            rcDTO.coursePositions.waypointPositions.add(simulationResults.getStartPosition());
+            rcDTO.coursePositions.waypointPositions.add(simulationResults.getEndPosition());
+            result = new SimulatorResultsDTO(simulationResults.getVersion().asMillis(),
+                    legIdentifier.getOneBasedLegIndex(), simulationResults.getStartTime(),
+                    simulationResults.getTimeStep(), simulationResults.getLegDuration(), rcDTO, pathDTOs, null, null);
+        }
         return result;
     }
     

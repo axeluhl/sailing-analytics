@@ -1030,7 +1030,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
     private void handleDeviceMappings(StrippedLeaderboardDTOWithSecurity t) {
         sailingServiceWrite.getSecretForRegattaByName(t.getName(), new AsyncCallback<String>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 // if this happens, the user did apparently not have sufficient rights.

@@ -191,7 +191,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 sailingServiceAsync, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
                 startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true,
-                new DefaultQuickFlagDataProvider(), paywallResolver);
+                new DefaultQuickFlagDataProvider(), paywallResolver, /* isSimulationEnabled */false);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);
@@ -201,7 +201,6 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
          * Needs to resize the map because google maps are not shown loaded fully when they are hidden.
          * */
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            
             @Override
             public void execute() {
                 raceMap.onResize();

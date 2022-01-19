@@ -10,6 +10,8 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 public interface SubscriptionView extends SubscribeView, IsWidget {
 
     void addSubscriptionPlan(SubscriptionPlanDTO plan, final SubscriptionCard.Type type, final EventBus eventBus);
+    
+    void resetSubscriptions();
 
     void setPresenter(SubscriptionView.Presenter presenter);
 

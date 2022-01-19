@@ -93,6 +93,11 @@ public abstract class Subscription implements Serializable {
     private final Integer reoccuringPaymentValue;
     
     /*
+     * The String representation of the currency code used 
+     */
+    private final String currencyCode;
+    
+    /*
      * TIme at which the subscription status was last changed to cancelled or will be changed to cancelled, 
      * if it is planned for cancellation.
      */
@@ -147,12 +152,13 @@ public abstract class Subscription implements Serializable {
     public Subscription(String subscriptionId, String planId, String customerId, TimePoint trialStart,
             TimePoint trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
             String transactionStatus, String invoiceId, String invoiceStatus, Integer reoccuringPaymentValue,
-            TimePoint subscriptionCreatedAt, TimePoint subscriptionUpdatedAt, TimePoint subscriptionActivatedAt,
-            TimePoint nextBillingAt, TimePoint currentTermEnd, TimePoint cancelledAt, TimePoint latestEventTime,
-            TimePoint manualUpdatedAt, String providerName) {
+            String currencyCode, TimePoint subscriptionCreatedAt, TimePoint subscriptionUpdatedAt,
+            TimePoint subscriptionActivatedAt, TimePoint nextBillingAt, TimePoint currentTermEnd, TimePoint cancelledAt,
+            TimePoint latestEventTime, TimePoint manualUpdatedAt, String providerName) {
         this.subscriptionId = subscriptionId;
         this.planId = planId;
         this.customerId = customerId;
+        this.currencyCode = currencyCode;
         this.subscriptionActivatedAt = subscriptionActivatedAt;
         this.nextBillingAt = nextBillingAt;
         this.currentTermEnd = currentTermEnd;
@@ -274,29 +280,16 @@ public abstract class Subscription implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        final String separator = ", ";
-        builder.append("provider: ").append(providerName).append(separator).append("subscriptionId: ")
-                .append(getStringFieldValue(subscriptionId)).append(separator).append("planId: ")
-                .append(getStringFieldValue(planId)).append(separator).append("customerId: ")
-                .append(getStringFieldValue(customerId)).append(separator).append("subscriptionStatus: ")
-                .append(getStringFieldValue(subscriptionStatus)).append(separator).append("paymentStatus: ")
-                .append(getStringFieldValue(paymentStatus)).append(separator).append("transactionType: ")
-                .append(getStringFieldValue(transactionType)).append(separator).append("transactionStatus: ")
-                .append(getStringFieldValue(transactionStatus)).append(separator).append("trialStart: ")
-                .append(trialStart.asMillis()).append(separator).append("trialEnd: ")
-                .append(trialEnd.asMillis()).append(separator).append("invoiceId: ")
-                .append(getStringFieldValue(invoiceId)).append(separator).append("invoiceStatus: ")
-                .append(getStringFieldValue(invoiceStatus)).append(separator).append("latestEventTime: ")
-                .append(latestEventTime.asMillis()).append(separator).append("manualUpdatedAt: ")
-                .append(manualUpdatedAt.asMillis()).append(separator)
-                .append("subscriptionCreatedAt: ").append(subscriptionCreatedAt.asMillis()).append(separator)
-                .append("subscriptionUpdatedAt: ").append(subscriptionUpdatedAt.asMillis());
-        return builder.toString();
-    }
-
-    private String getStringFieldValue(String value) {
-        return (value == null || value.equals("")) ? "empty" : value;
+        return "Subscription [subscriptionId=" + subscriptionId + ", planId=" + planId + ", customerId=" + customerId
+                + ", trialStart=" + trialStart + ", trialEnd=" + trialEnd + ", subscriptionStatus=" + subscriptionStatus
+                + ", paymentStatus=" + paymentStatus + ", invoiceId=" + invoiceId + ", invoiceStatus=" + invoiceStatus
+                + ", transactionType=" + transactionType + ", transactionStatus=" + transactionStatus
+                + ", subscriptionCreatedAt=" + subscriptionCreatedAt + ", reoccuringPaymentValue="
+                + reoccuringPaymentValue + ", currencyCode=" + getCurrencyCode() + ", cancelledAt=" + cancelledAt
+                + ", subscriptionActivatedAt=" + subscriptionActivatedAt + ", nextBillingAt=" + nextBillingAt
+                + ", currentTermEnd=" + currentTermEnd + ", subscriptionUpdatedAt=" + subscriptionUpdatedAt
+                + ", latestEventTime=" + latestEventTime + ", manualUpdatedAt=" + manualUpdatedAt + ", providerName="
+                + providerName + "]";
     }
 
     public TimePoint getCancelledAt() {
@@ -305,6 +298,10 @@ public abstract class Subscription implements Serializable {
 
     public Integer getReoccuringPaymentValue() {
         return reoccuringPaymentValue;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
     }
 
 }

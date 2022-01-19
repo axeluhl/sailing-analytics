@@ -69,9 +69,11 @@ public class SubscriptionCard extends Composite {
 
     private final Consumer<SubscriptionPrice> subscriptionCallback;
     private SubscriptionPrice currentPrice;
+    private final SubscriptionPlanDTO subscriptionPlanDTO;
 
     public <T> SubscriptionCard(SubscriptionPlanDTO subscriptionPlanDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
         this.subscriptionCallback = subscriptionCallback;
+        this.subscriptionPlanDTO = subscriptionPlanDTO;
         SubscriptionCardResources.INSTANCE.css().ensureInjected();
         SharedResources.INSTANCE.mediaCss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -163,7 +165,7 @@ public class SubscriptionCard extends Composite {
             });
         default:
             break;
-        }
+        }       
         final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
         title.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanNameMessageKey()));
         description.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanDescMessageKey()));
@@ -177,6 +179,10 @@ public class SubscriptionCard extends Composite {
                 features.add(feature);
             }
         }
+    }
+    
+    public SubscriptionPlanDTO getSubscriptionPlanDTO() {
+        return subscriptionPlanDTO;
     }
 
     @UiHandler("button")

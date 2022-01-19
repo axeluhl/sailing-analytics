@@ -7,6 +7,4 @@ import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConsta
 @DefaultLocale("en")
 public interface SailingSubscriptionStringConstants extends SubscriptionStringConstants {
     public static final SailingSubscriptionStringConstants INSTANCE = GWT.create(SailingSubscriptionStringConstants.class);
-    
-    String streamlet_viewer_role();
 }

@@ -41,13 +41,11 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
     public static final SubscriptionPlan YEARLY = new SailingSubscriptionPlan(YEARLY_PLAN_ID,
             Stream.of(new SubscriptionPrice(YEARLY_PLAN_ITEMPRICE_ID, YEARLY_PLAN_PRICE, USD_CURRENCY_CODE,
                     PaymentInterval.YEAR)).collect(Collectors.toSet()),
-            new SubscriptionPlanRole(StreamletViewerRole.getRoleId()),
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
 
     public static final SubscriptionPlan WEEKLY = new SailingSubscriptionPlan(WEEKLY_PLAN_ID,
             Stream.of(new SubscriptionPrice(WEEKLY_PLAN_ITEMPRICE_ID, WEEKLY_PLAN_PRICE, USD_CURRENCY_CODE,
                     PaymentInterval.WEEK)).collect(Collectors.toSet()),
-            new SubscriptionPlanRole(StreamletViewerRole.getRoleId()),
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
 
     public static Map<Serializable, SubscriptionPlan> getAllInstances() {

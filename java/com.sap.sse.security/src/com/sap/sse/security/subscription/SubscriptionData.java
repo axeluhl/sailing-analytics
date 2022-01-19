@@ -30,7 +30,8 @@ public class SubscriptionData {
         CURRENT_TERM_END,
         CANCELLED_AT,
         SUBSCRIPTION_ACTIVATED_AT,
-        REOCURRING_PAYMENT_VALUE;
+        REOCURRING_PAYMENT_VALUE,
+        CURRENCY_CODE;
     }
 
     /**
@@ -139,6 +140,10 @@ public class SubscriptionData {
     
     public Integer getReocurringPaymentValue() {
         return getMapIntegerValue(DataAttribute.REOCURRING_PAYMENT_VALUE.name());
+    }
+    
+    public String getCurrencyCode() {
+        return getMapStringValue(DataAttribute.CURRENCY_CODE.name());
     }
 
     private String getMapStringValue(String key) {

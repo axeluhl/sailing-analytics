@@ -263,7 +263,7 @@ public class PermissionChecker {
     /**
      * This is not the fully featured permission check!<br>
      * This method checks if a user owns all permissions implied by the given {@link WildcardPermission}. If a user
-     * wants to grant another user a specific permissions, he needs to own all permissions that may be implied by the
+     * wants to grant another user a specific permissions, he/she needs to own all permissions that may be implied by the
      * granted permission.<br>
      * The regular permission check only succeeds if a requested permission is completely implied by a granted
      * permission. This is fine when checking for a specific permission like USER:UPDATE:my_user. If one user grants a

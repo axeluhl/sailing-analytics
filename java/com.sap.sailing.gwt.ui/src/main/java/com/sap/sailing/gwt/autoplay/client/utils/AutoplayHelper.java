@@ -304,7 +304,7 @@ public class AutoplayHelper {
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
                 new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
-                raceMapResources, false, provider, paywallResolver);
+                raceMapResources, false, provider, paywallResolver, /* isSimulationEnabled */false);
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         raceboardTimer.setPlayMode(PlayModes.Live);

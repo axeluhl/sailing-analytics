@@ -229,7 +229,7 @@
 
 .hint button {
  background: none;
- border: 1px solid transparent;
+ border: 1px solid lightgray;
  border-radius: 4px;
  color: #333
 }
@@ -239,14 +239,43 @@
  color: #fff;
 }
 
-.featureList dt {
- font-size: 1.2em;
- font-weight: bold;
- margin-top: 1em;
- margin-bottom: 0.5em;
+.featureList {
+ margin-bottom: 1em;
 }
 
-.featureList dd {
- font-size: 1em;
- font-weight: 600;
+.featureTitle {
+ font-weight: bold;
+ font-size: 1.2em;
+ margin-top: 1em;
+}
+
+.featureDescription {
+ font-style: italic;
+}
+
+.featureLink {
+ font-weight: bolder;
+ color: #008fcc;
+ font-style: normal;
+ text-decoration: none !important;
+}
+
+.featureLink a {
+ text-decoration: none;
+}
+
+.featureCheck {
+ text-align: center;
+ margin: 0 1em;
+}
+
+.featureCheck img {
+ width: 27px;
+}
+
+.featureHeader {
+ font-weight: bold;
+ font-size: 1.2em;
+ text-transform: capitalize;
+ margin: 0 1em;
 }

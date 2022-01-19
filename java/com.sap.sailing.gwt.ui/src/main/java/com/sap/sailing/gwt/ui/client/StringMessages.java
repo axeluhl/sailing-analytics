@@ -2337,7 +2337,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String openPortal();
     String plans();
     String freePlan();
+    String currentTermEnd();
     String inTrial();
+    String cancelled();
     String paused();
     String trialText(String endIn, String endAt);
     String numHours(int hours);
@@ -2347,6 +2349,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String paymentStatusSuccess();
     String paymentStatusNoSuccess();
     String refunded();
+    String cancelledAt();
+    String nextBillingAt();
+    String currencyValue(double value, String currency);
     String errorLoadingUserSubscription(String errMessage);
     String failedCancelSubscription();
     String errorCancelSubscription(String errMessage);

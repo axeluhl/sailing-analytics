@@ -51,7 +51,7 @@ public class CombinedWindPanel extends FlowPanel {
             addStyleName(raceMapStyle.premiumReady());
         }
         // TODO: create custom confirm dialog with list of available plans or if no plan available a text hint that there is no plan
-        // integrate this functions as reusable in paywalResolver
+        // integrate this functions as reusable in paywallResolver
         // TODO: use something like eventBus to get logIn event (see paywalResolver.registerUserStatusEventHandler())
         ConfirmationDialog subscribeDialog = ConfirmationDialog.create(stringMessages.subscriptionSuggestionTitle(),
                 stringMessages.pleaseSubscribeToUseSpecific(stringMessages.streamletsOverlayFeature()),
@@ -64,9 +64,7 @@ public class CombinedWindPanel extends FlowPanel {
         canvas = transformer.getCanvas();
         canvas.addStyleName(this.raceMapStyle.raceMapIndicatorPanelCanvas());
         add(canvas);
-        
         paywallResolver.registerUserStatusEventHandler(new UserStatusEventHandler() {
-            
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 final boolean hasPermission = paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS);
@@ -80,7 +78,6 @@ public class CombinedWindPanel extends FlowPanel {
                 updateSettings(map, hasPermission);
             }
         });
-        
         canvas.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
