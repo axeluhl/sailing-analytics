@@ -339,6 +339,22 @@ public class LandscapeServiceImpl implements LandscapeService {
         return idForProgressTracking;
     }
 
+    private void terminateReplicasNotManagedByAutoScalingGroup(AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDecryption) throws InterruptedException, ExecutionException {
+        // only terminate replica if not running on host created by auto-scaling group
+        final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
+        for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
+            final Instance instance = getLandscape().getInstance(replica.getHost().getInstanceId(), replica.getHost().getRegion());
+            instance.tags().stream().filter(tag->autoScalingGroup != null && tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG) && tag.value().equals(autoScalingGroup.getName())).findAny()
+                .orElseGet(()->{
+                    logger.info("Found replica "+replica+" running on an instance not managed by auto-scaling group " +
+                            (autoScalingGroup != null ? autoScalingGroup.getName() : "") + ". Stopping...");
+                    replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+                    return null;
+                });
+        }
+    }
+    
     @Override
     public void removeApplicationReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
@@ -346,25 +362,12 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AwsRegion region = new AwsRegion(regionId);
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         final CompletableFuture<Void> autoScalingGroupRemoval;
+        terminateReplicasNotManagedByAutoScalingGroup(applicationReplicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
         if (autoScalingGroup != null) {
-            // only terminate replica if not running on host created by auto-scaling group
-            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
-                final Instance instance = getLandscape().getInstance(replica.getHost().getInstanceId(), replica.getHost().getRegion());
-                instance.tags().stream().filter(tag->tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG) && tag.value().equals(autoScalingGroup.getName())).findAny()
-                    .orElseGet(()->{
-                        logger.info("Found replica "+replica+" running on an instance not managed by auto-scaling group "+autoScalingGroup.getName()+". Stopping...");
-                        replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-                        return null;
-                    });
-            }
             // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
             // this will also terminate all replicas spun up by the auto-scaling group
             autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
         } else {
-            // no auto-scaling group; terminate replicas explicitly
-            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
-                replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-            }
             autoScalingGroupRemoval = new CompletableFuture<>();
             autoScalingGroupRemoval.complete(null);
         }
