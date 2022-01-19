@@ -56,8 +56,8 @@ class UserSubscriptionItem extends Composite {
         sectionHeaderUi.setSectionTitle(valueProvider.getSubscriptionName(subscription));
         sectionHeaderUi.setLabelType(valueProvider.getSubscriptionStatusLabelType(subscription));
 
-        addInfo(i18n.createdAt(), "???"); // formatDateAndTime(subscription.getCreatedAt()));
-        addInfo(i18n.currentTermEnd(), subscription.getCurrentTermEnd());
+        addInfo(i18n.createdAt(), subscription.getCreatedAt());
+        addInfo(i18n.currentTermEnd(), valueProvider.getTermEnd(subscription));
 
         valueProvider.configurePaymentStatusElement(subscription, this::addInfo, this::addInfo);
 
@@ -65,7 +65,7 @@ class UserSubscriptionItem extends Composite {
             addInfo(i18n.cancelledAt(), subscription.getCancelledAt());
         } else if (subscription.isRenewing()) {
             addInfo(i18n.nextBillingAt(), subscription.getNextBillingAt());
-            addInfo("", i18n.currencyValue(subscription.getReoccuringPaymentValue() / 100, "$"));
+            addInfo("", valueProvider.getRecurringPayment(subscription));
         }
 
         sectionHeaderUi.initCollapsibility(contentContainerUi.getElement(), false);
