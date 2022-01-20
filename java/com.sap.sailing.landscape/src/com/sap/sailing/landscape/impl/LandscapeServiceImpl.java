@@ -510,6 +510,25 @@ public class LandscapeServiceImpl implements LandscapeService {
         return masterConfigurationBuilder;
     }
 
+    private Builder<?, String> createReplicaConfigurationBuilder(final AwsLandscape<String> landscape,
+            final AwsRegion region, String replicaSetName, final int masterPort,
+            final Release release, final String bearerTokenUsedByReplicas, final String masterHostname) {
+        final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
+        // no specific memory configuration is made here; replicas are currently launched on a dedicated host and hence can
+        // grab as much memory as they can get on that host
+        replicaConfigurationBuilder
+            .setLandscape(landscape)
+            .setRegion(region)
+            .setServerName(replicaSetName)
+            .setRelease(release)
+            .setPort(masterPort) // replicas need to run on the same port for target group "interoperability"
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
+                    .setMasterHostname(masterHostname) // don't set the master port; the replica set talks to "itself" through the load balancer using HTTPS
+                    .setCredentials(new BearerTokenReplicationCredentials(bearerTokenUsedByReplicas))
+                    .build());
+        return replicaConfigurationBuilder;
+    }
+    
     private void applyMemoryConfigurationToApplicationConfigurationBuilder(
             final AwsApplicationConfiguration.Builder<?, ?, ?, ?, ?> applicationConfigurationBuilder,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) {
@@ -546,19 +565,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .build();
         createLoadBalancerMapping.run();
         // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
-        final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
-        // no specific memory configuration is made here; replicas are currently launched on a dedicated host and hence can
-        // grab as much memory as they can get on that host
-        replicaConfigurationBuilder
-            .setLandscape(landscape)
-            .setRegion(region)
-            .setServerName(replicaSetName)
-            .setRelease(release)
-            .setPort(master.getPort()) // replicas need to run on the same port for target group "interoperability"
-            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
-                    .setMasterHostname(masterHostname) // don't set the master port; the replica set talks to "itself" through the load balancer using HTTPS
-                    .setCredentials(new BearerTokenReplicationCredentials(bearerTokenUsedByReplicas))
-                    .build());
+        final Builder<?, String> replicaConfigurationBuilder = createReplicaConfigurationBuilder(landscape, region, replicaSetName, master.getPort(), release, bearerTokenUsedByReplicas, masterHostname);
         final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
@@ -596,7 +603,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                         allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
         return applicationReplicaSet;
     }
-    
+
     @Override
     public Release upgradeApplicationReplicaSet(AwsRegion region,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
@@ -717,19 +724,11 @@ public class LandscapeServiceImpl implements LandscapeService {
     private SailingAnalyticsProcess<String> spinUpReplicaAndRegisterInPublicTargetGroup(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicationBearerToken) throws Exception {
-        final com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
         final AwsRegion region = replicaSet.getMaster().getHost().getRegion();
-        final InstanceType masterInstanceType = getLandscape().getInstance(replicaSet.getMaster().getHost().getInstanceId(), region).instanceType();
         final Release release = replicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase);
-        replicaConfigurationBuilder
-            .setLandscape(getLandscape())
-            .setRegion(region)
-            .setPort(replicaSet.getMaster().getPort())
-            .setServerName(replicaSet.getServerName())
-            .setRelease(release)
-            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
-                    .setMasterHostname(replicaSet.getHostname()) // see bug5571: don't rely on hostname being {server-name}.sapsailing.com but take from load balancer config
-                    .setCredentials(new BearerTokenReplicationCredentials(replicationBearerToken)).build());
+        final com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder<?, String> replicaConfigurationBuilder =
+                createReplicaConfigurationBuilder(getLandscape(), region, replicaSet.getServerName(), replicaSet.getMaster().getPort(), release, replicationBearerToken, replicaSet.getHostname());
+        final InstanceType masterInstanceType = getLandscape().getInstance(replicaSet.getMaster().getHost().getInstanceId(), region).instanceType();
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
         replicaHostBuilder
             .setInstanceType(masterInstanceType)
