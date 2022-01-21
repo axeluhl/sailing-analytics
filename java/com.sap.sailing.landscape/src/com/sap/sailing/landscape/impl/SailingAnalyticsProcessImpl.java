@@ -195,7 +195,6 @@ implements SailingAnalyticsProcess<ShardingKey> {
 
     @Override
     public SailingAnalyticsHost<ShardingKey> getHost() {
-        @SuppressWarnings("unchecked")
         final SailingAnalyticsHost<ShardingKey> result = (SailingAnalyticsHost<ShardingKey>) super.getHost();
         return result;
     }

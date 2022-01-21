@@ -81,6 +81,7 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * <ul>
      * <li>not run any other application process on the {@link #getPort() HTTP port} used by this application replica set</li>
      * <li>not have a process already deployed under the same {@link #getServerName() server name} used by this replica set</li>
+     * <li>not be managed by an auto-scaling group</li>
      * </ul>
      */
     boolean isEligibleForDeployment(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host,

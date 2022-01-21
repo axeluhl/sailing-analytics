@@ -353,7 +353,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             } else {
                 final JSONArray result = new JSONArray();
                 for (final SailingAnalyticsHost<String> host : getLandscapeService().getEligibleHostsForReplicaSet(region, replicaSet, optionalKeyName, passphraseForPrivateKeyDecryption)) {
-                    result.add(new HostJsonSerializer().serialize(host));
+                    result.add(new HostJsonSerializer<String>().serialize(host));
                 }
                 response = Response.ok().entity(streamingOutput(result)).build();
             }

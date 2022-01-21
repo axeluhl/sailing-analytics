@@ -18,4 +18,7 @@ extends ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactory) throws Exception;
     
     Database getDatabaseConfiguration(Region region, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    @Override
+    AwsInstance<ShardingKey> getHost();
 }

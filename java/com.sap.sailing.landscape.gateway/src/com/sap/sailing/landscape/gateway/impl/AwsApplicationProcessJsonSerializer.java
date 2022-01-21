@@ -14,7 +14,7 @@ public class AwsApplicationProcessJsonSerializer<ShardingKey, MetricsT extends A
     @Override
     public JSONObject serialize(ProcessT object) {
         final JSONObject result = new JSONObject();
-        result.put(HOST, new HostJsonSerializer().serialize(object.getHost()));
+        result.put(HOST, new HostJsonSerializer<ShardingKey>().serialize(object.getHost()));
         result.put(PORT, object.getPort());
         result.put(SERVER_DIRECTORY, object.getServerDirectory());
         return result;

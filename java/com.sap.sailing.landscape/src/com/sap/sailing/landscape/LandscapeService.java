@@ -13,12 +13,10 @@ import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
-import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
-import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
 public interface LandscapeService {
@@ -46,12 +44,6 @@ public interface LandscapeService {
    
     String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
 
-    /**
-     * tag {@link Tag#key() key} used by AWS auto-scaling groups to tag the instances launched by the group; the
-     * tag's {@link Tag#value() value} equals the {@link AwsAutoScalingGroup auto-scaling group's} name. 
-     */
-    String AWS_AUTOSCALING_GROUP_NAME_TAG = "aws:autoscaling:groupName";
-    
     /**
      * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
      * credentials and stores them in the user's preference store from where they can be obtained again using

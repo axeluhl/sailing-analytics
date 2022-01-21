@@ -273,13 +273,20 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     @Override
     public boolean isEligibleForDeployment(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final Iterable<ProcessT> applicationProcesses = host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        for (final ProcessT applicationProcess : applicationProcesses) {
-            if (applicationProcess.getPort() == getPort() || applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase).equals(getServerName())) {
-                return false;
+        boolean result;
+        if (host.isManagedByAutoScalingGroup()) {
+            result = false;
+        } else {
+            result = true;
+            final Iterable<ProcessT> applicationProcesses = host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            for (final ProcessT applicationProcess : applicationProcesses) {
+                if (applicationProcess.getPort() == getPort() || applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase).equals(getServerName())) {
+                    result = false;
+                    break;
+                }
             }
         }
-        return true;
+        return result;
     }
 
     private boolean hasPublicRuleForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> publicTargetGroupCandidate) {

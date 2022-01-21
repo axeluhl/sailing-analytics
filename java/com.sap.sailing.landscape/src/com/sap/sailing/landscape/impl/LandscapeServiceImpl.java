@@ -87,7 +87,6 @@ import com.sap.sse.util.ServiceTrackerFactory;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
-import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -344,14 +343,11 @@ public class LandscapeServiceImpl implements LandscapeService {
         // only terminate replica if not running on host created by auto-scaling group
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
-            final Instance instance = getLandscape().getInstance(replica.getHost().getInstanceId(), replica.getHost().getRegion());
-            instance.tags().stream().filter(tag->autoScalingGroup != null && tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG) && tag.value().equals(autoScalingGroup.getName())).findAny()
-                .orElseGet(()->{
-                    logger.info("Found replica "+replica+" running on an instance not managed by auto-scaling group " +
-                            (autoScalingGroup != null ? autoScalingGroup.getName() : "") + ". Stopping...");
-                    replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
-                    return null;
-                });
+            if (autoScalingGroup == null || !replica.getHost().isManagedByAutoScalingGroup(autoScalingGroup)) {
+                logger.info("Found replica "+replica+" running on an instance not managed by auto-scaling group " +
+                        (autoScalingGroup != null ? autoScalingGroup.getName() : "") + ". Stopping...");
+                replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+            }
         }
     }
     
