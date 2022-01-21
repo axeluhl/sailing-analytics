@@ -9,14 +9,17 @@ import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
+import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
 public interface LandscapeService {
@@ -69,6 +72,16 @@ public interface LandscapeService {
             String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
     
+    /**
+     * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName} parameter.
+     * The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of available ports
+     * is identified and chosen automatically. The {@code replicaInstanceType} is used to configure the launch configuration
+     * used by the auto-scaling group which is also created so that when dedicated replicas need to be provided during
+     * auto-scaling, their instance type is known. The choice of {@code dynamicLoadBalancerMapping} must only be set
+     * if the host to deploy to lives in the default region; otherwise, the DNS wildcard record for the overall domain
+     * would be made point to a wrong region. If set to {@code false}, a DNS entry will be created that points to the
+     * load balancer used for the new replica set's routing rules.<p>
+     */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> deployApplicationToExistingHost(String replicaSetName,
             SailingAnalyticsHost<String> hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
@@ -151,4 +164,13 @@ public interface LandscapeService {
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> getApplicationReplicaSet(
             AwsRegion region, String replicaSetName, Long optionalTimeoutInMilliseconds, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption) throws Exception;
+    
+    /**
+     * Creates a new empty multi-server instance. The region must be specified; instance type and availability zone
+     * may be specified, and so may the server name used for the "Name" tag.
+     */
+    <BuilderT extends StartMultiServer.Builder<BuilderT, String>>
+    SailingAnalyticsHost<String> createEmptyMultiServer(AwsRegion region, Optional<InstanceType> instanceType,
+            Optional<AwsAvailabilityZone> availabilityZone, Optional<String> name, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

@@ -38,6 +38,7 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
+import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost;
@@ -57,6 +58,7 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
@@ -194,6 +196,12 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     /**
+     * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName} parameter.
+     * The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of available ports
+     * is identified and chosen automatically. The {@code replicaInstanceType} is used to configure the launch configuration
+     * used by the auto-scaling group which is also created so that when dedicated replicas need to be provided during
+     * auto-scaling, their instance type is known.<p>
+     * 
      * The "internal" method exists in order to declare a few type parameters which wouldn't be possible on the GWT RPC
      * interface method as some of these types are not seen by clients.
      */
@@ -881,5 +889,24 @@ public class LandscapeServiceImpl implements LandscapeService {
             }
         }
         return null;
+    }
+
+    @Override
+    public <BuilderT extends StartMultiServer.Builder<BuilderT, String>> SailingAnalyticsHost<String> createEmptyMultiServer(AwsRegion region, Optional<InstanceType> instanceType,
+            Optional<AwsAvailabilityZone> availabilityZone, Optional<String> name, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final StartMultiServer.Builder<BuilderT, String> startMultiServerProcedureBuilder = StartMultiServer.<BuilderT, String>builder();
+        startMultiServerProcedureBuilder
+            .setLandscape(getLandscape())
+            .setRegion(region);
+        instanceType.ifPresent(it->startMultiServerProcedureBuilder.setInstanceType(it));
+        availabilityZone.ifPresent(az->startMultiServerProcedureBuilder.setAvailabilityZone(az));
+        optionalKeyName.ifPresent(keyName->startMultiServerProcedureBuilder.setKeyName(keyName));
+        if (privateKeyEncryptionPassphrase != null) {
+            startMultiServerProcedureBuilder.setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
+        }
+        name.ifPresent(nameTag->startMultiServerProcedureBuilder.setInstanceName(nameTag));
+        final StartMultiServer<String> startMultiServerProcedure = startMultiServerProcedureBuilder.build();
+        startMultiServerProcedure.run();
+        return startMultiServerProcedure.getHost();
     }
 }
