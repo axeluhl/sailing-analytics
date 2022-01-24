@@ -88,6 +88,15 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
+     * Any {@link #getReplicas() replica in this replica set} that is not running on a host
+     * {@link AwsInstance#isManagedByAutoScalingGroup(AwsAutoScalingGroup) managed} by this replica set's
+     * {@link #getAutoScalingGroup() auto-scaling group} (in case there is no auto-scaling group defined for this
+     * replica set, all replicas) will be stopped, and if it was the last application process on its host, the host
+     * will be terminated.
+     */
+    void stopAllUnmanagedReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
+    /**
      * In addition to what the super-interface does (checking the {@link #getMaster() master's} {@link Process#getPort()
      * port}), in case a master instance currently cannot be found, this implementation can resort to checking the
      * {@link #getMasterTargetGroup() master target group's} {@link TargetGroup#getPort() port} setting.

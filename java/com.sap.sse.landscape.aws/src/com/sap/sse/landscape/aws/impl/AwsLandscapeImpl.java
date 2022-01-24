@@ -38,7 +38,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
@@ -52,6 +51,7 @@ import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -306,7 +306,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region) throws InterruptedException, ExecutionException {
         Region awsRegion = getRegion(region);
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(awsRegion);
-        final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
+        final Iterable<AwsAvailabilityZone> availabilityZones = getAvailabilityZones(region);
         final SubnetMapping[] subnetMappings = Util.toArray(Util.map(getSubnetsForAvailabilityZones(awsRegion, availabilityZones),
                 subnet->SubnetMapping.builder().subnetId(subnet.subnetId()).build()), new SubnetMapping[0]);
         final CreateLoadBalancerResponse response = client
@@ -368,7 +368,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 });
     }
 
-    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Listener createLoadBalancerHttpsListener(ApplicationLoadBalancer<ShardingKey> alb) throws InterruptedException, ExecutionException {
         final CompletableFuture<String> defaultCertificateArnFuture = getDefaultCertificateArn(alb.getRegion(), DEFAULT_CERTIFICATE_DOMAIN);
         final int httpPort = 80;
@@ -466,7 +466,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     /**
      * Grabs all subnets that are default subnet for any of the availability zones specified
      */
-    private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AvailabilityZone> azs) {
+    private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AwsAvailabilityZone> azs) {
         return Util.filter(getEc2Client(region).describeSubnets().subnets(), subnet -> subnet.defaultForAz()
                 && Util.contains(Util.map(azs, az -> az.getId()), subnet.availabilityZoneId()));
     }
@@ -961,7 +961,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public Iterable<AvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
+    public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
         return Util.map(getEc2Client(getRegion(awsRegion)).describeAvailabilityZones().availabilityZones(),
                 AwsAvailabilityZoneImpl::new);
     }
@@ -1056,7 +1056,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
         for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
@@ -1319,7 +1319,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<HostT> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
             HostSupplier<ShardingKey, HostT> hostSupplier) {
@@ -1327,7 +1327,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSetByTagValue(
             com.sap.sse.landscape.Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier,
@@ -1337,7 +1337,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(
             com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier,
@@ -1346,7 +1346,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
-    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSets(
             com.sap.sse.landscape.Region region, Supplier<Iterable<HostT>> hostsSupplier,
@@ -1424,7 +1424,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(com.sap.sse.landscape.Region region,
             final String serverName, final ProcessT master, final Iterable<ProcessT> replicas) {
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
@@ -1437,7 +1437,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
     }
 
-    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(
             final String serverName, final ProcessT master, final Iterable<ProcessT> replicas,
             final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
@@ -1697,7 +1697,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfigurationAndAutoScalingGroup(
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    void createLaunchConfigurationAndAutoScalingGroup(
             com.sap.sse.landscape.Region region, String replicaSetName, Optional<Tags> tags,
             TargetGroup<ShardingKey> publicTargetGroup, String keyName, InstanceType instanceType,
             String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
@@ -1707,7 +1708,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
         final String launchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
         final String autoScalingGroupName = getAutoScalingGroupName(replicaSetName);
-        final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
+        final Iterable<AwsAvailabilityZone> availabilityZones = getAvailabilityZones(region);
         final int instanceWarmupTimeInSeconds = (int) Duration.ONE_MINUTE.times(3).asSeconds();
         autoScalingClient.createLaunchConfiguration(b->b
                 .launchConfigurationName(launchConfigurationName)

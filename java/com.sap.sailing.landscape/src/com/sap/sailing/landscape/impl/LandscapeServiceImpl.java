@@ -182,8 +182,8 @@ public class LandscapeServiceImpl implements LandscapeService {
                         replicaDeploymentProcessBuilder.setKeyName(optionalKeyName);
                     }
                     replicaDeploymentProcessBuilder
-                    .setOptionalTimeout(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)
-                    .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
+                        .setOptionalTimeout(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)
+                        .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
                     DeployProcessOnMultiServer<String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> replicaDeploymentProcess;
                     try {
                         replicaDeploymentProcess = replicaDeploymentProcessBuilder.build();
@@ -196,11 +196,13 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     /**
-     * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName} parameter.
-     * The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of available ports
-     * is identified and chosen automatically. The {@code replicaInstanceType} is used to configure the launch configuration
-     * used by the auto-scaling group which is also created so that when dedicated replicas need to be provided during
-     * auto-scaling, their instance type is known.<p>
+     * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName}
+     * parameter. The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of
+     * available ports is identified and chosen automatically. The target groups and load balancing set-up is created.
+     * The {@code replicaInstanceType} is used to configure the launch configuration used by the auto-scaling group
+     * which is also created so that when dedicated replicas need to be provided during auto-scaling, their instance
+     * type is known.
+     * <p>
      * 
      * The "internal" method exists in order to declare a few type parameters which wouldn't be possible on the GWT RPC
      * interface method as some of these types are not seen by clients.
@@ -248,7 +250,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             throws Exception {
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> archiveReplicaSet = getLandscape()
                 .getApplicationReplicaSetByTagValue(new AwsRegion(regionId),
-                        SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, "ARCHIVE",
+                        SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE,
                         new SailingAnalyticsHostSupplier<String>(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
                         Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
         logger.info("Found ARCHIVE replica set " + archiveReplicaSet + " with master " + archiveReplicaSet.getMaster());
@@ -680,17 +682,13 @@ public class LandscapeServiceImpl implements LandscapeService {
         if (replicaSet.getAutoScalingGroup() != null) {
             getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(), replicaSet.getName(), release);
         }
-        logger.info("Upgrading master "+replicaSet.getMaster()+" to release "+release.getName());
-        replicaSet.getMaster().getHost().createRootSshChannel(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)
-            .runCommandAndReturnStdoutAndLogStderr("su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
-                    "cd "+replicaSet.getMaster().getServerDirectory().replaceAll("\"", "\\\\\"")+"; "+
-                    "./refreshInstance.sh install-release "+release.getName()+" && ./stop && ./start"+
-                    "\"", "Refreshing master to release "+release.getName(), Level.INFO);
+        final SailingAnalyticsProcess<String> master = replicaSet.getMaster();
+        master.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         // wait for master to turn healthy:
-        logger.info("Waiting for master "+replicaSet.getMaster()+" to get ready with new release "+release.getName());
-        replicaSet.getMaster().waitUntilReady(Optional.of(Duration.ONE_DAY)); // wait a little longer since master may need to re-load many races
+        logger.info("Waiting for master "+master+" to get ready with new release "+release.getName());
+        master.waitUntilReady(Optional.of(Duration.ONE_DAY)); // wait a little longer since master may need to re-load many races
         // register master again with master and public target group
-        logger.info("Adding master "+replicaSet.getMaster()+" again to target groups "+
+        logger.info("Adding master "+master+" again to target groups "+
                 replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().addTarget(replicaSet.getMaster().getHost());
         replicaSet.getMasterTargetGroup().addTarget(replicaSet.getMaster().getHost());
@@ -703,15 +701,22 @@ public class LandscapeServiceImpl implements LandscapeService {
             // on the old release will now be stopped:
         }
         // TODO bug5674: start up as many new replicas as there were old replicas without hooking up to target group, then replace atomically, shut down old replicas, wait for auto-scaling to provide new ones, then terminate explicit upgrade replicas
-        // TODO bug5676: consider the possibility of a combination of explicit replicas on shared hosts not managed by auto-scaling and auto-scaling replicas; find out if launching a replica explicitly on a shared host is desired; see tag aws:autoscaling:groupName
-        logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicasToStopAfterUpgradingMaster);
         for (final SailingAnalyticsProcess<String> replica : replicasToStopAfterUpgradingMaster) {
+            // if managed by auto-scaling group or if it's an "unmanaged" / "explicit" replica and it's the one launched in order to have at least one, stop/terminate;
             replicaSet.getPublicTargetGroup().removeTarget(replica.getHost());
-            replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+            if (replica.getHost().isManagedByAutoScalingGroup() || replica.getHost().getInstanceId().equals(additionalReplicaStarted.getHost().getInstanceId())) {
+                logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicasToStopAfterUpgradingMaster);
+                replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+            } else { // otherwise, upgrade in place and add to target group again when ready
+                logger.info("Refreshing unmanaged replica "+replica+" in place");
+                replica.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                replica.waitUntilReady(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT);
+                replicaSet.getPublicTargetGroup().addTarget(replica.getHost());
+            }
         }
         return release;
     }
-    
+
     @Override
     public Iterable<SailingAnalyticsHost<String>> getEligibleHostsForReplicaSet(AwsRegion region,
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,

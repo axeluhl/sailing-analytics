@@ -40,7 +40,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
-import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
@@ -69,7 +68,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * @author Axel Uhl (D043530)
  *
  */
-public class ConnectivityTest<ProcessT extends ApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
+public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
     private AwsLandscape<String> landscape;

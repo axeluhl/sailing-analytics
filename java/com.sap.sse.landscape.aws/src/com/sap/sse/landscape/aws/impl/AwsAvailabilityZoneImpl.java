@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws.impl;
 
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 
 public class AwsAvailabilityZoneImpl extends NamedImpl implements AwsAvailabilityZone {
@@ -16,6 +17,16 @@ public class AwsAvailabilityZoneImpl extends NamedImpl implements AwsAvailabilit
     
     public AwsAvailabilityZoneImpl(software.amazon.awssdk.services.ec2.model.AvailabilityZone az) {
         this(az.zoneId(), az.zoneName(), new AwsRegion(az.regionName()));
+    }
+    
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        return getId().equals(((AvailabilityZone) other).getId());
     }
 
     @Override

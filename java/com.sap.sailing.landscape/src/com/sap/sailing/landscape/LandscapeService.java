@@ -114,6 +114,32 @@ public interface LandscapeService {
 
     String getDefaultRedirectPath(Rule defaultRedirectRule);
 
+    /**
+     * Performs an in-place upgrade for the master service if the replica set has distinct public and master
+     * target groups. If no replica exists, one is launched with the master's release, and the method waits
+     * until the replica has reached its healthy state. The replica is then registered in the public target group.<p>
+     * 
+     * Then, the {@code ./refreshInstance.sh install-release <release>} command is sent to the master which will
+     * download and unpack the new release but will not yet stop the master process. In parallel, an existing
+     * launch configuration will be copied and updated with user data reflecting the new release to be used.
+     * An existing auto-scaling group will then be updated to use the new launch configuration. The old launch
+     * configuration will then be removed.<p>
+     * 
+     * Replication is then stopped for all existing replicas, then the master is de-registered from the master
+     * target group and the public target group, effectively making the replica set "read-only." Then, the {@code ./stop}
+     * command is issued which is expected to wait until all process resources have been released so that it's
+     * appropriate to call {@code ./start} just after the {@code ./stop} call has returned, thus spinning up the
+     * master process with the new release configuration.<p>
+     * 
+     * When the master process has reached its healthy state, it is registered with both target groups while all other
+     * replicas are de-registered and then stopped. For replica processes being the last on their host, the host will
+     * be terminated. It is up to an auto-scaling group or to the user to decide whether to launch new replicas again.
+     * This won't happen automatically by this procedure.
+     * TODO bug5674: before registering the master with the TGs, spin up as many new replicas as there are currently
+     * replicas; wait until they are all ready, then register master and new replicas in TGs and de-register old replicas.
+     * Then terminate old auto-scaling replicas and update any unmanaged replica in-place. When the number of auto-scaling
+     * replicas has reached the desired size of the auto-scaling group, terminate the replicas created explicitly.
+     */
     Release upgradeApplicationReplicaSet(AwsRegion region,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             String releaseOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,

@@ -4,10 +4,10 @@ import java.util.Optional;
 
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.Release;
-import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
@@ -31,7 +31,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  *
  * @param <ShardingKey>
  */
-public class CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+public class CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
 extends AbstractProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
     private static final int DEFAULT_MIN_REPLICAS = 1;
@@ -42,7 +42,7 @@ implements Procedure<ShardingKey> {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+    public static interface Builder<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey> {
         BuilderT setKeyName(String keyName);
 
@@ -71,7 +71,7 @@ implements Procedure<ShardingKey> {
         BuilderT setMaxRequestsPerTarget(int maxRequestsPerTarget);
     }
     
-    protected static class BuilderImpl<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+    protected static class BuilderImpl<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     extends AbstractProcedureImpl.BuilderImpl<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey>
     implements Builder<ShardingKey, BuilderT, MetricsT, ProcessT> {
         private final String replicaSetName;
@@ -204,7 +204,7 @@ implements Procedure<ShardingKey> {
     private final int maxReplicas;
     private final int maxRequestsPerTarget;
     
-    public static <ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+    public static <ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     Builder<ShardingKey, BuilderT, MetricsT, ProcessT> builder(
             AwsLandscape<ShardingKey> landscape, Region region,
             String replicaSetName,

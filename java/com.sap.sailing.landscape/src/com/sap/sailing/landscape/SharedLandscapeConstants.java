@@ -39,4 +39,17 @@ public interface SharedLandscapeConstants {
      * application replica sets in a landscape.
      */
     String SAILING_ANALYTICS_APPLICATION_HOST_TAG = "sailing-analytics-server";
+
+    String ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE = "ARCHIVE";
+
+    /**
+     * Value of the {@link #SAILSAILING_ANALYTICS_APPLICATION_HOST_TAGING_ANALYTICS_APPLICATION_HOST_TAG} tag
+     * for hosts expected to run more than one dedicated application process.
+     */
+    String MULTI_PROCESS_INSTANCE_TAG_VALUE = "___multi___";
+
+    /**
+     * Default value for the {@code Name} tag for shared instances expected to run multiple application processes.
+     */
+    String MULTI_PROCESS_INSTANCE_DEFAULT_NAME = "SL Multi-Server";
 }

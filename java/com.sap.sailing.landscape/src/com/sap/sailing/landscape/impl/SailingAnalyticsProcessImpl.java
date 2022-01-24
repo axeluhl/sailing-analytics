@@ -2,6 +2,7 @@ package com.sap.sailing.landscape.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,11 +20,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingAnalyticsProcessConfigurationVariable;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -197,5 +201,16 @@ implements SailingAnalyticsProcess<ShardingKey> {
     public SailingAnalyticsHost<ShardingKey> getHost() {
         final SailingAnalyticsHost<ShardingKey> result = (SailingAnalyticsHost<ShardingKey>) super.getHost();
         return result;
+    }
+
+    @Override
+    public void refreshToRelease(Release release, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws IOException, InterruptedException, JSchException, Exception {
+        logger.info("Upgrading process "+this+" to release "+release.getName());
+        getHost().createRootSshChannel(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase)
+            .runCommandAndReturnStdoutAndLogStderr("su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
+                    "cd "+getServerDirectory().replaceAll("\"", "\\\\\"")+"; "+
+                    "./refreshInstance.sh install-release "+release.getName()+" && ./stop && ./start"+
+                    "\"", "Refreshing process to release "+release.getName(), Level.INFO);
     }
 }

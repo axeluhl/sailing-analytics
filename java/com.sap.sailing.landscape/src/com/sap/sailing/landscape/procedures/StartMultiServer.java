@@ -86,7 +86,7 @@ implements StartFromSailingAnalyticsImage {
             if (isInstanceNameSet()) {
                 result = super.getInstanceName();
             } else {
-                result = "SL Multi-Server";
+                result = SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_DEFAULT_NAME;
             }
             return result;
         }
@@ -123,7 +123,7 @@ implements StartFromSailingAnalyticsImage {
         
         @Override
         protected Optional<Tags> getTags() {
-            return Optional.of(super.getTags().orElse(Tags.empty()).and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, "___multi___"));
+            return Optional.of(super.getTags().orElse(Tags.empty()).and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE));
         }
         
         /**

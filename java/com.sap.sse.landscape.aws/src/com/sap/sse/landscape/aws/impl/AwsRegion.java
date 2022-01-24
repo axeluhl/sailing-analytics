@@ -1,8 +1,8 @@
 package com.sap.sse.landscape.aws.impl;
 
-import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 
 public class AwsRegion implements Region {
@@ -23,14 +23,8 @@ public class AwsRegion implements Region {
     }
 
     @Override
-    public Iterable<AvailabilityZone> getAvailabilityZones() {
-        return landscape.getAvailabilityZones(this);
-    }
-
-    @Override
-    public Iterable<SecurityGroup> getSecurityGroups() {
-        // TODO Implement AwsRegion.getSecurityGroups(...)
-        return null;
+    public AwsAvailabilityZone[] getAvailabilityZones() {
+        return Util.toArray(landscape.getAvailabilityZones(this), new AwsAvailabilityZone[0]);
     }
 
     @Override
