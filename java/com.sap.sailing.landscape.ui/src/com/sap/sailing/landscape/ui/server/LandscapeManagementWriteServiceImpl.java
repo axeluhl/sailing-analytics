@@ -471,7 +471,14 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     replicaReplicationBearerToken, optionalDomainName, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
         return new SailingApplicationReplicaSetDTO<String>(result.getName(),
                 convertToSailingAnalyticsProcessDTO(result.getMaster(), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
-                /* replicas won't be up and running yet */ Collections.emptySet(), release.getName(),
+                Util.map(result.getReplicas(), r->{
+                    try {
+                        return convertToSailingAnalyticsProcessDTO(r, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                    } catch (Exception e) {
+                        throw new RuntimeException();
+                    }
+                }),
+                release.getName(),
                 getLandscapeService().getFullyQualifiedHostname(name, Optional.ofNullable(optionalDomainName)),
                 getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()));
     }

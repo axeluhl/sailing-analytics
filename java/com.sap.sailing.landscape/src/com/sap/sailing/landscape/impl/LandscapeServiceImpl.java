@@ -259,6 +259,33 @@ public class LandscapeServiceImpl implements LandscapeService {
             createLoadBalancingAndAutoScalingSetup(landscape, region, replicaSetName, master, release, replicaInstanceType, dynamicLoadBalancerMapping,
                 optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName, /* use default AMI as replica machine image */ Optional.empty(),
                 bearerTokenUsedByReplicas, /* minimum number of replicas */ Optional.of(0), /* maximum number of replicas */ Optional.empty());
+        final SailingAnalyticsProcess<String> replica = launchUnmanagedReplica(replicaSet, region, optionalKeyName,
+                privateKeyEncryptionPassphrase, replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull,
+                optionalMemoryTotalSizeFactorOrNull, optionalInstanceType, optionalPreferredInstanceToDeployTo);
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSetWithReplica =
+                landscape.getApplicationReplicaSet(region, replicaSet.getServerName(), master, Collections.singleton(replica));
+        return replicaSetWithReplica;
+    }
+
+    /**
+     * Starts a replica process for the given {@code replicaSet}. The memory configuration can optionally be defined. It
+     * defaults to the usual large share of the physical RAM of the instance it is deployed on. The replica is launched
+     * on the {@code optionalPreferredInstanceToDeployTo} host is specified and eligible, else on the "best" existing
+     * eligible instance (based on aspects such as the processes already deployed on the instance). If no running
+     * instance is found to be eligible (e.g., because none has the port required by the replica available, or all run
+     * in the same availability zone as the replica set's master process), a new instance is launched.
+     * <p>
+     * 
+     * If a new instance needs to be launched, the instance type can optionally be specified. It defaults to something
+     * with large fast swap space and a reasonable amount of physical RAM that would allow somewhere between two and
+     * four processes to share the physical RAM even during a live event.
+     */
+    private SailingAnalyticsProcess<String> launchUnmanagedReplica(
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            AwsRegion region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String replicaReplicationBearerToken, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalInstanceType,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo) throws Exception {
         final EligibleInstanceForReplicaSetFindingStrategy strategyForFindingOrLaunchingInstanceForUnmangedReplica =
                 new EligbleInstanceForReplicaSetFindingStrategyImpl(this, region, optionalKeyName,
                         privateKeyEncryptionPassphrase, /* master==false because we'd like to deploy a replica */ false,
@@ -267,9 +294,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingAnalyticsProcess<String> replica = deployReplicaToExistingHost(
                 replicaSet, strategyForFindingOrLaunchingInstanceForUnmangedReplica.getInstanceToDeployTo(replicaSet),
                 optionalKeyName, privateKeyEncryptionPassphrase, replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
-        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSetWithReplica =
-                landscape.getApplicationReplicaSet(region, replicaSet.getServerName(), master, Collections.singleton(replica));
-        return replicaSetWithReplica;
+        return replica;
     }
     
     @Override
