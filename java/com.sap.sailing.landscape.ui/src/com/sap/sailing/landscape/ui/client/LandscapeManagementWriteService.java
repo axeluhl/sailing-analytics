@@ -70,9 +70,10 @@ public interface LandscapeManagementWriteService extends RemoteService {
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
 
     SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
+            String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String replicaReplicationBearerToken,
+            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull) throws Exception;
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
 

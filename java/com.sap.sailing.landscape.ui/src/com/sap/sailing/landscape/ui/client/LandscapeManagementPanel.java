@@ -519,14 +519,16 @@ public class LandscapeManagementPanel extends SimplePanel {
                     public void ok(CreateApplicationReplicaSetInstructions instructions) {
                         applicationReplicaSetsBusy.setBusy(true);
                         landscapeManagementService.createApplicationReplicaSet(regionId, instructions.getName(), instructions.getInstanceType(),
+                                instructions.getOptionalReplicaInstanceType(),
                                 instructions.isDynamicLoadBalancerMapping(), instructions.getReleaseNameOrNullForLatestMaster(),
-                                        sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
-                                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
-                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
-                                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(),
-                                                instructions.getOptionalMemoryTotalSizeFactorOrNull(),
-                                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
+                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(),
+                                instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                                /* minimum auto-scaling group size: */ instructions.isFirstReplicaOnSharedInstance()?0:null,
+                                /* maximum auto-scaling group size remains at default: */ null,
+                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {
                                     applicationReplicaSetsBusy.setBusy(false);

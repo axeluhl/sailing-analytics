@@ -459,18 +459,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull)
+            String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken,
+            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
-        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result =
-                getLandscapeService().createApplicationReplicaSet(regionId, name, masterInstanceType, dynamicLoadBalancerMapping,
-                    release.getName(), optionalKeyName, privateKeyEncryptionPassphrase, masterReplicationBearerToken,
-                    replicaReplicationBearerToken, optionalDomainName, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
-        return new SailingApplicationReplicaSetDTO<String>(result.getName(),
-                convertToSailingAnalyticsProcessDTO(result.getMaster(), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result = getLandscapeService()
+                .createApplicationReplicaSet(regionId, name, masterInstanceType, optionalReplicaInstanceTypeOrNull,
+                        dynamicLoadBalancerMapping, release.getName(), optionalKeyName, privateKeyEncryptionPassphrase,
+                        masterReplicationBearerToken, replicaReplicationBearerToken, optionalDomainName,
+                        optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
+                        Optional.ofNullable(minimumAutoScalingGroupSizeOrNull),
+                        Optional.ofNullable(maximumAutoScalingGroupSizeOrNull));
+        return new SailingApplicationReplicaSetDTO<String>(result.getName(), convertToSailingAnalyticsProcessDTO(result
+                .getMaster(), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
                 Util.map(result.getReplicas(), r->{
                     try {
                         return convertToSailingAnalyticsProcessDTO(r, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);

@@ -67,10 +67,10 @@ public interface LandscapeService {
     void clearSessionCredentials();
     
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createApplicationReplicaSet(
-            String regionId, String name, String masterInstanceType, boolean dynamicLoadBalancerMapping,
-            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
-            String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
+            String regionId, String name, String masterInstanceType, String replicaInstanceTypeOrNull,
+            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken,
+            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull, Optional<Integer> minimumAutoScalingGroupSize, Optional<Integer> maximumAutoScalingGroupSize) throws Exception;
     
     /**
      * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName} parameter.

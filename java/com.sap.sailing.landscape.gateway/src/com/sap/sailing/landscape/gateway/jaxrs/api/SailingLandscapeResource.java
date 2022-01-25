@@ -47,6 +47,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String REGION_FORM_PARAM = "regionId";
     private static final String REPLICA_SET_NAME_FORM_PARAM = "replicaSetName";
     private static final String MASTER_INSTANCE_TYPE_FORM_PARAM = "masterInstanceType";
+    private static final String REPLICA_INSTANCE_TYPE_FORM_PARAM = "replicaInstanceType";
     private static final String DYNAMIC_LOAD_BALANCER_MAPPING_FORM_PARAM = "dynamicLoadBalancerMapping";
     private static final String RELEASE_NAME_FORM_PARAM = "releaseName";
     private static final String KEY_NAME_FORM_PARAM = "keyName";
@@ -56,6 +57,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String DOMAIN_NAME_FORM_PARAM = "domainName";
     private static final String MEMORY_IN_MEGABYTES_FORM_PARAM = "memoryInMegabytes";
     private static final String MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM = "memoryTotalSizeFactor";
+    private static final String MINIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM = "minimumAutoScalingGroupSize";
+    private static final String MAXIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM = "maximumAutoScalingGroupSize";
     private static final String TIMEOUT_IN_MILLISECONDS_FORM_PARAM = "timeoutInMilliseconds";
     private static final String REMOVE_APPLICATION_REPLICA_SET_FORM_PARAM = "removeApplicationReplicaSet";
     private static final String MAX_NUMBER_OF_COMPARE_SERVER_ATTEMPTS_FORM_PARAM = "maxNumberOfCompareserverAttempts";
@@ -142,6 +145,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(REGION_FORM_PARAM) String regionId,
             @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
             @FormParam(MASTER_INSTANCE_TYPE_FORM_PARAM) String masterInstanceType,
+            @FormParam(REPLICA_INSTANCE_TYPE_FORM_PARAM) String replicaInstanceTypeOrNull,
             @FormParam(DYNAMIC_LOAD_BALANCER_MAPPING_FORM_PARAM) @DefaultValue("false") boolean dynamicLoadBalancerMapping,
             @FormParam(RELEASE_NAME_FORM_PARAM) String releaseNameOrNullForLatestMaster,
             @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
@@ -150,17 +154,20 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(REPLICA_REPLICATION_BEARER_TOKEN_FORM_PARAM) String replicaReplicationBearerToken,
             @FormParam(DOMAIN_NAME_FORM_PARAM) String domainName,
             @FormParam(MEMORY_IN_MEGABYTES_FORM_PARAM) Integer optionalMemoryInMegabytesOrNull,
-            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull) {
+            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull,
+            @FormParam(MINIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM) Integer optionalMinimumAutoScalingGroupSize,
+            @FormParam(MAXIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM) Integer optionalMaximumAutoScalingGroupSize) {
         checkLandscapeManageAwsPermission();
         Response response;
         try {
             final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
-                    .createApplicationReplicaSet(regionId, replicaSetName, masterInstanceType, dynamicLoadBalancerMapping,
-                            release.getName(), optionalKeyName,
-                            privateKeyEncryptionPassphrase == null ? null : privateKeyEncryptionPassphrase.getBytes(),
-                            masterReplicationBearerToken, replicaReplicationBearerToken, domainName,
-                            optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+                    .createApplicationReplicaSet(regionId, replicaSetName, masterInstanceType, replicaInstanceTypeOrNull,
+                            dynamicLoadBalancerMapping, release.getName(),
+                            optionalKeyName,
+                            privateKeyEncryptionPassphrase == null ? null : privateKeyEncryptionPassphrase.getBytes(), masterReplicationBearerToken, replicaReplicationBearerToken,
+                            domainName, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
+                            Optional.ofNullable(optionalMinimumAutoScalingGroupSize), Optional.ofNullable(optionalMaximumAutoScalingGroupSize));
             final JSONObject result = new AwsApplicationReplicaSetJsonSerializer(release.getName()).serialize(replicaSet);
             response = Response.ok(streamingOutput(result)).build();
         } catch (Exception e) {

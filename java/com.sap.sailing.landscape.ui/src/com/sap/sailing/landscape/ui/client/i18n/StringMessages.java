@@ -114,4 +114,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups();
     String successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups(String replicaSetName);
     String stopReplicating();
+    String sameAsMaster();
+    String firstReplicaOnSharedInstance();
+    String replicaInstanceType();
 }

@@ -88,10 +88,11 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
 
     void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
-            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
-            Integer optionalMemoryTotalSizeFactorOrNull,
+            String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping,
+            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String securityReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,

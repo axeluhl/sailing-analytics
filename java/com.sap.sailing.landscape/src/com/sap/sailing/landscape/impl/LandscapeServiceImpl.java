@@ -3,8 +3,10 @@ package com.sap.sailing.landscape.impl;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -124,10 +126,11 @@ public class LandscapeServiceImpl implements LandscapeService {
     
     @Override
     public AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createApplicationReplicaSet(
-            String regionId, String name, String masterInstanceType, boolean dynamicLoadBalancerMapping,
-            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
-            String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception {
+            String regionId, String name, String masterInstanceType, String replicaInstanceTypeOrNull,
+            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken,
+            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Optional<Integer> minimumAutoScalingGroupSize, Optional<Integer> maximumAutoScalingGroupSize) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
         final AwsRegion region = new AwsRegion(regionId, landscape);
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
@@ -148,11 +151,29 @@ public class LandscapeServiceImpl implements LandscapeService {
         masterHostStartProcedure.run();
         final SailingAnalyticsProcess<String> master = masterHostStartProcedure.getSailingAnalyticsProcess();
         final String bearerTokenUsedByReplicas = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
-        return createLoadBalancingAndAutoScalingSetup(landscape, region, name, master, release, masterInstanceType,
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result =
+            createLoadBalancingAndAutoScalingSetup(landscape, region, name, master, release,
+                replicaInstanceTypeOrNull == null ? masterInstanceType : replicaInstanceTypeOrNull,
                 dynamicLoadBalancerMapping, optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName,
                 Optional.of(masterHostBuilder.getMachineImage()), bearerTokenUsedByReplicas,
-                /* use default minimum number of replicas */ Optional.empty(),
-                /* use default maximum number of replicas */ Optional.empty());
+                minimumAutoScalingGroupSize, maximumAutoScalingGroupSize);
+        final Optional<SailingAnalyticsProcess<String>> unmanagedReplica = minimumAutoScalingGroupSize.map(minASGSize->{
+            final List<SailingAnalyticsProcess<String>> unmanagedReplicas = new ArrayList<>();
+            if (minASGSize == 0) {
+                logger.info("No auto-scaling replica forced for replica set "+name+"; starting with an unmanaged replica on a shared instance");
+                try {
+                    unmanagedReplicas.add(launchUnmanagedReplica(result, region, optionalKeyName, privateKeyEncryptionPassphrase,
+                            replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
+                            Optional.of(InstanceType.valueOf(masterInstanceType)), // use master's instance type as this may be an all-shared use case
+                            /* optionalPreferredInstanceToDeployTo */ Optional.empty()));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+            return unmanagedReplicas.isEmpty() ? null : unmanagedReplicas.get(0);
+        });
+        // if an unmanaged replica process was launched, return a replica set that contains it; otherwise use the one we already have (without any replica)
+        return unmanagedReplica.map(ur->getLandscape().getApplicationReplicaSet(region, name, master, Collections.singleton(ur))).orElse(result);
     }
     
     @Override
