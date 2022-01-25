@@ -190,12 +190,13 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet;
         try {
             replicaSet = getLandscapeService().getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName, passphraseForPrivateKeyDecryption);
-            final Release release = getLandscapeService().upgradeApplicationReplicaSet(region, replicaSet,
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> upgradedReplicaSet = getLandscapeService().upgradeApplicationReplicaSet(region, replicaSet,
                     releaseNameOrNullForLatestMaster, optionalKeyName, passphraseForPrivateKeyDecryption,
                     replicaReplicationBearerToken);
             responseBuilder = Response.ok();
             result.put(RESPONSE_STATUS, "OK");
-            result.put(RESPONSE_RELEASE, release.getName());
+            result.put(RESPONSE_RELEASE, upgradedReplicaSet.getVersion(Optional.ofNullable(optionalTimeoutInMilliseconds).map(Duration::ofMillis),
+                    Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName());
         } catch (Exception e) {
             result.put(RESPONSE_STATUS, "ERROR");
             result.put(RESPONSE_ERROR_MESSAGE, e.getMessage());

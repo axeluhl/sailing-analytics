@@ -142,7 +142,7 @@ public interface LandscapeService {
      * Then terminate old auto-scaling replicas and update any unmanaged replica in-place. When the number of auto-scaling
      * replicas has reached the desired size of the auto-scaling group, terminate the replicas created explicitly.
      */
-    Release upgradeApplicationReplicaSet(AwsRegion region,
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> upgradeApplicationReplicaSet(AwsRegion region,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             String releaseOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String replicaReplicationBearerToken) throws InterruptedException, ExecutionException,

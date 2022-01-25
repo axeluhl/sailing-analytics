@@ -694,7 +694,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
 
     @Override
-    public Release upgradeApplicationReplicaSet(AwsRegion region,
+    public AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> upgradeApplicationReplicaSet(AwsRegion region,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             String releaseOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String replicaReplicationBearerToken)
@@ -733,11 +733,13 @@ public class LandscapeServiceImpl implements LandscapeService {
             } // else, the replica was started explicitly, without an auto-scaling group; in any case, all replicas still
             // on the old release will now be stopped:
         }
+        final Set<SailingAnalyticsProcess<String>> replicasUpdatedInPlace = new HashSet<>();
         // TODO bug5674: start up as many new replicas as there were old replicas without hooking up to target group, then replace atomically, shut down old replicas, wait for auto-scaling to provide new ones, then terminate explicit upgrade replicas
         for (final SailingAnalyticsProcess<String> replica : replicasToStopAfterUpgradingMaster) {
             // if managed by auto-scaling group or if it's an "unmanaged" / "explicit" replica and it's the one launched in order to have at least one, stop/terminate;
             replicaSet.getPublicTargetGroup().removeTarget(replica.getHost());
-            if (replica.getHost().isManagedByAutoScalingGroup() || replica.getHost().getInstanceId().equals(additionalReplicaStarted.getHost().getInstanceId())) {
+            if (replica.getHost().isManagedByAutoScalingGroup() ||
+                    (additionalReplicaStarted != null && replica.getHost().getInstanceId().equals(additionalReplicaStarted.getHost().getInstanceId()))) {
                 logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicasToStopAfterUpgradingMaster);
                 replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
             } else { // otherwise, upgrade in place and add to target group again when ready
@@ -745,16 +747,17 @@ public class LandscapeServiceImpl implements LandscapeService {
                 replica.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                 replica.waitUntilReady(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT);
                 replicaSet.getPublicTargetGroup().addTarget(replica.getHost());
+                replicasUpdatedInPlace.add(replica);
             }
         }
-        return release;
+        return getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), master, replicasUpdatedInPlace);
     }
 
     @Override
     public Iterable<SailingAnalyticsHost<String>> getEligibleHostsForReplicaSet(AwsRegion region,
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) {
-        return Util.filter(getLandscape().getHostsWithTag(region, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, new SailingAnalyticsHostSupplier<String>()),
+        return Util.filter(getLandscape().getRunningHostsWithTag(region, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, new SailingAnalyticsHostSupplier<String>()),
                 h->{
                     try {
                         return replicaSet.isEligibleForDeployment(h, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);

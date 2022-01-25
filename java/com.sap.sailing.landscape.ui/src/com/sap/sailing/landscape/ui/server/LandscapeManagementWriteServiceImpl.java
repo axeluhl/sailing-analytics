@@ -699,16 +699,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(region, applicationReplicaSetToUpgrade);
-        final Release release = getLandscapeService().upgradeApplicationReplicaSet(region, replicaSet,
-                releaseOrNullForLatestMaster, optionalKeyName, privateKeyEncryptionPassphrase,
-                replicaReplicationBearerToken);
-        final SailingAnalyticsProcessDTO oldMaster = applicationReplicaSetToUpgrade.getMaster();
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> upgradedReplicaSet =
+                getLandscapeService().upgradeApplicationReplicaSet(region, replicaSet,
+                    releaseOrNullForLatestMaster, optionalKeyName, privateKeyEncryptionPassphrase,
+                    replicaReplicationBearerToken);
+        final SailingAnalyticsProcess<String> oldMaster = replicaSet.getMaster();
+        final Release release = upgradedReplicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         return new SailingApplicationReplicaSetDTO<String>(applicationReplicaSetToUpgrade.getName(),
-                new SailingAnalyticsProcessDTO(oldMaster.getHost(), oldMaster.getPort(), oldMaster.getHostname(),
-                        release.getName(), oldMaster.getTelnetPortToOSGiConsole(), oldMaster.getServerName(),
-                        oldMaster.getServerDirectory(), oldMaster.getExpeditionUdpPort(),
-                        TimePoint.now()),
-                /* replicas won't be up and running yet */ Collections.emptySet(), release.getName(), applicationReplicaSetToUpgrade.getHostname(),
+                convertToSailingAnalyticsProcessDTO(oldMaster, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
+                Util.map(upgradedReplicaSet.getReplicas(), r->{
+                    try {
+                        return convertToSailingAnalyticsProcessDTO(r, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }),
+                release.getName(), applicationReplicaSetToUpgrade.getHostname(),
                 applicationReplicaSetToUpgrade.getDefaultRedirectPath());
     }
 
