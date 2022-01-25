@@ -95,7 +95,7 @@ public class TestProcedures {
     public void setUp() {
         privateKeyEncryptionPassphrase = ("awptyf87l"+"097384sf;,57").getBytes();
         landscape = AwsLandscape.obtain();
-        region = new AwsRegion(Region.EU_WEST_2);
+        region = new AwsRegion(Region.EU_WEST_2, landscape);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
         mailSmtpPassword = System.getProperty(MAIL_SMTP_PASSWORD);
     }
@@ -109,7 +109,7 @@ public class TestProcedures {
     
     @Test
     public void testGetMongoEndpoints() {
-        final Iterable<MongoEndpoint> mongoEndpoints = landscape.getMongoEndpoints(new AwsRegion(Region.EU_WEST_1));
+        final Iterable<MongoEndpoint> mongoEndpoints = landscape.getMongoEndpoints(new AwsRegion(Region.EU_WEST_1, landscape));
         assertTrue(!Util.isEmpty(Util.filter(mongoEndpoints, mongoEndpoint->
             (mongoEndpoint instanceof MongoReplicaSet &&
              ((MongoReplicaSet) mongoEndpoint).getName().equals("live") &&

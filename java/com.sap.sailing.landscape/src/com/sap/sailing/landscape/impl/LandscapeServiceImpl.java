@@ -25,6 +25,7 @@ import com.jcraft.jsch.SftpException;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.ALBToReverseProxyArchiveRedirectMapper;
 import com.sap.sailing.landscape.AwsSessionCredentialsWithExpiry;
+import com.sap.sailing.landscape.EligibleInstanceForReplicaSetFindingStrategy;
 import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
@@ -56,6 +57,7 @@ import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -127,7 +129,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, landscape);
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder =
@@ -158,12 +160,15 @@ public class LandscapeServiceImpl implements LandscapeService {
             SailingAnalyticsHost<String> hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String masterReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception {
+            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Optional<InstanceType> optionalSharedInstanceTypeForNewReplicaHost,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception {
         return deployApplicationToExistingHostInternal(hostToDeployTo.getRegion(),
                 replicaSetName, hostToDeployTo,
                 replicaInstanceType, dynamicLoadBalancerMapping, releaseNameOrNullForLatestMaster, optionalKeyName,
                 privateKeyEncryptionPassphrase, masterReplicationBearerToken, replicaReplicationBearerToken,
-                optionalDomainName, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+                optionalDomainName, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
+                optionalSharedInstanceTypeForNewReplicaHost, optionalPreferredInstanceToDeployUnmanagedReplicaTo);
     }
     
     @Override
@@ -206,6 +211,19 @@ public class LandscapeServiceImpl implements LandscapeService {
      * 
      * The "internal" method exists in order to declare a few type parameters which wouldn't be possible on the GWT RPC
      * interface method as some of these types are not seen by clients.
+     * 
+     * @param optionalInstanceType
+     *            if a new instance must be launched because no eligible one is found, this parameter can be used to
+     *            specify its instance type. It defaults to {@link InstanceType#I3_2_XLARGE} which is reasonably suited
+     *            for a multi-process set-up.
+     * @param optionalPreferredInstanceToDeployTo
+     *            If {@link Optional#isPresent() present}, specifies a preferred host for the answer given by
+     *            {@link #getInstanceToDeployTo(AwsApplicationReplicaSet)}. However, if the instance turns out not to be
+     *            eligible by the rules regarding general
+     *            {@link AwsApplicationReplicaSet#isEligibleForDeployment(ApplicationProcessHost, Optional, Optional, byte[])
+     *            eligibility} (based mainly on port and directory available as well as not being managed by an
+     *            auto-scaling group) and additional rules regarding availability zone "anti-affinity" as defined here
+     *            (see {@link #master}), the default rules for selecting or launching an eligible instance apply.
      */
     private <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
         MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
@@ -214,7 +232,9 @@ public class LandscapeServiceImpl implements LandscapeService {
             String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
             String optionalKeyName,
             byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull)
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Optional<InstanceType> optionalInstanceType,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo)
             throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
@@ -235,9 +255,21 @@ public class LandscapeServiceImpl implements LandscapeService {
         deployer.run();
         final SailingAnalyticsProcess<String> master = deployer.getProcess();
         final String bearerTokenUsedByReplicas = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
-        return createLoadBalancingAndAutoScalingSetup(landscape, region, replicaSetName, master, release, replicaInstanceType, dynamicLoadBalancerMapping,
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
+            createLoadBalancingAndAutoScalingSetup(landscape, region, replicaSetName, master, release, replicaInstanceType, dynamicLoadBalancerMapping,
                 optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName, /* use default AMI as replica machine image */ Optional.empty(),
                 bearerTokenUsedByReplicas, /* minimum number of replicas */ Optional.of(0), /* maximum number of replicas */ Optional.empty());
+        final EligibleInstanceForReplicaSetFindingStrategy strategyForFindingOrLaunchingInstanceForUnmangedReplica =
+                new EligbleInstanceForReplicaSetFindingStrategyImpl(this, region, optionalKeyName,
+                        privateKeyEncryptionPassphrase, /* master==false because we'd like to deploy a replica */ false,
+                        /* mustBeDifferentAvailabilityZone */ true, optionalInstanceType,
+                        optionalPreferredInstanceToDeployTo);
+        final SailingAnalyticsProcess<String> replica = deployReplicaToExistingHost(
+                replicaSet, strategyForFindingOrLaunchingInstanceForUnmangedReplica.getInstanceToDeployTo(replicaSet),
+                optionalKeyName, privateKeyEncryptionPassphrase, replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSetWithReplica =
+                landscape.getApplicationReplicaSet(region, replicaSet.getServerName(), master, Collections.singleton(replica));
+        return replicaSetWithReplica;
     }
     
     @Override
@@ -249,7 +281,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> archiveReplicaSet = getLandscape()
-                .getApplicationReplicaSetByTagValue(new AwsRegion(regionId),
+                .getApplicationReplicaSetByTagValue(new AwsRegion(regionId, getLandscape()),
                         SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE,
                         new SailingAnalyticsHostSupplier<String>(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
                         Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
@@ -296,7 +328,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                     for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
                         Util.addAll(eids, eventIDs);
                     }
-                    final AwsRegion region = new AwsRegion(regionId);
+                    final AwsRegion region = new AwsRegion(regionId, getLandscape());
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
                             getLandscape().getCentralReverseProxy(region);
                     // TODO bug5311: when refactoring this for general scope migration, moving to a dedicated replica set will not require this
@@ -365,7 +397,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     public void removeApplicationReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         final CompletableFuture<Void> autoScalingGroupRemoval;
         terminateReplicasNotManagedByAutoScalingGroup(applicationReplicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
@@ -603,6 +635,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             final Optional<AmazonMachineImage<String>> replicaMachineImage,
             final String bearerTokenUsedByReplicas, Optional<Integer> minimumNumberOfReplicas, Optional<Integer> maximumNumberOfReplicas)
             throws Exception, JSchException, IOException, InterruptedException, SftpException, TimeoutException {
+        logger.info("Creating load balancing and auto-scaling set-up for replica set "+replicaSetName);
         if (dynamicLoadBalancerMapping && !region.getId().equals(SharedLandscapeConstants.REGION_WITH_DEFAULT_LOAD_BALANCER)) {
             // see bug5669:
             throw new IllegalArgumentException("You must not request dynamic load balancer mapping in regions other than "+

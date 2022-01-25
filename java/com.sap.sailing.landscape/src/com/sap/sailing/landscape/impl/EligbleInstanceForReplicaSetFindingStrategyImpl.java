@@ -90,6 +90,14 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
      *            if a new instance must be launched because no eligible one is found, this parameter can be used to
      *            specify its instance type. It defaults to {@link InstanceType#I3_2_XLARGE} which is reasonably suited
      *            for a multi-process set-up.
+     * @param optionalPreferredInstanceToDeployTo
+     *            If {@link Optional#isPresent() present}, specifies a preferred host for the answer given by
+     *            {@link #getInstanceToDeployTo(AwsApplicationReplicaSet)}. However, if the instance turns out not to be
+     *            eligible by the rules regarding general
+     *            {@link AwsApplicationReplicaSet#isEligibleForDeployment(ApplicationProcessHost, Optional, Optional, byte[])
+     *            eligibility} (based mainly on port and directory available as well as not being managed by an
+     *            auto-scaling group) and additional rules regarding availability zone "anti-affinity" as defined here
+     *            (see {@link #master}), the default rules for selecting or launching an eligible instance apply.
      */
     public EligbleInstanceForReplicaSetFindingStrategyImpl(LandscapeService landscapeService, AwsRegion region,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, boolean master,
@@ -107,9 +115,10 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
     }
 
     @Override
-    public ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> getInstanceToDeployTo(
+    public SailingAnalyticsHost<String> getInstanceToDeployTo(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) {
         return optionalPreferredInstanceToDeployTo.map(host->{
+            logger.info("Checking preferred instance "+host+" for eligibility");
             try {
                 return replicaSet.isEligibleForDeployment(host, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)
                     && isAcceptableAvailabilityZone(host.getAvailabilityZone(), replicaSet) ? host : null;
@@ -117,6 +126,7 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
                 throw new RuntimeException(e);
             }
         }).orElseGet(()->{
+            logger.info("Preferred instance not specified or not eligible. Computing default...");
             final Optional<SailingAnalyticsHost<String>> bestExistingCandidate =
                 Util.stream(landscapeService.getEligibleHostsForReplicaSet(region, replicaSet, optionalKeyName, privateKeyEncryptionPassphrase))
                     .filter(host->{
@@ -128,8 +138,10 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
                         }
                     })
                     .sorted(getEligibleHostRanking(replicaSet)).findFirst();
+            bestExistingCandidate.ifPresent(bec->logger.info("Found best existing candidate "+bec));
             return bestExistingCandidate.orElseGet(()->{
                 try {
+                    logger.info("No existing candidate found. Launching new instance of type "+instanceType+" for replica set "+replicaSet.getName());
                     return landscapeService.createEmptyMultiServer(region, Optional.of(instanceType), getPreferredAvailabilityZone(replicaSet),
                             Optional.of(SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_DEFAULT_NAME), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                 } catch (Exception e) {

@@ -217,7 +217,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.sessionToken = Optional.ofNullable(sessionToken);
-        this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
+        this.globalRegion = new AwsRegion(Region.AWS_GLOBAL, this);
         this.landscapeState = landscapeState;
     }
     
@@ -477,7 +477,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .describeAvailabilityZones(
                         DescribeAvailabilityZonesRequest.builder().zoneNames(availabilityZoneName).build())
                 .availabilityZones().iterator().next();
-        return new AwsAvailabilityZoneImpl(awsAz);
+        return new AwsAvailabilityZoneImpl(awsAz, this);
     }
     
     @Override
@@ -828,7 +828,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
-        landscapeState.deleteKeyPair(region, keyName);
+        landscapeState.deleteKeyPair(region.getId(), keyName);
     }
 
     @Override
@@ -866,7 +866,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public SSHKeyPair getSSHKeyPair(com.sap.sse.landscape.Region region, String keyName) {
-        return landscapeState.getSSHKeyPair(region, keyName);
+        return landscapeState.getSSHKeyPair(region.getId(), keyName);
     }
     
     @Override
@@ -963,7 +963,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
         return Util.map(getEc2Client(getRegion(awsRegion)).describeAvailabilityZones().availabilityZones(),
-                AwsAvailabilityZoneImpl::new);
+                az->new AwsAvailabilityZoneImpl(az, this));
     }
 
     @Override
@@ -1470,7 +1470,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Matcher matcher = pattern.matcher(loadBalancerDNSName);
         final Pair<String, AwsRegion> result;
         if (matcher.matches()) {
-            result = new Pair<>(matcher.group(1), new AwsRegion(matcher.group(3)));
+            result = new Pair<>(matcher.group(1), new AwsRegion(matcher.group(3), this));
         } else {
             result = null;
         }
@@ -1652,12 +1652,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public AwsRegion getDefaultRegion() {
-        return new AwsRegion(Region.EU_WEST_2); // TODO actually, EU_WEST_1 (Ireland) is our default region, but as long as this is under development, EU_WEST_2 gives us an isolated test environment
+        return new AwsRegion(Region.EU_WEST_2, this); // TODO actually, EU_WEST_1 (Ireland) is our default region, but as long as this is under development, EU_WEST_2 gives us an isolated test environment
     }
 
     @Override
     public Iterable<com.sap.sse.landscape.Region> getRegions() {
-        return Util.map(Region.regions(), AwsRegion::new);
+        return Util.map(Region.regions(), r->new AwsRegion(r, this));
     }
     
     @Override

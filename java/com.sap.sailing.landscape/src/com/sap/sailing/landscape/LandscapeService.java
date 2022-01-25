@@ -86,7 +86,9 @@ public interface LandscapeService {
             SailingAnalyticsHost<String> hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String masterReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
+            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Optional<InstanceType> optionalSharedInstanceTypeForNewReplicaHost,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
     
     /**
      * @return the UUID that can be used to track the master data import progress; see

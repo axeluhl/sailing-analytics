@@ -6,15 +6,16 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 
 public class AwsRegion implements Region {
-    private AwsLandscape<?> landscape; // FIXME this is broken; it shall be final and has to be initialized by the constructors if getAvailabilityZones and getSecurityGroups is expected to do anything useful
+    private final AwsLandscape<?> landscape;
     private final String id;
     
-    public AwsRegion(String id) {
+    public AwsRegion(String id, AwsLandscape<?> landscape) {
         this.id = id;
+        this.landscape = landscape;
     }
     
-    public AwsRegion(software.amazon.awssdk.regions.Region region) {
-        this(region.id());
+    public AwsRegion(software.amazon.awssdk.regions.Region region, AwsLandscape<?> landscape) {
+        this(region.id(), landscape);
     }
 
     @Override

@@ -185,7 +185,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         checkLandscapeManageAwsPermission();
         ResponseBuilder responseBuilder;
         final JSONObject result = new JSONObject();
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
         AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet;
         try {
@@ -222,7 +222,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM) String mongoUriToArchiveDbTo) {
         checkLandscapeManageAwsPermission();
         Response response;
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
         final AwsLandscape<String> landscape = getLandscapeService().getLandscape();
         final MongoUriParser<String> mongoUriParser = new MongoUriParser<>(landscape, region);
@@ -261,7 +261,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase) {
         checkLandscapeManageAwsPermission();
         Response response;
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
         try {
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToRemove = getLandscapeService()
@@ -296,7 +296,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull) {
         checkLandscapeManageAwsPermission();
         Response response;
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
         try {
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
@@ -342,7 +342,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase) {
         checkLandscapeManageAwsPermission();
         Response response;
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
         try {
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()

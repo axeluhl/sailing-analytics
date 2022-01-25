@@ -79,7 +79,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     @Before
     public void setUp() {
         landscape = AwsLandscape.obtain();
-        region = new AwsRegion(Region.EU_WEST_2);
+        region = new AwsRegion(Region.EU_WEST_2, landscape);
         AXELS_KEY_PASS = new String(Base64.getDecoder().decode(System.getProperty("axelskeypassphrase")));
         keyPass = "lkayrelakuesyrlasp8caorewyc".getBytes();
     }
@@ -454,7 +454,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     
     @Test
     public void testCentralReverseProxyInEuWest2IsAvailable() throws IOException, InterruptedException, JSchException {
-        final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
+        final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2", landscape));
         assertEquals(1, Util.size(proxy.getHosts()));
         final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
         assertEquals(200, healthCheckConnection.getResponseCode());

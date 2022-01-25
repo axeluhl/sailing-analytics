@@ -328,8 +328,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                 applicationReplicaSetForWhichToDefineLoadBalancerMapping -> createDefaultLoadBalancerMappings(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLoadBalancerMapping));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER,
-                applicationReplicaSetForWhichToDefineLoadBalancerMapping -> createApplicationReplicaSetWithMasterOnExistingHost(stringMessages,
-                        applicationReplicaSetForWhichToDefineLoadBalancerMapping.getMaster().getHost()));
+                applicationReplicaSetOnWhichToDeployMaster -> createApplicationReplicaSetWithMasterOnExistingHost(stringMessages,
+                        applicationReplicaSetOnWhichToDeployMaster));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_REMOVE,
                 applicationReplicaSetToRemove -> removeApplicationReplicaSet(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToRemove));
@@ -552,7 +552,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         });
     }
 
-    private void createApplicationReplicaSetWithMasterOnExistingHost(StringMessages stringMessages, AwsInstanceDTO hostToDeployTo) {
+    private void createApplicationReplicaSetWithMasterOnExistingHost(StringMessages stringMessages, SailingApplicationReplicaSetDTO<String> applicationReplicaSetOnWhichToDeployMaster) {
         landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -566,13 +566,14 @@ public class LandscapeManagementPanel extends SimplePanel {
                     @Override
                     public void ok(CreateApplicationReplicaSetInstructions instructions) {
                         applicationReplicaSetsBusy.setBusy(true);
-                        landscapeManagementService.deployApplicationToExistingHost(instructions.getName(), hostToDeployTo, 
+                        landscapeManagementService.deployApplicationToExistingHost(instructions.getName(), applicationReplicaSetOnWhichToDeployMaster.getMaster().getHost(), 
                                 instructions.getInstanceType(), instructions.isDynamicLoadBalancerMapping(),
                                         instructions.getReleaseNameOrNullForLatestMaster(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
                                                 instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
                                                 instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(), instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                                                getMasterHostFromFirstSelectedApplicationReplicaSetThatIsNot(applicationReplicaSetOnWhichToDeployMaster),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {
@@ -599,6 +600,15 @@ public class LandscapeManagementPanel extends SimplePanel {
         });
     }
 
+    private AwsInstanceDTO getMasterHostFromFirstSelectedApplicationReplicaSetThatIsNot(SailingApplicationReplicaSetDTO<String> applicationReplicaSetOnWhichToDeployMaster) {
+        for (final SailingApplicationReplicaSetDTO<String> selectedReplicaSet : applicationReplicaSetsTable.getSelectionModel().getSelectedSet()) {
+            if (!selectedReplicaSet.getName().equals(applicationReplicaSetOnWhichToDeployMaster.getName())) {
+                return selectedReplicaSet.getMaster().getHost();
+            }
+        }
+        return null;
+    }
+    
     private void removeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
         if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToRemove.getName()))) {

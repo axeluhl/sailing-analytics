@@ -194,6 +194,7 @@ public interface LandscapeManagementWriteServiceAsync {
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
             String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
             Integer optionalMemoryTotalSizeFactorOrNull,
+            AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     /**

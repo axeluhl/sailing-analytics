@@ -633,6 +633,13 @@
          unpack="false"/>
 
    <plugin
+         id="com.amazon.aws.aws-java-api.source"
+         download-size="0"
+         install-size="0"
+         version="2.16.19"
+         unpack="false"/>
+
+   <plugin
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
