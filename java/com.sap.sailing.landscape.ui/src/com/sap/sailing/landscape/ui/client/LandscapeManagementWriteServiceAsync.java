@@ -189,17 +189,12 @@ public interface LandscapeManagementWriteServiceAsync {
             MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption,
             AsyncCallback<UUID> callback);
 
-    /**
-     * Like {@link #createApplicationReplicaSet(String, String, String, boolean, String, String, byte[], String, String, String, AsyncCallback)},
-     * only that in this case the master is deployed on an already existing host ({@code hostToDeployTo}) using the next available combination
-     * of ports, and only for the replicas an instance type ({@code replicaInstanceType}) can be specified. The minimum number of replicas is
-     * set to 0 (instead of 1), so the resulting application replica set is created in "low availability" ("economy") mode.
-     */
-    void deployApplicationToExistingHost(String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
+    void deployApplicationToExistingHost(String replicaSetName, AwsInstanceDTO hostToDeployTo,
             String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
             String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
-            Integer optionalMemoryTotalSizeFactorOrNull, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+            Integer optionalMemoryTotalSizeFactorOrNull,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     /**
      * For the given replica set ensures there is at least one healthy replica, then stops replicating on all replicas and

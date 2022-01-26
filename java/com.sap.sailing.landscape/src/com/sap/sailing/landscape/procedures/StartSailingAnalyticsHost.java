@@ -37,14 +37,14 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
      * {@link StartAwsApplicationHost.Builder}, are:
      * <ul>
      * <li>If no {@link #setInstanceName(String) instance name} is provided, the instance name is constructed from the
-     * {@link #getServerName() server name} by pre-pending the prefix "SL ".</li>
+     * {@link #getServerName() server name} by pre-pending the prefix "SL " (see {@link StartSailingAnalyticsHost#INSTANCE_NAME_DEFAULT_PREFIX}).</li>
      * <li>Uses the latest machine image of the type described by
      * {@link StartSailingAnalyticsHost#IMAGE_TYPE_TAG_VALUE_SAILING} if no explicit
      * {@link #setMachineImage(AmazonMachineImage) machine image is set} and no {@link #setImageType(String) image type
      * is set} of which the latest version would be used otherwise.</li>
      * <li>The {@link #getServerDirectory() server directory} defaults to {@code /home/sailing/servers/<server-name>}
      * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
-     * <li>The tag {@link SailingAnalyticsHost#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is set, with the value equaling the
+     * <li>The tag {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is set, with the value equaling the
      * {@link SailingAnalyticsApplicationConfiguration.Builder#setServerName(String) server name} set in the application
      * configuration.</li>
      * </ul>

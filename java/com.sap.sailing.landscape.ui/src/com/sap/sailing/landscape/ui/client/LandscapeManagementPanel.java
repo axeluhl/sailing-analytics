@@ -329,7 +329,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLoadBalancerMapping));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER,
                 applicationReplicaSetForWhichToDefineLoadBalancerMapping -> createApplicationReplicaSetWithMasterOnExistingHost(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLoadBalancerMapping.getMaster().getHost()));
+                        applicationReplicaSetForWhichToDefineLoadBalancerMapping.getMaster().getHost()));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_REMOVE,
                 applicationReplicaSetToRemove -> removeApplicationReplicaSet(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToRemove));
@@ -552,7 +552,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         });
     }
 
-    private void createApplicationReplicaSetWithMasterOnExistingHost(StringMessages stringMessages, String regionId, AwsInstanceDTO hostToDeployTo) {
+    private void createApplicationReplicaSetWithMasterOnExistingHost(StringMessages stringMessages, AwsInstanceDTO hostToDeployTo) {
         landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -566,7 +566,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                     @Override
                     public void ok(CreateApplicationReplicaSetInstructions instructions) {
                         applicationReplicaSetsBusy.setBusy(true);
-                        landscapeManagementService.deployApplicationToExistingHost(regionId, instructions.getName(), hostToDeployTo, 
+                        landscapeManagementService.deployApplicationToExistingHost(instructions.getName(), hostToDeployTo, 
                                 instructions.getInstanceType(), instructions.isDynamicLoadBalancerMapping(),
                                         instructions.getReleaseNameOrNullForLatestMaster(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null

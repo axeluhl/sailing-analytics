@@ -42,6 +42,13 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
+    public AwsInstance<ShardingKey> getHost() {
+        @SuppressWarnings("unchecked")
+        final AwsInstance<ShardingKey> host = (AwsInstance<ShardingKey>) super.getHost();
+        return host;
+    }
+
+    @Override
     public Database getDatabaseConfiguration(Region region, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         if (databaseConfiguration == null) {

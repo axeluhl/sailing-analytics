@@ -476,20 +476,28 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(String regionId,
-            String replicaSetName, AwsInstanceDTO hostToDeployTo, String replicaInstanceType,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
-            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
-            Integer optionalMemoryTotalSizeFactorOrNull) throws Exception {
-        return deployApplicationToExistingHostInternal(regionId,
-                replicaSetName, hostToDeployTo,
-                replicaInstanceType, dynamicLoadBalancerMapping, releaseNameOrNullForLatestMaster, optionalKeyName,
-                privateKeyEncryptionPassphrase, masterReplicationBearerToken, replicaReplicationBearerToken,
-                optionalDomainName, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+    public SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(String replicaSetName,
+            AwsInstanceDTO hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
+            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String masterReplicationBearerToken, String replicaReplicationBearerToken,
+            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception {
+        return deployApplicationToExistingHostInternal(replicaSetName,
+                hostToDeployTo, replicaInstanceType,
+                dynamicLoadBalancerMapping, releaseNameOrNullForLatestMaster, optionalKeyName, privateKeyEncryptionPassphrase,
+                masterReplicationBearerToken, replicaReplicationBearerToken, optionalDomainName,
+                optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
     }
     
     /**
+     * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName} parameter.
+     * The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of available ports
+     * is identified and chosen automatically. The {@code replicaInstanceType} is used to configure the launch configuration
+     * used by the auto-scaling group which is also created so that when dedicated replicas need to be provided during
+     * auto-scaling, their instance type is known. The choice of {@code dynamicLoadBalancerMapping} must only be set
+     * if the host to deploy to lives in the default region; otherwise, the DNS wildcard record for the overall domain
+     * would be made point to a wrong region. If set to {@code false}, a DNS entry will be created that points to the
+     * load balancer used for the new replica set's routing rules.<p>
+     * 
      * The "internal" method exists in order to declare a few type parameters which wouldn't be possible on the GWT RPC
      * interface method as some of these types are not seen by clients.
      */
@@ -498,20 +506,20 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         SailingAnalyticsHost<String>,
         SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
     SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHostInternal(
-            String regionId, String replicaSetName, AwsInstanceDTO hostToDeployTo,
-            String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
-            String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull)
+            String replicaSetName, AwsInstanceDTO hostToDeployTo, String replicaInstanceType,
+            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase,
+            String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result =
-                getLandscapeService().deployApplicationToExistingHost(regionId, replicaSetName,
-                    getHostFromInstanceDTO(hostToDeployTo), replicaInstanceType, dynamicLoadBalancerMapping,
-                    release.getName(), optionalKeyName, privateKeyEncryptionPassphrase,
-                    masterReplicationBearerToken, replicaReplicationBearerToken, optionalDomainName,
-                    optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+                getLandscapeService().deployApplicationToExistingHost(replicaSetName, getHostFromInstanceDTO(hostToDeployTo),
+                    replicaInstanceType, dynamicLoadBalancerMapping, release.getName(),
+                    optionalKeyName, privateKeyEncryptionPassphrase, masterReplicationBearerToken,
+                    replicaReplicationBearerToken, optionalDomainName, optionalMemoryInMegabytesOrNull,
+                    optionalMemoryTotalSizeFactorOrNull);
         return new SailingApplicationReplicaSetDTO<String>(result.getName(),
                 convertToSailingAnalyticsProcessDTO(result.getMaster(), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
                 /* replicas won't be up and running yet */ Collections.emptySet(), release.getName(),

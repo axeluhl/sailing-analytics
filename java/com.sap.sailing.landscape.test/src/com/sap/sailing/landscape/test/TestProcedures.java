@@ -207,9 +207,8 @@ public class TestProcedures {
                 SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
                 DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String,
                         ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-                        SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder);
+                        SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder, host);
         multiServerAppDeployerBuilder
-            .setHostToDeployTo(host)
             .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
             .setOptionalTimeout(optionalTimeout);
         multiServerAppConfigBuilder

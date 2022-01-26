@@ -185,8 +185,8 @@ implements SailingAnalyticsProcess<ShardingKey> {
                 logger.info("No more application processes running on "+this+"; terminating");
                 getHost().terminate();
             } else {
-                logger.info("There are other application processes deployed on " + this + ": "
-                        + Util.joinStrings(", ", applicationProcesses) + ". Leaving " + this + " running.");
+                logger.info("There are other application processes deployed on " + getHost() + ": "
+                        + Util.joinStrings(", ", applicationProcesses) + ". Leaving " + getHost() + " running.");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -195,7 +195,6 @@ implements SailingAnalyticsProcess<ShardingKey> {
 
     @Override
     public SailingAnalyticsHost<ShardingKey> getHost() {
-        @SuppressWarnings("unchecked")
         final SailingAnalyticsHost<ShardingKey> result = (SailingAnalyticsHost<ShardingKey>) super.getHost();
         return result;
     }

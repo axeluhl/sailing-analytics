@@ -15,6 +15,7 @@ import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.shared.util.Wait;
@@ -43,12 +44,15 @@ implements StartFromSailingAnalyticsImage {
     private Optional<Duration> optionalTimeout;
     
     /**
-     * Under all circumstances, this builder will return {@code true} for {@link #isNoShutdown()}, making sure
-     * that after the upgrade progress the server does not try to re-boot. Defaults:<ul>
+     * Under all circumstances, this builder will return {@code true} for {@link #isNoShutdown()}, making sure that
+     * after the upgrade progress the server does not try to re-boot. Defaults:
+     * <ul>
      * <li>The instance name defaults to "Multi-Server"</li>
-     * <li>The instance type defaults to {@link InstanceType#C5_D_4_XLARGE}</li>
-     * <li>The {@link #setImageType(String) image type} defaults to {@link StartFromSailingAnalyticsImage#IMAGE_TYPE_TAG_VALUE_SAILING}
-     * ({@code "sailing-analytics-server"}).
+     * <li>The instance type defaults to {@link InstanceType#I3_XLARGE}</li>
+     * <li>The {@link #setImageType(String) image type} defaults to
+     * {@link StartFromSailingAnalyticsImage#IMAGE_TYPE_TAG_VALUE_SAILING} ({@code "sailing-analytics-server"}).
+     * <li>The tag {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is set, with the value set to
+     * {@code "___multi___"} if no </li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -82,7 +86,7 @@ implements StartFromSailingAnalyticsImage {
             if (isInstanceNameSet()) {
                 result = super.getInstanceName();
             } else {
-                result = "Multi-Server";
+                result = "SL Multi-Server";
             }
             return result;
         }
@@ -110,11 +114,16 @@ implements StartFromSailingAnalyticsImage {
         protected InstanceType getInstanceType() {
             final InstanceType result;
             if (super.getInstanceType() == null) {
-                result = InstanceType.C5_D_4_XLARGE;
+                result = InstanceType.I3_XLARGE;
             } else {
                 result = super.getInstanceType();
             }
             return result;
+        }
+        
+        @Override
+        protected Optional<Tags> getTags() {
+            return Optional.of(super.getTags().orElse(Tags.empty()).and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, "___multi___"));
         }
         
         /**
