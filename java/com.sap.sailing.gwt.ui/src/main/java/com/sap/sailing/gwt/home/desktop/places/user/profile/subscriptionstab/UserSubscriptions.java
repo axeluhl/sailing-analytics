@@ -69,10 +69,10 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     public UserSubscriptions(final UserSubscriptionsView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
-        initSubscriptionsTable(presenter);
-        presenter.setView(this);
         this.presenter = presenter;
+        this.presenter.setView(this);
         this.valueProvider = new SubscriptionsValueProvider(i18n);
+        initSubscriptionsTable(presenter);
     }
 
     @UiHandler("subscribeButtonUi")
@@ -115,9 +115,9 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
 
         }, i18n.status());
 
-        addDateTimeColumn(i18n.createdAt(), s -> null);
+        addDateTimeColumn(i18n.createdAt(), SubscriptionDTO::getCreatedAt);
 
-        addDateTimeColumn(i18n.currentTermEnd(), s -> s.isInTrial() ? s.getTrialEnd() : s.getCurrentTermEnd());
+        addDateTimeColumn(i18n.currentTermEnd(), valueProvider::getTermEnd);
 
         final Column<SubscriptionDTO, String> cancelColumn = new Column<SubscriptionDTO, String>(new ButtonCell()) {
 
@@ -165,8 +165,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
                 } else if (rowValue.isRenewing()) {
                     addTextCell(tr, i18n.nextBillingAt() + ":", css.fontStyleItalic(), css.textAlignRight());
                     addTextCell(tr, formatDateAndTime(rowValue.getNextBillingAt().asDate()), css.textAlignRight());
-                    addTextCell(tr, i18n.currencyValue(rowValue.getReoccuringPaymentValue() / 100, "$"),
-                            css.textAlignRight());
+                    addTextCell(tr, valueProvider.getRecurringPayment(rowValue), css.textAlignRight());
                 }
 
                 tr.endTR();
@@ -193,7 +192,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             @Override
             public String getValue(final SubscriptionDTO object) {
                 final TimePoint timePoint = valueProvider.apply(object);
-                return timePoint == null ? "???" : formatDateAndTime(timePoint.asDate());
+                return formatDateAndTime(timePoint.asDate());
             }
         };
         dateTimeColumn.setCellStyleNames(local_res.css().textAlignRight());

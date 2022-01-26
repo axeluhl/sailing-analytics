@@ -70,7 +70,7 @@ fi
 
 #reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 if [ "$SERVERS_HOME" = "" ]; then
-	SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
+    SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
 fi
 
 # x86 or x86_64 should work for most cases
@@ -726,7 +726,21 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     
         # make sure to honour the service configuration
         # needed to make sure that tests use the right servers
-        APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+        if [ -n "${MONGODB_HOST}" ]; then
+          APP_PARAMETERS="-Dmongo.host=${MONGODB_HOST} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${MONGODB_PORT}" ]; then
+          APP_PARAMETERS="-Dmongo.port=${MONGODB_PORT} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${EXPEDITION_PORT}" ]; then
+          APP_PARAMETERS="-Dexpedition.udp.port=${EXPEDITION_PORT} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${REPLICATION_HOST}" ]; then
+          APP_PARAMETERS="-Dreplication.exchangeHost=${REPLICATION_HOST} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${REPLICATION_CHANNEL}" ]; then
+          APP_PARAMETERS="-Dreplication.exchangeName=${REPLICATION_CHANNEL} ${APP_PARAMETERS}"
+        fi
     
         extra="$extra -P with-not-android-relevant,!with-mobile"
     

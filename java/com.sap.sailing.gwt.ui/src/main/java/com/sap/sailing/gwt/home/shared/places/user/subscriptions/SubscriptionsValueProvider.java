@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionDTO;
 
 /**
@@ -61,6 +62,14 @@ public class SubscriptionsValueProvider {
         } else {
             textValueHandler.accept(i18n.paymentStatus(), "---");
         }
+    }
+
+    public TimePoint getTermEnd(final SubscriptionDTO subscription) {
+        return subscription.isInTrial() ? subscription.getTrialEnd() : subscription.getCurrentTermEnd();
+    }
+
+    public String getRecurringPayment(final SubscriptionDTO subscription) {
+        return i18n.currencyValue(subscription.getReoccuringPaymentValue() / 100, subscription.getCurrencyCode());
     }
 
 }

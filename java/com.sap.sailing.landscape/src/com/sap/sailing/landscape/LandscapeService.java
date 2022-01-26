@@ -1,13 +1,18 @@
 package com.sap.sailing.landscape;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -89,4 +94,20 @@ public interface LandscapeService {
     AwsLandscape<String> getLandscape();
 
     String getDefaultRedirectPath(Rule defaultRedirectRule);
+
+    Release upgradeApplicationReplicaSet(AwsRegion region,
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String releaseOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String replicaReplicationBearerToken) throws InterruptedException, ExecutionException,
+            MalformedURLException, IOException, TimeoutException, Exception;
+
+    /**
+     * @return a new replica that was started in case no running replica was found in the {@code replicaSet}, otherwise
+     *         {@code null}.
+     */
+    SailingAnalyticsProcess<String> ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String effectiveReplicaReplicationBearerToken) throws Exception, MalformedURLException, IOException,
+            TimeoutException, InterruptedException, ExecutionException;
 }

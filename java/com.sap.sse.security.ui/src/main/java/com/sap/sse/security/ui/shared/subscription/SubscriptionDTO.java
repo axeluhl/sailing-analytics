@@ -31,16 +31,25 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
     private String transactionType;
 
     /*
-     * The Value of the reocurring payment in cents. Depends on the currency type.
+     * The Value of the reocurring payment in cents. Depends on the currency code.
      */
     private Integer reoccuringPaymentValue;
+
+    /**
+     * The currency code for the {@link #reoccuringPaymentValue recurring payment value}
+     */
+    private String currencyCode;
+
+    /**
+     * Point in time when the subscription has originally been created.
+     */
+    private TimePoint createdAt;
 
     /*
      * TIme at which the subscription status was last changed to cancelled or will be changed to cancelled,
      * if it is planned for cancellation.
      */
     private TimePoint cancelledAt;
-
 
     /**
      * The date/time at which the next billing for the subscription happens.
@@ -72,8 +81,9 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
 
     protected SubscriptionDTO(final String planId, final String subscriptionId, final String subscriptionStatus,
             final String paymentStatus, final String transactionType, final Integer reoccuringPaymentValue,
-            String currencyCode, final TimePoint trialEnd, final TimePoint currentTermEnd, final TimePoint cancelledAt,
-            final TimePoint nextBillingAt, final String provider) {
+            final String currencyCode, final TimePoint createdAt, final TimePoint trialEnd,
+            final TimePoint currentTermEnd, final TimePoint cancelledAt, final TimePoint nextBillingAt,
+            final String provider) {
         this.planId = planId;
         this.subscriptionId = subscriptionId;
         this.trialEnd = trialEnd;
@@ -82,6 +92,8 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
         this.transactionType = transactionType;
         this.provider = provider;
         this.reoccuringPaymentValue = reoccuringPaymentValue;
+        this.currencyCode = currencyCode;
+        this.createdAt = createdAt;
         this.cancelledAt = cancelledAt;
         this.nextBillingAt = nextBillingAt;
         this.currentTermEnd = currentTermEnd;
@@ -160,6 +172,14 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
 
     public Integer getReoccuringPaymentValue() {
         return reoccuringPaymentValue;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public TimePoint getCreatedAt() {
+        return createdAt;
     }
 
     public TimePoint getCancelledAt() {
