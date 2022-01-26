@@ -256,8 +256,8 @@ public class RegattaService {
                     raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), -1));
                 }
         
-                sailingService.addRaceColumnsToSeries(newRegatta.getRegattaIdentifier(), series.getName(), raceColumnNamesToAddWithInsertIndex,
-                        new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
+                sailingService.addRaceColumnsToSeries(newRegatta.getRegattaIdentifier(), series.getName(),
+                        raceColumnNamesToAddWithInsertIndex, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                     @Override
                     public void onFailure(Throwable t) {
                         callback.onFailure(t);
@@ -266,7 +266,7 @@ public class RegattaService {
                     @Override
                     public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
                         requestRegattaList(event.id, true);
-                        callback.onSuccess(newRegatta);     
+                        callback.onSuccess(newRegatta);
                     }
                 });     
             }

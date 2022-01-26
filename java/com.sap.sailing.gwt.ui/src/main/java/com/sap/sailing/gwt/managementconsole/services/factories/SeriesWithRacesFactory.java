@@ -14,29 +14,28 @@ import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public abstract class SeriesWithRacesFactory {
-    
+
     private static final String DEFAULT_RACE_NAME = "R";
 
-    public static SeriesDTO createSeriesWithRaces(String regattaName, int numberOfRaces) {
-        SeriesDTO series = new SeriesDTO();
+    public static SeriesDTO createSeriesWithRaces(final String regattaName, final int numberOfRaces) {
+        final SeriesDTO series = new SeriesDTO();
         series.setName(Series.DEFAULT_NAME);
         series.setMedal(false);
         series.setStartsWithZeroScore(false);
         series.setSplitFleetContiguousScoring(false);
         series.setFirstColumnIsNonDiscardableCarryForward(false);
         series.setFleets(Collections.singletonList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
-        List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
+        final List<RaceColumnDTO> races = new ArrayList<>();
         for (int i = 1; i <= numberOfRaces; i++) {
-            RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO(DEFAULT_RACE_NAME + i, series.getName(), regattaName);
-            races.add(raceColumnDTO);
+            races.add(new RaceColumnInSeriesDTO(DEFAULT_RACE_NAME + i, series.getName(), regattaName));
         }
-        series.setRaceColumns(races);          
+        series.setRaceColumns(races);
         return series;
     }
-    
-    public static LinkedHashMap<String, SeriesCreationParametersDTO> createSeriesStructure(SeriesDTO seriesDTO) {
-        LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<String, SeriesCreationParametersDTO>();
-        SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
+
+    public static LinkedHashMap<String, SeriesCreationParametersDTO> createSeriesStructure(final SeriesDTO seriesDTO) {
+        final LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<>();
+        final SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                 seriesDTO.isMedal(), seriesDTO.isFleetsCanRunInParallel(), seriesDTO.isStartsWithZeroScore(),
                 seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
                 seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());

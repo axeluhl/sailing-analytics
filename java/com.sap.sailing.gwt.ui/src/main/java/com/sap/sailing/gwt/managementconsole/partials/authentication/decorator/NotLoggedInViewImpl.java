@@ -12,6 +12,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInView;
 
+/**
+ * The management console application's {@link NotLoggedInView} implementation used within the
+ * {@link AuthorizedDecorator decorator} to be shown if the user is not authorized/allowed to see the actual content.
+ */
 class NotLoggedInViewImpl extends Composite implements NotLoggedInView {
 
     private static NotLoggedInViewImplUiBinder uiBinder = GWT.create(NotLoggedInViewImplUiBinder.class);

@@ -7,6 +7,10 @@ import java.util.function.Supplier;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 
+/**
+ * Abstract super class for management console {@link Place place} implementations providing abstract super classes for
+ * convenient {@link PlaceTokenizer place tokenizer} implementations.
+ */
 public abstract class AbstractManagementConsolePlace extends Place {
 
     protected static abstract class DefautTokenizer<P extends AbstractManagementConsolePlace>

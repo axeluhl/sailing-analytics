@@ -16,11 +16,16 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.managementconsole.partials.mainframe.MainFrame;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 import com.sap.sailing.gwt.ui.common.client.DropdownHandler;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
+/**
+ * Header component for management console application {@link MainFrame main frame} containing the primary navigation
+ * items, which are shown tab-like on desktop resolutions and as burger menu on smaller / mobile screens.
+ */
 public class Header extends Composite implements NeedsAuthenticationContext {
 
     interface HeaderUiBinder extends UiBinder<Widget, Header> {

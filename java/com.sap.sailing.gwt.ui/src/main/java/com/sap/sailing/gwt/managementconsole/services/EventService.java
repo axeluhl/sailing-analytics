@@ -93,26 +93,17 @@ public class EventService {
             @Override
             public void onSuccess(final LeaderboardGroupDTO result) {
                 final List<UUID> leaderboardGroupIDs = Arrays.asList(result.getId());
-                sailingService.createEvent(name, null, date, null, venue, false, courseAreaNames, null, null, new HashMap<String, String>(), 
-                        new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), leaderboardGroupIDs, callback); 
+                sailingService.createEvent(name, null, date, null, venue, false, courseAreaNames, null, null, new HashMap<String, String>(),
+                        new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), leaderboardGroupIDs, callback);
             }
         });
     }
-    
+
     private void createDefaultLeaderboardGroup(final AsyncCallback<LeaderboardGroupDTO> leaderboardGroupCallback) {
         final LeaderboardGroupDescriptor newGroup = LeaderboardGroupFactory.createDefaultLeaderboardGroupDescriptor();
         sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
                 newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
-                newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<>(
-                        new AsyncCallback<LeaderboardGroupDTO>() {
-                            @Override
-                            public void onFailure(final Throwable t) {
-                                leaderboardGroupCallback.onFailure(t);
-                            }
-                            @Override
-                            public void onSuccess(final LeaderboardGroupDTO newGroup) {
-                                leaderboardGroupCallback.onSuccess(newGroup);
-                            }
-                        }));
+                newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(),
+                new MarkedAsyncCallback<>(leaderboardGroupCallback));
     }
 }

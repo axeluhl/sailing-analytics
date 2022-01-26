@@ -10,6 +10,9 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.client.WithSecurity;
 
+/**
+ * The management console appliction's client factory interface providing access to several commonly used services, etc.
+ */
 public interface ManagementConsoleClientFactory extends WithSecurity, WithAuthenticationManager {
 
     public PlaceController getPlaceController();
@@ -21,7 +24,7 @@ public interface ManagementConsoleClientFactory extends WithSecurity, WithAuthen
     public MediaServiceWriteAsync getMediaServiceWrite();
 
     public EventService getEventService();
-    
+
     public RegattaService getRegattaService();
 
     public ViewFactory getViewFactory();

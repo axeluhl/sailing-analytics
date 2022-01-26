@@ -14,9 +14,11 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 
 public abstract class RegattaFactory {
-    public static RegattaDTO createDefaultRegatta(String regattaName, String boatClassName, final RankingMetrics ranking, final ScoringSchemeType scoringScheme, 
-            final SeriesDTO series, final EventDTO event) {
-        RegattaDTO regatta = new RegattaDTO(regattaName, scoringScheme);
+
+    public static RegattaDTO createDefaultRegatta(final String regattaName, final String boatClassName,
+            final RankingMetrics ranking, final ScoringSchemeType scoringScheme, final SeriesDTO series,
+            final EventDTO event) {
+        final RegattaDTO regatta = new RegattaDTO(regattaName, scoringScheme);
         regatta.boatClass = new BoatClassDTO(boatClassName, Distance.NULL, Distance.NULL);
         regatta.rankingMetricType = ranking;
         regatta.series = Collections.singletonList(series);
@@ -24,7 +26,7 @@ public abstract class RegattaFactory {
         regatta.controlTrackingFromStartAndFinishTimes = false;
         regatta.autoRestartTrackingUponCompetitorSetChange = false;
         regatta.canBoatsOfCompetitorsChangePerRace = false;
-        regatta.buoyZoneRadiusInHullLengths = Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS;      
+        regatta.buoyZoneRadiusInHullLengths = Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS;
         regatta.courseAreas = new ArrayList<>();
         Util.addAll(event.venue.getCourseAreas(), regatta.courseAreas);
         return regatta;

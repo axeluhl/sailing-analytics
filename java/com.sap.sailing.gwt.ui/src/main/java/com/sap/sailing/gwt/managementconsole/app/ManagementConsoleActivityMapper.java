@@ -21,7 +21,20 @@ import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOver
 import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewPlace;
 import com.sap.sailing.gwt.managementconsole.places.showcase.ShowcaseActivityProxy;
 import com.sap.sailing.gwt.managementconsole.places.showcase.ShowcasePlace;
+import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
+/**
+ * The management console application's {@link ActivityMapper} implementation providing the {@link Activity activity} to
+ * start depending on the provided {@link Place place} implementation.
+ *
+ * <p>
+ * <b>Note:</b> Indeed, this mapper provides an {@link AbstractActivityProxy} instance which wraps the actual activity
+ * in order to benefit from the <a href="http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html">GWT code
+ * splitting</a> feature. *
+ * </p>
+ *
+ * @see ActivityMapper#getActivity(Place)
+ */
 public class ManagementConsoleActivityMapper implements ActivityMapper {
 
     private final ManagementConsoleClientFactory clientFactory;

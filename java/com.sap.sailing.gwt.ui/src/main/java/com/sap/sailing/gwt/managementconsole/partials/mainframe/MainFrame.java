@@ -12,6 +12,10 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 
+/**
+ * The management console application's main frame containing the navigation {@link Header header} and the
+ * {@link AcceptsOneWidget content container} which is wrapped into an {@link AuthorizedDecorator content decorator}.
+ */
 public class MainFrame extends ResizeComposite implements NeedsAuthenticationContext {
 
     interface MainFrameUiBinder extends UiBinder<Widget, MainFrame> {
