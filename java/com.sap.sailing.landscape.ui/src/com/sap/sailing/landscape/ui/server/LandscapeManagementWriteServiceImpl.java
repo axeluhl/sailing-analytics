@@ -412,9 +412,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setOptionalTimeout(IMAGE_UPGRADE_TIMEOUT);
         final UpgradeAmi<String> upgradeAmi = upgradeAmiBuilder.build();
         upgradeAmi.run();
-        // TODO bug5502: here or in the procedure we should offer the user to also upgrade the launch configurations using this AMI
         final AmazonMachineImage<String> resultingAmi = upgradeAmi.getUpgradedAmi();
-        return new AmazonMachineImageDTO(resultingAmi.getId(), resultingAmi.getRegion().getId(), resultingAmi.getName(), /* TODO type */ null, resultingAmi.getState().name(), resultingAmi.getCreatedAt());
+        return new AmazonMachineImageDTO(resultingAmi.getId(), resultingAmi.getRegion().getId(), resultingAmi.getName(),
+               resultingAmi.getType(), resultingAmi.getState().name(), resultingAmi.getCreatedAt());
     }
 
     @Override

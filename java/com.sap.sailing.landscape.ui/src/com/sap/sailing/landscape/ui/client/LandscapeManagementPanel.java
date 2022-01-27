@@ -413,7 +413,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 new AmazonMachineImagesImagesBarCell(stringMessages), /* permission checker */ (machineImage, action)->true);
         machineImagesActionColumn.addAction(AmazonMachineImagesImagesBarCell.ACTION_REMOVE, DefaultActions.DELETE, machineImageToRemove->removeMachineImage(stringMessages, machineImageToRemove));
         machineImagesActionColumn.addAction(AmazonMachineImagesImagesBarCell.ACTION_UPGRADE,
-                machineImageToUpgrade->upgradeMachineImage(stringMessages, machineImageToUpgrade, applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+                machineImageToUpgrade->upgradeMachineImage(stringMessages, machineImageToUpgrade, getApplicationReplicaSetsToUpgradeAutoScalingReplicaAmisFor(machineImageToUpgrade)));
         machineImagesTable.addColumn(machineImagesActionColumn, stringMessages.actions());
         final CaptionPanel machineImagesCaptionPanel = new CaptionPanel(stringMessages.machineImages());
         final VerticalPanel machineImagesVerticalPanel = new VerticalPanel();
@@ -432,6 +432,17 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
+
+    private Iterable<SailingApplicationReplicaSetDTO<String>> getApplicationReplicaSetsToUpgradeAutoScalingReplicaAmisFor(AmazonMachineImageDTO amiBeingUpdated) {
+        final Iterable<SailingApplicationReplicaSetDTO<String>> result;
+        final Set<SailingApplicationReplicaSetDTO<String>> selection = applicationReplicaSetsTable.getSelectionModel().getSelectedSet();
+        if (selection == null || selection.isEmpty()) {
+            result = Util.filter(applicationReplicaSetsTable.getFilterPanel().getAll(), rs->rs.getAutoScalingGroupAmiId().equals(amiBeingUpdated.getId()));
+        } else {
+            result = selection;
+        }
+        return result;
+    }
     
     private void updateAutoScalingReplicaAmi(StringMessages stringMessages, String regionId,
             Iterable<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdateAutoScalingReplicaAmiFor,
@@ -448,25 +459,25 @@ public class LandscapeManagementPanel extends SimplePanel {
         landscapeManagementService.updateImageForReplicaSets(regionId, applicationReplicaSetsToUpdate, amiOrNullForLatest,
                 sshKeyManagementPanel.getSelectedKeyPair().getName(), sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                         ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                new AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        applicationReplicaSetsBusy.setBusy(false);
-                                        errorReporter.reportError(caught.getMessage());
-                                    }
+                new AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        applicationReplicaSetsBusy.setBusy(false);
+                        errorReporter.reportError(caught.getMessage());
+                    }
 
-                                    @Override
-                                    public void onSuccess(ArrayList<SailingApplicationReplicaSetDTO<String>> result) {
-                                        applicationReplicaSetsBusy.setBusy(false);
-                                        for (final SailingApplicationReplicaSetDTO<String> updatedReplicaSet : result) {
-                                            applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(updatedReplicaSet);
-                                            Notification.notify(stringMessages.successfullyUpdatedMachineImageForAutoScalingReplicas(
-                                                    updatedReplicaSet.getName(), updatedReplicaSet.getAutoScalingGroupAmiId()),
-                                                    NotificationType.SUCCESS);
-                                        }
-                                        applicationReplicaSetsTable.refresh();
-                                    }
-                                });
+                    @Override
+                    public void onSuccess(ArrayList<SailingApplicationReplicaSetDTO<String>> result) {
+                        applicationReplicaSetsBusy.setBusy(false);
+                        for (final SailingApplicationReplicaSetDTO<String> updatedReplicaSet : result) {
+                            applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(updatedReplicaSet);
+                            Notification.notify(stringMessages.successfullyUpdatedMachineImageForAutoScalingReplicas(
+                                    updatedReplicaSet.getName(), updatedReplicaSet.getAutoScalingGroupAmiId()),
+                                    NotificationType.SUCCESS);
+                        }
+                        applicationReplicaSetsTable.refresh();
+                    }
+                });
     }
 
     private String getGwtStatusLink(final String host, int port) {
@@ -1180,7 +1191,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                         stringMessages.successfullyUpgradedMachineImage(machineImageToUpgrade.getName(),
                                 machineImageToUpgrade.getId(), machineImageToUpgrade.getRegionId(), result.getName()),
                         NotificationType.SUCCESS);
-                if (result.getType().equals(SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING)
+                if (Util.equalsWithNull(result.getType(), SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING)
                         && selectedApplicationReplicaSetsToUpdate != null
                         && !Util.isEmpty(selectedApplicationReplicaSetsToUpdate)) {
                     if (Window.confirm(stringMessages.updateSelectedReplicaSetAmisToo(Util.join(", ", selectedApplicationReplicaSetsToUpdate)))) {
