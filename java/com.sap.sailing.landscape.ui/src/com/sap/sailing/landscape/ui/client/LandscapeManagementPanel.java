@@ -1180,7 +1180,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                         stringMessages.successfullyUpgradedMachineImage(machineImageToUpgrade.getName(),
                                 machineImageToUpgrade.getId(), machineImageToUpgrade.getRegionId(), result.getName()),
                         NotificationType.SUCCESS);
-                if (selectedApplicationReplicaSetsToUpdate != null && !Util.isEmpty(selectedApplicationReplicaSetsToUpdate)) {
+                if (result.getType().equals(SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING)
+                        && selectedApplicationReplicaSetsToUpdate != null
+                        && !Util.isEmpty(selectedApplicationReplicaSetsToUpdate)) {
                     if (Window.confirm(stringMessages.updateSelectedReplicaSetAmisToo(Util.join(", ", selectedApplicationReplicaSetsToUpdate)))) {
                         updateAutoScalingReplicaAmi(stringMessages, machineImageToUpgrade.getRegionId(), selectedApplicationReplicaSetsToUpdate, result);
                     }
