@@ -134,4 +134,9 @@ public interface LandscapeManagementWriteService extends RemoteService {
     Boolean ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSet, String optionalKeyName,
             byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken) throws Exception;
+
+    ArrayList<SailingApplicationReplicaSetDTO<String>> updateImageForReplicaSets(String regionId,
+            ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,
+            AmazonMachineImageDTO amiDTO,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

@@ -8,9 +8,11 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -238,19 +240,19 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final ArrayList<SailingApplicationReplicaSetDTO<String>> result = new ArrayList<>();
         final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
-        final Set<Future<SailingApplicationReplicaSetDTO<String>>> resultFutures = new HashSet<>();
+        final Map<Future<SailingApplicationReplicaSetDTO<String>>, AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> resultFutures = new HashMap<>();
         final ScheduledExecutorService backgroundThreadPool = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Constructing SailingApplicationReplicaSetDTOs "+UUID.randomUUID());
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
             getLandscape().getApplicationReplicaSetsByTag(region, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
                 hostSupplier, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
-            resultFutures.add(backgroundThreadPool.submit(()->
-                convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)));
+            resultFutures.put(backgroundThreadPool.submit(()->
+                convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)), applicationServerReplicaSet);
         }
-        Util.addAll(Util.filter(Util.map(resultFutures, future->{
+        Util.addAll(Util.filter(Util.map(resultFutures.keySet(), future->{
             try {
                 return future.get(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                logger.log(Level.WARNING, "Problem waiting for a replica set; ignoring that replica set", e);
+                logger.log(Level.WARNING, "Problem waiting for a replica set "+resultFutures.get(future)+"; ignoring that replica set", e);
                 return null;
             }
         }), r->r!=null), result);
@@ -271,7 +273,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     }
                 }),
                 applicationServerReplicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
-                applicationServerReplicaSet.getHostname(), getLandscapeService().getDefaultRedirectPath(applicationServerReplicaSet.getDefaultRedirectRule()));
+                applicationServerReplicaSet.getHostname(), getLandscapeService().getDefaultRedirectPath(applicationServerReplicaSet.getDefaultRedirectRule()),
+                applicationServerReplicaSet.getAutoScalingGroup() == null ? null : applicationServerReplicaSet.getAutoScalingGroup().getLaunchConfiguration().imageId());
     }
     
     private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
@@ -484,7 +487,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 }),
                 release.getName(),
                 getLandscapeService().getFullyQualifiedHostname(name, Optional.ofNullable(optionalDomainName)),
-                getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()));
+                getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()),
+                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchConfiguration().imageId());
     }
 
     @Override
@@ -560,7 +564,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     }
                 }), release.getName(),
                 getLandscapeService().getFullyQualifiedHostname(replicaSetName, Optional.ofNullable(optionalDomainName)),
-                getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()));
+                getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()),
+                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchConfiguration().imageId());
     }
 
     @Override
@@ -677,7 +682,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getReplicas(),
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getVersion(),
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getHostname(),
-                RedirectDTO.toString(defaultRedirect.getPath(), defaultRedirect.getQuery()));
+                RedirectDTO.toString(defaultRedirect.getPath(), defaultRedirect.getQuery()),
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getAutoScalingGroupAmiId());
     }
 
     @Override
@@ -726,11 +732,36 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     }
                 }),
                 release.getName(), applicationReplicaSetToUpgrade.getHostname(),
-                applicationReplicaSetToUpgrade.getDefaultRedirectPath());
+                applicationReplicaSetToUpgrade.getDefaultRedirectPath(), applicationReplicaSetToUpgrade.getAutoScalingGroupAmiId());
     }
 
     @Override
     public ArrayList<ReleaseDTO> getReleases() {
         return Util.mapToArrayList(SailingReleaseRepository.INSTANCE, r->new ReleaseDTO(r.getName(), r.getBaseName(), r.getCreationDate()));
+    }
+    
+    @Override
+    public ArrayList<SailingApplicationReplicaSetDTO<String>> updateImageForReplicaSets(
+            String regionId, ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,
+            AmazonMachineImageDTO amiDTOOrNullForLatest,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion region = new AwsRegion(regionId, getLandscape());
+        final AmazonMachineImage<String> ami = amiDTOOrNullForLatest==null?null:getLandscape().getImage(region, amiDTOOrNullForLatest.getId());
+        final Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
+                Util.map(applicationReplicaSetsToUpdate, rsDTO->{
+                    try {
+                        return convertFromApplicationReplicaSetDTO(region, rsDTO);
+                    } catch (UnknownHostException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+        final Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> updatedReplicaSets =
+                getLandscapeService().updateImageForReplicaSets(region, replicaSets, Optional.ofNullable(ami));
+        final ArrayList<SailingApplicationReplicaSetDTO<String>> result = new ArrayList<>();
+        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> updatedReplicaSet : updatedReplicaSets) {
+            result.add(convertToSailingApplicationReplicaSetDTO(updatedReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+        }
+        return result;
     }
 }

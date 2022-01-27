@@ -46,4 +46,7 @@ public interface IconResources extends ClientBundle {
 
     @Source("images/unlink.png")
     ImageResource unlinkIcon();
+
+    @Source("images/red_gears.png")
+    ImageResource redGearsIcon();
 }

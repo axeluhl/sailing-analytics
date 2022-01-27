@@ -179,6 +179,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 }
             }
         }
+        if (!autoScalingGroup.isDone()) { // no auto-scaling group was found after having looked at all target groups
+            autoScalingGroup.complete(null);
+        }
         // "legacy" case where a single target group handles all requests
         if (!masterTargetGroup.isDone() && !publicTargetGroup.isDone() && singleTargetGroupCandidate != null) {
             myMasterTargetGroup = singleTargetGroupCandidate;

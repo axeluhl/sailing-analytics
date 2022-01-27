@@ -701,12 +701,6 @@ public class LandscapeServiceImpl implements LandscapeService {
         createLoadBalancerMapping.run();
         // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
         final Builder<?, String> replicaConfigurationBuilder = createReplicaConfigurationBuilder(region, replicaSetName, master.getPort(), release, bearerTokenUsedByReplicas, masterHostname);
-        final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
-        final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
-        final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
-        final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = landscape.getAutoScalingGroupsAsync(region);
-        final CompletableFuture<Iterable<LaunchConfiguration>> launchConfigurations = landscape.getLaunchConfigurationsAsync(region);
-        final DNSCache dnsCache = landscape.getNewDNSCache();
         // Now wait for master to become healthy before creating auto-scaling; otherwise it may happen that the replica tried to start
         // replication before the master is ready (see also bug 5527).
         master.waitUntilReady(LandscapeService.WAIT_FOR_HOST_TIMEOUT);
@@ -733,6 +727,12 @@ public class LandscapeServiceImpl implements LandscapeService {
             createLaunchConfigurationAndAutoScalingGroupBuilder.setKeyName(optionalKeyName);
         }
         createLaunchConfigurationAndAutoScalingGroupBuilder.build().run();
+        final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
+        final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
+        final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
+        final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = landscape.getAutoScalingGroupsAsync(region);
+        final CompletableFuture<Iterable<LaunchConfiguration>> launchConfigurations = landscape.getLaunchConfigurationsAsync(region);
+        final DNSCache dnsCache = landscape.getNewDNSCache();
         final AwsApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(replicaSetName, masterHostname, master, /* no replicas yet */ Optional.empty(),
                         allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
@@ -995,5 +995,24 @@ public class LandscapeServiceImpl implements LandscapeService {
         final StartMultiServer<String> startMultiServerProcedure = startMultiServerProcedureBuilder.build();
         startMultiServerProcedure.run();
         return startMultiServerProcedure.getHost();
+    }
+
+    @Override
+    public Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> updateImageForReplicaSets(AwsRegion region,
+            Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets,
+            Optional<AmazonMachineImage<String>> optionalAmi) throws InterruptedException, ExecutionException {
+        final Set<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> result = new HashSet<>();
+        for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet : replicaSets) {
+            if (replicaSet.getAutoScalingGroup() != null) {
+                final AmazonMachineImage<String> ami = optionalAmi.orElseGet(
+                        ()->getLandscape().getLatestImageWithType(region, SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING));
+                logger.info("Upgrading AMI in auto-scaling group "+replicaSet.getAutoScalingGroup().getName()+" of replica set "+replicaSet.getName()+" to "+ami.getId());
+                getLandscape().updateImageInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(), replicaSet.getName(), ami);
+                result.add(getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), replicaSet.getMaster(), replicaSet.getReplicas()));
+            } else {
+                logger.info("No auto-scaling group found for replica set "+replicaSet.getName()+" to update AMI in");
+            }
+        }
+        return result;
     }
 }

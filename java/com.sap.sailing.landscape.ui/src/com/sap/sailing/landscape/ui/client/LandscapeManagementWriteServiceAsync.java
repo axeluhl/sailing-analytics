@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.landscape.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
@@ -210,4 +211,21 @@ public interface LandscapeManagementWriteServiceAsync {
             SailingApplicationReplicaSetDTO<String> applicationReplicaSet, String optionalKeyName,
             byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
             AsyncCallback<Boolean> callback);
+
+    /**
+     * Updates the AMI to use in the launch configurations of those of the {@code replicaSets} that have an auto-scaling group.
+     * Any running replica will not be affected by this. Only new replicas will be launched based on the AMI specified.
+     * 
+     * @param replicaSets
+     *            those without an auto-scaling group won't be affected
+     * @param amiDTOOrNullForLatest
+     *            defaults to the latest image of type {@link SharedLandscapeConstants#IMAGE_TYPE_TAG_VALUE_SAILING}
+     * @return those replica sets that were updated according to this request; those from {@code replicaSets} not part
+     *         of this result have not had their AMI upgraded, probably because we didn't find an auto-scaling group and
+     *         hence no launch configuration to update
+     */
+    void updateImageForReplicaSets(String regionId,
+            ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,
+            AmazonMachineImageDTO amiDTOOrNullForLatest, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
 }

@@ -13,6 +13,7 @@ import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -201,4 +202,20 @@ public interface LandscapeService {
     SailingAnalyticsHost<String> createEmptyMultiServer(AwsRegion region, Optional<InstanceType> instanceType,
             Optional<AwsAvailabilityZone> availabilityZone, Optional<String> name, Optional<String> optionalKeyName,
             byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    /**
+     * Updates the AMI to use in the launch configurations of those of the {@code replicaSets} that have an auto-scaling group.
+     * Any running replica will not be affected by this. Only new replicas will be launched based on the AMI specified.
+     * 
+     * @param replicaSets
+     *            those without an auto-scaling group won't be affected
+     * @param optionalAmi
+     *            defaults to the latest image of type {@link SharedLandscapeConstants#IMAGE_TYPE_TAG_VALUE_SAILING}
+     * @return those replica sets that were updated according to this request; those from {@code replicaSets} not part
+     *         of this result have not had their AMI upgraded, probably because we didn't find an auto-scaling group and
+     *         hence no launch configuration to update
+     */
+    Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> updateImageForReplicaSets(AwsRegion region,
+            Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets,
+            Optional<AmazonMachineImage<String>> optionalAmi) throws InterruptedException, ExecutionException;
 }

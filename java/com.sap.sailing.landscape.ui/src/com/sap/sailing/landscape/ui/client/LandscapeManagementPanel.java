@@ -243,9 +243,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 final SafeHtmlBuilder builder = new SafeHtmlBuilder();
                 final String version = replicaSet.getVersion();
                 final String releaseNotesLink = getReleaseNotesLink(version);
-                builder.appendHtmlConstant("<a target=\"_blank\" href=\""+releaseNotesLink+"\">");
-                builder.appendEscaped(version);
-                builder.appendHtmlConstant("</a>");
+                appendEc2Link(builder, releaseNotesLink, version);
                 return builder.toSafeHtml();
             }
         };
@@ -313,6 +311,18 @@ public class LandscapeManagementPanel extends SimplePanel {
         };
         applicationReplicaSetsTable.addColumn(replicasColumn, stringMessages.replicas());
         applicationReplicaSetsTable.addColumn(rs->rs.getDefaultRedirectPath(), stringMessages.defaultRedirectPath());
+        final SafeHtmlCell autoScalingGroupAmiIdCell = new SafeHtmlCell();
+        final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> autoScalingGroupAmiIdColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(autoScalingGroupAmiIdCell) {
+            @Override
+            public SafeHtml getValue(SailingApplicationReplicaSetDTO<String> replicaSet) {
+                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                if (replicaSet.getAutoScalingGroupAmiId() != null) {
+                    appendEc2AmiLink(builder, replicaSet.getAutoScalingGroupAmiId());
+                }
+                return builder.toSafeHtml();
+            }
+        };
+        applicationReplicaSetsTable.addColumn(autoScalingGroupAmiIdColumn, stringMessages.machineImageId());
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
                 new ApplicationReplicaSetsImagesBarCell(stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_ARCHIVE,
@@ -338,7 +348,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                     ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups)));
-        applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
+        // see below for the finalization o the applicationRelicaSetsActionColumn; we need to have the machineImagesTable ready for the last action...
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
         final HorizontalPanel applicationReplicaSetsButtonPanel = new HorizontalPanel();
@@ -375,6 +385,19 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return Arrays.asList(t.getRegionId(), t.getId(), t.getName(), t.getState() );
             }
         };
+        // the button action needs the machineImagesTable initialized already
+        final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> updateAutoScalingReplicaAmisButton = new SelectedElementsCountingButton<>(
+                stringMessages.updateAmiForAutoScalingReplicas(), applicationReplicaSetsTable.getSelectionModel(),
+                e->updateAutoScalingReplicaAmi(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
+                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet(), machineImagesTable.getSelectionModel().getSelectedObject()));
+        applicationReplicaSetsButtonPanel.add(updateAutoScalingReplicaAmisButton);
+        // Need to initialize this action after the machineImagesTable has been created
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_UPDATE_AMI_FOR_AUTO_SCALING_REPLICAS,
+                applicationReplicaSetToUpdateAutoScalingReplicaAmiFor -> updateAutoScalingReplicaAmi(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(),
+                        Collections.singleton(applicationReplicaSetToUpdateAutoScalingReplicaAmiFor),
+                        machineImagesTable.getSelectionModel().getSelectedObject()));
+        applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
         machineImagesTable.addColumn(object->object.getId(), stringMessages.id());
         machineImagesTable.addColumn(object->object.getRegionId(), stringMessages.region());
         machineImagesTable.addColumn(object->object.getName(), stringMessages.name());
@@ -389,7 +412,8 @@ public class LandscapeManagementPanel extends SimplePanel {
         final ActionsColumn<AmazonMachineImageDTO, AmazonMachineImagesImagesBarCell> machineImagesActionColumn = new ActionsColumn<AmazonMachineImageDTO, AmazonMachineImagesImagesBarCell>(
                 new AmazonMachineImagesImagesBarCell(stringMessages), /* permission checker */ (machineImage, action)->true);
         machineImagesActionColumn.addAction(AmazonMachineImagesImagesBarCell.ACTION_REMOVE, DefaultActions.DELETE, machineImageToRemove->removeMachineImage(stringMessages, machineImageToRemove));
-        machineImagesActionColumn.addAction(AmazonMachineImagesImagesBarCell.ACTION_UPGRADE, machineImageToUpgrade->upgradeMachineImage(stringMessages, machineImageToUpgrade));
+        machineImagesActionColumn.addAction(AmazonMachineImagesImagesBarCell.ACTION_UPGRADE,
+                machineImageToUpgrade->upgradeMachineImage(stringMessages, machineImageToUpgrade, applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         machineImagesTable.addColumn(machineImagesActionColumn, stringMessages.actions());
         final CaptionPanel machineImagesCaptionPanel = new CaptionPanel(stringMessages.machineImages());
         final VerticalPanel machineImagesVerticalPanel = new VerticalPanel();
@@ -409,6 +433,42 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
     
+    private void updateAutoScalingReplicaAmi(StringMessages stringMessages, String regionId,
+            Iterable<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdateAutoScalingReplicaAmiFor,
+            AmazonMachineImageDTO amiOrNullForLatest) {
+        final ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate = new ArrayList<>();
+        Util.addAll(applicationReplicaSetsToUpdateAutoScalingReplicaAmiFor, applicationReplicaSetsToUpdate);
+        updateAutoScalingReplicaAmis(stringMessages, regionId, applicationReplicaSetsToUpdate, amiOrNullForLatest);
+    }
+
+    private void updateAutoScalingReplicaAmis(StringMessages stringMessages, String regionId,
+            final ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,
+            AmazonMachineImageDTO amiOrNullForLatest) {
+        applicationReplicaSetsBusy.setBusy(true);
+        landscapeManagementService.updateImageForReplicaSets(regionId, applicationReplicaSetsToUpdate, amiOrNullForLatest,
+                sshKeyManagementPanel.getSelectedKeyPair().getName(), sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                        ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                new AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        applicationReplicaSetsBusy.setBusy(false);
+                                        errorReporter.reportError(caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(ArrayList<SailingApplicationReplicaSetDTO<String>> result) {
+                                        applicationReplicaSetsBusy.setBusy(false);
+                                        for (final SailingApplicationReplicaSetDTO<String> updatedReplicaSet : result) {
+                                            applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(updatedReplicaSet);
+                                            Notification.notify(stringMessages.successfullyUpdatedMachineImageForAutoScalingReplicas(
+                                                    updatedReplicaSet.getName(), updatedReplicaSet.getAutoScalingGroupAmiId()),
+                                                    NotificationType.SUCCESS);
+                                        }
+                                        applicationReplicaSetsTable.refresh();
+                                    }
+                                });
+    }
+
     private String getGwtStatusLink(final String host, int port) {
         return (port == 443 ? "https" : "http") + "://" + host + ":" + port + "/gwt/status";
     }
@@ -491,7 +551,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                                         applicationReplicaSetToDefineLandingPageFor.getReplicas(),
                                         applicationReplicaSetToDefineLandingPageFor.getVersion(),
                                         applicationReplicaSetToDefineLandingPageFor.getHostname(),
-                                        newDefaultRedirect));
+                                        newDefaultRedirect,
+                                        applicationReplicaSetToDefineLandingPageFor.getAutoScalingGroupAmiId()));
                                 Notification.notify(stringMessages.successfullyUpdatedLandingPage(), NotificationType.SUCCESS);
                             }
                         });
@@ -1099,8 +1160,8 @@ public class LandscapeManagementPanel extends SimplePanel {
             });
         }
     }
-    
-    private void upgradeMachineImage(final StringMessages stringMessages, final AmazonMachineImageDTO machineImageToUpgrade) {
+
+    private void upgradeMachineImage(final StringMessages stringMessages, final AmazonMachineImageDTO machineImageToUpgrade, Iterable<SailingApplicationReplicaSetDTO<String>> selectedApplicationReplicaSetsToUpdate) {
         Notification.notify(stringMessages.startedImageUpgrade(machineImageToUpgrade.getName(), machineImageToUpgrade.getId(), machineImageToUpgrade.getRegionId()), NotificationType.INFO);
         machineImagesBusy.setBusy(true);
         landscapeManagementService.upgradeAmazonMachineImage(machineImageToUpgrade.getRegionId(), machineImageToUpgrade.getId(),
@@ -1119,6 +1180,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                         stringMessages.successfullyUpgradedMachineImage(machineImageToUpgrade.getName(),
                                 machineImageToUpgrade.getId(), machineImageToUpgrade.getRegionId(), result.getName()),
                         NotificationType.SUCCESS);
+                if (selectedApplicationReplicaSetsToUpdate != null && !Util.isEmpty(selectedApplicationReplicaSetsToUpdate)) {
+                    if (Window.confirm(stringMessages.updateSelectedReplicaSetAmisToo(Util.join(", ", selectedApplicationReplicaSetsToUpdate)))) {
+                        updateAutoScalingReplicaAmi(stringMessages, machineImageToUpgrade.getRegionId(), selectedApplicationReplicaSetsToUpdate, result);
+                    }
+                }
             }
         });
     }
@@ -1152,15 +1218,31 @@ public class LandscapeManagementPanel extends SimplePanel {
     }
 
     private String getEc2ConsoleLinkForInstanceId(String instanceId) {
-        return "https://"+regionsTable.getSelectionModel().getSelectedObject()+
-                ".console.aws.amazon.com/ec2/v2/home?region="+regionsTable.getSelectionModel().getSelectedObject()+
-                "#Instances:search="+instanceId;
+        return getEc2ConsoleBaseUrlForSelectedRegion()+"#Instances:search="+instanceId;
     }
 
     private void appendEc2InstanceLink(final SafeHtmlBuilder builder, final String instanceId) {
         final String ec2Link = getEc2ConsoleLinkForInstanceId(instanceId);
+        appendEc2Link(builder, ec2Link, instanceId);
+    }
+
+    private void appendEc2Link(final SafeHtmlBuilder builder, final String ec2Link, final String text) {
         builder.appendHtmlConstant("<a target=\"_blank\" href=\""+ec2Link+"\">");
-        builder.appendEscaped(instanceId);
+        builder.appendEscaped(text);
         builder.appendHtmlConstant("</a>");
+    }
+    
+    private String getEc2ConsoleBaseUrlForSelectedRegion() {
+        return "https://"+regionsTable.getSelectionModel().getSelectedObject()+
+                ".console.aws.amazon.com/ec2/v2/home?region="+regionsTable.getSelectionModel().getSelectedObject();
+    }
+    
+    private String getEc2ConsoleLinkForAmiId(String amiId) {
+        return getEc2ConsoleBaseUrlForSelectedRegion()+"#Images:imageId="+amiId;
+    }
+
+    private void appendEc2AmiLink(final SafeHtmlBuilder builder, final String amiId) {
+        final String ec2Link = getEc2ConsoleLinkForAmiId(amiId);
+        appendEc2Link(builder, ec2Link, amiId);
     }
 }

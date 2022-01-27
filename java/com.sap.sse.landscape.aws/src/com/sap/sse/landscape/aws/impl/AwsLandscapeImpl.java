@@ -1688,6 +1688,38 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .securityGroups(oldLaunchConfiguration.securityGroups())
                 .spotPrice(oldLaunchConfiguration.spotPrice())
                 .userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
+        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+    }
+
+    @Override
+    public void updateImageInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami) {
+        logger.info("Adjusting AMI for auto-scaling group "+autoScalingGroup.getName()+" to "+ami);
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, "ami-"+ami.getId());
+        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
+        autoScalingClient.createLaunchConfiguration(b->b
+                .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())
+                .blockDeviceMappings(oldLaunchConfiguration.blockDeviceMappings())
+                .classicLinkVPCId(oldLaunchConfiguration.classicLinkVPCId())
+                .classicLinkVPCSecurityGroups(oldLaunchConfiguration.classicLinkVPCSecurityGroups())
+                .ebsOptimized(oldLaunchConfiguration.ebsOptimized())
+                .iamInstanceProfile(oldLaunchConfiguration.iamInstanceProfile())
+                .imageId(ami.getId())
+                .instanceMonitoring(oldLaunchConfiguration.instanceMonitoring())
+                .instanceType(oldLaunchConfiguration.instanceType())
+                .keyName(oldLaunchConfiguration.keyName())
+                .launchConfigurationName(newLaunchConfigurationName)
+                .placementTenancy(oldLaunchConfiguration.placementTenancy())
+                .securityGroups(oldLaunchConfiguration.securityGroups())
+                .spotPrice(oldLaunchConfiguration.spotPrice())
+                .userData(oldLaunchConfiguration.userData()));
+        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+    }
+
+    private void updateLaunchConfigurationForAutoScalingGroup(final AutoScalingClient autoScalingClient,
+            AwsAutoScalingGroup autoScalingGroup, final LaunchConfiguration oldLaunchConfiguration,
+            final String newLaunchConfigurationName) {
         logger.info("Telling auto-scaling group "+autoScalingGroup.getName()+" to use new launch configuration "+newLaunchConfigurationName);
         autoScalingClient.updateAutoScalingGroup(b->b
                 .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
