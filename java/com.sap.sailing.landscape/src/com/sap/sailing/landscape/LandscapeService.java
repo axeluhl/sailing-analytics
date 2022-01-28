@@ -141,22 +141,28 @@ public interface LandscapeService {
             throws Exception;
 
     /**
-     * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName} parameter.
-     * The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of available ports
-     * is identified and chosen automatically. The {@code replicaInstanceType} is used to configure the launch configuration
-     * used by the auto-scaling group which is also created so that when dedicated replicas need to be provided during
-     * auto-scaling, their instance type is known. The choice of {@code dynamicLoadBalancerMapping} must only be set
-     * if the host to deploy to lives in the default region; otherwise, the DNS wildcard record for the overall domain
-     * would be made point to a wrong region. If set to {@code false}, a DNS entry will be created that points to the
-     * load balancer used for the new replica set's routing rules.<p>
+     * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName}
+     * parameter. The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of
+     * available ports is identified and chosen automatically. The {@code replicaInstanceType} is used to configure the
+     * launch configuration used by the auto-scaling group which is also created so that when dedicated replicas need to
+     * be provided during auto-scaling, their instance type is known. The choice of {@code dynamicLoadBalancerMapping}
+     * must only be set if the host to deploy to lives in the default region; otherwise, the DNS wildcard record for the
+     * overall domain would be made point to a wrong region. If set to {@code false}, a DNS entry will be created that
+     * points to the load balancer used for the new replica set's routing rules.
+     * <p>
+     * 
+     * @param optionalMinimumAutoScalingGroupSize
+     *            defaults to 1; if 0, a replica process will be launched on an eligible shared instance in an
+     *            availability zone different from that of the instance hosting the master process. Otherwise,
+     *            at least one auto-scaling replica will ensure availability of the replica set.
      */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> deployApplicationToExistingHost(String replicaSetName,
             SailingAnalyticsHost<String> hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String masterReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
-            Optional<InstanceType> optionalSharedInstanceTypeForNewReplicaHost,
-            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
+            String optionalDomainName, Optional<Integer> optionalMinimumAutoScalingGroupSize, Optional<Integer> optionalMaximumAutoScalingGroupSize,
+            Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalSharedInstanceTypeForNewReplicaHost, Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
     
     /**
      * @return the UUID that can be used to track the master data import progress; see

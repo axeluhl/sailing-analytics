@@ -72,8 +72,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
     SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, boolean sharedMasterInstance,
             String masterInstanceType, String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
-            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
-            Integer optionalMemoryTotalSizeFactorOrNull, Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull) throws Exception;
+            String replicaReplicationBearerToken, String optionalDomainName, Integer minimumAutoScalingGroupSizeOrNull,
+            Integer maximumAutoScalingGroupSizeOrNull, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
 
@@ -99,36 +99,13 @@ public interface LandscapeManagementWriteService extends RemoteService {
             MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception;
 
-    /**
-     * For a new replica set starts a first master process and a first replica not managed by the auto-scaling group.
-     * The replica set name is provided by the {@code replicaSetName} parameter. The master process is started on the host
-     * identified by the {@code hostToDeployTo} parameter. A set of available ports is identified and chosen
-     * automatically. The unmanaged replica is launched on a different shared instance. If {@code optionalPreferredInstanceToDeployUnmanagedReplicaTo}
-     * is not {@code null}, it is considered first for unmanaged replica deployment. If not eligible (e.g., because the port required is already
-     * taken by another process), the default strategy for finding or creating an eligible instance is applied which
-     * looks for an instance in an AZ different from the one to which the master process was deployed and that is eligible
-     * based on port and directory availability and not being an ARCHIVE server. If multiple hosts apply, those with
-     * the fewest processes on it yet is selected. If a new instance must be launched for replica deployment, its instance
-     * type is set to be the same as that of the host selected for master deployment.<p>
-     * 
-     * The {@code replicaInstanceType} is used to configure the launch configuration used by the
-     * auto-scaling group which is also created so that when dedicated replicas need to be provided during auto-scaling,
-     * their instance type is known. The choice of {@code dynamicLoadBalancerMapping} must only be set if the host to
-     * deploy to lives in the default region; otherwise, the DNS wildcard record for the overall domain would be made
-     * point to a wrong region. If set to {@code false}, a DNS entry will be created that points to the load balancer
-     * used for the new replica set's routing rules.
-     * <p>
-     * 
-     * @param optionalPreferredInstanceToDeployUnmanagedReplicaTo
-     *            if provided, suggests a shared instance to deploy the micro-replica to; if the instance is not
-     *            provided or not eligible for the deployment of the unmanaged micro-replica, default rules for finding
-     *            or creating such an instance take over.
-     */
-    SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(String replicaSetName, AwsInstanceDTO hostToDeployTo,
-            String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
-            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
-            Integer optionalMemoryTotalSizeFactorOrNull, AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
+    SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(String replicaSetName,
+            AwsInstanceDTO hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
+            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
+            Integer optionalMinimumAutoScalingGroupSizeOrNull, Integer optionalMaximumAutoScalingGroupSizeOrNull,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
 
 
     Boolean ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,
