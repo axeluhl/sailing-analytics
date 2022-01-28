@@ -15,7 +15,7 @@ import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
@@ -147,7 +147,6 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         private BuilderImpl() {
             super();
-            setNoShutdown(false);
         }
         
         @Override

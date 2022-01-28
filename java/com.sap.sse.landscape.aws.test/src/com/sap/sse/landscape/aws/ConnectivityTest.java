@@ -33,7 +33,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingReleaseRepository;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;

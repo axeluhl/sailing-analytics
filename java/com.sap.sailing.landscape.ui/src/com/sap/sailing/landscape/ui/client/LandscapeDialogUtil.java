@@ -13,10 +13,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class LandscapeDialogUtil {
     public static ListBox createInstanceTypeListBox(DataEntryDialog<?> dialog,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
-            String defaultInstanceType, ErrorReporter errorReporter) {
+            String defaultInstanceTypeName, ErrorReporter errorReporter) {
         return createInstanceTypeListBoxWithAdditionalDefaultEntry(dialog,
                 /* additionalItem */ null, /* additionalValue */ null,
-                landscapeManagementService, stringMessages, defaultInstanceType, errorReporter);
+                landscapeManagementService, stringMessages, defaultInstanceTypeName, errorReporter);
     }
 
     /**
@@ -28,13 +28,13 @@ public class LandscapeDialogUtil {
     public static ListBox createInstanceTypeListBoxWithAdditionalDefaultEntry(DataEntryDialog<?> dialog,
             String additionalItem, String additionalValue,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
-            String defaultInstanceType, ErrorReporter errorReporter) {
+            String defaultInstanceTypeNamr, ErrorReporter errorReporter) {
         final ListBox instanceTypeBox = dialog.createListBox(/*isMultipleSelect*/false);
         if (additionalItem != null) {
             instanceTypeBox.addItem(additionalItem, additionalValue);
             instanceTypeBox.setSelectedIndex(0);
         }
-        landscapeManagementService.getInstanceTypes(new AsyncCallback<ArrayList<String>>() {
+        landscapeManagementService.getInstanceTypeNames(new AsyncCallback<ArrayList<String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
@@ -46,7 +46,7 @@ public class LandscapeDialogUtil {
                 int i=0;
                 for (final String instanceType : result) {
                     instanceTypeBox.addItem(instanceType, instanceType);
-                    if (additionalItem == null && instanceType.equals(defaultInstanceType)) {
+                    if (additionalItem == null && instanceType.equals(defaultInstanceTypeNamr)) {
                         instanceTypeBox.setSelectedIndex(i);
                     }
                     i++;
@@ -54,5 +54,14 @@ public class LandscapeDialogUtil {
             }
         });
         return instanceTypeBox;
+    }
+
+    public static void selectInstanceType(ListBox instanceTypeListBox, String instanceTypeName) {
+        for (int i=0; i<instanceTypeListBox.getItemCount(); i++) {
+            if (instanceTypeListBox.getValue(i).equals(instanceTypeName)) {
+                instanceTypeListBox.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 }

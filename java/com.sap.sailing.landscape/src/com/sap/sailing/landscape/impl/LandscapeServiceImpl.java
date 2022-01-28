@@ -33,7 +33,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.procedures.CreateLaunchConfigurationAndAutoScalingGroup;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
@@ -126,20 +126,22 @@ public class LandscapeServiceImpl implements LandscapeService {
     
     @Override
     public AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createApplicationReplicaSet(
-            String regionId, String name, String masterInstanceType, String replicaInstanceTypeOrNull,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
-            Optional<Integer> minimumAutoScalingGroupSize, Optional<Integer> maximumAutoScalingGroupSize) throws Exception {
+            String regionId, String name, boolean newSharedMasterInstance, String sharedInstanceType,
+            String dedicatedInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, Optional<Integer> minimumAutoScalingGroupSize,
+            Optional<Integer> maximumAutoScalingGroupSize) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
         final AwsRegion region = new AwsRegion(regionId, landscape);
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder =
-                createMasterConfigurationBuilder(name, masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull, region, release);
+                createMasterConfigurationBuilder(name, masterReplicationBearerToken, optionalMemoryInMegabytesOrNull,
+                        newSharedMasterInstance ? optionalMemoryTotalSizeFactorOrNull : null, region, release);
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         masterHostBuilder
-            .setInstanceType(InstanceType.valueOf(masterInstanceType))
+            .setInstanceType(InstanceType.valueOf(newSharedMasterInstance ? sharedInstanceType : dedicatedInstanceType))
             .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
             .setLandscape(landscape)
             .setRegion(region)
@@ -147,13 +149,17 @@ public class LandscapeServiceImpl implements LandscapeService {
         if (optionalKeyName != null) {
             masterHostBuilder.setKeyName(optionalKeyName);
         }
+        if (newSharedMasterInstance) {
+            masterHostBuilder
+                .setInstanceName(SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_DEFAULT_NAME)
+                .setTags(Tags.with(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE));
+        }
         final StartSailingAnalyticsMasterHost<String> masterHostStartProcedure = masterHostBuilder.build();
         masterHostStartProcedure.run();
         final SailingAnalyticsProcess<String> master = masterHostStartProcedure.getSailingAnalyticsProcess();
         final String bearerTokenUsedByReplicas = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result =
-            createLoadBalancingAndAutoScalingSetup(landscape, region, name, master, release,
-                replicaInstanceTypeOrNull == null ? masterInstanceType : replicaInstanceTypeOrNull,
+            createLoadBalancingAndAutoScalingSetup(landscape, region, name, master, release, dedicatedInstanceType,
                 dynamicLoadBalancerMapping, optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName,
                 Optional.of(masterHostBuilder.getMachineImage()), bearerTokenUsedByReplicas,
                 minimumAutoScalingGroupSize, maximumAutoScalingGroupSize);
@@ -164,7 +170,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 try {
                     unmanagedReplicas.add(launchUnmanagedReplica(result, region, optionalKeyName, privateKeyEncryptionPassphrase,
                             replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
-                            Optional.of(InstanceType.valueOf(masterInstanceType)), // use master's instance type as this may be an all-shared use case
+                            Optional.of(InstanceType.valueOf(sharedInstanceType)),
                             /* optionalPreferredInstanceToDeployTo */ Optional.empty()));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -300,6 +306,9 @@ public class LandscapeServiceImpl implements LandscapeService {
      * If a new instance needs to be launched, the instance type can optionally be specified. It defaults to something
      * with large fast swap space and a reasonable amount of physical RAM that would allow somewhere between two and
      * four processes to share the physical RAM even during a live event.
+     * 
+     * @param optionalInstanceType
+     *            defaults to {@link SharedLandscapeConstants#DEFAULT_SHARED_INSTANCE_TYPE_NAME}
      */
     private SailingAnalyticsProcess<String> launchUnmanagedReplica(
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
@@ -800,11 +809,12 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
 
     @Override
-    public Iterable<SailingAnalyticsHost<String>> getEligibleHostsForReplicaSet(AwsRegion region,
+    public Iterable<SailingAnalyticsHost<String>> getEligibleSharedHostsForReplicaSet(AwsRegion region,
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) {
-        return Util.filter(getLandscape().getRunningHostsWithTag(region, SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, new SailingAnalyticsHostSupplier<String>()),
-                h->{
+        return Util.filter(getLandscape().getRunningHostsWithTagValue(region,
+                SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE,
+                new SailingAnalyticsHostSupplier<String>()), h->{
                     try {
                         return replicaSet.isEligibleForDeployment(h, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                     } catch (Exception e) {

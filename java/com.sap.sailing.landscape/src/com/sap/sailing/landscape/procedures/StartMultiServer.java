@@ -3,7 +3,7 @@ package com.sap.sailing.landscape.procedures;
 import java.util.Optional;
 
 import com.sap.sailing.landscape.SailingAnalyticsHost;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;

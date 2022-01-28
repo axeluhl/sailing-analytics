@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
@@ -20,7 +20,7 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
     
-    void getInstanceTypes(AsyncCallback<ArrayList<String>> callback);
+    void getInstanceTypeNames(AsyncCallback<ArrayList<String>> callback);
 
     void getMongoEndpoints(String regionId, AsyncCallback<ArrayList<MongoEndpointDTO>> callback);
 
@@ -88,8 +88,8 @@ public interface LandscapeManagementWriteServiceAsync {
     void getApplicationReplicaSets(String regionId, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
 
-    void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping,
+    void createApplicationReplicaSet(String regionId, String name, boolean sharedMasterInstance,
+            String sharedInstanceType, String dedicatedInstanceType, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String securityReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,

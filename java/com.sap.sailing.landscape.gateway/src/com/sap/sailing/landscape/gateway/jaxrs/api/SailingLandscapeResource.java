@@ -45,9 +45,10 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final Logger logger = Logger.getLogger(SailingLandscapeResource.class.getName());
 
     private static final String REGION_FORM_PARAM = "regionId";
+    private static final String SHARED_MASTER_INSTANCE_FORM_PARAM = "sharedMasterInstance";
     private static final String REPLICA_SET_NAME_FORM_PARAM = "replicaSetName";
-    private static final String MASTER_INSTANCE_TYPE_FORM_PARAM = "masterInstanceType";
-    private static final String REPLICA_INSTANCE_TYPE_FORM_PARAM = "replicaInstanceType";
+    private static final String DEDICATED_INSTANCE_TYPE_FORM_PARAM = "dedicatedInstanceType";
+    private static final String SHARED_INSTANCE_TYPE_FORM_PARAM = "sharedInstanceType";
     private static final String DYNAMIC_LOAD_BALANCER_MAPPING_FORM_PARAM = "dynamicLoadBalancerMapping";
     private static final String RELEASE_NAME_FORM_PARAM = "releaseName";
     private static final String KEY_NAME_FORM_PARAM = "keyName";
@@ -143,9 +144,10 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     @Produces("application/json;charset=UTF-8")
     public Response createApplicationReplicaSet(
             @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(SHARED_MASTER_INSTANCE_FORM_PARAM) @DefaultValue("false") boolean sharedMasterInstance,
             @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
-            @FormParam(MASTER_INSTANCE_TYPE_FORM_PARAM) String masterInstanceType,
-            @FormParam(REPLICA_INSTANCE_TYPE_FORM_PARAM) String replicaInstanceTypeOrNull,
+            @FormParam(DEDICATED_INSTANCE_TYPE_FORM_PARAM) String dedicatedInstanceType,
+            @FormParam(SHARED_INSTANCE_TYPE_FORM_PARAM) String sharedInstanceTypeOrNull,
             @FormParam(DYNAMIC_LOAD_BALANCER_MAPPING_FORM_PARAM) @DefaultValue("false") boolean dynamicLoadBalancerMapping,
             @FormParam(RELEASE_NAME_FORM_PARAM) String releaseNameOrNullForLatestMaster,
             @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
@@ -162,12 +164,11 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         try {
             final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
-                    .createApplicationReplicaSet(regionId, replicaSetName, masterInstanceType, replicaInstanceTypeOrNull,
-                            dynamicLoadBalancerMapping, release.getName(),
-                            optionalKeyName,
-                            privateKeyEncryptionPassphrase == null ? null : privateKeyEncryptionPassphrase.getBytes(), masterReplicationBearerToken, replicaReplicationBearerToken,
-                            domainName, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
-                            Optional.ofNullable(optionalMinimumAutoScalingGroupSize), Optional.ofNullable(optionalMaximumAutoScalingGroupSize));
+                    .createApplicationReplicaSet(regionId, replicaSetName, sharedMasterInstance, sharedInstanceTypeOrNull,
+                            dedicatedInstanceType, dynamicLoadBalancerMapping, release.getName(),
+                            optionalKeyName, privateKeyEncryptionPassphrase == null ? null : privateKeyEncryptionPassphrase.getBytes(), masterReplicationBearerToken,
+                            replicaReplicationBearerToken, domainName, optionalMemoryInMegabytesOrNull,
+                            optionalMemoryTotalSizeFactorOrNull, Optional.ofNullable(optionalMinimumAutoScalingGroupSize), Optional.ofNullable(optionalMaximumAutoScalingGroupSize));
             final JSONObject result = new AwsApplicationReplicaSetJsonSerializer(release.getName()).serialize(replicaSet);
             response = Response.ok(streamingOutput(result)).build();
         } catch (Exception e) {
@@ -360,7 +361,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
                 response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
             } else {
                 final JSONArray result = new JSONArray();
-                for (final SailingAnalyticsHost<String> host : getLandscapeService().getEligibleHostsForReplicaSet(region, replicaSet, optionalKeyName, passphraseForPrivateKeyDecryption)) {
+                for (final SailingAnalyticsHost<String> host : getLandscapeService().getEligibleSharedHostsForReplicaSet(region, replicaSet, optionalKeyName, passphraseForPrivateKeyDecryption)) {
                     result.add(new HostJsonSerializer<String>().serialize(host));
                 }
                 response = Response.ok().entity(streamingOutput(result)).build();

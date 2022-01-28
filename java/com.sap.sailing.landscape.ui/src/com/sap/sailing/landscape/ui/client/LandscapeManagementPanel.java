@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
@@ -585,43 +585,46 @@ public class LandscapeManagementPanel extends SimplePanel {
 
             @Override
             public void onSuccess(ArrayList<ReleaseDTO> result) {
-                new CreateApplicationReplicaSetDialog(landscapeManagementService, result.stream().map(r->r.getName())::iterator,
+                new CreateApplicationReplicaSetDialog(landscapeManagementService, /* sharedMasterInstanceAlreadyExists */ false,
+                        result.stream().map(r->r.getName())::iterator,
                         stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
-                    @Override
-                    public void ok(CreateApplicationReplicaSetInstructions instructions) {
-                        applicationReplicaSetsBusy.setBusy(true);
-                        landscapeManagementService.createApplicationReplicaSet(regionId, instructions.getName(), instructions.getInstanceType(),
-                                instructions.getOptionalReplicaInstanceType(),
-                                instructions.isDynamicLoadBalancerMapping(), instructions.getReleaseNameOrNullForLatestMaster(),
-                                sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
-                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
-                                instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(),
-                                instructions.getOptionalMemoryTotalSizeFactorOrNull(),
-                                /* minimum auto-scaling group size: */ instructions.isFirstReplicaOnSharedInstance()?0:null,
-                                /* maximum auto-scaling group size remains at default: */ null,
-                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
-                                 @Override
-                                 public void onFailure(Throwable caught) {
-                                    applicationReplicaSetsBusy.setBusy(false);
-                                    errorReporter.reportError(caught.getMessage());
-                                 }
-                                 
-                                 @Override
-                                 public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
-                                    applicationReplicaSetsBusy.setBusy(false);
-                                    Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
-                                    if (result != null) {
-                                        applicationReplicaSetsTable.getFilterPanel().add(result);
-                                    }
-                                 }
-                              });
-                    }
-                    
-                    @Override
-                    public void cancel() {
-                    }
-                }).show();
+               @Override
+               public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                applicationReplicaSetsBusy.setBusy(true);
+                landscapeManagementService.createApplicationReplicaSet(regionId, 
+                        instructions.getName(), instructions.isSharedMasterInstance(),
+                        instructions.getOptionalSharedInstanceType(),
+                        instructions.getDedicatedInstanceType(),
+                        instructions.isDynamicLoadBalancerMapping(), instructions.getReleaseNameOrNullForLatestMaster(),
+                        sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                        sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                        instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
+                        instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(),
+                        instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                        /* minimum auto-scaling group size: */ instructions.isFirstReplicaOnSharedInstance()?0:null,
+                        /* maximum auto-scaling group size remains at default: */ null,
+                        new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                         @Override
+                         public void onFailure(Throwable caught) {
+                            applicationReplicaSetsBusy.setBusy(false);
+                            errorReporter.reportError(caught.getMessage());
+                         }
+                         
+                         @Override
+                         public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                            applicationReplicaSetsBusy.setBusy(false);
+                            Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
+                            if (result != null) {
+                                applicationReplicaSetsTable.getFilterPanel().add(result);
+                            }
+                         }
+                      });
+               }
+               
+               @Override
+               public void cancel() {
+               }
+            }, regionId.equals(SharedLandscapeConstants.REGION_WITH_DEFAULT_LOAD_BALANCER)).show();
             }
         });
     }
@@ -635,13 +638,13 @@ public class LandscapeManagementPanel extends SimplePanel {
 
             @Override
             public void onSuccess(ArrayList<ReleaseDTO> result) {
-                new CreateApplicationReplicaSetDialog(landscapeManagementService, result.stream().map(r->r.getName())::iterator,
-                        stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
-                    @Override
-                    public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                new CreateApplicationReplicaSetDialog(landscapeManagementService, /* sharedMasterInstanceAlreadyExists */ true,
+                        result.stream().map(r->r.getName())::iterator, stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
+            @Override
+            public void ok(CreateApplicationReplicaSetInstructions instructions) {
                         applicationReplicaSetsBusy.setBusy(true);
                         landscapeManagementService.deployApplicationToExistingHost(instructions.getName(), applicationReplicaSetOnWhichToDeployMaster.getMaster().getHost(), 
-                                instructions.getInstanceType(), instructions.isDynamicLoadBalancerMapping(),
+                                instructions.getDedicatedInstanceType(), instructions.isDynamicLoadBalancerMapping(),
                                         instructions.getReleaseNameOrNullForLatestMaster(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                                 ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
@@ -664,12 +667,14 @@ public class LandscapeManagementPanel extends SimplePanel {
                                     }
                                  }
                               });
-                    }
-                    
-                    @Override
-                    public void cancel() {
-                    }
-                }).show();
+            }
+            
+            @Override
+            public void cancel() {
+            }
+         },
+                regionsTable.getSelectionModel().getSelectedObject().equals(SharedLandscapeConstants.REGION_WITH_DEFAULT_LOAD_BALANCER))
+                .show();
             }
         });
     }

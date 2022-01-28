@@ -35,7 +35,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
@@ -176,7 +176,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public ArrayList<String> getInstanceTypes() {
+    public ArrayList<String> getInstanceTypeNames() {
         final ArrayList<String> result = new ArrayList<>();
         Util.addAll(Util.map(Arrays.asList(InstanceType.values()), instanceType->instanceType.name()), result);
         return result;
@@ -461,21 +461,21 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
-            Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull)
+    public SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, boolean sharedMasterInstance,
+            String sharedInstanceType, String dedicatedInstanceType, boolean dynamicLoadBalancerMapping,
+            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result = getLandscapeService()
-                .createApplicationReplicaSet(regionId, name, masterInstanceType, optionalReplicaInstanceTypeOrNull,
-                        dynamicLoadBalancerMapping, release.getName(), optionalKeyName, privateKeyEncryptionPassphrase,
-                        masterReplicationBearerToken, replicaReplicationBearerToken, optionalDomainName,
-                        optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
-                        Optional.ofNullable(minimumAutoScalingGroupSizeOrNull),
-                        Optional.ofNullable(maximumAutoScalingGroupSizeOrNull));
+                .createApplicationReplicaSet(regionId, name, sharedMasterInstance, sharedInstanceType,
+                        dedicatedInstanceType, dynamicLoadBalancerMapping, release.getName(), optionalKeyName,
+                        privateKeyEncryptionPassphrase, masterReplicationBearerToken, replicaReplicationBearerToken,
+                        optionalDomainName, optionalMemoryInMegabytesOrNull,
+                        optionalMemoryTotalSizeFactorOrNull,
+                        Optional.ofNullable(minimumAutoScalingGroupSizeOrNull), Optional.ofNullable(maximumAutoScalingGroupSizeOrNull));
         return new SailingApplicationReplicaSetDTO<String>(result.getName(), convertToSailingAnalyticsProcessDTO(result
                 .getMaster(), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
                 Util.map(result.getReplicas(), r->{

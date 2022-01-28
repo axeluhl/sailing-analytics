@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
@@ -67,12 +68,78 @@ public interface LandscapeService {
      */
     void clearSessionCredentials();
     
+    /**
+     * Creates a new application replica set by launching a new instance that runs the master process, and if the
+     * {@code minimumAutoScalingGroupSize} is 0, a replica process running on a shared instance. In this case an
+     * eligible shared instance is looked for (based on the
+     * {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE} value of the
+     * {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} tag), and if not found, a new one is
+     * launched. If the {@code minimumAutoScalingGroupSize} is greater than 0, no unmanaged replica is launched because
+     * the auto-scaling group will launch one or more of them on dedicated instances.
+     * 
+     * @param name
+     *            the name for the new replica set; defines the "server name" from which the server group name, the
+     *            replica channel / exchange name and the database name will be derived.
+     * @param newSharedMasterInstance
+     *            if {@code true} the instance launched for the master process will be created such that it can be
+     *            shared by other application processes as well. In particular, it's name will be set to
+     *            {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_DEFAULT_NAME} and the
+     *            {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} tag will be set to
+     *            {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE}.
+     * @param sharedInstanceType
+     *            specifies the type of instance launched for hosting the new master process in case a shared masted
+     *            instance is requested by setting {@code newSharedMasterInstance} to {@code true}, and for launching an
+     *            instance for a first replica not managed by an auto-scaling group in case
+     *            {@code minimumAutoScalingGroupSize} is 0. Make sure to use one that is good for sharing by multiple
+     *            processes; e.g., use an instance type with plenty of fast swap space, such as
+     *            {@link SharedLandscapeConstants#DEFAULT_SHARED_INSTANCE_TYPE_NAME}. The instance type is specified as
+     *            a string that must match one of the {@link InstanceType} {@link Enum#name() literal names}. The
+     *            parameter is ignored if neither a shared master nor a first shared replica are requested.
+     * @param dedicatedInstanceType
+     *            defines the instance type to use for the master (unless a shared master instance is requested by
+     *            setting the {@code newSharedMasterInstance} parameter to {@code true}) and for the auto-scaling
+     *            replicas. Must not be {@code null}.
+     * @param dynamicLoadBalancerMapping
+     *            If {@code true}, no DNS entry is created for the new application replica set. Instead, the
+     *            fall-through logic in the landscape's default mapping for the {@code optionalDomainName} (defaulting
+     *            to {@code sapsailing.com}) is used, assuming it points to a default Application Load Balancer (ALB) in
+     *            our default region (see {@link SharedLandscapeConstants#REGION_WITH_DEFAULT_LOAD_BALANCER}).
+     * @param optionalDomainName
+     *            defaults to {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME}.
+     * @param optionalMemoryInMegabytesOrNull
+     *            if not {@code null}, specifies the heap size to allocate for the master and replica processes each, in
+     *            MB (1024*1024B); if provided, this takes precedence over anything specified in
+     *            {@code optionalMemoryTotalSizeFactorOrNull}.
+     * @param optionalMemoryTotalSizeFactorOrNull
+     *            if not {@code null} and if {@code optionalMemoryInMegabytesOrNull} does not specify an absolute heap
+     *            size, this parameter specifies how much memory to allocate for application processes on shared
+     *            instances (which does not include dedicated auto-scaling replicas); the amount is specified as a
+     *            fraction of the "physical" RAM (as seen by the operating system running on the instance) minus some
+     *            space reserved for the operating system itself and for the Java VM. It can be thought of as an
+     *            approximation for how many processes configured this way will fit into the instance's physical memory
+     *            without the need for massive swapping activity.
+     * @param minimumAutoScalingGroupSize
+     *            if {@code 0}, a replica process will be started on a shared host that must run in an availability zone
+     *            different from the one on which the master process runs. If no such shared host exists that is
+     *            eligible to receive a process deployment for the new replica set (e.g., based on available port
+     *            restrictions), a new shared host is launched, using the same instance type specification provided for
+     *            the master ({@code masterInstanceType}). Note that for the probably somewhat unusual combination of a
+     *            non-shared master instance ({@code newSharedMasterInstance==false}) and a
+     *            {@code minimumAutoScalingGroupSize} of 0, a "shared" host that needs to be launched for the first
+     *            replica will inherit an instance type from the master's configuration that may not be suited too well
+     *            for sharing. Eligibility considerations and precedence rules are then hoped to rank such instances to
+     *            the bottom of the list based, e.g., on their available physical / swap memory ratio, so that they
+     *            would hardly ever get chosen as a deployment target for other replica's shared instances.
+     */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createApplicationReplicaSet(
-            String regionId, String name, String masterInstanceType, String replicaInstanceTypeOrNull,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull, Optional<Integer> minimumAutoScalingGroupSize, Optional<Integer> maximumAutoScalingGroupSize) throws Exception;
-    
+            String regionId, String name, boolean newSharedMasterInstance, String sharedInstanceType,
+            String dedicatedInstanceType, boolean dynamicLoadBalancerMapping,
+            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Optional<Integer> minimumAutoScalingGroupSize, Optional<Integer> maximumAutoScalingGroupSize)
+            throws Exception;
+
     /**
      * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName} parameter.
      * The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of available ports
@@ -177,8 +244,8 @@ public interface LandscapeService {
 
     /**
      * In the {@code region} specified, searches through all hosts tagged with the
-     * {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} tag (regardless the tag's value) for
-     * hosts that are
+     * {@link SharedLandscapeConstants#SAILING_ANALYTICS_APPLICATION_HOST_TAG} tag set to
+     * {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE} for hosts that are
      * {@link AwsApplicationReplicaSet#isEligibleForDeployment(com.sap.sse.landscape.aws.ApplicationProcessHost, Optional, Optional, byte[])
      * eligible} for receiving a deployment of a process that belongs to the {@code replicaSet}. This could be a master
      * or a replica; both will require the same set of resources that the eligibility check is looking for: the HTTP
@@ -186,7 +253,7 @@ public interface LandscapeService {
      * 
      * @return the hosts eligible for receiving a process deployment for the {@code replicaSet}.
      */
-    Iterable<SailingAnalyticsHost<String>> getEligibleHostsForReplicaSet(AwsRegion region,
+    Iterable<SailingAnalyticsHost<String>> getEligibleSharedHostsForReplicaSet(AwsRegion region,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase);
 

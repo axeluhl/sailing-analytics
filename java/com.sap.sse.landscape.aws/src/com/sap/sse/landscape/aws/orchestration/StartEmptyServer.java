@@ -45,7 +45,7 @@ implements Procedure<ShardingKey> {
     ShardingKey, HostT extends AwsInstance<ShardingKey>>
     extends StartAwsHost.BuilderImpl<BuilderT, T, ShardingKey, HostT>
     implements Builder<BuilderT, T, ShardingKey, HostT> {
-        private boolean noShutdown = true;
+        private boolean noShutdown = false;
         
         protected boolean isNoShutdown() {
             return noShutdown;

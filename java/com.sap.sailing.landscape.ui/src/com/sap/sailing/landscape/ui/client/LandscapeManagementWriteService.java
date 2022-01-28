@@ -19,7 +19,7 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<String> getRegions();
     
-    ArrayList<String> getInstanceTypes();
+    ArrayList<String> getInstanceTypeNames();
 
     ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) throws Exception;
     
@@ -69,11 +69,11 @@ public interface LandscapeManagementWriteService extends RemoteService {
     SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
 
-    SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String replicaReplicationBearerToken,
-            String optionalDomainName, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
-            Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull) throws Exception;
+    SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, boolean sharedMasterInstance,
+            String masterInstanceType, String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping,
+            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull) throws Exception;
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
 

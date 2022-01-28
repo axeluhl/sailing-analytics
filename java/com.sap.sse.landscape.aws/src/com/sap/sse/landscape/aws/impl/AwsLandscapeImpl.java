@@ -1696,7 +1696,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         logger.info("Adjusting AMI for auto-scaling group "+autoScalingGroup.getName()+" to "+ami);
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
         final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
-        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, "ami-"+ami.getId());
+        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, ami.getId());
         logger.info("Creating new launch configuration "+newLaunchConfigurationName);
         autoScalingClient.createLaunchConfiguration(b->b
                 .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())

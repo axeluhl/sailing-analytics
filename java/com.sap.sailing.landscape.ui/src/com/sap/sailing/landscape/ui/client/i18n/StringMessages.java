@@ -116,9 +116,15 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String stopReplicating();
     String sameAsMaster();
     String firstReplicaOnSharedInstance();
-    String replicaInstanceType();
     String machineImageId();
     String updateAmiForAutoScalingReplicas();
     String successfullyUpdatedMachineImageForAutoScalingReplicas(String replicaSetName, String autoScalingGroupAmiId);
     String updateSelectedReplicaSetAmisToo(String listOfReplicaSetsToUpdate);
+    String sharedMasterInstance();
+    String autoScalingReplicaInstanceType();
+    String dedicatedInstanceType();
+    String dedicatedMasterAndAutoScalingReplicaInstanceType();
+    String sharedMasterInstanceType();
+    String sharedMasterAndReplicaInstanceType();
+    String sharedReplicaInstanceType();
 }

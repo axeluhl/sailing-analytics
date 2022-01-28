@@ -32,8 +32,8 @@
             <div><tt>regionId</tt>, region where to set up the replica set, e.g., eu-west-1</div>
             <div><tt>replicaSetName</tt>, name of the replica set; used as the hostname to which the domain name is appended, as well as
                                  for the database and RabbitMQ exchange name</div>
-            <div><tt>masterInstanceType</tt>, instance type to use in the hyperscaler for the master node (by default also for the
-                                     replicas if <tt>replicaInstanceType</tt> is not specified), e.g., C5_4_XLARGE;
+            <div><tt>dedicatedInstanceType</tt>, instance type to use in the hyperscaler for a dedicated non-shared master node and for the
+                                     auto-scaling replicas, e.g., C5_4_XLARGE;
                                      see <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/ec2/model/InstanceType.html">here</a></div>
             <div><tt>keyName</tt>, the name of the SSH key to use; must identify an existing SSH key by that name in the region specified
                           and will be used to log on to existing and new instances using a root ssh connection.</div>
@@ -43,11 +43,16 @@
     <tr>
         <td>Optional form parameters:</td>
         <td>
-            <div><tt>replicaInstanceType</tt>, instance type to use in the hyperscaler for replica nodes managed by the auto-scaling group, e.g., C5_4_XLARGE;
+            <div><tt>sharedMasterInstance</tt> defaults to <tt>false</tt>; if set to <tt>true</tt>, the instance launched for the master process
+                                     will be named "SL Multi-Server" and will be tagged with <tt>sailing-analytics-server:___multi___</tt> which
+                                     makes it eligible for automated deployment of other Sailing Analytics processes, such as unmanaged replicas.
+                                     Otherwise, the master instance will be named and tagged after the replica set's name.</div>
+            <div><tt>sharedInstanceType</tt>, instance type to use in the hyperscaler for a new shared master instance (if <tt>sharedMasterInstance</tt> was
+                                     set to <tt>true</tt>) as well as for a new instance that needs to be launched for a shared first replica
+                                     in case <tt>minimumAutoScalingGroupSize</tt> is set to 0; e.g., I3_2_XLARGE;
                                      see <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/ec2/model/InstanceType.html">here</a>.
-                                     If not provided, the auto-scaling group will be configured to use the same instance type for the replicas that is used
-                                     by the master. If you'd like to configure your master to run on an instance intended to be shared with other
-                                     replica sets you may want to size your master instance type larger and with much swap space (e.g., i3.2xlarge)
+                                     If you'd like to configure your master to run on an instance intended to be shared with other
+                                     replica sets you may want to size your shared instance type with much swap space (e.g., i3.2xlarge)
                                      whereas your auto scaling group-managed replicas will not be shared and hence may get along with smaller
                                      instance types.</div>.
             <div><tt>dynamicLoadBalancerMappingionId</tt>, boolean value (false or true; defaulting to false); if true, the rules will be entered
