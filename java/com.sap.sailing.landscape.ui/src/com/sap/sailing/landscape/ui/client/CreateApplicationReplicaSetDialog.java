@@ -208,7 +208,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
             }
         }
         if (!memoryAsFactorToTotalMemoryAdjusted) {
-            if ((!useExistingSharedMasterInstance && sharedMasterInstanceBox.getValue()) || startWithReplicaOnSharedInstanceBox.getValue()) {
+            if (sharedMasterInstanceBox.getValue() || startWithReplicaOnSharedInstanceBox.getValue()) {
                 memoryTotalSizeFactorBox.setValue(SharedLandscapeConstants.DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY);
             } else {
                 memoryTotalSizeFactorBox.setText("");

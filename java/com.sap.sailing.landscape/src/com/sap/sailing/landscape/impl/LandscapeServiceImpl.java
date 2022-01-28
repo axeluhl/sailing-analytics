@@ -471,7 +471,8 @@ public class LandscapeServiceImpl implements LandscapeService {
             autoScalingGroupRemoval = new CompletableFuture<>();
             autoScalingGroupRemoval.complete(null);
         }
-        // terminate the instances
+        // TODO it would be more graceful here to wait for the replicas to become unavailable; then we would know they have de-registered cleanly from the master
+        // terminate the master process:
         autoScalingGroupRemoval.thenAccept(v->
             applicationReplicaSet.getMaster().stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
         // remove the load balancer rules
