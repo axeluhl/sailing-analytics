@@ -238,8 +238,10 @@ public class LandscapeServiceImpl implements LandscapeService {
      * 
      * The "internal" method exists in order to declare a few type parameters which wouldn't be possible on the GWT RPC
      * interface method as some of these types are not seen by clients.
-     * @param optionalMinimumAutoScalingGroupSize TODO
-     * @param optionalMaximumAutoScalingGroupSize TODO
+     * @param optionalMinimumAutoScalingGroupSize
+     *            defaults to 1; if 0, a replica process will be launched on an eligible shared instance in an
+     *            availability zone different from that of the instance hosting the master process. Otherwise,
+     *            at least one auto-scaling replica will ensure availability of the replica set.
      * @param optionalInstanceType
      *            if a new instance must be launched because no eligible one is found, this parameter can be used to
      *            specify its instance type. It defaults to {@link InstanceType#I3_2_XLARGE} which is reasonably suited
