@@ -293,15 +293,18 @@ public interface LandscapeService {
             Optional<AmazonMachineImage<String>> optionalAmi) throws InterruptedException, ExecutionException;
 
     /**
-     * For an existing replica set with an {@link AwsApplicationReplicaSet#getAutoScalingGroup() auto-scaling group} ensures that the
-     * auto-scaling group has a minimum size of 1 and waits until an auto-scaling replica is available. Then, all replicas not managed
-     * by the auto-scaling group are stopped one by one.<p>
+     * For an existing replica set with an {@link AwsApplicationReplicaSet#getAutoScalingGroup() auto-scaling group}
+     * ensures that the auto-scaling group has a minimum size of 1 and waits until an auto-scaling replica is available.
+     * Then, all replicas not managed by the auto-scaling group are stopped one by one.
+     * <p>
      * 
      * If the replica set does not have an auto-scaling group assigned, no action is taken.
+     * 
+     * @return the updated replica set
      */
     <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
      MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
-    void useDedicatedAutoScalingReplicasInsteadOfShared(
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useDedicatedAutoScalingReplicasInsteadOfShared(
                     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
                     String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
                     throws Exception;

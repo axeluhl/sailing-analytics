@@ -269,7 +269,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     try {
                         return convertToSailingAnalyticsProcessDTO(r, optionalKeyName, privateKeyEncryptionPassphrase);
                     } catch (Exception e) {
-                        throw new RuntimeException();
+                        throw new RuntimeException(e);
                     }
                 }),
                 applicationServerReplicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
@@ -771,11 +771,14 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public void useDedicatedAutoScalingReplicasInsteadOfShared(SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO,
+    public SailingApplicationReplicaSetDTO<String> useDedicatedAutoScalingReplicasInsteadOfShared(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsRegion region = new AwsRegion(applicationReplicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = convertFromApplicationReplicaSetDTO(region, applicationReplicaSetDTO);
-        getLandscapeService().useDedicatedAutoScalingReplicasInsteadOfShared(replicaSet, optionalKeyName, privateKeyEncryptionPassphrase);
+        return convertToSailingApplicationReplicaSetDTO(
+                getLandscapeService().useDedicatedAutoScalingReplicasInsteadOfShared(replicaSet, optionalKeyName, privateKeyEncryptionPassphrase),
+                Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
     }
 }

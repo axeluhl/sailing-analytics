@@ -1039,14 +1039,16 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
             MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
-    void useDedicatedAutoScalingReplicasInsteadOfShared(
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useDedicatedAutoScalingReplicasInsteadOfShared(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result;
         if (replicaSet.getAutoScalingGroup() != null) {
             final Integer minSize = replicaSet.getAutoScalingGroup().getAutoScalingGroup().minSize();
             if (minSize != null && minSize > 0) {
                 logger.info("Replica set "+replicaSet+" already has its auto-scaling group minimum size set to a non-zero value: "+minSize);
+                result = replicaSet;
             } else {
                 final SailingAnalyticsProcess<String> replica = spinUpReplicaByIncreasingAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), replicaSet.getMaster());
                 assert replica.isReady(WAIT_FOR_PROCESS_TIMEOUT);
@@ -1057,9 +1059,13 @@ public class LandscapeServiceImpl implements LandscapeService {
                         nonAutoScalingReplica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                     }
                 }
+                result = getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(), replicaSet.getServerName(), replicaSet.getMaster(),
+                        Collections.singleton(replica));
             }
         } else {
             logger.warning("No auto-scaling group found for replica set "+replicaSet+"; not terminating any replicas.");
+            result = null;
         }
+        return result;
     }
 }

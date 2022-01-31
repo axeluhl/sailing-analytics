@@ -72,7 +72,7 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                 final Integer port = replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replicatedFrom.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
                 HostT host = getHostFromIpAddress(hostSupplier, masterAddress);
                 if (host != null) {
-                    return processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null,
+                    return processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null, // FIXME cannot be discovered otherwise currently
                             /* telnetPort can be obtained from environment on demand */ null, /* serverName to be discovered otherwise */ null, Collections.emptyMap());
                 }
             }
@@ -117,7 +117,7 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                     final Integer port = replica.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replica.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
                     HostT host = getHostFromIpAddress(hostSupplier, replicaAddress);
                     if (host != null) {
-                        result.add(processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null,
+                        result.add(processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null, // FIXME this causes problems because serverDirectory currently CANNOT be discovered otherwise
                                 /* telnetPort can be obtained from environment on demand */ null, /* serverName to be discovered otherwise */ null, Collections.emptyMap()));
                     }
                 }

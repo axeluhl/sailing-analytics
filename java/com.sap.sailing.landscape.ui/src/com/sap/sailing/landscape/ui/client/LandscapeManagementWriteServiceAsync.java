@@ -232,5 +232,5 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void useDedicatedAutoScalingReplicasInsteadOfShared(
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, AsyncCallback<Void> callback);
+            byte[] privateKeyEncryptionPassphrase, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }

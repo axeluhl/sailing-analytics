@@ -450,7 +450,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null;
         for (final SailingApplicationReplicaSetDTO<String> replicaSet : replicaSets) {
             landscapeManagementService.useDedicatedAutoScalingReplicasInsteadOfShared(replicaSet,
-                    optionalKeyName, privateKeyEncryptionPassphrase, new AsyncCallback<Void>() {
+                    optionalKeyName, privateKeyEncryptionPassphrase, new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.problemSwitchingReplicaSetToAutoReplicasOnly(replicaSet.getName(),
@@ -461,9 +461,13 @@ public class LandscapeManagementPanel extends SimplePanel {
                         }
 
                         @Override
-                        public void onSuccess(Void result) {
-                            Notification.notify(stringMessages.successfullySwitchedReplicaSetToAutoReplicasOnly(
-                                    replicaSet.getName()), NotificationType.SUCCESS);
+                        public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                            if (result != null) {
+                                applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(result);
+                                applicationReplicaSetsTable.refresh();
+                                Notification.notify(stringMessages.successfullySwitchedReplicaSetToAutoReplicasOnly(
+                                        replicaSet.getName()), NotificationType.SUCCESS);
+                            }
                             if (--count[0] <= 0) {
                                 applicationReplicaSetsBusy.setBusy(false);
                             }
@@ -792,7 +796,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     private void archiveApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive) {
         final MongoEndpointDTO selectedMongoEndpointForDBArchiving = mongoEndpointsTable.getSelectionModel().getSelectedObject();
-        new DataEntryDialog<ReplicaSetArchivingParameters>(stringMessages.createLoadBalancerMapping(), stringMessages.createLoadBalancerMapping(),
+        new DataEntryDialog<ReplicaSetArchivingParameters>(stringMessages.archive(), stringMessages.archive(),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, new DialogCallback<ReplicaSetArchivingParameters>() {
                     @Override
                     public void ok(ReplicaSetArchivingParameters bearerTokensAndWhetherToRemoveReplicaSet) {
