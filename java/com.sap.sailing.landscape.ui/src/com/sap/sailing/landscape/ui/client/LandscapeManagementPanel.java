@@ -1010,8 +1010,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                             if (result != null) {
                                                                 Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
                                                                                 result.getName(), result.getVersion()), NotificationType.SUCCESS);
-                                                                applicationReplicaSetsTable.getFilterPanel().remove(replicaSet);
-                                                                applicationReplicaSetsTable.getFilterPanel().add(result);
+                                                                applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(result);
+                                                                applicationReplicaSetsTable.refresh();
                                                             } else {
                                                                 Notification.notify(stringMessages.upgradingApplicationReplicaSetFailed(replicaSet.getName()),
                                                                         NotificationType.ERROR);
