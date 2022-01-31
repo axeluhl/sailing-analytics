@@ -2,7 +2,6 @@ package com.sap.sailing.landscape.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
@@ -124,7 +123,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
             if (status.containsKey(STATUS_SERVERDIRECTORY_PROPERTY_NAME)) {
                 serverDirectory = status.get(STATUS_SERVERDIRECTORY_PROPERTY_NAME).toString();
             } else {
-                serverDirectory = ApplicationProcessHost.DEFAULT_SERVERS_PATH + File.pathSeparator + status.get(STATUS_SERVERNAME_PROPERTY_NAME).toString();
+                serverDirectory = ApplicationProcessHost.DEFAULT_SERVERS_PATH + "/" + status.get(STATUS_SERVERNAME_PROPERTY_NAME).toString();
             }
         }
     }
