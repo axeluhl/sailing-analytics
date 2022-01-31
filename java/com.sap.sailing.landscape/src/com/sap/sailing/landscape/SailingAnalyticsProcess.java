@@ -20,7 +20,7 @@ public interface SailingAnalyticsProcess<ShardingKey> extends AwsApplicationProc
     
     /**
      * Refreshes this process to the {@code release} specified. This happens by connecting to the {@link #getHost() instance} by
-     * SSH, changing into the {@link #getServerDirectory() server directory} for this process, running the {@code refreshInstance.sh}
+     * SSH, changing into the {@link #getServerDirectory(Optional) server directory} for this process, running the {@code refreshInstance.sh}
      * script there with the {@code install-release} subcommand parameterized with the {@code release} to install, and then
      * runs {@code ./stop; ./start} to activate the {@code release}.
      */

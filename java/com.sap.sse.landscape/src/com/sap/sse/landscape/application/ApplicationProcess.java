@@ -55,10 +55,10 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
      * process's OSGi console using the {@link #getTelnetPortToOSGiConsole() telnet port}. If the instance hasn't
      * terminated after some time, a hard kill command will be used terminate the virtual machine. All this is
-     * implemented in the {@code stop} script in the {@link #getServerDirectory() server's directory}.<p>
+     * implemented in the {@code stop} script in the {@link #getServerDirectory(Optional) server's directory}.<p>
      * 
      * The server directory and the {@link #getHost()} are left untouched by this. In particular, a subsequent execution
-     * of the {@code start} script in the {@link #getServerDirectory() server directory} can be expected to start the
+     * of the {@code start} script in the {@link #getServerDirectory(Optional) server directory} can be expected to start the
      * application process again.
      */
     void tryShutdown(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
@@ -70,12 +70,12 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
      *         it or to copy files to or read files from there.
      */
-    String getServerDirectory();
+    String getServerDirectory(Optional<Duration> optionalTimeout) throws TimeoutException, Exception;
     
     /**
      * The name that is the basis for the user group name; e.g., a server named "my" will by default be owned by a
      * dedicated user group named "my-server". For multi-instance servers, a default setup will use this server name also
-     * as the base name of the {@link #getServerDirectory() server's directory}. Often, it is also used as the name of
+     * as the base name of the {@link #getServerDirectory(Optional) server's directory}. Often, it is also used as the name of
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
      */

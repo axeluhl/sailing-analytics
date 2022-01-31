@@ -2,6 +2,7 @@ package com.sap.sailing.landscape.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
@@ -34,6 +35,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsApplicationProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
@@ -45,6 +47,7 @@ extends AwsApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingA
 implements SailingAnalyticsProcess<ShardingKey> {
     private static final Logger logger = Logger.getLogger(SailingAnalyticsProcessImpl.class.getName());;
     private static final String STATUS_SERVERNAME_PROPERTY_NAME = "servername";
+    private static final String STATUS_SERVERDIRECTORY_PROPERTY_NAME = "serverdirectory";
     private static final String STATUS_RELEASE_PROPERTY_NAME = "release";
     private Integer expeditionUdpPort;
     private Release release;
@@ -80,6 +83,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
         updateStartTimePointFromStatus(status);
         updateReleaseFromStatus(status);
         updateServerNameFromStatus(status);
+        updateServerDirectoryFromStatus(status);
         return status;
     }
 
@@ -115,6 +119,16 @@ implements SailingAnalyticsProcess<ShardingKey> {
         serverName = status.get(STATUS_SERVERNAME_PROPERTY_NAME).toString();
     }
     
+    private void updateServerDirectoryFromStatus(JSONObject status) {
+        if (serverDirectory == null) {
+            if (status.containsKey(STATUS_SERVERDIRECTORY_PROPERTY_NAME)) {
+                serverDirectory = status.get(STATUS_SERVERDIRECTORY_PROPERTY_NAME).toString();
+            } else {
+                serverDirectory = ApplicationProcessHost.DEFAULT_SERVERS_PATH + File.pathSeparator + status.get(STATUS_SERVERNAME_PROPERTY_NAME).toString();
+            }
+        }
+    }
+    
     /**
      * For a sailing application process we know that there is a {@code /gwt/status} end point from which much
      * information about server name as well as availability and replication status can be obtained.
@@ -132,6 +146,27 @@ implements SailingAnalyticsProcess<ShardingKey> {
             getStatus(optionalTimeout); // triggers updateServerNameFromStatus
         }
         return serverName;
+    }
+    
+    /**
+     * For a sailing application process we know that there is a {@code /gwt/status} end point from which information
+     * about the server directory can be obtained. Legacy servers, however, may not expose this field in their status
+     * document in which case the server directory will default to the
+     * {@link ApplicationProcessHost#DEFAULT_SERVERS_PATH default servers directory} to which the
+     * {@link #getServerName(Optional, Optional, byte[]) server name} is appended.
+     * <p>
+     * 
+     * This redefinition does not require the {@code optionalKeyName} nor the {@code privateKeyEncryptionPassphrase}.
+     * 
+     * @param optionalTimeout
+     *            used for the HTTP(S) connection to the status servlet
+     */
+    @Override
+    public String getServerDirectory(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        if (serverDirectory == null) {
+            getStatus(optionalTimeout); // triggers updateServerNameFromStatus
+        }
+        return serverDirectory;
     }
     
     @Override
@@ -181,9 +216,9 @@ implements SailingAnalyticsProcess<ShardingKey> {
             byte[] privateKeyEncryptionPassphrase) {
         try {
             tryShutdown(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            logger.info("Removing server directory "+getServerDirectory()+" of "+this);
+            logger.info("Removing server directory "+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)+" of "+this);
             getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
-                .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory()+"\"", "Removing server directory "+getServerDirectory(), Level.INFO);
+                .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)+"\"", "Removing server directory "+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT), Level.INFO);
             final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost().getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             if (Util.isEmpty(applicationProcesses)) {
                 logger.info("No more application processes running on "+this+"; terminating");
@@ -209,7 +244,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
         logger.info("Upgrading process "+this+" to release "+release.getName());
         getHost().createRootSshChannel(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase)
             .runCommandAndReturnStdoutAndLogStderr("su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
-                    "cd "+getServerDirectory().replaceAll("\"", "\\\\\"")+"; "+
+                    "cd "+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT).replaceAll("\"", "\\\\\"")+"; "+
                     "./refreshInstance.sh install-release "+release.getName()+" && ./stop && ./start"+
                     "\"", "Refreshing process to release "+release.getName(), Level.INFO);
     }

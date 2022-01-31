@@ -284,7 +284,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 sailingAnalyticsProcess.getRelease(SailingReleaseRepository.INSTANCE, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
                 sailingAnalyticsProcess.getTelnetPortToOSGiConsole(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
                 sailingAnalyticsProcess.getServerName(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
-                sailingAnalyticsProcess.getServerDirectory(),
+                sailingAnalyticsProcess.getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT),
                 sailingAnalyticsProcess.getExpeditionUdpPort(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
                 sailingAnalyticsProcess.getStartTimePoint(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT));
     }
