@@ -979,7 +979,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         if (autoScalingGroup.getAutoScalingGroup().minSize() < 1) {
             getLandscape().updateAutoScalingGroupMinSize(autoScalingGroup, 1);
         }
-        return Wait.wait(()->hasHealthyReplica(master), healthyReplica->healthyReplica != null,
+        return Wait.wait(()->hasHealthyAutoScalingReplica(master, autoScalingGroup), healthyReplica->healthyReplica != null,
                 /* retryOnException */ true,
                 LandscapeService.WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(5), Level.INFO,
                 "Waiting for auto-scaling group to produce healthy replica");
@@ -988,10 +988,10 @@ public class LandscapeServiceImpl implements LandscapeService {
     /**
      * Returns one replica process that is healthy, or {@code null} if no such process was found
      */
-    private SailingAnalyticsProcess<String> hasHealthyReplica(SailingAnalyticsProcess<String> master) throws Exception {
+    private SailingAnalyticsProcess<String> hasHealthyAutoScalingReplica(SailingAnalyticsProcess<String> master, AwsAutoScalingGroup autoScalingGroup) throws Exception {
         final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
         for (final SailingAnalyticsProcess<String> replica : master.getReplicas(LandscapeService.WAIT_FOR_HOST_TIMEOUT, hostSupplier, processFactoryFromHostAndServerDirectory)) {
-            if (replica.isReady(LandscapeService.WAIT_FOR_HOST_TIMEOUT)) {
+            if (replica.getHost().isManagedByAutoScalingGroup(autoScalingGroup) && replica.isReady(LandscapeService.WAIT_FOR_HOST_TIMEOUT)) {
                 return replica;
             }
         }
@@ -1034,5 +1034,32 @@ public class LandscapeServiceImpl implements LandscapeService {
             }
         }
         return result;
+    }
+
+    @Override
+    public <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
+            MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
+    void useDedicatedAutoScalingReplicasInsteadOfShared(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception {
+        if (replicaSet.getAutoScalingGroup() != null) {
+            final Integer minSize = replicaSet.getAutoScalingGroup().getAutoScalingGroup().minSize();
+            if (minSize != null && minSize > 0) {
+                logger.info("Replica set "+replicaSet+" already has its auto-scaling group minimum size set to a non-zero value: "+minSize);
+            } else {
+                final SailingAnalyticsProcess<String> replica = spinUpReplicaByIncreasingAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), replicaSet.getMaster());
+                assert replica.isReady(WAIT_FOR_PROCESS_TIMEOUT);
+                for (final SailingAnalyticsProcess<String> nonAutoScalingReplica : replicaSet.getReplicas()) {
+                    if (!nonAutoScalingReplica.getHost().isManagedByAutoScalingGroup()) {
+                        logger.info("Found replica "+nonAutoScalingReplica+" to be not managed by auto-scaling group "+replicaSet.getAutoScalingGroup().getName()+
+                                ". Stopping it...");
+                        nonAutoScalingReplica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                    }
+                }
+            }
+        } else {
+            logger.warning("No auto-scaling group found for replica set "+replicaSet+"; not terminating any replicas.");
+        }
     }
 }

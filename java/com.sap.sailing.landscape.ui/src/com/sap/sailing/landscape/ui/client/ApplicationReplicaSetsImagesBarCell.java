@@ -19,6 +19,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER = "LAUNCH_ANOTHER_REPLICA_SET_ON_THIS_MASTER";
     public static final String ACTION_ENSURE_ONE_REPLICA_THEN_STOP_REPLICATING_AND_REMOVE_MASTER_FROM_TARGET_GROUPS = "ACTION_ENSURE_ONE_REPLICA_THEN_STOP_REPLICATING_AND_REMOVE_MASTER_FROM_TARGET_GROUPS";
     public static final String ACTION_UPDATE_AMI_FOR_AUTO_SCALING_REPLICAS = "ACTION_UPDATE_AMI_FOR_AUTO_SCALING_REPLICAS";
+    public static final String ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY = "ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY";
 
     private final StringMessages stringMessages;
 
@@ -52,6 +53,7 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
                 IconResources.INSTANCE.unlinkIcon()));
         if (applicationReplicaSet.getAutoScalingGroupAmiId() != null) {
             result.add(new ImageSpec(ACTION_UPDATE_AMI_FOR_AUTO_SCALING_REPLICAS, stringMessages.updateAmiForAutoScalingReplicas(), IconResources.INSTANCE.redGearsIcon()));
+            result.add(new ImageSpec(ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY, stringMessages.switchToAutoScalingReplicasOnly(), IconResources.INSTANCE.scaleIcon()));
         }
         return result;
     }

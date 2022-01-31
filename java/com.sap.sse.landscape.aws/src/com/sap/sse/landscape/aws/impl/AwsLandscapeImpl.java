@@ -1528,6 +1528,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize) {
+        logger.info("Setting minimum size of auto-scaling group "+autoScalingGroup.getName()+" to "+minSize);
         getAutoScalingClient(getRegion(autoScalingGroup.getRegion())).updateAutoScalingGroup(b->b
                 .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
                 .minSize(minSize));

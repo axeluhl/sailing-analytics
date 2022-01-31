@@ -127,4 +127,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String sharedMasterInstanceType();
     String sharedMasterAndReplicaInstanceType();
     String sharedReplicaInstanceType();
+    String switchToAutoScalingReplicasOnly();
+    String problemSwitchingReplicaSetToAutoReplicasOnly(String replicaSetName, String message);
+    String successfullySwitchedReplicaSetToAutoReplicasOnly(String replicaSetName);
 }

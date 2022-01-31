@@ -229,4 +229,8 @@ public interface LandscapeManagementWriteServiceAsync {
             ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,
             AmazonMachineImageDTO amiDTOOrNullForLatest, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
+
+    void useDedicatedAutoScalingReplicasInsteadOfShared(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, AsyncCallback<Void> callback);
 }

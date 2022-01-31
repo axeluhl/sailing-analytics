@@ -116,4 +116,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
             ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,
             AmazonMachineImageDTO amiDTO,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    void useDedicatedAutoScalingReplicasInsteadOfShared(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

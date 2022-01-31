@@ -769,4 +769,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         }
         return result;
     }
+    
+    @Override
+    public void useDedicatedAutoScalingReplicasInsteadOfShared(SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion region = new AwsRegion(applicationReplicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = convertFromApplicationReplicaSetDTO(region, applicationReplicaSetDTO);
+        getLandscapeService().useDedicatedAutoScalingReplicasInsteadOfShared(replicaSet, optionalKeyName, privateKeyEncryptionPassphrase);
+    }
 }

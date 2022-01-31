@@ -348,6 +348,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                     ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups)));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY,
+                applicationReplicaSetToUpgrade -> switchToAutoScalingReplicasOnly(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
         // see below for the finalization o the applicationRelicaSetsActionColumn; we need to have the machineImagesTable ready for the last action...
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -369,6 +372,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                 e->ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(stopReplicatingAndUnregisterMasterButton);
+        final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> useOnlyAutoScalingReplicasButton = new SelectedElementsCountingButton<>(
+                stringMessages.switchToAutoScalingReplicasOnly(), applicationReplicaSetsTable.getSelectionModel(),
+                e->switchToAutoScalingReplicasOnly(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
+                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        applicationReplicaSetsButtonPanel.add(useOnlyAutoScalingReplicasButton);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
@@ -431,6 +439,38 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+    }
+
+    private void switchToAutoScalingReplicasOnly(StringMessages stringMessages, String selectedObject,
+            Iterable<SailingApplicationReplicaSetDTO<String>> replicaSets) {
+        applicationReplicaSetsBusy.setBusy(true);
+        final int[] count = { Util.size(replicaSets) };
+        final String optionalKeyName = sshKeyManagementPanel.getSelectedKeyPair().getName();
+        final byte[] privateKeyEncryptionPassphrase = sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+        ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null;
+        for (final SailingApplicationReplicaSetDTO<String> replicaSet : replicaSets) {
+            landscapeManagementService.useDedicatedAutoScalingReplicasInsteadOfShared(replicaSet,
+                    optionalKeyName, privateKeyEncryptionPassphrase, new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(stringMessages.problemSwitchingReplicaSetToAutoReplicasOnly(replicaSet.getName(),
+                                    caught.getMessage()), /* silentMode */ true);
+                            if (--count[0] <= 0) {
+                                applicationReplicaSetsBusy.setBusy(false);
+                            }
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            Notification.notify(stringMessages.successfullySwitchedReplicaSetToAutoReplicasOnly(
+                                    replicaSet.getName()), NotificationType.SUCCESS);
+                            if (--count[0] <= 0) {
+                                applicationReplicaSetsBusy.setBusy(false);
+                            }
+                        }
+                
+            });
+        }
     }
 
     private Iterable<SailingApplicationReplicaSetDTO<String>> getApplicationReplicaSetsToUpgradeAutoScalingReplicaAmisFor(AmazonMachineImageDTO amiBeingUpdated) {
@@ -599,10 +639,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                         sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                         sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
                         instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
-                        instructions.getOptionalDomainName(), instructions.getOptionalMemoryInMegabytesOrNull(),
-                        instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                        instructions.getOptionalDomainName(),
                         /* minimum auto-scaling group size: */ instructions.isFirstReplicaOnSharedInstance()?0:null,
                         /* maximum auto-scaling group size remains at default: */ null,
+                        instructions.getOptionalMemoryInMegabytesOrNull(),
+                        instructions.getOptionalMemoryTotalSizeFactorOrNull(),
                         new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                          @Override
                          public void onFailure(Throwable caught) {
