@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -348,6 +349,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                     ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetForWhichToEnsureAtLeastOneReplicaStopReplicatingAndRemoveMasterFromTargetGroups)));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SWITCH_TO_REPLICA_ON_SHARED_INSTANCE,
+                applicationReplicaSetToUpgrade -> switchToReplicaOnSharedInstance(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY,
                 applicationReplicaSetToUpgrade -> switchToAutoScalingReplicasOnly(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
@@ -446,40 +450,56 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
 
-    private void switchToReplicaOnSharedInstance(StringMessages stringMessages, String selectedObject,
-            Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
+    private void switchToReplicaOnSharedInstance(StringMessages stringMessages, String selectedObject, Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
         new SwitchToReplicaOnSharedInstanceDialog(stringMessages, errorReporter, landscapeManagementService,
                 new DialogCallback<SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions>() {
                     @Override
                     public void ok(SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions instructions) {
-                        applicationReplicaSetsBusy.setBusy(true);
-                        for (final SailingApplicationReplicaSetDTO<String> replicaSet : selectedSet) {
-                            landscapeManagementService.useSingleSharedInsteadOfDedicatedAutoScalingReplica(replicaSet,
-                                    sshKeyManagementPanel.getSelectedKeyPair() == null ? null : sshKeyManagementPanel.getSelectedKeyPair().getName(),
-                                    sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                    instructions.getReplicaReplicationBearerToken(),
-                                    instructions.getOptionalMemoryInMegabytesOrNull(),
-                                    instructions.getOptionalMemoryTotalSizeFactorOrNull(),
-                                    instructions.getOptionalSharedReplicaInstanceType(),
-                                    new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            applicationReplicaSetsBusy.setBusy(false);
-                                            errorReporter.reportError(caught.getMessage());
-                                        }
-
-                                        @Override
-                                        public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
-                                            applicationReplicaSetsBusy.setBusy(false);
-                                            Notification.notify(
-                                                    stringMessages.successfullyCreatedReplicaSet(replicaSet.getName()),
-                                                    NotificationType.SUCCESS);
-                                            if (result != null) {
-                                                applicationReplicaSetsTable.getFilterPanel().add(result);
-                                            }
-                                        }
-                                    });
+                        final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator = selectedSet.iterator();
+                        if (replicaSetIterator.hasNext()) {
+                            applicationReplicaSetsBusy.setBusy(true);
+                            useSingleSharedInsteadOfDedicatedAutoScalingReplica(instructions, replicaSetIterator, stringMessages);
                         }
+                    }
+
+                    private void useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+                            SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions instructions,
+                            final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator, StringMessages stringMessages) {
+                        assert replicaSetIterator.hasNext();
+                        final SailingApplicationReplicaSetDTO<String> replicaSet = replicaSetIterator.next();
+                        landscapeManagementService.useSingleSharedInsteadOfDedicatedAutoScalingReplica(replicaSet,
+                                sshKeyManagementPanel.getSelectedKeyPair() == null ? null : sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                instructions.getReplicaReplicationBearerToken(),
+                                instructions.getOptionalMemoryInMegabytesOrNull(),
+                                instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                                instructions.getOptionalSharedReplicaInstanceType(),
+                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(caught.getMessage());
+                                        if (!replicaSetIterator.hasNext()) {
+                                            applicationReplicaSetsBusy.setBusy(false);
+                                        } else {
+                                            useSingleSharedInsteadOfDedicatedAutoScalingReplica(instructions, replicaSetIterator, stringMessages);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                        Notification.notify(
+                                                stringMessages.successfullyCreatedReplicaSet(replicaSet.getName()),
+                                                NotificationType.SUCCESS);
+                                        if (result != null) {
+                                            applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(result);
+                                        }
+                                        if (!replicaSetIterator.hasNext()) {
+                                            applicationReplicaSetsBusy.setBusy(false);
+                                        } else {
+                                            useSingleSharedInsteadOfDedicatedAutoScalingReplica(instructions, replicaSetIterator, stringMessages);
+                                        }
+                                    }
+                                });
                     }
 
                     @Override

@@ -1,7 +1,10 @@
 package com.sap.sailing.landscape.ui.client;
 
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
@@ -42,6 +45,7 @@ public class SwitchToReplicaOnSharedInstanceDialog extends DataEntryDialog<Switc
     private final IntegerBox memoryInMegabytesBox;
     private final IntegerBox memoryTotalSizeFactorBox;
     private final TextBox replicaReplicationBearerTokenBox;
+    private final StringMessages stringMessages;
     private static final String DEFAULT_INSTANCE_TYPE = "___default___";
 
     public SwitchToReplicaOnSharedInstanceDialog(StringMessages stringMessages, ErrorReporter errorReporter,
@@ -49,16 +53,32 @@ public class SwitchToReplicaOnSharedInstanceDialog extends DataEntryDialog<Switc
             DialogCallback<SwitchToReplicaOnSharedInstanceDialogInstructions> callback) {
         super(stringMessages.switchToReplicaOnSharedInstance(), stringMessages.switchToReplicaOnSharedInstance(),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
+        this.stringMessages = stringMessages;
         sharedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBoxWithAdditionalDefaultEntry(this,
                 stringMessages.sameAsMaster(), DEFAULT_INSTANCE_TYPE,
                 landscapeManagementService,
                 stringMessages, SharedLandscapeConstants.DEFAULT_SHARED_INSTANCE_TYPE_NAME, errorReporter);
         replicaReplicationBearerTokenBox = createTextBox("", 40);
         memoryInMegabytesBox = createIntegerBox(null, 7);
-        memoryTotalSizeFactorBox = createIntegerBox(null, 2);
+        memoryTotalSizeFactorBox = createIntegerBox(SharedLandscapeConstants.DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY, 2);
         memoryInMegabytesBox.addValueChangeHandler(e->memoryTotalSizeFactorBox.setEnabled(e.getValue() == null));
     }
-    
+
+    @Override
+    protected Widget getAdditionalWidget() {
+        final Grid result = new Grid(4, 2);
+        int row=0;
+        result.setWidget(row, 0, new Label(stringMessages.sharedReplicaInstanceType()));
+        result.setWidget(row++, 1, sharedInstanceTypeListBox);
+        result.setWidget(row, 0, new Label(stringMessages.replicaReplicationBearerToken()));
+        result.setWidget(row++, 1, replicaReplicationBearerTokenBox);
+        result.setWidget(row, 0, new Label(stringMessages.memoryInMegabytes()));
+        result.setWidget(row++, 1, memoryInMegabytesBox);
+        result.setWidget(row, 0, new Label(stringMessages.memoryTotalSizeFactor()));
+        result.setWidget(row++, 1, memoryTotalSizeFactorBox);
+        return result;
+    }
+
     @Override
     protected SwitchToReplicaOnSharedInstanceDialogInstructions getResult() {
         return new SwitchToReplicaOnSharedInstanceDialogInstructions(replicaReplicationBearerTokenBox.getText(),

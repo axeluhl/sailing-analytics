@@ -35,6 +35,12 @@ public interface IconResources extends ClientBundle {
     @Source("images/scale.png")
     ImageResource scaleIcon();
 
+    @Source("images/scaleUp.png")
+    ImageResource scaleUpIcon();
+
+    @Source("images/scaleDown.png")
+    ImageResource scaleDownIcon();
+
     @Source("images/archive.png")
     ImageResource archiveIcon();
 
