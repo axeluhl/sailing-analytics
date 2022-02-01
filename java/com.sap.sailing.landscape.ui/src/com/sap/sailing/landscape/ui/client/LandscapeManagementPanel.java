@@ -377,6 +377,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                 e->switchToAutoScalingReplicasOnly(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(useOnlyAutoScalingReplicasButton);
+        final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> useSharedInsteadOfDedicatedAutoScalingReplicasButton = new SelectedElementsCountingButton<>(
+                stringMessages.switchToReplicaOnSharedInstance(), applicationReplicaSetsTable.getSelectionModel(),
+                e->switchToReplicaOnSharedInstance(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
+                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        applicationReplicaSetsButtonPanel.add(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
@@ -439,6 +444,48 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+    }
+
+    private void switchToReplicaOnSharedInstance(StringMessages stringMessages, String selectedObject,
+            Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
+        new SwitchToReplicaOnSharedInstanceDialog(stringMessages, errorReporter, landscapeManagementService,
+                new DialogCallback<SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions>() {
+                    @Override
+                    public void ok(SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions instructions) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        for (final SailingApplicationReplicaSetDTO<String> replicaSet : selectedSet) {
+                            landscapeManagementService.useSingleSharedInsteadOfDedicatedAutoScalingReplica(replicaSet,
+                                    sshKeyManagementPanel.getSelectedKeyPair() == null ? null : sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                    sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                    instructions.getReplicaReplicationBearerToken(),
+                                    instructions.getOptionalMemoryInMegabytesOrNull(),
+                                    instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                                    instructions.getOptionalSharedReplicaInstanceType(),
+                                    new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            applicationReplicaSetsBusy.setBusy(false);
+                                            errorReporter.reportError(caught.getMessage());
+                                        }
+
+                                        @Override
+                                        public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                            applicationReplicaSetsBusy.setBusy(false);
+                                            Notification.notify(
+                                                    stringMessages.successfullyCreatedReplicaSet(replicaSet.getName()),
+                                                    NotificationType.SUCCESS);
+                                            if (result != null) {
+                                                applicationReplicaSetsTable.getFilterPanel().add(result);
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
     }
 
     private void switchToAutoScalingReplicasOnly(StringMessages stringMessages, String selectedObject,

@@ -130,4 +130,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String switchToAutoScalingReplicasOnly();
     String problemSwitchingReplicaSetToAutoReplicasOnly(String replicaSetName, String message);
     String successfullySwitchedReplicaSetToAutoReplicasOnly(String replicaSetName);
+    String switchToReplicaOnSharedInstance();
 }

@@ -21,6 +21,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
@@ -309,4 +310,19 @@ public interface LandscapeService {
                     String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
                     throws Exception;
 
+    /**
+     * For an existing replica set ensures that there is a replica running and ready that is not an auto-scaling replica
+     * on a dedicated instance. If no such replica process is found, one is launched on a shared instance in an
+     * availability zone different from the one hosting the replica set's master instance. Once the non-auto-scaling
+     * replica is ready, the auto-scaling group's {@link AutoScalingGroup#minSize() minimum size} is reduced to 0 so
+     * that with no excess workload the auto-scaling group will terminate all auto-scaling group-managed instances.<p>
+     * 
+     * Should a new shared instance be required for a new replica, its instance type is obtained from the one hosting
+     * the replica set's master process, silently assuming that it may already be on a shared set-up.
+     */
+    <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>, MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>> AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Optional<InstanceType> optionalInstanceType) throws Exception;
 }

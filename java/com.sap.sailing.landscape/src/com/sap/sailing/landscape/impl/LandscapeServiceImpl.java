@@ -306,7 +306,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     /**
      * Starts a replica process for the given {@code replicaSet}. The memory configuration can optionally be defined. It
      * defaults to the usual large share of the physical RAM of the instance it is deployed on. The replica is launched
-     * on the {@code optionalPreferredInstanceToDeployTo} host is specified and eligible, else on the "best" existing
+     * on the {@code optionalPreferredInstanceToDeployTo} host if specified and eligible, else on the "best" existing
      * eligible instance (based on aspects such as the processes already deployed on the instance). If no running
      * instance is found to be eligible (e.g., because none has the port required by the replica available, or all run
      * in the same availability zone as the replica set's master process), a new instance is launched.
@@ -469,12 +469,13 @@ public class LandscapeServiceImpl implements LandscapeService {
             // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
             // this will also terminate all replicas spun up by the auto-scaling group
             autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
+            Wait.wait(()->isAllAutoScalingReplicasShutDown(applicationReplicaSet, autoScalingGroup),
+                    LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Duration.ONE_SECOND.times(5),
+                    Level.INFO, "Waiting for auto-scaling replicas to shut down");
         } else {
             autoScalingGroupRemoval = new CompletableFuture<>();
             autoScalingGroupRemoval.complete(null);
         }
-        // TODO it would be more graceful here to wait for the replicas to become unavailable; then we would know they have de-registered cleanly from the master
-        // terminate the master process:
         autoScalingGroupRemoval.thenAccept(v->
             applicationReplicaSet.getMaster().stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
         // remove the load balancer rules
@@ -502,6 +503,20 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped.");
         }
+    }
+
+    private boolean isAllAutoScalingReplicasShutDown(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            AwsAutoScalingGroup autoScalingGroup) throws Exception {
+        final Iterable<SailingAnalyticsProcess<String>> replicas = applicationReplicaSet.getMaster().getReplicas(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
+                new SailingAnalyticsHostSupplier<String>(), processFactoryFromHostAndServerDirectory);
+        for (final SailingAnalyticsProcess<String> replica : replicas) {
+            if (replica.getHost().isManagedByAutoScalingGroup(autoScalingGroup) && replica.isAlive(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)) {
+                logger.info("Replica "+replica+" is managed by auto-scaling group "+autoScalingGroup.getName()+" and is still alive.");
+                return false;
+            }
+        }
+        return true;
     }
 
     private <BuilderT extends CopyAndCompareMongoDatabase.Builder<BuilderT, String>> CopyAndCompareMongoDatabase<String>
@@ -1067,5 +1082,43 @@ public class LandscapeServiceImpl implements LandscapeService {
             result = null;
         }
         return result;
+    }
+
+
+    @Override
+    public <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
+            MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String replicaReplicationBearerToken, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalInstanceType) throws Exception {
+        final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
+        final Set<SailingAnalyticsProcess<String>> nonAutoScalingReplica = new HashSet<>();
+        for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
+            if (autoScalingGroup == null || !replica.getHost().isManagedByAutoScalingGroup(autoScalingGroup)) {
+                logger.info("Found replica "+replica+" in replica set "+replicaSet.getName()+
+                        " which is not managed by auto-scaling group");
+                nonAutoScalingReplica.add(replica);
+            }
+        }
+        if (nonAutoScalingReplica.isEmpty()) {
+            logger.info("No replica found for replica set "+replicaSet.getName()+
+                    " that is not managed by auto-scaling group "+autoScalingGroup.getName()+
+                    ". Launching one on an eligible shared instance.");
+            nonAutoScalingReplica.add(launchUnmanagedReplica(replicaSet, replicaSet.getMaster().getHost().getRegion(), optionalKeyName,
+                    privateKeyEncryptionPassphrase, replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull,
+                    optionalMemoryTotalSizeFactorOrNull,
+                    Optional.of(optionalInstanceType.orElseGet(()->replicaSet.getMaster().getHost().getInstance().instanceType())),
+                    /* optionalPreferredInstanceToDeployTo */ Optional.empty()));
+        }
+        if (autoScalingGroup != null) {
+            logger.info("Scaling down auto-scaling group for replica set "+replicaSet.getName()+" from minimum size "+
+                    replicaSet.getAutoScalingGroup().getAutoScalingGroup().minSize()+" to 0");
+            getLandscape().updateAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), 0);
+        } else {
+            logger.info("No auto-scaling group found for replica set "+replicaSet.getName()+"; nothing to scale down.");
+        }
+        return getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(), replicaSet.getServerName(), replicaSet.getMaster(), nonAutoScalingReplica);
     }
 }

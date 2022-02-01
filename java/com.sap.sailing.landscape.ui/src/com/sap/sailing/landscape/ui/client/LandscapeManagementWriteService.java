@@ -120,4 +120,10 @@ public interface LandscapeManagementWriteService extends RemoteService {
     SailingApplicationReplicaSetDTO<String> useDedicatedAutoScalingReplicasInsteadOfShared(
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
             byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    SailingApplicationReplicaSetDTO<String> useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            String optionalSharedReplicaInstanceType) throws Exception;
 }
