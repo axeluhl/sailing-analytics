@@ -470,7 +470,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             // this will also terminate all replicas spun up by the auto-scaling group
             autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
             Wait.wait(()->isAllAutoScalingReplicasShutDown(applicationReplicaSet, autoScalingGroup),
-                    LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Duration.ONE_SECOND.times(5),
+                    LandscapeService.WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(10),
                     Level.INFO, "Waiting for auto-scaling replicas to shut down");
         } else {
             autoScalingGroupRemoval = new CompletableFuture<>();
