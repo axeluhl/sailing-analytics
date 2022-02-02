@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -439,7 +440,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public void deleteLoadBalancerListenerRules(com.sap.sse.landscape.Region region, Rule... rulesToDelete) {
-        logger.info("Removing load balancer rules "+rulesToDelete+" in region "+region);
+        logger.info("Removing load balancer rules "+Util.joinStrings(", ", Arrays.asList(rulesToDelete))+" in region "+region);
         for (final Rule rule : rulesToDelete) {
             getLoadBalancingClient(getRegion(region)).deleteRule(b -> b.ruleArn(rule.ruleArn()));
         }
@@ -1531,7 +1532,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         logger.info("Setting minimum size of auto-scaling group "+autoScalingGroup.getName()+" to "+minSize);
         getAutoScalingClient(getRegion(autoScalingGroup.getRegion())).updateAutoScalingGroup(b->b
                 .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
-                .minSize(minSize));
+                .minSize(minSize)
+                .desiredCapacity(minSize));
     }
     
     @Override
