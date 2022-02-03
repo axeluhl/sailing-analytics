@@ -396,7 +396,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         for (final ProcessT replica : getReplicas()) {
             logger.info("Restarting replica "+replica+" in replica set "+getName());
             replica.restart(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            logger.info("Wating until restarte replica "+replica+" in replica set "+getName()+" has become ready:");
+            logger.info("Wating until restarted replica "+replica+" in replica set "+getName()+" has become ready:");
             replica.waitUntilReady(optionalTimeout);
         }
     }
