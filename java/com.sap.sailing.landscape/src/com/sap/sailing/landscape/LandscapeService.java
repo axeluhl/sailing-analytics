@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
@@ -334,4 +335,15 @@ public interface LandscapeService {
      * for the current session's principal is returned. See also {@link SecurityService#getOrCreateAccessToken(String)}.
      */
     String getEffectiveBearerToken(String replicaReplicationBearerToken);
+
+    <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
+    MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> moveMasterToOtherInstance(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            boolean useSharedInstance, Optional<InstanceType> optionalInstanceType,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String optionalMasterReplicationBearerTokenOrNull,
+            String optionalReplicaReplicationBearerTokenOrNull, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull) throws MalformedURLException, IOException, TimeoutException,
+            InterruptedException, ExecutionException, Exception;
 }

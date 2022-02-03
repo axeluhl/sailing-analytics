@@ -9,8 +9,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.simple.parser.ParseException;
-
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
@@ -159,7 +157,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
 
     Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
-    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException, java.text.ParseException, TimeoutException;
+    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws Exception;
 
     /**
      * Executes a {@code ./stop; ./start} sequence which waits for the graceful stopping of the process, then starts it again.

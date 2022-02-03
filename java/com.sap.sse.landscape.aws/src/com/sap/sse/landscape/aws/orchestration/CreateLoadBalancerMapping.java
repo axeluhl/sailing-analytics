@@ -225,7 +225,7 @@ extends ProcedureWithTargetGroup<ShardingKey> {
     private Rule[] createRules() {
         final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
         int ruleCount = 0;
-        rules[ruleCount++] = getLoadBalancerUsed().setDefaultRedirect(getHostName(), new PlainRedirectDTO());
+        rules[ruleCount++] = getLoadBalancerUsed().getDefaultRedirectRule(getHostName(), new PlainRedirectDTO());
         rules[ruleCount++] = Rule.builder().conditions(
                 RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).build(),
                 getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).

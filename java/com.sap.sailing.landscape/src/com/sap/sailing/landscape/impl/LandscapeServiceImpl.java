@@ -1131,6 +1131,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         return getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(), replicaSet.getServerName(), replicaSet.getMaster(), nonAutoScalingReplica);
     }
     
+    @Override
     public <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
     MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> moveMasterToOtherInstance(
@@ -1142,12 +1143,14 @@ public class LandscapeServiceImpl implements LandscapeService {
                     throws MalformedURLException,
                     IOException, TimeoutException, InterruptedException, ExecutionException, Exception {
         ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, getEffectiveBearerToken(optionalReplicaReplicationBearerTokenOrNull));
+        // important to obtain the release before stopping master:
+        final Release release = replicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         logger.info("Stopping master "+replicaSet.getMaster());
         replicaSet.getMaster().stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         final AwsRegion region = replicaSet.getMaster().getHost().getRegion();
         final AppConfigBuilderT masterConfigurationBuilder = createMasterConfigurationBuilder(replicaSet.getName(),
                 optionalMasterReplicationBearerTokenOrNull, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
-                region, replicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+                region, release);
         final SailingAnalyticsProcess<String> newMaster;
         final SailingAnalyticsHost<String> hostToDeployTo;
         if (useSharedInstance) {
