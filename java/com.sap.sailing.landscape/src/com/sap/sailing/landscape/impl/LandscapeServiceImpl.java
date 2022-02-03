@@ -1175,8 +1175,9 @@ public class LandscapeServiceImpl implements LandscapeService {
             masterHostStartProcedure.run();
             hostToDeployTo = masterHostStartProcedure.getHost();
             logger.info("Launched dedicated instance for master: "+hostToDeployTo);
-            newMaster = hostToDeployTo.getApplicationProcesses(LandscapeService.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase).iterator().next();
+            newMaster = masterHostStartProcedure.getSailingAnalyticsProcess();
         }
+        newMaster.waitUntilReady(LandscapeService.WAIT_FOR_HOST_TIMEOUT);
         logger.info("Adding new master "+newMaster+" to target groups");
         replicaSet.getPublicTargetGroup().addTarget(hostToDeployTo);
         replicaSet.getMasterTargetGroup().addTarget(hostToDeployTo);
