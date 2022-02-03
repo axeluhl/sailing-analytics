@@ -20,6 +20,7 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.security.SecurityService;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -144,18 +145,19 @@ public interface LandscapeService {
     /**
      * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName}
      * parameter. The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of
-     * available ports is identified and chosen automatically. The {@code replicaInstanceType} is used to configure the
-     * launch configuration used by the auto-scaling group which is also created so that when dedicated replicas need to
-     * be provided during auto-scaling, their instance type is known. The choice of {@code dynamicLoadBalancerMapping}
-     * must only be set if the host to deploy to lives in the default region; otherwise, the DNS wildcard record for the
-     * overall domain would be made point to a wrong region. If set to {@code false}, a DNS entry will be created that
-     * points to the load balancer used for the new replica set's routing rules.
+     * available ports is identified and chosen automatically. The target groups and load balancing set-up is created.
+     * The {@code replicaInstanceType} is used to configure the launch configuration used by the auto-scaling group
+     * which is also created so that when dedicated replicas need to be provided during auto-scaling, their instance
+     * type is known. The choice of {@code dynamicLoadBalancerMapping} must only be set if the host to deploy to lives
+     * in the default region; otherwise, the DNS wildcard record for the overall domain would be made point to a wrong
+     * region. If set to {@code false}, a DNS entry will be created that points to the load balancer used for the new
+     * replica set's routing rules.
      * <p>
      * 
      * @param optionalMinimumAutoScalingGroupSize
      *            defaults to 1; if 0, a replica process will be launched on an eligible shared instance in an
-     *            availability zone different from that of the instance hosting the master process. Otherwise,
-     *            at least one auto-scaling replica will ensure availability of the replica set.
+     *            availability zone different from that of the instance hosting the master process. Otherwise, at least
+     *            one auto-scaling replica will ensure availability of the replica set.
      */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> deployApplicationToExistingHost(String replicaSetName,
             SailingAnalyticsHost<String> hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
@@ -325,4 +327,11 @@ public interface LandscapeService {
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
             Optional<InstanceType> optionalInstanceType) throws Exception;
+
+    /**
+     * If a non-{@code null}, non-{@link String#isEmpty() empty} bearer token is provided by the
+     * {@code optionalBearerTokenOnNull} parameter, it is returned unchanged; otherwise, the bearer token as obtained
+     * for the current session's principal is returned. See also {@link SecurityService#getOrCreateAccessToken(String)}.
+     */
+    String getEffectiveBearerToken(String replicaReplicationBearerToken);
 }

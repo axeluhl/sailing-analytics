@@ -116,6 +116,14 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
+    public void restart(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws IOException, InterruptedException, JSchException, Exception {
+        logger.info("Restarting application process "+this);
+        getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
+            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory(optionalTimeout)+"; ./stop; ./start", "Shutting down "+this, Level.INFO);
+    }
+    
+    @Override
     public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         if (telnetPortToOSGiConsole == null) {

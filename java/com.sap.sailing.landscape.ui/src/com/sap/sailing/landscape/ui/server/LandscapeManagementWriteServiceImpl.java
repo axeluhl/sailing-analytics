@@ -695,14 +695,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(region, applicationReplicaSet);
-        final String effectiveReplicaReplicationBearerToken = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken :
-            getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
+        final String effectiveReplicaReplicationBearerToken = getLandscapeService().getEffectiveBearerToken(replicaReplicationBearerToken);
         final SailingAnalyticsProcess<String> additionalReplicaStarted = getLandscapeService()
                 .ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(replicaSet,
                         optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
         return additionalReplicaStarted != null;
     }
-    
+
     /**
      * Upgrades the {@code applicationReplicaSetToUpgrade} to the release specified or the latest master build if no
      * release is specified. See
