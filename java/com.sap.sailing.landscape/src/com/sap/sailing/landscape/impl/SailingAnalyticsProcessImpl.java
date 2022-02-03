@@ -174,7 +174,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     }
     
     @Override
-    public TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+    public TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws Exception {
         if (startTimePoint == null) {
             getStatus(optionalTimeout); // triggers updateStartTimePointFromStatus(status);
         }

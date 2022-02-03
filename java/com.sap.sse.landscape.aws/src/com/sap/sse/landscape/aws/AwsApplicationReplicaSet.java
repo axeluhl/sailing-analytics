@@ -112,4 +112,13 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return port;
     }
 
+    /**
+     * For all existing replicas, a {@code ./stop; ./start} sequence is executed which will in particular have the effect that
+     * all replicas will sync up to the current master and listen to replicated operations. This is useful, e.g., after telling
+     * all replicas to stop replicating because the master will temporarily become unavailable for a version upgrade or a
+     * scaling operation. After running {@code ./stop; ./start} on a replica, the method waits until that replica has become
+     * ready again before proceeding with the stop/start cycle for the next replica. This way, availability of a set of replicas
+     * is temporarily reduced by no more than one replica at a time.
+     */
+    void restartAllReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

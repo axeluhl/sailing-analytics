@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
@@ -112,6 +113,8 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      * @return the {@link Rule} that represents the default re-direct
      */
     Rule setDefaultRedirect(String hostname, String path, Optional<String> query);
+    
+    Rule getDefaultRedirectRule(String hostName, PlainRedirectDTO plainRedirectDTO);
 
     RuleCondition createHostHeaderRuleCondition(String hostname);
 }

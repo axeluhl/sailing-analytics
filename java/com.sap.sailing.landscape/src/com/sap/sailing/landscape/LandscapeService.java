@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
@@ -20,7 +21,9 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.security.SecurityService;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
@@ -143,18 +146,19 @@ public interface LandscapeService {
     /**
      * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName}
      * parameter. The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of
-     * available ports is identified and chosen automatically. The {@code replicaInstanceType} is used to configure the
-     * launch configuration used by the auto-scaling group which is also created so that when dedicated replicas need to
-     * be provided during auto-scaling, their instance type is known. The choice of {@code dynamicLoadBalancerMapping}
-     * must only be set if the host to deploy to lives in the default region; otherwise, the DNS wildcard record for the
-     * overall domain would be made point to a wrong region. If set to {@code false}, a DNS entry will be created that
-     * points to the load balancer used for the new replica set's routing rules.
+     * available ports is identified and chosen automatically. The target groups and load balancing set-up is created.
+     * The {@code replicaInstanceType} is used to configure the launch configuration used by the auto-scaling group
+     * which is also created so that when dedicated replicas need to be provided during auto-scaling, their instance
+     * type is known. The choice of {@code dynamicLoadBalancerMapping} must only be set if the host to deploy to lives
+     * in the default region; otherwise, the DNS wildcard record for the overall domain would be made point to a wrong
+     * region. If set to {@code false}, a DNS entry will be created that points to the load balancer used for the new
+     * replica set's routing rules.
      * <p>
      * 
      * @param optionalMinimumAutoScalingGroupSize
      *            defaults to 1; if 0, a replica process will be launched on an eligible shared instance in an
-     *            availability zone different from that of the instance hosting the master process. Otherwise,
-     *            at least one auto-scaling replica will ensure availability of the replica set.
+     *            availability zone different from that of the instance hosting the master process. Otherwise, at least
+     *            one auto-scaling replica will ensure availability of the replica set.
      */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> deployApplicationToExistingHost(String replicaSetName,
             SailingAnalyticsHost<String> hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
@@ -291,4 +295,55 @@ public interface LandscapeService {
     Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> updateImageForReplicaSets(AwsRegion region,
             Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets,
             Optional<AmazonMachineImage<String>> optionalAmi) throws InterruptedException, ExecutionException;
+
+    /**
+     * For an existing replica set with an {@link AwsApplicationReplicaSet#getAutoScalingGroup() auto-scaling group}
+     * ensures that the auto-scaling group has a minimum size of 1 and waits until an auto-scaling replica is available.
+     * Then, all replicas not managed by the auto-scaling group are stopped one by one.
+     * <p>
+     * 
+     * If the replica set does not have an auto-scaling group assigned, no action is taken.
+     * 
+     * @return the updated replica set
+     */
+    <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
+     MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useDedicatedAutoScalingReplicasInsteadOfShared(
+                    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+                    String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+                    throws Exception;
+
+    /**
+     * For an existing replica set ensures that there is a replica running and ready that is not an auto-scaling replica
+     * on a dedicated instance. If no such replica process is found, one is launched on a shared instance in an
+     * availability zone different from the one hosting the replica set's master instance. Once the non-auto-scaling
+     * replica is ready, the auto-scaling group's {@link AutoScalingGroup#minSize() minimum size} is reduced to 0 so
+     * that with no excess workload the auto-scaling group will terminate all auto-scaling group-managed instances.<p>
+     * 
+     * Should a new shared instance be required for a new replica, its instance type is obtained from the one hosting
+     * the replica set's master process, silently assuming that it may already be on a shared set-up.
+     */
+    <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>, MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>> AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Optional<InstanceType> optionalInstanceType) throws Exception;
+
+    /**
+     * If a non-{@code null}, non-{@link String#isEmpty() empty} bearer token is provided by the
+     * {@code optionalBearerTokenOnNull} parameter, it is returned unchanged; otherwise, the bearer token as obtained
+     * for the current session's principal is returned. See also {@link SecurityService#getOrCreateAccessToken(String)}.
+     */
+    String getEffectiveBearerToken(String replicaReplicationBearerToken);
+
+    <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
+    MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> moveMasterToOtherInstance(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            boolean useSharedInstance, Optional<InstanceType> optionalInstanceType,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String optionalMasterReplicationBearerTokenOrNull,
+            String optionalReplicaReplicationBearerTokenOrNull, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull) throws MalformedURLException, IOException, TimeoutException,
+            InterruptedException, ExecutionException, Exception;
 }

@@ -390,4 +390,14 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     public ResourceRecordSet getResourceRecordSet() throws InterruptedException, ExecutionException {
         return resourceRecordSet.get();
     }
+
+    @Override
+    public void restartAllReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        for (final ProcessT replica : getReplicas()) {
+            logger.info("Restarting replica "+replica+" in replica set "+getName());
+            replica.restart(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            logger.info("Wating until restarted replica "+replica+" in replica set "+getName()+" has become ready:");
+            replica.waitUntilReady(optionalTimeout);
+        }
+    }
 }

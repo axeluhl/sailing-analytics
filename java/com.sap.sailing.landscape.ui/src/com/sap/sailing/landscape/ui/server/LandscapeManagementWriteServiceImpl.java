@@ -269,7 +269,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     try {
                         return convertToSailingAnalyticsProcessDTO(r, optionalKeyName, privateKeyEncryptionPassphrase);
                     } catch (Exception e) {
-                        throw new RuntimeException();
+                        throw new RuntimeException(e);
                     }
                 }),
                 applicationServerReplicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
@@ -518,12 +518,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
      * 
      * The "internal" method exists in order to declare a few type parameters which wouldn't be possible on the GWT RPC
      * interface method as some of these types are not seen by clients.
-     * @param optionalMinimumAutoScalingGroupSizeOrNull TODO
-     * @param optionalMaximumAutoScalingGroupSizeOrNull TODO
-     * @param optionalInstanceType
-     *            if a new instance must be launched because no eligible one is found, this parameter can be used to
-     *            specify its instance type. It defaults to {@link InstanceType#I3_2_XLARGE} which is reasonably suited
-     *            for a multi-process set-up.
+     * @param optionalMinimumAutoScalingGroupSize
+     *            defaults to 1; if 0, a replica process will be launched on an eligible shared instance in an
+     *            availability zone different from that of the instance hosting the master process. Otherwise,
+     *            at least one auto-scaling replica will ensure availability of the replica set.
      * @param optionalPreferredInstanceToDeployTo
      *            If {@link Optional#isPresent() present}, specifies a preferred host for the answer given by
      *            {@link #getInstanceToDeployTo(AwsApplicationReplicaSet)}. However, if the instance turns out not to be
@@ -697,14 +695,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(region, applicationReplicaSet);
-        final String effectiveReplicaReplicationBearerToken = Util.hasLength(replicaReplicationBearerToken) ? replicaReplicationBearerToken :
-            getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
+        final String effectiveReplicaReplicationBearerToken = getLandscapeService().getEffectiveBearerToken(replicaReplicationBearerToken);
         final SailingAnalyticsProcess<String> additionalReplicaStarted = getLandscapeService()
                 .ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(replicaSet,
                         optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
         return additionalReplicaStarted != null;
     }
-    
+
     /**
      * Upgrades the {@code applicationReplicaSetToUpgrade} to the release specified or the latest master build if no
      * release is specified. See
@@ -766,5 +763,34 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             result.add(convertToSailingApplicationReplicaSetDTO(updatedReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
         }
         return result;
+    }
+    
+    @Override
+    public SailingApplicationReplicaSetDTO<String> useDedicatedAutoScalingReplicasInsteadOfShared(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion region = new AwsRegion(applicationReplicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = convertFromApplicationReplicaSetDTO(region, applicationReplicaSetDTO);
+        return convertToSailingApplicationReplicaSetDTO(
+                getLandscapeService().useDedicatedAutoScalingReplicasInsteadOfShared(replicaSet, optionalKeyName, privateKeyEncryptionPassphrase),
+                Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+    }
+    
+    @Override
+    public SailingApplicationReplicaSetDTO<String> useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            String optionalSharedReplicaInstanceType) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion region = new AwsRegion(applicationReplicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = convertFromApplicationReplicaSetDTO(region, applicationReplicaSetDTO);
+        return convertToSailingApplicationReplicaSetDTO(
+                getLandscapeService().useSingleSharedInsteadOfDedicatedAutoScalingReplica(replicaSet, optionalKeyName,
+                        privateKeyEncryptionPassphrase, replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull,
+                        optionalMemoryTotalSizeFactorOrNull,
+                        optionalSharedReplicaInstanceType==null?Optional.empty():Optional.of(InstanceType.valueOf(optionalSharedReplicaInstanceType))),
+                Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
     }
 }
