@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
@@ -121,7 +122,8 @@ public interface LandscapeService {
      *            fraction of the "physical" RAM (as seen by the operating system running on the instance) minus some
      *            space reserved for the operating system itself and for the Java VM. It can be thought of as an
      *            approximation for how many processes configured this way will fit into the instance's physical memory
-     *            without the need for massive swapping activity.
+     *            without the need for massive swapping activity. The parameter will be ignored for a new dedicated master
+     *            instance where we assume that almost all physical RAM shall be made available to the process.
      * @param minimumAutoScalingGroupSize
      *            if {@code 0}, a replica process will be started on a shared host that must run in an availability zone
      *            different from the one on which the master process runs. If no such shared host exists that is
@@ -167,7 +169,8 @@ public interface LandscapeService {
             String masterReplicationBearerToken, String replicaReplicationBearerToken,
             String optionalDomainName, Optional<Integer> optionalMinimumAutoScalingGroupSize, Optional<Integer> optionalMaximumAutoScalingGroupSize,
             Integer optionalMemoryInMegabytesOrNull,
-            Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalSharedInstanceTypeForNewReplicaHost, Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
+            Integer optionalMemoryTotalSizeFactorOrNull, Optional<InstanceType> optionalSharedInstanceTypeForNewReplicaHost,
+            Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
     
     /**
      * @return the UUID that can be used to track the master data import progress; see
@@ -245,7 +248,7 @@ public interface LandscapeService {
      * replica set name and the HTTP port must not be used by any other application already deployed on that host.
      */
     <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
-     MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
+     MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
     SailingAnalyticsProcess<String> deployReplicaToExistingHost(
                     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
                     SailingAnalyticsHost<String> hostToDeployTo, String optionalKeyName,
@@ -308,7 +311,7 @@ public interface LandscapeService {
      * @return the updated replica set
      */
     <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
-     MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
+    MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useDedicatedAutoScalingReplicasInsteadOfShared(
                     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
                     String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
@@ -324,7 +327,9 @@ public interface LandscapeService {
      * Should a new shared instance be required for a new replica, its instance type is obtained from the one hosting
      * the replica set's master process, silently assuming that it may already be on a shared set-up.
      */
-    <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>, MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>> AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+    <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
+    MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
+    AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> useSingleSharedInsteadOfDedicatedAutoScalingReplica(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
@@ -364,7 +369,7 @@ public interface LandscapeService {
      *            checking the AZ, and if not eligible the method behaves as if the instance had not been specified.
      */
     <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
-    MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
+    MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> moveMasterToOtherInstance(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             boolean useSharedInstance, Optional<InstanceType> optionalInstanceType,

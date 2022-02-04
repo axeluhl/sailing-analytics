@@ -94,6 +94,8 @@ public class MoveMasterProcessDialog extends DataEntryDialog<MoveMasterProcessDi
     
     private void updateInstanceTypeBasedOnSharedMasterInstanceBox() {
         instanceTypeLabel.setText(sharedMasterInstanceBox.getValue() ? stringMessages.sharedMasterInstanceType() : stringMessages.dedicatedInstanceType());
+        LandscapeDialogUtil.selectInstanceType(instanceTypeListBox,
+                sharedMasterInstanceBox.getValue() ? SharedLandscapeConstants.DEFAULT_SHARED_INSTANCE_TYPE_NAME : SharedLandscapeConstants.DEFAULT_DEDICATED_INSTANCE_TYPE_NAME);
         if (!memoryAsFactorToTotalMemoryAdjusted) {
             if (sharedMasterInstanceBox.getValue()) {
                 memoryTotalSizeFactorBox.setValue(SharedLandscapeConstants.DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY);
@@ -105,7 +107,7 @@ public class MoveMasterProcessDialog extends DataEntryDialog<MoveMasterProcessDi
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(12, 2);
+        final Grid result = new Grid(6, 2);
         int row=0;
         result.setWidget(row, 0, new Label(stringMessages.sharedMasterInstance()));
         result.setWidget(row++, 1, sharedMasterInstanceBox);

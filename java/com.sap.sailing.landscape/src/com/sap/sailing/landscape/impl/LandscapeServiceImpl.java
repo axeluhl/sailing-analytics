@@ -1151,6 +1151,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AppConfigBuilderT masterConfigurationBuilder = createMasterConfigurationBuilder(replicaSet.getName(),
                 optionalMasterReplicationBearerTokenOrNull, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
                 region, release);
+        masterConfigurationBuilder.setPort(replicaSet.getPort()); // master must run on same port as the rest of the replica set
         final SailingAnalyticsProcess<String> newMaster;
         final SailingAnalyticsHost<String> hostToDeployTo;
         if (useSharedInstance) {

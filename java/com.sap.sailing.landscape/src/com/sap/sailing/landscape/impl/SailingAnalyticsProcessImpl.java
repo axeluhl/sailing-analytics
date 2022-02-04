@@ -220,7 +220,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
                 .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)+"\"", "Removing server directory "+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT), Level.INFO);
             final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost().getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             if (Util.isEmpty(applicationProcesses)) {
-                logger.info("No more application processes running on "+this+"; terminating");
+                logger.info("No more application processes running on "+getHost()+"; terminating");
                 getHost().terminate();
             } else {
                 logger.info("There are other application processes deployed on " + getHost() + ": "
