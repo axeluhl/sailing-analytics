@@ -15,6 +15,7 @@ import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -336,6 +337,32 @@ public interface LandscapeService {
      */
     String getEffectiveBearerToken(String replicaReplicationBearerToken);
 
+    /**
+     * Moves a replica set's master process to another instance. For this, all {@link ApplicationReplicaSet#getReplicas() replicas}
+     * will stop replicating the current master and the current master is de-registered from the two target groups.
+     * Then, if necessary, a new (shared or dedicated) instance is launched if no existing eligible shared instance is found
+     * in case {@code useSharedInstance} is {@code true}. The new master process is deployed and launched on the instance
+     * and if ready will be registered with the two target groups again. Then, all replicas are re-started in place one
+     * after the other, always keeping the master and n-1 replicas available for reading if n was the original number of
+     * replicas in the set at the time the method was called.
+     * 
+     * @param useSharedInstance
+     *            if {@code true}, a shared instance that is eligible to host the {@code replicaSet}'s master is
+     *            determined (shared-instance replicas running in different AZ or auto-scaling replica exists), and if
+     *            not found, a new shared instance is launched using the {@code optionalInstanceType}, defaulting to
+     *            {@link SharedLandscapeConstants#DEFAULT_SHARED_INSTANCE_TYPE_NAME}. If {@code useSharedInstance} is
+     *            {@code false}, a new dedicated instance is launched, using {@code optionalInstanceType}, defaulting to
+     *            {@link SharedLandscapeConstants#DEFAULT_DEDICATED_INSTANCE_TYPE_NAME}.
+     * @param optionalInstanceType
+     *            used to control the type of instance to launch; depending on {@code useSharedInstance}, this may be
+     *            used to launch a dedicated or a shared instance. The default for the two cases are
+     *            {@link SharedLandscapeConstants#DEFAULT_DEDICATED_INSTANCE_TYPE_NAME} and
+     *            {@link SharedLandscapeConstants#DEFAULT_SHARED_INSTANCE_TYPE_NAME}, respectively.
+     * @param optionalPreferredInstanceToDeployTo
+     *            can be used if {@code useSharedInstance} is {@code true} to specify a preferred shared instance to
+     *            deploy the new master process to. The instance will be checked for eligibility first, including
+     *            checking the AZ, and if not eligible the method behaves as if the instance had not been specified.
+     */
     <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
     MultiServerDeployerBuilderT extends com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> moveMasterToOtherInstance(
