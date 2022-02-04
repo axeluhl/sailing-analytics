@@ -55,4 +55,7 @@ public interface IconResources extends ClientBundle {
 
     @Source("images/red_gears.png")
     ImageResource redGearsIcon();
+
+    @Source("images/move.png")
+    ImageResource moveIcon();
 }

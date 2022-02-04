@@ -239,4 +239,11 @@ public interface LandscapeManagementWriteServiceAsync {
             byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
             String optionalSharedReplicaInstanceType, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void moveMasterToOtherInstance(SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO,
+            boolean useSharedInstance, String optionalInstanceTypeOrNull, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String optionalMasterReplicationBearerTokenOrNull,
+            String optionalReplicaReplicationBearerTokenOrNull, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }

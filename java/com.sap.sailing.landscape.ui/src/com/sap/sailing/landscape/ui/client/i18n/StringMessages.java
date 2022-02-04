@@ -131,4 +131,6 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String problemSwitchingReplicaSetToAutoReplicasOnly(String replicaSetName, String message);
     String successfullySwitchedReplicaSetToAutoReplicasOnly(String replicaSetName);
     String switchToReplicaOnSharedInstance();
+    String moveMasterToOtherInstance();
+    String successfullyMovedMasterOfReplicaSet(String replicaSetName);
 }

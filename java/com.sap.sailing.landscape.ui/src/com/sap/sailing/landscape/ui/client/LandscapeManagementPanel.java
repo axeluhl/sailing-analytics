@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -35,6 +36,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
+import com.sap.sailing.landscape.ui.client.MoveMasterProcessDialog.MoveMasterToOtherInstanceInstructions;
+import com.sap.sailing.landscape.ui.client.SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions;
 import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
@@ -414,6 +417,10 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetToUpdateAutoScalingReplicaAmiFor),
                         machineImagesTable.getSelectionModel().getSelectedObject()));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_MOVE_MASTER_TO_OTHER_INSTANCE,
+                applicationReplicaSetToMoveMasterFor -> moveMasterToOtherInstance(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(),
+                        Collections.singleton(applicationReplicaSetToMoveMasterFor)));
         applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
         machineImagesTable.addColumn(object->object.getId(), stringMessages.id());
         machineImagesTable.addColumn(object->object.getRegionId(), stringMessages.region());
@@ -450,6 +457,87 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
 
+    private void moveMasterToOtherInstance(StringMessages stringMessages, String regionId, Set<SailingApplicationReplicaSetDTO<String>> replicaSetsForWhichToMoveMaster) {
+        new MoveMasterProcessDialog(landscapeManagementService, stringMessages, errorReporter,
+                new DialogCallback<MoveMasterToOtherInstanceInstructions>() {
+                    @Override
+                    public void ok(MoveMasterToOtherInstanceInstructions instructions) {
+                        final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator = replicaSetsForWhichToMoveMaster.iterator();
+                        if (replicaSetIterator.hasNext()) {
+                            applicationReplicaSetsBusy.setBusy(true);
+                            moveMasterToOtherInstance(instructions, replicaSetIterator, stringMessages);
+                        }
+                    }
+        
+                    private void moveMasterToOtherInstance(
+                            MoveMasterToOtherInstanceInstructions instructions,
+                            final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator, StringMessages stringMessages) {
+                        assert replicaSetIterator.hasNext();
+                        final SailingApplicationReplicaSetDTO<String> replicaSet = replicaSetIterator.next();
+                        landscapeManagementService.moveMasterToOtherInstance(replicaSet,
+                                instructions.isSharedMasterInstance(), instructions.getInstanceTypeOrNull(),
+                                sshKeyManagementPanel.getSelectedKeyPair() == null ? null : sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                instructions.getMasterReplicationBearerToken(), instructions.getReplicaReplicationBearerToken(),
+                                instructions.getOptionalMemoryInMegabytesOrNull(), instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                                new ApplicationReplicaSetActionChainingCallback<MoveMasterToOtherInstanceInstructions>(
+                                        replicaSetIterator, replicaSet, (i, sri)->moveMasterToOtherInstance(instructions, replicaSetIterator, stringMessages), instructions,
+                                        replicaSetName->stringMessages.successfullyMovedMasterOfReplicaSet(replicaSetName)));
+                    }
+
+                    @Override
+                    public void cancel() {}
+        }).show();
+    }
+
+    private static interface ApplicationReplicaSetChainingAction<INSTRUCTIONS> {
+        void run(INSTRUCTIONS instructions, Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator);
+    }
+    
+    private class ApplicationReplicaSetActionChainingCallback<INSTRUCTIONS> implements AsyncCallback<SailingApplicationReplicaSetDTO<String>> {
+        private final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator;
+        private final SailingApplicationReplicaSetDTO<String> replicaSet;
+        private final ApplicationReplicaSetChainingAction<INSTRUCTIONS> action;
+        private final INSTRUCTIONS instructions;
+        private final Function<String, String> successMessageSupplier;
+        
+        public ApplicationReplicaSetActionChainingCallback(
+                Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator,
+                SailingApplicationReplicaSetDTO<String> replicaSet,
+                ApplicationReplicaSetChainingAction<INSTRUCTIONS> action, INSTRUCTIONS instructions,
+                Function<String, String> successMessageSupplier) {
+            super();
+            this.replicaSetIterator = replicaSetIterator;
+            this.replicaSet = replicaSet;
+            this.action = action;
+            this.instructions = instructions;
+            this.successMessageSupplier = successMessageSupplier;
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+            errorReporter.reportError(caught.getMessage());
+            if (!replicaSetIterator.hasNext()) {
+                applicationReplicaSetsBusy.setBusy(false);
+            } else {
+                action.run(instructions, replicaSetIterator);
+            }
+        }
+
+        @Override
+        public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+            Notification.notify(successMessageSupplier.apply(replicaSet.getName()), NotificationType.SUCCESS);
+            if (result != null) {
+                applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(result);
+            }
+            if (!replicaSetIterator.hasNext()) {
+                applicationReplicaSetsBusy.setBusy(false);
+            } else {
+                action.run(instructions, replicaSetIterator);
+            }
+        }
+    }
+
     private void switchToReplicaOnSharedInstance(StringMessages stringMessages, String selectedObject, Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
         new SwitchToReplicaOnSharedInstanceDialog(stringMessages, errorReporter, landscapeManagementService,
                 new DialogCallback<SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions>() {
@@ -474,32 +562,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 instructions.getOptionalMemoryInMegabytesOrNull(),
                                 instructions.getOptionalMemoryTotalSizeFactorOrNull(),
                                 instructions.getOptionalSharedReplicaInstanceType(),
-                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        errorReporter.reportError(caught.getMessage());
-                                        if (!replicaSetIterator.hasNext()) {
-                                            applicationReplicaSetsBusy.setBusy(false);
-                                        } else {
-                                            useSingleSharedInsteadOfDedicatedAutoScalingReplica(instructions, replicaSetIterator, stringMessages);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
-                                        Notification.notify(
-                                                stringMessages.successfullyCreatedReplicaSet(replicaSet.getName()),
-                                                NotificationType.SUCCESS);
-                                        if (result != null) {
-                                            applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(result);
-                                        }
-                                        if (!replicaSetIterator.hasNext()) {
-                                            applicationReplicaSetsBusy.setBusy(false);
-                                        } else {
-                                            useSingleSharedInsteadOfDedicatedAutoScalingReplica(instructions, replicaSetIterator, stringMessages);
-                                        }
-                                    }
-                                });
+                                new ApplicationReplicaSetActionChainingCallback<SwitchToReplicaOnSharedInstanceDialogInstructions>(replicaSetIterator, replicaSet,
+                                        (i, rsi)->useSingleSharedInsteadOfDedicatedAutoScalingReplica(i, rsi, stringMessages), instructions,
+                                        replicaSetName->stringMessages.successfullyCreatedReplicaSet(replicaSetName)));
                     }
 
                     @Override

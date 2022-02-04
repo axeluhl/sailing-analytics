@@ -792,5 +792,23 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         optionalMemoryTotalSizeFactorOrNull,
                         optionalSharedReplicaInstanceType==null?Optional.empty():Optional.of(InstanceType.valueOf(optionalSharedReplicaInstanceType))),
                 Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+    }    
+    
+    @Override
+    public SailingApplicationReplicaSetDTO<String> moveMasterToOtherInstance(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, boolean useSharedInstance,
+            String optionalInstanceTypeOrNull,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String optionalMasterReplicationBearerTokenOrNull,
+            String optionalReplicaReplicationBearerTokenOrNull, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsRegion region = new AwsRegion(applicationReplicaSetDTO.getMaster().getHost().getRegion(), getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = convertFromApplicationReplicaSetDTO(region, applicationReplicaSetDTO);
+        return convertToSailingApplicationReplicaSetDTO(
+                getLandscapeService().moveMasterToOtherInstance(replicaSet, useSharedInstance,
+                        optionalInstanceTypeOrNull==null?Optional.empty():Optional.of(InstanceType.valueOf(optionalInstanceTypeOrNull)),
+                        /* optionalPreferredInstanceToDeployTo */ Optional.empty(), optionalKeyName,
+                        privateKeyEncryptionPassphrase, optionalMasterReplicationBearerTokenOrNull, optionalReplicaReplicationBearerTokenOrNull,
+                        optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
     }
 }
