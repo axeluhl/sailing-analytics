@@ -23,6 +23,21 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">February 2022</h2>
+          <ul class="bulletList">
+            <li>The policy for selecting replication instances can now be switched for running replica sets.
+                Users now have the possibility to switch from a replica running on a shared instance to
+                the use of dedicated replica instances, fully managed by the auto-scaling group. Conversely,
+                a replica set using only fully-managed dedicated replica instances can be switched (back)
+                to a more cost-efficient, yet still highly available replica running on a shared instance
+                if workload does not require additional replicas launched by the auto-scaling group.</li>
+            <li>A replica set's master process can now be moved to a different instance. Users can choose
+                between moving to a shared or a dedicated instance. With this, a replica set that started
+                out in an inexpensive shared set-up can me modified so that it uses a dedicated master instance.
+                Furthermore, with this a scale-up and scale-down for the instance hosting the master process
+                is now supported.</li>
+            <li>Added a Remove button for application replica sets that is mutli-selection aware.
+          </ul>
           <h2 class="articleSubheadline">January 2022</h2>
           <ul class="bulletList">
             <li>Landscape management now offers to upgrade auto-scaling groups after an AMI update.</li>
@@ -38,20 +53,6 @@
                 instances when starting. While auto-scaling replicas will still be launched into new
                 dedicated instances when the workload requires it, small-scale set-ups with low workloads
                 can now be mapped very cost-effectively.</li>
-          </ul>
-          <h2 class="articleSubheadline">January 2022</h2>
-          <ul class="bulletList">
-            <li>The policy for selecting replication instances can now be switched for running replica sets.
-                Users now have the possibility to switch from a replica running on a shared instance to
-                the use of dedicated replica instances, fully managed by the auto-scaling group. Conversely,
-                a replica set using only fully-managed dedicated replica instances can be switched (back)
-                to a more cost-efficient, yet still highly available replica running on a shared instance
-                if workload does not require additional replicas launched by the auto-scaling group.</li>
-            <li>A replica set's master process can now be moved to a different instance. Users can choose
-                between moving to a shared or a dedicated instance. With this, a replica set that started
-                out in an inexpensive shared set-up can me modified so that it uses a dedicated master instance.
-                Furthermore, with this a scale-up and scale-down for the instance hosting the master process
-                is now supported.</li>
           </ul>
           <h2 class="articleSubheadline">December 2021</h2>
           <ul class="bulletList">

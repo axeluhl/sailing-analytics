@@ -133,4 +133,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String switchToReplicaOnSharedInstance();
     String moveMasterToOtherInstance();
     String successfullyMovedMasterOfReplicaSet(String replicaSetName);
+    String successfullyRemovedApplicationReplicaSet(String replicaSetName);
 }

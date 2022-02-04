@@ -105,7 +105,7 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> callback);
+            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,

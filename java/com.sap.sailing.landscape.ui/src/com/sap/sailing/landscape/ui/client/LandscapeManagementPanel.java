@@ -369,6 +369,11 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Button addApplicationReplicaSetButton = new Button(stringMessages.add());
         applicationReplicaSetsButtonPanel.add(addApplicationReplicaSetButton);
         addApplicationReplicaSetButton.addClickHandler(e->createApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
+        final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> removeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
+                stringMessages.remove(), applicationReplicaSetsTable.getSelectionModel(), /* element name mapper */ rs -> rs.getName(),
+                StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
+                e -> removeApplicationReplicaSets(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        applicationReplicaSetsButtonPanel.add(removeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> upgradeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
                 stringMessages.upgrade(), applicationReplicaSetsTable.getSelectionModel(),
                 e->upgradeApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
@@ -529,6 +534,8 @@ public class LandscapeManagementPanel extends SimplePanel {
             Notification.notify(successMessageSupplier.apply(replicaSet.getName()), NotificationType.SUCCESS);
             if (result != null) {
                 applicationReplicaSetsTable.replaceBasedOnEntityIdentityComparator(result);
+            } else {
+                applicationReplicaSetsTable.remove(replicaSet);
             }
             if (!replicaSetIterator.hasNext()) {
                 applicationReplicaSetsBusy.setBusy(false);
@@ -871,24 +878,30 @@ public class LandscapeManagementPanel extends SimplePanel {
     private void removeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
         if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToRemove.getName()))) {
-            applicationReplicaSetsBusy.setBusy(true);
-            landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove,
-                    sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
-                            sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
-                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null, new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    applicationReplicaSetsBusy.setBusy(false);
-                    errorReporter.reportError(caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    applicationReplicaSetsBusy.setBusy(false);
-                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToRemove);
-                }
-            });
+            removeApplicationReplicaSets(stringMessages, regionId, Collections.singleton(applicationReplicaSetToRemove));
         }
+    }
+    
+    private void removeApplicationReplicaSets(StringMessages stringMessages, String regionId,
+        Iterable<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToRemove) {
+        applicationReplicaSetsBusy.setBusy(true);
+        final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator = applicationReplicaSetsToRemove.iterator();
+        if (replicaSetIterator.hasNext()) {
+            applicationReplicaSetsBusy.setBusy(true);
+            removeApplicationReplicaSet(regionId, replicaSetIterator, stringMessages);
+        }
+    }
+
+    private void removeApplicationReplicaSet(String regionId, final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator, StringMessages stringMessages) {
+        assert replicaSetIterator.hasNext();
+        final SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove = replicaSetIterator.next();
+        landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove,
+                sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                        sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                        ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                        new ApplicationReplicaSetActionChainingCallback<String>(replicaSetIterator, applicationReplicaSetToRemove,
+                                (rId, rsi)->removeApplicationReplicaSet(rId, rsi, stringMessages), regionId,
+                                replicaSetName->stringMessages.successfullyRemovedApplicationReplicaSet(replicaSetName)));
     }
     
     private static class ReplicaSetArchivingParameters {
@@ -1163,47 +1176,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                 }).show();
             }
         });
-        /*
-         * Distinguish the following cases:
-         *  1) with auto-scaling group: we assume two target groups exist; ensure a replica is running, launch one
-         *    if none is running currently by increasing the minimum number of replicas in the auto-scaling group
-         *    to "1" and wait for it to become healthy in the public target group. When at least one replica is
-         *    healthy, stop replication on all of them using /replication/replication?action=STOP_REPLICATING.
-         *    Then update master in place, issuing a "./refreshInstance.sh install-release {release}; ./stop; sleep 5; ./start"
-         *    sequence. Wait for the master to become healthy, then add to the master and public target group,
-         *    remove replicas from public target group, create a new launch configuration for the new release
-         *    and update the auto-scaling group with it; re-adjust the minimum number of instances to its old value,
-         *    then terminate all replicas running the old release.
-         *  2) without auto-scaling group and without replication, but distinct master/public target groups: ensure
-         *    that at least one healthy replica is registered in public target group; if not, spin one up and wait until
-         *    it's healthy. Then stop replication using the new replication API.
-         *    Then remove the master process from the master target group (making the replica set "read-only").
-         *    Upgrade master in place using refreshInstance.sh install-release {release}. After the new master has become
-         *    healthy, register it again with the
-         *    master and public target groups while de-registering all replicas from the public target group, then
-         *    stopping the old process and subsequently terminating its instance in case it was the last application
-         *    process on that host.
-         *  3) without auto-scaling group, without replication, and with only a single target group: the master couldn't
-         *    be left reachable as we would not be able to distinguish between "read" and "write" calls without
-         *    separate target groups and their routing rules. Therefore, this scenario should be reduced to scenario 2)
-         *    by first establishing two separate target groups (if naming conventions match, use the existing target
-         *    group as the public target group and only create the separate master target group) and making sure the
-         *    old master is registered with the (potentially new) public target group. Then proceed as in 2).
-         * 
-         * Both, for 2) and 3), we'll need a way to identify a host/instance that qualifies for hosting the new master.
-         * This brings us to the topic of allowing the user / landscape manager to provide data allowing us to choose
-         * an appropriate scaling for the new master (mostly CPU, RAM). This could similarly apply to 1) where we could
-         * also allow the user to select CPU/RAM for a new master and where we could make adjustments to the launch configuration
-         * that we're touching anyhow for the release update.
-         * 
-         * For implementation order, let's consider "bang for the buck": finally getting the "club server" upgrades done
-         * in a way that leaves them available at least read-only would help our general availability, especially where
-         * "club servers" provide content featured through the archive server(s), such as tractrac.sapsailing.com,
-         * lyc.sapsailing.com, and vsaw.sapsailing.com. Upgrading auto-scaling groups manually is tedious and would also
-         * benefit a lot from more automation.
-         */
-        
-        // TODO Implement LandscapeManagementPanel.upgradeApplicationReplicaSet(...)
     }
 
     private void refreshRegionsTable(UserService userService) {

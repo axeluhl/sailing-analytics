@@ -599,12 +599,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public void removeApplicationReplicaSet(String regionId,
+    public SailingApplicationReplicaSetDTO<String> removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
         checkLandscapeManageAwsPermission();
         getLandscapeService().removeApplicationReplicaSet(regionId, convertFromApplicationReplicaSetDTO(
                 new AwsRegion(regionId, getLandscape()), applicationReplicaSetToRemove), optionalKeyName, passphraseForPrivateKeyDecryption);
+        return null;
     }
 
     private AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> convertFromApplicationReplicaSetDTO(
