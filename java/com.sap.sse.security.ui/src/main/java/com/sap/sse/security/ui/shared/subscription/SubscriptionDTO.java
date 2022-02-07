@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.shared.subscription;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsSerializable {
 
@@ -128,7 +129,7 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
      * Check if {@link #nextBillingAt} and {@link #reoccuringPaymentValue} are available
      */
     public boolean isRenewing() {
-        return nextBillingAt != null && reoccuringPaymentValue != null;
+        return nextBillingAt != null && nextBillingAt != Subscription.emptyTime() && reoccuringPaymentValue != null;
     }
 
     /**
