@@ -50,9 +50,13 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     /**
      * Absolute path in the file system of the host on which this process is running and that represents
      * this process's working directory. This directory is expected to contain a file named {@link #ENV_SH}
-     * whose contents can be obtained using the {@link #getEnvSh(Optional, Optional, byte[])} method.
+     * whose contents can be obtained using the {@link #getEnvSh(Optional, Optional, byte[])} method.<p>
+     * 
+     * Under certain circumstances and for specific subclasses the value of this field may start out as {@code null}
+     * and may later be determined, e.g., by fetching the server's status document and extracting it from there,
+     * just like with the {@link #serverName} field.
      */
-    private final String serverDirectory;
+    protected String serverDirectory;
     
     protected String serverName;
     
@@ -100,7 +104,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
     private String getVersionTxt(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        return getFileContents(getServerDirectory(optionalTimeout)+"/"+VERSION_TXT, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
@@ -108,7 +112,15 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             throws IOException, InterruptedException, JSchException, Exception {
         logger.info("Stopping application process "+this);
         getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
-            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory()+"; ./stop", "Shutting down "+this, Level.INFO);
+            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory(optionalTimeout)+"; ./stop", "Shutting down "+this, Level.INFO);
+    }
+    
+    @Override
+    public void restart(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws IOException, InterruptedException, JSchException, Exception {
+        logger.info("Restarting application process "+this);
+        getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
+            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory(optionalTimeout)+"; ./stop; ./start", "Shutting down "+this, Level.INFO);
     }
     
     @Override
@@ -128,7 +140,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     @Override
     public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        return getEnvShValueFor(getHost(), getServerDirectory(optionalTimeout), variableName, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName,
@@ -150,7 +162,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getServerDirectory() {
+    public String getServerDirectory(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return serverDirectory;
     }
     
@@ -158,8 +170,8 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return serverDirectory+"/"+ENV_SH;
         
     }
-    private String getEnvShPath() {
-        return getEnvShPath(getServerDirectory());
+    private String getEnvShPath(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        return getEnvShPath(getServerDirectory(optionalTimeout));
     }
 
     @Override
@@ -172,7 +184,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public String getEnvSh(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getFileContents(getEnvShPath(), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        return getFileContents(getEnvShPath(optionalTimeout), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     protected String getFileContents(String path, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)

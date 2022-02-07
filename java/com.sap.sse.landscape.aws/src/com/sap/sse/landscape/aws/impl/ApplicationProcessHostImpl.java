@@ -43,11 +43,6 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public AwsLandscape<ShardingKey> getLandscape() {
-        return super.getLandscape();
-    }
-
-    @Override
     public ReverseProxy<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getReverseProxy() {
         return new ApacheReverseProxy<>(getLandscape(), this);
     }

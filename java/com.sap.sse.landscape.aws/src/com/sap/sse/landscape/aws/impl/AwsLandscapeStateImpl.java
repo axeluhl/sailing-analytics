@@ -85,8 +85,7 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     }
     
     @Override
-    public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
-        final String regionId = region.getId();
+    public void deleteKeyPair(String regionId, String keyName) {
         apply(s->s.internalDeleteKeyPair(regionId, keyName));
     }
 
@@ -111,8 +110,8 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     }
 
     @Override
-    public SSHKeyPair getSSHKeyPair(com.sap.sse.landscape.Region region, String keyName) {
-        return sshKeyPairs.get(new Pair<>(region.getId(), keyName));
+    public SSHKeyPair getSSHKeyPair(String regionId, String keyName) {
+        return sshKeyPairs.get(new Pair<>(regionId, keyName));
     }
     
     @Override

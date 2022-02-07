@@ -9,7 +9,7 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/createapplicationreplicaset</h2>
+<h2>URL: /sailinglandscape/api/landscape/createapplicationreplicaset</h2>
 
 <b>Description:</b>
  <p>Creates an application replica set with an auto-scaling group and corresponding launch configuration, load
@@ -32,7 +32,8 @@
             <div><tt>regionId</tt>, region where to set up the replica set, e.g., eu-west-1</div>
             <div><tt>replicaSetName</tt>, name of the replica set; used as the hostname to which the domain name is appended, as well as
                                  for the database and RabbitMQ exchange name</div>
-            <div><tt>masterInstanceType</tt>, instance type to use in the hyperscaler for master and replica nodes, e.g., C5_4_XLARGE;
+            <div><tt>dedicatedInstanceType</tt>, instance type to use in the hyperscaler for a dedicated non-shared master node and for the
+                                     auto-scaling replicas, e.g., C5_4_XLARGE;
                                      see <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/ec2/model/InstanceType.html">here</a></div>
             <div><tt>keyName</tt>, the name of the SSH key to use; must identify an existing SSH key by that name in the region specified
                           and will be used to log on to existing and new instances using a root ssh connection.</div>
@@ -42,6 +43,18 @@
     <tr>
         <td>Optional form parameters:</td>
         <td>
+            <div><tt>sharedMasterInstance</tt> defaults to <tt>false</tt>; if set to <tt>true</tt>, the instance launched for the master process
+                                     will be named "SL Multi-Server" and will be tagged with <tt>sailing-analytics-server:___multi___</tt> which
+                                     makes it eligible for automated deployment of other Sailing Analytics processes, such as unmanaged replicas.
+                                     Otherwise, the master instance will be named and tagged after the replica set's name.</div>
+            <div><tt>sharedInstanceType</tt>, instance type to use in the hyperscaler for a new shared master instance (if <tt>sharedMasterInstance</tt> was
+                                     set to <tt>true</tt>) as well as for a new instance that needs to be launched for a shared first replica
+                                     in case <tt>minimumAutoScalingGroupSize</tt> is set to 0; e.g., I3_2_XLARGE;
+                                     see <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/ec2/model/InstanceType.html">here</a>.
+                                     If you'd like to configure your master to run on an instance intended to be shared with other
+                                     replica sets you may want to size your shared instance type with much swap space (e.g., i3.2xlarge)
+                                     whereas your auto scaling group-managed replicas will not be shared and hence may get along with smaller
+                                     instance types.</div>.
             <div><tt>dynamicLoadBalancerMappingionId</tt>, boolean value (false or true; defaulting to false); if true, the rules will be entered
                                                   into the region's default dynamic load balancer without a specific DNS mapping. In this
                                                   case the domain must not be specified or must be "sapsailing.com", and the region must
@@ -64,6 +77,15 @@
                                         host; e.g., if 4 is specified, approximately 1/4 of the physical memory available (not considering swap space) is
                                         assigned as the process's heap space. If neither memoryInMegabytes nor memoryTotalSizeFactor are specified then
                                         the amount of memory is calculated automatically based on the amount of physical memory available on the host.</div>
+            <div><tt>minimumAutoScalingGroupSize</tt>, defines how many replicas the auto-scaling group shall minimally keep running, even if the auto-scaling
+                                        rules things that less may be enough. Defaults to 1. If 0, an "unmanaged" replica will be launched on a shared instance
+                                        for availability reasons. The shared instance is picked such that it has the HTTP port required for the new replica set
+                                        free and that it runs in an availability zone different from where the master process was just deployed. If required,
+                                        a new instance will be launched for this purpose. Other than for the auto-scaling group-managed replica instances
+                                        the instance for an unmanaged replica is assumed to be for sharing, and hence it's instance type is set to be the
+                                        same as for the instance hosting the master process. This way, if the master instance type is selected such that
+                                        it works well for being shared then so will the instance that needs to be launched for an unmanaged replica.</div>
+            <div><tt>maximumAutoScalingGroupSize</tt>, defines how many replicas the auto-scaling group shall create at most. Defaults to 30.</div>
         </td>
     </tr>
     <tr>

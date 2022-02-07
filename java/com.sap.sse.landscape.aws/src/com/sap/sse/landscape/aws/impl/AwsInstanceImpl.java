@@ -19,6 +19,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -58,13 +59,6 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     @Override
     public int hashCode() {
         return getInstance().hashCode();
-    }
-    
-    /**
-     * Obtains a fresh copy of the instance by looking it up in the {@link #getRegion() region} by its {@link #instanceId ID}.
-     */
-    private Instance getInstance() {
-        return landscape.getInstance(getInstanceId(), getRegion());
     }
     
     @Override
@@ -263,10 +257,23 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         landscape.terminate(this);
     }
     
-    protected AwsLandscape<ShardingKey> getLandscape() {
+    @Override
+    public AwsLandscape<ShardingKey> getLandscape() {
         return landscape;
     }
     
+    @Override
+    public boolean isManagedByAutoScalingGroup() {
+        return getInstance().tags().stream().filter(tag->tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG)).findAny().isPresent();
+    }
+
+    @Override
+    public boolean isManagedByAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup) {
+        return getInstance().tags().stream().filter(tag -> autoScalingGroup != null
+                && tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG) && tag.value().equals(autoScalingGroup.getName()))
+                .findAny().isPresent();
+    }
+
     @Override
     public String toString() {
         return getInstanceId();
