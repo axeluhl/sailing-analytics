@@ -246,4 +246,8 @@ public interface LandscapeManagementWriteServiceAsync {
             String optionalReplicaReplicationBearerTokenOrNull, Integer optionalMemoryInMegabytesOrNull,
             Integer optionalMemoryTotalSizeFactorOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void changeAutoScalingReplicasInstanceType(SailingApplicationReplicaSetDTO<String> replicaSet,
+            String instanceTypeName, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }

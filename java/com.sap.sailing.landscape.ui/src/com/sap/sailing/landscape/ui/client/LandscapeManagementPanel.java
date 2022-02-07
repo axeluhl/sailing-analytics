@@ -358,6 +358,9 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SWITCH_TO_AUTO_SCALING_REPLICAS_ONLY,
                 applicationReplicaSetToUpgrade -> switchToAutoScalingReplicasOnly(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SCALE_AUTO_SCALING_REPLICAS_UP_DOWN,
+                applicationReplicaSetToUpgrade -> scaleAutoScalingReplicasUpDown(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
         // see below for the finalization o the applicationRelicaSetsActionColumn; we need to have the machineImagesTable ready for the last action...
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -394,6 +397,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                 e->switchToReplicaOnSharedInstance(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
+        final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> scaleAutoScalingReplicasUpDown = new SelectedElementsCountingButton<>(
+                stringMessages.scaleAutoScalingReplicasUpOrDown(), applicationReplicaSetsTable.getSelectionModel(),
+                e->scaleAutoScalingReplicasUpDown(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
+                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        applicationReplicaSetsButtonPanel.add(scaleAutoScalingReplicasUpDown);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
@@ -553,11 +561,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                         final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator = selectedSet.iterator();
                         if (replicaSetIterator.hasNext()) {
                             applicationReplicaSetsBusy.setBusy(true);
-                            useSingleSharedInsteadOfDedicatedAutoScalingReplica(instructions, replicaSetIterator, stringMessages);
+                            scaleSingleAutoScalingReplicaSetUpDown(instructions, replicaSetIterator, stringMessages);
                         }
                     }
 
-                    private void useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+                    private void scaleSingleAutoScalingReplicaSetUpDown(
                             SwitchToReplicaOnSharedInstanceDialog.SwitchToReplicaOnSharedInstanceDialogInstructions instructions,
                             final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator, StringMessages stringMessages) {
                         assert replicaSetIterator.hasNext();
@@ -570,7 +578,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 instructions.getOptionalMemoryTotalSizeFactorOrNull(),
                                 instructions.getOptionalSharedReplicaInstanceType(),
                                 new ApplicationReplicaSetActionChainingCallback<SwitchToReplicaOnSharedInstanceDialogInstructions>(replicaSetIterator, replicaSet,
-                                        (i, rsi)->useSingleSharedInsteadOfDedicatedAutoScalingReplica(i, rsi, stringMessages), instructions,
+                                        (i, rsi)->scaleSingleAutoScalingReplicaSetUpDown(i, rsi, stringMessages), instructions,
                                         replicaSetName->stringMessages.successfullyCreatedReplicaSet(replicaSetName)));
                     }
 
@@ -614,6 +622,39 @@ public class LandscapeManagementPanel extends SimplePanel {
                 
             });
         }
+    }
+
+    private void scaleAutoScalingReplicasUpDown(StringMessages stringMessages, String selectedObject, Set<SailingApplicationReplicaSetDTO<String>> selectedSet) {
+        new ChangeAutoScalingReplicaInstanceTypeDialog(landscapeManagementService, stringMessages, errorReporter,
+                new DialogCallback<String>() {
+                    @Override
+                    public void ok(String instanceTypeName) {
+                        final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator = selectedSet.iterator();
+                        if (replicaSetIterator.hasNext()) {
+                            applicationReplicaSetsBusy.setBusy(true);
+                            scaleSingleAutoScalingReplicaSetUpDown(instanceTypeName, replicaSetIterator, stringMessages);
+                        }
+                    }
+
+                    private void scaleSingleAutoScalingReplicaSetUpDown(
+                            String instanceTypeName,
+                            final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator, StringMessages stringMessages) {
+                        assert replicaSetIterator.hasNext();
+                        final SailingApplicationReplicaSetDTO<String> replicaSet = replicaSetIterator.next();
+                        final String optionalKeyName = sshKeyManagementPanel.getSelectedKeyPair().getName();
+                        final byte[] privateKeyEncryptionPassphrase = sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                        ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null;
+                        landscapeManagementService.changeAutoScalingReplicasInstanceType(replicaSet,
+                                instanceTypeName, optionalKeyName, privateKeyEncryptionPassphrase,
+                                new ApplicationReplicaSetActionChainingCallback<String>(replicaSetIterator, replicaSet,
+                                        (itn, rsi)->scaleSingleAutoScalingReplicaSetUpDown(itn, rsi, stringMessages), instanceTypeName,
+                                        replicaSetName->stringMessages.successfullyScaledAutoScalingReplicasForReplicaSet(replicaSetName)));
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
     }
 
     private Iterable<SailingApplicationReplicaSetDTO<String>> getApplicationReplicaSetsToUpgradeAutoScalingReplicaAmisFor(AmazonMachineImageDTO amiBeingUpdated) {

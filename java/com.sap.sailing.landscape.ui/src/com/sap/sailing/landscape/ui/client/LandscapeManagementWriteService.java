@@ -132,4 +132,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
             String optionalInstanceTypeOrNull, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String optionalMasterReplicationBearerTokenOrNull, String optionalReplicaReplicationBearerTokenOrNull,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
+
+    SailingApplicationReplicaSetDTO<String> changeAutoScalingReplicasInstanceType(
+            SailingApplicationReplicaSetDTO<String> replicaSet, String instanceTypeName,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

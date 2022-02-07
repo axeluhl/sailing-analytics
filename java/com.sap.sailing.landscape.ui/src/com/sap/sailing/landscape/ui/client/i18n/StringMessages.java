@@ -134,4 +134,6 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String moveMasterToOtherInstance();
     String successfullyMovedMasterOfReplicaSet(String replicaSetName);
     String successfullyRemovedApplicationReplicaSet(String replicaSetName);
+    String scaleAutoScalingReplicasUpOrDown();
+    String successfullyScaledAutoScalingReplicasForReplicaSet(String replicaSetName);
 }
