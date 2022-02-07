@@ -42,9 +42,9 @@ public class ChargebeeApiSubscriptionData {
             invoiceId = invoice.id();
             invoiceStatus = stringToLowerCase(invoice.status().name());
         }
-        String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
+        final String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
                 invoiceStatus);
-        String planId = getPlanId(subscriptionPlanProvider);
+        final String planId = getPlanId(subscriptionPlanProvider);
         return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
                 getTime(subscription.trialStart()), getTime(subscription.trialEnd()), subscriptionStatus, paymentStatus,
                 transactionType, transactionStatus, invoiceId, invoiceStatus, subscription.mrr(),
@@ -55,20 +55,19 @@ public class ChargebeeApiSubscriptionData {
     }
     
     private String getPlanId(SubscriptionPlanProvider subscriptionPlanProvider) {
-        String planId = null;
         for(SubscriptionItem item : subscription.subscriptionItems()) {
             if(item.itemType().equals(ItemType.PLAN)) {
                 final String itemPriceId = item.itemPriceId();
                 for(SubscriptionPlan plan : subscriptionPlanProvider.getAllSubscriptionPlans().values()) {
                     for(SubscriptionPrice price : plan.getPrices()) {
-                        if(price.getPriceId().equals(itemPriceId));{
-                            planId = plan.getId();
+                        if(price.getPriceId().equals(itemPriceId)){
+                            return plan.getId();
                         }
                     }
                 }
             }
         }
-        return planId;
+        return null;
     }
     
     private TimePoint getTime(Timestamp millis) {
