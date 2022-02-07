@@ -70,6 +70,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, TrackedRaceChangedListener,
@@ -111,6 +112,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     private final Button reloadAllRaceLogs;
 
     protected UserService userService;
+    protected SubscriptionServiceFactory subscriptionServiceFactory;
     
     private final Displayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer = new Displayer<StrippedLeaderboardDTOWithSecurity>() {
         
@@ -186,6 +188,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         this.stringMessages = theStringConstants;
         this.sailingServiceWrite = presenter.getSailingService();
         this.userService = presenter.getUserService();
+        this.subscriptionServiceFactory = presenter.getSubscriptionServiceFactory();
         filteredLeaderboardList = new ListDataProvider<>();
         allRegattas = new ArrayList<RegattaDTO>();
         this.errorReporter = presenter.getErrorReporter();

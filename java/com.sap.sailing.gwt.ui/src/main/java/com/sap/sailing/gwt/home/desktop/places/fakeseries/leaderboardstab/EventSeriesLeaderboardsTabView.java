@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard.OldMultiLeaderboard;
@@ -33,6 +34,8 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -82,7 +85,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                             final boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                                     LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
                             final ComponentContext<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(
-                                    leaderboardName, currentPresenter.getUserService(), /* FIXME placeToken */ null, result);
+                                    leaderboardName, currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(), /* FIXME placeToken */ null, result);
                             componentContext.getInitialSettings(
                                     new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
                                         @Override
@@ -140,8 +143,9 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     }
 
     private ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
-            String placeToken, Iterable<DetailType> availableDetailTypes) {
-        final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(StringMessages.INSTANCE, availableDetailTypes);
+            SubscriptionServiceFactory subscriptionServiceFactory, String placeToken, Iterable<DetailType> availableDetailTypes) {
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, leaderboardName, SecuredDomainType.LEADERBOARD);
+        final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(StringMessages.INSTANCE, availableDetailTypes, paywallResolver);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesRegattaLeaderboards(leaderboardName);
 
         final ComponentContext<MultiRaceLeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(

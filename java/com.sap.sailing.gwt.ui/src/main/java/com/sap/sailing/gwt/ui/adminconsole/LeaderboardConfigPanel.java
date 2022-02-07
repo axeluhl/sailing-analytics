@@ -108,6 +108,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>,
@@ -609,10 +610,11 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard,
             Iterable<DetailType> availableDetailType) {
         final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, leaderboard.getName(), SecuredDomainType.LEADERBOARD);
         if (leaderboard.type.isMetaLeaderboard()) {
-            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
+            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType, paywallResolver);
         } else {
-            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType);
+            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType, paywallResolver);
         }
         final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(
                 leaderboard.getName(), leaderboard.getDisplayName());

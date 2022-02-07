@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -15,6 +16,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> {
@@ -31,14 +33,15 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService,
-            Iterable<DetailType> availableDetailTypes, final RaceWithCompetitorsAndBoatsDTO raceDTO, PaywallResolver paywallResolver) {
+            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory,
+            Iterable<DetailType> availableDetailTypes, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         this.stringMessages = stringMessages;
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, leaderboard.getName(), SecuredDomainType.LEADERBOARD);
         raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolver);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         maneuverTableLifecycle = new ManeuverTableLifecycle(stringMessages);
         leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages, availableDetailTypes,
-                leaderboard.canBoatsOfCompetitorsChangePerRace);
+                leaderboard.canBoatsOfCompetitorsChangePerRace, paywallResolver);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, competitorChartAllowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages, userService, raceDTO);

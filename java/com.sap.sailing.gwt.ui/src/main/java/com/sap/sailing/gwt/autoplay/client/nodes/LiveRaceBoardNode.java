@@ -29,8 +29,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoProviderListener {
     private static final long RACETIME_UPDATE_INTERVAL = 3000l;
@@ -59,11 +57,9 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
         raceTimesInfoProvider.addRaceIdentifier(cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace(), true);
         final PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtxSignalError().getAutoplaySettings();
         final AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getAutoPlayCtxSignalError().getAutoplayLifecycle();
-        final UserService userService = cf.getUserService();
         final SailingServiceAsync sailingService = cf.getSailingService();
         final MediaServiceAsync mediaService = cf.getMediaService();
         final MediaServiceWriteAsync mediaServiceWrite = cf.getMediaServiceWrite();
-        final SubscriptionServiceFactory subscriptionServiceFactory = cf.getSubscriptionServiceFactory();
         final AsyncCallback<RaceboardDataDTO> raceBoardDataCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO result) {
@@ -71,7 +67,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         .findSettingsByComponentId(autoplayLifecycle.getRaceboardLifecycle().getComponentId());
                 RaceBoardPanel raceboardPerspective = new RaceBoardPanel(null, null,
                         autoplayLifecycle.getRaceboardLifecycle(), raceboardSettings, sailingService, mediaService, mediaServiceWrite,
-                        userService, AutoplayHelper.asyncActionsExecutor, result.getCompetitorAndTheirBoats(),
+                        AutoplayHelper.asyncActionsExecutor, result.getCompetitorAndTheirBoats(),
                         raceboardTimer,
                         cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace(), cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(),
                         /** leaderboardGroupName */
@@ -80,7 +76,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false,
                         Arrays.asList(DetailType.values()), result.getLeaderboard(), result.getRace(),
                         result.getTrackingConnectorInfo(), cf.getSailingServiceWrite(),
-                        /* raceboardContextDefinition */ null, subscriptionServiceFactory);
+                        /* raceboardContextDefinition */ null, cf);
                 setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
                 firePlaceChangeAndStartTimer();
                 getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace().getRegattaName(),

@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
@@ -41,6 +42,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -142,9 +144,10 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                     }
                                 });
                         if (leaderboardDTO.type.isMetaLeaderboard()) {
+                            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), leaderboardName, SecuredDomainType.LEADERBOARD);
                             // overall
                             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
-                                    stringmessages, leaderboardDTO, result);
+                                    stringmessages, leaderboardDTO, result, paywallResolver);
                             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
                                     rootComponentLifeCycle, getUserService(), storageDefinition);
                             context.getInitialSettings(
@@ -158,7 +161,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                                     sailingServiceFactory, new AsyncActionsExecutor(), timer, null,
                                                     leaderboardName, LeaderboardEntryPoint.this,
                                                     getStringMessages(), getActualChartDetailType(defaultSettings),
-                                                    result);
+                                                    result, LeaderboardEntryPoint.this);
                                             createUi(leaderboardViewer, defaultSettings, timer,
                                                     leaderboardContextDefinition);
                                         }
@@ -173,8 +176,9 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                         }
                                     });
                         } else {
+                            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), leaderboardName, SecuredDomainType.LEADERBOARD);
                             LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
-                                    StringMessages.INSTANCE, leaderboardDTO, result);
+                                    StringMessages.INSTANCE, leaderboardDTO, result, paywallResolver);
                             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
                                     rootComponentLifeCycle, getUserService(), storageDefinition);
                             context.getInitialSettings(
@@ -200,7 +204,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                                                     defaultSettings, sailingServiceFactory,
                                                                     new AsyncActionsExecutor(), timer, leaderboardName,
                                                                     LeaderboardEntryPoint.this, getStringMessages(),
-                                                                    getActualChartDetailType(defaultSettings), result);
+                                                                    getActualChartDetailType(defaultSettings), result, LeaderboardEntryPoint.this);
                                                             createUi(leaderboardViewer, defaultSettings, timer,
                                                                     leaderboardContextDefinition);
                                                         }

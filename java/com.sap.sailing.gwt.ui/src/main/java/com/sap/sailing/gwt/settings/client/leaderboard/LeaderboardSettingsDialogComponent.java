@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -24,6 +25,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSettings> implements SettingsDialogComponent<T> {
     public static final String CHECK_BOX_DEBUGID_CONSTANT = "CheckBox";
@@ -45,9 +47,11 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected CheckBox isCompetitorNationalityColumnVisible;
     protected T initialSettings;
     protected Iterable<DetailType> availableDetailTypes;
+    
+    protected final PaywallResolver paywallResolver;
 
     protected LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail) {
+            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail, PaywallResolver paywallResolver) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.canBoatInfoBeShownAsOverallDetail = canBoatInfoBeShownAsOverallDetail;
@@ -56,6 +60,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         this.availableDetailTypes = availableDetailTypes;
+        this.paywallResolver = paywallResolver;
     }
 
     protected FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
@@ -216,6 +221,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     private CheckBox createAndRegisterCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected,
             Map<DetailType, CheckBox> registry) {
         CheckBox checkbox = createCheckbox(dialog, detailType, selected);
+        GWT.log("++++ juhuu, got it: " + paywallResolver);
+        
         registry.put(detailType, checkbox);
         return checkbox;
     }

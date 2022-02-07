@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class EditableLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<EditableLeaderboardSettings> {
@@ -31,8 +32,8 @@ public class EditableLeaderboardSettingsDialogComponent
 
     public EditableLeaderboardSettingsDialogComponent(EditableLeaderboardSettings initialSettings,
             List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, 
-            boolean canBoatInfoBeShown) {
-        super(initialSettings, stringMessages, availableDetailTypes, canBoatInfoBeShown);
+            boolean canBoatInfoBeShown, PaywallResolver paywallResolver) {
+        super(initialSettings, stringMessages, availableDetailTypes, canBoatInfoBeShown, paywallResolver);
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         this.raceAllRaceColumnNames = allRaceColumnNames;
         raceColumnCheckboxes = new LinkedHashMap<>();

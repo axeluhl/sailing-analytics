@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * This is a special lifecycle that uses a different ID, which is required to allow a MultiLeaderboard and a normal
@@ -12,8 +13,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class MultipleMultiLeaderboardPanelLifecycle extends MultiRaceLeaderboardPanelLifecycle {
     public static final String MID = "mlb";
 
-    public MultipleMultiLeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
-        super(Collections.emptyList(), false, stringMessages, availableDetailTypes);
+    public MultipleMultiLeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, 
+            PaywallResolver paywallResolver) {
+        super(Collections.emptyList(), false, stringMessages, availableDetailTypes, paywallResolver);
     }
 
     @Override

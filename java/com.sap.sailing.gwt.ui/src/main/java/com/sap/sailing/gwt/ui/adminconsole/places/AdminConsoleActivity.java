@@ -32,6 +32,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AdminConsoleActivity extends AbstractActivity implements AdminConsoleView.Presenter {
     private Logger logger = Logger.getLogger(getClass().getName());
@@ -257,6 +258,11 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     @Override
     public UserService getUserService() {
         return clientFactory.getUserService();
+    }
+    
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return clientFactory.getSubscriptionServiceFactory();
     }
     
     @Override

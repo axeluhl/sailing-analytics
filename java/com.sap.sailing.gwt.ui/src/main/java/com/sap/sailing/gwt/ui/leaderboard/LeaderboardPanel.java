@@ -74,6 +74,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
@@ -127,6 +128,8 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -334,6 +337,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private HandlerRegistration leaderboardAsTableSelectionModelRegistration;
 
     private final FlowPanel contentPanel = new FlowPanel();
+    protected final PaywallResolver leaderboardPaywallResolver;
 
     private HorizontalPanel refreshAndSettingsPanel;
     private Label scoreCorrectionLastUpdateTimeLabel;
@@ -411,16 +415,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             AsyncActionsExecutor asyncActionsExecutor, LS settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,
-            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, false, competitorSelectionProvider,
-                leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes);
+                leaderboardName, errorReporter, stringMessages, showRaceDetails, style, flagImageResolver, availableDetailTypes, sailingCF);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 new Timer(
                         // perform the first request as "live" but don't by default auto-play
@@ -430,7 +434,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false, style, flagImageResolver, availableDetailTypes);
+                /* enableSyncScroller */ false, style, flagImageResolver, availableDetailTypes, sailingCF);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
@@ -440,7 +444,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, 
+            Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         super(parent, context);
         this.style = style;
         this.showSelectionCheckbox = showSelectionCheckbox;
@@ -565,6 +570,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
         this.availableDetailTypes = availableDetailTypes;
+        this.leaderboardPaywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory(), leaderboardName, SecuredDomainType.LEADERBOARD);
     }
 
     protected abstract void openSettingsDialog();

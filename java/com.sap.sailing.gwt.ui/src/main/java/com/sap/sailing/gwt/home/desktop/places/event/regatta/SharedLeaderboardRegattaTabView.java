@@ -4,6 +4,7 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
@@ -18,6 +19,8 @@ import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -32,7 +35,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     }
 
     public void createSharedLeaderboardPanel(String leaderboardName,
-            RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService, String placeToken,
+            RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory, String placeToken,
             final Consumer<MultiRaceLeaderboardPanel> consumer, Iterable<DetailType> availableDetailTypes) {
 
         // FIXME remove
@@ -40,7 +43,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                 .getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
 
         final PlaceBasedComponentContextWithSettingsStorage<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(
-                leaderboardName, userService, placeToken, availableDetailTypes);
+                leaderboardName, userService, subscriptionServiceFactory, placeToken, availableDetailTypes);
         componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
             @Override
             public void onSuccess(MultiRaceLeaderboardSettings leaderboardSettings) {
@@ -86,9 +89,10 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     }
     
     protected PlaceBasedComponentContextWithSettingsStorage<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(
-            String leaderboardName, UserService userService, String placeToken,
+            String leaderboardName, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory, String placeToken,
             Iterable<DetailType> availableDetailTypes) {
-        final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes);
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, leaderboardName, SecuredDomainType.LEADERBOARD);
+        final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes, paywallResolver);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForEventRegattaLeaderboard(leaderboardName);
 
         final PlaceBasedComponentContextWithSettingsStorage<MultiRaceLeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(

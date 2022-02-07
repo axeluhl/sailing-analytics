@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class SingleRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<SingleRaceLeaderboardSettings> {
@@ -16,8 +17,8 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     private CheckBox showRaceRankColumn;
     
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
-            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
-        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true);
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true, paywallResolver);
     }
 
     @Override

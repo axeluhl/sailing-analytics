@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithZoomingPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
@@ -22,14 +23,14 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
 
     public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService,
             SubscriptionServiceFactory subscriptionServiceFactory, Iterable<DetailType> availableDetailTypes) {
+
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, leaderboard.getName(), SecuredDomainType.LEADERBOARD);
         leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
-                availableDetailTypes);
+                availableDetailTypes, paywallResolver);
         // As we cannot know, if Bravo data is available later on, we will offer DetailTypes, that might be relevant
         // despite not having data for them yet
-        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
-                /* TODO: raceDTO is needed for permission check */null);
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
-                DetailType.getAutoplayDetailTypesForChart(), userService, availableDetailTypes, null, paywallResolver);
+                DetailType.getAutoplayDetailTypesForChart(), userService, subscriptionServiceFactory, availableDetailTypes, null);
         addLifeCycle(leaderboardLifecycle);
         addLifeCycle(raceboardLifecycle);
     }

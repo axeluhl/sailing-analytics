@@ -34,6 +34,7 @@ import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -117,9 +118,10 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
                 StrippedLeaderboardDTOWithSecurity leaderboardWithSecurity) {
             final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                     .createStoredSettingsLocatorForEditableLeaderboard(editableLeaderboardContextDefinition);
+            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), leaderboardWithSecurity);
             EditableLeaderboardLifecycle rootComponentLifeCycle = 
                     new EditableLeaderboardLifecycle(StringMessages.INSTANCE, leaderboardWithSecurity, 
-                            getAvailableDetailTypesForLeaderboardResult);
+                            getAvailableDetailTypesForLeaderboardResult, paywallResolver);
             ComponentContext<EditableLeaderboardSettings> context = 
                     new ComponentContextWithSettingsStorage<>(
                     rootComponentLifeCycle, getUserService(), storageDefinition);
@@ -137,7 +139,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
                             EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(
                                     context, getSailingService(), new AsyncActionsExecutor(), leaderboardName, 
                                     /* leaderboardGroupName */ null, LeaderboardEditPage.this, getStringMessages(), 
-                                    userAgent, getAvailableDetailTypesForLeaderboardResult, settings);
+                                    userAgent, getAvailableDetailTypesForLeaderboardResult, settings, LeaderboardEditPage.this);
                             leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
                             return leaderboardPanel;
                         }
