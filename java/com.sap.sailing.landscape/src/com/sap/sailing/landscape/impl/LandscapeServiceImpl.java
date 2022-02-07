@@ -1197,4 +1197,71 @@ public class LandscapeServiceImpl implements LandscapeService {
             getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
     }
     
+    @Override
+    public AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> changeAutoScalingReplicasInstanceType(
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            InstanceType instanceType) throws Exception {
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result;
+        final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
+        if (autoScalingGroup != null) {
+            getLandscape().updateInstanceTypeInAutoScalingGroup(replicaSet.getMaster().getHost().getRegion(), autoScalingGroup, replicaSet.getName(), instanceType);
+            final int oldMinSize = autoScalingGroup.getAutoScalingGroup().minSize();
+            final int newMinSize = autoScalingGroup.getAutoScalingGroup().instances().size() + 1;
+            getLandscape().updateAutoScalingGroupMinSize(autoScalingGroup, newMinSize);
+            Iterable<SailingAnalyticsProcess<String>> newSetOfAllReplicas = replicaSet.getReplicas();
+            for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
+                final SailingAnalyticsHost<String> replicaHost = replica.getHost();
+                if (replicaHost.isManagedByAutoScalingGroup(autoScalingGroup)) {
+                    logger.info("Replica "+replica+" is managed by auto-scaling group "+
+                            autoScalingGroup.getName()+" ");
+                    newSetOfAllReplicas = waitUntilAtLeastSoManyAutoScalingReplicasAreReady(replicaSet, newMinSize);
+                    getLandscape().terminate(replicaHost);
+                }
+            }
+            getLandscape().updateAutoScalingGroupMinSize(autoScalingGroup, oldMinSize);
+            result = getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(),
+                    replicaSet.getServerName(), replicaSet.getMaster(), newSetOfAllReplicas);
+        } else {
+            logger.info("Replica set "+replicaSet.getName()+
+                    " does not have an auto-scaling group configured, so no changes can be made to its launch configuration.");
+            result = replicaSet;
+        }
+        return result;
+    }
+
+    private Iterable<SailingAnalyticsProcess<String>> waitUntilAtLeastSoManyAutoScalingReplicasAreReady(
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            final int newMinSize) throws Exception {
+        final SailingAnalyticsProcess<String> master = replicaSet.getMaster();
+        final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
+        assert autoScalingGroup != null;
+        final Set<SailingAnalyticsProcess<String>> replicas = new HashSet<>(); 
+        if (Wait.wait(()->{
+                replicas.clear();
+                Util.addAll(master.getReplicas(
+                        LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, new SailingAnalyticsHostSupplier<String>(),
+                        processFactoryFromHostAndServerDirectory), replicas);
+                int readyAutoScalingReplicas = 0;
+                for (final SailingAnalyticsProcess<String> replica : replicas) {
+                    if (replica.getHost().isManagedByAutoScalingGroup(autoScalingGroup)) {
+                        if (replica.waitUntilReady(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT)) {
+                            readyAutoScalingReplicas++;
+                            logger.info("Replica "+replica+" is ready; found "+readyAutoScalingReplicas+"/"+newMinSize+" so far");
+                            if (readyAutoScalingReplicas >= newMinSize) {
+                                break;
+                            }
+                        } else {
+                            logger.info("Replica "+replica+" NOT ready; still found only "+readyAutoScalingReplicas+"/"+newMinSize+" so far");
+                        }
+                    }
+                }
+                return readyAutoScalingReplicas >= newMinSize;
+            }, LandscapeService.WAIT_FOR_HOST_TIMEOUT, /* duration between attempts */ Duration.ONE_SECOND.times(30),
+                    Level.INFO, "Waiting until at least "+newMinSize+" auto-scaling replicas for replica set "+replicaSet.getName()+" are ready")) {
+            return replicas;
+        } else {
+            throw new TimeoutException("Could determine set of ready auto-scaling replicas of replica set "+
+                    replicaSet.getName()+" within timeout period "+LandscapeService.WAIT_FOR_HOST_TIMEOUT);
+        }
+    }
 }

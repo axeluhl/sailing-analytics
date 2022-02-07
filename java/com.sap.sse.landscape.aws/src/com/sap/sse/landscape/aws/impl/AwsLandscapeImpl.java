@@ -93,6 +93,7 @@ import software.amazon.awssdk.services.acm.model.CertificateStatus;
 import software.amazon.awssdk.services.autoscaling.AutoScalingAsyncClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -1666,58 +1667,49 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public void updateReleaseInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release) {
         logger.info("Adjusting release for auto-scaling group "+autoScalingGroup.getName()+" to "+release);
-        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
         final String releaseName = release.getName();
+        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
         final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
         final String oldUserData = new String(Base64.getDecoder().decode(oldLaunchConfiguration.userData().getBytes()));
         final String newUserData = oldUserData.replaceFirst(
                 "(?m)^"+DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=(.*)$",
                 DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=\""+release.getName()+"\"");
-        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
-        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
-        autoScalingClient.createLaunchConfiguration(b->b
-                .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())
-                .blockDeviceMappings(oldLaunchConfiguration.blockDeviceMappings())
-                .classicLinkVPCId(oldLaunchConfiguration.classicLinkVPCId())
-                .classicLinkVPCSecurityGroups(oldLaunchConfiguration.classicLinkVPCSecurityGroups())
-                .ebsOptimized(oldLaunchConfiguration.ebsOptimized())
-                .iamInstanceProfile(oldLaunchConfiguration.iamInstanceProfile())
-                .imageId(oldLaunchConfiguration.imageId())
-                .instanceMonitoring(oldLaunchConfiguration.instanceMonitoring())
-                .instanceType(oldLaunchConfiguration.instanceType())
-                .keyName(oldLaunchConfiguration.keyName())
-                .launchConfigurationName(newLaunchConfigurationName)
-                .placementTenancy(oldLaunchConfiguration.placementTenancy())
-                .securityGroups(oldLaunchConfiguration.securityGroups())
-                .spotPrice(oldLaunchConfiguration.spotPrice())
-                .userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
-        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+        updateLaunchConfiguration(region, autoScalingGroup, newLaunchConfigurationName,
+                b->b.userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
+    }
+    
+    private CreateLaunchConfigurationRequest.Builder copyLaunchConfigurationToCreateRequestBuilder(LaunchConfiguration launchConfigurationToCopy) {
+        return CreateLaunchConfigurationRequest.builder()
+            .associatePublicIpAddress(launchConfigurationToCopy.associatePublicIpAddress())
+            .blockDeviceMappings(launchConfigurationToCopy.blockDeviceMappings())
+            .classicLinkVPCId(launchConfigurationToCopy.classicLinkVPCId())
+            .classicLinkVPCSecurityGroups(launchConfigurationToCopy.classicLinkVPCSecurityGroups())
+            .ebsOptimized(launchConfigurationToCopy.ebsOptimized())
+            .iamInstanceProfile(launchConfigurationToCopy.iamInstanceProfile())
+            .imageId(launchConfigurationToCopy.imageId())
+            .instanceMonitoring(launchConfigurationToCopy.instanceMonitoring())
+            .instanceType(launchConfigurationToCopy.instanceType())
+            .keyName(launchConfigurationToCopy.keyName())
+            .launchConfigurationName(launchConfigurationToCopy.launchConfigurationName())
+            .placementTenancy(launchConfigurationToCopy.placementTenancy())
+            .securityGroups(launchConfigurationToCopy.securityGroups())
+            .spotPrice(launchConfigurationToCopy.spotPrice())
+            .userData(launchConfigurationToCopy.userData());
     }
 
     @Override
     public void updateImageInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami) {
         logger.info("Adjusting AMI for auto-scaling group "+autoScalingGroup.getName()+" to "+ami);
-        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
-        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
         final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, ami.getId());
-        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
-        autoScalingClient.createLaunchConfiguration(b->b
-                .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())
-                .blockDeviceMappings(oldLaunchConfiguration.blockDeviceMappings())
-                .classicLinkVPCId(oldLaunchConfiguration.classicLinkVPCId())
-                .classicLinkVPCSecurityGroups(oldLaunchConfiguration.classicLinkVPCSecurityGroups())
-                .ebsOptimized(oldLaunchConfiguration.ebsOptimized())
-                .iamInstanceProfile(oldLaunchConfiguration.iamInstanceProfile())
-                .imageId(ami.getId())
-                .instanceMonitoring(oldLaunchConfiguration.instanceMonitoring())
-                .instanceType(oldLaunchConfiguration.instanceType())
-                .keyName(oldLaunchConfiguration.keyName())
-                .launchConfigurationName(newLaunchConfigurationName)
-                .placementTenancy(oldLaunchConfiguration.placementTenancy())
-                .securityGroups(oldLaunchConfiguration.securityGroups())
-                .spotPrice(oldLaunchConfiguration.spotPrice())
-                .userData(oldLaunchConfiguration.userData()));
-        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+        updateLaunchConfiguration(region, autoScalingGroup, newLaunchConfigurationName, b->b.imageId(ami.getId()));
+    }
+
+    @Override
+    public void updateInstanceTypeInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, InstanceType instanceType) {
+        logger.info("Adjusting instance type for auto-scaling group "+autoScalingGroup.getName()+" to "+instanceType);
+        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        final String newLaunchConfigurationName = oldLaunchConfiguration.launchConfigurationName()+"-"+instanceType.name();
+        updateLaunchConfiguration(region, autoScalingGroup, newLaunchConfigurationName, b->b.instanceType(instanceType.toString()));
     }
 
     private void updateLaunchConfigurationForAutoScalingGroup(final AutoScalingClient autoScalingClient,
@@ -1729,6 +1721,42 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .launchConfigurationName(newLaunchConfigurationName));
         logger.info("Removing old launch configuration "+oldLaunchConfiguration.launchConfigurationName());
         autoScalingClient.deleteLaunchConfiguration(b->b.launchConfigurationName(oldLaunchConfiguration.launchConfigurationName()));
+    }
+    
+    /**
+     * Creates a copy of the {@code autoScalingGroup}'s launch configuration (see also
+     * {@link #copyLaunchConfigurationToCreateRequestBuilder(LaunchConfiguration)}) and adjusts it by letting the
+     * {@code builderConsumer} apply changes to the copy builder. The new launch configuration is created and set as the
+     * {@code autoScalingGroup}'s new launch configuration. Its previous launch configuration is removed in the process.
+     * 
+     * @param newLaunchConfigurationName
+     *            must not be {@code null} and must not equal the current name of the auto-scaling group's launch
+     *            configuration; will be used to set the new launch configuration's name by calling
+     *            {@link CreateLaunchConfigurationRequest.Builder#launchConfigurationName(String)}. By making this a
+     *            mandatory parameter, callers cannot forget specifying a new name.
+     * 
+     * @see #updateLaunchConfigurationForAutoScalingGroup(AutoScalingClient, AwsAutoScalingGroup, LaunchConfiguration,
+     *      String)
+     */
+    private void updateLaunchConfiguration(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, 
+            String newLaunchConfigurationName, Consumer<CreateLaunchConfigurationRequest.Builder> builderConsumer) {
+        if (newLaunchConfigurationName == null) {
+            throw new NullPointerException("New launch configuration name for auto-scaling group "+autoScalingGroup.getName()+" must not be null");
+        }
+        logger.info("Adjusting launch configuration for auto-scaling group "+autoScalingGroup.getName());
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        if (newLaunchConfigurationName.equals(oldLaunchConfiguration.launchConfigurationName())) {
+            throw new IllegalArgumentException("New launch configuration name "+newLaunchConfigurationName+" for auto-scaling group "+
+                    autoScalingGroup.getName()+" equals the old one");
+        }
+        final CreateLaunchConfigurationRequest.Builder createLaunchConfigurationRequestBuilder = copyLaunchConfigurationToCreateRequestBuilder(oldLaunchConfiguration);
+        builderConsumer.accept(createLaunchConfigurationRequestBuilder);
+        createLaunchConfigurationRequestBuilder.launchConfigurationName(newLaunchConfigurationName);
+        final CreateLaunchConfigurationRequest createLaunchConfigurationRequest = createLaunchConfigurationRequestBuilder.build();
+        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
+        autoScalingClient.createLaunchConfiguration(createLaunchConfigurationRequest);
+        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
     }
 
     @Override

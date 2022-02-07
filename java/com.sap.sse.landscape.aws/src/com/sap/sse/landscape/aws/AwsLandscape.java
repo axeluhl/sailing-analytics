@@ -719,4 +719,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     void updateReleaseInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release);
 
     void updateImageInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami);
+
+    void updateInstanceTypeInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, InstanceType instanceType);
 }

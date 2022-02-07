@@ -25,6 +25,7 @@ import org.json.simple.parser.ParseException;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
@@ -73,6 +74,18 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         this.serverName = serverName;
     }
 
+    @Override
+    public int hashCode() {
+        return getHost().hashCode() ^ getPort();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        ApplicationProcess<?, ?, ?> other = (ApplicationProcess<?, ?, ?>) o;
+        return Util.equalsWithNull(getHost(), other.getHost())
+            && getPort() == other.getPort();
+    }
+    
     @Override
     public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)

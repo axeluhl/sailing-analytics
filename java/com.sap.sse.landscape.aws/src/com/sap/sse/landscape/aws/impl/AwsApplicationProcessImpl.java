@@ -117,6 +117,7 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                     final Integer port = replica.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replica.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
                     HostT host = getHostFromIpAddress(hostSupplier, replicaAddress);
                     if (host != null) {
+                        // adding to the set relies on ApplicationProcess deciding equality based on host and port
                         result.add(processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null,
                                 /* telnetPort can be obtained from environment on demand */ null, /* serverName to be discovered otherwise */ null, Collections.emptyMap()));
                     }
