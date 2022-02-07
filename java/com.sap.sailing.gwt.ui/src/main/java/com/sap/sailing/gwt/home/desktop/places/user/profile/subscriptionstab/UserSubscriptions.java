@@ -151,14 +151,11 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             public void buildRowImpl(final SubscriptionDTO rowValue, final int absRowIndex) {
                 super.buildRowImpl(rowValue, absRowIndex);
                 final SubscriptionProfileCss css = local_res.css();
-
                 final TableRowBuilder tr = startRow();
                 tr.className(local_res.css().borderTableRow());
-
                 addTextCell(tr, i18n.paymentStatus() + ":", css.fontStyleItalic());
                 valueProvider.configurePaymentStatusElement(rowValue, (label, value) -> addTextCell(tr, value),
                         (label, value) -> addImageCell(tr, value));
-
                 if (rowValue.isCancelled()) {
                     addTextCell(tr, i18n.cancelledAt() + ":", css.textAlignRight());
                     addTextCell(tr, formatDateAndTime(rowValue.getCancelledAt().asDate()), css.textAlignRight());
@@ -167,7 +164,6 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
                     addTextCell(tr, formatDateAndTime(rowValue.getNextBillingAt().asDate()), css.textAlignRight());
                     addTextCell(tr, valueProvider.getRecurringPayment(rowValue), css.textAlignRight());
                 }
-
                 tr.endTR();
             }
 
