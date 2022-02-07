@@ -129,7 +129,7 @@ public abstract class SubscriptionDTO implements HasSubscriptionMessageKeys, IsS
      * Check if {@link #nextBillingAt} and {@link #reoccuringPaymentValue} are available
      */
     public boolean isRenewing() {
-        return nextBillingAt != null && nextBillingAt != Subscription.emptyTime() && reoccuringPaymentValue != null;
+        return nextBillingAt != null && !Subscription.emptyTime().equals(nextBillingAt) && reoccuringPaymentValue != null;
     }
 
     /**
