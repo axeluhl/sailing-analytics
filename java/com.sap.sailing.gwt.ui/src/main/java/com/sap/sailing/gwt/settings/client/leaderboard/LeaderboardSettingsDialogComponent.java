@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -221,7 +222,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     private CheckBox createAndRegisterCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected,
             Map<DetailType, CheckBox> registry) {
         CheckBox checkbox = createCheckbox(dialog, detailType, selected);
-        GWT.log("++++ juhuu, got it: " + paywallResolver);
+        GWT.log("++++ juhuu, got it: " + paywallResolver.hasPermission(SecuredDomainType.LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION));
         
         registry.put(detailType, checkbox);
         return checkbox;

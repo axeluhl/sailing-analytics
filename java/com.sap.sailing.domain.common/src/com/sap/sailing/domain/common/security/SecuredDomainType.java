@@ -50,6 +50,10 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE",
             TrackedRaceActions.ALL_ACTIONS);
     
+    public static enum LeaderboardActions implements Action {
+        PREMIUM_LEADERBOARD_INFORMATION
+    }
+    
     public static enum TrackedRaceActions implements Action {
         CAN_REPLAY_DURING_LIVE_RACES,
         DETAIL_TIMER,

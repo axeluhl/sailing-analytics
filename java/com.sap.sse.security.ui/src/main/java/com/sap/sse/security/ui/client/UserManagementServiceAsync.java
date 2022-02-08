@@ -15,6 +15,7 @@ import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -92,4 +93,6 @@ public interface UserManagementServiceAsync {
     void logout(AsyncCallback<SuccessInfo> callback);
 
     void getAllHasPermissions(AsyncCallback<ArrayList<HasPermissions>> callback);
+
+    void addSecurityInformation(SecuredDTO securedDTO, AsyncCallback<Void> callback);
 }

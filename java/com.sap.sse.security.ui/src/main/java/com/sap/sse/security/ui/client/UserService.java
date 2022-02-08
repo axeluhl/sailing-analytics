@@ -41,6 +41,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
+import com.sap.sse.security.ui.shared.EssentialSecuredDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -450,11 +451,31 @@ public class UserService {
      * Checks whether the user has the permission to the given action for the given object.
      */
     public boolean hasPermission(SecuredDTO securedDTO, Action action) {
+        GWT.log("+++ securedDTO:" + securedDTO);
         if (securedDTO == null) {
             return false;
         }
         return PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
                 anonymousUser, securedDTO.getOwnership(), securedDTO.getAccessControlList());
+    }
+    
+    /**
+     * Checks whether the user has the permission to the given action for the given object.
+     */
+    public void createEssentialSecuredDTOByIdAndType(String id, HasPermissions permissionType, final AsyncCallback<EssentialSecuredDTO> callback) {
+        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(id, permissionType);
+        userManagementService.addSecurityInformation(secureDTO, new AsyncCallback<Void>() {
+            
+            @Override
+            public void onSuccess(Void result) {
+                callback.onSuccess(secureDTO);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+        });
     }
 
     /**

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.HasPermissions;
@@ -18,8 +19,7 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.subscription.SubscriptionClientProvider;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.client.subscription.SubscriptionWriteServiceAsync;
-import com.sap.sse.security.ui.server.EssentialSecuredDTOByName;
-import com.sap.sse.security.ui.server.SecurityDTOUtil;
+import com.sap.sse.security.ui.shared.EssentialSecuredDTO;
 
 public class PaywallResolver {
 
@@ -29,9 +29,6 @@ public class PaywallResolver {
     private final SubscriptionServiceFactory subscriptionServiceFactory;
     private SecuredDTO dtoContext;
 
-    private String name;
-    private HasPermissions permissionType;
-
     public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory,
             final SecuredDTO dtoContext) {
         this.userService = userService;
@@ -40,11 +37,11 @@ public class PaywallResolver {
         this.dtoContext = dtoContext;
     }
 
-    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, String name, HasPermissions permissionType) {
+    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, String securityDTOId, HasPermissions permissionType) {
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
-        this.name = name;
-        this.permissionType = permissionType;
+        GWT.log("+++ init PaywalResolver. ID: " + securityDTOId + ", type: " + permissionType);
+        updateByIdAndType(securityDTOId, permissionType);
         subscriptionServiceFactory.initializeProviders();
     }
 
@@ -69,10 +66,6 @@ public class PaywallResolver {
     }
 
     public boolean hasPermission(final Action action) {
-        if (dtoContext == null && name != null && permissionType != null) {
-            dtoContext = new EssentialSecuredDTOByName(name, permissionType);
-            SecurityDTOUtil.addSecurityInformation(null, dtoContext);
-        }
         return userService.hasPermission(dtoContext, action);
     }
 
@@ -101,5 +94,21 @@ public class PaywallResolver {
     
     public void setDtoContext(SecuredDTO dtoContext) {
         this.dtoContext = dtoContext;
+    }
+    
+    public void updateByIdAndType(String id, HasPermissions permissionType) {
+        userService.createEssentialSecuredDTOByIdAndType(id, permissionType, new AsyncCallback<EssentialSecuredDTO>() {
+            
+            @Override
+            public void onSuccess(EssentialSecuredDTO result) {
+                dtoContext = result;
+                GWT.log("++ DTOContext created: " + dtoContext);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("++ DTOContext creation failed!", caught);
+            }
+        });
     }
 }

@@ -40,6 +40,7 @@ import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -279,6 +280,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         } else {
             throw new UnauthorizedException("Not permitted to get the unpruned ACL for a user");
         }
+    }
+
+    @Override
+    public void addSecurityInformation(SecuredDTO securedDTO) {
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDTO);
     }
 
     @Override
