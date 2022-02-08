@@ -124,8 +124,12 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     public void tryShutdown(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws IOException, InterruptedException, JSchException, Exception {
         logger.info("Stopping application process "+this);
-        getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
-            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory(optionalTimeout)+"; ./stop", "Shutting down "+this, Level.INFO);
+        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        if (sshChannel == null) {
+            logger.warning("Couldn't create an SSH connection to "+this+" for shutdown. Assuming it is already shut down.");
+        } else {
+            sshChannel.runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory(optionalTimeout)+"; ./stop", "Shutting down "+this, Level.INFO);
+        }
     }
     
     @Override

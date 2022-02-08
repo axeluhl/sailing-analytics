@@ -854,7 +854,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             if (managedByAutoScalingGroup ||
                     (additionalReplicaStarted != null && replica.getHost().getInstanceId().equals(additionalReplicaStarted.getHost().getInstanceId()))) {
                 logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicasToStopAfterUpgradingMaster);
-                replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                replica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
             } else { // otherwise, upgrade in place and add to target group again when ready
                 logger.info("Refreshing unmanaged replica "+replica+" in place");
                 replica.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
@@ -1328,6 +1328,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             getLandscape().updateAutoScalingGroupMinSize(autoScalingGroup, newMinSize);
             // Don't trust the replicas passed in by the client; it may be stale. Instead, obtain a new set of replicas from the master:
             Iterable<SailingAnalyticsProcess<String>> newSetOfAllReplicas = oldReplicas;
+            final Set<SailingAnalyticsProcess<String>> terminatedReplicas = new HashSet<>();
             for (final SailingAnalyticsProcess<String> replica : oldReplicas) {
                 final SailingAnalyticsHost<String> replicaHost = replica.getHost();
                 if (replicaHost.isManagedByAutoScalingGroup(autoScalingGroup)) {
@@ -1335,11 +1336,14 @@ public class LandscapeServiceImpl implements LandscapeService {
                             autoScalingGroup.getName()+" ");
                     newSetOfAllReplicas = waitUntilAtLeastSoManyAutoScalingReplicasAreReady(replicaSet, newMinSize);
                     getLandscape().terminate(replicaHost);
+                    terminatedReplicas.add(replica);
                 }
             }
             getLandscape().updateAutoScalingGroupMinSize(autoScalingGroup, oldMinSize);
             result = getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(),
-                    replicaSet.getServerName(), replicaSet.getMaster(), newSetOfAllReplicas);
+                    replicaSet.getServerName(), replicaSet.getMaster(),
+                    // remove terminated replicas:
+                    Util.filter(newSetOfAllReplicas, r->!Util.contains(terminatedReplicas, r)));
         } else {
             logger.info("Replica set "+replicaSet.getName()+
                     " does not have an auto-scaling group configured, so no changes can be made to its launch configuration.");
