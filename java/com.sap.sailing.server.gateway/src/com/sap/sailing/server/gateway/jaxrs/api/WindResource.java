@@ -26,7 +26,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
 
@@ -113,9 +113,16 @@ public class WindResource extends AbstractSailingServerResource {
         } else {
             for (final Regatta regatta : getService().getAllRegattas()) {
                 final DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-                for (final DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                    if (getSecurityService().hasCurrentUserUpdatePermission(trackedRace.getRaceIdentifier())) {
-                        result.add(new RaceIdentifierAndTrackedRace(trackedRace.getRaceIdentifier(), trackedRace));
+                if (trackedRegatta != null) {
+                    trackedRegatta.lockTrackedRacesForRead();
+                    try {
+                        for (final DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                            if (getSecurityService().hasCurrentUserUpdatePermission(trackedRace.getRaceIdentifier())) {
+                                result.add(new RaceIdentifierAndTrackedRace(trackedRace.getRaceIdentifier(), trackedRace));
+                            }
+                        }
+                    } finally {
+                        trackedRegatta.unlockTrackedRacesAfterRead();
                     }
                 }
             }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
@@ -47,6 +48,15 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
                 throw new RuntimeException(e);
             }
         });
+    }
+    
+    /**
+     * The HTTP traffic port used by all processes of this application replica set. This must be so because processes
+     * may be added as targets to a target group, and such a target group always routes traffic to the same port
+     * for all nodes added to it. 
+     */
+    default int getPort() throws InterruptedException, ExecutionException {
+        return getMaster().getPort();
     }
     
     /**
@@ -122,4 +132,23 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
      * of this replica set.
      */
     void removeSharding(Shard<ShardingKey> shard);
+
+    /**
+     * The fully-qualified host name by which this application replica set is publicly reachable. When resolving this
+     * hostname through DNS, the result is expected to identify a load balancer which contains the ingress rules for
+     * this application replica set.<p>
+     * 
+     * If we plan to support multi-region distribution of application replica sets in the future, resolving the hostname
+     * may have to happen on a per-region basis. It would then be nice if this application replica set would "know" its
+     * regions to which it has been deployed.
+     */
+    String getHostname() throws InterruptedException, ExecutionException;
+
+    /**
+     * The "SERVER_NAME" property that is equal for the master and all replica processes of this replica set. It is
+     * at the same time the {@link #getName() name} of this application replica set.
+     */
+    default String getServerName() {
+        return getName();
+    }
 }

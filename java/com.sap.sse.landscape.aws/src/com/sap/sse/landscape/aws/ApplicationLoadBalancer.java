@@ -1,10 +1,16 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Optional;
+
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
+import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 
 /**
  * Represents an AWS Application Load Balancer (ALB). When created, a default configuration with the following
@@ -35,6 +41,9 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      */
     String getDNSName();
 
+    /**
+     * Obtains a fresh copy of the rules in this load balancers HTTPS listener from the AWS API.
+     */
     Iterable<Rule> getRules();
     
     void deleteRules(Rule... rulesToDelete);
@@ -42,12 +51,16 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     Region getRegion();
 
     String getArn();
+    
+    default String getId() {
+        return getArn().substring(getArn().lastIndexOf('/')+1);
+    }
 
     /**
      * Application load balancer rules have a {@link Rule#priority() priority} which must be unique in the scope of a
-     * load balancer's listener. This way, when rules come and go, holes in the priority numbering scheme will start to exist.
-     * If a set of rules is to be added ({@code rulesToAdd}), consider using {@link #assignUnusedPriorities} to make room
-     * for interleaved or contiguous addition of the new rules.
+     * load balancer's listener. This way, when rules come and go, holes in the priority numbering scheme will start to
+     * exist. If a set of rules is to be added ({@code rulesToAdd}), consider using
+     * {@link #addRulesAssigningUnusedPriorities} to make room for interleaved or contiguous addition of the new rules.
      * 
      * @param rulesToAdd
      *            rules (without an ARN set yet), specifying which rules to add to the HTTPS listener of this load
@@ -84,4 +97,24 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     void delete() throws InterruptedException;
 
     void deleteListener(Listener listener);
+
+    Listener getListener(ProtocolEnum protocol);
+    
+    default Rule setDefaultRedirect(String hostname, RedirectDTO redirect) {
+        return setDefaultRedirect(hostname, redirect.getPath(), redirect.getQuery());
+    }
+
+    /**
+     * {@link #createDefaultRedirectRule(String, String, Optional) Creates} or updates a default re-direct rule in this
+     * load balancer's HTTPS listener. Such a default re-direct rule is triggered by a request for the {@code hostname}
+     * with the path being {@code "/"} and sends a re-direct response to the client that replaces path and query with
+     * the values specified by the {@code path} and {@code query} parameters.
+     * 
+     * @return the {@link Rule} that represents the default re-direct
+     */
+    Rule setDefaultRedirect(String hostname, String path, Optional<String> query);
+    
+    Rule getDefaultRedirectRule(String hostName, PlainRedirectDTO plainRedirectDTO);
+
+    RuleCondition createHostHeaderRuleCondition(String hostname);
 }

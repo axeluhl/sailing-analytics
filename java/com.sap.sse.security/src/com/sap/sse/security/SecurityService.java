@@ -199,7 +199,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Creates a new role with initially empty {@link RoleDefinition#getPermissions() permissions}.
      */
     RoleDefinition createRoleDefinition(UUID id, String name);
-    
+
     /**
      * Deletes the {@code roleDefinition} from this service persistently.
      */
@@ -343,6 +343,15 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * be created and returned instead (see {@link #createAccessToken(String)}.
      */
     String getOrCreateAccessToken(String username);
+
+    /**
+     * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
+     * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
+     * only username and password or bearer token, not the three of them. If none is provided but there is no user
+     * currently authenticated, {@code null} will be returned.<p>
+     */
+    String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
+            String targetServerPassword, String targetServerBearerToken);
 
     /**
      * Looks up a user by an access token that was created before using {@link #createAccessToken(String)} for same user name.

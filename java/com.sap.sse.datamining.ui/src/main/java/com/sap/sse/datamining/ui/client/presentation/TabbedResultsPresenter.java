@@ -127,23 +127,21 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     @Override
     public void showResult(String presenterId, StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         CloseablePresenterTab presenterTab = getTab(presenterId);
-        if (presenterTab == null) {
-            return;
-        }
-        
-        if (result != null) {
-            ResultsPresenter<?> presenter = presenterTab.getPresenter();
-            ResultsPresenterFactory<?> factory = registeredPresenterFactories.getOrDefault(result.getResultType(), defaultFactory);
-            if (presenter.getClass() != factory.getProducedType()) {
-                CloseablePresenterTab newPresenterTab = addTabAndFocus(factory.createPresenter());
-                removeTab(presenterTab);
-                presenterTab = newPresenterTab;
+        if (presenterTab != null) {
+            if (result != null) {
+                ResultsPresenter<?> presenter = presenterTab.getPresenter();
+                ResultsPresenterFactory<?> factory = registeredPresenterFactories.getOrDefault(result.getResultType(), defaultFactory);
+                if (presenter.getClass() != factory.getProducedType()) {
+                    CloseablePresenterTab newPresenterTab = addTabAndFocus(factory.createPresenter());
+                    removeTab(presenterTab);
+                    presenterTab = newPresenterTab;
+                }
+                presenterTab.setText(result.getResultSignifier());
+            } else {
+                presenterTab.setText(getDataMiningStringMessages().empty());
             }
-            presenterTab.setText(result.getResultSignifier());
-        } else {
-            presenterTab.setText(getDataMiningStringMessages().empty());
+            presenterTab.getPresenter().showResult(queryDefinition, result);
         }
-        presenterTab.getPresenter().showResult(queryDefinition, result);
     }
     
     @Override
@@ -339,7 +337,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
     
     public static class ResultsPresenterFactory<T extends ResultsPresenter<?>> {
-        
         private final Class<T> presenterType;
         private final ResultsPresenterSupplier<T> presenterSupplier;
         
@@ -355,7 +352,6 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         public T createPresenter() {
             return presenterSupplier.create();
         }
-        
     }
 
     private class CloseablePresenterTab extends FlowPanel {

@@ -59,7 +59,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
     private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
-    private final Button advancedSettingsButton;
+    private final Button filterSetSelectionButton;
     private final StringMessages stringMessages;
     private final AbstractListFilter<CompetitorDTO> filter;
     private final CompetitorSelectionProvider competitorSelectionProvider;
@@ -90,6 +90,9 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 final List<String> result = new ArrayList<>(Arrays.asList(competitor.getName().toLowerCase(), competitor.getShortName()));
                 if (competitor.hasBoat()) {
                     result.add(((CompetitorWithBoatDTO) competitor).getSailID().toLowerCase());
+                    if (((CompetitorWithBoatDTO) competitor).getBoat().getName() != null) {
+                        result.add(((CompetitorWithBoatDTO) competitor).getBoat().getName().toLowerCase());
+                    }
                 }
                 return result;
             }
@@ -119,12 +122,12 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 clearSelection();
             }
         });
-        advancedSettingsButton = new Button("");
-        advancedSettingsButton.setStyleName(css.button());
-        advancedSettingsButton.addStyleName(css.filterButton());
-        advancedSettingsButton.setTitle(stringMessages.competitorsFilter());
-        advancedSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
-        advancedSettingsButton.addClickHandler(new ClickHandler() {
+        filterSetSelectionButton = new Button("");
+        filterSetSelectionButton.setStyleName(css.button());
+        filterSetSelectionButton.addStyleName(css.filterButton());
+        filterSetSelectionButton.setTitle(stringMessages.competitorsFilter());
+        filterSetSelectionButton.addStyleName(css.filterInactiveButtonBackgroundImage());
+        filterSetSelectionButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 showEditCompetitorsFiltersDialog();
@@ -137,13 +140,15 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         searchBoxPanel.add(clearTextBoxButton);
         add(searchBoxPanel);
         add(settingsButton);
-        add(advancedSettingsButton);
-        loadCompetitorsFilterSets(loadedCompetitorsFilterSets->{
+        add(filterSetSelectionButton);
+        loadCompetitorsFilterSets(loadedCompetitorsFilterSets -> {
             if (loadedCompetitorsFilterSets != null) {
                 competitorsFilterSets = loadedCompetitorsFilterSets;
                 insertSelectedCompetitorsFilter(competitorsFilterSets);
+                updateCompetitorFilterSetAndView(competitorsFilterSets.getActiveFilterSet());
             } else {
                 competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
+                updateCompetitorFilterSetAndView(competitorsFilterSets.getActiveFilterSet());
                 storeCompetitorsFilterSets(competitorsFilterSets);
             }
         });
@@ -290,21 +295,21 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = filterSets.getActiveFilterSet();
         if (activeFilterSet != null) {
             if (lastActiveCompetitorFilterSet == null) {
-                advancedSettingsButton.removeStyleName(css.filterInactiveButtonBackgroundImage());
-                advancedSettingsButton.addStyleName(css.filterActiveButtonBackgroundImage());
+                filterSetSelectionButton.removeStyleName(css.filterInactiveButtonBackgroundImage());
+                filterSetSelectionButton.addStyleName(css.filterActiveButtonBackgroundImage());
             }
             lastActiveCompetitorFilterSet = activeFilterSet;
         } else {
             if (lastActiveCompetitorFilterSet != null) {
-                advancedSettingsButton.removeStyleName(css.filterActiveButtonBackgroundImage());
-                advancedSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
+                filterSetSelectionButton.removeStyleName(css.filterActiveButtonBackgroundImage());
+                filterSetSelectionButton.addStyleName(css.filterInactiveButtonBackgroundImage());
             }
             lastActiveCompetitorFilterSet = null;
         }
         if (lastActiveCompetitorFilterSet != null) {
-            advancedSettingsButton.setTitle(competitorsFilterTitle+" ("+lastActiveCompetitorFilterSet.getName()+")");
+            filterSetSelectionButton.setTitle(competitorsFilterTitle+" ("+lastActiveCompetitorFilterSet.getName()+")");
         } else {
-            advancedSettingsButton.setTitle(competitorsFilterTitle);
+            filterSetSelectionButton.setTitle(competitorsFilterTitle);
         }
     }
     
@@ -357,8 +362,6 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         totalRankFilter.setValue(50);
         topNTotalRankCompetitorsFilterSet.addFilter(totalRankFilter);
         filterSets.addFilterSet(topNTotalRankCompetitorsFilterSet);
-        // set default active filter
-        filterSets.setActiveFilterSet(topNRaceRankCompetitorsFilterSet);
         return filterSets;
     }
     

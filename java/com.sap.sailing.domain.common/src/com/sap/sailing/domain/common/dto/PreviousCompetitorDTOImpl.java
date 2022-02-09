@@ -24,7 +24,7 @@ public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements 
     PreviousCompetitorDTOImpl() {} // for serialization only
     
     public PreviousCompetitorDTOImpl(int indexInPreviousCompetitorList) {
-        super();
+        super(null); // name is not needed here
         this.indexInPreviousCompetitorList = indexInPreviousCompetitorList;
     }
     

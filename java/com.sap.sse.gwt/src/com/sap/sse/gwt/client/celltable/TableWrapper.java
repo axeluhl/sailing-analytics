@@ -124,7 +124,8 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
      */
     public void addColumnWithNaturalComparatorOnStringRepresentation(Column<T, ?> column, String header) {
         addColumn(column, header,
-                (t1, t2)->new NaturalComparator(/* case sensitive */ false).compare(""+column.getValue(t1), ""+column.getValue(t2)));
+                (t1, t2)->new NaturalComparator(/* case sensitive */ false)
+                    .compare(""+column.getValue(t1), ""+column.getValue(t2)));
     }
     
     /**
@@ -185,6 +186,21 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
     
     public void remove(T t) {
         getDataProvider().getList().remove(t);
+    }
+    
+    public void replaceBasedOnEntityIdentityComparator(T t) {
+        if (entityIdentityComparator == null) {
+            remove(t);
+            add(t);
+        } else {
+            for (final T existingElement : getDataProvider().getList()) {
+                if (entityIdentityComparator.representSameEntity(existingElement, t)) {
+                    remove(existingElement);
+                    add(t);
+                    break;
+                }
+            }
+        }
     }
     
     public void clear() {

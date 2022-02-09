@@ -707,17 +707,38 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes) {
-        this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
+        if (controlTrackingFromStartAndFinishTimes != this.controlTrackingFromStartAndFinishTimes) {
+            this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
+            synchronized (regattaListeners) {
+                for (RegattaListener l : regattaListeners) {
+                    l.controlTrackingFromStartAndFinishTimesChanged(this, controlTrackingFromStartAndFinishTimes);
+                }
+            }
+        }
     }
     
     @Override
     public void setAutoRestartTrackingUponCompetitorSetChange(boolean autoRestartTrackingUponCompetitorSetChange) {
-        this.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChange;
+        if (autoRestartTrackingUponCompetitorSetChange != this.autoRestartTrackingUponCompetitorSetChange) {
+            this.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChange;
+            synchronized (regattaListeners) {
+                for (RegattaListener l : regattaListeners) {
+                    l.autoRestartTrackingUponCompetitorSetChangeChanged(this, autoRestartTrackingUponCompetitorSetChange);
+                }
+            }
+        }
     }
 
     @Override
     public void setUseStartTimeInference(boolean useStartTimeInference) {
-        this.useStartTimeInference = useStartTimeInference;
+        if (useStartTimeInference != this.useStartTimeInference) {
+            this.useStartTimeInference = useStartTimeInference;
+            synchronized (regattaListeners) {
+                for (RegattaListener l : regattaListeners) {
+                    l.useStartTimeInferenceChanged(this, useStartTimeInference);
+                }
+            }
+        }
     }
 
     @Override

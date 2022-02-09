@@ -5,6 +5,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -13,6 +14,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
+/**
+ * Equality / hash code is based on the {@link WithID#getId() ID}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface Host extends WithID {
     /**
      * Obtains the public IP address of this host. Note that during the boot phase and after shutdown/termination a host
@@ -29,7 +36,7 @@ public interface Host extends WithID {
      * @param timeoutEmptyMeaningForever
      *            if {@code null}, waits forever
      */
-    InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever);
+    InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) throws TimeoutException, Exception;
     
     /**
      * Obtains the private IP address of this host. Note that during the boot phase and after shutdown/termination a host

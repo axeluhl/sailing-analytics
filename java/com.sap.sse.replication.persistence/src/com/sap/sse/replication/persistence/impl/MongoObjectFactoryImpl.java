@@ -7,7 +7,7 @@ import org.bson.Document;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.persistence.MongoObjectFactory;
 
@@ -34,8 +34,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         replicaDescriptorDoc.put(FieldNames.REPLICA_ADDITIONAL_INFORMATION.name(), replicaDescriptor.getAdditionalInformation());
         replicaDescriptorDoc.put(FieldNames.REPLICA_REPLICABLE_IDS_AS_STRINGS.name(),
                 Arrays.asList(replicaDescriptor.getReplicableIdsAsStrings()));
+        replicaDescriptorDoc.put(FieldNames.REPLICA_PORT.name(), replicaDescriptor.getPort());
         getReplicaDescriptorCollection().withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(replicaDescriptorDoc,
-                replicaDescriptorDoc, new UpdateOptions().upsert(true));
+                replicaDescriptorDoc, new ReplaceOptions().upsert(true));
     }
     
     @Override

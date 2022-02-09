@@ -56,7 +56,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 /**
  * Implements the connector to the SwissTiming Sail Master system. It uses a host name and port number to establish the
@@ -630,7 +630,10 @@ public abstract class AbstractSailMasterConnector extends SailMasterTransceiverI
                 devicesNamesStartIndex = 2;
             }
             marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]),
-                    Arrays.asList(markDetails).subList(devicesNamesStartIndex, markDetails.length).stream().map(idAsString->UUIDHelper.tryUuidConversion(idAsString)).collect(Collectors.toList()),
+                    Arrays.asList(markDetails).subList(devicesNamesStartIndex, markDetails.length).stream()
+                        .filter(idAsString->Util.hasLength(idAsString))
+                        .map(idAsString->UUIDHelper.tryUuidConversion(idAsString))
+                        .collect(Collectors.toList()),
                     markType));
         }
         return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);

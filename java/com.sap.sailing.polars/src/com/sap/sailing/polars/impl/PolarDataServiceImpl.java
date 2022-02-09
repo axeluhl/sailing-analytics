@@ -47,7 +47,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.util.ClearStateTestSupport;
 
 /**
@@ -250,7 +250,7 @@ public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStrea
     @Override
     public void insertExistingFixes(TrackedRace trackedRace) {
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+            final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
             track.lockForRead();
             try {
                 for (GPSFixMoving fix : track.getFixes()) {

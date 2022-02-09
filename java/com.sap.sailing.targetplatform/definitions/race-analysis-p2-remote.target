@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="172">
+<target name="Race Analysis Target" sequenceNumber="195">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -15,6 +15,15 @@
 <unit id="org.objectweb.asm.tree" version="9.0.0.v20201001-1419"/>
 <unit id="org.objectweb.asm.tree.source" version="9.0.0.v20201001-1419"/>
 <unit id="javax.annotation" version="1.3.5.v20200909-1856"/>
+<unit id="org.apache.poi" version="4.1.1.v20200604-1524"/>
+<unit id="org.apache.poi.ooxml" version="4.1.1.v20200820-1148"/>
+<unit id="org.apache.poi.ooxml.schemas" version="4.1.1.v20200922-2105"/>
+<unit id="org.apache.poi.source" version="4.1.1.v20200604-1524"/>
+<unit id="org.apache.poi.ooxml.source" version="4.1.1.v20200820-1148"/>
+<unit id="org.apache.commons.collections4" version="4.4.0.v20200420-1700"/>
+<unit id="org.apache.commons.collections4.source" version="4.4.0.v20200420-1700"/>
+<unit id="org.apache.commons.compress" version="1.19.0.v20200106-2343"/>
+<unit id="org.apache.commons.compress.source" version="1.19.0.v20200106-2343"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20201130205003/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -35,8 +44,6 @@
 <unit id="javax.xml.bind.source" version="2.2.0.v201105210648"/>
 <unit id="javax.xml.stream" version="1.0.1.v201004272200"/>
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
-<unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
-<unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
 <unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
 <unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
 <unit id="org.apache.commons.collections" version="3.2.2.v201511171945"/>
@@ -56,13 +63,6 @@
 <unit id="org.apache.httpcomponents.httpclient.source" version="4.5.5.v20180409-1525"/>
 <unit id="org.apache.httpcomponents.httpcore" version="4.4.9.v20180409-1525"/>
 <unit id="org.apache.httpcomponents.httpcore.source" version="4.4.9.v20180409-1525"/>
-<unit id="org.apache.poi" version="3.9.0.v201405241750"/>
-<unit id="org.apache.poi.ooxml" version="3.9.0.v201405241905"/>
-<unit id="org.apache.poi.ooxml.schemas" version="3.9.0.v201405241750"/>
-<unit id="org.apache.xmlbeans" version="2.3.0.v201605172150"/>
-<unit id="org.dom4j" version="1.6.1.v20170815-1500"/>
-<unit id="org.jdom" version="1.1.1.v201101151400"/>
-<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
 <unit id="com.jcraft.jsch" version="0.1.54.v20170116-1932"/>
 <unit id="com.jcraft.jsch.source" version="0.1.54.v20170116-1932"/>
 <unit id="org.apache.xalan" version="2.7.1.v201005080400"/>
@@ -71,10 +71,9 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.36.v20210114"/>
+<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.36.v20210114"/>
 <repository location="https://p2.sapsailing.com/p2/jetty/"/>
 </location>
-<!-- use this location to avoid long running refreshes during development, TODO: remove when everything is set up. -->
-<!-- location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.35.v20201120\jetty.bundles.repo\target\site" type="Directory"/ -->
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="1.1.0.v20201023-1558"/>
 <unit id="org.apache.felix.gogo.runtime" version="1.1.2.v20201023-1558"/>
@@ -105,10 +104,15 @@
 <unit id="org.eclipse.osgi" version="3.16.100.v20201030-1916"/>
 <unit id="org.eclipse.osgi.services" version="3.9.0.v20200511-1725"/>
 <unit id="org.eclipse.osgi.util" version="3.5.300.v20190708-1141"/>
-<repository location="http://download.eclipse.org/releases/2020-12"/>
+<repository location="https://download.eclipse.org/releases/2020-12"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.15.81"/>
+<unit id="org.apache.xmlbeans" version="3.1.0.v20200922-1359"/>
+<unit id="org.apache.xmlbeans.source" version="3.1.0.v20200922-1359"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.17.124"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -124,6 +128,7 @@
 </locations>
 <includeBundles>
 <plugin id="com.rabbitmq.client"/>
+<plugin id="com.rabbitmq.client.source"/>
 <plugin id="com.sun.activation.javax.activation"/>
 <plugin id="com.sun.istack.commons-runtime"/>
 <plugin id="com.sun.jersey"/>
@@ -147,7 +152,7 @@
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
 <plugin id="lz4-java"/>
-<plugin id="org.apache.commons.beanutils" version="1.9.0"/>
+<plugin id="org.apache.commons.beanutils"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
 <plugin id="org.apache.commons.collections"/>
@@ -169,8 +174,6 @@
 <plugin id="org.apache.felix.gogo.runtime.source"/>
 <plugin id="org.apache.felix.gogo.shell"/>
 <plugin id="org.apache.felix.gogo.shell.source"/>
-<plugin id="org.apache.felix.shell"/>
-<plugin id="org.apache.felix.shell.remote"/>
 <plugin id="org.apache.httpcomponents.httpclient"/>
 <plugin id="org.apache.httpcomponents.httpclient.source"/>
 <plugin id="org.apache.httpcomponents.httpcore"/>
@@ -178,15 +181,21 @@
 <plugin id="org.apache.poi"/>
 <plugin id="org.apache.poi.ooxml"/>
 <plugin id="org.apache.poi.ooxml.schemas"/>
+<plugin id="org.apache.commons.collections4"/>
+<plugin id="org.apache.commons.compress"/>
 <plugin id="org.apache.servicemix.bundles.ehcache"/>
+<plugin id="org.apache.servicemix.bundles.ehcache.source"/>
 <plugin id="org.apache.servicemix.bundles.scribe"/>
+<plugin id="org.apache.servicemix.bundles.scribe.source"/>
 <plugin id="org.apache.servicemix.bundles.zxing"/>
 <plugin id="org.apache.shiro.core"/>
 <plugin id="org.apache.shiro.ehcache"/>
 <plugin id="org.apache.shiro.web"/>
+<plugin id="org.owasp.encoder"/>
 <plugin id="org.apache.shiro.core.source"/>
 <plugin id="org.apache.shiro.ehcache.source"/>
 <plugin id="org.apache.shiro.web.source"/>
+<plugin id="org.owasp.encoder.source"/>
 <plugin id="org.apache.xmlbeans"/>
 <plugin id="org.codehaus.jettison.jettison"/>
 <plugin id="org.dom4j"/>
@@ -249,29 +258,34 @@
 <plugin id="org.hamcrest.library"/>
 <plugin id="org.hamcrest.text"/>
 <plugin id="org.hyperic.sigar"/>
-<plugin id="org.jdom"/>
-<plugin id="org.jdom.source"/>
 <plugin id="org.junit"/>
 <plugin id="org.junit.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
-<plugin id="org.mongodb.mongo-java-driver"/>
-<plugin id="org.mongodb.mongo-java-driver.source"/>
+<plugin id="org.mongodb.bson"/>
+<plugin id="org.mongodb.bson.source"/>
+<plugin id="org.mongodb.driver-core"/>
+<plugin id="org.mongodb.driver-core.source"/>
+<plugin id="org.mongodb.driver-sync"/>
+<plugin id="org.mongodb.driver-sync.source"/>
 <plugin id="org.objenesis"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="com.chargebee.chargebee-java"/>
+<plugin id="com.chargebee.chargebee-java.source"/>
 <plugin id="slf4j.jdk14"/>
 <plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>
 <plugin id="com.jcraft.jsch.source"/>
 <plugin id="org.apache.commons.codec.source"/>
-<plugin id="org.apache.poi.ooxml.schemas.source"/>
 <plugin id="org.apache.poi.ooxml.source"/>
 <plugin id="org.apache.poi.source"/>
+<plugin id="org.apache.commons.collections4.source"/>
+<plugin id="org.apache.commons.compress.source"/>
 <plugin id="org.apache.xmlbeans.source"/>
 <plugin id="org.dom4j.source"/>
 <plugin id="com.amazon.aws.aws-java-api.source"/>
+<plugin id="com.sap.db.jdbc"/>
 <plugin id="org.eclipse.equinox.event"/>
 <plugin id="org.eclipse.equinox.event.source"/>
 <plugin id="org.eclipse.jetty.jndi"/>
@@ -280,30 +294,31 @@
 <plugin id="org.eclipse.jetty.plus.source"/>
 <plugin id="javax.annotation-api"/>
 <plugin id="org.apache.aries.spifly.dynamic.bundle"/>
-<plugin id="org.objectweb.asm" version="9.0.0.v20201001-1419"/>
-<plugin id="org.objectweb.asm.commons" version="9.0.0.v20201001-1419"/>
-<plugin id="org.objectweb.asm.tree" version="9.0.0.v20201001-1419"/>
+<plugin id="org.objectweb.asm"/>
+<plugin id="org.objectweb.asm.commons"/>
+<plugin id="org.objectweb.asm.tree"/>
 <plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
 <plugin id="org.mortbay.jasper.apache-el"/>
 <plugin id="org.mortbay.jasper.apache-jsp"/>
-<plugin id="org.eclipse.jetty.apache-jsp" version="9.4.36.v20210114"/>
+<plugin id="org.eclipse.jetty.apache-jsp"/>
 <plugin id="org.eclipse.jdt.core.compiler.batch"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp" version="9.4.36.v20210114"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
 <plugin id="org.apache.taglibs.standard-impl"/>
 <plugin id="org.apache.taglibs.taglibs-standard-spec"/>
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.36.v20201120"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
 <plugin id="org.mortbay.jasper.apache-jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objectweb.asm.tree.source"/>
 <plugin id="org.objectweb.asm.commons.source"/>
-<plugin id="javax.annotation" version="1.3.5.v20200909-1856"/>
+<plugin id="javax.annotation"/>
 <plugin id="org.eclipse.jetty.io"/>
 <plugin id="org.eclipse.osgi.util"/>
 <plugin id="org.eclipse.osgi.util.source"/>
+<plugin id="org.eclipse.jetty.io.source"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>

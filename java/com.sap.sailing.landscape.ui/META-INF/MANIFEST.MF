@@ -23,14 +23,18 @@ Require-Bundle: com.sap.sse.gwt,
  com.sap.sse.landscape.aws.common,
  com.jcraft.jsch;bundle-version="0.1.54",
  elemental2;bundle-version="1.1.0",
- org.json.simple
+ org.json.simple,
+ com.sap.sse,
+ com.sap.sse.shared.android,
+ com.sap.sailing.domain
 Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sse.landscape.aws.common.shared,
  com.google.gwt.user.client.rpc.core.com.sap.sse.landscape.common.shared,
  com.sap.sailing.landscape.ui.client,
  com.sap.sailing.landscape.ui.server,
  com.sap.sailing.landscape.ui.shared
 Bundle-ActivationPolicy: lazy
-Import-Package: com.sap.sse.util,
+Import-Package: com.sap.sailing.domain.common,
+ com.sap.sailing.server.gateway.interfaces,
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sailing.landscape.ui.impl.Activator

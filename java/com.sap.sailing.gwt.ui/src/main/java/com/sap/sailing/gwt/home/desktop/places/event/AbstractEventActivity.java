@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.event;
 
+import static com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListDataUtil.getFleetName;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.eventview.SeriesReferenceWithEventsDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
@@ -187,6 +190,17 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                 perspectiveOwnSettings, innerSettings);
         return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
+    }
+    
+    @Override
+    public String getMapAndWindChartUrl(final String leaderboardName, final String raceName, final String fleetName) {
+        return EntryPointWithSettingsLinkFactory.createEmbeddedMapAndWindChartLink(leaderboardName, raceName, fleetName);
+    }
+    
+    @Override
+    public String getMapAndWindChartUrl(final RaceMetadataDTO<?> metadata) {
+        return EntryPointWithSettingsLinkFactory.createEmbeddedMapAndWindChartLink(metadata.getLeaderboardName(),
+                metadata.getRaceName(), getFleetName(metadata));
     }
 
     @Override

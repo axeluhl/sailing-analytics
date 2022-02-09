@@ -15,7 +15,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.ApiRequest;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
-import com.sap.sailing.selenium.api.event.RoleApi.Role;
+import com.sap.sailing.selenium.api.event.RoleApi.RoleDefinition;
 
 public class UserGroupApi {
 
@@ -134,12 +134,12 @@ public class UserGroupApi {
             return col;
         }
 
-        public Iterable<Role> getRoles() {
+        public Iterable<RoleDefinition> getRoles() {
             JSONArray array = get(KEY_ROLES);
-            Collection<Role> col = new ArrayList<>();
+            Collection<RoleDefinition> col = new ArrayList<>();
             if (array != null) {
                 for (Object roleJson : array) {
-                    col.add(new Role((JSONObject) roleJson));
+                    col.add(new RoleDefinition((JSONObject) roleJson));
                 }
             }
             return col;

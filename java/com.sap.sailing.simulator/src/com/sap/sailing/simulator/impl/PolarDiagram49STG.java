@@ -33,7 +33,6 @@ public class PolarDiagram49STG extends PolarDiagramBase {
         beatAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(45.6));
         beatAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(47.0));
 
-
         tableRow = new TreeMap<Bearing, Speed>(PolarDiagramBase.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(cutAngle), Speed.NULL);
@@ -122,15 +121,12 @@ public class PolarDiagram49STG extends PolarDiagramBase {
         jibeSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(19.00));
 
         for (Speed s : speedTable.keySet()) {
-
             if (beatAngles.containsKey(s) && !speedTable.get(s).containsKey(beatAngles.get(s))) {
                 speedTable.get(s).put(beatAngles.get(s), beatSOG.get(s));
             }
-
             if (jibeAngles.containsKey(s) && !speedTable.get(s).containsKey(jibeAngles.get(s))) {
                 speedTable.get(s).put(jibeAngles.get(s), jibeSOG.get(s));
             }
-
         }
     }
 }

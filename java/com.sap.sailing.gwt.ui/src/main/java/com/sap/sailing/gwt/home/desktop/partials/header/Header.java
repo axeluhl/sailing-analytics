@@ -12,8 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -65,15 +63,12 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
 public class Header extends Composite implements HeaderConstants {
-    
-    private static final Logger LOG = Logger.getLogger(Header.class.getName());
-    
+
     @UiField Anchor startPageLinkMenu;
     @UiField Anchor eventsPageLinkMenu;
     @UiField Anchor solutionsPageLinkMenu;
     @UiField Anchor adminConsolePageLinkMenu;
     @UiField Anchor dataMiningPageLinkMenu;
-    
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
@@ -85,9 +80,7 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Anchor hamburgerMenuIcon;
     @UiField Element headerNavigationDropDownMenuContainer;
     @UiField Element centerMenuPanel;
-    
     @UiField Anchor usermenu;
-    
     @UiField ImageElement logoImage;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
@@ -142,14 +135,8 @@ public class Header extends Composite implements HeaderConstants {
          */
         private boolean isVisibilityInMenuBar(Anchor anchor, int leftOffset) {
             int anchorWidth = this.menuItemWidthMap.getOrDefault(anchor, 200);
-            if (LOG.isLoggable(Level.FINEST))
-                LOG.finest(anchor.getText() + " " + (leftOffset + anchorWidth) + " < "
-                        + this.centerMenuPanel.getAbsoluteRight());
             // calculate if the element is outside of the center menu panel, which is the view port here
             boolean fitsFullyIntoPanel = leftOffset + anchorWidth < this.centerMenuPanel.getAbsoluteRight();
-            if (LOG.isLoggable(Level.FINEST))
-                LOG.finest(anchor.getText() + " centerMenuPanel right boundary: "
-                        + this.centerMenuPanel.getAbsoluteRight());
             return fitsFullyIntoPanel;
         }
 
@@ -198,8 +185,6 @@ public class Header extends Composite implements HeaderConstants {
                 if (newWidth > 0) {
                     return newWidth;
                 } else {
-                    if (LOG.isLoggable(Level.FINEST))
-                        LOG.finest(menuItem.getText() + " keep old width " + oldWidth);
                     return oldWidth;
                 }
             });
@@ -263,7 +248,6 @@ public class Header extends Composite implements HeaderConstants {
         menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
-            LOG.fine("current user:" + authContext.getCurrentUser());
             // make it point to the current server if the user has CREATE_OBJECT permission there
             if (authContext.isLoggedIn() && authContext.hasServerPermission(ServerActions.CREATE_OBJECT)) {
                 adminConsolePageLinkMenu.setHref(ADMIN_CONSOLE_PATH);
@@ -320,9 +304,13 @@ public class Header extends Composite implements HeaderConstants {
         authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
+            logoImage.setTitle(StringMessages.INSTANCE.sapSailingAnalytics());
             solutionsPageLink.getElement().getStyle().setDisplay(Display.NONE);
             logoAnchor.setHref("");
+            logoAnchor.setTitle(StringMessages.INSTANCE.sapSailingAnalytics());
             menuItemVisibilityHandler.addIgnore(solutionsPageLink);
+        } else {
+            logoAnchor.setHref(UriUtils.fromString(StringMessages.INSTANCE.sapAnalyticsURL()).asString());
         }
         logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");
         solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");

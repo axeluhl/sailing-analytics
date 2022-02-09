@@ -169,7 +169,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithDateTimeBox<RaceLogSe
         dto.startTime = timeBox.getValue();
         dto.passId = advancePassIdCheckbox.getValue() ? currentPassId+1 : currentPassId;
         dto.racingProcedure = RacingProcedureType.values()[racingProcedureSelection.getSelectedIndex()];
-        if (courseAreaSelection.getSelectedIndex() == 0) {
+        if (courseAreaSelection.getSelectedIndex() <= 0) {
             dto.courseAreaId = null;
         } else {
             dto.courseAreaId = UUID.fromString(courseAreaSelection.getSelectedValue());

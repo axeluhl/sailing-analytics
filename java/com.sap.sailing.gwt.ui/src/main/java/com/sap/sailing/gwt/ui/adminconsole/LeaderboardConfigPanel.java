@@ -57,6 +57,8 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -74,6 +76,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiv
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -118,6 +121,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private Button addRaceColumnsButton;
     private Button columnMoveUpButton;
     private Button columnMoveDownButton;
+    private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
     
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -135,6 +140,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         super(presenter, theStringConstants, /* multi-selection */ false);
         this.showRaceDetails = showRaceDetails;
         leaderboardTable.ensureDebugId("LeaderboardsCellTable");
+        competitorsRefresher = presenter.getCompetitorsRefresher();
+        boatsRefresher = presenter.getBoatsRefresher();
     }
 
     @Override
@@ -304,9 +311,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS, UPDATE,
                 leaderboardDTO -> {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingServiceWrite, userService,
-                            leaderboardDTO.getName(), leaderboardDTO.boatClassName,
-                            /* createWithBoatByDefault */ !leaderboardDTO.canBoatsOfCompetitorsChangePerRace,
-                            stringMessages, errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
+                            competitorsRefresher, boatsRefresher, leaderboardDTO.getName(),
+                            leaderboardDTO.boatClassName,
+                            /* createWithBoatByDefault */ !leaderboardDTO.canBoatsOfCompetitorsChangePerRace, stringMessages, errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
                                 @Override
                                 public void cancel() {
                                 }
@@ -332,10 +339,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         }
                     });
         });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML, READ,
-                leaderboardDTO -> Window.open(UriUtils
-                        .fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.getName()).asString(), "",
-                        null));
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD, READ,
                 leaderboardDTO -> {
                     Map<String, String> dashboardURLParameters = new HashMap<String, String>();
@@ -574,9 +577,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             List<StrippedLeaderboardDTO> otherExistingLeaderboard, final String oldLeaderboardName,
             LeaderboardDescriptor descriptor, List<EventDTO> existingEvents) {
         FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(
-                Collections.unmodifiableCollection(otherExistingLeaderboard), descriptor, stringMessages,
-                Collections.unmodifiableList(existingEvents), errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(otherExistingLeaderboard), descriptor, userService,
+                stringMessages, Collections.unmodifiableList(existingEvents),
+                errorReporter, new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
                     }
@@ -887,9 +890,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
     private void createFlexibleLeaderboard(List<EventDTO> existingEvents) {
         final FlexibleLeaderboardCreateDialog dialog = new FlexibleLeaderboardCreateDialog(
-                Collections.unmodifiableCollection(availableLeaderboardList), stringMessages,
-                Collections.unmodifiableCollection(existingEvents), errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(availableLeaderboardList), userService,
+                stringMessages, Collections.unmodifiableCollection(existingEvents),
+                errorReporter, new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
                     }
@@ -1001,6 +1004,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void addLeaderboard(StrippedLeaderboardDTOWithSecurity result) {
         filteredLeaderboardList.getList().add(result);
         availableLeaderboardList.add(result);
+        presenter.getLeaderboardsRefresher().add(result);
         leaderboardSelectionModel.clear();
         leaderboardSelectionModel.setSelected(result, true);
         loadAndRefreshLeaderboard(result);
@@ -1069,9 +1073,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 public void onSuccess(Void result) {
                     for (StrippedLeaderboardDTOWithSecurity leaderboard : leaderboards) {
                         removeLeaderboardFromTable(leaderboard);
+                        getLeaderboardsRefresher().remove(leaderboard);
                     }
-                    getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList,
-                            LeaderboardConfigPanel.this.getLeaderboardsDisplayer());
+                    getLeaderboardsRefresher().callAllFill();
                 }
             });
         }
@@ -1089,8 +1093,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     @Override
                     public void onSuccess(Void result) {
                         removeLeaderboardFromTable(leaderBoard);
-                        getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList,
-                                LeaderboardConfigPanel.this.getLeaderboardsDisplayer());
+                        getLeaderboardsRefresher().remove(leaderBoard);
+                        getLeaderboardsRefresher().callAllFill();
                     }
                 }));
     }

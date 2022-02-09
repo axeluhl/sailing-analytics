@@ -36,8 +36,19 @@ public interface SimulatorService extends RemoteService {
     SimulatorResultsDTO getSimulatorResults(char mode, char rcDirection, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField,
             SimulatorUISelectionDTO selection) throws WindPatternNotFoundException, ConfigurationException;
 
+    /**
+     * The ordering of boat classes in {@link BoatClassDTOsAndNotificationMessage#getBoatClassDTOs()} can be used to
+     * infer a zero-based boat class "index" which can then be used to identify such a boat class in a call to
+     * {@link #getPolarDiagram(Double, int)}.
+     */
     BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException;
 
+    /**
+     * @param boatClassIndex
+     *            refers to the order of boat classes as found in
+     *            {@link #getBoatClasses()}.{@link BoatClassDTOsAndNotificationMessage#getBoatClassDTOs()
+     *            getBoatClassDTOs()} result.
+     */
     PolarDiagramDTOAndNotificationMessage getPolarDiagram(Double bearingStep, int boatClassIndex) throws ConfigurationException;
 
     ResponseTotalTimeDTO getTotalTime(RequestTotalTimeDTO requestData) throws ConfigurationException;

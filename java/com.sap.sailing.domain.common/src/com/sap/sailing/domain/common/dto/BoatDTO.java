@@ -20,8 +20,9 @@ public class BoatDTO extends NamedSecuredObjectDTO implements WithID, Serializab
     private String sailId;
     private Color color;
 
-    // for GWT
-    public BoatDTO() {}
+    public BoatDTO() {
+        super("");
+    }
 
     public BoatDTO(String idAsString, String name, BoatClassDTO boatClass, String sailId) {
         this(idAsString, name, boatClass, sailId, null);
@@ -122,7 +123,8 @@ public class BoatDTO extends NamedSecuredObjectDTO implements WithID, Serializab
     
     @Override
     public String toString() {
-        return getName() == null ? (getBoatClass().getName() + " / " + getSailId()) : getName();
+        return "BoatDTO [idAsString=" + idAsString + ", boatClass=" + boatClass + ", sailId=" + sailId + ", color="
+                + color + "]";
     }
     
     @Override

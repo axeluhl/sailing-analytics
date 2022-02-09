@@ -95,33 +95,10 @@ public class EventListComposite extends Composite {
     private final List<EventDTO> allEvents;
     private final Label noEventsLabel;
     protected final LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
-
+    private final Displayer<LeaderboardGroupDTO> leaderboardGroupsDisplayer;
+    private final Displayer<EventDTO> eventsDisplayer;
     private Iterable<LeaderboardGroupDTO> availableLeaderboardGroups;
     
-    private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
-
-        @Override
-        public void fill(Iterable<EventDTO> result) {
-            fillEvents(result);
-        }
-    };
-    
-    public Displayer<EventDTO> getEventsDisplayer() {
-        return eventsDisplayer;
-    }
-    
-    private final Displayer<LeaderboardGroupDTO> leaderboardGroupsDisplayer = new Displayer<LeaderboardGroupDTO>() {
-        
-        @Override
-        public void fill(Iterable<LeaderboardGroupDTO> result) {
-            fillLeaderboardGroups(result);
-        }
-    };
-    
-    public Displayer<LeaderboardGroupDTO> getLeaderboardGroupsDisplayer() {
-        return leaderboardGroupsDisplayer;
-    }
-
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -153,6 +130,18 @@ public class EventListComposite extends Composite {
         final VerticalPanel panel = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
         panel.add(buttonPanel);
+        leaderboardGroupsDisplayer = new Displayer<LeaderboardGroupDTO>() {
+            @Override
+            public void fill(Iterable<LeaderboardGroupDTO> result) {
+                fillLeaderboardGroups(result);
+            }
+        };
+        eventsDisplayer = new Displayer<EventDTO>() {
+            @Override
+            public void fill(Iterable<EventDTO> result) {
+                fillEvents(result);
+            }
+        };
         eventListDataProvider = new ListDataProvider<EventDTO>();
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()),
                 allEvents, eventListDataProvider, stringMessages) {
@@ -212,6 +201,14 @@ public class EventListComposite extends Composite {
         filterTextbox.setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
 
+    public Displayer<EventDTO> getEventsDisplayer() {
+        return eventsDisplayer;
+    }
+    
+    public Displayer<LeaderboardGroupDTO> getLeaderboardGroupsDisplayer() {
+        return leaderboardGroupsDisplayer;
+    }
+
     private CellTable<EventDTO> createEventTable(UserDTO user) {
         FlushableCellTable<EventDTO> table = new FlushableCellTable<EventDTO>(/* pageSize */10000, tableRes);
         eventListDataProvider.addDataDisplay(table);
@@ -230,8 +227,9 @@ public class EventListComposite extends Composite {
                     }
                 },filterTextbox.getAllListDataProvider(),table);
         AnchorCell anchorCell = new AnchorCell();
+        ListHandler<EventDTO> listHandler = new ListHandler<EventDTO>(eventListDataProvider.getList());
         final TextColumn<EventDTO> eventUUidColumn = new AbstractSortableTextColumn<EventDTO>(
-                event -> event.getId() == null ? "<null>" : event.getId().toString());
+                event -> event.getId() == null ? "<null>" : event.getId().toString(), listHandler);
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
@@ -367,9 +365,9 @@ public class EventListComposite extends Composite {
         leaderboardGroupsColumn.setSortable(true);
         groupColumn.setSortable(true);
         userColumn.setSortable(true);
-        final ListHandler<EventDTO> columnSortHandler = getEventTableColumnSortHandler(eventListDataProvider.getList(),
-                eventSelectionCheckboxColumn, eventNameColumn, venueNameColumn, startEndDateColumn, isPublicColumn,
-                courseAreasColumn, leaderboardGroupsColumn, groupColumn, userColumn);
+        configureTableColumnSortHandler(listHandler, eventSelectionCheckboxColumn,
+                eventNameColumn, venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn,
+                leaderboardGroupsColumn, groupColumn, userColumn);
         table.addColumn(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getHeader());
         table.addColumn(eventNameColumn, stringMessages.event());
         table.addColumn(venueNameColumn, stringMessages.venue());
@@ -384,32 +382,31 @@ public class EventListComposite extends Composite {
         table.addColumn(eventUUidColumn, stringMessages.id());
         table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
-        table.addColumnSortHandler(columnSortHandler);
+        table.addColumnSortHandler(listHandler);
         table.getColumnSortList().push(startEndDateColumn);
         return table;
     }
     
-    private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
-            SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn, Column<EventDTO, SafeHtml> eventNameColumn,
-            TextColumn<EventDTO> venueNameColumn, TextColumn<EventDTO> startEndDateColumn,
-            TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
-            Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn,
-            SecuredDTOOwnerColumn<EventDTO> groupColumn, SecuredDTOOwnerColumn<EventDTO> userColumn) {
-        ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
-        result.setComparator(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getComparator());
-        result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
+    private void configureTableColumnSortHandler(ListHandler<EventDTO> columnSortHandler, SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn,
+            Column<EventDTO, SafeHtml> eventNameColumn, TextColumn<EventDTO> venueNameColumn,
+            TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn,
+            Column<EventDTO, SafeHtml> courseAreasColumn, Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn,
+            SecuredDTOOwnerColumn<EventDTO> groupColumn,
+            SecuredDTOOwnerColumn<EventDTO> userColumn) {
+        columnSortHandler.setComparator(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getComparator());
+        columnSortHandler.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return new NaturalComparator().compare(e1.getName(), e2.getName());
             }
         });
-        result.setComparator(venueNameColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(venueNameColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return new NaturalComparator().compare(e1.venue.getName(), e2.venue.getName());
             }
         });
-        result.setComparator(startEndDateColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(startEndDateColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 int result;
@@ -425,27 +422,26 @@ public class EventListComposite extends Composite {
                 return result;
             }
         });
-        result.setComparator(isPublicColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(isPublicColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.isPublic == e2.isPublic ? 0 : e1.isPublic ? 1 : -1;
             }
         });
-        result.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.venue.getCourseAreas().toString().compareTo(e2.venue.getCourseAreas().toString());
             }
         });
-        result.setComparator(leaderboardGroupsColumn, new Comparator<EventDTO>() {
+        columnSortHandler.setComparator(leaderboardGroupsColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.getLeaderboardGroups().toString().compareTo(e2.getLeaderboardGroups().toString());
             }
         });
-        result.setComparator(groupColumn, groupColumn.getComparator());
-        result.setComparator(userColumn, userColumn.getComparator());
-        return result;
+        columnSortHandler.setComparator(groupColumn, groupColumn.getComparator());
+        columnSortHandler.setComparator(userColumn, userColumn.getComparator());
     }
 
     private void removeEvents(Collection<EventDTO> events) {
@@ -461,7 +457,10 @@ public class EventListComposite extends Composite {
                 }
                 @Override
                 public void onSuccess(Void result) {
-                    presenter.getEventsRefresher().reloadAndCallFillAll();
+                    for (EventDTO event : events) {
+                        presenter.getEventsRefresher().remove(event);
+                    }
+                    presenter.getEventsRefresher().callAllFill();
                 }
             });
         }
@@ -476,7 +475,8 @@ public class EventListComposite extends Composite {
 
             @Override
             public void onSuccess(Void result) {
-                presenter.getEventsRefresher().reloadAndCallFillAll();
+                presenter.getEventsRefresher().remove(event);
+                presenter.getEventsRefresher().callAllFill();
             }
         });
     }
@@ -549,8 +549,8 @@ public class EventListComposite extends Composite {
     private void openCreateRegattaDialog(List<RegattaDTO> existingRegattas, List<EventDTO> existingEvents,
             EventDTO createdEvent) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas,
-                existingEvents, createdEvent, sailingServiceWrite, stringMessages,
-                new CreateRegattaCallback(stringMessages, presenter, existingEvents));
+                existingEvents, createdEvent, sailingServiceWrite, userService,
+                stringMessages, new CreateRegattaCallback(stringMessages, presenter, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
@@ -588,6 +588,8 @@ public class EventListComposite extends Composite {
                                         } else {
                                             errorReporter.reportError("Could not find the event with name "+newEvent.getName()+" to which the leaderboardgroup should be added");
                                         }
+                                        presenter.getLeaderboardGroupsRefresher().add(newGroup);
+                                        presenter.getLeaderboardGroupsRefresher().callAllFill();
                                         openCreateDefaultRegattaDialog(newEvent);
                                     }
                                 }));
@@ -721,7 +723,8 @@ public class EventListComposite extends Composite {
 
             @Override
             public void onSuccess(final EventDTO newEvent) {
-                presenter.getEventsRefresher().reloadAndCallFillAll();
+                presenter.getEventsRefresher().add(newEvent);
+                presenter.getEventsRefresher().callAllFill();
                 if (newEvent.getLeaderboardGroups().isEmpty()) {
                     // show simple Dialog
                     DataEntryDialog<Void> dialog = new CreateDefaultLeaderboardGroupDialog(
@@ -745,7 +748,7 @@ public class EventListComposite extends Composite {
     }
 
     public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
-        availableLeaderboardGroups = leaderboardGroups;
+        availableLeaderboardGroups = Util.filter(leaderboardGroups, lg->userService.hasPermission(lg, DefaultActions.UPDATE));
     }
 
     public void fillEvents(Iterable<EventDTO> events) {

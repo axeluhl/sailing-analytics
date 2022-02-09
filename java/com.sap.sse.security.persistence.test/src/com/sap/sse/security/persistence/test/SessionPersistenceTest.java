@@ -99,6 +99,7 @@ public class SessionPersistenceTest {
         session.setStartTimestamp(start);
         session.setLastAccessTime(last);
         session.setTimeout(timeout);
+        session.setAttribute("a", "b");
         mof.storeSession(cacheName, session);
         final Map<String, Set<Session>> sessions = dof.loadSessionsByCacheName();
         // expecting the session to be still there because the 10s haven't expired yet:

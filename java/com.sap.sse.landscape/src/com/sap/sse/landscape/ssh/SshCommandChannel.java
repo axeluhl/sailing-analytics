@@ -39,7 +39,7 @@ public interface SshCommandChannel {
     
     int getExitStatus();
     
-    void disconnect();
+    void disconnect() throws JSchException;
 
     /**
      * Consumes the entire input stream content as provided by {@link #sendCommandLineSynchronously(String, OutputStream)} and then

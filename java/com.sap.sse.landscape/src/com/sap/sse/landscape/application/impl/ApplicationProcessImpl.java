@@ -3,9 +3,12 @@ package com.sap.sse.landscape.application.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +23,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
@@ -32,7 +37,9 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.impl.ProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
-import com.sap.sse.util.Wait;
+import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.HttpUrlConnectionHelper;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public abstract class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -44,46 +51,39 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     /**
      * Absolute path in the file system of the host on which this process is running and that represents
      * this process's working directory. This directory is expected to contain a file named {@link #ENV_SH}
-     * whose contents can be obtained using the {@link #getEnvSh(Optional, Optional, byte[])} method.
+     * whose contents can be obtained using the {@link #getEnvSh(Optional, Optional, byte[])} method.<p>
+     * 
+     * Under certain circumstances and for specific subclasses the value of this field may start out as {@code null}
+     * and may later be determined, e.g., by fetching the server's status document and extracting it from there,
+     * just like with the {@link #serverName} field.
      */
-    private final String serverDirectory;
+    protected String serverDirectory;
     
-    private String serverName;
+    protected String serverName;
     
     private Integer telnetPortToOSGiConsole;
-    
-    /**
-     * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the
-     * {@link #ENV_SH env.sh} file located on the {@code host} in the {@code serverDirectory} specified.
-     * 
-     * @param optionalKeyName
-     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
-     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
-     *            pair that was originally used when the instance was launched will be used.
-     * @param privateKeyEncryptionPassphrase
-     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
-     */
-    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        this(readPortFromDirectory(host, serverDirectory, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase), host, serverDirectory);
-    }
     
     public ApplicationProcessImpl(int port, Host host, String serverDirectory) {
         super(port, host);
         this.serverDirectory = serverDirectory;
     }
 
-    public ApplicationProcessImpl(int port, Host host, String serverDirectory, int telnetPort, String serverName) {
+    public ApplicationProcessImpl(int port, Host host, String serverDirectory, Integer telnetPort, String serverName) {
         this(port, host, serverDirectory);
         this.telnetPortToOSGiConsole = telnetPort;
         this.serverName = serverName;
     }
 
-    private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
-            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
-            throws Exception {
-        return Integer.parseInt(
-                getEnvShValueFor(host, serverDirectory, DefaultProcessConfigurationVariables.SERVER_PORT.name(),
-                        optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
+    @Override
+    public int hashCode() {
+        return getHost().hashCode() ^ getPort();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        ApplicationProcess<?, ?, ?> other = (ApplicationProcess<?, ?, ?>) o;
+        return Util.equalsWithNull(getHost(), other.getHost())
+            && getPort() == other.getPort();
     }
     
     @Override
@@ -117,13 +117,27 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
     private String getVersionTxt(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        return getFileContents(getServerDirectory(optionalTimeout)+"/"+VERSION_TXT, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
-    public boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout) {
-        // TODO Implement ApplicationProcessImpl.tryCleanShutdown(...)
-        return false;
+    public void tryShutdown(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws IOException, InterruptedException, JSchException, Exception {
+        logger.info("Stopping application process "+this);
+        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        if (sshChannel == null) {
+            logger.warning("Couldn't create an SSH connection to "+this+" for shutdown. Assuming it is already shut down.");
+        } else {
+            sshChannel.runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory(optionalTimeout)+"; ./stop", "Shutting down "+this, Level.INFO);
+        }
+    }
+    
+    @Override
+    public void restart(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws IOException, InterruptedException, JSchException, Exception {
+        logger.info("Restarting application process "+this);
+        getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
+            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory(optionalTimeout)+"; ./stop; ./start", "Shutting down "+this, Level.INFO);
     }
     
     @Override
@@ -143,7 +157,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     @Override
     public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        return getEnvShValueFor(getHost(), getServerDirectory(optionalTimeout), variableName, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName,
@@ -165,7 +179,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getServerDirectory() {
+    public String getServerDirectory(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return serverDirectory;
     }
     
@@ -173,8 +187,8 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return serverDirectory+"/"+ENV_SH;
         
     }
-    private String getEnvShPath() {
-        return getEnvShPath(getServerDirectory());
+    private String getEnvShPath(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        return getEnvShPath(getServerDirectory(optionalTimeout));
     }
 
     @Override
@@ -187,17 +201,19 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public String getEnvSh(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getFileContents(getEnvShPath(), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        return getFileContents(getEnvShPath(optionalTimeout), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     protected String getFileContents(String path, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
-        sftpChannel.get(path, bos);
-        sftpChannel.disconnect();
-        return bos.toString();
+        try {final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
+            sftpChannel.get(path, bos);
+            return bos.toString();
+        } finally {
+            sftpChannel.getSession().disconnect();
+        }
     }
     
     /**
@@ -208,15 +224,14 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return "/";
     }
     
-    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout)
-            throws ClientProtocolException, IOException, ParseException {
+    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(optionalTimeout));
     }
 
     private JSONObject getReplicationStatus(final URL url)
             throws IOException, ClientProtocolException, ParseException {
         final HttpPost postRequest = new HttpPost(url.toString());
-        final HttpClient client = HttpClientBuilder.create().build();
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         client.execute(postRequest).getEntity().writeTo(bos);
         return (JSONObject) new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
@@ -246,9 +261,9 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                 } catch (Exception e) {
                     return false;
                 }
-            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for server name");
+            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for master server name of "+this);
         } catch (Exception e) {
-            logger.info("Exception while waiting for master server name: "+e.getMessage());
+            logger.info("Exception while waiting for master server name of "+this+": "+e.getMessage());
         }
         return result[0];
     }
@@ -256,5 +271,26 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private JSONObject getReplicationStatus(Optional<Duration> optionalTimeout, String hostname, int port)
             throws ClientProtocolException, IOException, ParseException {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(hostname, port));
+    }
+    
+    @Override
+    public void stopReplicatingFromMaster(String bearerToken, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper
+                .redirectConnectionWithBearerToken(getUrl(STOP_REPLICATION_POST_URL_PATH_AND_QUERY, optionalTimeout),
+                        /* HTTP method */ "POST", bearerToken);
+        StringBuilder uuid = new StringBuilder();
+        InputStream content = (InputStream) deregistrationRequestConnection.getContent();
+        byte[] buf = new byte[256];
+        int read = content.read(buf);
+        while (read != -1) {
+            uuid.append(new String(buf, 0, read));
+            read = content.read(buf);
+        }
+        content.close();
+    }
+    
+    @Override
+    public String toString() {
+        return "ApplicationProcessImpl [serverDirectory=" + serverDirectory + ", serverName=" + serverName + ", port=" + getPort() + ", host=" + getHost() + "]";
     }
 }

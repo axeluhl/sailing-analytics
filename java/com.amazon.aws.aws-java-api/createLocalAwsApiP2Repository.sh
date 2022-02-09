@@ -27,7 +27,7 @@ echo "Downloading libraries..."
 rm -rf ${LIB}/*
 ${WORKSPACE}/gradlew downloadLibs
 cd ${LIB}
-VERSION=`ls -1 aws-core-*.jar | grep -v -- -sources | sed -e 's/aws-core-\([.0-9]*\)\.jar/\1/'`
+VERSION=`ls -1 aws-core-*.jar | grep -v -- -sources | sed -e 's/aws-core-\([.0-9]*\)\.jar/\1/' | sort | tail -n 1`
 echo VERSION=${VERSION}
 LIBS=`ls -1 | grep -v -- -sources\.jar`
 echo "Generating the .classpath file..."
@@ -114,14 +114,16 @@ sed -i -e 's/^\( *\)version="[0-9.]*"/\1version="'${VERSION}'"/' ${FEATURE_XML}
 echo "Patching com.sap.sse.feature.runtime's feature.xml..."
 NEW_SSE_RUNTIME_FEATURE_XML_CONTENT=$( cat "${SSE_RUNTIME_FEATURE_XML}" |  awk -v VERSION=${VERSION} '
 /id="com.amazon.aws.aws-java-api"/ { IN_PLUGIN="true"; }
-{ if (IN_PLUGIN=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN="false"; } else print $0; }
+/id="com.amazon.aws.aws-java-api.source"/ { IN_PLUGIN_SOURCE="true"; }
+{ if (IN_PLUGIN=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN="false"; } else
+if (IN_PLUGIN_SOURCE=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN_SOURCE="false"; } else print $0; }
 ' )
 echo "${NEW_SSE_RUNTIME_FEATURE_XML_CONTENT}" >"${SSE_RUNTIME_FEATURE_XML}"
 echo "Patching update site's site.xml..."
 sed -i -e 's/com.amazon.aws.aws-java-api\(\.source\)\?_\([0-9.]*\)\.jar/com.amazon.aws.aws-java-api\1_'${VERSION}'.jar/' -e '/feature url=/s/version="[0-9.]*"/version="'${VERSION}'"/' ${SITE_XML}
 echo "Building update site..."
 mvn clean install
-echo "Patching SDK version in target platform definition ${TARGET_DEFINITION}..."
+echo "Patching SDK version ${VERSION} in target platform definition ${TARGET_DEFINITION}..."
 sed -i -e 's/<unit id="com.amazon.aws.aws-java-api.feature.group" version="[0-9.]*"\/>/<unit id="com.amazon.aws.aws-java-api.feature.group" version="'${VERSION}'"\/>/' ${TARGET_DEFINITION}
 echo "You may test your target platform locally by creating race-analysis-p2-local.target by running the script createLocalTargetDef.sh."
 echo "You can also try a Hudson build with the -v option, generating and using the local target platform during the build."

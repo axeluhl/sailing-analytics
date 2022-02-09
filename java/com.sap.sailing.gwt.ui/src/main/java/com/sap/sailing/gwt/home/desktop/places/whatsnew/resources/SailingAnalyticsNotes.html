@@ -4,6 +4,133 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">December 2021</h5>
+         <ul class="bulletList">
+           <li>The strategy simulator (see <a href="https://sapsailing.com/gwt/Simulator.html">https://sapsailing.com/gwt/Simulator.html</a>)
+               now offers all the boat polars trained during more than 25,000 races tracked.
+           </li>
+         </ul>
+         <h5 class="articleSubheadline">November 2021</h5>
+         <ul class="bulletList">
+           <li>When signing up for a new user account, the user name is now trimmed, meaning that
+               leading and trailing whitespace / blank characters are removed. For example, if you
+               sign up for a user name " abc123 " it will become "abc123". This change is inteneded
+               to help those using touch-screen keyboards with auto-completion where particularly
+               trailing blanks are often appended, leading to problems logging in to these accounts
+               if the trailing blank remains part of the username but then are not provided during
+               the login process.</li>
+         </ul>
+         <h5 class="articleSubheadline">October 2021</h5>
+         <ul class="bulletList">
+           <li>The <a href="/gwt/DataMining.html">Data Mining</a> module now has additional statistics for a competitor's
+               start performance, such as the absolute and normalized distance from the starboard side of the start line,
+               projected onto the start line, the distance to the next boat to port/starboard at the start projected
+               onto the start line, and the windward/line-perpendicular distances to the port/starboard neighbors
+               at the start line.</li>
+           <li>More enhancements to the DataMining module, e.g., adding the IRM / penalty code as a filter / grouping
+               dimension, and providing sums of absolute distances to neighbors at start line.</li>
+           <li>Performance improvements for ORC Performance Curve Scoring, especially for the "WINDWARD_LEEWARD_REAL_LIVE"
+               leg type.</li>
+           <li>Performance improvements for leaderboards with few or only a single column but many competitors by parallelizing
+               calculations across competitors, too.</li>
+           <li>When a boat name but no competitor short name is provided, the boat name now takes precedence over the sail number in the
+               little flag-shaped overlays on the race map.</li>
+         </ul>
+         <h5 class="articleSubheadline">September 2021</h5>
+         <ul class="bulletList">
+           <li>On race board it is now possible to add media files from disc or capture video and sound directly from mobile device.</li>
+           <li>Also in the media gallery of the event page it is now possible to add photos and videos from disc or capture them from smartphone.</li>
+           <li>Due to the growing number of functions we cleaned up the race board. The most of the buttons moved to a launch pad.
+               The features are now arranged in one place within a uniform look and are available with a maximum of two short clicks.
+               This creates a lot more space for the actual race map.</li>
+         </ul>
+         <h5 class="articleSubheadline">July 2021</h5>
+         <ul class="bulletList">
+           <li>The data mining module (<a href="/gwt/DataMining.html">/gwt/DataMining.html</a>) now offers additional
+               metrics regarding the regular wind-based rank calculation for upwind and downwind legs as well as
+               hypothetical ranks calculated for upwind and downwind legs ignoring wind information and instead
+               projecting onto the Rhumb line. This allows for analyzing the effects of a wind-based ranking
+               on upwind and downwind legs.</li>
+           <li>Groups are now ordered by name in the drop-down for setting the default creation group
+               under "User Details."</li>
+           <li>A Slovenian translation of the user interface has been added.</li>
+           <li>The IOC code for "Russian Olympic Committee" has been added under the "ROC" abbreviation, together
+               with the IOC-provided flag.</li>
+           <li>Fixed a regression: competitors are now again selected correctly for the Start Analysis and for the
+               Winning Lanes modes of the race viewer.</li>
+           <li>When the streamlet settings are changed using the wind indicator on the map, these settings are now
+               also stored in the user profile as if they had been changed via the map settings dialog.</li>
+           <li>Boat scaling on large zoom levels has been fixed. The pixel size now better corresponds to the
+               boat class's hull length and beam.</li>
+           <li>An issue with re-drawing the "Progression" chart during live races has been fixed.</li>
+           <li>Wind arrows now fade according to their fading confidence, e.g., when a WindBot device has been
+               switched off, or if Wind Finder samples have aged by ten minutes or more.</li>
+           <li>The place for which the "combined wind" is calculated is now closer to the "middle of the course" than
+               before. Before, each waypoint's position was considered for the average, overemphasizing leeward waypoints
+               for windward-leeward courses, for example. Now, each leg's middle position is considered for the average,
+               with a weight that corresponds to the leg's length. This results in an average that virtually takes into
+               account every single point on each sailed leg's rhumb line. Note, though, that the positions are taken based
+               on the mark positions at the time point requested. If marks are moved around the course this will have an
+               effect, obviously, on how this average is calculated.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2021</h5>
+         <ul class="bulletList">
+           <li>The advantage line now also (again) shows after the first competitor has crossed the finish line.</li>
+           <li>Dampening of wind, in particular the estimation from courses over ground (COG),
+               has been improved. The confidences inferred from cluster sizes sailing on separate tacks
+               are now growing more smoothly for small fleet sizes and hence cause less unexpected
+               "jumps" in estimated wind directions. Base confidence of wind estimations, compared
+               to sensor-based measurements, has been slightly reduced, as has the base confidence for
+               estimations from downwind legs.</li>
+           <li>Wind streamlet overlay on race map now scales better for long-distance races. Its spatial
+               interpolation is now a much closer approximation of the server-side wind field used which
+               also leads to smoother transitions between sensors distributed across the race course area.</li>
+           <li>Usernames with leading/trailing space characters can no longer be created in the sign-up dialog.
+               Access to existing accounts with such names now need explicit confirmation during sign-in and
+               password recovery to make users aware of the problem.</li>
+         </ul>
+         <h5 class="articleSubheadline">May 2021</h5>
+         <ul class="bulletList">
+           <li>Added language support for Danish (Dansk).</li>
+           <li>The stage will from now on randomize the order of long-running events that span more than
+               two weeks, assuming that those are actually event <em>series</em>, so these won't
+               dominate the stage.</li>
+           <li>Fixed a problem that occurred with empty tracks while trying to display a leaderboard.
+               The issue was displayed to users as error message at the bottom of the race board:
+               "Error trying to obtain leaderboard contents: ...".</li>
+           <li>The advantage line will now also be shown reliably after the first competitors have
+               finished the race.</li>
+         </ul>
+         <h5 class="articleSubheadline">April 2021</h5>
+         <ul class="bulletList">
+           <li>Bug fix: the distance traveled in a leg is now reported correctly by the DataMining module even
+               if no "end of tracking" time point is known for the containing race.</li>
+           <li>Added <tt>balaton</tt> to the list of supported <a href="https://www.windfinder.com">WindFinder</a>
+               spot collections you can use for your own events.</li>
+           <li>The polar sheet display in the DataMining front-end suffered from bad performance after the server
+               returned the query results. This is now fixed.</li>
+           <li>Cross track error (XTE) statistics have now been added to the <tt>/sailingserver/api/v1/regattas/{regattaname}/races/{racename}/competitors/legs</tt>
+               and the <tt>/sailingserver/api/v2/leaderboards/{name}</tt> end points. The former also contains the average XTE values (signed and absolute)
+               for all legs. For the latter, specify one or more of the following new detail types:
+               <ul>
+                 <li><tt>LEG_CURRENT_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS</tt> produces the new field <tt>legCurrentAbsoluteCrossTrackErrorInMeters</tt></li>
+                 <li><tt>LEG_CURRENT_SIGNED_CROSS_TRACK_ERROR_IN_METERS</tt> produces the new field <tt>legCurrentSignedCrossTrackErrorInMeters</tt></li>
+               </ul>
+               Note that the "...CURRENT..." values will not be present when at the time point for which the values are to be reported
+               the competitor is not actively racing in any leg.
+           </li>
+           <li>When removing a setting from <tt>gwt/Home.html#/user/profile/settings/:</tt> the filter expression is now
+               considered while refreshing the table.</li>
+         </ul>
+         <h5 class="articleSubheadline">March 2021</h5>
+         <ul class="bulletList">
+           <li>Bug fix: show course middle line of first leg only if display of course middle lines is selected in settings.</li>
+           <li>Start/finish line biases are now correctly translated into the selected locale's display language.</li>
+         </ul>
+         <h5 class="articleSubheadline">February 2021</h5>
+         <ul class="bulletList">
+           <li>The solution now supports the new Olympic penalty code (IRM) "NSC" ("Did not sail the course").</li>
+         </ul>
          <h5 class="articleSubheadline">January 2021</h5>
          <ul class="bulletList">
            <li>The charts within the progression tab of a regatta or series now support viewing in fullscreen mode.</li>

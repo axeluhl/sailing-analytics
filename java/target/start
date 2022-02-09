@@ -13,9 +13,9 @@ PARAM=$@
 JAVA_BINARY=$JAVA_HOME/bin/java
 if [[ ! -d "$JAVA_HOME" ]]; then
     echo "Could not find $JAVA_BINARY set in env.sh. Trying to find the correct one..."
-    JAVA_VERSION=$(java -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
-    if [ "$JAVA_VERSION" -lt 17 ]; then
-        echo "The current Java version ($JAVA_VERSION) does not match the requirements (>= 1.7)."
+    JAVA_VERSION=$(java -version 2>&1 | sed 's/^\(java version "\(.*\)\.\(.*\)\..*"\)\|\(openjdk version "\(.*\)\.\(.*\)\.\(.*\)" .*\)$/\3\5/; 1q')
+    if [ "$JAVA_VERSION" -lt 7 -o "$JAVA_VERSION" -gt 8 ]; then
+        echo "The current Java version ($JAVA_VERSION) does not match the requirements (>= Java 7, <= Java 8)."
         exit
     fi
     JAVA_BINARY=`which java`
@@ -75,6 +75,8 @@ else
   MONGODB_URI_FOR_SED="$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME"
 fi
 sed $SED_ARGS "s/System:.*$/System: $MONGODB_URI_FOR_SED-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+VERSION_JSON_CONTENTS=$( cat ./configuration/jetty/version.json )
+echo "${VERSION_JSON_CONTENTS}" | jq --argjson start_time_millis $( date +%s )000 '. + {start_time_millis: $start_time_millis} + {port: '${SERVER_PORT}'}' >./configuration/jetty/version.json
 
 # Apply app parameters from env.sh
 if [ "$MONGODB_URI" = "" ]; then

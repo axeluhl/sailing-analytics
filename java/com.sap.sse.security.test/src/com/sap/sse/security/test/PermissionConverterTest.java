@@ -59,6 +59,6 @@ public class PermissionConverterTest {
         final String objectID = "KW2017 Laser Int.";
         final String permissionString = typeName+":"+mode+":"+objectID;
         Permission permission = new UsernamePasswordRealm().getPermissionResolver().resolvePermission(permissionString);
-        assertEquals("["+typeName+"]:["+mode+"]:["+objectID+"]", permission.toString());
+        assertEquals(typeName+":"+mode+":"+objectID, permission.toString());
     }
 }

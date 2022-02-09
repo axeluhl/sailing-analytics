@@ -45,10 +45,10 @@ allprojects {
 // dependency versions for all sub modules
 ext {
     // regular
-    buildTools = "29.0.3"
-    compileSdk = 29
+    buildTools = "30.0.3"
+    compileSdk = 30
     minSdk = 16
-    targetSdk = 29
+    targetSdk = 30
 
     sourceCompatibilityVersion = JavaVersion.VERSION_1_8
     targetCompatibilityVersion = JavaVersion.VERSION_1_8
@@ -68,11 +68,11 @@ ext {
     isXmakeBuild = project.hasProperty("xmake")
     isReleaseBuild = Boolean.parseBoolean(System.env.XMAKE_RELEASE_BUILD)
 
-    destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
+    destinationFolder = project.rootDir.absolutePath + "/java/com.sap.sailing.www/apps/"
 }
 
-apply plugin: "org.ajoberstar.grgit"
 if (project.hasProperty("xmake")) {
+    apply plugin: "org.ajoberstar.grgit"
     task wrapper(type: Wrapper) {
         distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
         System.setProperty("http.proxyHost", sapProxyHost)
@@ -83,4 +83,3 @@ if (project.hasProperty("xmake")) {
         System.setProperty("https.nonProxyHosts", sapNonProxyHosts)
     }
 }
-

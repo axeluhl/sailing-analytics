@@ -15,7 +15,7 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
@@ -85,7 +85,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             permissionMap.add(permissionMapEntry);
         }
         dbACL.put(FieldNames.AccessControlList.PERMISSION_MAP.name(), permissionMap);
-        aclCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbACL, new UpdateOptions().upsert(true));
+        aclCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbACL, new ReplaceOptions().upsert(true));
     }
     
     @Override
@@ -113,7 +113,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbOwnership.put(FieldNames.Ownership.OWNER_USERNAME.name(), owner.getAnnotation().getUserOwner()==null?null:owner.getAnnotation().getUserOwner().getName());
         dbOwnership.put(FieldNames.Ownership.TENANT_OWNER_ID.name(), owner.getAnnotation().getTenantOwner()==null?null:owner.getAnnotation().getTenantOwner().getId());
         dbOwnership.put(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name(), owner.getDisplayNameOfAnnotatedObject());
-        ownershipCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbOwnership, new UpdateOptions().upsert(true));
+        ownershipCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbOwnership, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -144,7 +144,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             stringPermissions.add(permission.toString());
         }
         dbRole.put(FieldNames.Role.PERMISSIONS.name(), stringPermissions);
-        roleCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbRole, new UpdateOptions().upsert(true));
+        roleCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbRole, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -162,6 +162,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.Role.QUALIFYING_TENANT_ID.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getId());
         result.put(FieldNames.Role.QUALIFYING_TENANT_NAME.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getName());
         result.put(FieldNames.Role.QUALIFYING_USERNAME.name(), role.getQualifiedForUser()==null?null:role.getQualifiedForUser().getName());
+        result.put(FieldNames.Role.TRANSITIVE.name(), role.isTransitive());
         return result;
     }
     
@@ -186,7 +187,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRoleDefinitionMap.add(dbRoleDef);
         }
         dbUserGroup.put(FieldNames.UserGroup.ROLE_DEFINITION_MAP.name(), dbRoleDefinitionMap);
-        userGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUserGroup, new UpdateOptions().upsert(true));
+        userGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUserGroup, new ReplaceOptions().upsert(true));
     }
     
     @Override
@@ -231,7 +232,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         dbUser.put(FieldNames.User.DEFAULT_TENANT_IDS.name(), defaultTennants);
         dbUser.put(FieldNames.User.SUBSCRIPTIONS.name(), createSubscriptions(user.getSubscriptions()));
-        usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUser, new UpdateOptions().upsert(true));
+        usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUser, new ReplaceOptions().upsert(true));
     }
     
     @Override
@@ -275,7 +276,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.MAP.name(), createSettingsMapObject(settings));
-        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbSettings, new UpdateOptions().upsert(true));
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbSettings, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -297,7 +298,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.Preferences.USERNAME.name(), username);
         Document update = new Document(FieldNames.Preferences.KEYS_AND_VALUES.name(), dbSettings);
         update.put(FieldNames.Preferences.USERNAME.name(), username);
-        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, update, new UpdateOptions().upsert(true));
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, update, new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -315,7 +316,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.MAP.name(), createSettingTypesMapObject(settingTypes));
-        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbSettingTypes, new UpdateOptions().upsert(true));
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbSettingTypes, new ReplaceOptions().upsert(true));
     }
 
     private Document createSettingsMapObject(Map<String, Object> settings) {

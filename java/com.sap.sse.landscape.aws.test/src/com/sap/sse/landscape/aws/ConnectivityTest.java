@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,14 +33,13 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
-import com.sap.sailing.landscape.procedures.StartFromSailingAnalyticsImage;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
-import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
@@ -68,7 +68,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * @author Axel Uhl (D043530)
  *
  */
-public class ConnectivityTest<ProcessT extends ApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
+public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
     private AwsLandscape<String> landscape;
@@ -79,7 +79,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     @Before
     public void setUp() {
         landscape = AwsLandscape.obtain();
-        region = new AwsRegion(Region.EU_WEST_2);
+        region = new AwsRegion(Region.EU_WEST_2, landscape);
         AXELS_KEY_PASS = new String(Base64.getDecoder().decode(System.getProperty("axelskeypassphrase")));
         keyPass = "lkayrelakuesyrlasp8caorewyc".getBytes();
     }
@@ -162,7 +162,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String configFileName = "/etc/httpd/conf.d/"+hostname+".conf";
         sftpChannel.get(configFileName, configFileContents);
         assertTrue(configFileContents.toString().startsWith("Use Event-SSL "+hostname));
-        sftpChannel.disconnect();
+        sftpChannel.getSession().disconnect();
         proxy.removeRedirect(hostname, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final String lsOutput = lsSshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+configFileName, /* stderr prefix */ null, /* stderr log level */ null);
@@ -171,7 +171,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
 
     protected ProcessT createApplicationProcess(final AwsInstance<String> host) {
         @SuppressWarnings("unchecked")
-        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, host, ApplicationProcessHost.DEFAULT_SERVER_PATH);
+        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, host, ApplicationProcessHost.DEFAULT_SERVER_PATH, 2010, landscape);
         return process;
     }
     
@@ -242,7 +242,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     }
 
     private AmazonMachineImage<String> getLatestSailingImage() {
-        return landscape.getLatestImageWithTag(region, "image-type", StartFromSailingAnalyticsImage.IMAGE_TYPE_TAG_VALUE_SAILING);
+        return landscape.getLatestImageWithTag(region, "image-type", SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING);
     }
     
     @Test
@@ -400,7 +400,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String ipAddress = "1.2.3.4";
         final String dnsHostedZoneId = landscape.getDNSHostedZoneId(testHostedZoneDnsName);
         try {
-            ChangeInfo changeInfo = landscape.setDNSRecordToValue(dnsHostedZoneId, hostname, ipAddress);
+            ChangeInfo changeInfo = landscape.setDNSRecordToValue(dnsHostedZoneId, hostname, ipAddress, /* force */ false);
             int attempts = 10;
             while ((changeInfo=landscape.getUpdatedChangeInfo(changeInfo)).status() != ChangeStatus.INSYNC && --attempts > 0) {
                 Thread.sleep(10000);
@@ -414,7 +414,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     }
     
     @Test
-    public void createEmptyLoadBalancerTest() throws InterruptedException {
+    public void createEmptyLoadBalancerTest() throws InterruptedException, ExecutionException {
         final String albName = "MyAlb"+new Random().nextInt();
         final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region);
         try {
@@ -439,9 +439,13 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     @Test
     public void createAndDeleteTargetGroupTest() {
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
-        final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
+        final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80,
+                /* loadBalancerArn */ null);
         try {
-            final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName, targetGroup.getTargetGroupArn());
+            final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName,
+                    targetGroup.getTargetGroupArn(), targetGroup.getLoadBalancerArn(), targetGroup.getProtocol(),
+                    targetGroup.getPort(), targetGroup.getHealthCheckProtocol(),
+                    targetGroup.getHealthCheckPort(), targetGroup.getHealthCheckPath());
             assertEquals(targetGroupName, fetchedTargetGroup.getName());
         } finally {
             landscape.deleteTargetGroup(targetGroup);
@@ -450,7 +454,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     
     @Test
     public void testCentralReverseProxyInEuWest2IsAvailable() throws IOException, InterruptedException, JSchException {
-        final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
+        final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2", landscape));
         assertEquals(1, Util.size(proxy.getHosts()));
         final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
         assertEquals(200, healthCheckConnection.getResponseCode());

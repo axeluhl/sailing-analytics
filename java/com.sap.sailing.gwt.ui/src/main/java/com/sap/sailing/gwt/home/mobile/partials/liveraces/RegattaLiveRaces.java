@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.liveraces;
 
+import static com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListDataUtil.getFleetName;
+
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -17,7 +19,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 public class RegattaLiveRaces extends Composite implements RefreshableWidget<SortedSetResult<LiveRaceDTO>> {
 
     private static RegattaLiveRacesUiBinder uiBinder = GWT.create(RegattaLiveRacesUiBinder.class);
-    
+
     interface RegattaLiveRacesUiBinder extends UiBinder<MobileSection, RegattaLiveRaces> {
     }
 
@@ -32,16 +34,17 @@ public class RegattaLiveRaces extends Composite implements RefreshableWidget<Sor
         sectionHeaderUi.setSectionTitle(StringMessages.INSTANCE.liveNow());
         setVisible(false);
     }
-    
+
     @Override
-    public void setData(SortedSetResult<LiveRaceDTO> data) {
+    public void setData(final SortedSetResult<LiveRaceDTO> data) {
         setVisible(data != null && !data.isEmpty());
         mobileSection.clearContent();
         if (data != null) {
-            for (LiveRaceDTO liveRace : data.getValues()) {
-                mobileSection.addContent(new RegattaStatusRace(liveRace, presenter::getRaceViewerURL));
+            for (final LiveRaceDTO liveRace : data.getValues()) {
+                mobileSection.addContent(new RegattaStatusRace(liveRace, presenter::getRaceViewerURL, race -> presenter
+                        .getMapAndWindChartUrl(race.getLeaderboardName(), race.getRaceName(), getFleetName(liveRace))));
             }
         }
     }
-    
+
 }

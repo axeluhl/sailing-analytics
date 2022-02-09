@@ -4,11 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +19,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -30,7 +28,7 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.landscape.ssh.SshCommandChannelImpl;
 import com.sap.sse.landscape.ssh.YesUserInfo;
-import com.sap.sse.util.Wait;
+import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
@@ -40,11 +38,16 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
+    private final InetAddress privateAddress;
+    private InetAddress publicAddress;
+    private final TimePoint launchTimePoint;
     private final AwsLandscape<ShardingKey> landscape;
     
-    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<ShardingKey> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
+        this.privateAddress = privateAddress;
+        this.launchTimePoint = launchTimePoint;
         this.landscape = landscape;
     }
     
@@ -58,69 +61,53 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         return getInstance().hashCode();
     }
     
-    /**
-     * Obtains a fresh copy of the instance by looking it up in the {@link #getRegion() region} by its {@link #instanceId ID}.
-     */
-    private Instance getInstance() {
-        return landscape.getInstance(getInstanceId(), getRegion());
-    }
-    
     @Override
     public TimePoint getLaunchTimePoint() {
-        return TimePoint.of(getInstance().launchTime().toEpochMilli());
+        return launchTimePoint;
     }
 
     @Override
     public InetAddress getPublicAddress() {
-        return getIpAddress(Instance::publicIpAddress);
+        if (publicAddress == null) {
+            try {
+                publicAddress = getPublicAddress(Optional.of(Duration.NULL));
+            } catch (TimeoutException e) {
+                logger.info("Couldn't get public address of instance "+getId());
+                return null;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return publicAddress;
     }
     
     @Override
-    public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPublicAddress);
+    public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) throws TimeoutException, Exception {
+        if (publicAddress == null) {
+            final Instance instance = getInstance();
+            // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
+            if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
+                final String publicIpAddress = Wait.wait(()->getInstance().publicIpAddress(), ipAddress->ipAddress != null, /* retryOnException */ false,
+                        timeoutEmptyMeaningForever, /* sleep between attempts */ Duration.ONE_SECOND.times(5),
+                        Level.INFO, "Waiting for public IP address of instance "+instance.instanceId());
+                publicAddress = publicIpAddress == null ? null : InetAddress.getByName(publicIpAddress);
+            } else {
+                publicAddress = null;
+            }
+        }
+        return publicAddress;
     }
     
     @Override
     public InetAddress getPrivateAddress() {
-        return getIpAddress(Instance::privateIpAddress);
+        return privateAddress;
     }
     
     @Override
     public InetAddress getPrivateAddress(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPrivateAddress);
+        return getPrivateAddress();
     }
 
-    private InetAddress getIpAddress(Function<Instance, String> addressAsStringSupplier) {
-        try {
-            final Instance instance = getInstance();
-            final InetAddress result;
-            if (instance.state().name() == InstanceStateName.RUNNING) {
-                final String privateIpAddress = addressAsStringSupplier.apply(instance);
-                result = privateIpAddress==null?null:InetAddress.getByName(privateIpAddress);
-            } else {
-                result = null; // not RUNNING
-            }
-            return result;
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private InetAddress getAddressWithTimeout(Optional<Duration> timeoutNullMeaningForever, Supplier<InetAddress> addressSupplierMethod) {
-        final Instance instance = getInstance();
-        InetAddress result;
-        // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
-        if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
-            final TimePoint started = TimePoint.now();
-            while ((result = addressSupplierMethod.get()) == null &&
-                    (!timeoutNullMeaningForever.isPresent() ||
-                     started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever.get()) < 0));
-        } else {
-            result = null;
-        }
-        return result;
-    }
-    
     /**
      * Establishes an unconnected session configured for the "root" user.
      * 
@@ -133,7 +120,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
      * @see #createRootSshChannel
      */
     public com.jcraft.jsch.Session createRootSshSession(Optional<String> optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase) throws JSchException {
+            byte[] privateKeyEncryptionPassphrase) throws TimeoutException, Exception {
         return createSshSession(ROOT_USER_NAME, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
@@ -149,6 +136,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
      *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase to unlock the private key that belongs to the key pair identified by {@code keyName}
+     * @throws JSchException 
      * @see #createRootSshChannel
      */
     public com.jcraft.jsch.Session createSshSession(String sshUserName, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
@@ -205,27 +193,32 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
                 " with key "+optionalKeyName+
                 " to instance with ID "+getInstanceId());
         Channel result;
-        try {
-            result = Wait.wait(()->{
-                    Session session = null;
-                    try {
-                        session = createSshSession(sshUserName, optionalKeyName, privateKeyEncryptionPassphrase);
-                        session.setUserInfo(new YesUserInfo());
-                        session.connect(optionalTimeout.map(d->d.asMillis()).orElse(0l).intValue());
-                        return session.openChannel(channelType);
-                    } catch (JSchException | IllegalStateException e) {
-                        if (session != null) {
-                            session.disconnect();
-                        }
-                        throw e;
-                    }
-                },
-                channel->channel != null,
-                /* retryOnException */ true, optionalTimeout,
-                Duration.ONE_SECOND.times(5), Level.INFO,
-                "Trying to connect to " + getInstanceId() + " with user " + sshUserName + " using SSH");
-        } catch (TimeoutException timeout) {
+        if (!optionalKeyName.isPresent() && !Util.hasLength(getInstance().keyName())) {
+            logger.severe("SSH connection to "+this+" cannot be made because no key name is provided, neither explicitly nor during start-up");
             result = null;
+        } else {
+            try {
+                result = Wait.wait(()->{
+                        Session session = null;
+                        try {
+                            session = createSshSession(sshUserName, optionalKeyName, privateKeyEncryptionPassphrase);
+                            session.setUserInfo(new YesUserInfo());
+                            session.connect(optionalTimeout.map(d->d.asMillis()).orElse(0l).intValue());
+                            return session.openChannel(channelType);
+                        } catch (JSchException | IllegalStateException e) {
+                            if (session != null) {
+                                session.disconnect();
+                            }
+                            throw e;
+                        }
+                    },
+                    channel->channel != null,
+                    /* retryOnException */ true, optionalTimeout,
+                    Duration.ONE_SECOND.times(5), Level.INFO,
+                    "Trying to connect to " + getInstanceId() + " with user " + sshUserName + " using SSH");
+            } catch (TimeoutException timeout) {
+                result = null;
+            }
         }
         return result;
     }
@@ -264,10 +257,23 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         landscape.terminate(this);
     }
     
-    protected AwsLandscape<ShardingKey> getLandscape() {
+    @Override
+    public AwsLandscape<ShardingKey> getLandscape() {
         return landscape;
     }
     
+    @Override
+    public boolean isManagedByAutoScalingGroup() {
+        return getInstance().tags().stream().filter(tag->tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG)).findAny().isPresent();
+    }
+
+    @Override
+    public boolean isManagedByAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup) {
+        return getInstance().tags().stream().filter(tag -> autoScalingGroup != null
+                && tag.key().equals(AWS_AUTOSCALING_GROUP_NAME_TAG) && tag.value().equals(autoScalingGroup.getName()))
+                .findAny().isPresent();
+    }
+
     @Override
     public String toString() {
         return getInstanceId();

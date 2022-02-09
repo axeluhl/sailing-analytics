@@ -94,6 +94,8 @@ public abstract class DataEntryDialog<T> {
     }
 
     /**
+     * @param message
+     *            may be {@code null}
      * @param cancelButtonName
      *            if {@code null}, no cancel button will be displayed
      * @param validator
@@ -110,6 +112,8 @@ public abstract class DataEntryDialog<T> {
     }
     
     /**
+     * @param message
+     *            may be {@code null}
      * @param cancelButtonName
      *            if {@code null}, no cancel button will be displayed
      * @param validator
@@ -218,15 +222,16 @@ public abstract class DataEntryDialog<T> {
                 public void onSuccess(String errorMessage) {
                     boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
                     if (invalidState != dialogInInvalidState) {
-                        dialogInInvalidState = invalidState;
                         onInvalidStateChanged(invalidState);
                     }
-                    if (!invalidState) {
-                        statusLabel.setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
-                        onChange(result);
-                    } else {
+                    if (invalidState) {
                         statusLabel.setHTML(SafeHtmlUtils.fromString(errorMessage));
                         statusLabel.setStyleName("errorLabel");
+                        getOkButton().setEnabled(false);
+                    } else {
+                        statusLabel.setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
+                        onChange(result);
+                        getOkButton().setEnabled(true);
                     }
                 }
             }, validationExecutor);
@@ -241,6 +246,7 @@ public abstract class DataEntryDialog<T> {
     
     protected void onInvalidStateChanged(boolean invalidState) {
         getOkButton().setEnabled(!invalidState);
+        dialogInInvalidState = invalidState;
     }
 
     protected abstract T getResult();

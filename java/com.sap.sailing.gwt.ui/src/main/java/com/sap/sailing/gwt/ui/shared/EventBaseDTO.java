@@ -61,14 +61,9 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
      */
     private boolean isOnRemoteServer;
 
+    @Deprecated
     EventBaseDTO() {
     } // for serialization only
-
-    public EventBaseDTO(List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
-        this.leaderboardGroups = leaderboardGroups;
-        this.imageSizes = new HashMap<String, ImageSize>();
-        sailorsInfoWebsiteURLs = new HashMap<>();
-    }
 
     public EventBaseDTO(String name, List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         super(name);
@@ -81,17 +76,17 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     public boolean equals(Object o) {
         return Util.equalsWithNull(this.getId(), ((EventBaseDTO) o).getId());
     }
-    
+
     @Override
     public int hashCode() {
         return this.getId().hashCode();
     }
-    
+
     @Override
     public UUID getId() {
         return id;
     }
-    
+
     public ImageDTO getLogoImage() {
         ImageDTO result = null;
         for (ImageDTO image : images) {
@@ -102,7 +97,7 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         }
         return result;
     }
-    
+
     public boolean isRunning() {
         Date now = new Date();
         if (startDate != null && endDate != null && (now.after(startDate) && now.before(endDate))) {
@@ -132,19 +127,19 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         }
         return result;
     }
-    
+
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
         this.officialWebsiteURL = getUrlWithHttpsAsDefaultProtocolIfMissing(officialWebsiteURL);
     }
-    
+
     public Map<String, String> getSailorsInfoWebsiteURLs() {
         return sailorsInfoWebsiteURLs;
     }
-    
+
     public String getSailorsInfoWebsiteURL(String locale) {
         return sailorsInfoWebsiteURLs.get(locale);
     }
-    
+
     public void setSailorsInfoWebsiteURL(String locale, String url) {
         if (url == null || url.isEmpty()) {
             sailorsInfoWebsiteURLs.remove(locale);
@@ -194,12 +189,20 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         images.add(image);
     }
 
+    public boolean removeImage(ImageDTO image) {
+        return images.remove(image);
+    }
+
     public List<ImageDTO> getImages() {
         return images;
     }
 
     public void addVideo(VideoDTO video) {
         videos.add(video);
+    }
+
+    public boolean removeVideo(VideoDTO video) {
+        return videos.remove(video);
     }
 
     public List<VideoDTO> getVideos() {

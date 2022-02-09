@@ -113,14 +113,12 @@ public class AbstractPosition implements Position {
         double lat1 = getLatRad();
         double lon1 = getLngRad();
         double bearingRad = bearing.getRadians();
-
         double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distanceRad) + Math.cos(lat1) * Math.sin(distanceRad)
                 * Math.cos(bearingRad));
         double lon2 = lon1
                 + Math.atan2(Math.sin(bearingRad) * Math.sin(distanceRad) * Math.cos(lat1), Math.cos(distanceRad)
                         - Math.sin(lat1) * Math.sin(lat2));
         lon2 = (lon2 + 3 * Math.PI) % (2 * Math.PI) - Math.PI; // normalize to -180..+180
-
         return new DegreePosition(lat2 / Math.PI * 180., lon2 / Math.PI * 180.);
     }
 

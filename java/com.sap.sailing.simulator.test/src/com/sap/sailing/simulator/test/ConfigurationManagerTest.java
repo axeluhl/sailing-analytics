@@ -22,7 +22,7 @@ public class ConfigurationManagerTest {
 
     @Before
     public void initialize() {
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er", new MeterDistance(4.995), "PolarDiagram49.csv", 0));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er Static", new MeterDistance(4.995), "PolarDiagram49.csv", 0));
         this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er Bethwaite", new MeterDistance(4.876), "PolarDiagram49Bethwaite.csv", 1));
         this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er ORC", new MeterDistance(4.995), "PolarDiagram49ORC.csv", 2));
         this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er STG", new MeterDistance(4.876), "PolarDiagram49STG.csv", 3));

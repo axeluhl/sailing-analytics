@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
@@ -38,7 +37,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  */
 public abstract class StartAwsHost<ShardingKey, HostT extends AwsInstance<ShardingKey>>
 extends StartHost<ShardingKey, HostT> {
-    protected static final String NAME_TAG_NAME = "Name";
+    public static final String NAME_TAG_NAME = "Name";
 
     private final List<String> userData;
     private final InstanceType instanceType;
@@ -104,6 +103,8 @@ extends StartHost<ShardingKey, HostT> {
         BuilderT setInstanceName(String name);
         
         BuilderT setHostSupplier(HostSupplier<ShardingKey, HostT> hostSupplier);
+
+        AmazonMachineImage<ShardingKey> getMachineImage();
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
@@ -243,6 +244,13 @@ extends StartHost<ShardingKey, HostT> {
         protected byte[] getPrivateKeyEncryptionPassphrase() {
             return privateKeyEncryptionPassphrase;
         }
+        
+        @Override
+        public AmazonMachineImage<ShardingKey> getMachineImage() {
+            @SuppressWarnings("unchecked")
+            final AmazonMachineImage<ShardingKey> result = (AmazonMachineImage<ShardingKey>) super.getMachineImage();
+            return result;
+        }
     }
     
     protected StartAwsHost(BuilderImpl<?, ? extends StartAwsHost<ShardingKey, HostT>, ShardingKey, HostT> builder) {
@@ -271,7 +279,7 @@ extends StartHost<ShardingKey, HostT> {
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsAvailabilityZone getRandomAvailabilityZone(AwsRegion region, AwsLandscape<ShardingKey> landscape) {
-        final Iterable<AvailabilityZone> azs = landscape.getAvailabilityZones(region);
+        final Iterable<AwsAvailabilityZone> azs = landscape.getAvailabilityZones(region);
         return (AwsAvailabilityZone) Util.get(azs, new Random().nextInt(Util.size(azs)));
     }
 

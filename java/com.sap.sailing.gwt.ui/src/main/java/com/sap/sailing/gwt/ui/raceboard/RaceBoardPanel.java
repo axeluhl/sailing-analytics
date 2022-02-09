@@ -97,7 +97,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
@@ -170,7 +170,7 @@ public class RaceBoardPanel
     private EditMarkPassingsPanel editMarkPassingPanel;
     private EditMarkPositionPanel editMarkPositionPanel;
     
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     
     private final DockLayoutPanel dockPanel;
     private final ResizableFlowPanel timePanelWrapper;
@@ -200,7 +200,7 @@ public class RaceBoardPanel
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private TrackingConnectorInfoDTO trackingConnectorInfo;
     private CompetitorFilterPanel competitorSearchTextBox;
-    
+
     /**
      * @param eventId
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
@@ -217,7 +217,7 @@ public class RaceBoardPanel
      * @param availableDetailTypes
      *            A list of all Detailtypes, that will be offered in the Settingsdialog. Can be used to hide settings no
      *            data exists for, eg Bravo, Expdition ect.
-     * @param trackingConnectorInfo
+     * @param trackingConnectorInfo 
      *            Information about the tracking technology provider, that was used to track the race.
      */
     public RaceBoardPanel(Component<?> parent,
@@ -361,9 +361,9 @@ public class RaceBoardPanel
         final String sharedTagURLParameter = parsedPerspectiveOwnSettings.getJumpToTag();
         String sharedTagTitle = null;
         TimePoint sharedTagTimePoint = null;
-        boolean showTaggingPanel = false;
+        boolean showTaggingComponent = false;
         if (sharedTagURLParameter != null) {
-            showTaggingPanel = true;
+            showTaggingComponent = true;
             int indexOfSeperator = sharedTagURLParameter.indexOf(",");
             if (indexOfSeperator != -1) {
                 try {
@@ -374,10 +374,10 @@ public class RaceBoardPanel
                 }
             }
         }
-        taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer,
+        taggingComponent = new TaggingComponent(parent, componentContext, stringMessages, sailingService, userService, timer,
                 raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO, sailingServiceWrite);
-        addChildComponent(taggingPanel);
-        taggingPanel.setVisible(showTaggingPanel);
+        addChildComponent(taggingComponent);
+        taggingComponent.setVisible(showTaggingComponent);
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
@@ -394,6 +394,7 @@ public class RaceBoardPanel
                 isScreenLargeEnoughToInitiallyDisplayLeaderboard,
                 raceMap, userService, showChartMarkEditMediaButtonsAndVideo, leaderboardDTO, raceDTO); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
+        raceMap.addMediaPlayerManagerComponent(mediaPlayerManagerComponent);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (parsedPerspectiveOwnSettings.getActiveCompetitorsFilterSetName() != null) {
@@ -437,6 +438,9 @@ public class RaceBoardPanel
     }
     
     /**
+     * Creates the overall split pane view with the map in the center and all the components around of it. 
+     * Except race time panel on the bottom.
+     *  
      * @param event
      *            an optional event; may be <code>null</code> or else can be used to show some context information.
      * @param showChartMarkEditMediaButtonsAndVideo 
@@ -531,9 +535,9 @@ public class RaceBoardPanel
                         });
             }
         };
-        mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingPanel, mediaPlayerManagerComponent,
-                componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel,
-                asyncFetcher);
+        mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingComponent,
+                mediaPlayerManagerComponent, componentsForSideBySideViewer, stringMessages, userService,
+                editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel, asyncFetcher);
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             @Override
             public void notifyStateChange() {
@@ -671,7 +675,7 @@ public class RaceBoardPanel
      * @param visible <code>true</code> if the leaderboard shall be open/visible
      */
     public void setTaggingPanelVisible(boolean visible) {
-        setComponentVisible(mapViewer, taggingPanel, visible);
+        setComponentVisible(mapViewer, taggingComponent, visible);
     }
 
     /**
@@ -704,7 +708,7 @@ public class RaceBoardPanel
     }
     
     public void setTagPanelVisible(boolean visible) {
-        setComponentVisible(mapViewer, taggingPanel, visible);
+        setComponentVisible(mapViewer, taggingComponent, visible);
     }
     
     public void setManeuverTableVisible(boolean visible) {
@@ -766,7 +770,7 @@ public class RaceBoardPanel
                 regattaNameAnchor.setHref(link);
             } else {
                 String leaderboardGroupNameParam = Window.Location.getParameter("leaderboardGroupName");
-                if(leaderboardGroupNameParam != null) {
+                if (leaderboardGroupNameParam != null) {
                     Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
                     leaderboardGroupLinkParameters.put("showRaceDetails", "true");
                     leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupNameParam);
@@ -778,12 +782,12 @@ public class RaceBoardPanel
                 }
             }
             regattaNameAnchor.setStyleName("RegattaName-Anchor");
-            Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
+            final Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
             raceTimeLabel.setStyleName("RaceTime-Label");
             regattaAndRaceTimeInformationHeader.clear();
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
-            DataByLogo dataByLogo = new DataByLogo();
+            final DataByLogo dataByLogo = new DataByLogo();
             dataByLogo.setUp(trackingConnectorInfo == null ? Collections.emptySet()
                     : Collections.singleton(trackingConnectorInfo), /** colorIfPossible **/ false, /** enforceTextColor **/ true);
             if (dataByLogo.isVisible()) {
@@ -791,7 +795,7 @@ public class RaceBoardPanel
             }
             regattaAndRaceTimeInformationHeader.add(dataByLogo);
             currentRaceHasBeenSelectedOnce = true;
-            taggingPanel.updateRace(leaderboardName, raceColumn, fleet);
+            taggingComponent.updateRace(leaderboardName, raceColumn, fleet);
         }
     }
 
@@ -872,14 +876,9 @@ public class RaceBoardPanel
         final RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
         final CompetitorsFilterSets leaderboardFiterPanelFilterSets = competitorSearchTextBox
                 .getCompetitorsFilterSets();
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets
+        final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets
                 .getActiveFilterSet();
-        String activeCompetitorsFilterSetName;
-        if (activeFilterSet != null) {
-            activeCompetitorsFilterSetName = activeFilterSet.getName();
-        } else {
-            activeCompetitorsFilterSetName = initialSettings.getActiveCompetitorsFilterSetName();
-        }
+        final String activeCompetitorsFilterSetName = activeFilterSet == null ? null : activeFilterSet.getName();
         final Set<String> selectedCompetitorIds = new HashSet<>();
         final Duration newInitialDurationAfterRaceStartInReplay;
         if (timer != null && racetimePanel != null) {
@@ -904,13 +903,17 @@ public class RaceBoardPanel
         final boolean isWindChartVisible = windChart == null ? false : windChart.isVisible();
         final boolean isManeuverTableVisible = maneuverTablePanel == null ? false : maneuverTablePanel.isVisible();
         final boolean autoExpandPreSelectedRace = leaderboardPanel.isAutoExpandPreSelectedRace();
-        RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
+        final RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), isWindChartVisible,
                 isCompetitorChartVisible, initialSettings.isCanReplayDuringLiveRaces(),
                 newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
-                selectedCompetitorIds, taggingPanel.isVisible(), isManeuverTableVisible,
+                selectedCompetitorIds, taggingComponent.isVisible(), isManeuverTableVisible,
                 initialSettings.getJumpToTag(), zoomStartInMillis, zoomEndInMillis, autoExpandPreSelectedRace);
         return raceBoardPerspectiveOwnSettings;
+    }
+    
+    public RaceBoardPerspectiveOwnSettings getOriginalPerspectiveSettings() {
+        return super.getPerspectiveSettings();
     }
     
     @Override

@@ -339,24 +339,6 @@ public class Util {
         return result;
     }
     
-    public static <T> List<T> createList(Iterable<T> iterable) {
-        List<T> list = new ArrayList<>();
-        Iterator<T> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            list.add(iterator.next());
-        }
-        return list;
-    }
-    
-    public static <T> Set<T> createSet(Iterable<T> iterable) {
-        Set<T> set = new HashSet<>();
-        Iterator<T> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            set.add(iterator.next());
-        }
-        return set;
-    }
-    
     public static interface Mapper<S, T> { T map(S s); }
     public static <S, T> Iterable<T> map(final Iterable<S> iterable, final Mapper<S, T> mapper) {
         return new MappingIterable<>(iterable, new MappingIterator.MapFunction<S, T>() {
@@ -775,8 +757,13 @@ public class Util {
     }
 
     public static <T> List<T> asList(Iterable<T> iterable) {
-        final List<T> list = new ArrayList<>();
-        addAll(iterable, list);
+        final List<T> list;
+        if (iterable instanceof List<?>) {
+            list = (List<T>) iterable;
+        } else {
+            list = new ArrayList<>();
+            addAll(iterable, list);
+        }
         return list;
     }
     
@@ -802,16 +789,23 @@ public class Util {
     }
 
     public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection) {
+        return sortNamedCollection(collection, /* caseSensitive */ true);
+    }
+
+    public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection, boolean caseSensitive) {
         List<T> sortedCollection = new ArrayList<>(collection);
-        Collections.sort(sortedCollection, new Comparator<T>() {
-            @Override
-            public int compare(T o1, T o2) {
-                return new NaturalComparator().compare(o1.getName(), o2.getName());
-            }
-        });
+        Collections.sort(sortedCollection, naturalNamedComparator(caseSensitive));
         return sortedCollection;
     }
-    
+
+    public static <T extends Named> Comparator<T> naturalNamedComparator(boolean caseSensitive) {
+        return new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                return new NaturalComparator(caseSensitive).compare(o1.getName(), o2.getName());
+            }
+        };
+    }
     /**
      * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
      * Collections of the resulting Map are created using the given {@link Supplier} instance.
@@ -1006,24 +1000,35 @@ public class Util {
     }
     
     public static interface MapBuilder<K, V> {
+        static <K, V> MapBuilder<K, V> of(Map<K, V> other) { return new MapBuilderImpl<>(other); }
         MapBuilder<K, V> put(K key, V value);
         Map<K, V> build();
     }
     
-    public static <K, V> MapBuilder<K, V> mapBuilder() {
-        return new MapBuilder<K, V>() {
-            final Map<K, V> result = new HashMap<>();
-            
-            @Override
-            public Map<K, V> build() {
-                return result;
-            }
+    private static class MapBuilderImpl<K, V> implements MapBuilder<K, V> {
+        private final Map<K, V> result;
+        
+        public MapBuilderImpl() {
+            result = new HashMap<>();
+        }
+        
+        public MapBuilderImpl(Map<K, V> other) {
+            result = new HashMap<>(other);
+        }
+        
+        @Override
+        public Map<K, V> build() {
+            return result;
+        }
 
-            @Override
-            public MapBuilder<K, V> put(K key, V value) {
-                result.put(key, value);
-                return this;
-            }
-        };
+        @Override
+        public MapBuilder<K, V> put(K key, V value) {
+            result.put(key, value);
+            return this;
+        }
+    }
+    
+    public static <K, V> MapBuilder<K, V> mapBuilder() {
+        return new MapBuilderImpl<>();
     }
 }

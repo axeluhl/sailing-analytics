@@ -32,9 +32,9 @@ import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 
 @Path("/v1/trackedRaces")
 public class TrackedRaceListResource extends AbstractSailingServerResource {
@@ -110,7 +110,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             eventFilter = (uuid)->eventUUIDs.contains(uuid);
         } else if ("excl".equals(predicate)) {
             eventFilter = (uuid)->!eventUUIDs.contains(uuid);
-        }else {
+        } else {
             throw new IllegalArgumentException("unrecognized predicate " + predicate + " only \"excl\" and \"incl\" are possible");
         }
         final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = getDistinctRaces(includeRemotes,

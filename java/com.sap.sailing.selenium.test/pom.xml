@@ -92,7 +92,7 @@
                 <exclude>**/core/**</exclude>
               </excludes>
 
-              <argLine>${tycho.tests.argLine}</argLine>
+              <argLine>${argLine} ${tycho.tests.argLine}</argLine>
               <appArgLine>-consoleLog -console -clean</appArgLine>
 
               <product>raceanalysis.product</product>
@@ -152,11 +152,6 @@
                 <bundle>
                   <id>com.sap.sailing.gwt.ui</id>
                   <level>6</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sailing.xmlexport</id>
-                  <level>5</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
@@ -235,6 +230,21 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.domain.oceanraceadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.yellowbrickadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.yellowbrickadapter.persistence</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.dashboards.gwt</id>
                   <level>6</level>
                   <autoStart>true</autoStart>
@@ -295,6 +305,16 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.landscape.gateway</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.hanaexport</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sse.security.ui</id>
                   <level>6</level>
                   <autoStart>true</autoStart>
@@ -327,16 +347,6 @@
                 <bundle>
                   <id>org.eclipse.jetty.osgi.boot</id>
                   <level>3</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.apache.felix.shell</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.apache.felix.shell.remote</id>
-                  <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>

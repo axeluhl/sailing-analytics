@@ -25,16 +25,12 @@ import com.sap.sse.common.Util.Pair;
  * entirety.
  * <p>
  * 
- * Each of the {@link TimeRange}s is trimmed against the {@link TimeRaneResultCache cache} of returned and outstanding
+ * Each of the {@link TimeRange}s is trimmed against the {@link TimeRangeResultCache cache} of returned and outstanding
  * requests for the respective {@code Key}. After having received the server responses for all time ranges required to
  * satisfy a {@link TimeRangeAsyncAction} the trimmed results are combined and the {@link TimeRangeAsyncCallback
  * callback} is invoked.
  * <p>
  * 
- * For the actual execution this class relies on an {@link AsyncActionsExecutor}.
- * <p>
- *
- *
  * @param <Result>
  *            Type returned by the combined call. See {@link TimeRangeAsyncAction}. Holds a compound result for several
  *            keys, such as for several competitors or several boats. A {@link TimeRangeAsyncCallback} object is
