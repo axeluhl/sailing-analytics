@@ -188,6 +188,21 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
         getDataProvider().getList().remove(t);
     }
     
+    public void replaceBasedOnEntityIdentityComparator(T t) {
+        if (entityIdentityComparator == null) {
+            remove(t);
+            add(t);
+        } else {
+            for (final T existingElement : getDataProvider().getList()) {
+                if (entityIdentityComparator.representSameEntity(existingElement, t)) {
+                    remove(existingElement);
+                    add(t);
+                    break;
+                }
+            }
+        }
+    }
+    
     public void clear() {
         getDataProvider().getList().clear();
     }

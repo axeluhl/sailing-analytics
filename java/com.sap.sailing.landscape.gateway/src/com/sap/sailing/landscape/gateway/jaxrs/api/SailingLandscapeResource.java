@@ -20,17 +20,20 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.landscape.AwsSessionCredentialsWithExpiry;
+import com.sap.sailing.landscape.LandscapeService;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.gateway.impl.AwsApplicationProcessJsonSerializer;
 import com.sap.sailing.landscape.gateway.impl.AwsApplicationReplicaSetJsonSerializer;
+import com.sap.sailing.landscape.gateway.impl.HostJsonSerializer;
 import com.sap.sailing.landscape.gateway.jaxrs.AbstractLandscapeResource;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -38,13 +41,18 @@ import com.sap.sse.landscape.aws.MongoUriParser;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
+import software.amazon.awssdk.services.ec2.model.InstanceType;
+
 @Path("/landscape")
 public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final Logger logger = Logger.getLogger(SailingLandscapeResource.class.getName());
 
     private static final String REGION_FORM_PARAM = "regionId";
+    private static final String SHARED_MASTER_INSTANCE_FORM_PARAM = "sharedMasterInstance";
     private static final String REPLICA_SET_NAME_FORM_PARAM = "replicaSetName";
-    private static final String MASTER_INSTANCE_TYPE_FORM_PARAM = "masterInstanceType";
+    private static final String DEDICATED_INSTANCE_TYPE_FORM_PARAM = "dedicatedInstanceType";
+    private static final String SHARED_INSTANCE_TYPE_FORM_PARAM = "sharedInstanceType";
+    private static final String INSTANCE_TYPE_FORM_PARAM = "instanceType";
     private static final String DYNAMIC_LOAD_BALANCER_MAPPING_FORM_PARAM = "dynamicLoadBalancerMapping";
     private static final String RELEASE_NAME_FORM_PARAM = "releaseName";
     private static final String KEY_NAME_FORM_PARAM = "keyName";
@@ -54,6 +62,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String DOMAIN_NAME_FORM_PARAM = "domainName";
     private static final String MEMORY_IN_MEGABYTES_FORM_PARAM = "memoryInMegabytes";
     private static final String MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM = "memoryTotalSizeFactor";
+    private static final String MINIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM = "minimumAutoScalingGroupSize";
+    private static final String MAXIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM = "maximumAutoScalingGroupSize";
     private static final String TIMEOUT_IN_MILLISECONDS_FORM_PARAM = "timeoutInMilliseconds";
     private static final String REMOVE_APPLICATION_REPLICA_SET_FORM_PARAM = "removeApplicationReplicaSet";
     private static final String MAX_NUMBER_OF_COMPARE_SERVER_ATTEMPTS_FORM_PARAM = "maxNumberOfCompareserverAttempts";
@@ -70,6 +80,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String RESPONSE_STATUS = "status";
     private static final String RESPONSE_ERROR_MESSAGE = "message";
     private static final String RESPONSE_RELEASE = "release";
+    private static final String HOST_ID_FORM_PARAM = "hostId";
 
     @Context
     UriInfo uriInfo;
@@ -137,8 +148,10 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     @Produces("application/json;charset=UTF-8")
     public Response createApplicationReplicaSet(
             @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(SHARED_MASTER_INSTANCE_FORM_PARAM) @DefaultValue("false") boolean sharedMasterInstance,
             @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
-            @FormParam(MASTER_INSTANCE_TYPE_FORM_PARAM) String masterInstanceType,
+            @FormParam(DEDICATED_INSTANCE_TYPE_FORM_PARAM) String dedicatedInstanceType,
+            @FormParam(SHARED_INSTANCE_TYPE_FORM_PARAM) String sharedInstanceTypeOrNull,
             @FormParam(DYNAMIC_LOAD_BALANCER_MAPPING_FORM_PARAM) @DefaultValue("false") boolean dynamicLoadBalancerMapping,
             @FormParam(RELEASE_NAME_FORM_PARAM) String releaseNameOrNullForLatestMaster,
             @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
@@ -147,17 +160,19 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(REPLICA_REPLICATION_BEARER_TOKEN_FORM_PARAM) String replicaReplicationBearerToken,
             @FormParam(DOMAIN_NAME_FORM_PARAM) String domainName,
             @FormParam(MEMORY_IN_MEGABYTES_FORM_PARAM) Integer optionalMemoryInMegabytesOrNull,
-            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull) {
+            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull,
+            @FormParam(MINIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM) Integer optionalMinimumAutoScalingGroupSize,
+            @FormParam(MAXIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM) Integer optionalMaximumAutoScalingGroupSize) {
         checkLandscapeManageAwsPermission();
         Response response;
         try {
             final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
-                    .createApplicationReplicaSet(regionId, replicaSetName, masterInstanceType, dynamicLoadBalancerMapping,
-                            release.getName(), optionalKeyName,
-                            privateKeyEncryptionPassphrase == null ? null : privateKeyEncryptionPassphrase.getBytes(),
-                            masterReplicationBearerToken, replicaReplicationBearerToken, domainName,
-                            optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+                    .createApplicationReplicaSet(regionId, replicaSetName, sharedMasterInstance, sharedInstanceTypeOrNull,
+                            dedicatedInstanceType, dynamicLoadBalancerMapping, release.getName(),
+                            optionalKeyName, privateKeyEncryptionPassphrase == null ? null : privateKeyEncryptionPassphrase.getBytes(), masterReplicationBearerToken,
+                            replicaReplicationBearerToken, domainName, optionalMemoryInMegabytesOrNull,
+                            optionalMemoryTotalSizeFactorOrNull, Optional.ofNullable(optionalMinimumAutoScalingGroupSize), Optional.ofNullable(optionalMaximumAutoScalingGroupSize));
             final JSONObject result = new AwsApplicationReplicaSetJsonSerializer(release.getName()).serialize(replicaSet);
             response = Response.ok(streamingOutput(result)).build();
         } catch (Exception e) {
@@ -182,20 +197,18 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         checkLandscapeManageAwsPermission();
         ResponseBuilder responseBuilder;
         final JSONObject result = new JSONObject();
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
-        final AwsLandscape<String> landscape = getLandscapeService().getLandscape();
         AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet;
         try {
-            replicaSet = getApplicationReplicaSet(
-                    replicaSetName, optionalKeyName, optionalTimeoutInMilliseconds, region,
-                    passphraseForPrivateKeyDecryption, landscape);
-            final Release release = getLandscapeService().upgradeApplicationReplicaSet(region, replicaSet,
+            replicaSet = getLandscapeService().getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName, passphraseForPrivateKeyDecryption);
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> upgradedReplicaSet = getLandscapeService().upgradeApplicationReplicaSet(region, replicaSet,
                     releaseNameOrNullForLatestMaster, optionalKeyName, passphraseForPrivateKeyDecryption,
                     replicaReplicationBearerToken);
             responseBuilder = Response.ok();
             result.put(RESPONSE_STATUS, "OK");
-            result.put(RESPONSE_RELEASE, release.getName());
+            result.put(RESPONSE_RELEASE, upgradedReplicaSet.getVersion(Optional.ofNullable(optionalTimeoutInMilliseconds).map(Duration::ofMillis),
+                    Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName());
         } catch (Exception e) {
             result.put(RESPONSE_STATUS, "ERROR");
             result.put(RESPONSE_ERROR_MESSAGE, e.getMessage());
@@ -222,17 +235,17 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM) String mongoUriToArchiveDbTo) {
         checkLandscapeManageAwsPermission();
         Response response;
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
         final AwsLandscape<String> landscape = getLandscapeService().getLandscape();
         final MongoUriParser<String> mongoUriParser = new MongoUriParser<>(landscape, region);
         try {
             final MongoEndpoint moveDatabaseHere = mongoUriToArchiveDbTo == null ? null : mongoUriParser.parseMongoUri(mongoUriToArchiveDbTo).getEndpoint();
-            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive = getApplicationReplicaSet(
-                    replicaSetName, optionalKeyName, optionalTimeoutInMilliseconds, region,
-                    passphraseForPrivateKeyDecryption, landscape);
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive = getLandscapeService()
+                    .getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName,
+                            passphraseForPrivateKeyDecryption);
             if (applicationReplicaSetToArchive == null) {
-                response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
+                response = badRequest("Application replica set with name " + replicaSetName + " not found in region "+regionId);
             } else {
                 final UUID uuidForMdiProgress = getLandscapeService().archiveReplicaSet(regionId, applicationReplicaSetToArchive,
                     bearerTokenOrNullForApplicationReplicaSetToArchive, bearerTokenOrNullForArchive,
@@ -249,22 +262,11 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         return response;
     }
 
-    private AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> getApplicationReplicaSet(
-            String replicaSetName, String optionalKeyName, Long optionalTimeoutInMilliseconds, final AwsRegion region,
-            byte[] passphraseForPrivateKeyDecryption, final AwsLandscape<String> landscape) throws Exception {
-        return Util.first(Util.filter(
-                landscape.getApplicationReplicaSetsByTag(region,
-                    SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, new SailingAnalyticsHostSupplier<String>(),
-                    Optional.ofNullable(optionalTimeoutInMilliseconds).map(Duration::ofMillis), Optional.ofNullable(optionalKeyName),
-                    passphraseForPrivateKeyDecryption),
-                rs->rs.getName().equals(replicaSetName)));
-    }
-
     @Path("/removeapplicationreplicaset")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response removeApplicationServerReplicaSet(
+    public Response removeApplicationReplicaSet(
             @FormParam(REGION_FORM_PARAM) String regionId,
             @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
             @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
@@ -272,12 +274,12 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase) {
         checkLandscapeManageAwsPermission();
         Response response;
-        final AwsRegion region = new AwsRegion(regionId);
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
         byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
-        final AwsLandscape<String> landscape = getLandscapeService().getLandscape();
         try {
-            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToRemove = getApplicationReplicaSet(replicaSetName, optionalKeyName, optionalTimeoutInMilliseconds, region,
-                    passphraseForPrivateKeyDecryption, landscape);
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToRemove = getLandscapeService()
+                    .getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName,
+                            passphraseForPrivateKeyDecryption);
             if (applicationReplicaSetToRemove == null) {
                 response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
             } else {
@@ -290,4 +292,222 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
         }
         return response;
     }
+    
+    @Path("/deployreplicatoexistinghost")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response deployReplicaToExistingHost(
+            @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
+            @FormParam(HOST_ID_FORM_PARAM) String hostId,
+            @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
+            @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
+            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase,
+            @FormParam(REPLICA_REPLICATION_BEARER_TOKEN_FORM_PARAM) String replicaReplicationBearerToken,
+            @FormParam(MEMORY_IN_MEGABYTES_FORM_PARAM) Integer optionalMemoryInMegabytesOrNull,
+            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
+        byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
+        try {
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
+                    .getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName,
+                            passphraseForPrivateKeyDecryption);
+            if (replicaSet == null) {
+                response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
+            } else {
+                final SailingAnalyticsHost<String> hostToDeployTo = getLandscapeService().getLandscape().getHostByInstanceId(region, hostId, new SailingAnalyticsHostSupplier<>());
+                if (replicaSet.isEligibleForDeployment(hostToDeployTo,
+                        optionalTimeoutInMilliseconds == null ? Optional.empty()
+                                : Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
+                        Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption)) {
+                    final SailingAnalyticsProcess<String> process = getLandscapeService().deployReplicaToExistingHost(replicaSet, hostToDeployTo, optionalKeyName,
+                            passphraseForPrivateKeyDecryption, replicaReplicationBearerToken,
+                            optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+                    response = Response.ok().entity(streamingOutput(
+                            new AwsApplicationProcessJsonSerializer<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>()
+                                    .serialize(process)))
+                            .build();
+                } else {
+                    response = badRequest("Host " + hostToDeployTo
+                            + " is not eligible for deploying a process of application replica set " + replicaSetName
+                            + ". Check port and directory.");
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage(), e);
+            response = badRequest("Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage());
+        }
+        return response;
+    }
+
+    @Path("/gethostseligibleforreplicasetprocessdeployment")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response getHostsEligibleForReplicaSetProcessDeployment(
+            @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
+            @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
+            @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
+            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
+        byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
+        try {
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
+                    .getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName,
+                            passphraseForPrivateKeyDecryption);
+            if (replicaSet == null) {
+                response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
+            } else {
+                final JSONArray result = new JSONArray();
+                for (final SailingAnalyticsHost<String> host : getLandscapeService().getEligibleSharedHostsForReplicaSet(region, replicaSet, optionalKeyName, passphraseForPrivateKeyDecryption)) {
+                    result.add(new HostJsonSerializer<String>().serialize(host));
+                }
+                response = Response.ok().entity(streamingOutput(result)).build();
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage(), e);
+            response = badRequest("Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage());
+        }
+        return response;
+    }
+
+    @Path("/usededicatedautoscalingreplicasinsteadofshared")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response useDedicatedAutoScalingReplicasInsteadOfShared(
+            @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
+            @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
+            @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
+            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
+        byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
+        try {
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
+                    .getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName,
+                            passphraseForPrivateKeyDecryption);
+            if (replicaSet == null) {
+                response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
+            } else {
+                final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result =
+                        getLandscapeService().useDedicatedAutoScalingReplicasInsteadOfShared(replicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
+                response = Response.ok()
+                        .entity(streamingOutput(new AwsApplicationReplicaSetJsonSerializer(
+                                result.getVersion(optionalTimeoutInMilliseconds==null?LandscapeService.WAIT_FOR_PROCESS_TIMEOUT:Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
+                                        Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName())
+                                                .serialize(result)))
+                        .build();
+            }
+        } catch (Exception e) {
+            final String message = "Error trying to use dedicated auto-scaling replicas only for replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage();
+            logger.log(Level.SEVERE, message, e);
+            response = badRequest(message);
+        }
+        return response;
+    }
+
+    @Path("/usesinglesharedinsteadofdedicatedautoscalingreplica")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+            @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
+            @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
+            @FormParam(SHARED_INSTANCE_TYPE_FORM_PARAM) String sharedInstanceTypeOrNull,
+            @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
+            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase,
+            @FormParam(REPLICA_REPLICATION_BEARER_TOKEN_FORM_PARAM) String replicaReplicationBearerToken,
+            @FormParam(MEMORY_IN_MEGABYTES_FORM_PARAM) Integer optionalMemoryInMegabytesOrNull,
+            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
+        byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
+        try {
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
+                    .getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName,
+                            passphraseForPrivateKeyDecryption);
+            if (replicaSet == null) {
+                response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
+            } else {
+                final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result = getLandscapeService()
+                        .useSingleSharedInsteadOfDedicatedAutoScalingReplica(replicaSet, optionalKeyName,
+                                passphraseForPrivateKeyDecryption, replicaReplicationBearerToken,
+                                optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
+                                Optional.ofNullable(sharedInstanceTypeOrNull).map(sharedInstanceTypeName->InstanceType.valueOf(sharedInstanceTypeName)));
+                response = Response.ok()
+                        .entity(streamingOutput(new AwsApplicationReplicaSetJsonSerializer(result.getVersion(
+                                optionalTimeoutInMilliseconds == null ? LandscapeService.WAIT_FOR_PROCESS_TIMEOUT
+                                        : Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
+                                Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName()).serialize(result)))
+                        .build();
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage(), e);
+            response = badRequest("Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage());
+        }
+        return response;
+    }
+
+    @Path("/movemastertootherinstance")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
+    public Response moveMasterToOtherInstance(
+            @FormParam(REGION_FORM_PARAM) String regionId,
+            @FormParam(REPLICA_SET_NAME_FORM_PARAM) String replicaSetName,
+            @FormParam(SHARED_MASTER_INSTANCE_FORM_PARAM) @DefaultValue("false") Boolean useSharedInstance,
+            @FormParam(TIMEOUT_IN_MILLISECONDS_FORM_PARAM) Long optionalTimeoutInMilliseconds,
+            @FormParam(INSTANCE_TYPE_FORM_PARAM) String optionalInstanceType,
+            @FormParam(HOST_ID_FORM_PARAM) String optionalIdOfHostToDeployTo,
+            @FormParam(KEY_NAME_FORM_PARAM) String optionalKeyName,
+            @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase,
+            @FormParam(MASTER_REPLICATION_BEARER_TOKEN_FORM_PARAM) String masterReplicationBearerToken,
+            @FormParam(REPLICA_REPLICATION_BEARER_TOKEN_FORM_PARAM) String replicaReplicationBearerToken,
+            @FormParam(MEMORY_IN_MEGABYTES_FORM_PARAM) Integer optionalMemoryInMegabytesOrNull,
+            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull) {
+        checkLandscapeManageAwsPermission();
+        Response response;
+        final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
+        byte[] passphraseForPrivateKeyDecryption = privateKeyEncryptionPassphrase==null?null:privateKeyEncryptionPassphrase.getBytes();
+        try {
+            final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet = getLandscapeService()
+                    .getApplicationReplicaSet(region, replicaSetName, optionalTimeoutInMilliseconds, optionalKeyName,
+                            passphraseForPrivateKeyDecryption);
+            if (replicaSet == null) {
+                response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
+            } else {
+                final Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo = Optional
+                        .ofNullable(optionalIdOfHostToDeployTo).map(instanceId -> getLandscapeService().getLandscape()
+                                .getHostByInstanceId(region, instanceId, new SailingAnalyticsHostSupplier<String>()));
+                final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result = getLandscapeService()
+                        .moveMasterToOtherInstance(replicaSet, useSharedInstance,
+                                Optional.ofNullable(optionalInstanceType).map(instanceTypeName->InstanceType.valueOf(instanceTypeName)),
+                                optionalPreferredInstanceToDeployTo, optionalKeyName, passphraseForPrivateKeyDecryption,
+                                masterReplicationBearerToken, replicaReplicationBearerToken,
+                                optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+                response = Response.ok()
+                        .entity(streamingOutput(new AwsApplicationReplicaSetJsonSerializer(result.getVersion(
+                                optionalTimeoutInMilliseconds == null ? LandscapeService.WAIT_FOR_PROCESS_TIMEOUT
+                                        : Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
+                                Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName()).serialize(result)))
+                        .build();
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage(), e);
+            response = badRequest("Error trying to archive replica set "+replicaSetName+" in region "+regionId+": "+e.getMessage());
+        }
+        return response;
+    }
+
 }

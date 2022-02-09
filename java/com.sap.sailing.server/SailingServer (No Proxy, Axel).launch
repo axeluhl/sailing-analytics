@@ -205,7 +205,6 @@
         <setEntry value="com.sap.sailing.landscape@default:default"/>
         <setEntry value="com.sap.sailing.manage2sail.resultimport@4:true"/>
         <setEntry value="com.sap.sailing.manage2sail@default:default"/>
-        <setEntry value="com.sap.sailing.monitoring@7:true"/>
         <setEntry value="com.sap.sailing.news@4:true"/>
         <setEntry value="com.sap.sailing.nmeaconnector@default:default"/>
         <setEntry value="com.sap.sailing.polars.datamining.shared@default:default"/>

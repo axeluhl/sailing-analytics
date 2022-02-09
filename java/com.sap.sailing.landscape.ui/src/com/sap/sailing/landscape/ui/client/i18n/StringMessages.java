@@ -114,4 +114,24 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups();
     String successfullyStoppedReplicatingAndRemovedMasterFromTargetGroups(String replicaSetName);
     String stopReplicating();
+    String sameAsMaster();
+    String firstReplicaOnSharedInstance();
+    String machineImageId();
+    String updateAmiForAutoScalingReplicas();
+    String successfullyUpdatedMachineImageForAutoScalingReplicas(String replicaSetName, String autoScalingGroupAmiId);
+    String updateSelectedReplicaSetAmisToo(String listOfReplicaSetsToUpdate);
+    String sharedMasterInstance();
+    String autoScalingReplicaInstanceType();
+    String dedicatedInstanceType();
+    String dedicatedMasterAndAutoScalingReplicaInstanceType();
+    String sharedMasterInstanceType();
+    String sharedMasterAndReplicaInstanceType();
+    String sharedReplicaInstanceType();
+    String switchToAutoScalingReplicasOnly();
+    String problemSwitchingReplicaSetToAutoReplicasOnly(String replicaSetName, String message);
+    String successfullySwitchedReplicaSetToAutoReplicasOnly(String replicaSetName);
+    String switchToReplicaOnSharedInstance();
+    String moveMasterToOtherInstance();
+    String successfullyMovedMasterOfReplicaSet(String replicaSetName);
+    String successfullyRemovedApplicationReplicaSet(String replicaSetName);
 }

@@ -33,14 +33,13 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingReleaseRepository;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
-import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
@@ -69,7 +68,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * @author Axel Uhl (D043530)
  *
  */
-public class ConnectivityTest<ProcessT extends ApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
+public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
     private AwsLandscape<String> landscape;
@@ -80,7 +79,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     @Before
     public void setUp() {
         landscape = AwsLandscape.obtain();
-        region = new AwsRegion(Region.EU_WEST_2);
+        region = new AwsRegion(Region.EU_WEST_2, landscape);
         AXELS_KEY_PASS = new String(Base64.getDecoder().decode(System.getProperty("axelskeypassphrase")));
         keyPass = "lkayrelakuesyrlasp8caorewyc".getBytes();
     }
@@ -455,7 +454,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     
     @Test
     public void testCentralReverseProxyInEuWest2IsAvailable() throws IOException, InterruptedException, JSchException {
-        final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
+        final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2", landscape));
         assertEquals(1, Util.size(proxy.getHosts()));
         final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
         assertEquals(200, healthCheckConnection.getResponseCode());

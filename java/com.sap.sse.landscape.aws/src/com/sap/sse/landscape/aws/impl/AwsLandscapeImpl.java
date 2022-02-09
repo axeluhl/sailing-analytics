@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +39,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
@@ -52,6 +52,7 @@ import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -183,7 +184,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String AUTO_SCALING_GROUP_NAME_SUFFIX = "-auto-replicas";
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
-    private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
+    private static final long DEFAULT_DNS_TTL_MILLIS = 60l;
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
@@ -217,7 +218,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.sessionToken = Optional.ofNullable(sessionToken);
-        this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
+        this.globalRegion = new AwsRegion(Region.AWS_GLOBAL, this);
         this.landscapeState = landscapeState;
     }
     
@@ -306,7 +307,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region) throws InterruptedException, ExecutionException {
         Region awsRegion = getRegion(region);
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(awsRegion);
-        final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
+        final Iterable<AwsAvailabilityZone> availabilityZones = getAvailabilityZones(region);
         final SubnetMapping[] subnetMappings = Util.toArray(Util.map(getSubnetsForAvailabilityZones(awsRegion, availabilityZones),
                 subnet->SubnetMapping.builder().subnetId(subnet.subnetId()).build()), new SubnetMapping[0]);
         final CreateLoadBalancerResponse response = client
@@ -368,7 +369,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 });
     }
 
-    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Listener createLoadBalancerHttpsListener(ApplicationLoadBalancer<ShardingKey> alb) throws InterruptedException, ExecutionException {
         final CompletableFuture<String> defaultCertificateArnFuture = getDefaultCertificateArn(alb.getRegion(), DEFAULT_CERTIFICATE_DOMAIN);
         final int httpPort = 80;
@@ -439,7 +440,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public void deleteLoadBalancerListenerRules(com.sap.sse.landscape.Region region, Rule... rulesToDelete) {
-        logger.info("Removing load balancer rules "+rulesToDelete+" in region "+region);
+        logger.info("Removing load balancer rules "+Util.joinStrings(", ", Arrays.asList(rulesToDelete))+" in region "+region);
         for (final Rule rule : rulesToDelete) {
             getLoadBalancingClient(getRegion(region)).deleteRule(b -> b.ruleArn(rule.ruleArn()));
         }
@@ -466,7 +467,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     /**
      * Grabs all subnets that are default subnet for any of the availability zones specified
      */
-    private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AvailabilityZone> azs) {
+    private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AwsAvailabilityZone> azs) {
         return Util.filter(getEc2Client(region).describeSubnets().subnets(), subnet -> subnet.defaultForAz()
                 && Util.contains(Util.map(azs, az -> az.getId()), subnet.availabilityZoneId()));
     }
@@ -477,7 +478,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .describeAvailabilityZones(
                         DescribeAvailabilityZonesRequest.builder().zoneNames(availabilityZoneName).build())
                 .availabilityZones().iterator().next();
-        return new AwsAvailabilityZoneImpl(awsAz);
+        return new AwsAvailabilityZoneImpl(awsAz, this);
     }
     
     @Override
@@ -828,7 +829,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
-        landscapeState.deleteKeyPair(region, keyName);
+        landscapeState.deleteKeyPair(region.getId(), keyName);
     }
 
     @Override
@@ -866,7 +867,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public SSHKeyPair getSSHKeyPair(com.sap.sse.landscape.Region region, String keyName) {
-        return landscapeState.getSSHKeyPair(region, keyName);
+        return landscapeState.getSSHKeyPair(region.getId(), keyName);
     }
     
     @Override
@@ -961,9 +962,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public Iterable<AvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
+    public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
         return Util.map(getEc2Client(getRegion(awsRegion)).describeAvailabilityZones().availabilityZones(),
-                AwsAvailabilityZoneImpl::new);
+                az->new AwsAvailabilityZoneImpl(az, this));
     }
 
     @Override
@@ -1056,7 +1057,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
         for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
@@ -1319,7 +1320,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<HostT> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
             HostSupplier<ShardingKey, HostT> hostSupplier) {
@@ -1327,7 +1328,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSetByTagValue(
             com.sap.sse.landscape.Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier,
@@ -1337,7 +1338,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(
             com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier,
@@ -1346,7 +1347,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
-    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSets(
             com.sap.sse.landscape.Region region, Supplier<Iterable<HostT>> hostsSupplier,
@@ -1424,7 +1425,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(com.sap.sse.landscape.Region region,
             final String serverName, final ProcessT master, final Iterable<ProcessT> replicas) {
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
@@ -1437,7 +1438,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
     }
 
-    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(
             final String serverName, final ProcessT master, final Iterable<ProcessT> replicas,
             final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
@@ -1470,7 +1471,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Matcher matcher = pattern.matcher(loadBalancerDNSName);
         final Pair<String, AwsRegion> result;
         if (matcher.matches()) {
-            result = new Pair<>(matcher.group(1), new AwsRegion(matcher.group(3)));
+            result = new Pair<>(matcher.group(1), new AwsRegion(matcher.group(3), this));
         } else {
             result = null;
         }
@@ -1528,9 +1529,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize) {
+        logger.info("Setting minimum size of auto-scaling group "+autoScalingGroup.getName()+" to "+minSize);
         getAutoScalingClient(getRegion(autoScalingGroup.getRegion())).updateAutoScalingGroup(b->b
                 .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
-                .minSize(minSize));
+                .minSize(minSize)
+                .desiredCapacity(minSize));
     }
     
     @Override
@@ -1652,12 +1655,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public AwsRegion getDefaultRegion() {
-        return new AwsRegion(Region.EU_WEST_2); // TODO actually, EU_WEST_1 (Ireland) is our default region, but as long as this is under development, EU_WEST_2 gives us an isolated test environment
+        return new AwsRegion(Region.EU_WEST_2, this); // TODO actually, EU_WEST_1 (Ireland) is our default region, but as long as this is under development, EU_WEST_2 gives us an isolated test environment
     }
 
     @Override
     public Iterable<com.sap.sse.landscape.Region> getRegions() {
-        return Util.map(Region.regions(), AwsRegion::new);
+        return Util.map(Region.regions(), r->new AwsRegion(r, this));
     }
     
     @Override
@@ -1688,6 +1691,38 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .securityGroups(oldLaunchConfiguration.securityGroups())
                 .spotPrice(oldLaunchConfiguration.spotPrice())
                 .userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
+        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+    }
+
+    @Override
+    public void updateImageInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami) {
+        logger.info("Adjusting AMI for auto-scaling group "+autoScalingGroup.getName()+" to "+ami);
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, ami.getId());
+        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
+        autoScalingClient.createLaunchConfiguration(b->b
+                .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())
+                .blockDeviceMappings(oldLaunchConfiguration.blockDeviceMappings())
+                .classicLinkVPCId(oldLaunchConfiguration.classicLinkVPCId())
+                .classicLinkVPCSecurityGroups(oldLaunchConfiguration.classicLinkVPCSecurityGroups())
+                .ebsOptimized(oldLaunchConfiguration.ebsOptimized())
+                .iamInstanceProfile(oldLaunchConfiguration.iamInstanceProfile())
+                .imageId(ami.getId())
+                .instanceMonitoring(oldLaunchConfiguration.instanceMonitoring())
+                .instanceType(oldLaunchConfiguration.instanceType())
+                .keyName(oldLaunchConfiguration.keyName())
+                .launchConfigurationName(newLaunchConfigurationName)
+                .placementTenancy(oldLaunchConfiguration.placementTenancy())
+                .securityGroups(oldLaunchConfiguration.securityGroups())
+                .spotPrice(oldLaunchConfiguration.spotPrice())
+                .userData(oldLaunchConfiguration.userData()));
+        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+    }
+
+    private void updateLaunchConfigurationForAutoScalingGroup(final AutoScalingClient autoScalingClient,
+            AwsAutoScalingGroup autoScalingGroup, final LaunchConfiguration oldLaunchConfiguration,
+            final String newLaunchConfigurationName) {
         logger.info("Telling auto-scaling group "+autoScalingGroup.getName()+" to use new launch configuration "+newLaunchConfigurationName);
         autoScalingClient.updateAutoScalingGroup(b->b
                 .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
@@ -1697,7 +1732,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfigurationAndAutoScalingGroup(
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    void createLaunchConfigurationAndAutoScalingGroup(
             com.sap.sse.landscape.Region region, String replicaSetName, Optional<Tags> tags,
             TargetGroup<ShardingKey> publicTargetGroup, String keyName, InstanceType instanceType,
             String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
@@ -1707,7 +1743,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
         final String launchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
         final String autoScalingGroupName = getAutoScalingGroupName(replicaSetName);
-        final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
+        final Iterable<AwsAvailabilityZone> availabilityZones = getAvailabilityZones(region);
         final int instanceWarmupTimeInSeconds = (int) Duration.ONE_MINUTE.times(3).asSeconds();
         autoScalingClient.createLaunchConfiguration(b->b
                 .launchConfigurationName(launchConfigurationName)

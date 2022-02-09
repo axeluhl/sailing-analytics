@@ -27,7 +27,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
-import com.sap.sailing.landscape.SharedLandscapeConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
@@ -95,7 +95,7 @@ public class TestProcedures {
     public void setUp() {
         privateKeyEncryptionPassphrase = ("awptyf87l"+"097384sf;,57").getBytes();
         landscape = AwsLandscape.obtain();
-        region = new AwsRegion(Region.EU_WEST_2);
+        region = new AwsRegion(Region.EU_WEST_2, landscape);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
         mailSmtpPassword = System.getProperty(MAIL_SMTP_PASSWORD);
     }
@@ -109,7 +109,7 @@ public class TestProcedures {
     
     @Test
     public void testGetMongoEndpoints() {
-        final Iterable<MongoEndpoint> mongoEndpoints = landscape.getMongoEndpoints(new AwsRegion(Region.EU_WEST_1));
+        final Iterable<MongoEndpoint> mongoEndpoints = landscape.getMongoEndpoints(new AwsRegion(Region.EU_WEST_1, landscape));
         assertTrue(!Util.isEmpty(Util.filter(mongoEndpoints, mongoEndpoint->
             (mongoEndpoint instanceof MongoReplicaSet &&
              ((MongoReplicaSet) mongoEndpoint).getName().equals("live") &&
@@ -207,9 +207,8 @@ public class TestProcedures {
                 SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
                 DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String,
                         ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-                        SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder);
+                        SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder, host);
         multiServerAppDeployerBuilder
-            .setHostToDeployTo(host)
             .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
             .setOptionalTimeout(optionalTimeout);
         multiServerAppConfigBuilder

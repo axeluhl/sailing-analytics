@@ -35,6 +35,4 @@ extends AwsInstance<ShardingKey> {
      *            pair that was originally used when the instance was launched will be used.
      */
     Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
-    
-    AwsLandscape<ShardingKey> getLandscape();
 }

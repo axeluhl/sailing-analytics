@@ -19,7 +19,7 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<String> getRegions();
     
-    ArrayList<String> getInstanceTypes();
+    ArrayList<String> getInstanceTypeNames();
 
     ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) throws Exception;
     
@@ -69,15 +69,16 @@ public interface LandscapeManagementWriteService extends RemoteService {
     SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
 
-    SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
+    SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, boolean sharedMasterInstance,
+            String masterInstanceType, String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping,
+            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName, Integer minimumAutoScalingGroupSizeOrNull,
+            Integer maximumAutoScalingGroupSizeOrNull, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
 
-    void removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String keyName,
+    SailingApplicationReplicaSetDTO<String> removeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
             byte[] passphraseForPrivateKeyDescryption) throws Exception;
 
     SailingApplicationReplicaSetDTO<String> createDefaultLoadBalancerMappings(String regionId,
@@ -98,14 +99,37 @@ public interface LandscapeManagementWriteService extends RemoteService {
             MongoEndpointDTO moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception;
 
-    SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(String regionId, String replicaSetName,
+    SailingApplicationReplicaSetDTO<String> deployApplicationToExistingHost(String replicaSetName,
             AwsInstanceDTO hostToDeployTo, String replicaInstanceType, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
+            Integer optionalMinimumAutoScalingGroupSizeOrNull, Integer optionalMaximumAutoScalingGroupSizeOrNull,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
 
 
     Boolean ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSet, String optionalKeyName,
             byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken) throws Exception;
+
+    ArrayList<SailingApplicationReplicaSetDTO<String>> updateImageForReplicaSets(String regionId,
+            ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,
+            AmazonMachineImageDTO amiDTO,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    SailingApplicationReplicaSetDTO<String> useDedicatedAutoScalingReplicasInsteadOfShared(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    SailingApplicationReplicaSetDTO<String> useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            String optionalSharedReplicaInstanceType) throws Exception;
+
+    SailingApplicationReplicaSetDTO<String> moveMasterToOtherInstance(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, boolean useSharedInstance,
+            String optionalInstanceTypeOrNull, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String optionalMasterReplicationBearerTokenOrNull, String optionalReplicaReplicationBearerTokenOrNull,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
 }

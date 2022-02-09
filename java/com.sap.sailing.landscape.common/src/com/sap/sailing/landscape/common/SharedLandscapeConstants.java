@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape;
+package com.sap.sailing.landscape.common;
 
 public interface SharedLandscapeConstants {
     /**
@@ -39,4 +39,28 @@ public interface SharedLandscapeConstants {
      * application replica sets in a landscape.
      */
     String SAILING_ANALYTICS_APPLICATION_HOST_TAG = "sailing-analytics-server";
+
+    String ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE = "ARCHIVE";
+
+    /**
+     * Value of the {@link #SAILSAILING_ANALYTICS_APPLICATION_HOST_TAGING_ANALYTICS_APPLICATION_HOST_TAG} tag
+     * for hosts expected to run more than one dedicated application process.
+     */
+    String MULTI_PROCESS_INSTANCE_TAG_VALUE = "___multi___";
+
+    /**
+     * Default value for the {@code Name} tag for shared instances expected to run multiple application processes.
+     */
+    String MULTI_PROCESS_INSTANCE_DEFAULT_NAME = "SL Multi-Server";
+
+    String DEFAULT_DEDICATED_INSTANCE_TYPE_NAME = "C4_2_XLARGE";
+    
+    String DEFAULT_SHARED_INSTANCE_TYPE_NAME = "I3_2_XLARGE";
+
+    /**
+     * Tells how to size process heaps on shared instances by default, based on the instance's physical memory.
+     * Harmonizes with the {@link #DEFAULT_SHARED_INSTANCE_TYPE_NAME} and the expected approximate memory requirements
+     * of a typical process instance.
+     */
+    int DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY = 4;
 }
