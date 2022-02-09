@@ -201,7 +201,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState) {
         this(awsLandscapeState,
-             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
+             System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
     }
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey) {
@@ -796,7 +797,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      * @return
      */
     private AwsCredentials getCredentials() {
-        return sessionToken.map(nonEmptySessionToken->(AwsCredentials) AwsSessionCredentials.create(accessKeyId, secretAccessKey, sessionToken.get()))
+        return sessionToken.map(nonEmptySessionToken->(AwsCredentials) AwsSessionCredentials.create(accessKeyId, secretAccessKey, nonEmptySessionToken))
                 .orElse(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
     }
     
@@ -1028,14 +1029,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
-        return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
-                        .names(targetGroupName).build()).targetGroups().iterator().next();
+        return Util.first(getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
+                        .names(targetGroupName).build()).targetGroups());
     }
     
     @Override
     public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(com.sap.sse.landscape.Region region, String targetGroupArn) {
-        return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
-                        .targetGroupArns(targetGroupArn).build()).targetGroups().iterator().next();
+        return Util.first(getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
+                        .targetGroupArns(targetGroupArn).build()).targetGroups());
     }
     
     @Override

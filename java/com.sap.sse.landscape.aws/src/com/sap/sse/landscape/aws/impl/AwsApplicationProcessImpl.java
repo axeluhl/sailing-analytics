@@ -10,12 +10,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
+import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -23,6 +25,10 @@ import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.MongoUriParser;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.replication.ReplicationStatus;
+
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthStateEnum;
 
 public abstract class AwsApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends ApplicationProcessImpl<ShardingKey, MetricsT, ProcessT>
@@ -81,21 +87,61 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     /**
-     * Assuming to find the {@code ipAddress} in this host's {@link Host#getRegion() region}, this method looks for instances that
-     * have {@code ipAddress} as their public or private IP address. If found, the respective host is returned, otherwise
-     * {@code null} is returned.
+     * If {@code ipAddressOrHostname} refers to a DNS entry instead of an IP address, a lookup in our own DNS registry
+     * is performed, checking if the hostname matches a CNAME record that in turn points to a load balancer. See
+     * {@link AwsLandscape#getDNSMappedLoadBalancerFor(Region, String)}. If so, the load balancer rules are scanned for
+     * those having a hostname filter matching the hostname provided in {@code ipAddressOrHostname} and checks to which
+     * "-m" master target group the rule refers. The corresponding target group is then looked up, and the first target
+     * ready will be returned, or {@code null} if the target group does not contain any target that is ready.
+     * <p>
+     * 
+     * In case {@code ipAddressOrHostname} represents an IP address this method assumes to find the
+     * {@code ipAddressOrHostname} in this host's {@link Host#getRegion() region}. This method then looks for instances
+     * that have {@code ipAddressOrHostname} as their public or private IP address. If found, the respective host is
+     * returned, otherwise {@code null} is returned.
+     * <p>
      */
-    private <HostT extends AwsInstance<ShardingKey>> HostT getHostFromIpAddress(HostSupplier<ShardingKey, HostT> hostSupplier, final String ipAddress) {
+    private <HostT extends AwsInstance<ShardingKey>> HostT getHostFromIpAddress(HostSupplier<ShardingKey, HostT> hostSupplier, final String ipAddressOrHostname) {
         HostT host;
-        try {
-            host = landscape.getHostByPublicIpAddress(getHost().getRegion(), ipAddress, hostSupplier);
-        } catch (Exception e) {
-            logger.info("Unable to find master by public IP "+ipAddress+" ("+e.getMessage()+"); trying to look up master assuming "+ipAddress+" is the private IP");
+        final ApplicationLoadBalancer<ShardingKey> alb = landscape.getDNSMappedLoadBalancerFor(getHost().getRegion(), ipAddressOrHostname);
+        if (alb != null) {
+            logger.info("Found a hostname mapped to a load balancer; trying to find master through target group...");
+            host = null;
+            for (final Rule rule : alb.getRules()) {
+                if (rule.conditions().stream().filter(
+                        r->r.hostHeaderConfig().values().contains(ipAddressOrHostname)
+                        && r.httpHeaderConfig() != null
+                        && r.httpHeaderConfig().httpHeaderName().equals(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                        && r.httpHeaderConfig().values().contains(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).findAny().isPresent()) {
+                    logger.info("Found rule matching hostname "+ipAddressOrHostname+" for master");
+                    Optional<String> targetGroupArn = rule.actions().stream().filter(
+                                                            a -> a.type() == ActionTypeEnum.FORWARD).map(
+                                                                    act -> act.forwardConfig().targetGroups().stream().findAny().map(
+                                                                            tgt -> tgt.targetGroupArn()).orElse(null)).findAny();
+                    host = targetGroupArn
+                            .map(tgArn->landscape.getAwsTargetGroupByArn(getHost().getRegion(), tgArn))
+                            .map(awsTg->landscape.getTargetGroup(getHost().getRegion(), awsTg.targetGroupName()))
+                            .map(tg->tg.getRegisteredTargets())
+                            .map(tah->tah.keySet().stream().filter(t->tah.get(t).state() == TargetHealthStateEnum.HEALTHY).findAny().orElse(null))
+                            .map(awsInstance->hostSupplier.supply(awsInstance.getInstanceId(), awsInstance.getAvailabilityZone(), awsInstance.getPrivateAddress(), awsInstance.getLaunchTimePoint(), landscape))
+                            .orElse(null);
+                    if (host != null) {
+                        logger.info("Identified master in target group for hostname "+ipAddressOrHostname+": "+host);
+                        break;
+                    }
+                }
+            }
+        } else {
             try {
-                host = landscape.getHostByPrivateIpAddress(getHost().getRegion(), ipAddress, hostSupplier);
-            } catch (Exception f) {
-                logger.info("Unable to find master by private IP "+ipAddress+" ("+f.getMessage()+") either. Returning null.");
-                host = null;
+                host = landscape.getHostByPublicIpAddress(getHost().getRegion(), ipAddressOrHostname, hostSupplier);
+            } catch (Exception e) {
+                logger.info("Unable to find master by public IP "+ipAddressOrHostname+" ("+e.getMessage()+"); trying to look up master assuming "+ipAddressOrHostname+" is the private IP");
+                try {
+                    host = landscape.getHostByPrivateIpAddress(getHost().getRegion(), ipAddressOrHostname, hostSupplier);
+                } catch (Exception f) {
+                    logger.info("Unable to find master by private IP "+ipAddressOrHostname+" ("+f.getMessage()+") either. Returning null.");
+                    host = null;
+                }
             }
         }
         return host;

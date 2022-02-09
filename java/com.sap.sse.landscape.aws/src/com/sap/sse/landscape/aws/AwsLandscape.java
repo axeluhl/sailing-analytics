@@ -489,8 +489,14 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
                 healthCheckPath);
     }
 
+    /**
+     * @return {@code null} if a target group by the name specified isn't found in the {@code region}
+     */
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(Region region, String targetGroupName);
 
+    /**
+     * @return {@code null} if a target group by the ARN specified isn't found in the {@code region}
+     */
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(Region region, String targetGroupArn);
 
     Map<AwsInstance<ShardingKey>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey> targetGroup);

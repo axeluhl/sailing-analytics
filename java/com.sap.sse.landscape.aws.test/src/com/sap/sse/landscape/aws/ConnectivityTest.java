@@ -2,6 +2,7 @@ package com.sap.sse.landscape.aws;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -31,10 +32,15 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sap.sailing.landscape.LandscapeService;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
+import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsProcessFactory;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -75,6 +81,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     private AwsRegion region;
     private byte[] keyPass;
     private String AXELS_KEY_PASS;
+    private final String AXELS_KEY_NAME = "Axel";
     
     @Before
     public void setUp() {
@@ -84,10 +91,27 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
         keyPass = "lkayrelakuesyrlasp8caorewyc".getBytes();
     }
     
+    @Test
+    public void testGetMasterOnApplicationProcess() throws Exception {
+        final Iterable<SailingAnalyticsHost<String>> hosts = landscape.getApplicationProcessHostsByTag(region,
+                SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
+                new SailingAnalyticsHostSupplier<String>());
+        for (final SailingAnalyticsHost<String> host : hosts) {
+            final Iterable<SailingAnalyticsProcess<String>> processes = host.getApplicationProcesses(
+                    LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.of(AXELS_KEY_NAME), AXELS_KEY_PASS.getBytes());
+            for (final SailingAnalyticsProcess<String> process : processes) {
+                SailingAnalyticsProcess<String> master = process.getMaster(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
+                        new SailingAnalyticsHostSupplier<String>(),
+                        new SailingAnalyticsProcessFactory(() -> landscape));
+                assertNotNull(master);
+                assertNotEquals(master, process);
+            }
+        }
+    }
+    
     //@Ignore("Fill in key details for the key used to launch the central reverse proxy in the test landscape")
     @Test
     public void readAndStoreSSHKey() throws Exception {
-        final String AXELS_KEY_NAME = "Axel";
         final String PATH_TO_YOUR_PRIVATE_KEY = "c:/Users/d043530/.ssh/id_rsa";
         landscape.deleteKeyPair(region, AXELS_KEY_NAME);
         final KeyPair keyPair = KeyPair.load(new JSch(), PATH_TO_YOUR_PRIVATE_KEY, PATH_TO_YOUR_PRIVATE_KEY+".pub");
