@@ -47,7 +47,7 @@ do
       if [[ $j =~ $k ]]; then
 	found=1
 	echo -n "  - ${j} ... "
-	digest=$( curl -s -X HEAD -I -i -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "${AUTH_HEADER}" https://docker.sapsailing.com/v2/${REPO}/manifests/${j} | grep "^Docker-Content-Digest: " | sed -e 's/^Docker-Content-Digest: \([^]*\)\?$/\1/' )
+	digest=$( curl -s -X HEAD -I -i -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "${AUTH_HEADER}" https://docker.sapsailing.com/v2/${REPO}/manifests/${j} | grep -i "^Docker-Content-Digest: " | sed -e 's/^[dD]ocker-[cC]ontent-[dD]igest: \([^]*\)\?$/\1/' )
 	URL="https://docker.sapsailing.com/v2/${REPO}/manifests/${digest}"
 	curl -s -X DELETE -H "${AUTH_HEADER}" "${URL}"
 	echo "DELETED ($?)"
