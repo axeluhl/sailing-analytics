@@ -39,6 +39,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.NamedWithIDImpl;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
@@ -201,7 +202,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState) {
         this(awsLandscapeState,
-             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
+             System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
     }
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey) {
@@ -796,7 +798,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      * @return
      */
     private AwsCredentials getCredentials() {
-        return sessionToken.map(nonEmptySessionToken->(AwsCredentials) AwsSessionCredentials.create(accessKeyId, secretAccessKey, sessionToken.get()))
+        return sessionToken.map(nonEmptySessionToken->(AwsCredentials) AwsSessionCredentials.create(accessKeyId, secretAccessKey, nonEmptySessionToken))
                 .orElse(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
     }
     
@@ -1028,14 +1030,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
-        return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
-                        .names(targetGroupName).build()).targetGroups().iterator().next();
+        return Util.first(getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
+                        .names(targetGroupName).build()).targetGroups());
     }
     
     @Override
     public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(com.sap.sse.landscape.Region region, String targetGroupArn) {
-        return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
-                        .targetGroupArns(targetGroupArn).build()).targetGroups().iterator().next();
+        return Util.first(getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
+                        .targetGroupArns(targetGroupArn).build()).targetGroups());
     }
     
     @Override
@@ -1165,15 +1167,73 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private String getNonDNSMappedLoadBalancerName(String wildcardDomain) {
         return DEFAULT_NON_DNS_MAPPED_ALB_NAME + wildcardDomain.replaceAll("\\.", "-");
     }
+    
+    /**
+     * @param hostname example: {@code NLB-sapsailing-dot-com-f937a5b33246d221.elb.eu-west-1.amazonaws.com} or
+     * {@code DNSMapped-0-1286577811.eu-west-1.elb.amazonaws.com}. The ".elb." part may occur before or after
+     * the region identifier.
+     */
+    private boolean isLoadBalancerDNSName(String hostname) {
+        return getLoadBalancerDescriptorForDNSName(hostname) != null;
+    }
+
+    private static class LoadBalancerDescriptor extends NamedWithIDImpl {
+        private static final long serialVersionUID = 5813730385448660098L;
+        private final Region region;
+
+        public LoadBalancerDescriptor(String name, String id, Region region) {
+            super(name, id);
+            this.region = region;
+        }
+
+        public Region getRegion() {
+            return region;
+        }
+    }
+    
+    private LoadBalancerDescriptor getLoadBalancerDescriptorForDNSName(String hostname) {
+        final String loadBalancerNameAndIdPattern = "([^.]*)-([^.-]*)";
+        final String amazonAwsComSuffixPattern = "amazonaws\\.com";
+        final String elbInfixPattern = "\\.elb\\.";
+        final String regionIdPattern = "([^.]*)";
+        final Pattern p1 = Pattern.compile("^"+loadBalancerNameAndIdPattern+elbInfixPattern+regionIdPattern+"\\."+amazonAwsComSuffixPattern+"$");
+        final Pattern p2 = Pattern.compile("^"+loadBalancerNameAndIdPattern+"\\."+regionIdPattern+elbInfixPattern+amazonAwsComSuffixPattern+"$");
+        final Matcher m1 = p1.matcher(hostname);
+        final Matcher result;
+        if (m1.matches()) {
+            result = m1;
+        } else {
+            final Matcher m2 = p2.matcher(hostname);
+            if (m2.matches()) {
+                result = m2;
+            } else {
+                result = null;
+            }
+        }
+        return result == null ? null : new LoadBalancerDescriptor(result.group(1), result.group(2), Region.of(result.group(3)));
+    }
 
     @Override
-    public ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(
-            com.sap.sse.landscape.Region region, String hostname) {
+    public ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(String hostname) {
+        return Util.stream(getResourceRecordSets(hostname))
+                    .filter(rrs->rrs.type() == RRType.CNAME)
+                    .flatMap(rrs->rrs.resourceRecords().stream())
+                    .filter(rr->isLoadBalancerDNSName(rr.value()))
+                    .map(rr->getLoadBalancerDescriptorForDNSName(rr.value()))
+                    .findAny()
+                    .map(lbDesc->getLoadBalancerByName(lbDesc.getName(), new AwsRegion(lbDesc.getRegion(), this)))
+                    .orElse(null);
+    }
+    
+    @Override
+    public ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(com.sap.sse.landscape.Region region, String hostname) {
         final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers();
         for (final LoadBalancer lb : response.loadBalancers()) {
             final ApplicationLoadBalancer<ShardingKey> alb = new ApplicationLoadBalancerImpl<>(region, lb, this);
             for (final Rule rule : alb.getRules()) {
-                if (rule.conditions().stream().filter(r->r.hostHeaderConfig().values().contains(hostname)).findAny().isPresent()) {
+                if (rule.conditions().stream().filter(
+                        r->r.hostHeaderConfig() != null && r.hostHeaderConfig().values().contains(hostname))
+                        .findAny().isPresent()) {
                     return alb;
                 }
             }
@@ -1501,6 +1561,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final String hostedZoneId = getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname));
         return route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname)).handle((response, e)->
             Util.filter(response.resourceRecordSets(), resourceRecordSet->AwsLandscape.removeTrailingDotFromHostname(resourceRecordSet.name()).equals(hostname)));
+    }
+    
+    @Override
+    public Iterable<ResourceRecordSet> getResourceRecordSets(String hostname) {
+        final Route53Client route53Client = getRoute53Client();
+        final String hostedZoneId = getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname));
+        return Util.filter(route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname)).resourceRecordSets(),
+                resourceRecordSet->AwsLandscape.removeTrailingDotFromHostname(resourceRecordSet.name()).equals(hostname));
     }
     
     @Override
