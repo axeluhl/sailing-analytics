@@ -577,6 +577,12 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.
      */
     ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(Region region, String hostname);
+
+    /**
+     * Looks up the hostname in the DNS to get the CNAME, then extract the name and region ID from the A-record to which the CNAME
+     * points and search for the load balancer there.
+     */
+    ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(String hostname);
     
     /**
      * The default MongoDB configuration to connect to. See also {@link #MONGO_DEFAULT_REPLICA_SET_NAME} and
@@ -709,6 +715,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname);
 
+    Iterable<ResourceRecordSet> getResourceRecordSets(String hostname);
+    
     DNSCache getNewDNSCache();
 
     CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(Region region);

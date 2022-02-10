@@ -95,9 +95,9 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
                     System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
             final Credentials credentials = tmpLandscape.getMfaSessionCredentials(
                     System.getProperty(AwsLandscape.MFA_TOKEN_CODE_SYSTEM_PROPERTY_NAME));
-            logger.info("-Dcom.sap.sse.landscape.aws.accesskeyid="+
-                    credentials.accessKeyId()+" -Dcom.sap.sse.landscape.aws.secretaccesskey="+
-                    credentials.secretAccessKey()+" -Dcom.sap.sse.landscape.aws.sessiontoken="+
+            logger.info("-D"+AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME+"="+
+                    credentials.accessKeyId()+" -D"+AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME+"="+
+                    credentials.secretAccessKey()+" -D"+AwsLandscape.SESSION_TOKEN_SYSTEM_PROPERTY_NAME+"="+
                     credentials.sessionToken());
             landscape = AwsLandscape.obtain(credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken());
         }
@@ -119,6 +119,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
                         new SailingAnalyticsHostSupplier<String>(),
                         new SailingAnalyticsProcessFactory(() -> landscape));
                 assertNotNull(master);
+                assertNotNull(master.getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT));
                 assertNotEquals(master, process);
             }
         }

@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Region;
@@ -23,6 +24,7 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.MongoUriParser;
+import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.replication.ReplicationStatus;
 
@@ -75,10 +77,15 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             if (replicatedFrom != null) {
                 final String masterAddress = (String) replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_HOSTNAME);
                 final Integer port = replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replicatedFrom.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
-                HostT host = getHostFromIpAddress(hostSupplier, masterAddress);
-                if (host != null) {
-                    return processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null,
-                            /* telnetPort can be obtained from environment on demand */ null, /* serverName to be discovered otherwise */ null, Collections.emptyMap());
+                Pair<HostT, Integer> hostAndOptionalTargetPort = getHostAndOptionalTargetPortFromIpAddress(hostSupplier, masterAddress);
+                if (hostAndOptionalTargetPort != null) {
+                    return processFactory.createProcess(hostAndOptionalTargetPort.getA(),
+                            // if a separate target port was returned by the lookup via IP address, use it because then
+                            // the "port" we have here is only targeting a load balancer, not the host itself:
+                            hostAndOptionalTargetPort.getB() != null ? hostAndOptionalTargetPort.getB() : port,
+                            /* serverDirectory to be discovered otherwise */ null,
+                            /* telnetPort can be obtained from environment on demand */ null,
+                            /* serverName to be discovered otherwise */ null, Collections.emptyMap());
                 }
             }
         }
@@ -100,19 +107,23 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * returned, otherwise {@code null} is returned.
      * <p>
      */
-    private <HostT extends AwsInstance<ShardingKey>> HostT getHostFromIpAddress(HostSupplier<ShardingKey, HostT> hostSupplier, final String ipAddressOrHostname) {
+    private <HostT extends AwsInstance<ShardingKey>> Pair<HostT, Integer> getHostAndOptionalTargetPortFromIpAddress(HostSupplier<ShardingKey, HostT> hostSupplier, final String ipAddressOrHostname) {
         HostT host;
+        Integer targetPort;
         // FIXME bug5530: the hostname may be a DNS record pointing to another region, e.g., the ALB hosting security-service.sapsailing.com;
         // We would need to infer the region from the CNAME resolution, such as DNSMapped-1-440026482.eu-west-1.elb.amazonaws.com
         // which would resolve to eu-west-1
-        final ApplicationLoadBalancer<ShardingKey> alb = landscape.getDNSMappedLoadBalancerFor(getHost().getRegion(), ipAddressOrHostname);
+        final ApplicationLoadBalancer<ShardingKey> alb = landscape.getDNSMappedLoadBalancerFor(ipAddressOrHostname);
         if (alb != null) {
             logger.info("Found a hostname mapped to a load balancer; trying to find master through target group...");
             host = null;
+            targetPort = null;
             for (final Rule rule : alb.getRules()) {
                 if (rule.conditions().stream().filter(
-                        r->r.hostHeaderConfig().values().contains(ipAddressOrHostname)
-                        && r.httpHeaderConfig() != null
+                        r->r.hostHeaderConfig() != null
+                        && r.hostHeaderConfig().values().contains(ipAddressOrHostname)).findAny().isPresent()
+                && rule.conditions().stream().filter(
+                        r->r.httpHeaderConfig() != null
                         && r.httpHeaderConfig().httpHeaderName().equals(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
                         && r.httpHeaderConfig().values().contains(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).findAny().isPresent()) {
                     logger.info("Found rule matching hostname "+ipAddressOrHostname+" for master");
@@ -120,20 +131,23 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                                                             a -> a.type() == ActionTypeEnum.FORWARD).map(
                                                                     act -> act.forwardConfig().targetGroups().stream().findAny().map(
                                                                             tgt -> tgt.targetGroupArn()).orElse(null)).findAny();
-                    host = targetGroupArn
-                            .map(tgArn->landscape.getAwsTargetGroupByArn(getHost().getRegion(), tgArn))
-                            .map(awsTg->landscape.getTargetGroup(getHost().getRegion(), awsTg.targetGroupName()))
+                    final Optional<TargetGroup<ShardingKey>> targetGroup = targetGroupArn
+                            .map(tgArn->landscape.getAwsTargetGroupByArn(alb.getRegion(), tgArn))
+                            .map(awsTg->landscape.getTargetGroup(alb.getRegion(), awsTg.targetGroupName()));
+                    host = targetGroup
                             .map(tg->tg.getRegisteredTargets())
                             .map(tah->tah.keySet().stream().filter(t->tah.get(t).state() == TargetHealthStateEnum.HEALTHY).findAny().orElse(null))
                             .map(awsInstance->hostSupplier.supply(awsInstance.getInstanceId(), awsInstance.getAvailabilityZone(), awsInstance.getPrivateAddress(), awsInstance.getLaunchTimePoint(), landscape))
                             .orElse(null);
+                    targetPort = targetGroup.map(TargetGroup::getPort).orElse(null);
                     if (host != null) {
-                        logger.info("Identified master in target group for hostname "+ipAddressOrHostname+": "+host);
+                        logger.info("Identified master in target group for hostname "+ipAddressOrHostname+": "+host+":"+targetPort);
                         break;
                     }
                 }
             }
         } else {
+            targetPort = null;
             try {
                 host = landscape.getHostByPublicIpAddress(getHost().getRegion(), ipAddressOrHostname, hostSupplier);
             } catch (Exception e) {
@@ -146,7 +160,7 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                 }
             }
         }
-        return host;
+        return host == null ? null : new Pair<>(host, targetPort);
     }
 
     @Override
@@ -163,11 +177,16 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                     final JSONObject replica = (JSONObject) replicaObject;
                     final String replicaAddress = (String) replica.get(ReplicationStatus.JSON_FIELD_NAME_ADDRESS);
                     final Integer port = replica.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replica.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
-                    HostT host = getHostFromIpAddress(hostSupplier, replicaAddress);
-                    if (host != null) {
+                    Pair<HostT, Integer> hostAndOptionalTargetPort = getHostAndOptionalTargetPortFromIpAddress(hostSupplier, replicaAddress);
+                    if (hostAndOptionalTargetPort != null) {
                         // adding to the set relies on ApplicationProcess deciding equality based on host and port
-                        result.add(processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null,
-                                /* telnetPort can be obtained from environment on demand */ null, /* serverName to be discovered otherwise */ null, Collections.emptyMap()));
+                        result.add(processFactory.createProcess(hostAndOptionalTargetPort.getA(),
+                                // if a separate target port was returned by the lookup via IP address, use it because then
+                                // the "port" we have here is only targeting a load balancer, not the host itself:
+                                hostAndOptionalTargetPort.getB() != null ? hostAndOptionalTargetPort.getB() : port,
+                                /* serverDirectory to be discovered otherwise */ null,
+                                /* telnetPort can be obtained from environment on demand */ null,
+                                /* serverName to be discovered otherwise */ null, Collections.emptyMap()));
                     }
                 }
             }
