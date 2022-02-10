@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Optional;
@@ -25,7 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.jcraft.jsch.ChannelSftp;
@@ -38,11 +36,11 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsProcessFactory;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -64,6 +62,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeStatus;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.sts.model.Credentials;
 
 /**
  * Tests for the AWS SDK landscape wrapper in bundle {@code com.sap.sse.landscape.aws}. To run these tests
@@ -77,15 +76,31 @@ import software.amazon.awssdk.services.route53.model.RRType;
 public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
-    private AwsLandscape<String> landscape;
-    private AwsRegion region;
-    private byte[] keyPass;
-    private String AXELS_KEY_PASS;
-    private final String AXELS_KEY_NAME = "Axel";
+    private static AwsLandscape<String> landscape;
+    private static AwsRegion region;
+    private static byte[] keyPass;
+    private static String AXELS_KEY_PASS;
+    private static final String AXELS_KEY_NAME = "Axel";
     
-    @Before
-    public void setUp() {
-        landscape = AwsLandscape.obtain();
+    @BeforeClass
+    public static void setUp() {
+        if (System.getProperty(AwsLandscape.SESSION_TOKEN_SYSTEM_PROPERTY_NAME) != null) {
+            landscape = AwsLandscape.obtain(
+                    System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
+                    System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME),
+                    System.getProperty(AwsLandscape.SESSION_TOKEN_SYSTEM_PROPERTY_NAME));
+        } else {
+            final AwsLandscape<String> tmpLandscape = AwsLandscape.obtain(
+                    System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
+                    System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+            final Credentials credentials = tmpLandscape.getMfaSessionCredentials(
+                    System.getProperty(AwsLandscape.MFA_TOKEN_CODE_SYSTEM_PROPERTY_NAME));
+            logger.info("-Dcom.sap.sse.landscape.aws.accesskeyid="+
+                    credentials.accessKeyId()+" -Dcom.sap.sse.landscape.aws.secretaccesskey="+
+                    credentials.secretAccessKey()+" -Dcom.sap.sse.landscape.aws.sessiontoken="+
+                    credentials.sessionToken());
+            landscape = AwsLandscape.obtain(credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken());
+        }
         region = new AwsRegion(Region.EU_WEST_2, landscape);
         AXELS_KEY_PASS = new String(Base64.getDecoder().decode(System.getProperty("axelskeypassphrase")));
         keyPass = "lkayrelakuesyrlasp8caorewyc".getBytes();
@@ -112,7 +127,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     //@Ignore("Fill in key details for the key used to launch the central reverse proxy in the test landscape")
     @Test
     public void readAndStoreSSHKey() throws Exception {
-        final String PATH_TO_YOUR_PRIVATE_KEY = "c:/Users/d043530/.ssh/id_rsa";
+        final String PATH_TO_YOUR_PRIVATE_KEY = System.getProperty("pathtoaxelsprivatekey");
         landscape.deleteKeyPair(region, AXELS_KEY_NAME);
         final KeyPair keyPair = KeyPair.load(new JSch(), PATH_TO_YOUR_PRIVATE_KEY, PATH_TO_YOUR_PRIVATE_KEY+".pub");
         final byte[] pubKeyBytes = getPublicKeyBytes(keyPair);
@@ -194,8 +209,12 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     }
 
     protected ProcessT createApplicationProcess(final AwsInstance<String> host) {
+        final SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>> sailingAnalyticsHost =
+                new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(
+                        host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(), host.getLaunchTimePoint(),
+                        landscape, new SailingAnalyticsProcessFactory(()->landscape));
         @SuppressWarnings("unchecked")
-        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, host, ApplicationProcessHost.DEFAULT_SERVER_PATH, 2010, landscape);
+        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, sailingAnalyticsHost, ApplicationProcessHost.DEFAULT_SERVER_PATH, 2010, landscape);
         return process;
     }
     
@@ -212,7 +231,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
                 InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"),
                 Optional.of(Tags.with("Name", "MyHost").and("Hello", "World")),
                 "MONGODB_URI=\""+mongoEndpoint.getURI(Optional.of(new DatabaseImpl(mongoEndpoint, "winddbTest")))+"\"",
-                "INSTALL_FROM_RELEASE="+SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811").getName()); // TODO this is the development branch/release; switch to master build later
+                "INSTALL_FROM_RELEASE="+SailingReleaseRepository.INSTANCE.getLatestMasterRelease().getName());
         try {
             assertNotNull(host);
             final Instance instance = landscape.getInstance(host.getInstanceId(), region);
@@ -407,14 +426,6 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
         final SSHKeyPair sshKeyPair = landscape.createKeyPair(region, keyName, keyPass);
         assertNotNull(sshKeyPair);
         assertEquals(keyName, sshKeyPair.getName());
-    }
-    
-    @Test
-    public void testImageDate() throws ParseException {
-        final AmazonMachineImage<String> image = landscape.getImage(region, "ami-0c0907685eae2dbab");
-        assertEquals(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").parse(
-                /* November 9, 2020 at 9:37:16 PM UTC+1 */ "2020-11-09T21:37:16+0100")),
-                image.getCreatedAt());
     }
     
     @Test

@@ -73,8 +73,7 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             final JSONObject replicable = (JSONObject) replicableObject;
             final JSONObject replicatedFrom = (JSONObject) replicable.get(ReplicationStatus.JSON_FIELD_NAME_REPLICABLE_REPLICATEDFROM);
             if (replicatedFrom != null) {
-                final String masterAddress = (String) replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_ADDRESS);
-                // FIXME bug5530 if masterAddress is a hostname then it could either resolve to the IP address of the master's host, or it could be a CNAME for a load balancer which means we would have to scan the load balancer rules for the hostname, find a master target group and try to resolve the process this way
+                final String masterAddress = (String) replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_HOSTNAME);
                 final Integer port = replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replicatedFrom.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
                 HostT host = getHostFromIpAddress(hostSupplier, masterAddress);
                 if (host != null) {
@@ -103,6 +102,9 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      */
     private <HostT extends AwsInstance<ShardingKey>> HostT getHostFromIpAddress(HostSupplier<ShardingKey, HostT> hostSupplier, final String ipAddressOrHostname) {
         HostT host;
+        // FIXME bug5530: the hostname may be a DNS record pointing to another region, e.g., the ALB hosting security-service.sapsailing.com;
+        // We would need to infer the region from the CNAME resolution, such as DNSMapped-1-440026482.eu-west-1.elb.amazonaws.com
+        // which would resolve to eu-west-1
         final ApplicationLoadBalancer<ShardingKey> alb = landscape.getDNSMappedLoadBalancerFor(getHost().getRegion(), ipAddressOrHostname);
         if (alb != null) {
             logger.info("Found a hostname mapped to a load balancer; trying to find master through target group...");

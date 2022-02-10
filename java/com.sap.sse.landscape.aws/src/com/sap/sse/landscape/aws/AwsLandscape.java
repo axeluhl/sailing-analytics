@@ -91,6 +91,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
     
+    String MFA_TOKEN_CODE_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.mfatokencode";
+    
+    String SESSION_TOKEN_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.sessiontoken";
+    
     /**
      * The name of the tag used on {@link AwsInstance hosts} running one or more {@link MongoProcess}(es). The tag value
      * provides information about the replica sets and the ports on which the respective {@link MongoProcess} is listening.

@@ -1174,7 +1174,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         for (final LoadBalancer lb : response.loadBalancers()) {
             final ApplicationLoadBalancer<ShardingKey> alb = new ApplicationLoadBalancerImpl<>(region, lb, this);
             for (final Rule rule : alb.getRules()) {
-                if (rule.conditions().stream().filter(r->r.hostHeaderConfig().values().contains(hostname)).findAny().isPresent()) {
+                if (rule.conditions().stream().filter(
+                        r->r.hostHeaderConfig() != null && r.hostHeaderConfig().values().contains(hostname))
+                        .findAny().isPresent()) {
                     return alb;
                 }
             }
