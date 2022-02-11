@@ -660,6 +660,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final UserGroup serverGroup;
         if (existingServerGroup == null) {
             final UUID serverGroupId = UUID.randomUUID();
+            // FIXME bug5678: if this runs on a server with separate security realm, using the local security service doesn't help!
             serverGroup = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.USER_GROUP,
                     new TypeRelativeObjectIdentifier(serverGroupId.toString()), /* securityDisplayName */ serverGroupName,
                     (Callable<UserGroup>)()->getSecurityService().createUserGroup(serverGroupId, serverGroupName));
