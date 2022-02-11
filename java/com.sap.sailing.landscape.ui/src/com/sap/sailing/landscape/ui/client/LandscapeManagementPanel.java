@@ -289,7 +289,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return builder.toSafeHtml();
             }
         };
-        applicationReplicaSetsTable.addColumn(masterInstanceIdColumn, stringMessages.masterInstanceId());
+        applicationReplicaSetsTable.addColumn(masterInstanceIdColumn, stringMessages.masterInstanceId(),
+                (rs1, rs2)->new NaturalComparator().compare(rs1.getMaster().getHost().getInstanceId(), rs2.getMaster().getHost().getInstanceId()));
         applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint(),
                 (rs1, rs2)->rs1.getMaster().getStartTimePoint().compareTo(rs2.getMaster().getStartTimePoint()));
         final SafeHtmlCell replicasCell = new SafeHtmlCell();
