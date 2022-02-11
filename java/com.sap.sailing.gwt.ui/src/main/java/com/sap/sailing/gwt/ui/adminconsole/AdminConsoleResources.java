@@ -65,9 +65,6 @@ public interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/flag_blue.png")
     ImageResource flagIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/xml.png")
-    ImageResource exportXMLIcon();
-    
     @Source("com/sap/sailing/gwt/ui/client/images/opencoachdashboard.png")
     ImageResource openCoachDashboard();
 

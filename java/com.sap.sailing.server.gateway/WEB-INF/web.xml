@@ -221,6 +221,14 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/fileupload</url-pattern>
 	</servlet-mapping>
+    <servlet>
+        <servlet-name>ProgressServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.impl.ProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProgressServlet</servlet-name>
+        <url-pattern>/fileupload/progress</url-pattern>
+    </servlet-mapping>
 	<servlet>
 		<servlet-name>ORCCertificateImportServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.orc.ORCCertificateImportServlet</servlet-class>
@@ -232,7 +240,7 @@
 	
 	<servlet>
 		<servlet-name>Jersey REST API</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
@@ -254,7 +262,7 @@
 	
 	<servlet>
 		<servlet-name>Jersey REST SPI</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
@@ -289,7 +297,7 @@
 
 	<servlet>
 		<servlet-name>SharingApi</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>com.sap.sailing.server.gateway.jaxrs.sharing.SharingApiApplication</param-value>

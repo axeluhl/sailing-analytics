@@ -84,6 +84,97 @@ Our central web server at `www.sapsailing.com` does this periodically every day,
 
 We have now started to analyze those ALB logs using Amazon Athena. See [https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query](https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query) for details. CloudWatch and Lambda are being used to automatically trigger some form of log analysis every month. See the CloudWatch event rule ``RunALBLogAnalysis`` and how it triggers the Lambda named [RunALBLogAnalysis](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) and the [Lambda function](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) containing the queries and configuration.
 
+In order to cope with the data volume in our logs, a technique called "partition projection" is required. Another annoyance is that AWS extended the ALB log format somewhen in 2019, adding six more fields (redirect_url, lambda_error_reason, target_port_list, target_status_code_list, classification, classification_reason) to each log entry. Therefore, table definitions that span this format change need to handle the additional six fields as optional. For each bucket containing ALB logs (usually one per region) a database table must be created, like this:
+<pre>
+CREATE EXTERNAL TABLE IF NOT EXISTS alb_log_partition_projection_old_and_new (
+type string,
+time string,
+elb string,
+client_ip string,
+client_port int,
+target_ip string,
+target_port int,
+request_processing_time double,
+target_processing_time double,
+response_processing_time double,
+elb_status_code string,
+target_status_code string,
+received_bytes bigint,
+sent_bytes bigint,
+request_verb string,
+request_url string,
+request_proto string,
+user_agent string,
+ssl_cipher string,
+ssl_protocol string,
+target_group_arn string,
+trace_id string,
+domain_name string,
+chosen_cert_arn string,
+matched_rule_priority string,
+request_creation_time string,
+actions_executed string,
+redirect_url string,
+lambda_error_reason string,
+target_port_list string,
+target_status_code_list string,
+classification string,
+classification_reason string
+)
+PARTITIONED BY(year int, month int, day int)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+WITH SERDEPROPERTIES (
+'serialization.format' = '1',
+'input.regex' =
+'([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) \"([^ ]*) ([^ ]*) (- |[^ ]*)\" \"([^\"]*)\" ([A-Z0-9-]+) ([A-Za-z0-9.-]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" ([-.0-9]*) ([^ ]*) \"([^\"]*)\"(.*)(.*)(.*)(.*)(.*)(.*)')
+LOCATION 's3://sapsailing-access-logs/AWSLogs/017363970217/elasticloadbalancing/eu-west-1'
+TBLPROPERTIES (
+'has_encrypted_data'='false',
+'projection.day.digits'='2',
+'projection.day.range'='01,31',
+'projection.day.type'='integer',
+'projection.enabled'='true',
+'projection.month.digits'='2',
+'projection.month.range'='01,12',
+'projection.month.type'='integer',
+'projection.year.digits'='4',
+'projection.year.range'='2017,2100',
+'projection.year.type'='integer',
+"storage.location.template" = "s3://sapsailing-access-logs/AWSLogs/017363970217/elasticloadbalancing/eu-west-1/${year}/${month}/${day}"
+)
+</pre>
+Replace the bucket and region name in the ``s3://`` URL as well as the table name accordingly. Note how the optional trailing six fields are "matched" by the trailing combination ``(.*)(.*)(.*)(.*)(.*)(.*)`` in the regular expression. It will inaccurately and greedily match all trailing fields into the ``redirect_url`` field, including any quotes, and the five remaining fields can be expected to remain empty. (The challenge in modeling these optional components properly in the regular expression is that the match groups need to correspond to the table fields exactly; so nesting parenthesized match groups is not an option here. Also, all tables united with the ``union all`` construct need to expose exactly the same set of fields.)
+
+The queries then have to unite the tables to consider in the query. Example:
+<pre>
+with union_table AS 
+    (select *
+    from alb_log_partition_projection_old_and_new
+    union all
+    select *
+    from alb_log_tokyo2020_ap_northeast_1_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_ap_southeast_2_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_eu_west_3_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_us_east_1_partition_projection
+    union all
+    select *
+    from alb_log_tokyo2020_us_west_1_partition_projection),
+    daycounts as (SELECT domain_name, date_trunc('day', parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z')) as day, count(*) as requests_per_unique_visitor_per_day
+                   FROM union_table
+                   GROUP by domain_name, client_ip, user_agent, 2)
+select domain_name, date_trunc('year', day) as year, count(requests_per_unique_visitor_per_day) as unique_visitors_per_year, avg(requests_per_unique_visitor_per_day) as average_requests_per_unique_visitor_per_day
+from daycounts
+group by domain_name, date_trunc('year', day)
+ORDER by year DESC, unique_visitors_per_year DESC
+</pre>
+which will compute the unique visitors per year across six log buckets.
+
 The results of the queries triggered by the cron job end up in [this S3 folder](https://s3.console.aws.amazon.com/s3/buckets/sapsailing-access-logs/query-results/?region=eu-west-1&tab=overview).
 
 ### Broken or Partly Missing Logs and How We Recover

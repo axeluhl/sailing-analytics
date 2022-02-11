@@ -40,19 +40,19 @@ public class IgtimiFixTrackTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testFetchFixesIntoTracks() throws Exception {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
-        TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:00:00Z"));
-        TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:10:00Z"));
+        final TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:00:00Z"));
+        final TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:10:00Z"));
         // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
-        Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
-        Set<String> deviceSerialNumbers = new HashSet<>();
-        for (DataAccessWindow daw : daws) {
+        final Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
+        final Set<String> deviceSerialNumbers = new HashSet<>();
+        for (final DataAccessWindow daw : daws) {
             deviceSerialNumbers.add(daw.getDeviceSerialNumber());
         }
         logger.info("Retrieving resource data as tracks...");
-        Map<String, Map<Type, DynamicTrack<Fix>>> data = connection.getResourceDataAsTracks(start, end, deviceSerialNumbers, Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG, Type.HDGM);
+        final Map<String, Map<Type, DynamicTrack<Fix>>> data = connection.getResourceDataAsTracks(start, end, deviceSerialNumbers, Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG, Type.HDGM);
         logger.info("Successfully retrieved resource data as tracks");
         assertFalse(data.isEmpty());
-        Map<Type, DynamicTrack<Fix>> windSensorMap = data.get("DD-EE-AAHG");
+        final Map<Type, DynamicTrack<Fix>> windSensorMap = data.get("DD-EE-AAHG");
         assertNotNull(windSensorMap);
         assertTrue(windSensorMap.containsKey(Type.AWA));
         assertTrue(windSensorMap.containsKey(Type.AWS));

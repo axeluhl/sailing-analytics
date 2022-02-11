@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -24,7 +25,15 @@ public interface ResultDiscardingRule extends Serializable {
     Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint);
 
+    default Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint,
+                raceColumn->leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache), cache);
+    }
+
     Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
+            Function<RaceColumn, Double> totalPointsSupplier,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 }

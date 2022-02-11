@@ -22,7 +22,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.impl.FileUploadServlet;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;

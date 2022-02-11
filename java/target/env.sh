@@ -72,15 +72,16 @@ fi
 JAVA_BINARY="$JAVA_HOME/bin/java"
 JAVA_VERSION_OUTPUT=$("$JAVA_BINARY" -version 2>&1)
 JAVA_VERSION=$(echo "$JAVA_VERSION_OUTPUT" | sed 's/^.* version "\(.*\)\.\(.*\)\..*".*$/\1.\2/; 1q')
-export JAVA_11_LOGGING_ARGS="-Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
-export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC ${JAVA_11_LOGGING_ARGS}"
+export JAVA_11_LOGGING_ARGS="-Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=10000000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
+export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC ${JAVA_11_LOGGING_ARGS} --illegal-access=permit"
 export JAVA_8_LOGGING_ARGS="-XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
 echo JAVA_VERSION detected: $JAVA_VERSION >&2
-if echo $JAVA_VERSION | grep -q "^11\."; then
-  echo Java 11 detected >&2
+JAVA_MAJOR_VERSION=$( echo "${JAVA_VERSION}" | sed -e 's/^\([0-9]*\)\..*$/\1/' )
+if [ ${JAVA_MAJOR_VERSION} -ge 11 ]; then
+  echo "Java major version >=11 detected ">&2
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_11_ARGS
 else
-  echo Java other than 11 detected >&2
+  echo Java before version 11 detected >&2
   # options for use with SAP JVM only:
   if echo "$JAVA_VERSION_OUTPUT" | grep -q "SAP Java"; then
     ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"

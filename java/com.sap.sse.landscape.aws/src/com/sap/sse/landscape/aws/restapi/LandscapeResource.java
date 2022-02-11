@@ -20,7 +20,6 @@ import org.json.simple.JSONObject;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.AwsLandscapeState;
 import com.sap.sse.landscape.aws.impl.Activator;
-import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -60,14 +59,13 @@ public class LandscapeResource extends StreamingOutputUtil {
     public Response getSshKeysOwnedByUser(@QueryParam("region") final String regionId, @QueryParam("key_name") final String keyName) throws IOException {
         final JSONArray sshKeysAsJsonArray = new JSONArray();
         final AwsLandscapeState landscape = Activator.getInstance().getLandscapeState();
-        final AwsRegion region = new AwsRegion(regionId);
-        final SSHKeyPair sshKeyPair = landscape.getSSHKeyPair(region, keyName);
+        final SSHKeyPair sshKeyPair = landscape.getSSHKeyPair(regionId, keyName);
         final Response result;
         if (sshKeyPair == null) {
             result = Response.status(Status.NOT_FOUND).entity("Key "+keyName+" not found in region "+regionId).build();
         } else {
             SecurityUtils.getSubject().checkPermission(sshKeyPair.getIdentifier().getStringPermission(DefaultActions.DELETE));
-            landscape.deleteKeyPair(region, keyName);
+            landscape.deleteKeyPair(regionId, keyName);
             sshKeysAsJsonArray.add(sshKeyPairJsonSerializer.serialize(sshKeyPair));
             result = Response.ok(streamingOutput(sshKeysAsJsonArray)).build();
         }

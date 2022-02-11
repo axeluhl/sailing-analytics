@@ -92,7 +92,7 @@
                 <exclude>**/core/**</exclude>
               </excludes>
 
-              <argLine>${tycho.tests.argLine}</argLine>
+              <argLine>${argLine} ${tycho.tests.argLine}</argLine>
               <appArgLine>-consoleLog -console -clean</appArgLine>
 
               <product>raceanalysis.product</product>
@@ -152,11 +152,6 @@
                 <bundle>
                   <id>com.sap.sailing.gwt.ui</id>
                   <level>6</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>com.sap.sailing.xmlexport</id>
-                  <level>5</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
@@ -240,6 +235,16 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.domain.yellowbrickadapter</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.domain.yellowbrickadapter.persistence</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.dashboards.gwt</id>
                   <level>6</level>
                   <autoStart>true</autoStart>
@@ -296,6 +301,11 @@
                 </bundle>
                 <bundle>
                   <id>com.sap.sailing.shared.server.gateway</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.landscape.gateway</id>
                   <level>5</level>
                   <autoStart>true</autoStart>
                 </bundle>

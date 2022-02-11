@@ -11,6 +11,8 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
 import com.sap.sailing.gwt.ui.adminconsole.places.refresher.AbstractRefresher;
@@ -44,6 +46,8 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private final Refresher<RegattaDTO> regattasRefresher;
     private final Refresher<EventDTO> eventsRefresher;
     private final Refresher<MediaTrackWithSecurityDTO> mediaTracksRefresher;
+    private final Refresher<CompetitorDTO> competitorsRefresher;
+    private final Refresher<BoatDTO> boatsRefresher;
     
     public AdminConsoleActivity(final AdminConsoleClientFactory clientFactory) {
         this.clientFactory = clientFactory;
@@ -146,6 +150,45 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                 });
             }
         };
+        competitorsRefresher = new AbstractRefresher<CompetitorDTO>() {
+            @Override
+            public void reload(AsyncCallback<Iterable<CompetitorDTO>> callback) {
+                sailingService.getCompetitors(/* ignoreCompetitorsWithBoat */ false,
+                        /* ignoreCompetitorsWithoutBoat */ false, new MarkedAsyncCallback<Iterable<CompetitorDTO>>(
+                        new AsyncCallback<Iterable<CompetitorDTO>>() {
+                            @Override
+                            public void onSuccess(Iterable<CompetitorDTO> result) {
+                                logger.log(Level.FINE, "reload CompetitorDTO - success");
+                                callback.onSuccess(result);
+                            }
+                            @Override
+                            public void onFailure(Throwable t) {
+                                getErrorReporter().reportError("Error trying to obtain list of leaderboards from server " + t.getMessage());
+                                logger.log(Level.SEVERE, "Error trying to obtain list of leaderboards from server.", t);
+                                callback.onFailure(t);
+                            }
+                        }));
+            }
+        };
+        boatsRefresher = new AbstractRefresher<BoatDTO>() {
+            @Override
+            public void reload(AsyncCallback<Iterable<BoatDTO>> callback) {
+                sailingService.getAllBoats(new MarkedAsyncCallback<Iterable<BoatDTO>>(
+                        new AsyncCallback<Iterable<BoatDTO>>() {
+                            @Override
+                            public void onSuccess(Iterable<BoatDTO> result) {
+                                logger.log(Level.FINE, "reload BoatDTO - success");
+                                callback.onSuccess(result);
+                            }
+                            @Override
+                            public void onFailure(Throwable t) {
+                                getErrorReporter().reportError("Error trying to obtain list of leaderboards from server " + t.getMessage());
+                                logger.log(Level.SEVERE, "Error trying to obtain list of leaderboards from server.", t);
+                                callback.onFailure(t);
+                            }
+                        }));
+            }
+        };
     }
 
     @Override
@@ -171,6 +214,16 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     @Override
     public Refresher<MediaTrackWithSecurityDTO> getMediaTracksRefresher() {
         return mediaTracksRefresher;
+    }
+    
+    @Override
+    public Refresher<CompetitorDTO> getCompetitorsRefresher() {
+        return competitorsRefresher;
+    }
+    
+    @Override
+    public Refresher<BoatDTO> getBoatsRefresher() {
+        return boatsRefresher;
     }
     
     public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {

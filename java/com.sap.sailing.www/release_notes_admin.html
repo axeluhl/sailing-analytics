@@ -23,8 +23,103 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
-                    <h2 class="articleSubheadline">July 2021</h2>
-                    <ul class="bulletList">
+          <h2 class="articleSubheadline">February 2022</h2>
+          <ul class="bulletList">
+            <li>The policy for selecting replication instances can now be switched for running replica sets.
+                Users now have the possibility to switch from a replica running on a shared instance to
+                the use of dedicated replica instances, fully managed by the auto-scaling group. Conversely,
+                a replica set using only fully-managed dedicated replica instances can be switched (back)
+                to a more cost-efficient, yet still highly available replica running on a shared instance
+                if workload does not require additional replicas launched by the auto-scaling group.</li>
+            <li>A replica set's master process can now be moved to a different instance. Users can choose
+                between moving to a shared or a dedicated instance. With this, a replica set that started
+                out in an inexpensive shared set-up can me modified so that it uses a dedicated master instance.
+                Furthermore, with this a scale-up and scale-down for the instance hosting the master process
+                is now supported.</li>
+            <li>Added a Remove button for application replica sets that is mutli-selection aware.</li>
+            <li>The instance type of the replicas managed by a replica set's auto-scaling group can now be
+                modified, and one by one, the replicas in the set managed by the auto-scaling group will
+                be migrated to the new instance type, always keeping at least as many replicas available
+                as there were when the action was started. Available as action icon and as multi selection-aware
+                action button.</li>
+          </ul>
+          <h2 class="articleSubheadline">January 2022</h2>
+          <ul class="bulletList">
+            <li>Landscape management now offers to upgrade auto-scaling groups after an AMI update.</li>
+            <li>Replica sets can now also be managed on shared instances. This goes for new master processes which
+                can be deployed into the instance hosting another replica set's master process, or into a new
+                instance prepared for being shared. Alternatively to having the auto-scaling group provide a
+                dedicated first replica to increase availability, users can now choose to have a replica be deployed
+                to a shared instance that runs in an availability zone different from that of the one hosting the
+                replica set's master process. If no such shared instance with the port required by the new
+                replica set available, a new one is created in an availability zone other than the one hosting
+                this replica set's master process, and the first replica is deployed onto that.<p>
+                With these steps, operators are now able to set up new replica sets using only shared
+                instances when starting. While auto-scaling replicas will still be launched into new
+                dedicated instances when the workload requires it, small-scale set-ups with low workloads
+                can now be mapped very cost-effectively.</li>
+          </ul>
+          <h2 class="articleSubheadline">December 2021</h2>
+          <ul class="bulletList">
+            <li>The import of data from another server ("Advanced - Master Data Import") now waits for tracked races
+                to have finished loading when tracking the races imported has been requested. In this case, the
+                sub-progress of that step is determined by the share of races that already have finished loading.</li>
+          </ul>
+          <h2 class="articleSubheadline">October 2021</h2>
+          <ul class="bulletList">
+			<li>Added "Elan 350" boat class</li>
+			<li>Added "IRC" as a class</li>
+			<li>Fixed issue with mixed-up boat ID and competitor ID during competitor import</li>
+			<li>A new experimental connector for YellowBrick is now provided. Provide a "race URL" such
+			    as "rmsr2021" to start tracking a race. It is advisable to import competitors up-front.
+			    A CSV file, as exported, e.g., from Excel, that has the column headers
+			    <ul>
+			      <li>Race Name</li>
+			      <li>Sail Number</li>
+			      <li>Model</li>
+			      <li>loa</li>
+			      <li>Entrant</li>
+			      <li>Country</li>
+			      <li>Skipper</li>
+			      <li>cat-IRC</li>
+			      <li>IRC</li>
+			      <li>MOCRA</li>
+			      <li>DH</li>
+			      <li>ORC only</li>
+			      <li>YellowBrick Name</li>
+			      <li>Competitor ID</li>
+			    </ul>
+			    will be parsed properly. The "YellowBrick Name" column must contain the name
+			    exactly as it appears in the YellowBrick API for the boat. The "Competitor ID"
+			    column must be constructed as "YB-{raceURL}-{YellowBrick Name}". For example,
+			    if your race URL is "rmsr2021" and a competitor has the YellowBrick Name "BAIT" then
+			    the "Competitor ID" must be "YB-rmsr2021-BAIT".<p>
+			    The IRC column holds the handicap ToT / TMF / TCC value (e.g., 1.013) The "cat-IRC"
+			    is a category / classification, such as "Class 5" which will show in the competitor
+			    import as a suggestion for the fleet name. MOCRA, DH, and ORC only are columns which
+			    may be empty or have any non-empty string such as "x", indicating that the competitor
+			    is competing in the MOCRA, Double-Handed, and/or ORC class. If the "cat-IRC" is "undefined"
+			    then "ORC only" competitors will have "ORC" suggested as the race name and fleet name.<p>
+			    The connector will ask for new positions every minute which is safely below the request
+			    quota of once every five seconds set by YellowBrick. If the newest fix is more than 24h
+			    old, the tracker stops requesting new positions automatically.
+			</li>
+			<li>It is now possible to copy course marks, course definitions and marks' tracking device
+			    associations from one regatta to another. Use the "Copy Course and Competitors" action icon
+			    in the "Connectors - Smartphone Tracking" race column list bottom left.</li>
+                    </ul>
+          <h2 class="articleSubheadline">September 2021</h2>
+          <ul class="bulletList">
+			<li>Let Igtimi connections that search devices while holding locks time out after 10s.
+			    This avoids rare deadlock issues in case the Igtimi servers may not deliver an answer.</li>
+			<li>Landscape management now offers an implementation for archiving an application replica set.</li>
+          </ul>
+          <h2 class="articleSubheadline">August 2021</h2>
+          <ul class="bulletList">
+			<li>Added boat classes iQFOil Men/Women/Youth</li>
+          </ul>
+          <h2 class="articleSubheadline">July 2021</h2>
+          <ul class="bulletList">
 			<li>Creating and editing a Regatta object now uses the already loaded Events with their course areas
 			    to offer the event and course area selection in the Regatta dialog. This accelerates opening
 			    the dialog significantly, especially when used on a server with many events, such as the archive

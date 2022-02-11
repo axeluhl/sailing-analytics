@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
+import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_FLEET_NAME;
+
 import java.util.Collection;
 import java.util.Date;
 
@@ -142,5 +144,10 @@ public class RaceListDataUtil {
                 return start.getTime() / Duration.ONE_DAY.asMillis();
             }
         });
+    }
+    
+    public static <T extends RaceMetadataDTO<?>> String getFleetName(final T race) {
+        final FleetMetadataDTO fleet = race.getFleet();
+        return fleet == null ? DEFAULT_FLEET_NAME : fleet.getFleetName();
     }
 }

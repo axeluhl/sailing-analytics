@@ -863,10 +863,48 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertNull(loadedQualifyingSeries.getRaceColumnByName("Q2").getRaceIdentifier(loadedQualifyingSeries.getFleetByName("Blue")));
     }
 
+    @Test
+    public void testStorageOfRaceIdentifiersOnRaceColumnInSeriesWithSpecialCharactersInFleetName() {
+        final int numberOfQualifyingRaces = 5;
+        final int numberOfFinalRaces = 7;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regatta = createRegattaAndAddRaceColumns(new String[] {"1.Start", "2.Start"},
+                new String[] {"Gold", "Silver"}, numberOfQualifyingRaces, numberOfFinalRaces,
+                RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, regattaStartDate, regattaEndDate, 
+                /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), OneDesignRankingMetric::new);
+        Series qualifyingSeries = regatta.getSeries().iterator().next();
+        RaceColumn q2 = qualifyingSeries.getRaceColumnByName("Q2");
+        final RegattaNameAndRaceName q2TrackedRaceIdentifier = new RegattaNameAndRaceName(regatta.getName(), "Q2 TracTrac");
+        q2.setRaceIdentifier(qualifyingSeries.getFleetByName("1.Start"), q2TrackedRaceIdentifier);
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        Series loadedQualifyingSeries = loadedRegatta.getSeries().iterator().next();
+        RaceColumn loadedQ2 = loadedQualifyingSeries.getRaceColumnByName("Q2");
+        RaceIdentifier loadedQ2TrackedRaceIdentifier = loadedQ2.getRaceIdentifier(loadedQualifyingSeries.getFleetByName("1.Start"));
+        assertEquals(q2TrackedRaceIdentifier, loadedQ2TrackedRaceIdentifier);
+        assertNotSame(q2TrackedRaceIdentifier, loadedQ2TrackedRaceIdentifier);
+        assertNull(loadedQualifyingSeries.getRaceColumnByName("Q1").getRaceIdentifier(loadedQualifyingSeries.getFleetByName("1.Start")));
+        assertNull(loadedQualifyingSeries.getRaceColumnByName("Q2").getRaceIdentifier(loadedQualifyingSeries.getFleetByName("2.Start")));
+    }
+
     private Regatta createRegattaAndAddRaceColumns(final int numberOfQualifyingRaces, final int numberOfFinalRaces,
             final String regattaName, BoatClass boatClass, TimePoint startDate, TimePoint endDate, boolean persistent,
             ScoringScheme scoringScheme, RankingMetricConstructor rankingMetricConstructor) {
-        Regatta regatta = createRegatta(regattaName, boatClass, /* canBoatsOfCompetitorsChangePerRace */ true,
+        return createRegattaAndAddRaceColumns(new String[] {"Yellow", "Blue"},
+                new String[] {"Gold", "Silver"}, numberOfQualifyingRaces, numberOfFinalRaces, regattaName,
+                boatClass, startDate, endDate, persistent, scoringScheme, rankingMetricConstructor);
+    }
+
+    private Regatta createRegattaAndAddRaceColumns(String[] qualifyingSeriesFleetNames, String[] finalSeriesFleetNames,
+            final int numberOfQualifyingRaces, final int numberOfFinalRaces,
+            final String regattaName, BoatClass boatClass, TimePoint startDate, TimePoint endDate, boolean persistent,
+            ScoringScheme scoringScheme, RankingMetricConstructor rankingMetricConstructor) {
+        Regatta regatta = createRegatta(qualifyingSeriesFleetNames, finalSeriesFleetNames,
+                regattaName, boatClass, /* canBoatsOfCompetitorsChangePerRace */ true,
                 CompetitorRegistrationType.CLOSED, startDate, endDate, persistent, scoringScheme, null, rankingMetricConstructor);
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         return regatta;
@@ -891,21 +929,33 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     private Regatta createRegatta(final String regattaName, BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType, TimePoint startDate,
             TimePoint endDate, boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea,
             RankingMetricConstructor rankingMetricConstructor) {
+        return createRegatta(new String[] {"Yellow", "Blue"},
+                new String[] {"Gold", "Silver"}, regattaName, boatClass, canBoatsOfCompetitorsChangePerRace,
+                competitorRegistrationType, startDate, endDate, persistent, scoringScheme, courseArea, rankingMetricConstructor);
+    }
+    
+    private Regatta createRegatta(String[] qualifyingSeriesFleetNames, String[] finalSeriesFleetNames,
+            final String regattaName, BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType, TimePoint startDate,
+            TimePoint endDate, boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea,
+            RankingMetricConstructor rankingMetricConstructor) {
         List<String> emptyRaceColumnNames = Collections.emptyList();
         List<Series> series = new ArrayList<Series>();
         
         // -------- qualifying series ------------
         List<Fleet> qualifyingFleets = new ArrayList<Fleet>();
-        qualifyingFleets.add(new FleetImpl("Yellow"));
-        qualifyingFleets.add(new FleetImpl("Blue"));
+        for (final String qualifyingSeriesFleetName : qualifyingSeriesFleetNames) {
+            qualifyingFleets.add(new FleetImpl(qualifyingSeriesFleetName));
+        }
         Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualifyingFleets,
                 emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         
         // -------- final series ------------
         List<Fleet> finalFleets = new ArrayList<Fleet>();
-        finalFleets.add(new FleetImpl("Gold", 1));
-        finalFleets.add(new FleetImpl("Silver", 2));
+        int rank=1;
+        for (final String finalSeriesFleetName : finalSeriesFleetNames) {
+            finalFleets.add(new FleetImpl(finalSeriesFleetName, rank++));
+        }
         Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, finalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(finalSeries);
 

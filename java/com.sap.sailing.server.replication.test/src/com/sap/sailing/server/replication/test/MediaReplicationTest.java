@@ -29,8 +29,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
@@ -50,10 +49,10 @@ import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -84,17 +83,13 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             @Override
             public RacingEventServiceImpl createNewReplica() {
                 final MongoDBConfiguration masterMongoDBConfig = mongoDBService.getConfiguration();
-                final MongoClientURI masterMongoDbUri = masterMongoDBConfig.getMongoClientURI();
-                final MongoClientOptions masterMongoDbOptions = masterMongoDbUri.getOptions();
+                final ConnectionString masterMongoDbUri = masterMongoDBConfig.getMongoClientURI();
                 final MongoDBConfiguration proxyReplicaMongoDBConfig = new MongoDBConfiguration(
                         masterMongoDBConfig.getHostname(), masterMongoDBConfig.getPort(),
                         masterMongoDBConfig.getDatabaseName() + "-replica"); // use to construct basic MongoDB URI for replica DB name
-                final MongoClientURI replicaMongoDbUri = new MongoClientURI(proxyReplicaMongoDBConfig.getMongoClientURI().toString()) {
-                    @Override
-                    public MongoClientOptions getOptions() {
-                        return masterMongoDbOptions;
-                    }
-                };
+                final ConnectionString replicaMongoDbUri = new ConnectionString(proxyReplicaMongoDBConfig.getMongoClientURI().toString()+
+                        (proxyReplicaMongoDBConfig.getMongoClientURI().getConnectionString().indexOf("?") < 0 ? "?" : "&") +
+                            masterMongoDbUri.getConnectionString().substring(masterMongoDbUri.getConnectionString().indexOf("?")+1));
                 final MongoDBService replicaMongoDBService = new MongoDBConfiguration(replicaMongoDbUri).getService();
                 final RacingEventServiceImpl result = new RacingEventServiceImpl(
                         (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
@@ -115,7 +110,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                         /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
                         /* restoreTrackedRaces */ false, /* security service tracker */ securityServiceTrackerMock,
                         /* sharedSailingData */ null, /* replicationServiceTracker */ null,
-                        /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
+                        /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                        /* resultUrlRegistryServiceTracker */ null);
                 result.addMasterDataClassLoader(this.getClass().getClassLoader());
                 return result;
             }

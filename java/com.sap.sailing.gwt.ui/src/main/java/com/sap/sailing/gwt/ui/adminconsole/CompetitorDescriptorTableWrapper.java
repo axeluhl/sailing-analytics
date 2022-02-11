@@ -120,7 +120,6 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             }
         };
         registerSelectionModelOnNewDataProvider(filterablePanelCompetitorDescriptor.getAllListDataProvider());
-
         TextColumn<CompetitorDescriptor> competitorNameColumn = new TextColumn<CompetitorDescriptor>() {
             @Override
             public String getValue(CompetitorDescriptor competitor) {
@@ -128,7 +127,6 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             }
         };
         competitorNameColumn.setSortable(true);
-
         Column<CompetitorDescriptor, SafeHtml> sailIdColumn = new Column<CompetitorDescriptor, SafeHtml>(
                 new SafeHtmlCell()) {
             @Override
@@ -146,7 +144,6 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                     sb.append(FlagImageRenderer.image(flagImageResource.getSafeUri().asString()));
                     sb.appendHtmlConstant("&nbsp;");
                 }
-
                 sb.appendEscaped(competitor.getSailNumber());
                 return sb.toSafeHtml();
             }
@@ -160,7 +157,6 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             }
         };
         boatClassNameColumn.setSortable(true);
-        
         TextColumn<CompetitorDescriptor> raceNameColumn = new TextColumn<CompetitorDescriptor>() {
             @Override
             public String getValue(CompetitorDescriptor competitorDescriptor) {
@@ -168,7 +164,6 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             }
         };
         raceNameColumn.setSortable(true);
-
         TextColumn<CompetitorDescriptor> fleetNameColumn = new TextColumn<CompetitorDescriptor>() {
             @Override
             public String getValue(CompetitorDescriptor competitorDescriptor) {
@@ -176,7 +171,6 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             }
         };
         fleetNameColumn.setSortable(true);
-
         TextColumn<CompetitorDescriptor> isHasMatchesColumn = new TextColumn<CompetitorDescriptor>() {
             @Override
             public String getValue(CompetitorDescriptor competitorDescriptor) {

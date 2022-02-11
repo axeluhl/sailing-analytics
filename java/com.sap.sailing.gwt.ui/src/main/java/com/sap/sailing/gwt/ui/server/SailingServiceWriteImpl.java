@@ -255,6 +255,8 @@ import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickConfiguration;
+import com.sap.sailing.domain.yellowbrickadapter.YellowBrickTrackingAdapter;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
@@ -288,6 +290,8 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -585,6 +589,38 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
         }
+    }
+
+    @Override
+    public void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
+            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
+            String yellowBrickPassword) throws Exception {
+        logger.info(
+                "trackWithYellowBrick for regatta " + regattaToAddTo + " for race records " + rrs );
+        for (YellowBrickRaceRecordDTO rr : rrs) {
+            try {
+                getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.getRaceUrl(),
+                        getRaceLogStore(), getRegattaLogStore(), yellowBrickUsername, yellowBrickPassword, trackWind,
+                        correctWindByDeclination);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
+            }
+        }
+    }
+
+    @Override
+    public void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
+            String yellowBrickPassword) {
+        if (existsYellowBrickConfigurationForCurrentUser(yellowBrickRaceUrl)) {
+            throw new RuntimeException("A configuration for the current user with this race URL already exists.");
+        }
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        final TypeRelativeObjectIdentifier identifier = YellowBrickConfiguration.getTypeRelativeObjectIdentifier(yellowBrickRaceUrl, currentUserName);
+        final YellowBrickTrackingAdapter yellowBrickTrackingAdapter = getYellowBrickTrackingAdapter();
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.YELLOWBRICK_ACCOUNT,
+                identifier, name,
+                () -> yellowBrickTrackingAdapter.createYellowBrickConfiguration(name, yellowBrickRaceUrl, yellowBrickUsername, yellowBrickPassword, currentUserName));
     }
 
     @Override
@@ -1374,6 +1410,27 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
+    public EventDTO updateEvent(EventDTO eventDTO) throws MalformedURLException, UnauthorizedException {
+        UUID eventId = eventDTO.id;
+        String eventName = eventDTO.getName();
+        String eventDescription = eventDTO.getDescription();
+        Date startDate = eventDTO.startDate;
+        Date endDate = eventDTO.endDate;
+        VenueDTO venue = eventDTO.venue;
+        boolean isPublic = eventDTO.isPublic;
+        List<UUID> leaderboardGroupIds = eventDTO.getLeaderboardGroupIds();
+        String officialWebsiteURLString = eventDTO.getOfficialWebsiteURL();
+        String baseURLAsString = eventDTO.getBaseURL();
+        Map<String, String> sailorsInfoWebsiteURLsByLocaleName = eventDTO.getSailorsInfoWebsiteURLs();
+        List<ImageDTO> images = eventDTO.getImages();
+        List<VideoDTO> videos = eventDTO.getVideos();
+        List<String> windFinderReviewedSpotCollectionIds = eventDTO.getWindFinderReviewedSpotsCollectionIds();
+        return updateEvent(eventId, eventName, eventDescription, startDate, endDate, venue, isPublic,
+                leaderboardGroupIds, officialWebsiteURLString, baseURLAsString, sailorsInfoWebsiteURLsByLocaleName,
+                images, videos, windFinderReviewedSpotCollectionIds);
+    }
+
+    @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURLString,
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
@@ -1654,8 +1711,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final boolean exportTrackedRacesAndStartTracking) {
         final UUID importOperationId = UUID.randomUUID();
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
-        // // Create a progress indicator for as long as the server gets data from the other server.
-        // // As soon as the server starts the import operation, a progress object will be built on every server
+        // Create a progress indicator for as long as the server gets data from the other server.
+        // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
             @Override
             public void run() {
@@ -2294,18 +2351,22 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples, int priority)
+            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
             throws NotFoundException {
-        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(fromTriple.getA()));
+        final LeaderboardThatHasRegattaLike fromLeaderboard = (LeaderboardThatHasRegattaLike) getLeaderboardByName(fromTriple.getA());
+        getSecurityService().checkCurrentUserReadPermission(fromLeaderboard);
+        LeaderboardThatHasRegattaLike toLeaderboard = null;
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
-            getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(toTriple.getA()));
+            toLeaderboard = (LeaderboardThatHasRegattaLike) getLeaderboardByName(toTriple.getA()); // they should all be the same
+            getSecurityService().checkCurrentUserUpdatePermission(toLeaderboard);
         }
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
-        getRaceLogTrackingAdapter().copyCourse(fromRaceLog, toRaceLogs, baseDomainFactory, getService(), priority);
+        getRaceLogTrackingAdapter().copyCourse(fromRaceLog, fromLeaderboard, toRaceLogs, toLeaderboard,
+                copyMarkDeviceMappings, baseDomainFactory, getService(), priority);
     }
 
     @Override
@@ -3554,6 +3615,18 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         }
         return found;
     }
+    
+    private boolean existsYellowBrickConfigurationForCurrentUser(String raceUrl) {
+        boolean found = false;
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        for (final YellowBrickConfigurationWithSecurityDTO dto : getPreviousYellowBrickConfigurations()) {
+            if (dto.getRaceUrl().equals(raceUrl) && currentUserName.equals(dto.getCreatorName())) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
 
     private boolean existsTracTracConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException {
         boolean found = false;
@@ -3842,5 +3915,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
             }
         }
+    }
+
+    @Override
+    public void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> configs) {
+        for (final YellowBrickConfigurationWithSecurityDTO config : configs) {
+            getYellowBrickTrackingAdapter().removeYellowBrickConfiguration(config.getRaceUrl(), config.getCreatorName());
+        }
+    }
+
+    @Override
+    public void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject) {
+        getYellowBrickTrackingAdapter().updateYellowBrickConfiguration(editedObject.getName(),
+                editedObject.getRaceUrl(), editedObject.getUsername(), editedObject.getPassword(),
+                editedObject.getCreatorName());
     }
 }

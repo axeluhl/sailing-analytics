@@ -75,6 +75,11 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
             return currentPresenter.getRaceViewerURL(raceMetadata, mode);
         }
+        
+        @Override
+        protected String getMapAndWindChartUrl(String leaderboardName, String raceName, String fleetName) {
+            return currentPresenter.getMapAndWindChartUrl(leaderboardName, raceName, fleetName);
+        }
 
         @Override
         public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {

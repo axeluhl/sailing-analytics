@@ -31,23 +31,36 @@
         </td>
     </tr>
     <tr>
+        <td>Optional parameters:</td>
+        <td>
+            <div>include, a Boolean value that tells whether event IDs that can be set for the new remote server
+                 reference with the /sailingserver/api/v1/remoteserverreference/update PUT request will <em>include</em>
+                 or <em>exclude</em> the events listed. This parameter defaults to "false" which means that by default
+                 no events from the remote server will be excluded and that setting event IDs with the update call
+                 will exclude them.</div>
+        </td>
+    </tr>
+    <tr>
         <td>Request method:</td>
         <td>POST</td>
     </tr>
+    The service requires the requesting user to have permission <tt>SERVER:CONFIGURE_REMOTE_INSTANCES:{SERVER_NAME}</tt> for the
+    server to which the request is sent.
     <tr>
         <td>Example:</td>
         <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/remoteserverreference/add -d "remoteServerUrl=127.0.0.1:8888" -d "remoteServerName=1" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
-          "remoteServerNameAdded": "1",
-          "remoteServerUrlAdded": "http://127.0.0.1:8888",
-          "remoteServerEventsAdded": [
-            "World Cup Series 2019 - Enoshima, Japan",
-            "Old Mug 2020 ",
-            "Mästarnas Mästare 2018"
+          "remoteServerName": "1",
+          "remoteServerUrl": "http://127.0.0.1:8888",
+          "include": "true",
+          "eventIds": [
+            "0f4a825a-837f-4ea6-a2b6-acb861b410af",
+            "1fc9069a-0ee8-4ca9-ba62-4ab6c410c909"
           ]
         }
         </pre>
+        which describes the server reference that was added by the request.
         </td>
     </tr>
 </table>

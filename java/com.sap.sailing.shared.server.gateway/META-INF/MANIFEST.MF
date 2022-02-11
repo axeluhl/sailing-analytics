@@ -24,7 +24,6 @@ Require-Bundle: com.sap.sailing.domain,
  org.eclipse.jetty.osgi-servlet-api;bundle-version="3.1.0",
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
- org.jdom;bundle-version="1.0.0",
  com.sap.sailing.server.gateway.serialization,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server.trackfiles,
@@ -49,8 +48,11 @@ Require-Bundle: com.sap.sailing.domain,
  com.googlecode.java-diff-utils,
  com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0",
  com.sap.sailing.server.interface;bundle-version="1.0.0",
- org.mongodb.mongo-java-driver;bundle-version="3.6.4",
- com.sap.sailing.domain.racelogtrackingadapter
+ org.mongodb.bson;bundle-version="4.3.1",
+ org.mongodb.driver-core;bundle-version="4.3.1",
+ org.mongodb.driver-sync;bundle-version="4.3.1",
+ com.sap.sailing.domain.racelogtrackingadapter,
+ com.sap.sailing.server.gateway.interfaces
 Bundle-ClassPath: .
 Web-ContextPath: /sharedsailingserver
 Automatic-Module-Name: com.sap.sailing.shared.server.gateway

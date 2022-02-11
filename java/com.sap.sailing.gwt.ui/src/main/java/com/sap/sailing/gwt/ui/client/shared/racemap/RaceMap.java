@@ -34,8 +34,6 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
-import com.google.gwt.maps.client.controls.PanControlOptions;
-import com.google.gwt.maps.client.controls.ZoomControlOptions;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
@@ -69,6 +67,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.PopupPanel.AnimationType;
+import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -87,6 +88,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.common.client.sharing.FloatingSharingButtonsResources;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsCallback;
@@ -106,6 +108,7 @@ import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickFlagDataValuesProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickFlagDataListener;
@@ -193,6 +196,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private MapWidget map;
     private final Runnable shareLinkAction;
     private Collection<Runnable> mapInitializedListener;
+    private Button addVideoToRaceButton;
+    private final Button trueNorthIndicatorButtonButtonGroup;
+    private final PopupPanel advancedFunctionsPopup;
+    private final Button advancedFunctionsButton;
     
     /**
      * Always valid, non-<code>null</code>. Must be used to map all coordinates, headings, bearings, and directions
@@ -613,6 +620,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardGroupId = leaderboardGroupId;
+        this.advancedFunctionsPopup = new PopupPanel();
+        this.advancedFunctionsButton = new Button();
         floatingSharingButtonsResources = FloatingSharingButtonsResources.INSTANCE;
         floatingSharingButtonsResources.css().ensureInjected();
         timer.addTimeListener(this);
@@ -643,18 +652,23 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
+        panelForLeftHeaderLabels.setHeight("60px");
         panelForRightHeaderLabels = new AbsolutePanel();
+        panelForRightHeaderLabels.setHeight("60px");
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
-        trueNorthIndicatorPanel.setVisible(true);
+        trueNorthIndicatorPanel.setVisible(false);
         topLeftControlsWrapperPanel = new FlowPanel();
+        topLeftControlsWrapperPanel.addStyleName(raceMapStyle.topLeftControlsWrapperPanel());
         topLeftControlsWrapperPanel.add(combinedWindPanel);
         topLeftControlsWrapperPanel.add(trueNorthIndicatorPanel);
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
+        addVideoToRaceButton = createAddVideoToRaceButton();
+        this.trueNorthIndicatorButtonButtonGroup = createTrueNorthIndicatorButton();
         // TODO bug 494: reset zoom settings to user preferences
         initWidget(rootPanel);
         initializeData(settings.isShowMapControls(), showHeaderPanel);
@@ -709,7 +723,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
                     if (map != null) {
-                        mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ true,
+                        mapOptions = getMapOptions(/* wind-up */ true,
                                 settings.isShowSatelliteLayer());
                     } else {
                         mapOptions = null;
@@ -727,7 +741,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         } else {
             if (map != null) {
-                mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ false,
+                mapOptions = getMapOptions(/* wind-up */ false,
                         settings.isShowSatelliteLayer());
             } else {
                 mapOptions = null;
@@ -746,7 +760,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         map.setOptions(mapOptions);
                         // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
                         mapFirstZoomDone = false;
-                        trueNorthIndicatorPanel.redraw();
+                        boolean visible = coordinateSystem.mapDegreeBearing(0) != 0;
+                        trueNorthIndicatorPanel.setVisible(visible);
+                        trueNorthIndicatorButtonButtonGroup.getElement().getStyle().setProperty("transform", "rotate(" + coordinateSystem.mapDegreeBearing(0) + "deg)");
+                        if (trueNorthIndicatorPanel.isVisible()) {
+                            trueNorthIndicatorPanel.redraw();
+                        }
                         orientationChangeInProgress = false;
                     }
                 }
@@ -777,8 +796,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         Runnable onLoad = new Runnable() {
             @Override
             public void run() {
-                MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false, showSatelliteLayer);
+                MapOptions mapOptions = getMapOptions(/* wind up */ false, showSatelliteLayer);
                 map = new MapWidget(mapOptions);
+                map.getElement().setId("googleMapsArea");
                 rootPanel.add(map, 0, 0);
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
                 adjustLeftControlsIndent();
@@ -924,24 +944,101 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         getLeftHeaderPanel().insert(createSAPLogo(), 0);
                     }
                 }
-                if (shareLinkAction != null) {
-                    final Button shareLinkButton = createShareLinkButton(map);
-                    map.setControls(ControlPosition.RIGHT_BOTTOM, shareLinkButton);
-                }
-                if (showMapControls) {
-                    final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
-                    final Button settingsButton = createSettingsButton(map);
-                    settingsCotrolFlowPanel.add(settingsButton);
-                    map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
-                }
+                createAdvancedFunctionsButtonGroup(showMapControls);
                 // Data has been initialized
                 RaceMap.this.redraw();
-                trueNorthIndicatorPanel.redraw();
+                if (trueNorthIndicatorPanel.isVisible()) {
+                    trueNorthIndicatorPanel.redraw();
+                }
                 showAdditionalControls(map);
                 RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
             }
         };
         GoogleMapsLoader.load(onLoad);
+    }
+    
+    private void createAdvancedFunctionsButtonGroup(boolean showMapControls) {
+        final VerticalPanel sharingAndVideoPanel = new VerticalPanel();
+        sharingAndVideoPanel.add(advancedFunctionsButton);
+        sharingAndVideoPanel.add(createExitFullScreenButton());
+        map.setControls(ControlPosition.RIGHT_TOP, sharingAndVideoPanel);
+        
+        final HorizontalPanel popupContent = new HorizontalPanel();
+        popupContent.addStyleName(raceMapStyle.moreOptions());
+        popupContent.add(createZoomOutButton());
+        popupContent.add(createZoomInButton());
+        popupContent.add(createFullScreenButton());
+        popupContent.add(trueNorthIndicatorButtonButtonGroup);
+        // add-video button
+        if (shareLinkAction != null) {
+            final Button shareLinkButton = createShareLinkButton();
+            shareLinkButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    hideAdvancedFunctionsPopup();
+                }
+            });
+            popupContent.add(shareLinkButton);
+        }
+        addVideoToRaceButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hideAdvancedFunctionsPopup();
+            }
+        });
+        popupContent.add(addVideoToRaceButton);
+        if (showMapControls) {
+            Button settingsButton = createSettingsButton(map);
+            settingsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    hideAdvancedFunctionsPopup();
+                }
+            });
+            popupContent.add(settingsButton);
+        }
+        advancedFunctionsPopup.addStyleName(raceMapStyle.advancedFunctionsPopup());
+        advancedFunctionsPopup.setAnimationEnabled(true);
+        advancedFunctionsPopup.setAnimationType(AnimationType.ROLL_DOWN);
+        advancedFunctionsPopup.setGlassEnabled(false);
+        advancedFunctionsPopup.setModal(false);
+        advancedFunctionsPopup.setAutoHideEnabled(true);
+        advancedFunctionsPopup.addAutoHidePartner(advancedFunctionsButton.getElement());
+        advancedFunctionsButton.setStylePrimaryName(raceMapStyle.moreOptionsButton());
+        advancedFunctionsButton.setTitle(stringMessages.moreOptions());
+        advancedFunctionsButton.ensureDebugId("moreOptionsButton");
+        advancedFunctionsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (advancedFunctionsPopup.isShowing()) {
+                    hideAdvancedFunctionsPopup();
+                } else {
+                    showAdvancedFunctionsPopup();
+                }
+            }
+        });
+        advancedFunctionsPopup.add(popupContent);
+    }
+    
+    private void hideAdvancedFunctionsPopup() {
+        advancedFunctionsPopup.hide();
+    }
+    
+    private void showAdvancedFunctionsPopup() {
+        advancedFunctionsPopup.setPopupPositionAndShow(new PositionCallback() {
+            @Override
+            public void setPosition(int offsetWidth, int offsetHeight) {
+                int left = advancedFunctionsButton.getAbsoluteLeft();
+                int top = advancedFunctionsButton.getAbsoluteTop();
+                left += advancedFunctionsButton.getOffsetWidth();
+                top += advancedFunctionsButton.getOffsetHeight();
+                left -= offsetWidth;
+                if (left < 0) {
+                    left = advancedFunctionsButton.getAbsoluteLeft();
+                }
+                advancedFunctionsPopup.setPopupPosition(left, top);
+            }
+        });
     }
 
     /**
@@ -993,6 +1090,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // that controls get positioned right
         headerPanel.getElement().getStyle().setHeight(60, Unit.PX);
         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+        headerPanel.ensureDebugId("headerPanel");
         // some sort of hack: not positioning TOP_LEFT because then the
         // controls at RIGHT would not get the correct top setting
         map.setControls(ControlPosition.TOP_RIGHT, headerPanel);
@@ -1001,7 +1099,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Button createSettingsButton(MapWidget map) {
         final Component<RaceMapSettings> component = this;
         Button settingsButton = new Button();
-        settingsButton.setStyleName("gwt-MapSettingsButton");
+        settingsButton.setStyleName(raceMapStyle.settingsButton());
         settingsButton.ensureDebugId("raceMapSettingsButton");
         settingsButton.setTitle(stringMessages.settings());
         settingsButton.addClickHandler(new ClickHandler() {
@@ -1014,8 +1112,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         return settingsButton;
     }
-    
-    private Button createShareLinkButton(MapWidget map) {
+
+    private Button createShareLinkButton() {
         Button shareLinkButton = new Button();
         shareLinkButton.setStyleName(floatingSharingButtonsResources.css().sharing_item());
         shareLinkButton.addStyleName(floatingSharingButtonsResources.css().sharing_itemshare());
@@ -1029,6 +1127,92 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         });
         return shareLinkButton;
+    }
+
+    private Button createAddVideoToRaceButton() {
+        Button addVideoButton = new Button();
+        addVideoButton.setStylePrimaryName(raceMapStyle.raceMapVideoUploadButton());
+        addVideoButton.setTitle(stringMessages.addMediaTrack());
+        addVideoButton.ensureDebugId("addVideoAudioButton");
+        addVideoButton.setVisible(false);
+        return addVideoButton;
+    }
+
+    private Button createZoomInButton() {
+        Button zoomInButton = new Button();
+        zoomInButton.setStylePrimaryName(raceMapStyle.zoomInButton());
+        zoomInButton.setTitle(stringMessages.zoomIn());
+        zoomInButton.ensureDebugId("zoomInButton");
+        zoomInButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                map.setZoom(map.getZoom() + 1);
+            }
+        });
+        return zoomInButton;
+    }
+
+    private Button createFullScreenButton() {
+        Button fullScreenButton = new Button();
+        fullScreenButton.setStylePrimaryName(raceMapStyle.fullScreenButton());
+        fullScreenButton.setTitle(stringMessages.openFullscreenView());
+        fullScreenButton.ensureDebugId("fullScreenButton");
+        fullScreenButton.setVisible(FullscreenUtil.isFullscreenSupported());
+        fullScreenButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                GWT.log("Click fullscreen");
+                hideAdvancedFunctionsPopup();
+                FullscreenUtil.requestFullScreenToggle("googleMapsArea");
+            }
+        });
+        return fullScreenButton;
+    }
+
+    private Button createExitFullScreenButton() {
+        Button exitFullScreenButton = new Button();
+        exitFullScreenButton.setStylePrimaryName(raceMapStyle.exitFullScreenButton());
+        exitFullScreenButton.setTitle(stringMessages.closeFullscreenView());
+        exitFullScreenButton.ensureDebugId("exitFullScreenButton");
+        exitFullScreenButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hideAdvancedFunctionsPopup();
+                FullscreenUtil.exitFullscreen();
+            }
+        });
+        return exitFullScreenButton;
+    }
+
+    private Button createTrueNorthIndicatorButton() {
+        Button trueNorthIndicatorButton = new Button();
+        trueNorthIndicatorButton.setStylePrimaryName(raceMapStyle.trueNorthIndicatorButton());
+        trueNorthIndicatorButton.setTitle(stringMessages.clickToToggleWindUp());
+        trueNorthIndicatorButton.ensureDebugId("trueNorthIndicatorButton");
+        trueNorthIndicatorButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                trueNorthIndicatorPanel.toggle();
+                hideAdvancedFunctionsPopup();
+            }
+        });
+        return trueNorthIndicatorButton;
+    }
+
+    private Button createZoomOutButton() {
+        Button zoomOutButton = new Button();
+        zoomOutButton.setStylePrimaryName(raceMapStyle.zoomOutButton());
+        zoomOutButton.setTitle(stringMessages.zoomOut());
+        zoomOutButton.ensureDebugId("zoomOutButton");
+        zoomOutButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (map.getZoom() > 1) {
+                    map.setZoom(map.getZoom() - 1);
+                }
+            }
+        });
+        return zoomOutButton;
     }
 
     private void removeTransitions() {
@@ -1203,6 +1387,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public WindInfoForRaceDTO getLastCombinedWindTrackInfoDTO() {
         return lastCombinedWindTrackInfoDTO;
     }
+    
     /**
      * Requests updates for map data and, when received, updates the map structures accordingly.
      * <p>
@@ -1251,7 +1436,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         for (CompetitorDTO competitor : competitorSelection.getAllCompetitors()) {
             competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
         }
-
         // only update the tails for these competitors
         // Note: the fromAndToAndOverlap.getC() map will be UPDATED by the call to updateBoatPositions happening inside
         // the callback provided by getRaceMapDataCallback(...) for those
@@ -1321,7 +1505,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         quickFlagDataProvider.quickRanksReceivedFromServer(raceMapDataDTO.quickRanks);
                         if (isSimulationEnabled && settings.isShowSimulationOverlay()) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
-                                simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
+                            simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
                         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
                         Map<CompetitorDTO, Double> quickSpeedsFromServerInKnots = getCompetitorsSpeedInKnotsMap(boatData);
@@ -2540,7 +2724,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType lastFix) {
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.getName()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorSelection.getBoat(competitorDTO).getSailId()));
+        final BoatDTO boat = competitorSelection.getBoat(competitorDTO);
+        if (Util.hasLength(boat.getName())) {
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.boat(), boat.getName()));
+        }
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), boat.getSailId()));
         final Integer rank = getRank(competitorDTO);
         if (rank != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
@@ -2986,7 +3174,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void showSimulationOverlay(boolean visible) {
         simulationOverlay.setVisible(visible);
         if (visible) {
-            simulationOverlay.updateLeg(Math.max(lastLegNumber,1), true, -1 /* ensure ui-update */);
+            simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), true, -1 /* ensure ui-update */);
         }
     }
 
@@ -3019,7 +3207,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
             return newBounds;
         }
-        
     }
     
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
@@ -3050,7 +3237,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             return newBounds;
         }
     }
-    
+
     public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
@@ -3121,7 +3308,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     private void adjustLeftControlsIndent() {
-        topLeftControlsWrapperPanel.getParent().setStyleName("TopLeftControlsWrapperPanelParentDiv");
         String leftControlsIndentStyle = getLeftControlsIndentStyle();
         if (leftControlsIndentStyle != null) {
             topLeftControlsWrapperPanel.getParent().addStyleName(leftControlsIndentStyle);
@@ -3159,7 +3345,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
-
         switch (displayMode) {
         case DEFAULT:
             options.setColorMode(ColorlineMode.MONOCHROMATIC);
@@ -3186,7 +3371,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
             break;
         }
-
         options.setZIndex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
         return options;
     }
@@ -3275,15 +3459,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
     }
 
-    private MapOptions getMapOptions(final boolean showMapControls, boolean windUp, boolean showSatelliteLayer) {
+    private MapOptions getMapOptions(boolean windUp, boolean showSatelliteLayer) {
         MapOptions mapOptions = MapOptions.newInstance();
         // Google Maps API does not support rotated satellite images
         mapOptions.setMapTypeId(showSatelliteLayer && !windUp ? MapTypeId.SATELLITE : MapTypeId.ROADMAP);
         mapOptions.setScrollWheel(true);
         mapOptions.setMapTypeControl(false);
-        mapOptions.setPanControl(showMapControls);
-        mapOptions.setZoomControl(showMapControls);
+        mapOptions.setPanControl(false);
+        mapOptions.setZoomControl(false);
         mapOptions.setScaleControl(true);
+        mapOptions.setDisableDefaultUi(true);
+        mapOptions.setFullscreenControl(false);
         if (windUp) {
             mapOptions.setMinZoom(8);
         } else {
@@ -3299,18 +3485,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
         // set water color
         mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
-
         mapOptions.setMapTypeStyles(mapTypeStyles);
         // no need to try to position the scale control; it always ends up at the right bottom corner
         mapOptions.setStreetViewControl(false);
-        if (showMapControls) {
-            ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
-            zoomControlOptions.setPosition(ControlPosition.RIGHT_TOP);
-            mapOptions.setZoomControlOptions(zoomControlOptions);
-            PanControlOptions panControlOptions = PanControlOptions.newInstance();
-            panControlOptions.setPosition(ControlPosition.RIGHT_TOP);
-            mapOptions.setPanControlOptions(panControlOptions);
-        }
         return mapOptions;
     }
 
@@ -3404,6 +3581,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         } else {
             this.mapInitializedListener.add(runnable);
         }
+    }
+
+    public void addMediaPlayerManagerComponent(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
+        GWT.log("addMediaPlayerManagerComponent");
+        this.addVideoToRaceButton.addClickHandler(clickEvent->{
+            GWT.log("clicked addVideoToRaceButton");
+            mediaPlayerManagerComponent.addMediaTrack();
+        });
+    }
+    
+    public void setAddVideoToRaceButtonVisible(boolean visible) {
+        this.addVideoToRaceButton.setVisible(visible);
     }
 }
 

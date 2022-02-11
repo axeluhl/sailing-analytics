@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/remoteserverreference/add</h2>
+
+<b>Description:</b>
+<p>Updates a remote server reference on the target server. The reference is looked up by its name (not the URL).
+If the <tt>include</tt> parameter is provided, it is used to update this attribute on the remote reference.
+The <tt>eventIds</tt> will always be updated to what the request provides; in other words, if you want to only
+modify the <tt>include</tt> flag you have to pass the current set of <tt>eventIds</tt> as obtained from
+<tt>/sailingserver/api/v1/remoteserverreference</tt> for the respective remote reference.
+</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>PUT</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <div>remoteServerName, the name for the reference.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>PUT</td>
+    </tr>
+    The service requires the requesting user to have permission <tt>SERVER:CONFIGURE_REMOTE_INSTANCES:{SERVER_NAME}</tt> for the
+    server to which the request is sent.
+    <tr>
+        <td>Example:</td>
+        <td>curl -X PUT -d 'include=false' -d 'remoteServerName=Local8889' -d 'eventIds=97cac659-6d23-4d86-9b60-44c1447b6e88' "http://admin:admin@127.0.0.1:8888/sailingserver/api/v1/remoteserverreference/update"<br>
+        produces output:<pre>
+	{
+	  "remoteServerName": "Local8889",
+	  "remoteServerUrl": "http://127.0.0.1:8889",
+	  "include": false,
+	  "eventIds": [
+	    "97cac659-6d23-4d86-9b60-44c1447b6e88"
+	  ]
+	}
+        </pre>
+        which describes the server reference that was updated by the request.
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

@@ -42,6 +42,8 @@
       <plugin id="com.sap.sailing.domain.igtimiadapter" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.igtimiadapter.gateway" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.domain.oceanraceadapter" autoStart="true" startLevel="5" />
+      <plugin id="com.sap.sailing.domain.yellowbrickadapter" autoStart="true" startLevel="5" />
+      <plugin id="com.sap.sailing.domain.yellowbrickadapter.persistence" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.racelogtrackingadapter" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.swisstimingadapter" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.domain.swisstimingadapter.persistence" autoStart="true" startLevel="4" />
@@ -58,6 +60,7 @@
       <plugin id="com.sap.sailing.monitoring" autoStart="true" startLevel="7" />
       <plugin id="com.sap.sailing.news" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.polars" autoStart="true" startLevel="5" />
+      <plugin id="com.sap.sailing.landscape.gateway" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.polars.datamining" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.sailwave.resultimport" autoStart="true" startLevel="4" />
@@ -69,7 +72,6 @@
       <plugin id="com.sap.sailing.velum.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.windestimation" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="5" />
-      <plugin id="com.sap.sailing.xmlexport" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.yachtscoring.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sse.filestorage" autoStart="true" startLevel="4" />

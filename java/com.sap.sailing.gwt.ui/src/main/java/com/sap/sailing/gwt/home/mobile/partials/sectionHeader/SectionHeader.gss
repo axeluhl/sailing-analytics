@@ -167,3 +167,57 @@
   background-image: resourceUrl('audio');
   background-size: 1.5rem;
 }
+
+.button, .button:focus, .button:hover  {
+    position: relative;
+    width: 2.666666666666667em;
+    height: 2.666666666666667em;
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    margin: 0;
+    margin-left: 0.5em;
+    background-color: #9f9f9f;
+    outline: none;
+}
+.button:hover  {
+    background-color: #9f9f9f;
+    outline: none;
+}
+.button:after {
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 66.6%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+.iconManage:hover {
+    background-color: #fff;
+    outline: none;
+}
+.button.active, .button.active:hover {
+    background-color: #008fcc;
+    outline: none;
+}
+.iconManage {
+    background-color: #fff;  
+    opacity: 1;
+    -webkit-transition: opacity 0.5s ease-out;
+       -moz-transition: opacity 0.5s ease-out;
+        -ms-transition: opacity 0.5s ease-out;
+         -o-transition: opacity 0.5s ease-out;
+            transition: opacity 0.5s ease-out;
+}
+.iconManage.active:after {
+    background-image: resourceUrl('editWhite');
+}
+.iconManage:after {
+    background-image: resourceUrl('editBlack');
+}
+.iconManage.hideIcon {
+    opacity: 0;
+}

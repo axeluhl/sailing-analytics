@@ -89,6 +89,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
+         id="com.sap.sailing.server.gateway.interfaces"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="com.tractrac.clientmodule"
          download-size="0"
          install-size="0"
@@ -146,13 +153,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.udpconnector"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.sap.sailing.xmlexport"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -278,6 +278,20 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.domain.oceanraceadapter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.domain.yellowbrickadapter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.domain.yellowbrickadapter.persistence"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -503,6 +517,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.landscape"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.landscape.gateway"
          download-size="0"
          install-size="0"
          version="0.0.0"

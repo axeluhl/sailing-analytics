@@ -69,6 +69,7 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -393,7 +394,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
             @Override
             public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack, AddResult addedOrReplaced) {
-                updated(fix.getTimePoint());
+                final TimePoint fixTimePoint = fix.getTimePoint();
+                updated(fixTimePoint);
+                final GPSFix lastFixBefore = result.getLastFixBefore(fixTimePoint);
+                final GPSFix firstFixAfter = result.getFirstFixAfter(fixTimePoint);
+                invalidateDistancesFromStarboardSideOfStartLineProjectedOntoLineCache(TimeRange.create(lastFixBefore==null?null:lastFixBefore.getTimePoint(),
+                        firstFixAfter==null?null:firstFixAfter.getTimePoint()));
                 triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark, firstFixInTrack, addedOrReplaced);
             }
@@ -1081,9 +1087,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack, AddResult addedOrReplaced) {
         updated(fix.getTimePoint());
+        invalidateDistancesFromStarboardSideOfStartLineProjectedOntoLineCache(TimeRange.create(
+                fix.getTimePoint().minus(getMillisecondsOverWhichToAverageSpeed()),
+                fix.getTimePoint().plus(getMillisecondsOverWhichToAverageSpeed())));
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor, addedOrReplaced);
-        
         // getAndSet call is atomic which means, that it can be ensured that the listeners are notified only once
         final boolean oldGPSFixReceived = gpsFixReceived.getAndSet(true);
         if (!oldGPSFixReceived) {
@@ -1119,12 +1127,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public long getMillisecondsOverWhichToAverageWind() {
-        long result = 0; // default in case there is no competitor
-        for (WindSource windSource : getWindSources()) {
-            WindTrack someTrack = getOrCreateWindTrack(windSource);
-            result = someTrack.getMillisecondsOverWhichToAverageWind();
-        }
-        return result;
+        return this.millisecondsOverWhichToAverageWind;
     }
 
     @Override

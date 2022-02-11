@@ -1125,7 +1125,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         try {
             firstFixInTrack = getRawFixes().isEmpty();
             addResult = addWithoutLocking(fix, replace);
-            if (!validityCachingSuspended) {
+            if (addResult != AddResult.NOT_ADDED && !validityCachingSuspended) {
                 invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
             }
         } finally {

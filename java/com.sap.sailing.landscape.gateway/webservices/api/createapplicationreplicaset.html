@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /sailinglandscape/api/landscape/createapplicationreplicaset</h2>
+
+<b>Description:</b>
+ <p>Creates an application replica set with an auto-scaling group and corresponding launch configuration, load
+ balancer rules and corresponding target groups, hooking up to the region's default MongoDB replica set and
+ RabbitMQ and replicating the security service and shared sailing data from the security-service.sapsailing.com
+ server by default.</p>
+ <br />
+ <table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory query parameters:</td>
+        <td>
+            <div><tt>regionId</tt>, region where to set up the replica set, e.g., eu-west-1</div>
+            <div><tt>replicaSetName</tt>, name of the replica set; used as the hostname to which the domain name is appended, as well as
+                                 for the database and RabbitMQ exchange name</div>
+            <div><tt>dedicatedInstanceType</tt>, instance type to use in the hyperscaler for a dedicated non-shared master node and for the
+                                     auto-scaling replicas, e.g., C5_4_XLARGE;
+                                     see <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/ec2/model/InstanceType.html">here</a></div>
+            <div><tt>keyName</tt>, the name of the SSH key to use; must identify an existing SSH key by that name in the region specified
+                          and will be used to log on to existing and new instances using a root ssh connection.</div>
+            <div><tt>privateKeyEncryptionPassphrase</tt>, the pass phrase to decrypt the private key for the key specified by the keyName parameter</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Optional form parameters:</td>
+        <td>
+            <div><tt>sharedMasterInstance</tt> defaults to <tt>false</tt>; if set to <tt>true</tt>, the instance launched for the master process
+                                     will be named "SL Multi-Server" and will be tagged with <tt>sailing-analytics-server:___multi___</tt> which
+                                     makes it eligible for automated deployment of other Sailing Analytics processes, such as unmanaged replicas.
+                                     Otherwise, the master instance will be named and tagged after the replica set's name.</div>
+            <div><tt>sharedInstanceType</tt>, instance type to use in the hyperscaler for a new shared master instance (if <tt>sharedMasterInstance</tt> was
+                                     set to <tt>true</tt>) as well as for a new instance that needs to be launched for a shared first replica
+                                     in case <tt>minimumAutoScalingGroupSize</tt> is set to 0; e.g., I3_2_XLARGE;
+                                     see <a href="https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/ec2/model/InstanceType.html">here</a>.
+                                     If you'd like to configure your master to run on an instance intended to be shared with other
+                                     replica sets you may want to size your shared instance type with much swap space (e.g., i3.2xlarge)
+                                     whereas your auto scaling group-managed replicas will not be shared and hence may get along with smaller
+                                     instance types.</div>.
+            <div><tt>dynamicLoadBalancerMappingionId</tt>, boolean value (false or true; defaulting to false); if true, the rules will be entered
+                                                  into the region's default dynamic load balancer without a specific DNS mapping. In this
+                                                  case the domain must not be specified or must be "sapsailing.com", and the region must
+                                                  be the default region (eu-west-1), or an error status will result.</div>
+            <div><tt>releaseName</tt>, the release name, such as build-202108091125; if not provided, the latest master build is used by default.</div>
+            <div><tt>masterReplicationBearerToken</tt>, the bearer token the new replica set's master will use to replicate the security service and
+                                               shared sailing data from the central security-service.sapsailing.com server; defaults to the
+                                               bearer token of the user authenticated for this request. Note that this requires the
+                                               server processing this request to share the security information from security-service.sapsailing.com, too.</div>
+            <div><tt>replicaReplicationBearerToken</tt>, the bearer token the new replica set's replicas will use to replicate their master server; defaults to the
+                                               bearer token of the user authenticated for this request. Note that this requires the
+                                               server processing this request to share the security information from security-service.sapsailing.com, too.</div>
+            <div><tt>domainName</tt>, the domain name to use for the DNS entry that points to the load balancer holding the rules for the new replica set.
+                             Defaults to sapsailing.com. If dynamic load balancing is used, this parameter must either not be provided or must
+                             use the default domain sapsailing.com.</div>
+            <div><tt>memoryInMegabytes</tt>, can be used to specify the absolute amount of heap size used for the Java VM running the applications, both, on master
+                                    and replicas; if not specified, memoryTotalSizeFactor may be used (see below); if that isn't used either, heap size
+                                    is computed based on the amount of memory available on the instance, not considering any swap space available.</div>
+            <div><tt>memoryTotalSizeFactor</tt>, can be used if memoryInMegabytes is not used; it roughly specifies how many processes are intended to be run on the
+                                        host; e.g., if 4 is specified, approximately 1/4 of the physical memory available (not considering swap space) is
+                                        assigned as the process's heap space. If neither memoryInMegabytes nor memoryTotalSizeFactor are specified then
+                                        the amount of memory is calculated automatically based on the amount of physical memory available on the host.</div>
+            <div><tt>minimumAutoScalingGroupSize</tt>, defines how many replicas the auto-scaling group shall minimally keep running, even if the auto-scaling
+                                        rules things that less may be enough. Defaults to 1. If 0, an "unmanaged" replica will be launched on a shared instance
+                                        for availability reasons. The shared instance is picked such that it has the HTTP port required for the new replica set
+                                        free and that it runs in an availability zone different from where the master process was just deployed. If required,
+                                        a new instance will be launched for this purpose. Other than for the auto-scaling group-managed replica instances
+                                        the instance for an unmanaged replica is assumed to be for sharing, and hence it's instance type is set to be the
+                                        same as for the instance hosting the master process. This way, if the master instance type is selected such that
+                                        it works well for being shared then so will the instance that needs to be launched for an unmanaged replica.</div>
+            <div><tt>maximumAutoScalingGroupSize</tt>, defines how many replicas the auto-scaling group shall create at most. Defaults to 30.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>curl -X POST -d 'regionId=eu-west-2' -d 'replicaSetName=mynewevent' -d 'masterInstanceType=C5_4_XLARGE' -d 'keyName=Horst' --data-urlencode 'privateKeyEncryptionPassphrase=HorstsSuperSecretPassword' --data-urlencode 'masterReplicationBearerToken=DE7x+W/dwFKRAxFbJkC/IMafEnJ8kTQF+MUHNVhEwsD4=' --data-urlencode 'replicaReplicationBearerToken=CHxGpF0nr78Z4m/f28/MgiYhdRB3xoDCYd+rLc37rTt=' -H 'Authorization: Bearer RwGK+DV38LKjeuDu+Bx87/3blLJHD7Ff+NCLeud9nRQ=' "https://sapsailing.com/sailinglandscape/api/landscape/createapplicationreplicaset"
+        <br>
+        produces output:<pre>
+            {
+              "name": "mynewevent",
+              "version": "build-202112151552"
+            }
+        </pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

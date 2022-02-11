@@ -59,7 +59,10 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final String HOME_REDIRECT_MACRO = "Home-SSL";
     private static final String PLAIN_REDIRECT_MACRO = "Plain-SSL";
     private static final String EVENT_REDIRECT_MACRO = "Event-SSL";
-    private static final String SERIES_REDIRECT_MACRO = "Series-SSL"; 
+    private static final String SERIES_REDIRECT_MACRO = "Series-SSL";
+    private static final String HOME_ARCHIVE_REDIRECT_MACRO = "Home-ARCHIVE";
+    private static final String EVENT_ARCHIVE_REDIRECT_MACRO = "Event-ARCHIVE";
+    private static final String SERIES_ARCHIVE_REDIRECT_MACRO = "Series-ARCHIVE";
     private static final String STATUS = "Status";
     private static final String CONFIG_FILE_FOR_INTERNALS = "001-internals"+CONFIG_FILE_EXTENSION;
     
@@ -129,10 +132,27 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
 
     @Override
     public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
-            UUID leaderboardGroupId, byte[] privateKeyEncryptionPassphrase, Optional<String> optionalKeyName) throws Exception {
+            UUID leaderboardGroupId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
         setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, leaderboardGroupId.toString(), host, ""+port);
+    }
+
+    @Override
+    public void setHomeArchiveRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(getConfigFileNameForHostname(hostname), HOME_ARCHIVE_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase);
+    }
+
+    @Override
+    public void setEventArchiveRedirect(String hostname, UUID eventId, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(getConfigFileNameForHostname(hostname), EVENT_ARCHIVE_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, eventId.toString());
+    }
+
+    @Override
+    public void setEventSeriesArchiveRedirect(String hostname, UUID leaderboardGroupId,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(getConfigFileNameForHostname(hostname), SERIES_ARCHIVE_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, leaderboardGroupId.toString());
     }
 
     @Override

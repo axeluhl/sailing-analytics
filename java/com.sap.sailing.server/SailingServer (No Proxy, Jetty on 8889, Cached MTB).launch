@@ -41,11 +41,14 @@
 <setEntry value="com.sun.jersey.contribs.jersey-multipart@default:default"/>
 <setEntry value="javax.validation@default:default"/>
 <setEntry value="org.apache.commons.fileupload@default:default"/>
-<setEntry value="org.jdom@default:default"/>
 <setEntry value="org.jvnet.mimepull@default:default"/>
 <setEntry value="org.apache.commons.math3@default:default"/>
-<setEntry value="org.mongodb.mongo-java-driver@default:default"/>
-<setEntry value="org.mongodb.mongo-java-driver.source@default:default"/>
+<setEntry value="org.mongodb.driver-core@default:default"/>
+<setEntry value="org.mongodb.driver-core.source@default:default"/>
+<setEntry value="org.mongodb.bson@default:default"/>
+<setEntry value="org.mongodb.bson.source@default:default"/>
+<setEntry value="org.mongodb.driver-sync@default:default"/>
+<setEntry value="org.mongodb.driver-sync@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.warurl@default:default"/>
 <setEntry value="org.hyperic.sigar@default:default"/>
@@ -162,6 +165,7 @@
 <setEntry value="com.sap.sailing.domain.windfinderadapter@4:true"/>
 <setEntry value="com.sap.sailing.server@5:true"/>
 <setEntry value="com.sap.sailing.server.gateway@5:true"/>
+<setEntry value="com.sap.sailing.server.gateway.interfaces@default:default"/>
 <setEntry value="com.tractrac.clientmodule@default:default"/>
 <setEntry value="com.sap.sailing.declination@default:default"/>
 <setEntry value="com.sap.sailing.domain.persistence@default:default"/>
@@ -171,7 +175,6 @@
 <setEntry value="com.sap.sailing.domain.tractracadapter.persistence@4:true"/>
 <setEntry value="com.sap.sailing.gwt.ui@6:true"/>
 <setEntry value="com.sap.sailing.udpconnector@default:default"/>
-<setEntry value="com.sap.sailing.xmlexport@5:true"/>
 <setEntry value="com.sap.sailing.simulator@default:default"/>
 <setEntry value="com.sap.sailing.www@5:true"/>
 <setEntry value="com.sap.sailing.resultimport@4:true"/>
@@ -190,6 +193,8 @@
 <setEntry value="com.sap.sailing.domain.racelogtrackingadapter@4:true"/>
 <setEntry value="com.sap.sailing.domain.deckmanadapter@5:true"/>
 <setEntry value="com.sap.sailing.domain.oceanraceadapter@5:true"/>
+<setEntry value="com.sap.sailing.domain.yellowbrickadapter@5:true"/>
+<setEntry value="com.sap.sailing.domain.yellowbrickadapter.persistence@4:true"/>
 <setEntry value="com.sap.sailing.xrr.structureimport@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization.shared.android@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.serialization@default:default"/>
@@ -222,6 +227,7 @@
 <setEntry value="com.sap.sailing.shared.server.gateway@5:true"/>
 <setEntry value="com.sap.sailing.shared.persistence@default:default"/>
 <setEntry value="com.sap.sailing.landscape@default:default"/>
+<setEntry value="com.sap.sailing.landscape.gateway@5:true"/>
 <setEntry value="com.sap.sailing.landscape.common@default:default"/>
 <setEntry value="com.sap.sailing.landscape.ui@default:default"/>
 <setEntry value="com.sap.sailing.hanaexport@5:true"/>
