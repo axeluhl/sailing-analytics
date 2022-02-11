@@ -175,7 +175,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 logger.info("No auto-scaling replica forced for replica set "+name+"; starting with an unmanaged replica on a shared instance");
                 try {
                     unmanagedReplicas.add(launchUnmanagedReplica(result, region, optionalKeyName, privateKeyEncryptionPassphrase,
-                            replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
+                            bearerTokenUsedByReplicas, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
                             Optional.of(InstanceType.valueOf(sharedInstanceType)),
                             /* optionalPreferredInstanceToDeployTo */ Optional.empty()));
                 } catch (Exception e) {
