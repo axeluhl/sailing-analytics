@@ -209,10 +209,10 @@ REPLICATE_MASTER_EXCHANGE_NAME=security_service
 #     https://security-service.sapsailing.com/security/api/restsecurity/access_token
 REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
-DEPLOY_TO=aarhussejlklub
-SERVER_NAME=AARHUSSEJLKLUB
-SERVER_PORT=8927
-#MONGODB_URI="mongodb://dbserver.internal.sapsailing.com:10202/AARHUSSEJLKLUB"
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/AARHUSSEJLKLUB?replicaSet=live&retryWrites=true&readPreference=nearest"
-EXPEDITION_PORT=2049
-TELNET_PORT=14927
+SERVER_NAME=HSC
+DEPLOY_TO=hsc
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/HSC?replicaSet=live&retryWrites=true&readPreference=nearest"
+EXPEDITION_PORT=2010
+SERVER_PORT=8888
+TELNET_PORT=14888
+REPLICATION_CHANNEL=HSC
