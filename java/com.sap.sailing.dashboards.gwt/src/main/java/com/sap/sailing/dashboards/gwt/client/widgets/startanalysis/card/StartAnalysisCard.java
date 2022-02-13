@@ -186,7 +186,8 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         final RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, errorReporter,
                 Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, null);
+        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
+                /* FIXME: 5510 Premium features wont work without DTO context */ null);
         raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver), raceMapSettings,
                 sailingServiceAsync, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,

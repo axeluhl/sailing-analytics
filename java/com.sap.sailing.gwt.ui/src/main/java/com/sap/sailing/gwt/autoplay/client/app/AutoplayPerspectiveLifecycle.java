@@ -27,7 +27,7 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
         // As we cannot know, if Bravo data is available later on, we will offer DetailTypes, that might be relevant
         // despite not having data for them yet
         final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
-                /* TODO: raceDTO is needed for permission check */null);
+                /* FIXME: 5510 Premium features wont work without DTO context */null);
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
                 DetailType.getAutoplayDetailTypesForChart(), userService, availableDetailTypes, null, paywallResolver);
         addLifeCycle(leaderboardLifecycle);
