@@ -156,7 +156,7 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
                 addTextCell(tr, i18n.paymentStatus() + ":", css.fontStyleItalic());
                 valueProvider.configurePaymentStatusElement(rowValue, (label, value) -> addTextCell(tr, value),
                         (label, value) -> addImageCell(tr, value));
-                if (rowValue.isCancelled() || !rowValue.isRenewing()) {
+                if (!rowValue.isInTrial() && (rowValue.isCancelled() || !rowValue.isRenewing())) {
                     addTextCell(tr, i18n.cancelledAt() + ":", css.textAlignRight());
                     addTextCell(tr, formatDateAndTime(rowValue.getCancelledAt().asDate()), css.textAlignRight());
                 } else if (rowValue.isRenewing()) {
