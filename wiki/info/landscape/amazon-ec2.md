@@ -87,9 +87,23 @@ In addition to a default re-direct for the "/" path, the following four ALB list
 
 ### MongoDB Replica Sets
 
+There are currently three MongoDB replica sets:
+
+- ``live``: Used by default for any new event or club server. The replica set consists of three nodes, two of which running on instances with fast but ephemeral NVMe storage for high write throughput, thus eligible as primary nodes; and a hidden replica with a slower EBS gp2 SSD volume that has a backup plan. The two NVMe-backed nodes have DNS names pointing to their internal IP addresses: ``mongo0.internal.sapsailing.com`` and ``mongo1.internal.sapsailing.com``. Their MongoDB processes run on the default port 27017 each. They run in different availability zones. The hidden replica runs on ``dbserver.internal.sapsailing.com:10203``.
+- ``archive``: Used by the ARCHIVE servers (production and failover). It host a DB called ``winddb`` (for historical reasons). Its primary and by default only node is found on ``dbserver.internal.sapsailing.com:10201``. If an ARCHIVE server is launched it is a good idea to scale this ``archive`` replica set by adding one or two secondary nodes that are reasonably sized, such as ``i3.2xlarge``. Note that the ARCHIVE server configuration prefers reading from secondary MongoDB instances, thus will prefer any newly launched node over the primary.
+- ``slow``: Used as target for archiving / backing up content from the ``live`` replica set once it is no longer needed for regular operations. The default node for this replica set can be found at ``dbserver.internal.sapsailing.com:10202`` and has a large (currently 4TB) yet slow and inexpensive sc1 disk attached. One great benefit of this replica set is that in case you want to resurrect an application replica set after it has been archived, you can do so with little effort, simply by launching an instance with a DB configuration pointing at the ``slow`` replica set.
+
 ### Shared Security and Application Data Across ``sapsailing.com``
 
-TODO explain the special role of security-service.sapsailing.com
+Staying logged in and having a common underlying security infrastructure as users roam around the sapsailing.com landscape is an important feature of this architecture. This is achieved by using the same replication scheme that is applied when an application replica set replicates its entire content between its master and all its replicas, with a small modification: the replication between an application replica set's master and a "singleton" security environment is only partial in the sense that not all replicables available are actually replicated. Instead, replication from the central security service is restricted currently to three replicables:
+
+- ``com.sap.sse.security.impl.SecurityServiceImpl``
+- ``com.sap.sailing.shared.server.impl.SharedSailingDataImpl``
+- ``com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl``
+
+The central security service is provided by a small application replica set reachable under the domain name ``security-service.sapsailing.com``. It currently employs only a single master process running on a small dedicated instance. It launches into ready state within just a few seconds, and hence even upgrades may be performed in-place. The replication infrastructure is built such that when the securit-service master comes up again it knows which replicables were replicating it recently. Furthermore, replicas will buffer operations that are to be sent to the master as long as the master is not available. They will re-send them once the master has become available again.
+
+This default replication relationship for any regular application replica set and ARCHIVE servers is encoded currently in the environment [https://releases.sapsailing.com/environments/live-master-server](https://releases.sapsailing.com/environments/live-master-server) and [https://releases.sapsailing.com/environments/archive-server](https://releases.sapsailing.com/environments/archive-server).
 
 ### Dedicated Application Replica Set
 
