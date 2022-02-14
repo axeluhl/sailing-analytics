@@ -4,14 +4,16 @@
 
 ## Quickstart
 
-Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London).
+Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London). Most regular operations can be handled through the AdminConsole's "Advanced / Landscape" tab. See, e.g., [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:). Some operations occurring not so frequently still require more in-depth knowledge of steps, manual execution of commands on the command line and some basic Linux understanding.
 
-### Important Servers, Hostnames
+## Important Servers, Hostnames
 
 - Web Server / Central Reverse Proxy: reachable through SSH to sapsailing.com:22
 - Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com, mongo1.internal.sapsailing.com
 - RabbitMQ Server: rabbit.internal.sapsailing.com
-- MySQL DB (mainly for Bugzilla): mysql.internal.sapsailing.com (currently co-deployed on the same old instance that also runs RabbitMQ)
+- MySQL DB (mainly for Bugzilla): mysql.internal.sapsailing.com (currently co-deployed on the same old instance that also runs RabbitMQ, hence currently mysql.internal.sapsailing.com and rabbit.internal.sapsailing.com refer to the same instance)
+- Hudson Build Server: called "Build/Test/Dev", running a Hudson instance reachable at ``hudson.sapsailing.com`` and a test instance of the SAP Sailing Analytics available under ``dev.sapsailing.com``
+- Additional "Build Slaves" launched by the Hudson Build Server: Named ``Hudson Ubuntu Slave``, used to run individual build jobs
 
 ## Landscape Overview
 
@@ -22,9 +24,13 @@ In Route53 (the AWS DNS) we have registered the sapsailing.com domain and can ma
 * accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com`` target group
 * optionally, this NLB could be extended by UDP port mappings in case we see a use case for UDP-based data streams that need forwarding to specific applications, such as the Expedition data typically sent on ports 2010 and following
 
-### Webserver
+Additionally, we have created a CNAME record for ``*.sapsailing.com`` pointing at a default application load balancer (ALB) (currently ``DefDynsapsailing-com-1492504005.eu-west-1.elb.amazonaws.com``) in our default region (eu-west-1). Thie default ALB is also called our "dynamic ALB" because it doesn't depend on DNS rules other than the default one for ``*.sapsailing.com``, so other than changes to the DNS which can take minutes to hours to propagate through the world-wide DNS, changes to the default ALB's rule set take effect immediately. Like all ALBs, this one also has a default rule that refers all traffic not matched by other rules to a target group that forwards traffic to an (in the future probably multiple) Apache httpd webserver. All these ALBs handle SSL termination by means of an ACM-managed certificate that AWS automatically renews before it expires. The traffic routed to the target groups is always HTTP only.
 
-The web server currently exists only as one instance but could now be replicated to other availabililty zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will be described further below, to the ``CentralWebServerHTTP*`` (for the "dynamic" ALB in eu-west-1) or ``{ALB-name}-HTTP`` (for all DNS-mapped ALBs) target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
+Further ALBs may exist in addition to the default ALB and the NLB for ``sapsailing.com``. Those will then have to have one or more DNS record(s) pointing to them for which matching rules based on the hostname exist in the ALB listener's rule set. This set-up is specifically appropriate for "longer-lived" content where during archiving or dismantling a DNS lag is not a significant problem.
+
+### Apache httpd Webserver and Reverse Proxy
+
+The web server currently exists only as one instance but could now be replicated to other availability zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will be described further below, to the ``CentralWebServerHTTP*`` (for the "dynamic" ALB in eu-west-1) or ``{ALB-name}-HTTP`` (for all DNS-mapped ALBs) target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
 
 * hudson.sapsailing.com - a Hudson installation on dev.internal.sapsailing.com
 * bugzilla.sapsailing.com - a Bugzilla installation under /usr/lib/bugzilla
@@ -37,7 +43,7 @@ The web server currently exists only as one instance but could now be replicated
 * gitlist.sapsailing.com - for our git at /home/trac/git
 * git.sapsailing.com - for git cloning for dedicated users, used among other things for replication into git.wdf.sap.corp
 
-Furthermore, it host aliases for ``sapsailing.com``, ``www.sapsailing.com`` and all subdomains for archived content, pointing to the archive server which is defined in ``/etc/httpd/conf.d/000-macros.conf``. This is also where the archive server switching has to be configured. Before reloading the configuration, make sure the syntax is correct, or else you may end up killing the web server, leading to downtime. Check by running
+Furthermore, it hosts aliases for ``sapsailing.com``, ``www.sapsailing.com`` and all subdomains for archived content, pointing to the archive server which is defined in ``/etc/httpd/conf.d/000-macros.conf``. This is also where the archive server switching has to be configured. Before reloading the configuration, make sure the syntax is correct, or else you may end up killing the web server, leading to downtime. Check by running
 ```
         apachectl configtest
 ```
@@ -51,7 +57,7 @@ The webserver is registered as target in various locations:
 * As DNS record with its internal IP address (e.g., 172.31.19.129) for the two DNS entries ``logfiles.internal.sapsailing.com`` used by various NFS mounts, and ``smtp.internal.sapsailing.com`` for e-mail traffic sent within the landscape and not requiring the AWS SES
 * as IP target with its internal IP address for the ``HTTP-to-sapsailing-dot-com`` target group, accepting the HTTP traffic sent straight to ``sapsailing.com`` (not ``www.sapsailing.com``)
 * as IP target with its internal IP address for the ``SSH-to-sapsailing-dot-com`` target group, accepting the SSH traffic for ``sapsailing.com``
-* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on
+* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively.
 * as target of the elastic IP address ``54.229.94.254``
 
 Furthermore, it is helpful to ensure that the ``/internal-server-status`` path will resolve correctly to the Apache httpd server status page. For this, the ``/etc/httpd/conf.d/001-events.conf`` file contains three rules at the very beginning:
@@ -67,11 +73,65 @@ The second obviously requires maintenance as the internal IP changes, e.g., when
 
 ### DNS and Application Load Balancers (ALBs)
 
-We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (DNSMapped-0-1286577811.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects.
+We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (DNSMapped-0-1286577811.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects for non-archived ALB-mapped content.
 
 Shorter-running events may not require a DNS record. The ALB ``DefDynsapsailing-com-1492504005.eu-west-1.elb.amazonaws.com`` is target for ``*.sapsailing.com`` and receives all HTTP/HTTPS requests not otherwise handled. While HTTP immediately redirects to HTTPS, the HTTPS requests will pass through its rules. If application replica sets have their rules declared here, they will fire. Everything else falls through to the default rule which forwards to the web server's target group again. This is how archived events as well as requests for ``www.sapsailing.com`` end up.
 
-The requests going straight to ``sapsailing.com`` are handled by the NLB (see above), get forwarded to the web server and are re-directed to ``www.sapsailing.com`` from there, ending up at the non-DNS-mapped load balancer where by default they are then sent again to the web server which sends it to the archive server.
+The requests going straight to ``sapsailing.com`` are handled by the NLB (see above), get forwarded to the web server and are re-directed to ``www.sapsailing.com`` from there, ending up at the non-DNS-mapped load balancer where by default they are then sent again to the web server / reverse proxy which sends it to the archive server.
+
+In addition to a default re-direct for the "/" path, the following four ALB listener rules for a single application replica set are defined, all requiring the "Host" to match the hostname:
+- if the HTTP header ``X-SAPSSE-Forward-Request-To`` is ``master`` then forward to the master target group
+- if the HTTP header ``X-SAPSSE-Forward-Request-To`` is ``replica`` then forward to the public target group
+- if the request method is ``GET`` then forward to the public target group
+- forward all other request for the hostname to the master target group
+
+### MongoDB Replica Sets
+
+### Shared Security and Application Data Across ``sapsailing.com``
+
+TODO explain the special role of security-service.sapsailing.com
+
+### Dedicated Application Replica Set
+
+### Application Replica Set Using Shared Instances
+
+### Auto-Scaling Groups and Launch Configurations
+
+### Important Amazon Machine Images (AMIs)
+
+TODO talk about image upgradability using the "image-upgrade" user data line, optionally combined with the "no-shutdown" flag.
+
+### AWS Tags
+
+AMIs / image-type and versions
+
+sailing-analytics-server
+
+mongo-replica-sets
+
+## Automated Procedures
+
+### Creating a New Application Replica Set
+
+### Moving Application Replica Set from Shared to Dedicated Infrastructure
+
+### Moving Application Replica Set from Dedicated to Shared Infrastructure
+
+### Scaling Replica Instances Up/Down
+
+### Scaling Master Up/Down
+
+### Upgrading Application Replica Set
+
+### Archiving Application Replica Set
+
+### Removing Application Replica Set
+
+### Upgrading Application AMI
+
+TODO explain how launch configurations can be upgraded as well
+
+### Upgrading MongoDB AMI
 
 #### Starting an instance
 
