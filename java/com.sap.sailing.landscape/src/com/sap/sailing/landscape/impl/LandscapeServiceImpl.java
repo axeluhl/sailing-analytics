@@ -1232,7 +1232,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                     " that is not managed by auto-scaling group "+autoScalingGroup.getName()+
                     ". Launching one on an eligible shared instance.");
             nonAutoScalingReplica.add(launchUnmanagedReplica(replicaSet, replicaSet.getMaster().getHost().getRegion(), optionalKeyName,
-                    privateKeyEncryptionPassphrase, replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull,
+                    privateKeyEncryptionPassphrase, getEffectiveBearerToken(replicaReplicationBearerToken), optionalMemoryInMegabytesOrNull,
                     optionalMemoryTotalSizeFactorOrNull,
                     Optional.of(optionalInstanceType.orElseGet(()->replicaSet.getMaster().getHost().getInstance().instanceType())),
                     /* optionalPreferredInstanceToDeployTo */ Optional.empty()));
