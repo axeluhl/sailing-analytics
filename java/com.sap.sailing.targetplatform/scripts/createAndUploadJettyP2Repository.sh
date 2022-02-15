@@ -2,7 +2,7 @@
 VERSION=$( curl https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/ | grep "/jetty/updates/jetty-bundles-9.x" | sed -e 's/^.*> \?\(9\.4\.[0-9]*\.v[0-9]*\)<.*$/\1/' )
 echo "Found version ${VERSION}"
 P2_URL="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/${VERSION}/"
-TARGET_BASE_PLUGINS_DIR=../../com.sap.sailing.targetplatform.base/plugins/target-base/
+TARGET_BASE_PLUGINS_DIR=../../com.sap.sailing.targetplatform.base/plugins/target-base
 TMP_FOLDER="${TMP}/jetty-${VERSION}"
 rm -rf "${TMP_FOLDER}"
 eclipse -nosplash -verbose -application org.eclipse.equinox.p2.metadata.repository.mirrorApplication -source https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/${VERSION}/ -destination file:${TMP_FOLDER}
