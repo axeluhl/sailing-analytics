@@ -75,6 +75,8 @@ The second obviously requires maintenance as the internal IP changes, e.g., when
 
 We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (DNSMapped-0-1286577811.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects for non-archived ALB-mapped content.
 
+   <img src="/wiki/info/landscape/images/ALBsAndDNS.png"/>
+
 Shorter-running events may not require a DNS record. The ALB ``DefDynsapsailing-com-1492504005.eu-west-1.elb.amazonaws.com`` is target for ``*.sapsailing.com`` and receives all HTTP/HTTPS requests not otherwise handled. While HTTP immediately redirects to HTTPS, the HTTPS requests will pass through its rules. If application replica sets have their rules declared here, they will fire. Everything else falls through to the default rule which forwards to the web server's target group again. This is how archived events as well as requests for ``www.sapsailing.com`` end up.
 
 The requests going straight to ``sapsailing.com`` are handled by the NLB (see above), get forwarded to the web server and are re-directed to ``www.sapsailing.com`` from there, ending up at the non-DNS-mapped load balancer where by default they are then sent again to the web server / reverse proxy which sends it to the archive server.
@@ -89,9 +91,13 @@ In addition to a default re-direct for the "/" path, the following four ALB list
 
 There are currently three MongoDB replica sets:
 
+   <img src="/wiki/info/landscape/images/MongoDBReplicaSets.png"/>
+
 - ``live``: Used by default for any new event or club server. The replica set consists of three nodes, two of which running on instances with fast but ephemeral NVMe storage for high write throughput, thus eligible as primary nodes; and a hidden replica with a slower EBS gp2 SSD volume that has a backup plan. The two NVMe-backed nodes have DNS names pointing to their internal IP addresses: ``mongo0.internal.sapsailing.com`` and ``mongo1.internal.sapsailing.com``. Their MongoDB processes run on the default port 27017 each. They run in different availability zones. The hidden replica runs on ``dbserver.internal.sapsailing.com:10203``.
 - ``archive``: Used by the ARCHIVE servers (production and failover). It host a DB called ``winddb`` (for historical reasons). Its primary and by default only node is found on ``dbserver.internal.sapsailing.com:10201``. If an ARCHIVE server is launched it is a good idea to scale this ``archive`` replica set by adding one or two secondary nodes that are reasonably sized, such as ``i3.2xlarge``. Note that the ARCHIVE server configuration prefers reading from secondary MongoDB instances, thus will prefer any newly launched node over the primary.
 - ``slow``: Used as target for archiving / backing up content from the ``live`` replica set once it is no longer needed for regular operations. The default node for this replica set can be found at ``dbserver.internal.sapsailing.com:10202`` and has a large (currently 4TB) yet slow and inexpensive sc1 disk attached. One great benefit of this replica set is that in case you want to resurrect an application replica set after it has been archived, you can do so with little effort, simply by launching an instance with a DB configuration pointing at the ``slow`` replica set.
+
+Furthermore, every application server instance hosts a local MongoDB process, configured as a primary of a replica set called ``replica``. It is intended to be used by application replica processes running on the instance, scaling with the number of replicas required, starting clean and empty and getting deleted as the instance is terminated. Yet, being configured as a MongoDB replica set there are powerful options available for attaching more MongoDB instances as needed, or upgrading to a new MongoDB release while remaining fully available, should this ever become an issue for longer-running replicas.
 
 ### Shared Security and Application Data Across ``sapsailing.com``
 
@@ -105,11 +111,62 @@ The central security service is provided by a small application replica set reac
 
 This default replication relationship for any regular application replica set and ARCHIVE servers is encoded currently in the environment [https://releases.sapsailing.com/environments/live-master-server](https://releases.sapsailing.com/environments/live-master-server) and [https://releases.sapsailing.com/environments/archive-server](https://releases.sapsailing.com/environments/archive-server).
 
+### Standard Application Replica Set with Target Groups, Auto-Scaling Group and Launch Configuration
+
+With the exception of legacy, test and archive instances, regular application replica sets are created with the following elements:
+- an application load balancer (ALB) is identified or created if needed
+- a "master" target group, named like the replica set with a "-m" suffix appended
+- a "public" target group, named after the replica set
+- five rules for the replica set are created in the load balancer's HTTPS listener, forwarding traffic as needed to the "master" and the "public" target groups
+- for a DNS-mapped set-up (not using the default "dynamic" load balancer) a Route53 DNS CNAME record pointing to the ALB is created for the replica set's host name
+- an auto-scaling group, named after the replica set with the suffix "-replicas" appended
+- a launch configuration used by the auto-scaling group, named after the replica set with the release name appended, separated by a dash (-), e.g., "abc-build-202202142355"
+- a master process, registered in both, the "master" and the "public" target groups
+- a replica process, registered in the "public" target group
+There are different standard deployment choices for the master and the replica process that will be described in the following sections.
+
 ### Dedicated Application Replica Set
+
+For an event that expects more than a few hundred concurrent viewers the standard set-up includes dedicated instances for master and replica processes. Each application process (a Java VM) can consume most of the physical RAM for its heap size. No memory contention with other application processes will occur, and Java garbage collection will not run into memory swapping issues. All replicas in this set-up are managed by the auto-scaling group. Their instances will be named as "SL {replicaset-name} (Auto-Replica)". The master will be named "SL {replicaset-name} (Master)". The ``sailing-analytics-server`` tag on the instance will reflect the replica set's name in its value.
+
+   <img src="/wiki/info/landscape/images/DedicatedApplicationReplicaSet.png"/>
+
+As replicas may get added as the load increases, we would like to avoid them putting additional stress on the MongoDB replica set used by the master process. Therefore, each instance runs its own small MongoDB installation, configured as a replica set ``replica``. The DB content on a replica is said to be "undefined" and it is not intended to be used to read anything reasonable from it. Yet, we're trying to make the launch of a replica robust against reading from such a replica DB with undefined content before the actual initial load is received from the master process.
 
 ### Application Replica Set Using Shared Instances
 
-### Auto-Scaling Groups and Launch Configurations
+When an event is expected to produce less than hundreds of concurrent viewers and when the number of competitors to managed in a single leaderboard is less than approximately 50, master and replica processes of the corresponding application replica set may be deployed on instances shared with other application replica sets. This becomes even more attractive if the application replica sets sharing instances are not expected to produce high workload at the same time. The highest load is to be expected when races are live. For most non-long-distance races the times are constrained to a part of the daylight time in the time zone where the races are happening. Should there be multiple such events in different time zones then those would be good candidates for sharing instances as their load patterns are complementary.
+
+Likewise, if an application replica set is set up for a multi-day event and after the last race is over still has some read load to carry that would be more than would be good for an archive server, yet less than what dedicated instances are required for, leaving the event on an application replica set sharing instances with others may be a good idea. Similarly, event series such as a sailing league's season, are usually configured on an application replica set, and in the times between the events of the series the much lower workload makes the application replica set eligible for moving to shared instances.
+
+In principle, every application instance can host more than one application process. It is, however, essential that their file system directories and port assignments don't overlap. Also, a load balancing target group always routes traffic to the same port on all instances registered. Therefore, the master process and all replica processes of a single application replica set must use the same HTTP port. The default port range for the HTTP ports used by application replica sets starts at ``8888``. Telnet ports start at ``14888``, and UDP Expedition ports at ``2010``.
+
+All replica processes running on the same instance share the instance's local MongoDB (the single-node ``replica`` replica set), and for each replica a database named ``{replicaset-name}-replica`` will end up on the local MongoDB. The master processes are expected to use a non-local MongoDB replica set, such as the ``live`` replica set.
+
+   <img src="/wiki/info/landscape/images/ApplicationReplicaSetsOnSharedInstances.png"/>
+
+By means of several automation procedures it is possible with a few clicks or a single REST API call to move master and replica processes from one instance to another and to launch instances for dedicated and for shared use. With this, a reasonable degree of elasticity is provided that allows operators to move from shared to dedicated set-ups as an event is expected to generate more CPU load soon, and moving things back to a shared set-up when the load pressure decreases.
+
+Shared instances are usually named "SL Multi-Server" and have the value "___multi___" for the ``sailing-analytics-server`` tag.
+
+### Archive Server Set-Up
+
+The set-up for the "ARCHIVE" server differs from the set-up of regular application replica sets. While for the latter we assume that a single sub-domain (such as ``vsaw.sapsailing.com``) will reasonably identify the content of the application replica set, the archive needs to fulfill at least two roles:
+
+- keep content available under the original URL before archiving
+- make all content browsable under the landing page ``https://sapsailing.com``
+
+Furthermore, being the landing page for the entire web site, a concept for availability is required, given that an archive server restart can take up to 24 hours until all content is fully available again. Also, with a growing amount of content archived, more and more hostnames will need to be mapped to specific archived content. While ALBs incur cost and the number of ALBs and the size of their listeners' rule sets are limited, an HTTP reverse proxy such as the Apache httpd server is not limited in the number of rewrite rules it has configured. Archived events are usually not under high access load. The bandwidth required for all typical access to archived events is easily served by a single instance and can easily pass through a single reverse proxy.
+
+For now, we're using the following set-up:
+
+   <img src="/wiki/info/landscape/images/ArchiveServerSetup.png"/>
+
+A failover instance is kept ready to switch to in case the primary production archive process is failing. The switching happens in the reverse proxy's configuration, in particular the ``/etc/httpd/conf.d/000-macros.conf`` file and its ``ArchiveRewrite`` macro telling the IP address of the current production archive server. In case of a failure, change the IP address to the internal IP address of the failover archive server and re-load the httpd configuration:
+
+```
+        service httpd reload
+```
 
 ### Important Amazon Machine Images (AMIs)
 
