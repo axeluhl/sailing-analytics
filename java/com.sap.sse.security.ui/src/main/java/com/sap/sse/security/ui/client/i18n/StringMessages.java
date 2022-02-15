@@ -205,6 +205,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String premiumFeatureListDescription();
     String selectSubscriptionPlan();
     String features();
+    String premiumFeature();
     String price();
     String pleaseSubscribeToUse();
     String pleaseSubscribeToUseSpecific(String actionName);

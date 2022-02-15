@@ -473,7 +473,26 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         LEG_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
-
+        this.leaderboardPaywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory(), 
+                leaderboardName, SecuredDomainType.LEADERBOARD, new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        Set<DetailType> removableDetailTypes = new HashSet<DetailType>(); 
+                        for (DetailType detailType: overallDetailColumnMap.keySet()) {
+                            if (detailType.getPremiumAction() != null 
+                                    && !leaderboardPaywallResolver.hasPermission(detailType.getPremiumAction())) {
+                                removableDetailTypes.add(detailType);
+                            }
+                        }
+                        for (DetailType detailType: removableDetailTypes) {
+                            overallDetailColumnMap.remove(detailType);
+                        }
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error while init Paywall Resolver." , caught);
+                    }
+                });
         overallDetailColumnMap = createOverallDetailColumnMap();
 
         if (settings.getLegDetailsToShow() != null) {
@@ -570,7 +589,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
         this.availableDetailTypes = availableDetailTypes;
-        this.leaderboardPaywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory(), leaderboardName, SecuredDomainType.LEADERBOARD);
     }
 
     protected abstract void openSettingsDialog();
@@ -2275,8 +2293,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_DISTANCE_TRAVELED,
                         e -> e.totalDistanceTraveledInMeters, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                        new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
+            new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.OVERALL_TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                    new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS,
                 new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE, this));
         result.put(DetailType.OVERALL_TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
@@ -3633,6 +3651,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         textRenderer.accept(sb);
         sb.appendHtmlConstant("</div>");
+    }
+    
+    public PaywallResolver getLeaderboardPaywallResolver() {
+        return leaderboardPaywallResolver;
     }
 
 }

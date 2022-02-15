@@ -2,9 +2,18 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="i18n" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
     <ui:style type="com.sap.sse.security.ui.client.premium.PremiumCheckBox.Style">
+        .premium-checkbox {
+            display: inline-block;
+        }
         .premium-container, 
         .premium-container .premium-check-box input:disabled + label {
             cursor: pointer;
+        }
+        .premium-container .premium-check-box {
+            padding-right: 0;
+        }
+        .premium-container {
+            padding-right: 10px;
         }
         .premium-permitted .premium-container, 
         .premium-permitted .premium-container .premium-check-box input:disabled + label {
@@ -14,7 +23,7 @@
 	        pointer-events: none;
 	    }
         .premium-permitted .premium-container .premium-check-box input {
-            box-shadow: -3px 0 #ffffff, -6px 0 #d2af25;
+            box-shadow: -1px 1px #ffffff, -3px 3px #d2af25;
         }
         .premium-container .premium-icon {
             width: 17px;
@@ -22,8 +31,11 @@
             margin: 1px 3px;
             vertical-align: bottom;
         }
+        .premium-permitted .premium-container .premium-icon {
+            display: none;
+        }
     </ui:style>
-    <g:FocusPanel ui:field="container">
+    <g:FocusPanel ui:field="container" addStyleNames="{style.premium-checkbox}">
         <g:FlowPanel addStyleNames="{style.premium-container}">
             <g:CheckBox ui:field="checkBox" addStyleNames="{style.premium-check-box}" />
             <g:Image ui:field="image" addStyleNames="{style.premium-icon}"/>

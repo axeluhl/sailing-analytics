@@ -43,7 +43,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
 
     public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA");
 
-    public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD");
+    public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD", DefaultActions
+            .plus(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION));
 
     public static final HasPermissions LEADERBOARD_GROUP = new SecuredDomainType("LEADERBOARD_GROUP");
 

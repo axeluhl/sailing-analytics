@@ -451,7 +451,6 @@ public class UserService {
      * Checks whether the user has the permission to the given action for the given object.
      */
     public boolean hasPermission(SecuredDTO securedDTO, Action action) {
-        GWT.log("+++ securedDTO:" + securedDTO);
         if (securedDTO == null) {
             return false;
         }
@@ -463,7 +462,7 @@ public class UserService {
      * Checks whether the user has the permission to the given action for the given object.
      */
     public void createEssentialSecuredDTOByIdAndType(String id, HasPermissions permissionType, final AsyncCallback<EssentialSecuredDTO> callback) {
-        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(id, permissionType);
+        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(id, permissionType, id);
         userManagementService.addSecurityInformation(secureDTO, new AsyncCallback<Void>() {
             
             @Override

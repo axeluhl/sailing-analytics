@@ -1,25 +1,34 @@
 package com.sap.sse.security.ui.shared;
 
+import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
-public class EssentialSecuredDTO  extends NamedSecuredObjectDTO implements SecuredDTO, IsSerializable {
+/**
+ * TODO: Think about to implement {@link CustomFieldSerializer}.
+ * @author udowessels
+ *
+ */
+public class EssentialSecuredDTO extends SecurityInformationDTO implements SecuredDTO, IsSerializable {
 
     private static final long serialVersionUID = -5174060227113723186L;
 
+    private HasPermissions permissionType;
+    private String idAsString;
+    private String name;
+
     @Deprecated
     EssentialSecuredDTO() {
-        super(); // for GWT serialization only
-        //this.permissionType = null;
     }
 
-    public EssentialSecuredDTO(String name, HasPermissions permissionType) {
-        super(name);
-        //this.permissionType = permissionType;
+    public EssentialSecuredDTO(String idAsString, HasPermissions permissionType, String name) {
+        this.idAsString = idAsString;
+        this.permissionType = permissionType;
+        this.name = name;
     }
 
     @Override
@@ -28,12 +37,17 @@ public class EssentialSecuredDTO  extends NamedSecuredObjectDTO implements Secur
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return new TypeRelativeObjectIdentifier(getName());
+        return new TypeRelativeObjectIdentifier(idAsString);
     }
 
     @Override
     public HasPermissions getPermissionType() {
-        return null;
+        return permissionType;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
 }

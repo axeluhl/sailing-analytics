@@ -3,9 +3,11 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
@@ -78,6 +80,16 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
         this.leaderboardPanel = leaderboardPanel;
         this.detailSelection = detailSelection;
         detailColumnsMap = getDetailColumnMap(leaderboardPanel, stringConstants, detailHeaderStyle, detailColumnStyle);
+        Set<DetailType> removableDetailTypes = new HashSet<>();
+        for (DetailType detailType: detailColumnsMap.keySet()) {
+            if (detailType.getPremiumAction() != null 
+                    && !leaderboardPanel.getLeaderboardPaywallResolver().hasPermission(detailType.getPremiumAction())) {
+                removableDetailTypes.add(detailType);
+            }
+        }
+        for (DetailType detailType: removableDetailTypes) {
+            detailColumnsMap.remove(detailType);
+        }
     }
     
     /**

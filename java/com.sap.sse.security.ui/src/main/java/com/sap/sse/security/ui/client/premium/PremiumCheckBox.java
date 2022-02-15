@@ -138,4 +138,8 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
     public FocusWidget getFocusWidget() {
         return this.checkBox;
     }
+    
+    public CheckBox getCheckBox() {
+        return this.checkBox;
+    }
 }

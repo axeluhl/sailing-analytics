@@ -37,11 +37,28 @@ public class PaywallResolver {
         this.dtoContext = dtoContext;
     }
 
-    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, String securityDTOId, HasPermissions permissionType) {
+    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, 
+            String securityIdAsString, HasPermissions permissionType) {
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
-        GWT.log("+++ init PaywalResolver. ID: " + securityDTOId + ", type: " + permissionType);
-        updateByIdAndType(securityDTOId, permissionType);
+        updateByIdAndType(securityIdAsString, permissionType, new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                GWT.log("Updated paywall secured context successfully.");
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error while updating paywall security context.", caught);
+            }
+        });
+        subscriptionServiceFactory.initializeProviders();
+    }
+
+    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, 
+            String securityIdAsString, HasPermissions permissionType, final AsyncCallback<Void> callback) {
+        this.userService = userService;
+        this.subscriptionServiceFactory = subscriptionServiceFactory;
+        updateByIdAndType(securityIdAsString, permissionType, callback);
         subscriptionServiceFactory.initializeProviders();
     }
 
@@ -96,18 +113,19 @@ public class PaywallResolver {
         this.dtoContext = dtoContext;
     }
     
-    public void updateByIdAndType(String id, HasPermissions permissionType) {
-        userService.createEssentialSecuredDTOByIdAndType(id, permissionType, new AsyncCallback<EssentialSecuredDTO>() {
+    public void updateByIdAndType(String idAsString, HasPermissions permissionType, final AsyncCallback<Void> callback) {
+        userService.createEssentialSecuredDTOByIdAndType(idAsString, permissionType, new AsyncCallback<EssentialSecuredDTO>() {
             
             @Override
             public void onSuccess(EssentialSecuredDTO result) {
                 dtoContext = result;
-                GWT.log("++ DTOContext created: " + dtoContext);
+                callback.onSuccess(null);
             }
             
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("++ DTOContext creation failed!", caught);
+                GWT.log("DTOContext creation failed!", caught);
+                callback.onFailure(caught);
             }
         });
     }

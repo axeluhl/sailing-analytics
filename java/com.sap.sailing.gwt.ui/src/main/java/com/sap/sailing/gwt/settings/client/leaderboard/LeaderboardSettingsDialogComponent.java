@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -15,8 +14,9 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.common.client.premium.SailingPremiumCheckBox;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -26,7 +26,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 
 public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSettings> implements SettingsDialogComponent<T> {
     public static final String CHECK_BOX_DEBUGID_CONSTANT = "CheckBox";
@@ -73,9 +75,14 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         meneuverContent.addStyleName("dialogInnerContent");
         Collection<DetailType> currentMeneuverDetailSelection = initialSettings.getManeuverDetailsToShow();
         for (DetailType detailType : Util.retainCopy(ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), availableDetailTypes)) {
-            CheckBox checkbox = createAndRegisterCheckbox(dialog, detailType,
-                    currentMeneuverDetailSelection.contains(detailType), maneuverDetailCheckboxes);
-            
+            final Widget checkbox;
+            if (detailType.getPremiumAction() != null) {
+                checkbox = createAndRegisterPremiumCheckbox(dialog, detailType, currentMeneuverDetailSelection.contains(detailType),
+                        legDetailCheckboxes);
+            } else {
+                checkbox = createAndRegisterCheckbox(dialog, detailType, currentMeneuverDetailSelection.contains(detailType),
+                        maneuverDetailCheckboxes);
+            }
             meneuverContent.add(checkbox);
         }
         meneuverPanel.add(meneuverContent);
@@ -121,8 +128,14 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
                 raceDetailDialog.add(raceDetailDialogContent);
             }
-            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
-                    raceDetailCheckboxes);
+            final Widget checkbox;
+            if (type.getPremiumAction() != null) {
+                checkbox = createAndRegisterPremiumCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
+                        legDetailCheckboxes);
+            } else {
+                checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
+                        raceDetailCheckboxes);
+            }
             raceDetailDialogContent.add(checkbox);
             detailCountInCurrentFlowPanel++;
         }
@@ -151,8 +164,14 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                 raceStartAnalysisDialogContent.addStyleName("dialogInnerContent");
                 raceStartAnalysisDialog.add(raceStartAnalysisDialogContent);
             }
-            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
-                    raceDetailCheckboxes);
+            final Widget checkbox;
+            if (type.getPremiumAction() != null) {
+                checkbox = createAndRegisterPremiumCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
+                        legDetailCheckboxes);
+            } else {
+                checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
+                        raceDetailCheckboxes);
+            }
             raceStartAnalysisDialogContent.add(checkbox);
             detailCountInCurrentFlowPanel++;
         }
@@ -168,8 +187,14 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         Collection<DetailType> currentOverallDetailSelection = initialSettings.getOverallDetailsToShow();
         for (DetailType type : Util.retainCopy(DetailType.getAvailableOverallDetailColumnTypes(), availableDetailTypes)) {
-            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
-                    overallDetailCheckboxes);
+            final Widget checkbox;
+            if (type.getPremiumAction() != null) {
+                checkbox = createAndRegisterPremiumCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
+                        overallDetailCheckboxes);
+            } else {
+                checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
+                        overallDetailCheckboxes);
+            }
             overallDetailDialogContent.add(checkbox);
         }
         FlowPanel overallDetailDialogContentSecondLine = new FlowPanel();
@@ -209,38 +234,67 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                 legDetailsContent.addStyleName("dialogInnerContent");
                 legDetailsToShow.add(legDetailsContent);
             }
-            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentLegDetailSelection.contains(type),
-                    legDetailCheckboxes);
+            final Widget checkbox;
+            if (type.getPremiumAction() != null) {
+                checkbox = createAndRegisterPremiumCheckbox(dialog, type, currentLegDetailSelection.contains(type),
+                        legDetailCheckboxes);
+            } else {
+                checkbox = createAndRegisterCheckbox(dialog, type, currentLegDetailSelection.contains(type),
+                        legDetailCheckboxes);
+            }
             legDetailsContent.add(checkbox);
             detailCountInCurrentFlowPanel++;
         }
         return legDetailsToShow;
     }
 
-    
-    
     private CheckBox createAndRegisterCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected,
             Map<DetailType, CheckBox> registry) {
         CheckBox checkbox = createCheckbox(dialog, detailType, selected);
-        GWT.log("++++ juhuu, got it: " + paywallResolver.hasPermission(SecuredDomainType.LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION));
-        
         registry.put(detailType, checkbox);
         return checkbox;
     }
-    
+
+    private PremiumCheckBox createAndRegisterPremiumCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected,
+            Map<DetailType, CheckBox> registry) {
+        PremiumCheckBox premiumCheckbox = createPremiumCheckbox(dialog, detailType, selected);
+        registry.put(detailType, premiumCheckbox.getCheckBox());
+        return premiumCheckbox;
+    }
+
     private CheckBox createCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected) {
         CheckBox checkbox = createCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
                 DetailTypeFormatter.getTooltip(detailType));
         checkbox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + CHECK_BOX_DEBUGID_CONSTANT);
         return checkbox;
     }
+
+    private PremiumCheckBox createPremiumCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected) {
+        String tooltip = DetailTypeFormatter.getTooltip(detailType);
+        String premiumTooltip = stringMessages.premiumFeature();
+        if (tooltip != null && !tooltip.isEmpty()) {
+            premiumTooltip += ": " + tooltip;
+        } 
+        PremiumCheckBox premiumCheckBox = createPremiumCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
+                premiumTooltip , detailType.getPremiumAction());
+        premiumCheckBox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + CHECK_BOX_DEBUGID_CONSTANT);
+        return premiumCheckBox;
+    }
     
     protected CheckBox createCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip) {
-        CheckBox checkbox = dialog.createCheckbox(label);
+        final CheckBox checkbox = dialog.createCheckbox(label);
         checkbox.ensureDebugId(DebugIdHelper.createDebugId(label) + CHECK_BOX_DEBUGID_CONSTANT);
         checkbox.setValue(selected);
         dialog.addTooltip(checkbox, tooltip);
         return checkbox;
+    }
+
+    protected PremiumCheckBox createPremiumCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip, Action premiumAction) {
+        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, premiumAction, paywallResolver);
+        premiumCheckBox.ensureDebugId(DebugIdHelper.createDebugId(label) + CHECK_BOX_DEBUGID_CONSTANT);
+        premiumCheckBox.setValue(selected);
+        dialog.addTooltip(premiumCheckBox, tooltip);
+        return premiumCheckBox;
     }
 
     @Override

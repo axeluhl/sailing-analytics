@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
-import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
@@ -68,7 +67,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             MultiRaceLeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, SailingClientFactory sailingCF) {
+            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, competitorSelectionProvider,
                 leaderboardName, errorReporter, stringMessages, showRaceDetails,style, flagImageResolver, availableDetailTypes, sailingCF);
         initialize(settings);
