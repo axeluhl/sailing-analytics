@@ -70,9 +70,9 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.36.v20210114"/>
-<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.36.v20210114"/>
-<repository location="https://p2.sapsailing.com/p2/jetty/"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.44.v20210927"/>
+<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.44.v20210927"/>
+<repository location="https://p2.sapsailing.com/p2/jetty-9.4.44.v20210927/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="1.1.0.v20201023-1558"/>
