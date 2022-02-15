@@ -4,11 +4,11 @@ echo "Found version ${VERSION}"
 P2_URL="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/${VERSION}/"
 TMP_FOLDER="${TMP}/jetty-${VERSION}"
 rm -rf "${TMP_FOLDER}"
-#eclipse -nosplash -verbose -application org.eclipse.equinox.p2.metadata.repository.mirrorApplication -source https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/${VERSION}/ -destination file:${TMP_FOLDER}
-#eclipse -nosplash -verbose -application org.eclipse.equinox.p2.artifact.repository.mirrorApplication -source https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/${VERSION}/ -destination file:${TMP_FOLDER}
-#echo "Uploading the ${TMP_FOLDER} folder to trac@sapsailing.com:p2-repositories/jetty-${VERSION} ..."
-#ssh trac@sapsailing.com "rm -rf p2-repositories/jetty-${VERSION}"
-#scp -rp ${TMP_FOLDER} trac@sapsailing.com:p2-repositories/jetty-${VERSION}
+eclipse -nosplash -verbose -application org.eclipse.equinox.p2.metadata.repository.mirrorApplication -source https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/${VERSION}/ -destination file:${TMP_FOLDER}
+eclipse -nosplash -verbose -application org.eclipse.equinox.p2.artifact.repository.mirrorApplication -source https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/${VERSION}/ -destination file:${TMP_FOLDER}
+echo "Uploading the ${TMP_FOLDER} folder to trac@sapsailing.com:p2-repositories/jetty-${VERSION} ..."
+ssh trac@sapsailing.com "rm -rf p2-repositories/jetty-${VERSION}"
+scp -rp ${TMP_FOLDER} trac@sapsailing.com:p2-repositories/jetty-${VERSION}
 OLD_VERSION=$( cat ../definitions/race-analysis-p2-remote.target | grep '\(<unit id="org\.eclipse\.jetty\.bundles\.f\.feature\.group" version="\)\([^"]*\)\("\/>\)' | sed -e 's/\(<unit id="org\.eclipse\.jetty\.bundles\.f\.feature\.group" version="\)\([^"]*\)\("\/>\).*$/\2/' )
 echo "Found old version ${OLD_VERSION}"
 echo "Updating com.sap.sse.feature.runtime/feature.xml from Jetty bundles version ${OLD_VERSION} to ${VERSION} ..."
