@@ -18,12 +18,12 @@ echo "Updating com.sap.sailing.targetplatform.base/features/target-base/feature.
 sed -i -e 's/version="'${OLD_VERSION}'"/version="'${VERSION}'"/' ../../com.sap.sailing.targetplatform.base/features/target-base/feature.xml
 echo "Removing old versions of apache-jsp and osgi.boot.jsp from target-base..."
 rm "${TARGET_BASE_PLUGINS_DIR}/apache-jsp-9.4*.jar"
-rm "${TARGET_BASE_PLUGINS_DIR}/jetty-osgi-boot-9.4*.jar"
+rm "${TARGET_BASE_PLUGINS_DIR}/jetty-osgi-boot-jsp-9.4*.jar"
 echo "Downloading new versions..."
 wget -O "${TARGET_BASE_PLUGINS_DIR}/apache-jsp-${VERSION}.jar" https://repo1.maven.org/maven2/org/eclipse/jetty/apache-jsp/${VERSION}/apache-jsp-${VERSION}.jar
 wget -O "${TARGET_BASE_PLUGINS_DIR}/apache-jsp-${VERSION}-sources.jar" https://repo1.maven.org/maven2/org/eclipse/jetty/apache-jsp/${VERSION}/apache-jsp-${VERSION}-sources.jar
-wget -O "${TARGET_BASE_PLUGINS_DIR}/jetty-osgi-boot-${VERSION}.jar" https://repo1.maven.org/maven2/org/eclipse/jetty/osgi/jetty-osgi-boot/${VERSION}/jetty-osgi-boot-${VERSION}.jar
-wget -O "${TARGET_BASE_PLUGINS_DIR}/jetty-osgi-boot-${VERSION}-sources.jar" https://repo1.maven.org/maven2/org/eclipse/jetty/osgi/jetty-osgi-boot/${VERSION}/jetty-osgi-boot-${VERSION}-sources.jar
+wget -O "${TARGET_BASE_PLUGINS_DIR}/jetty-osgi-boot-jsp-${VERSION}.jar" https://repo1.maven.org/maven2/org/eclipse/jetty/osgi/jetty-osgi-boot-jsp/${VERSION}/jetty-osgi-boot-jsp-${VERSION}.jar
+wget -O "${TARGET_BASE_PLUGINS_DIR}/jetty-osgi-boot-jsp-${VERSION}-sources.jar" https://repo1.maven.org/maven2/org/eclipse/jetty/osgi/jetty-osgi-boot-jsp/${VERSION}/jetty-osgi-boot-jsp-${VERSION}-sources.jar
 echo "Adding new versions to git..."
 git add "${TARGET_BASE_PLUGINS_DIR}/*.jar"
 echo "Updating target platform definition..."
