@@ -170,19 +170,96 @@ A failover instance is kept ready to switch to in case the primary production ar
 
 ### Important Amazon Machine Images (AMIs)
 
-TODO talk about image upgradability using the "image-upgrade" user data line, optionally combined with the "no-shutdown" flag.
+In our default region ``eu-west-1`` there are four Amazon Machine Image (AMI) types that are relevant for the operation of the landscape. They all have a base name to which, separated by a space character, a version number consisting of a major and minor version, separated by a dot, is appended. Each of these AMIs has a tag ``image-type`` whose value reflects the type of the image.
+- SAP Sailing Analytics, ``image-type`` is ``sailing-analytics-server``
+- MongoDB Live Replica Set NVMe, ``image-type`` is ``mongodb-server``
+- Hudson Ubuntu Slave, ``image-type`` is ``hudson-slave``
+- Webserver, ``image-type`` is ``webserver``
+
+The SAP Sailing Analytics image is used to launch new instances, shared or dedicated, that host one or more Sailing Analytics application processes. The image contains an installation of the SAP JVM 8 under /opt/sapjvm_8, an Apache httpd service that is not currently used by default for reverse proxying / rewriting / logging activities, an initially empty directory ``/home/sailing/servers`` used to host default application process configurations, and an initialization script under ``/etc/init.d/sailing`` that handles the instance's initialization with a default application process from the EC2 instance's user data. The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date from the Git ``configuration/crontab`` file. If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image.
+
+The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing MongoDB replica sets. It also reads the EC2 instance's user data during start-up and can be parameterized by the following variables: ``REPLICA_SET_NAME``, ``REPLICA_SET_PRIMARY``, ``REPLICA_SET_PRIORITY``, and ``REPLICA_SET_VOTES``. An example configuration could look like this:
+```
+    REPLICA_SET_NAME="live"
+    REPLICA_SET_PRIMARY="172.31.28.93:27017"
+    REPLICA_SET_PRIORITY="0"
+    REPLICA_SET_VOTES="0"
+```
+Like the SAP Sailing Analytics image, the MongoDB image understands the ``image-upgrade`` and the ``no-shutdown`` directives in the user data.
+
+The latest Hudson Ubuntu Slave image is what the Hudson process reachable at [https://hudson.sapsailing.com](https://hudson.sapsailing.com) will launch to run a build. See also ``configuration/launchhudsonslave`` and ``configuration/aws-automation/getLatestImageOfType.sh`` in Git. Currently, upgrading it is still a manual process, and the ``image-upgrade`` and ``no-shutdown`` directives in the instance's EC2 user data are not supported yet. To upgrade it manually, launch it manually, then SSH into the instance as user ``ubuntu``. Then, run
+```
+    sudo -i
+    apt-get update
+    apt-get upgrade
+    cd /opt
+    rm -rf sapjvm_8
+    curl --cookie eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt "https://tools.hana.ondemand.com/additional/sapjvm-8.1.084-linux-x64.zip" > sapjvm8-linux-x64.zip
+    unzip sapjvm8-linux-x64.zip
+    rm sapjvm8-linux-x64.zip
+    shutdown -h now
+```
+and replace the SAP JVM's release (in the example above ``8.1.084`` by whatever is the latest release available under that URL. Then, create a new image named "Hudson Ubuntu Slave {version-number}" with {version-number} being the old minor version incremented by one. Tag the resulting AMI with tag ``image-type`` and value ``hudson-slave``. Name the root partition snapshot produced for the image as "Hudson Ubuntu Slave {version-number} (Root)". Terminate the stopped instance. Test the new image works for new builds. Only once you've verified this by running at least one successful master build with the new image you can deregister the old one and remove the corresponding root partition snapshot.
+
+The Webserver image can be used to launch a new web server / reverse proxy in a region. It is mainly a small Linux installation with the following elements
+- an Apache httpd and the default macros defined under ``/etc/httpd/conf`` and ``/etc/httpd/conf.d``
+- the Git repository under ``/home/trac/git``
+- the folder serving ``releases.sapsailing.com`` under ``/home/trac/releases``
+- the p2 OSGi repositories under ``/home/trac/p2-repositories`` exposed as ``p2.sapsailing.com/p2``
+- the Gollum Wiki set-up under ``/home/wiki`` with a checked-out Git workspace under ``/home/wiki/gitwiki``
+- the Bugzilla installation under ``/var/lib/bugzilla`` and ``/usr/share/bugzilla`` with a matching Perl installation
+The process of setting this up from scratch is explained [here](/wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch).
 
 ### AWS Tags
 
-AMIs / image-type and versions
+The landscape is designed to be self-describing so that no additional database is required for managing it. We assign tags to various AWS resources to identify their intended or actual use, function, or type in a way that is more formal than only relying on naming conventions based on the ``Name`` default tag.
 
-sailing-analytics-server
+The AMIs are tagged using the ``image-type`` tag key. As explained in the previous section, there are currently the types ``sailing-analytics-server``, ``hudson-slave``, ``mongodb-server``, and ``webserver``.
 
-mongo-replica-sets
+EC2 instances hosting application processes are tagged using the ``sailing-analytics-server`` tag key. For dedicated instances running only a single application process for a single application replica set, the replica set's name is used as the tag's value. For shared instances, the special value ``___multi___`` is used.
+
+MongoDB instances are tagged with the tag key ``mongo-replica-sets``. The value encodes information about the MongoDB processes running on that instance. Put as a regular expression, the syntax is
+
+```
+    [a-zA-Z-]*(:[0-9][0-9]*)(,[a-zA-Z-]*(:[0-9][0-9]*))*
+```
+
+or less formally, a comma-separated list of replica set names, optionally extended with the port number in case it is not the default port 27017, where the port number is separated from the replica set name by a colon (:). Example: ``live:10203,archive:10201,slow:10202``
+
+An instance running a RabbitMQ process shall announce this by defining a tag with key ``RabbitMQEndpoint`` where the value is the port number on which RabbitMQ is exposed. The value must also be specified for the default port 5672.
+
+If an instance hosts the region's reverse proxy server that in particular is used to dispatch requests to archived events, it shall expose a tag with key ``CentralReverseProxy`` and value ``true`` (although the value is currently ignored). When an application replica set is archived, the archiving procedure talks to the reverse proxy found via this tag in order to establish re-write rules for the content archived.
 
 ## Automated Procedures
 
+In order to reduce manual efforts for managing the system landscape and to make errors less likely, various automation procedures have been implemented that are intended to help operators in their daily job. The procedures are made available through two channels: an AdminConsole panel found in the "Advanced" category called "Landscape" (see [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:)) and a set of REST APIs (see [https://sapsailing.com/sailinglandscape/webservices/api/index.html](https://sapsailing.com/sailinglandscape/webservices/api/index.html)).
+
+The procedures manage application replica sets, MongoDB replica sets, and the Amazon Machine Images (AMIs) used to run them. They aim at reasonably high availability, at least for read access, while keeping cost low and utilization high. All application replica sets will be created with at least one master and one replica running almost at all times. Managed application replica sets will always have an auto-scaling group for their replicas that will scale the set of replicas elastically, based on the number of requests received per target. The procedures support managing replica processes not launched by the auto-scaling group which is helpful especially when the replica is meant to improve availability and not so much handle excessive load and hence can be launched on a shared instance.
+
+During upgrades and scaling operations the procedures will try to keep approximately as many processes available in the application replica set as there were when the operation started. For example, during a version upgrade first the existing replicas will be detached from their master, the master will be upgraded, then a new set of replicas of the same size as the set of old replicas will be launched on the new version before the old replicas will be replaced by the new ones. This way, the count of processes available to handle user requests will be reduced by one in the worst case, e.g., for temporary master unavailability or while upgrading a single replica in place.
+
+### Credentials and SSH Key
+
+All of these operations required a valid AWS IAM account that has the necessary privileges, with multi-factor authentication (MFA) enabled and an MFA token generator at hand. Furthermore, a user account for sapsailing.com is required that has the permission ``LANDSCAPE:MANAGE:AWS``. When going for REST, create valid session credentials from your AWS access key ID and secret plus a current MFA token code using [https://www.sapsailing.com/sailinglandscape/webservices/api/createsessioncredentials.html](https://www.sapsailing.com/sailinglandscape/webservices/api/createsessioncredentials.html). The session credentials, valid for about twelve hours, will be stored in your user account and will be used for every subsequent request to the AWS API carried out on behalf of your sapsailing.com user account. Likewise, if you're using the AdminConsole's Landscape panel, there is an "AWS Credentials" box where you can do the same.
+
+In addition to AWS credentials it is essential to create or upload an SSH key pair to use for connecting to and configuring the instances. Currently there is no REST API for this step yet (see also [https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5680](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5680)), so this step needs to be carried out in the Landscape panel of the AdminConsole. Upload an existing key pair or generate one and download public and private key so you can also connect from your local command line if you want. The public key of the key pair generated or uploaded is automatically installed in the AWS region you have selected. If you continue working from the AdminConsole, keep it selected and enter the passphrase to unlock it into the password field below the table listing all your keys. When using the REST API, simply pass the key name as argument of the request with the private key's passphrase in another parameter. See the REST API documentation for details on these parameters.
+
+In all of the following sub-sections the text will assume that you have provided valid AWS credentials, that you have selected a region in which you want to operate, and that you have an SSH key selected, with the passphrase to unlock the private key provided in the passphrase field below the SSH keys table.
+
+In several of the scenarios, both, AdminConsole and REST API, you will have the option to provide security bearer tokens that are used to authenticate requests to processes running the SAP Sailing Analytics. If you omit those, the credentials of the session used to authenticate your sailing user will be used. (Note, that for local test set-ups disconnected from the standard security realm used by all of the sapsailing.com-deployed processes, these credentials may not be accepted by the processes you're trying to control. In this case, please provide explicit bearer tokens instead.) We distinguish between the credentials required to replicate the information shared across the landscape, usually from ``security-service.sapsailing.com``, and those used by a replica in one of your application replica sets to authenticate for credentials to replicate the application replica set's master.
+
 ### Creating a New Application Replica Set
+
+In the Application Replica Sets table click the "Add" button and provide the replica set name. You may already now press the OK button and will receive a new application replica set with a master process running on a new dedicated host, and a single replica process running on a new instance launched by the application replica set's auto-scaling group.
+
+The dialog allows you to change several aspects of the application replica set creation process:
+- You can pick a different release. Should you, for any reason, not want the latest master build, use the "Release" field which provides suggestions based on the releases found at ``releases.sapsailing.com``. The release you pick will be used for all master and replica processes for this application replica set until upgraded.
+- You can choose to create a shared instead of a dedicated instance to deploy the master process to. In this case, a new "SL Multi-Server" instance tagged with the "___multi___" tag value for the "sailing-analytics-server" tag key will be created, and the new application replica set's master process will be deployed as the first process.
+- You can choose to deploy the first replica on a shared instance instead of having the auto-scaling group provide a dedicated instance for it. If you do so, an eligible instance based on the port number (default 8888) that lives in an availability zone different from that of the instance hosting the master process will be selected or launched if necessary.
+- You can choose the types of instances to launch for shared and for dedicated instances. If an eligible instance for a replica on a shared instance is found, the instance type will not be considered for the replica.
+- If deploying to the default region ``eu-west-1`` you are given the option to use the dynamic load balancer instead of a DNS-mapped one. This way, no DNS record needs to be created, and when archiving the application replica set at a later point in time, no DNS propagation lag needs to be considered.
+- You may choose a domain different from the default sapsailing.com as long as Route53 has a hosted zone for it.
+- You may specify non-standard memory options for the processes launched. By default, all processes launched will obtain a Java VM heap size occupying 75% of the instance's total physical RAM reduced by 1.5GB to leave space for the VM itself, the operating system and the MongoDB process running on the instance (relevant for replicas only). The minimum size alloted to a VM's heap is 2GB currently. While this set-up gives good results for dedicated instances, it may not be ideal for an archive server or a shared instance. For an archive, for example, you may want to use one of the ``i3.*`` instance types where ample fast swap space is available and may be used for large amounts of archived content. In this case you wouldn't want to restrict your Java VM heap size to only the physical RAM or less but rather you would want to exceed this by several factors. For an archive server running on an ``i3.2xlarge``-type instance with 61GB of RAM and 2TB of swap you may want to provide 300GB of heap space to the VM instead of the 50 or so GB it would be getting assigned by default. For this, use the "Memory (MB)" field. Alternatively, for example in case you want to configure a non-standard memory layout for a shared instance, you may rather want to think in terms of how many of your application process VMs would fit into the instance's physical RAM at the same time. 
 
 ### Moving Application Replica Set from Shared to Dedicated Infrastructure
 
