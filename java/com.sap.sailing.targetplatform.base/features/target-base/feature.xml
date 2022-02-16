@@ -251,21 +251,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.mortbay.jasper.apache-el.source"
-         download-size="0"
-         install-size="0"
-         version="8.5.70"
-         unpack="false"/>
-
-   <plugin
          id="org.mortbay.jasper.apache-jsp"
-         download-size="0"
-         install-size="0"
-         version="8.5.70"
-         unpack="false"/>
-
-   <plugin
-         id="org.mortbay.jasper.apache-jsp.source"
          download-size="0"
          install-size="0"
          version="8.5.70"
