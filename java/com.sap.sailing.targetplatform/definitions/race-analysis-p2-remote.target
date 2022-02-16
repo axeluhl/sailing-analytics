@@ -310,7 +310,6 @@
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
 <plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
-<plugin id="org.mortbay.jasper.apache-jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
 <plugin id="org.objectweb.asm.source"/>
@@ -322,6 +321,7 @@
 <plugin id="org.eclipse.osgi.util.source"/>
 <plugin id="org.eclipse.jetty.io.source"/>
 <plugin id="org.osgi.service.packageadmin"/>
+<plugin id="org.osgi.service.url"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
