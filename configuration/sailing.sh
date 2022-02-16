@@ -1,7 +1,7 @@
 # Script to be linked from /etc/profile.d
 # Appends to PATH, sets DISPLAY for VNC running on :2, exports JAVA_HOME and Amazon EC2 variables
 
-ulimit -n 30000
+ulimit -n 100000
 ulimit -u 40000
 
 export EC2_HOME=/opt/amazon/ec2-api-tools-1.6.8.0

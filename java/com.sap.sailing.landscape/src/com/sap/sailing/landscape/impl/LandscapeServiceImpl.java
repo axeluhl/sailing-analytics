@@ -175,7 +175,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 logger.info("No auto-scaling replica forced for replica set "+name+"; starting with an unmanaged replica on a shared instance");
                 try {
                     unmanagedReplicas.add(launchUnmanagedReplica(result, region, optionalKeyName, privateKeyEncryptionPassphrase,
-                            replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
+                            bearerTokenUsedByReplicas, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
                             Optional.of(InstanceType.valueOf(sharedInstanceType)),
                             /* optionalPreferredInstanceToDeployTo */ Optional.empty()));
                 } catch (Exception e) {
@@ -289,7 +289,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final Iterable<SailingAnalyticsProcess<String>> replicas;
         if (optionalMinimumAutoScalingGroupSize.isPresent() && optionalMinimumAutoScalingGroupSize.get() == 0) {
             replicas = Collections.singleton(launchUnmanagedReplica(replicaSet, region, optionalKeyName,
-                privateKeyEncryptionPassphrase, replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull,
+                privateKeyEncryptionPassphrase, bearerTokenUsedByReplicas, optionalMemoryInMegabytesOrNull,
                 optionalMemoryTotalSizeFactorOrNull, optionalInstanceType, optionalPreferredInstanceToDeployTo));
         } else {
             replicas = Collections.emptySet();
@@ -660,6 +660,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final UserGroup serverGroup;
         if (existingServerGroup == null) {
             final UUID serverGroupId = UUID.randomUUID();
+            // FIXME bug5678: if this runs on a server with separate security realm, using the local security service doesn't help!
             serverGroup = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.USER_GROUP,
                     new TypeRelativeObjectIdentifier(serverGroupId.toString()), /* securityDisplayName */ serverGroupName,
                     (Callable<UserGroup>)()->getSecurityService().createUserGroup(serverGroupId, serverGroupName));
@@ -858,7 +859,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             } else { // otherwise, upgrade in place and add to target group again when ready
                 logger.info("Refreshing unmanaged replica "+replica+" in place");
                 replica.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
-                replica.waitUntilReady(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT);
+                replica.waitUntilReady(Optional.of(Duration.ONE_DAY));
                 replicaSet.getPublicTargetGroup().addTarget(replica.getHost());
                 newUpgradedUnmanagedReplicas.add(replica);
             }
@@ -873,7 +874,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                             Util.filter(replicas,
                                     replica->replica.getHost().isManagedByAutoScalingGroup(autoScalingGroup))) >= autoScalingReplicaCount,
                       /* retryOnException */ true,
-                      WAIT_FOR_HOST_TIMEOUT, /* duration between attempts */ Duration.ONE_SECOND.times(30),
+                      Optional.of(Duration.ONE_DAY), /* duration between attempts */ Duration.ONE_SECOND.times(30),
                       Level.INFO, "Waiting for "+autoScalingReplicaCount+" auto-scaling replicas to become ready");
         } else {
             logger.info("No auto-scaling group or auto-scaling group did not have managed instances; using only the upgraded unmanaged replicas "+
@@ -930,7 +931,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             // regarding the dedicated temporary upgrade replica's memory configuration we can assume that either the
             // old replica was running on a dedicated instance and therefore had a memory configuration that uses the
             // instance's available RAM, so will fit into the new dedicated temporary upgrade instance; or the
-            // old replica w
+            // old replica was on a shared instance; in this case we'll over-provision, but it won't be long.
             replicaConfigurationBuilder.setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                     .setMasterHostname(master.getHost().getPrivateAddress().getHostName())
                     .setMasterHttpPort(master.getPort())
@@ -952,7 +953,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         for (final SailingAnalyticsProcess<String> resultReplica : result) {
             logger.info("Waiting for replica "+resultReplica+" to become ready");
-            resultReplica.waitUntilReady(WAIT_FOR_HOST_TIMEOUT);
+            resultReplica.waitUntilReady(Optional.of(Duration.ONE_DAY)); // the my or archive server will take that long...
         }
         return result;
     }
@@ -1231,7 +1232,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                     " that is not managed by auto-scaling group "+autoScalingGroup.getName()+
                     ". Launching one on an eligible shared instance.");
             nonAutoScalingReplica.add(launchUnmanagedReplica(replicaSet, replicaSet.getMaster().getHost().getRegion(), optionalKeyName,
-                    privateKeyEncryptionPassphrase, replicaReplicationBearerToken, optionalMemoryInMegabytesOrNull,
+                    privateKeyEncryptionPassphrase, getEffectiveBearerToken(replicaReplicationBearerToken), optionalMemoryInMegabytesOrNull,
                     optionalMemoryTotalSizeFactorOrNull,
                     Optional.of(optionalInstanceType.orElseGet(()->replicaSet.getMaster().getHost().getInstance().instanceType())),
                     /* optionalPreferredInstanceToDeployTo */ Optional.empty()));

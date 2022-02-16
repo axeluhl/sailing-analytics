@@ -674,7 +674,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public AmazonMachineImage<ShardingKey> getLatestImageWithTag(com.sap.sse.landscape.Region region, String tagName, String tagValue) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
-                .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
+                .describeImages(DescribeImagesRequest.builder().filters(
+                        Filter.builder().name("tag:"+tagName).values(tagValue).build(),
+                        Filter.builder().name("state").values("available").build()).build()); // only use available images, see bug 5679
         return new AmazonMachineImageImpl<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region, this);
     }
     

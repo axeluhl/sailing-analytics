@@ -8,9 +8,10 @@ Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in
 
 ### Important Servers, Hostnames
 
-- Web Server: reachable through SSH to sapsailing.com:22
+- Web Server / Central Reverse Proxy: reachable through SSH to sapsailing.com:22
 - Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com, mongo1.internal.sapsailing.com
 - RabbitMQ Server: rabbit.internal.sapsailing.com
+- MySQL DB (mainly for Bugzilla): mysql.internal.sapsailing.com (currently co-deployed on the same old instance that also runs RabbitMQ)
 
 ## Landscape Overview
 
@@ -23,7 +24,7 @@ In Route53 (the AWS DNS) we have registered the sapsailing.com domain and can ma
 
 ### Webserver
 
-The web server currently exists only as one instance but could now be replicated to other availabililty zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will described further below, to the ``CentralWebServerHTTP*`` target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
+The web server currently exists only as one instance but could now be replicated to other availabililty zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will be described further below, to the ``CentralWebServerHTTP*`` (for the "dynamic" ALB in eu-west-1) or ``{ALB-name}-HTTP`` (for all DNS-mapped ALBs) target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
 
 * hudson.sapsailing.com - a Hudson installation on dev.internal.sapsailing.com
 * bugzilla.sapsailing.com - a Bugzilla installation under /usr/lib/bugzilla
@@ -36,8 +37,11 @@ The web server currently exists only as one instance but could now be replicated
 * gitlist.sapsailing.com - for our git at /home/trac/git
 * git.sapsailing.com - for git cloning for dedicated users, used among other things for replication into git.wdf.sap.corp
 
-Furthermore, it host aliases for ``sapsailing.com``, ``www.sapsailing.com`` and all subdomains for archived content, pointing to the archive server which is defined in ``/etc/httpd/conf.d/000-macros.conf``. This is also where the archive server switching has to be configured. Reload the configuration using
-
+Furthermore, it host aliases for ``sapsailing.com``, ``www.sapsailing.com`` and all subdomains for archived content, pointing to the archive server which is defined in ``/etc/httpd/conf.d/000-macros.conf``. This is also where the archive server switching has to be configured. Before reloading the configuration, make sure the syntax is correct, or else you may end up killing the web server, leading to downtime. Check by running
+```
+        apachectl configtest
+```
+If you see ``Syntax OK`` then reload the configuration using
 ```
         service httpd reload
 ```
@@ -50,7 +54,7 @@ The webserver is registered as target in various locations:
 * as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on
 * as target of the elastic IP address ``54.229.94.254``
 
-Furthermore, it is important to ensure that the ``/internal-server-status`` path will resolve correctly to the Apache httpd server status page. For this, the ``/etc/httpd/conf.d/001-events.conf`` file contains three rules at the very beginning:
+Furthermore, it is helpful to ensure that the ``/internal-server-status`` path will resolve correctly to the Apache httpd server status page. For this, the ``/etc/httpd/conf.d/001-events.conf`` file contains three rules at the very beginning:
 
 ```
 ## SERVER STATUS
@@ -61,11 +65,11 @@ Use Status 127.0.0.1 internal-server-status
 
 The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
 
-### DNS and ALBs
+### DNS and Application Load Balancers (ALBs)
 
-We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (Sailing-DNSMapped-eu-west-1-604165534.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects.
+We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (DNSMapped-0-1286577811.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects.
 
-Shorter-running events may not require a DNS record. The ALB ``Sailing-eu-west-1-135628335.eu-west-1.elb.amazonaws.com`` is target for ``*.sapsailing.com`` and receives all HTTP/HTTPS requests not otherwise handled. While HTTP immediately redirects to HTTPS, the HTTPS requests will pass through its rules. If application replica sets have their rules declared here, they will fire. Everything else falls through to the default rule which forwards to the web server's target groups again. This is how archived events as well as requests for ``www.sapsailing.com`` end up.
+Shorter-running events may not require a DNS record. The ALB ``DefDynsapsailing-com-1492504005.eu-west-1.elb.amazonaws.com`` is target for ``*.sapsailing.com`` and receives all HTTP/HTTPS requests not otherwise handled. While HTTP immediately redirects to HTTPS, the HTTPS requests will pass through its rules. If application replica sets have their rules declared here, they will fire. Everything else falls through to the default rule which forwards to the web server's target group again. This is how archived events as well as requests for ``www.sapsailing.com`` end up.
 
 The requests going straight to ``sapsailing.com`` are handled by the NLB (see above), get forwarded to the web server and are re-directed to ``www.sapsailing.com`` from there, ending up at the non-DNS-mapped load balancer where by default they are then sent again to the web server which sends it to the archive server.
 

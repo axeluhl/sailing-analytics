@@ -124,8 +124,6 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
             final String result;
             if (!Util.hasLength(valueToValidate.getDedicatedInstanceType())) {
                 result = stringMessages.pleaseSelectInstanceTypeForNewMaster();
-            } else if (!Util.hasLength(valueToValidate.getMasterReplicationBearerToken())) {
-                result = stringMessages.pleaseProvideBearerTokenForSecurityReplication();
             } else if (!Util.hasLength(valueToValidate.getName())) {
                 result = stringMessages.pleaseProvideApplicationReplicaSetName();
             } else {
