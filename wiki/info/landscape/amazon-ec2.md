@@ -281,6 +281,10 @@ This way, as an event starts to "cool down" and load decreases, the more expensi
 
 ### Scaling Replica Instances Up/Down
 
+When an application replica set's replica processes are provided by the auto-scaling group, the corresponding launch configuration specifies the instance type used for the dedicated instances used to host the replica processes. If this instance type turns out to be inadequate for the situation, e.g., because the event hosted in the application replica set produces more CPU load than expected or produced more tracking data than assumed, the instance type can be changed for the launch configuration, with a rolling update being performed for all replica instances managed by the auto-scaling group.
+
+
+
 ### Scaling Master Up/Down
 
 ### Upgrading Application Replica Set
