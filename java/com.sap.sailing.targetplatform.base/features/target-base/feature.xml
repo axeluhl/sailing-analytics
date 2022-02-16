@@ -305,4 +305,18 @@
          install-size="0"
          version="1.2.5"
          unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.packageadmin"
+         download-size="0"
+         install-size="0"
+         version="1.2.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.packageadmin.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.1"
+         unpack="false"/>
 </feature>
