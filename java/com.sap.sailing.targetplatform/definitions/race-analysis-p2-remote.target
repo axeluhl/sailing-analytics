@@ -286,6 +286,7 @@
 <plugin id="org.dom4j.source"/>
 <plugin id="com.amazon.aws.aws-java-api.source"/>
 <plugin id="com.sap.db.jdbc"/>
+<plugin id="com.sap.db.jdbc.source"/>
 <plugin id="org.eclipse.equinox.event"/>
 <plugin id="org.eclipse.equinox.event.source"/>
 <plugin id="org.eclipse.jetty.jndi"/>
