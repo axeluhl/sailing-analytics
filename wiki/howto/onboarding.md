@@ -86,6 +86,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 1. Get the content of the git repository
   * Generate SSH Keys with "ssh-keygen -t rsa -C "" " command in Cygwin Terminal (Not with Putty!!!)
   * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys.
+To Clone the repository use the command: `git clone` after directing into a prior initialized repository. 
   * Please note that when using one of the newer versions of Cygwin, your Cygwin home folder setting might differ from your Windows home folder. This will likely lead to problems when issuing certain commands. For troubleshooting, take a look at the following thread: [https://stackoverflow.com/questions/1494658/how-can-i-change-my-cygwin-home-folder-after-installation](https://stackoverflow.com/questions/1494658/how-can-i-change-my-cygwin-home-folder-after-installation)
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 2. Configure your local git repository
@@ -97,7 +98,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Install the required plugins using the script provided above. Further configuration steps depend on the plugins being installed successfully.
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> GWT -> GWT Settings -> Add...)
-  * In "Window->Preferences->GWT->Errors/Warnings, set "Missing SDK" to "Ignore"
+  * In "Window->Preferences->GWT->Errors/Warnings, set "Missing SDK" to "Ignore" (If not done earlier, see: Tuning the Eclipse Installation)
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs
   * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
   * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
@@ -107,7 +108,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that JDK 1.8 is available and has been set for compilation in Eclipse
   * Check that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 8 to JavaSE-1.8 (for profiling purposes)
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard <del>"Git->Projects from Git"</del> "Import->General->Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard [but without smart import]<del>"Git->Projects from Git"</del> "Import->General->Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely

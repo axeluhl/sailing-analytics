@@ -181,6 +181,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         sharedMasterInstanceBox.setValue(useExistingSharedMasterInstance);
         sharedMasterInstanceBox.setEnabled(!useExistingSharedMasterInstance);
         updateInstanceTypesBasedOnSharedMasterInstanceBox();
+        validateAndUpdate(); // recognize the effects of setting the default values in some entry fields
     }
     
     private void updateInstanceTypesBasedOnSharedMasterInstanceBox() {
