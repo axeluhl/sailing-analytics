@@ -11,6 +11,11 @@ run_yum_update() {
   yum -y update
 }
 
+run_apt_update_upgrade() {
+  echo "Updating packages using apt" >>/var/log/sailing.err
+  apt-get -y update; apt-get -y upgrade
+}
+
 run_git_pull() {
   echo "Pulling git to /home/sailing/code" >>/var/log/sailing.err
   su - sailing -c "cd code; git pull"
@@ -76,9 +81,13 @@ clean_root_ssh_dir_and_tmp() {
   rm -rf /tmp/image-upgrade-finished
 }
 
+get_ec2_user_data() {
+  /opt/aws/bin/ec2-metadata -d
+}
+
 finalize() {
   # Finally, shut down the node unless "no-shutdown" was provided in the user data, so that a new AMI can be constructed cleanly
-  if /opt/aws/bin/ec2-metadata -d | grep "^no-shutdown$"; then
+  if get_ec2_user_data | grep "^no-shutdown$"; then
     echo "Shutdown disabled by no-shutdown option in user data. Remember to clean /root/.ssh when done."
     touch /tmp/image-upgrade-finished
   else
