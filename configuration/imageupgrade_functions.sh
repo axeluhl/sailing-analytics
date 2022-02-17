@@ -93,6 +93,7 @@ finalize() {
   else
     # Only clean ${LOGON_USER_HOME}/.ssh directory and /tmp/image-upgrade-finished if the next step is shutdown / image creation
     clean_root_ssh_dir_and_tmp
+    rm /var/log/sailing.err
     shutdown -h now &
   fi
 }
