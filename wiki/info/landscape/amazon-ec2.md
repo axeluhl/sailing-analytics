@@ -178,7 +178,7 @@ In our default region ``eu-west-1`` there are four Amazon Machine Image (AMI) ty
 
 The SAP Sailing Analytics image is used to launch new instances, shared or dedicated, that host one or more Sailing Analytics application processes. The image contains an installation of the SAP JVM 8 under /opt/sapjvm_8, an Apache httpd service that is not currently used by default for reverse proxying / rewriting / logging activities, an initially empty directory ``/home/sailing/servers`` used to host default application process configurations, and an initialization script under ``/etc/init.d/sailing`` that handles the instance's initialization with a default application process from the EC2 instance's user data. Instructions for setting up such an image from scratch can be found [here](/wiki/info/landscape/creating-ec2-image-from-scratch).
 
-The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date from the Git ``configuration/crontab`` file. If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image.
+The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date from the Git ``configuration/crontab`` file. If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image. See also [Upgrading AMIs](#upgrading-amis) for procedures that automate much of this upgrade process.
 
 The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing MongoDB replica sets. It also reads the EC2 instance's user data during start-up and can be parameterized by the following variables: ``REPLICA_SET_NAME``, ``REPLICA_SET_PRIMARY``, ``REPLICA_SET_PRIORITY``, and ``REPLICA_SET_VOTES``. An example configuration could look like this:
 ```
@@ -189,7 +189,7 @@ The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing
 ```
 Like the SAP Sailing Analytics image, the MongoDB image understands the ``image-upgrade`` and the ``no-shutdown`` directives in the user data.
 
-The latest Hudson Ubuntu Slave image is what the Hudson process reachable at [https://hudson.sapsailing.com](https://hudson.sapsailing.com) will launch to run a build. See also ``configuration/launchhudsonslave`` and ``configuration/aws-automation/getLatestImageOfType.sh`` in Git. Currently, upgrading it is still a manual process, and the ``image-upgrade`` and ``no-shutdown`` directives in the instance's EC2 user data are not supported yet. To upgrade it manually, launch it manually, then SSH into the instance as user ``ubuntu``. Then, run
+The latest Hudson Ubuntu Slave image is what the Hudson process reachable at [https://hudson.sapsailing.com](https://hudson.sapsailing.com) will launch to run a build. See also ``configuration/launchhudsonslave`` and ``configuration/aws-automation/getLatestImageOfType.sh`` in Git. Currently, upgrading it is still a manual process (see also [bug 5682](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5682)), and the ``image-upgrade`` and ``no-shutdown`` directives in the instance's EC2 user data are not supported yet. To upgrade it manually, launch it manually, then SSH into the instance as user ``ubuntu``. Then, run
 ```
     sudo -i
     apt-get update
@@ -297,13 +297,45 @@ Use the action icon entitled "Upgrade" or the corresponding multi-selection-enab
 
 ### Archiving Application Replica Set
 
+When the event or season or whatever you chose to assign an application replica set to has come to the end of its live workload with races and other updates no longer taking place, the application replica set is up for archiving. This will help save cost due to better resource utilization. The auto-scaling group, its launch configuration, its DNS record (unless the "dynamic" load balancing scenario in the default region eu-west-1 was used), its target groups and its load balancer listener rules can all be removed which frees up capacity for new or other live events. Furthermore, the processes can be stopped, freeing up memory and disk space on the instances they ran on, or even allowing for the termination of entire instances. Lastly, storage space in the ``live`` MongoDB replica set is more expensive than in the ``slow`` replica set that can be used for backup and archiving of DB content.
+
+To archive an application replica set, decide whether you want to move the MongoDB content away from the current (usually ``live``) replica set to free up space there. To do so, select any MongoDB endpoint from the "MongoDB Endpoints" table that you'd like to move the application replica set's database content to. If you want to keep it in the ``live`` environment, de-select all MongoDB endpoints in the table.
+
+Then use the action icon entitled "Archive". If your current user account with which you start the archiving process is not entitled to create content in the archive server (having the ``SERVER:CAN_IMPORT_MASTERDATA:ARCHIVE`` permission), you need to provide a bearer token authenticating a user that does. Usually, you will want to remove the archived application replica set if the archiving procedure succeeded. You have to confirm this by ticking the corresponding check-box in the pop-up dialog.
+
+When confirmed, the archiving procedure will start by identifying the ``ARCHIVE`` server in the region you're using, based on the ``sailing-analytics-server`` tag value on the instances in the region. If multiple such instances are found, the one that hosts the application process with the latest start time is selected, assuming it is the production server. The archive process identified this way is then asked to run a "master data import" from the application replica set to archive, importing all leaderboard groups found there. Only leaderboard groups ``READ``able by your logged-in user will be considered. The progress of the import process is tracked, and when complete, after a waiting period you can adjust in the archiving pop-up dialog a content comparison for the leaderboard groups imported is attempted, comparing the content in the ``ARCHIVE`` server with those in the application replica set being archived. If differences are found, the procedure assumes that no all calculations that take place after the races have been loaded in the archive server have completed yet. For example, maneuver calculations and wind estimations may influence whether a race is said to have valid wind fixes; not having valid wind fixes for races in the archive while the same race in the original application replica set does have wind fixes would be reported as a difference during the comparison. Hence, the comparison will be repeated a configurable number of times after waiting again for the same configured duration as before the first comparison attempt. If after the configured number of comparison attempts there are still differences found, the archiving process is considered failed and no further steps will be carried out. In particular, no database archiving and no removal of the application replica set will take place. You will need to inspect manually in which state the archived content is and what the differences are in detail. (Future versions should do better here; see [bug 5681](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5681).)
+
+After successful import and comparison, if you selected a MongoDB endpoint from the table then the MongoDB database used by the application replica set being archived will be copied to the MongoDB endpoint selected. After copying, the original and the copy will be compared by hashing their contents and comparing the hashes. Only if the two hashes are equal, the original database will be removed, freeing up the space in what usually would be the ``live`` MongoDB replica set.
+
+Finally, if you ticked the "Remove archive replica set after successful verification", the application replica set will be completely removed by stopping its master and replica processes, removing all its load balancer rules, removing its two target groups, removing the auto-scaling group and the corresponding launch configuration and, if a DNS-based load balancer was used, removing its DNS record.
+
 ### Removing Application Replica Set
 
-### Upgrading Application AMI
+This action is really only useful for application replica sets that were created for development, testing or debugging purposes. While its MongoDB database is left untouched, all other resources pertinent to the application replica set will be removed, including its load balancing rules, target groups, auto-scaling group, launch configuration, application processes and potentially the instances they ran on in case the processes were the last on their instance, and the optional DNS record.
 
-TODO explain how launch configurations can be upgraded as well
+Note that due to the database remaining in place, re-surrecting an application replica set removed this way is usually easy. If you use the "Add" button or the "+" action icon in case you'd like a shared master instance set-up, the application replica set launched will use the same database if it is launched with exactly the same name (case-sensitive).
 
-### Upgrading MongoDB AMI
+### Upgrading AMIs
+
+Currently the two AMI types ``sailing-analytics-server`` and ``mongodb-server`` can be upgraded automatically. For the ``hudson-slave`` image type there are also plans to enable these automatic upgrades in the future and so far requires a manual upgrade procedure as explained in section [Important Amazon Machine Images (AMIs)](#important-amazon-machine-images-amis). See also [bug 5682](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5682).
+
+Upgrading an AMI for which this is supported is as simple as clicking the "Upgrade"-entitled action icon for an AMI shown in the "Amazon Machine Images (AMIs)" table at the bottom of the "Landscape" panel in the AdminConsole. As a result, a new AMI will be created based on the old one. An instance will be launched based on the old AMI, using the ``image-upgrade`` user data line which asks the instance to run various upgrading steps at the end of the start-up sequence. The steps can include pulling latest content from the Git repository, updating all operating system packages including the kernel itself, cleaning up old logs and caches, and marking the images a "first-time boot."
+
+Then, a shutdown is triggered automatically, and when complete, a new AMI is created, the AMI is tagged with the same ``image-type`` tag that the original image has, and the minor version number is increased by one. All volume snapshots are labeled accordingly, using the new version number.
+
+You can then start testing or using the new image. It is recommended to keep the old image around for a while until the new image has been proven to work properly.
+
+#### Upgrading the Sailing Analytics Application AMI
+
+When upgrading the ``sailing-analytics-server`` AMI there is a good chance that the AMI you start with is used by one or more launch configurations that belong to auto-scaling groups and are used to launch new instances. Unfortunately, AWS doesn't keep you from removing old AMIs despite the fact that they are still referenced by one or more launch configurations that are in active use by their respective auto-scaling groups. So at some point you would want to upgrade those auto-scaling groups to use updated launch configurations which refer to the new AMI that results from the upgrade.
+
+After the AMI upgrade succeeds, you will see a pop-up dialog prompting you with a choice of whether you would like to update launch configurations for application replica sets that you selected in the table before upgrading the AMI, or in case you didn't pick any application replica sets suggesting all of them that currently use the AMI you just upgraded in their launch configuration. If you choose "OK" then all those auto-scaling groups will be updated so they point to new launch configurations copied from the previous ones, referencing the new AMI. The old launch configurations will be deleted. The names for the new launch configurations is constructed from the replica set name with the ID of the AMI appended to it.
+
+You can also manually trigger the upgrade of the AMI used by an auto-scaling group by using the "Update machine image for auto-scaling replicas" button or the action icon entitled correspondingly. It will use the lastest ``sailing-analytics-server``-tagged image available.
+
+### Removing an AMI and its Snapshots
+
+In the "Amazon Machine Images (AMIs)" table each row offers an action icon for removing the image. Use this with great care. After confirming the pop-up dialog shown, the AMI as well as its volume snapshots will be removed unrecoverably.
 
 ## Automated SSH Key Management
 
@@ -326,7 +358,7 @@ The `crontab` file which is used during image-upgrade (see `configuration/imageu
 
 ## Legacy Documentation for Manual Operations
 
-Most of 
+Most of the things that follow should be obsolete by now because the [automated procedures](#automated-procedures) should avoid the need for manual steps. Yet, should automatic procedures fail or should a deeper understanding of the things that have been automated become necessary, the following documentation may still be of value.
 
 #### Starting an instance
 
@@ -1066,37 +1098,6 @@ cp -rf ~/servers/server/logs/* /var/log/old/<event-name>/<instance-public-ipv4>/
 The script ``java/target/compareServers`` helps comparing server content after master data import. Run with two server URLs you want to compare, ideally in an empty directory where file downloads can be stored. Run initially with the ``-elv`` option to get verbose output. Make sure you have your ``http_proxy`` and ``https_proxy`` environment variables set or unset, depending on your network environment. Should the initial comparison fail, analyze the differences and continue by using ``-cel`` as command line arguments, telling the script to continue where it left off, exiting when hitting a difference and listing the leaderboard groups currently being compared. Repeat until done.
 
 Should you want to compare servers of which you know they have different sets of leaderboard groups, start with ``compareServers -elv`` and then manually adjust the ``leaderboardgroups.new.sed`` and ``leaderboardgroups.old.sed`` files according to your needs, then continue with the ``-cel`` switches to restrict comparisons to what you left in the ``leaderboardgroups.*.sed`` files.
-
-## Migration Checklist
-
-### Before switching sapsailing.com to the EC2 webserver
-- fire up archive server and load it (DONE)
-- configure 001-events.conf starting with a copy from old sapsailing.com, using test URLs (rombalur.de) (DONE)
-- clone entire MongoDB content (DONE)
-- migrate MySQL for Bugzilla
-- ensure that all users have access; either solicit their public keys and enter to ~trac/.ssh/authorized_keys or migrate /etc/passwd and /etc/group settings for access to trac group (DONE)
-- run test build and deploy (DONE)
-- fire up a live server and test it (DONE)
-- fire up a replica and check that it works correctly (ERROR!)
-- check that UDP mirror is working (DONE)
-- check that SwissTiming StoreAndForward is working
-- check that we can fire up a live2 / archive2 server and switch transparently
-
-### Just before the migration on Sunday evening
-- check that sapsailing.com is entered everywhere a hostname / domain name is required, particularly in /etc/httpd/conf.d/001-events.conf and /opt/piwik-scripts and all of /etc - also have a look at piwik and bugzilla configuration (DONE)
-- disable bugzilla on old.sapsailing.com because Nameserver switch can take up to 48 hours for everyone (DONE)
-- copy /home/trac/releases to webserver (DONE)
-- import bugzilla to mysql (DONE)
-- git fetch --all on webserver (DONE)
-- tell SAP hostmaster to point old.sapsailing.com to 195.227.10.246
-
-### Immediately after switching the sapsailing.com domain to the EC2 webserver on Sunday evening
-- check that old.sapsailing.com points to 195.227.10.246
-- check that EC2 web server is responding to sapsailing.com now
-- fetch all git branches from what is now old.sapsailing.com; also sync gollum wiki git
-- ask people (including internal Git team) to update their known_hosts files according to the new web server's key
-- check if build server can access new sapsailing.com
-- check why swisstiminglistener doesn't receive connections and fix
 
 ## Glossary
 
