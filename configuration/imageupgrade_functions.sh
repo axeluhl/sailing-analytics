@@ -82,7 +82,7 @@ clean_root_ssh_dir_and_tmp() {
 }
 
 get_ec2_user_data() {
-  /opt/aws/bin/ec2-metadata -d
+  /opt/aws/bin/ec2-metadata -d | sed -e 's/^user-data: //'
 }
 
 finalize() {
