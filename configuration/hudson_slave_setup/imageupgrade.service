@@ -4,6 +4,7 @@ Requires=-.mount cloud-init.service networking.service
 After=-.mount cloud-init.service networking.service
 
 [Install]
+WantedBy=multi-user.target
 
 [Service]
 Type=oneshot
