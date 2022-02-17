@@ -1,0 +1,3 @@
+Deploy the .mount and .service units to /etc/systemd/system.
+Deploy the imageupgrade script to /usr/local/bin,
+furthermore the ../imageupgrade_functions.sh has to go to /usr/local/bin, best as symbolic link to files in git.

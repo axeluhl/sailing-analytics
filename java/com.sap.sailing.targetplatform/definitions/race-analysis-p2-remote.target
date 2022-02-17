@@ -70,9 +70,9 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.36.v20210114"/>
-<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.36.v20210114"/>
-<repository location="https://p2.sapsailing.com/p2/jetty/"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.44.v20210927"/>
+<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.44.v20210927"/>
+<repository location="https://p2.sapsailing.com/p2/jetty-9.4.44.v20210927/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="1.1.0.v20201023-1558"/>
@@ -286,6 +286,7 @@
 <plugin id="org.dom4j.source"/>
 <plugin id="com.amazon.aws.aws-java-api.source"/>
 <plugin id="com.sap.db.jdbc"/>
+<plugin id="com.sap.db.jdbc.source"/>
 <plugin id="org.eclipse.equinox.event"/>
 <plugin id="org.eclipse.equinox.event.source"/>
 <plugin id="org.eclipse.jetty.jndi"/>
@@ -301,6 +302,7 @@
 <plugin id="org.mortbay.jasper.apache-el"/>
 <plugin id="org.mortbay.jasper.apache-jsp"/>
 <plugin id="org.eclipse.jetty.apache-jsp"/>
+<plugin id="org.eclipse.jetty.apache-jsp.source"/>
 <plugin id="org.eclipse.jdt.core.compiler.batch"/>
 <plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
 <plugin id="org.apache.taglibs.standard-impl"/>
@@ -308,7 +310,6 @@
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
 <plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
-<plugin id="org.mortbay.jasper.apache-jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
 <plugin id="org.objectweb.asm.source"/>
@@ -319,6 +320,8 @@
 <plugin id="org.eclipse.osgi.util"/>
 <plugin id="org.eclipse.osgi.util.source"/>
 <plugin id="org.eclipse.jetty.io.source"/>
+<plugin id="org.osgi.service.packageadmin"/>
+<plugin id="org.osgi.service.url"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
