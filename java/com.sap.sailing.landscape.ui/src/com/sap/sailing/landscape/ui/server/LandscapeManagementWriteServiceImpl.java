@@ -209,18 +209,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     private MongoEndpoint getMongoEndpoint(MongoEndpointDTO mongoEndpointDTO) {
         final MongoEndpoint result;
-        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
-        final Set<Pair<AwsInstance<String>, Integer>> nodes = new HashSet<>();
-        for (final MongoProcessDTO node : mongoEndpointDTO.getHostnamesAndPorts()) {
-            nodes.add(new Pair<>(getLandscape().getHostByInstanceId(new AwsRegion(node.getHost().getRegion(), getLandscape()), node.getHost().getInstanceId(), hostSupplier), node.getPort()));
-        }
-        if (mongoEndpointDTO.getReplicaSetName() == null) {
-            // single node:
-            final Pair<AwsInstance<String>, Integer> hostAndPort = nodes.iterator().next();
-            result = getLandscape().getDatabaseConfigurationForSingleNode(hostAndPort.getA(), hostAndPort.getB());
+        if (mongoEndpointDTO == null) {
+            result = null;
         } else {
-            // replica set
-            result = getLandscape().getDatabaseConfigurationForReplicaSet(mongoEndpointDTO.getReplicaSetName(), nodes);
+            final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = new SailingAnalyticsHostSupplier<>();
+            final Set<Pair<AwsInstance<String>, Integer>> nodes = new HashSet<>();
+            for (final MongoProcessDTO node : mongoEndpointDTO.getHostnamesAndPorts()) {
+                nodes.add(new Pair<>(getLandscape().getHostByInstanceId(new AwsRegion(node.getHost().getRegion(), getLandscape()), node.getHost().getInstanceId(), hostSupplier), node.getPort()));
+            }
+            if (mongoEndpointDTO.getReplicaSetName() == null) {
+                // single node:
+                final Pair<AwsInstance<String>, Integer> hostAndPort = nodes.iterator().next();
+                result = getLandscape().getDatabaseConfigurationForSingleNode(hostAndPort.getA(), hostAndPort.getB());
+            } else {
+                // replica set
+                result = getLandscape().getDatabaseConfigurationForReplicaSet(mongoEndpointDTO.getReplicaSetName(), nodes);
+            }
         }
         return result;
     }
@@ -598,9 +602,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 bearerTokenOrNullForApplicationReplicaSetToArchive, bearerTokenOrNullForArchive,
                 durationToWaitBeforeCompareServers, maxNumberOfCompareServerAttempts, removeApplicationReplicaSet,
                 getMongoEndpoint(moveDatabaseHere), optionalKeyName, passphraseForPrivateKeyDecryption);
-        final CompareServersResultDTO compareServersResultDTO = new CompareServersResultDTO(result.getB().getServerA(),
-                result.getB().getServerB(), result.getB().getADiffs().toString(), result.getB().getBDiffs().toString());
+        final CompareServersResultDTO compareServersResultDTO = createCompareServersResultDTO(result);
         return new Pair<>(result.getA(), compareServersResultDTO);
+    }
+
+    private CompareServersResultDTO createCompareServersResultDTO(
+            final Pair<DataImportProgress, CompareServersResult> compareServersResult) {
+        return compareServersResult == null ?
+                null :
+                new CompareServersResultDTO(compareServersResult.getB()==null?null:compareServersResult.getB().getServerA(),
+                                            compareServersResult.getB()==null?null:compareServersResult.getB().getServerB(),
+                                            compareServersResult.getB()==null?null:compareServersResult.getB().getADiffs().toString(),
+                                            compareServersResult.getB()==null?null:compareServersResult.getB().getBDiffs().toString());
     }
     
     @Override
