@@ -17,7 +17,8 @@ public class DataImportProgressImpl implements DataImportProgress {
     private boolean failed = false;
     private String errorMessage;
 
-    DataImportProgressImpl() {
+    @Deprecated
+    DataImportProgressImpl() { // for GWT serialization
     }
 
     public DataImportProgressImpl(final UUID currentImportOperationId) {
@@ -88,5 +89,4 @@ public class DataImportProgressImpl implements DataImportProgress {
     public void setErrorMessage(String message) {
         errorMessage = message;
     }
-
 }

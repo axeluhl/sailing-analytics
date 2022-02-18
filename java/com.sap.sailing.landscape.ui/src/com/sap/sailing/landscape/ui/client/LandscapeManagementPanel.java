@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -34,6 +33,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.MoveMasterProcessDialog.MoveMasterToOtherInstanceInstructions;
@@ -42,6 +42,7 @@ import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.Up
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
+import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
@@ -52,6 +53,7 @@ import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -997,7 +999,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 selectedMongoEndpointForDBArchiving, sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                     ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                new AsyncCallback<UUID>() {
+                                new AsyncCallback<Pair<DataImportProgress, CompareServersResultDTO>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 applicationReplicaSetsBusy.setBusy(false);
@@ -1005,14 +1007,25 @@ public class LandscapeManagementPanel extends SimplePanel {
                             }
 
                             @Override
-                            public void onSuccess(UUID progressId) {
-                                // TODO try to follow the progress and trigger removing the replica set from the table when complete
+                            public void onSuccess(Pair<DataImportProgress, CompareServersResultDTO> result) {
                                 applicationReplicaSetsBusy.setBusy(false);
-                                if (bearerTokensAndWhetherToRemoveReplicaSet.isRemoveApplicationReplicaSet()) {
-                                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToArchive);
+                                if (result == null || result.getA() == null || result.getA().failed()) {
+                                    errorReporter.reportError(stringMessages.errorDuringImport(result==null||result.getA()==null?"":result.getA().getErrorMessage()));
+                                } else if (result.getB() == null) {
+                                    errorReporter.reportError(stringMessages.errorWhileComparingServerContent());
+                                } else if (result.getB().hasDiffs()) {
+                                    errorReporter.reportError(stringMessages.differencesInServerContentFound(
+                                            result.getB().getServerAName(), result.getB().getADiffs().toString(),
+                                            result.getB().getServerBName(), result.getB().getBDiffs().toString()));
                                 }
-                                Notification.notify(stringMessages.successfullyArchivedReplicaSet(
-                                        applicationReplicaSetToArchive.getName()), NotificationType.SUCCESS);
+                                if (result != null && result.getA() != null && !result.getA().failed()
+                                 && result.getB() != null && !result.getB().hasDiffs()) {
+                                    if (bearerTokensAndWhetherToRemoveReplicaSet.isRemoveApplicationReplicaSet()) {
+                                        applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToArchive);
+                                    }
+                                    Notification.notify(stringMessages.successfullyArchivedReplicaSet(
+                                            applicationReplicaSetToArchive.getName()), NotificationType.SUCCESS);
+                                }
                             }
                         });
                     }

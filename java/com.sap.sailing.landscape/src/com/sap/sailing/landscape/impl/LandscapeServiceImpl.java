@@ -353,7 +353,8 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
     
     @Override
-    public UUID archiveReplicaSet(String regionId, AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive,
+    public Util.Pair<DataImportProgress, CompareServersResult> archiveReplicaSet(String regionId,
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
             String bearerTokenOrNullForArchive,
             Duration durationToWaitBeforeCompareServers,
@@ -387,9 +388,9 @@ public class LandscapeServiceImpl implements LandscapeService {
             throw new IllegalStateException("Couldn't find any result for the master data import. Aborting archiving of replica set "+from);
         }
         final DataImportProgress mdiProgress = waitForMDICompletionOrError(archive, idForProgressTracking, /* log message */ "MDI from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive);
+        final CompareServersResult compareServersResult;
         if (mdiProgress != null && !mdiProgress.failed() && mdiProgress.getResult() != null) {
             logger.info("MDI from "+hostnameFromWhichToArchive+" info "+hostnameOfArchive+" succeeded. Waiting "+durationToWaitBeforeCompareServers+" before starting to compare content...");
-            final CompareServersResult compareServersResult;
             if (Util.isEmpty(from.getLeaderboardGroupIds())) {
                 logger.info("Empty set of leaderboard groups imported. Not making any comparison.");
                 compareServersResult = null;
@@ -456,8 +457,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             logger.severe("The Master Data Import (MDI) from "+hostnameFromWhichToArchive+" into "+hostnameOfArchive+
                     " did not work"+(mdiProgress != null ? mdiProgress.getErrorMessage() : " (no result at all)"));
+            compareServersResult = null;
         }
-        return idForProgressTracking;
+        return new Util.Pair<>(mdiProgress, compareServersResult);
     }
 
     private void terminateReplicasNotManagedByAutoScalingGroup(AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,

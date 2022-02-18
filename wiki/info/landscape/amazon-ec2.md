@@ -189,19 +189,7 @@ The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing
 ```
 Like the SAP Sailing Analytics image, the MongoDB image understands the ``image-upgrade`` and the ``no-shutdown`` directives in the user data.
 
-The latest Hudson Ubuntu Slave image is what the Hudson process reachable at [https://hudson.sapsailing.com](https://hudson.sapsailing.com) will launch to run a build. See also ``configuration/launchhudsonslave`` and ``configuration/aws-automation/getLatestImageOfType.sh`` in Git. Currently, upgrading it is still a manual process (see also [bug 5682](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5682)), and the ``image-upgrade`` and ``no-shutdown`` directives in the instance's EC2 user data are not supported yet. To upgrade it manually, launch it manually, then SSH into the instance as user ``ubuntu``. Then, run
-```
-    sudo -i
-    apt-get update
-    apt-get upgrade
-    cd /opt
-    rm -rf sapjvm_8
-    curl --cookie eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt "https://tools.hana.ondemand.com/additional/sapjvm-8.1.084-linux-x64.zip" > sapjvm8-linux-x64.zip
-    unzip sapjvm8-linux-x64.zip
-    rm sapjvm8-linux-x64.zip
-    shutdown -h now
-```
-and replace the SAP JVM's release (in the example above ``8.1.084`` by whatever is the latest release available under that URL. Then, create a new image named "Hudson Ubuntu Slave {version-number}" with {version-number} being the old minor version incremented by one. Tag the resulting AMI with tag ``image-type`` and value ``hudson-slave``. Name the root partition snapshot produced for the image as "Hudson Ubuntu Slave {version-number} (Root)". Terminate the stopped instance. Test the new image works for new builds. Only once you've verified this by running at least one successful master build with the new image you can deregister the old one and remove the corresponding root partition snapshot.
+The latest Hudson Ubuntu Slave image is what the Hudson process reachable at [https://hudson.sapsailing.com](https://hudson.sapsailing.com) will launch to run a build. See also ``configuration/launchhudsonslave`` and ``configuration/aws-automation/getLatestImageOfType.sh`` in Git. Like the two other images discussed so far, the image understands the ``image-upgrade`` and ``no-shutdown`` directives in the instance's EC2 user data which will pull the Git repository's latest master to ``/home/sailing/code`` which is also from where the boot scripts are taken; furthermore, the SAP JVM 8 is brought to the latest release.
 
 The Webserver image can be used to launch a new web server / reverse proxy in a region. It is mainly a small Linux installation with the following elements
 - an Apache httpd and the default macros defined under ``/etc/httpd/conf`` and ``/etc/httpd/conf.d``
@@ -317,9 +305,7 @@ Note that due to the database remaining in place, re-surrecting an application r
 
 ### Upgrading AMIs
 
-Currently the two AMI types ``sailing-analytics-server`` and ``mongodb-server`` can be upgraded automatically. For the ``hudson-slave`` image type there are also plans to enable these automatic upgrades in the future and so far requires a manual upgrade procedure as explained in section [Important Amazon Machine Images (AMIs)](#amazon-ec2-for-sap-sailing-analytics_landscape-overview_important-amazon-machine-images-amis). See also [bug 5682](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5682).
-
-Upgrading an AMI for which this is supported is as simple as clicking the "Upgrade"-entitled action icon for an AMI shown in the "Amazon Machine Images (AMIs)" table at the bottom of the "Landscape" panel in the AdminConsole. As a result, a new AMI will be created based on the old one. An instance will be launched based on the old AMI, using the ``image-upgrade`` user data line which asks the instance to run various upgrading steps at the end of the start-up sequence. The steps can include pulling latest content from the Git repository, updating all operating system packages including the kernel itself, cleaning up old logs and caches, and marking the images a "first-time boot."
+Currently the three AMI types ``sailing-analytics-server``, ``mongodb-server`` and ``hudson-slave`` can be upgraded automatically. Upgrading an AMI for which this is supported is as simple as clicking the "Upgrade"-entitled action icon for an AMI shown in the "Amazon Machine Images (AMIs)" table at the bottom of the "Landscape" panel in the AdminConsole. As a result, a new AMI will be created based on the old one. An instance will be launched based on the old AMI, using the ``image-upgrade`` user data line which asks the instance to run various upgrading steps at the end of the start-up sequence. The steps can include pulling latest content from the Git repository, updating all operating system packages including the kernel itself, cleaning up old logs and caches, and marking the images a "first-time boot."
 
 Then, a shutdown is triggered automatically, and when complete, a new AMI is created, the AMI is tagged with the same ``image-type`` tag that the original image has, and the minor version number is increased by one. All volume snapshots are labeled accordingly, using the new version number.
 

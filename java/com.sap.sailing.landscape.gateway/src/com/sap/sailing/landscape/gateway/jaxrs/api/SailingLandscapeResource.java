@@ -2,7 +2,6 @@ package com.sap.sailing.landscape.gateway.jaxrs.api;
 
 import java.text.SimpleDateFormat;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +22,7 @@ import javax.ws.rs.core.UriInfo;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.AwsSessionCredentialsWithExpiry;
 import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
@@ -33,7 +33,11 @@ import com.sap.sailing.landscape.gateway.impl.AwsApplicationReplicaSetJsonSerial
 import com.sap.sailing.landscape.gateway.impl.HostJsonSerializer;
 import com.sap.sailing.landscape.gateway.jaxrs.AbstractLandscapeResource;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
+import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
+import com.sap.sailing.server.gateway.serialization.impl.CompareServersResultJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DataImportProgressJsonSerializer;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -68,7 +72,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String REMOVE_APPLICATION_REPLICA_SET_FORM_PARAM = "removeApplicationReplicaSet";
     private static final String MAX_NUMBER_OF_COMPARE_SERVER_ATTEMPTS_FORM_PARAM = "maxNumberOfCompareserverAttempts";
     private static final String DURATION_TO_WAIT_BEFORE_COMPARE_SERVERS_IN_MILLISECONDS_FORM_PARAM = "durationToWaitBeforeCompareServersInMilliseconds";
-    private static final String UUID_FOR_MDI_PROGRESS = "uuidForMdiProgress";
+    private static final String MDI_PROGRESS = "mdiProgress";
+    private static final String COMPARE_SERVERS_RESULT = "compareServersResult";
     private static final String BEARER_TOKEN_FOR_REPLICA_SET_TO_ARCHIVE_FORM_PARAM = "bearerTokenForReplicaSetToArchive";
     private static final String BEARER_TOKEN_FOR_ARCHIVE_FORM_PARAM = "bearerTokenForArchive";
     private static final String MONGO_URI_TO_ARCHIVE_DB_TO_FORM_PARAM = "mongoUriToArchiveDbTo";
@@ -247,12 +252,13 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             if (applicationReplicaSetToArchive == null) {
                 response = badRequest("Application replica set with name " + replicaSetName + " not found in region "+regionId);
             } else {
-                final UUID uuidForMdiProgress = getLandscapeService().archiveReplicaSet(regionId, applicationReplicaSetToArchive,
+                final Pair<DataImportProgress, CompareServersResult> mdiProgressAndCompareServersResult = getLandscapeService().archiveReplicaSet(regionId, applicationReplicaSetToArchive,
                     bearerTokenOrNullForApplicationReplicaSetToArchive, bearerTokenOrNullForArchive,
                     Duration.ofMillis(durationToWaitBeforeCompareServersInMillis), maxNumberOfCompareServerAttempts, removeApplicationReplicaSet,
                     moveDatabaseHere, optionalKeyName, passphraseForPrivateKeyDecryption);
                 final JSONObject result = new JSONObject();
-                result.put(UUID_FOR_MDI_PROGRESS, uuidForMdiProgress);
+                result.put(MDI_PROGRESS, mdiProgressAndCompareServersResult.getA()==null?null:new DataImportProgressJsonSerializer().serialize(mdiProgressAndCompareServersResult.getA()));
+                result.put(COMPARE_SERVERS_RESULT, mdiProgressAndCompareServersResult.getB()==null?null:new CompareServersResultJsonSerializer().serialize(mdiProgressAndCompareServersResult.getB()));
                 response = Response.ok(streamingOutput(result)).build();
             }
         } catch (Exception e) {
