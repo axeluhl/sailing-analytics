@@ -26,6 +26,11 @@ import com.sap.sse.replication.ReplicationServletActions;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
+/**
+ * Equality / hash code is based on the {@link #getHost() host} and {@link #getPort() port}.
+ * 
+ * @author Axel Uhl (d043530)
+ */
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {

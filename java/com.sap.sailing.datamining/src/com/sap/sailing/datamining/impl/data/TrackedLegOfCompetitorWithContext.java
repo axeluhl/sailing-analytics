@@ -72,9 +72,9 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     }
     
     @Override
-    public String getSailID() {
+    public Boat getBoat() {
         Boat boatOfCompetitor = getTrackedRace().getBoatOfCompetitor(getCompetitor());
-        return boatOfCompetitor != null ? boatOfCompetitor.getSailID() : null;
+        return boatOfCompetitor;
     }
     
     @Override

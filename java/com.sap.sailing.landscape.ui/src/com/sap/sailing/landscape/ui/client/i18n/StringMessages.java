@@ -134,4 +134,9 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String moveMasterToOtherInstance();
     String successfullyMovedMasterOfReplicaSet(String replicaSetName);
     String successfullyRemovedApplicationReplicaSet(String replicaSetName);
+    String scaleAutoScalingReplicasUpOrDown();
+    String successfullyScaledAutoScalingReplicasForReplicaSet(String replicaSetName);
+    String errorDuringImport(String message);
+    String errorWhileComparingServerContent();
+    String differencesInServerContentFound(String serverAName, String aDiffs, String serverBName, String bDiffs);
 }

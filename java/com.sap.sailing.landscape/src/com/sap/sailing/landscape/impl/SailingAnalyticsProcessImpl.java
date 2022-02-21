@@ -31,7 +31,6 @@ import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -52,7 +51,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     private Release release;
     private TimePoint startTimePoint;
     
-    public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory, Integer expeditionUdpPort, AwsLandscape<ShardingKey> landscape) {
+    public SailingAnalyticsProcessImpl(int port, SailingAnalyticsHost<ShardingKey> host, String serverDirectory, Integer expeditionUdpPort, AwsLandscape<ShardingKey> landscape) {
         super(port, host, serverDirectory, landscape);
         this.expeditionUdpPort = expeditionUdpPort;
     }

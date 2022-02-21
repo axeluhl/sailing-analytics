@@ -124,8 +124,6 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
             final String result;
             if (!Util.hasLength(valueToValidate.getDedicatedInstanceType())) {
                 result = stringMessages.pleaseSelectInstanceTypeForNewMaster();
-            } else if (!Util.hasLength(valueToValidate.getMasterReplicationBearerToken())) {
-                result = stringMessages.pleaseProvideBearerTokenForSecurityReplication();
             } else if (!Util.hasLength(valueToValidate.getName())) {
                 result = stringMessages.pleaseProvideApplicationReplicaSetName();
             } else {
@@ -183,6 +181,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         sharedMasterInstanceBox.setValue(useExistingSharedMasterInstance);
         sharedMasterInstanceBox.setEnabled(!useExistingSharedMasterInstance);
         updateInstanceTypesBasedOnSharedMasterInstanceBox();
+        validateAndUpdate(); // recognize the effects of setting the default values in some entry fields
     }
     
     private void updateInstanceTypesBasedOnSharedMasterInstanceBox() {

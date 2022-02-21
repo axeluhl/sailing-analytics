@@ -14,6 +14,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
+/**
+ * Equality / hash code is based on the {@link WithID#getId() ID}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface Host extends WithID {
     /**
      * Obtains the public IP address of this host. Note that during the boot phase and after shutdown/termination a host

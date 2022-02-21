@@ -133,7 +133,9 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
                     }
                 }
             } finally {
-                sshChannel.disconnect();
+                if (sshChannel != null) {
+                    sshChannel.disconnect();
+                }
             }
         }
         return result;

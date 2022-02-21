@@ -91,6 +91,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
     
+    String MFA_TOKEN_CODE_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.mfatokencode";
+    
+    String SESSION_TOKEN_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.sessiontoken";
+    
     /**
      * The name of the tag used on {@link AwsInstance hosts} running one or more {@link MongoProcess}(es). The tag value
      * provides information about the replica sets and the ports on which the respective {@link MongoProcess} is listening.
@@ -489,8 +493,14 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
                 healthCheckPath);
     }
 
+    /**
+     * @return {@code null} if a target group by the name specified isn't found in the {@code region}
+     */
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(Region region, String targetGroupName);
 
+    /**
+     * @return {@code null} if a target group by the ARN specified isn't found in the {@code region}
+     */
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(Region region, String targetGroupArn);
 
     Map<AwsInstance<ShardingKey>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey> targetGroup);
@@ -567,6 +577,12 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.
      */
     ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(Region region, String hostname);
+
+    /**
+     * Looks up the hostname in the DNS to get the CNAME, then extract the name and region ID from the A-record to which the CNAME
+     * points and search for the load balancer there.
+     */
+    ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(String hostname);
     
     /**
      * The default MongoDB configuration to connect to. See also {@link #MONGO_DEFAULT_REPLICA_SET_NAME} and
@@ -699,6 +715,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname);
 
+    Iterable<ResourceRecordSet> getResourceRecordSets(String hostname);
+    
     DNSCache getNewDNSCache();
 
     CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(Region region);
@@ -719,4 +737,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     void updateReleaseInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release);
 
     void updateImageInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami);
+
+    void updateInstanceTypeInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, InstanceType instanceType);
 }

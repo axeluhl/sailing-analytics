@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.data;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sse.common.Distance;
@@ -18,8 +19,8 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     @Dimension(messageKey="RelativeScoreInRaceInPercent", ordinal=12)
     public ClusterDTO getPercentageClusterForRelativeScoreInRace();
     
-    @Dimension(messageKey="SailID")
-    public String getSailID();
+    @Connector(messageKey="Boat")
+    public Boat getBoat();
     
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
