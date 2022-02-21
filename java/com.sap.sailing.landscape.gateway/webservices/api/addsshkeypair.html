@@ -14,7 +14,8 @@
 <b>Description:</b>
  <p>Persistently stores the SSH key pair provided in the user's key repository and uploads the public key to
  the AWS region specified. The request must be authenticated by a user with the SERVER:CREATE:{server-name}
- permission as well as the SSH_KEY:CREATE:{key_name} permission.
+ permission as well as the SSH_KEY:CREATE:{key_name} permission. If a key for the same region with an equal
+ name already existed, it will be overwritten by the key details provided with this request.
  </p>
  <br />
  <table>
