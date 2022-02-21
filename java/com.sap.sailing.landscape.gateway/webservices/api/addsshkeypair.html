@@ -37,12 +37,12 @@
     </tr>
     <tr>
         <td>Request method:</td>
-        <td>GET</td>
+        <td>POST</td>
     </tr>
     <tr>
         <td>Example:</td>
         <td><pre>
-           curl -i -d 'region=eu-west-2' -d 'key_name=Axel' \
+           curl -d 'region=eu-west-2' -d 'key_name=Axel' \
             --data-urlencode 'public_key=ssh-rsa AAAAB3Nz829yc2EAAAABIwAAAIEAu+eA2h6Fox7s9yir93P8MQ8HRXah3hd9Q4N4qjTa7ustnYfwOBxsVgIZh3CUT+6m66fgQij82kQd3Dt7IXR5Ja3wLIdFa/HCsvN4gtaag65o7/XyiPRc98EafQPW1+Cux+ieZsB+NoNFehdOyb2Ri7LhpKdPh3d7X9lhwbVIvEU= uhl@here' \
             --data-urlencode 'encrypted_private_key=-----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED
@@ -66,13 +66,13 @@ K940d2tuGhAcQy5YT/cnCy7Hg9222KZuCsWhDrY+Wd0=
             -X POST https://security-service.sapsailing.com/landscape/api/landscape/add_ssh_key</pre><br>
         produces a 200 status code with output
         <pre>
-        </pre>{
+            {
               "name": "Axel",
               "regionId": "eu-west-2",
               "creatorName": "admin",
               "creationTimeMillis": 1645439343022,
               "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAABbBIwAAAIEAu+eA2345ox7s9yir93P8MQ8HRXah3tD739N4qjTa7ustnYfwOBxsVghke3CUT+6m66fgQijkG6Qd3Dt7IXR5Ja3wLIdFa/HCsvN4gtL6Q65o7/XyiPRc98EafQPW1+Cux+ieZsB+NoNFehdOyb2Ri7LhpKdPh3d7X9lhwbVIvEU= uhl@here"
-            }
+            }</pre>
         </td>
     </tr>
 </table>
