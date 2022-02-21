@@ -20,7 +20,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     protected Label persistentAlertLabel;
     
     public DefaultErrorReporter(S stringMessages) {
-        this(stringMessages, true);
+        this(stringMessages, false);
     }
     
     public DefaultErrorReporter(S stringMessages, boolean showCommunicationErrorText) {
@@ -50,7 +50,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
     public void reportError(String message) {
         errorDialogBox.setText(stringMessages.serverError());
         serverResponseLabel.addStyleName("serverResponseLabelError"); //$NON-NLS-1$
-        serverResponseLabel.setHTML(message);
+        serverResponseLabel.setHTML(SafeHtmlUtils.fromString(message));
         errorDialogBox.center();
         dialogCloseButton.setFocus(true);
     }
