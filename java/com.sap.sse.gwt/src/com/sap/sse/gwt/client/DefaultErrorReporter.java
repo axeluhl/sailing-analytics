@@ -48,9 +48,9 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
 
     @Override
     public void reportError(String message) {
-        errorDialogBox.setText(message);
+        errorDialogBox.setText(stringMessages.serverError());
         serverResponseLabel.addStyleName("serverResponseLabelError"); //$NON-NLS-1$
-        serverResponseLabel.setHTML(stringMessages.serverError());
+        serverResponseLabel.setHTML(message);
         errorDialogBox.center();
         dialogCloseButton.setFocus(true);
     }
