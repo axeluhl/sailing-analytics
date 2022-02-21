@@ -23,18 +23,35 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
 
     public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService,
             SubscriptionServiceFactory subscriptionServiceFactory, Iterable<DetailType> availableDetailTypes) {
-
-        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, leaderboard.getName(), SecuredDomainType.LEADERBOARD);
+        PaywallResolver leaderboardPaywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
+                leaderboard.getName(), SecuredDomainType.LEADERBOARD);
         leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
-                availableDetailTypes, paywallResolver);
+                availableDetailTypes, leaderboardPaywallResolver);
         // As we cannot know, if Bravo data is available later on, we will offer DetailTypes, that might be relevant
         // despite not having data for them yet
+        PaywallResolver raceboardPaywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
+                null);
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
-                DetailType.getAutoplayDetailTypesForChart(), userService, subscriptionServiceFactory, availableDetailTypes, null);
+                DetailType.getAutoplayDetailTypesForChart(), userService, raceboardPaywallResolver,
+                leaderboardPaywallResolver, availableDetailTypes, null);
         addLifeCycle(leaderboardLifecycle);
         addLifeCycle(raceboardLifecycle);
     }
 
+    public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService,
+            PaywallResolver leaderboardPaywallResolver, PaywallResolver raceboardPaywallResolver,
+            Iterable<DetailType> availableDetailTypes) {
+        leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
+                availableDetailTypes, leaderboardPaywallResolver);
+        // As we cannot know, if Bravo data is available later on, we will offer DetailTypes, that might be relevant
+        // despite not having data for them yet
+        raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
+                DetailType.getAutoplayDetailTypesForChart(), userService, raceboardPaywallResolver,
+                leaderboardPaywallResolver, availableDetailTypes, null);
+        addLifeCycle(leaderboardLifecycle);
+        addLifeCycle(raceboardLifecycle);
+    }
+    
     @Override
     public AutoplayPerspectiveOwnSettings createPerspectiveOwnDefaultSettings() {
         return new AutoplayPerspectiveOwnSettings();

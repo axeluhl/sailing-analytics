@@ -17,8 +17,8 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     private CheckBox showRaceRankColumn;
     
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
-            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
-        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true, paywallResolver);
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolver leaderboardPaywallResolver) {
+        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true, leaderboardPaywallResolver);
     }
 
     @Override

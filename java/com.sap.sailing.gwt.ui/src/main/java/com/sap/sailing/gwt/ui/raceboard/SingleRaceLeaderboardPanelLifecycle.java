@@ -18,14 +18,14 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     private final boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard;
     private final boolean canBoatsOfCompetitorsChangePerRace;
-    private final PaywallResolver paywallResolver;
+    private final PaywallResolver leaderboardPaywallResolver;
 
     public SingleRaceLeaderboardPanelLifecycle(final StringMessages stringMessages,
-            final Iterable<DetailType> availableDetailTypes, final boolean canBoatsOfCompetitorsChangePerRace, PaywallResolver paywallResolver) {
+            final Iterable<DetailType> availableDetailTypes, final boolean canBoatsOfCompetitorsChangePerRace, PaywallResolver leaderboardPaywallResolver) {
         super(stringMessages, availableDetailTypes);
         this.isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
-        this.paywallResolver = paywallResolver;
+        this.leaderboardPaywallResolver = leaderboardPaywallResolver;
     }
     
     @Override
@@ -55,6 +55,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     @Override
     public SingleRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(SingleRaceLeaderboardSettings settings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages, availableDetailTypes, paywallResolver);
+        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages, availableDetailTypes, leaderboardPaywallResolver);
     }
 }

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.HasPermissions;
@@ -31,6 +31,7 @@ public class PaywallResolver {
 
     public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory,
             final SecuredDTO dtoContext) {
+        LOG.info("init PaywallResolver with dtoContex: " + dtoContext);
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
         subscriptionServiceFactory.initializeProviders();
@@ -39,23 +40,25 @@ public class PaywallResolver {
 
     public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, 
             String securityIdAsString, HasPermissions permissionType) {
+        LOG.info("init PaywallResolver with id (" + securityIdAsString + ") and type: " + permissionType);
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
-        updateByIdAndType(securityIdAsString, permissionType, new AsyncCallback<Void>() {
+        updateByIdAndType(securityIdAsString, permissionType, new AsyncCallback<PaywallResolver>() {
             @Override
-            public void onSuccess(Void result) {
-                GWT.log("Updated paywall secured context successfully.");
+            public void onSuccess(PaywallResolver result) {
+                LOG.info("Updated paywall secured context successfully.");
             }
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("Error while updating paywall security context.", caught);
+                LOG.log(Level.SEVERE, "Error while updating paywall security context.", caught);
             }
         });
         subscriptionServiceFactory.initializeProviders();
     }
 
     public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory, 
-            String securityIdAsString, HasPermissions permissionType, final AsyncCallback<Void> callback) {
+            String securityIdAsString, HasPermissions permissionType, final AsyncCallback<PaywallResolver> callback) {
+        LOG.info("init PaywallResolver with callback and id (" + securityIdAsString + ") and type: " + permissionType);
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
         updateByIdAndType(securityIdAsString, permissionType, callback);
@@ -113,18 +116,18 @@ public class PaywallResolver {
         this.dtoContext = dtoContext;
     }
     
-    public void updateByIdAndType(String idAsString, HasPermissions permissionType, final AsyncCallback<Void> callback) {
+    public void updateByIdAndType(String idAsString, HasPermissions permissionType, final AsyncCallback<PaywallResolver> callback) {
         userService.createEssentialSecuredDTOByIdAndType(idAsString, permissionType, new AsyncCallback<EssentialSecuredDTO>() {
             
             @Override
             public void onSuccess(EssentialSecuredDTO result) {
                 dtoContext = result;
-                callback.onSuccess(null);
+                callback.onSuccess(PaywallResolver.this);
             }
             
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("DTOContext creation failed!", caught);
+                LOG.log(Level.SEVERE, "DTOContext creation failed!", caught);
                 callback.onFailure(caught);
             }
         });

@@ -51,10 +51,10 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected T initialSettings;
     protected Iterable<DetailType> availableDetailTypes;
     
-    protected final PaywallResolver paywallResolver;
+    protected final PaywallResolver leaderboardPaywallResolver;
 
     protected LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail, PaywallResolver paywallResolver) {
+            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail, PaywallResolver leaderboardPaywallResolver) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.canBoatInfoBeShownAsOverallDetail = canBoatInfoBeShownAsOverallDetail;
@@ -63,7 +63,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         this.availableDetailTypes = availableDetailTypes;
-        this.paywallResolver = paywallResolver;
+        this.leaderboardPaywallResolver = leaderboardPaywallResolver;
     }
 
     protected FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
@@ -78,7 +78,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
             final Widget checkbox;
             if (detailType.getPremiumAction() != null) {
                 checkbox = createAndRegisterPremiumCheckbox(dialog, detailType, currentMeneuverDetailSelection.contains(detailType),
-                        legDetailCheckboxes);
+                        maneuverDetailCheckboxes);
             } else {
                 checkbox = createAndRegisterCheckbox(dialog, detailType, currentMeneuverDetailSelection.contains(detailType),
                         maneuverDetailCheckboxes);
@@ -131,7 +131,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
             final Widget checkbox;
             if (type.getPremiumAction() != null) {
                 checkbox = createAndRegisterPremiumCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
-                        legDetailCheckboxes);
+                        raceDetailCheckboxes);
             } else {
                 checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
                         raceDetailCheckboxes);
@@ -167,7 +167,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
             final Widget checkbox;
             if (type.getPremiumAction() != null) {
                 checkbox = createAndRegisterPremiumCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
-                        legDetailCheckboxes);
+                        raceDetailCheckboxes);
             } else {
                 checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
                         raceDetailCheckboxes);
@@ -290,7 +290,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     }
 
     protected PremiumCheckBox createPremiumCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip, Action premiumAction) {
-        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, premiumAction, paywallResolver);
+        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, premiumAction, leaderboardPaywallResolver);
+        dialog.registerCheckbox(premiumCheckBox.getCheckBox());
         premiumCheckBox.ensureDebugId(DebugIdHelper.createDebugId(label) + CHECK_BOX_DEBUGID_CONSTANT);
         premiumCheckBox.setValue(selected);
         dialog.addTooltip(premiumCheckBox, tooltip);

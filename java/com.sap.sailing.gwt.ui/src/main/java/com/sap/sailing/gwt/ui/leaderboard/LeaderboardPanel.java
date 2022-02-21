@@ -474,13 +474,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
         this.leaderboardPaywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory(), 
-                leaderboardName, SecuredDomainType.LEADERBOARD, new AsyncCallback<Void>() {
+                leaderboardName, SecuredDomainType.LEADERBOARD, new AsyncCallback<PaywallResolver>() {
                     @Override
-                    public void onSuccess(Void result) {
+                    public void onSuccess(PaywallResolver resolver) {
                         Set<DetailType> removableDetailTypes = new HashSet<DetailType>(); 
                         for (DetailType detailType: overallDetailColumnMap.keySet()) {
                             if (detailType.getPremiumAction() != null 
-                                    && !leaderboardPaywallResolver.hasPermission(detailType.getPremiumAction())) {
+                                    && !resolver.hasPermission(detailType.getPremiumAction())) {
                                 removableDetailTypes.add(detailType);
                             }
                         }

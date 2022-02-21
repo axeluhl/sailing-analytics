@@ -609,21 +609,35 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
      */
     private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard,
             Iterable<DetailType> availableDetailType) {
-        final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
-        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, leaderboard.getName(), SecuredDomainType.LEADERBOARD);
-        if (leaderboard.type.isMetaLeaderboard()) {
-            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType, paywallResolver);
-        } else {
-            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType, paywallResolver);
-        }
-        final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(
-                leaderboard.getName(), leaderboard.getDisplayName());
-        final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                EntryPointLinkFactory.LEADERBOARD_PATH, lifeCycle::createDefaultSettings, leaderboardContextSettings);
-        SettingsDialogForLinkSharing<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> dialog = new SettingsDialogForLinkSharing<>(
-                linkWithSettingsGenerator, lifeCycle, stringMessages);
-        dialog.ensureDebugId("LeaderboardPageUrlConfigurationDialog");
-        dialog.show();
+        new PaywallResolver(userService, subscriptionServiceFactory, leaderboard.getName(), SecuredDomainType.LEADERBOARD,
+                new AsyncCallback<PaywallResolver>() {
+                    
+                    @Override
+                    public void onSuccess(PaywallResolver resolver) {
+                        final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
+                        if (leaderboard.type.isMetaLeaderboard()) {
+                            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType, resolver);
+                        } else {
+                            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard, availableDetailType, resolver);
+                        }
+                        final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(
+                                leaderboard.getName(), leaderboard.getDisplayName());
+                        final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
+                                EntryPointLinkFactory.LEADERBOARD_PATH, lifeCycle::createDefaultSettings, leaderboardContextSettings);
+                        SettingsDialogForLinkSharing<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> dialog = new SettingsDialogForLinkSharing<>(
+                                linkWithSettingsGenerator, lifeCycle, stringMessages);
+                        dialog.ensureDebugId("LeaderboardPageUrlConfigurationDialog");
+                        dialog.show();
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error while init PaywallResolver.", caught);
+                        Notification.notify(stringMessages.error(),
+                                NotificationType.ERROR);
+                    }
+                });
+        
     }
 
     private void editCompetitorToBoatMappings(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {

@@ -480,7 +480,14 @@ public abstract class DataEntryDialog<T> {
         ensureFocusWidgetIsLinkedToKeyStrokes(result);
         return result;
     }
-    
+
+    public CheckBox registerCheckbox(CheckBox result) {
+        result.setWordWrap(false);
+        ensureHasValueIsValidated(result);
+        ensureFocusWidgetIsLinkedToKeyStrokes(result);
+        return result;
+    }
+
     public <C extends HasValueChangeHandlers<?> & HasAllKeyHandlers> C create(final Supplier<C> factory) {
         final C control = factory.get();
         ensureHasValueIsValidated(control);
