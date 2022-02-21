@@ -40,7 +40,7 @@
      -->
      <system-property>
         <name>webdriver.chrome.driver</name>
-        <value>C:\apps\ChromeSeleniumDriver\chromedriver.exe</value>
+        <value>/usr/bin/chromedriver</value>
         <!-- value>~/Documents/chromedriver/chromedriver</value-->
      </system-property>
      <!--
