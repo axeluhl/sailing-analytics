@@ -9,13 +9,11 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API</h1>
-<h2>URL: /landscape/api/landscape/get_ssh_keys_owned_by_user</h2>
+<h2>URL: /landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers</h2>
 
 <b>Description:</b>
- <p>Queries the SSH key pairs stored persistently in users' key repositories. A set of user names must be
- provided; they will be compared to the "creator name" of the SSH key.
- The user authenticating this request will only see the key pairs for which he/she has the SSH_KEY:READ:{key_name}
- permission.
+ <p>Obtains the time point when the last change in the set of users having the permission <tt>LANDSCAPE:MANAGE:AWS</tt> was
+    observed. The earliest time point that may be reported is the time this bundle has been activated.
  </p>
  <br />
  <table>
@@ -30,7 +28,7 @@
     <tr>
         <td>Mandatory form parameters:</td>
         <td>
-            <div><tt>username[]</tt>, one or more usernames for which to query their SSH key pairs</div>
+            None
         </td>
     </tr>
     <tr>
@@ -39,16 +37,13 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td><pre>curl -H 'Authorization: Bearer RvGK+D73k9KjeuDu+Bx17/3clLJHD7Ff+NCLeu9YDOQ=' -X GET http://127.0.0.1:8888/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=admin
+        <td><pre>curl -H 'Authorization: Bearer RvGK+D73k9KjeuDu+Bx17/3clLJHD7Ff+NCLeu9YDOQ=' -X GET https://security-service.sapsailing.com/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers
            </pre><br>
         produces a 200 status code with output
-        <pre>        [
+        <pre>
               {
-                "name": "Axel",
-                "regionId": "eu-west-2",
-                "creatorName": "admin",
-                "creationTimeMillis": 1645439343022,
-                "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAu+eA2h6Fox7s9yir93P8MQ8H9eu83tDSQ4N4qjTa7ustnYfwOBxsVgIZh3CUT+6m66fgQijkG6Qd3Dt7IXR5Ja3wLIdFa/HCsvN4gtL6Q65o7/XyiPRc98EafQPW1+Cux+ieZsB+NoNKhdUOyb2Ri7LhpKdPh3d7X9lhwbVIvEU= uhl@here"
+                  "timePointOfLastChangeOfSetOfLandscapeManagers-millis": 1645220854886,
+                  "timePointOfLastChangeOfSetOfLandscapeManagers-iso": "2022-02-18T21:47:34.047Z"
               }
         ]</pre>
         </td>
