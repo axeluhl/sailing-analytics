@@ -87,6 +87,7 @@ public class DefaultErrorReporter<S extends StringMessages> implements ErrorRepo
         dialogCloseButton.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "ErrorDialogCloseButton"); //$NON-NLS-1$
         final Label textToServerLabel = new Label();
         serverResponseLabel = new HTML();
+        serverResponseLabel.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "ErrorDialogServerResponse");
         VerticalPanel dialogVPanel = new VerticalPanel();
         if (showCommunicationErrorText) {
             dialogVPanel.add(new HTML("<b>" + stringMessages.errorCommunicatingWithServer() + "</b>")); //$NON-NLS-1$
