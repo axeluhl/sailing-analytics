@@ -36,13 +36,29 @@ For questions and support please get in touch through <a href="mailto:support@sa
 	</tr>
 </thead>
 <tbody>
-	<tr>
-		<td><a href="createsessioncredentials.html">/sailinglandscape/api/createsessioncredentials</a></td>
-		<td>Creates AWS session credentials, including MFA support</td>
-	</tr>
-	   <tr>
+    <tr>
+        <td><a href="addsshkeypair.html">/landscape/api/add_ssh_key</a></td>
+        <td>Add an SSH key pair to a region in the landscape and publish the public key to AWS</td>
+    </tr>
+    <tr>
+        <td><a href="createsessioncredentials.html">/sailinglandscape/api/createsessioncredentials</a></td>
+        <td>Creates AWS session credentials, including MFA support</td>
+    </tr>
+    <tr>
+        <td><a href="deletesshkeypair.html">/landscape/api/delete_ssh_key</a></td>
+        <td>Deletes an SSH key pair with a specific name from a given region.</td>
+    </tr>
+    <tr>
         <td><a href="getsessioncredentials.html">/sailinglandscape/api/getsessioncredentials</a></td>
         <td>Gets information about active AWS session credentials, telling their expiry time.</td>
+    </tr>
+    <tr>
+        <td><a href="getsshkeysownedbyuser.html">/landscape/api/get_ssh_keys_owned_by_user</a></td>
+        <td>Obtains the SSH keys owned by one or more users specified as long as the user authenticated may READ them.</td>
+    </tr>
+    <tr>
+        <td><a href="gettimepointoflastchangeinsshkeysofawslandscapemanagers.html">/landscape/api/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers</a></td>
+        <td>Obtains the time point when the last change in the set of users having the permission <tt>LANDSCAPE:MANAGE:AWS</tt> was observed</td>
     </tr>
 	<tr>
 		<td><a href="clearsessioncredentials.html">/sailinglandscape/api/clearsessioncredentials</a></td>

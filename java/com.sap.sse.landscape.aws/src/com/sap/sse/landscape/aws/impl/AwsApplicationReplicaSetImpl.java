@@ -395,9 +395,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     public void restartAllReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         for (final ProcessT replica : getReplicas()) {
             logger.info("Restarting replica "+replica+" in replica set "+getName());
-            replica.restart(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            logger.info("Wating until restarted replica "+replica+" in replica set "+getName()+" has become ready:");
-            replica.waitUntilReady(optionalTimeout);
+            try {
+                replica.restart(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+                logger.info("Wating until restarted replica "+replica+" in replica set "+getName()+" has become ready:");
+                replica.waitUntilReady(optionalTimeout);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Problem restarting replica "+replica+". Continuing by restarting the next replica if there are more.", e);
+            }
         }
     }
 }
