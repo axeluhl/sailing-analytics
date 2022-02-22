@@ -253,10 +253,15 @@ public class TestProcedures {
         do {
             try {
                 final SshCommandChannel sshChannel = mongoProcess.getHost().createSshChannel("ec2-user", optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
-                final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
-                        "i=0; while [ $i -lt $(echo \"rs.status().members.length\" | mongo  2>/dev/null | tail -n +5 | head -n +1) ]; do  echo \"rs.status().members[$i].stateStr\" | mongo  2>/dev/null | tail -n +5 | head -n +1; i=$((i+1)); done",
-                        "stderr while trying to fetch replica set members", Level.WARNING);
-                fine = stdout.contains("PRIMARY") && stdout.contains("SECONDARY");
+                if (sshChannel == null) {
+                    logger.info("Timeout trying to connect to "+mongoProcess.getHost());
+                    fine = false;
+                } else {
+                    final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
+                            "i=0; while [ $i -lt $(echo \"rs.status().members.length\" | mongo  2>/dev/null | tail -n +5 | head -n +1) ]; do  echo \"rs.status().members[$i].stateStr\" | mongo  2>/dev/null | tail -n +5 | head -n +1; i=$((i+1)); done",
+                            "stderr while trying to fetch replica set members", Level.WARNING);
+                    fine = stdout.contains("PRIMARY") && stdout.contains("SECONDARY");
+                }
             } catch (Exception e) {
                 logger.info("No success (yet) finding replica set "+mongoDefaultReplicaSetName);
                 fine = false;

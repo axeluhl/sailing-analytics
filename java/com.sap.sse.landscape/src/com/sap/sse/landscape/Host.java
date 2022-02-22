@@ -83,6 +83,7 @@ public interface Host extends WithID {
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * 
+     * @return {@code null} in case the connection attempt timed out
      * @see #createSshChannel(String, Optional, byte[])
      */
     SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
@@ -94,6 +95,7 @@ public interface Host extends WithID {
      *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     * @return {@code null} in case the connection attempt timed out
      */
     ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
@@ -104,6 +106,7 @@ public interface Host extends WithID {
      *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     * @return {@code null} in case the connection attempt timed out
      */
     ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
