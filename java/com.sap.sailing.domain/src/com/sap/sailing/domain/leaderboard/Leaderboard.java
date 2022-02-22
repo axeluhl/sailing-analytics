@@ -689,6 +689,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            used to determine which of the races are still being tracked and which ones are not
      * @param baseDomainFactory
      *            required as factory and cache for various DTO types
+     * @return a leaderboard DTO with no defined security info (ownership, ACL) set; note that the DTO may originate
+     *         from a cache, e.g., the {@link LiveLeaderboardUpdater} or the {@link LeaderboardDTOCache}. A caller may
+     *         augment the DTO by adding security information that needs to be transmitted to a client. If such
+     *         information happens to be found on the object returned from this method it shall be considered "stale"
+     *         and has to be updated before sending it to a client. See {@code SecurityDTOUtil.addSecurityInformation(...)}.
      */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
