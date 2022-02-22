@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardCo
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -94,7 +94,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
 
     }
     
-    private class GetLeaderboardWithSecurityCallback implements AsyncCallback<StrippedLeaderboardDTOWithSecurity> {
+    private class GetLeaderboardWithSecurityCallback implements AsyncCallback<StrippedLeaderboardDTO> {
         private final AuthorizedContentDecorator authorizedContentDecorator;
         private final Iterable<DetailType> getAvailableDetailTypesForLeaderboardResult;
         private final SAPHeaderWithAuthentication header;
@@ -115,7 +115,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
 
         @Override
         public void onSuccess(
-                StrippedLeaderboardDTOWithSecurity leaderboardWithSecurity) {
+                StrippedLeaderboardDTO leaderboardWithSecurity) {
             final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                     .createStoredSettingsLocatorForEditableLeaderboard(editableLeaderboardContextDefinition);
             PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), leaderboardWithSecurity);

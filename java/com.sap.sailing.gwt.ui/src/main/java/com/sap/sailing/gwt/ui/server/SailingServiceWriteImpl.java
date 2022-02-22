@@ -279,7 +279,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -935,15 +935,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName,
+    public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName,
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             List<UUID> courseAreaIds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName),
-                leaderboardDisplayName, new Callable<StrippedLeaderboardDTOWithSecurity>() {
+                leaderboardDisplayName, new Callable<StrippedLeaderboardDTO>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
-                        return createStrippedLeaderboardDTOWithSecurity(
+                    public StrippedLeaderboardDTO call() throws Exception {
+                        return createStrippedLeaderboardDTO(
                                 getService().apply(new CreateFlexibleLeaderboard(leaderboardName,
                                         leaderboardDisplayName, discardThresholds,
                                 baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaIds)), false, false);
@@ -952,28 +952,28 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity createRegattaLeaderboard(RegattaName regattaIdentifier,
+    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaIdentifier),
-                leaderboardDisplayName, new Callable<StrippedLeaderboardDTOWithSecurity>() {
+                leaderboardDisplayName, new Callable<StrippedLeaderboardDTO>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
-                        return createStrippedLeaderboardDTOWithSecurity(getService().apply(new CreateRegattaLeaderboard(
+                    public StrippedLeaderboardDTO call() throws Exception {
+                        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(
                                 regattaIdentifier, leaderboardDisplayName, discardThresholds)), false, false);
                     }
                 });
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name, String displayName,
+    public StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName,
             String fullRegattaLeaderboardName) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(name), displayName,
-                new Callable<StrippedLeaderboardDTOWithSecurity>() {
+                new Callable<StrippedLeaderboardDTO>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
-                        return createStrippedLeaderboardDTOWithSecurity(
+                    public StrippedLeaderboardDTO call() throws Exception {
+                        return createStrippedLeaderboardDTO(
                                 getService().apply(new CreateRegattaLeaderboardWithEliminations(name, displayName,
                                         fullRegattaLeaderboardName)),
                                 false, false);
@@ -982,14 +982,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
+    public StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThresholds, List<UUID> newCourseAreaIds) {
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         Leaderboard updatedLeaderboard = getService().apply(
                 new UpdateLeaderboard(leaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaIds));
-        return createStrippedLeaderboardDTOWithSecurity(updatedLeaderboard, false, false);
+        return createStrippedLeaderboardDTO(updatedLeaderboard, false, false);
     }
 
     @Override

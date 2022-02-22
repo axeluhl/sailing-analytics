@@ -15,7 +15,7 @@ public class RaceboardDataDTO implements IsSerializable {
     private boolean isValidEvent;
     private ArrayList<DetailType> detailTypesForCompetitorChart;
     private ArrayList<DetailType> availableDetailTypesForLeaderboard;
-    private StrippedLeaderboardDTOWithSecurity leaderboard;
+    private StrippedLeaderboardDTO leaderboard;
     private TrackingConnectorInfoDTO trackingConnectorInfo;
 
     // for GWT
@@ -23,7 +23,7 @@ public class RaceboardDataDTO implements IsSerializable {
     
     public RaceboardDataDTO(RaceWithCompetitorsAndBoatsDTO race,
             boolean isValidLeaderboardGroup, boolean isValidEvent, Iterable<DetailType> detailTypesForCompetitorChart,
-            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTOWithSecurity leaderboard,
+            Iterable<DetailType> availableDetailTypesForLeaderboard, StrippedLeaderboardDTO leaderboard,
             TrackingConnectorInfoDTO trackingConnectorInfo) {
         this.race = race;
         this.isValidLeaderboardGroup = isValidLeaderboardGroup;
@@ -36,7 +36,7 @@ public class RaceboardDataDTO implements IsSerializable {
         this.trackingConnectorInfo = trackingConnectorInfo;
     }
 
-    public StrippedLeaderboardDTOWithSecurity getLeaderboard() {
+    public StrippedLeaderboardDTO getLeaderboard() {
         return leaderboard;
     }
 

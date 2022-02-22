@@ -38,7 +38,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -115,9 +114,9 @@ public class AutoplayHelper {
     /**
      * functional sideeffect free method for getting a leaderboard from an event based on the name
      */
-    public static StrippedLeaderboardDTOWithSecurity getSelectedLeaderboard(EventDTO event, String leaderBoardName) {
+    public static StrippedLeaderboardDTO getSelectedLeaderboard(EventDTO event, String leaderBoardName) {
         for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
-            for (StrippedLeaderboardDTOWithSecurity leaderboard : leaderboardGroup.getLeaderboards()) {
+            for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
                 if (leaderboard.getName().equals(leaderBoardName)) {
                     return leaderboard;
                 }

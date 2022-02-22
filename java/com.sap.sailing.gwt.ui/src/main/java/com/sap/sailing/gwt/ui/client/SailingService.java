@@ -79,7 +79,6 @@ import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
@@ -192,7 +191,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
             throws UnauthorizedException, Exception;
 
-    List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() throws UnauthorizedException;
+    List<StrippedLeaderboardDTO> getLeaderboardsWithSecurity() throws UnauthorizedException;
 
     Map<String, RegattaAndRaceIdentifier> getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(
             String leaderboardName, String raceColumnName) throws UnauthorizedException;
@@ -252,7 +251,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     StrippedLeaderboardDTO getLeaderboard(String leaderboardName) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity getLeaderboardWithSecurity(String leaderboardName) throws UnauthorizedException;
+    StrippedLeaderboardDTO getLeaderboardWithSecurity(String leaderboardName) throws UnauthorizedException;
 
     List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl) throws UnauthorizedException;
 

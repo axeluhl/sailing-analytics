@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -46,7 +45,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
                     @SuppressWarnings("unchecked")
                     @Override
                     public void onSuccess(Iterable<DetailType> result) {
-                        StrippedLeaderboardDTOWithSecurity leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(initialEventData,
+                        StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(initialEventData,
                                 context.getLeaderboardName());
                         PaywallResolver raceboardPaywallResolver = new PaywallResolver(cf.getUserService(), cf.getSubscriptionServiceFactory(), null);
                         if (leaderBoardDTO != null) {

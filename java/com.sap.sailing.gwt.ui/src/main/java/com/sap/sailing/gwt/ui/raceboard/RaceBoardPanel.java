@@ -100,7 +100,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TrackingConnectorInfoDTO;
 import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Distance;
@@ -233,7 +233,7 @@ public class RaceBoardPanel
             final StringMessages stringMessages, UserAgentDetails userAgent,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean showChartMarkEditMediaButtonsAndVideo,
             boolean showHeaderPanel, Iterable<DetailType> availableDetailTypes,
-            StrippedLeaderboardDTOWithSecurity leaderboardDTO, final RaceWithCompetitorsAndBoatsDTO raceDTO,
+            StrippedLeaderboardDTO leaderboardDTO, final RaceWithCompetitorsAndBoatsDTO raceDTO,
             TrackingConnectorInfoDTO trackingConnectorInfo, SailingServiceWriteAsync sailingServiceWrite,
             RaceboardContextDefinition raceboardContextDefinition,
             WithSecurity withSecurity) {
@@ -459,7 +459,7 @@ public class RaceBoardPanel
             String leaderboardGroupName, UUID leaderboardGroupId, UUID event,
             FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
             UserService userService, boolean showChartMarkEditMediaButtonsAndVideo,
-            StrippedLeaderboardDTOWithSecurity leaderboard, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            StrippedLeaderboardDTO leaderboard, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         MediaPlayerLifecycle mediaPlayerLifecycle = getPerspectiveLifecycle().getMediaPlayerLifecycle();
         MediaPlayerSettings mediaPlayerSettings = settings
                 .findSettingsByComponentId(mediaPlayerLifecycle.getComponentId());
@@ -524,9 +524,9 @@ public class RaceBoardPanel
                 raceDTO);
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override
-            public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTOWithSecurity> consumer) {
+            public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTO> consumer) {
                 sailingService.getLeaderboardWithSecurity(leaderboardName,
-                        new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                        new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(
@@ -534,7 +534,7 @@ public class RaceBoardPanel
                             }
 
                             @Override
-                            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                            public void onSuccess(StrippedLeaderboardDTO result) {
                                 consumer.accept(result);
                             }
                         });
