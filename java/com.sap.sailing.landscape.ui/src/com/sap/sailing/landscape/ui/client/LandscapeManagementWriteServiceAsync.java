@@ -3,21 +3,26 @@ package com.sap.sailing.landscape.ui.client;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
+import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
-import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
     
-    void getInstanceTypes(AsyncCallback<ArrayList<String>> callback);
+    void getInstanceTypeNames(AsyncCallback<ArrayList<String>> callback);
 
     void getMongoEndpoints(String regionId, AsyncCallback<ArrayList<MongoEndpointDTO>> callback);
 
@@ -85,9 +90,12 @@ public interface LandscapeManagementWriteServiceAsync {
     void getApplicationReplicaSets(String regionId, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
 
-    void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName,
+    void createApplicationReplicaSet(String regionId, String name, boolean sharedMasterInstance,
+            String sharedInstanceType, String dedicatedInstanceType, boolean dynamicLoadBalancerMapping,
+            String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String securityReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
@@ -99,7 +107,7 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> callback);
+            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
@@ -112,4 +120,71 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void getReleases(AsyncCallback<ArrayList<ReleaseDTO>> asyncCallback);
+
+    void archiveReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
+            String bearerTokenOrNullForApplicationReplicaSetToArchive, String bearerTokenOrNullForArchive,
+            Duration durationToWaitBeforeCompareServers, int maxNumberOfCompareServerAttempts,
+            boolean removeApplicationReplicaSet, MongoEndpointDTO moveDatabaseHere, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDecryption,
+            AsyncCallback<Pair<DataImportProgress, CompareServersResultDTO>> callback);
+
+    void deployApplicationToExistingHost(String replicaSetName, AwsInstanceDTO hostToDeployTo,
+            String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
+            String replicaReplicationBearerToken, String optionalDomainName,
+            Integer optionalMinimumAutoScalingGroupSizeOrNull, Integer optionalMaximumAutoScalingGroupSizeOrNull,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    /**
+     * For the given replica set ensures there is at least one healthy replica, then stops replicating on all replicas and
+     * removes the master from the public and master target groups. This can be used as a preparatory action for upgrading
+     * the master while keeping one or more replicas available to handle read traffic.<p>
+     * 
+     * Other than de-registering the master from the replica set's target groups this method does nothing to the master
+     * process/host.
+     */
+    void ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSet, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            AsyncCallback<Boolean> callback);
+
+    /**
+     * Updates the AMI to use in the launch configurations of those of the {@code replicaSets} that have an auto-scaling group.
+     * Any running replica will not be affected by this. Only new replicas will be launched based on the AMI specified.
+     * 
+     * @param replicaSets
+     *            those without an auto-scaling group won't be affected
+     * @param amiDTOOrNullForLatest
+     *            defaults to the latest image of type {@link SharedLandscapeConstants#IMAGE_TYPE_TAG_VALUE_SAILING}
+     * @return those replica sets that were updated according to this request; those from {@code replicaSets} not part
+     *         of this result have not had their AMI upgraded, probably because we didn't find an auto-scaling group and
+     *         hence no launch configuration to update
+     */
+    void updateImageForReplicaSets(String regionId,
+            ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,
+            AmazonMachineImageDTO amiDTOOrNullForLatest, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
+
+    void useDedicatedAutoScalingReplicasInsteadOfShared(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void useSingleSharedInsteadOfDedicatedAutoScalingReplica(
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicaReplicationBearerToken,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            String optionalSharedReplicaInstanceType, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void moveMasterToOtherInstance(SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO,
+            boolean useSharedInstance, String optionalInstanceTypeOrNull, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String optionalMasterReplicationBearerTokenOrNull,
+            String optionalReplicaReplicationBearerTokenOrNull, Integer optionalMemoryInMegabytesOrNull,
+            Integer optionalMemoryTotalSizeFactorOrNull,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void changeAutoScalingReplicasInstanceType(SailingApplicationReplicaSetDTO<String> replicaSet,
+            String instanceTypeName, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }

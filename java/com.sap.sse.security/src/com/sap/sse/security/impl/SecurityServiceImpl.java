@@ -97,6 +97,7 @@ import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.ShiroWildcardPermissionFromParts;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.interfaces.OAuthToken;
@@ -173,6 +174,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
+import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -648,14 +650,39 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        return apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
-                displayNameOfOwnedObject));
+        final OwnershipAnnotation existingOwnership = getOwnership(objectId);
+        final User existingUserOwner;
+        final UserGroup existingTenantOwner;
+        final String existingDisplayNameOfOwnedObject;
+        final Ownership result;
+        if (existingOwnership == null || existingOwnership.getAnnotation() == null) {
+            existingUserOwner = null;
+            existingTenantOwner = null;
+        } else {
+            existingUserOwner = existingOwnership.getAnnotation().getUserOwner();
+            existingTenantOwner = existingOwnership.getAnnotation().getTenantOwner();
+        }
+        if (existingOwnership == null) {
+            existingDisplayNameOfOwnedObject = null;
+        } else {
+            existingDisplayNameOfOwnedObject = existingOwnership.getDisplayNameOfAnnotatedObject();
+        }
+        if (Util.equalsWithNull(existingDisplayNameOfOwnedObject, displayNameOfOwnedObject)
+            && existingUserOwner == userOwner
+            && existingTenantOwner == tenantOwner) {
+            result = existingOwnership.getAnnotation();
+        } else {
+            result = apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
+                    displayNameOfOwnedObject));
+        }
+        return result;
     }
     
     @Override
     public Ownership internalSetOwnership(QualifiedObjectIdentifier objectId, String userOwnerName, UUID tenantOwnerId, String displayName) {
+        final Ownership result = accessControlStore.setOwnership(objectId, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
         permissionChangeListeners.ownershipChanged(objectId);
-        return accessControlStore.setOwnership(objectId, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
+        return result;
     }
 
     @Override
@@ -667,8 +694,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalDeleteOwnership(QualifiedObjectIdentifier objectId) {
-        permissionChangeListeners.ownershipChanged(objectId);
         accessControlStore.removeOwnership(objectId);
+        permissionChangeListeners.ownershipChanged(objectId);
         return null;
     }
 
@@ -805,11 +832,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (userGroup == null) {
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
-            for (final OwnershipAnnotation ownershipWithGroupAsOwner : accessControlStore.getOwnerhipsWithGroupOwner(userGroup)) {
-                permissionChangeListeners.ownershipChanged(ownershipWithGroupAsOwner.getIdOfAnnotatedObject());
-            }
+            final Iterable<OwnershipAnnotation> ownerhipsWithGroupOwner = accessControlStore.getOwnerhipsWithGroupOwner(userGroup);
             accessControlStore.removeAllOwnershipsFor(userGroup);
             store.deleteUserGroup(userGroup);
+            for (final OwnershipAnnotation ownershipWithGroupAsOwner : ownerhipsWithGroupOwner) {
+                permissionChangeListeners.ownershipChanged(ownershipWithGroupAsOwner.getIdOfAnnotatedObject());
+            }
         }
         return null;
     }
@@ -1199,7 +1227,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
         QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
-        setOwnership(qualifiedTypeIdentifier, user, null);
+        setOwnership(qualifiedTypeIdentifier, user, /* owning group */ null);
     }
 
     @Override
@@ -1663,6 +1691,31 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
+    public String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
+            String targetServerPassword, String targetServerBearerToken) {
+        if ((Util.hasLength(targetServerUsername) || Util.hasLength(targetServerPassword))
+                && Util.hasLength(targetServerBearerToken)) {
+            final IllegalArgumentException e = new IllegalArgumentException("Please use either username/password or bearer token, not both.");
+            logger.log(Level.WARNING, e.getMessage(), e);
+            throw e;
+        }
+        final User user = getCurrentUser();
+        // Default to current user's token
+        final String effectiveTargetServerBearerToken;
+        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword) && !Util.hasLength(targetServerBearerToken)) {
+            effectiveTargetServerBearerToken = user == null ? null : getOrCreateAccessToken(user.getName());
+        } else {
+            effectiveTargetServerBearerToken = targetServerBearerToken;
+        }
+        final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
+                ? targetServerUsername != null ?
+                        RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername, targetServerPassword) :
+                        null // in case no effective bearer token has been provided but no user name either
+                : effectiveTargetServerBearerToken);
+        return token;
+    }
+    
+    @Override
     public Void internalRemoveAccessToken(String username) {
         store.removeAccessToken(username);
         return null;
@@ -1921,8 +1974,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
-            if (SecurityUtils.getSubject().isPermitted(
-                    objectToCheck.getIdentifier().getStringPermission(action))) {
+            if (SecurityUtils.getSubject().isPermitted(new ShiroWildcardPermissionFromParts(
+                    objectToCheck.getIdentifier().getPermission(action)))) {
                 filteredObjectsConsumer.accept(objectToCheck);
             }
         });
@@ -1937,7 +1990,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             boolean isPermitted = false;
             for (int i = 0; i < actions.length; i++) {
                 if (SecurityUtils.getSubject()
-                        .isPermitted(objectToCheck.getIdentifier().getStringPermission(actions[i]))) {
+                        .isPermitted(new ShiroWildcardPermissionFromParts(objectToCheck.getIdentifier().getPermission(actions[i])))) {
                     isPermitted = true;
                     break;
                 }

@@ -177,7 +177,7 @@ public class ReplicationStatusImpl implements ReplicationStatus {
         result.put(JSON_FIELD_NAME_REPLICABLE_ID, replicaDescriptor.getUuid().toString());
         result.put(JSON_FIELD_NAME_REGISTRATIONTIMEMILLIS, replicaDescriptor.getRegistrationTime().asMillis());
         result.put(JSON_FIELD_NAME_PORT, replicaDescriptor.getPort());
-        result.put(JSON_FIELD_NAME_ADDRESS, replicaDescriptor.getIpAddress().getCanonicalHostName());
+        result.put(JSON_FIELD_NAME_ADDRESS, replicaDescriptor.getIpAddress().getHostAddress());
         result.put(JSON_FIELD_NAME_ADDITIONALINFORMATION, replicaDescriptor.getAdditionalInformation());
         return result;
     }

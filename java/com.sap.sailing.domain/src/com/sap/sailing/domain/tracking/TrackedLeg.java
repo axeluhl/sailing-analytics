@@ -181,6 +181,8 @@ public interface TrackedLeg extends Serializable {
      */
     Position getMiddleOfLeg(TimePoint at);
     
+    Position getMiddleOfLeg(TimePoint at, MarkPositionAtTimePointCache cache);
+
     /**
      * The positions of the course breaking up of line, connecting the start and the end of leg waypoint's position at
      * time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
@@ -276,6 +278,10 @@ public interface TrackedLeg extends Serializable {
 
     Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
+    /**
+     * The true wind angle (TWA) for the leg; a perfect upwind leg would have 0deg as its TWA; a perfect downwind leg
+     * would have 180deg as its TWA.
+     */
     Bearing getTWA(TimePoint at) throws NoWindException;
     
     /**

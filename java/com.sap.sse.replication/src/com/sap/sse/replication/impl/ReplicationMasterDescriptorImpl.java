@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationServletActions;
@@ -100,7 +102,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     private String getHttpRequestProtocol() {
-        return servletPort==443?"https":"http";
+        return ReplicationMasterDescriptor.getHttpRequestProtocol(servletPort);
     }
 
     @Override
@@ -173,14 +175,13 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public synchronized QueueingConsumer getConsumer() throws IOException {
+    public synchronized QueueingConsumer getConsumer() throws IOException, TimeoutException {
         Channel channel = createChannel();
         /*
          * Connect a queue to the given exchange that has already been created by the master server.
          */
         channel.exchangeDeclare(exchangeName, "fanout");
         QueueingConsumer consumer = new QueueingConsumer(channel);
-
         /*
          * The x-message-ttl argument to queue.declare controls for how long a message published to a queue can live
          * before it is discarded. A message that has been in the queue for longer than the configured TTL is said to be
@@ -190,14 +191,12 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
          */
         final Map<String, Object> args = new HashMap<String, Object>();
         args.put("x-message-ttl", (60 * 30) * 1000); // messages will live half an hour in queue before being deleted
-
         /*
          * The x-expires argument to queue.declare controls for how long a queue can be unused before it is
          * automatically deleted. Unused means the queue has no consumers, the queue has not been redeclared, and
          * basic.get has not been invoked for a duration of at least the expiration period.
          */
         args.put("x-expires", (60 * 60) * 1000); // queue will live one hour before being deleted
-
         /*
          * The maximum length of a queue can be limited to a set number of messages by supplying the x-max-length queue
          * declaration argument with a non-negative integer value. Queue length is a measure that takes into account
@@ -205,24 +204,22 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
          * from the front of the queue to make room for new messages once the limit is reached.
          */
         args.put("x-max-length", 3000000);
-
         // a server-named non-exclusive, non-durable queue
         // this queue will survive a connection drop (autodelete=false) and
         // will also support being reconnected (exclusive=false). it will
         // not survive a rabbitmq server restart (durable=false).
-        String queueName = channel.queueDeclare(this.queueName,
-        /* durable */false, /* exclusive */false, /* auto-delete */false, args).getQueue();
-
+        final String queueName = channel.queueDeclare(this.queueName,
+                /* durable */false, /* exclusive */false, /* auto-delete */false, args).getQueue();
         // from now on we get all new messages that the exchange is getting from producer
         channel.queueBind(queueName, exchangeName, "");
-        channel.basicConsume(queueName, /* auto-ack */true, consumer);
+        channel.basicConsume(queueName, /* no auto-ack; see bug5611 */ false, consumer);
         this.consumer = consumer;
         return consumer;
     }
 
     @Override
-    public Channel createChannel() throws IOException {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
+    public Channel createChannel() throws IOException, TimeoutException {
+        ConnectionFactory connectionFactory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         connectionFactory.setHost(getMessagingHostname());
         int port = getMessagingPort();
         if (port != 0) {

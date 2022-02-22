@@ -116,6 +116,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     private final CellTable<WindDTO> rawWindFixesTable;
     private final VerticalPanel windFixPanel;
     private final Predicate<RaceDTO> userPermission;
+    private final Displayer<RegattaDTO> regattasDisplayer;
     
     /**
      * Composite pattern over the {@link RegattasDisplayer} interface. Calls to {@link #fillRegattas(Iterable)}
@@ -131,6 +132,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     
     public WindPanel(final Presenter presenter, final StringMessages stringMessages) {
         this.ensureDebugId("WindPanel");
+        this.regattasDisplayer = result->fillRegattas(result);
         this.userPermission = race -> presenter.getUserService().hasPermission(race, UPDATE);
         this.sailingServiceWrite = presenter.getSailingService();
         this.userService = presenter.getUserService();
@@ -618,13 +620,6 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
             }
         });
     }
-    
-    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
-        @Override
-        public void fill(Iterable<RegattaDTO> result) {
-            fillRegattas(result);
-        }
-    };
     
     public Displayer<RegattaDTO> getRegattasDisplayer() {
         return regattasDisplayer;

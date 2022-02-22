@@ -32,9 +32,9 @@ import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 
 @Path("/v1/trackedRaces")
 public class TrackedRaceListResource extends AbstractSailingServerResource {

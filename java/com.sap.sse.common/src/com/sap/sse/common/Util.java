@@ -789,16 +789,23 @@ public class Util {
     }
 
     public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection) {
+        return sortNamedCollection(collection, /* caseSensitive */ true);
+    }
+
+    public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection, boolean caseSensitive) {
         List<T> sortedCollection = new ArrayList<>(collection);
-        Collections.sort(sortedCollection, new Comparator<T>() {
-            @Override
-            public int compare(T o1, T o2) {
-                return new NaturalComparator().compare(o1.getName(), o2.getName());
-            }
-        });
+        Collections.sort(sortedCollection, naturalNamedComparator(caseSensitive));
         return sortedCollection;
     }
-    
+
+    public static <T extends Named> Comparator<T> naturalNamedComparator(boolean caseSensitive) {
+        return new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                return new NaturalComparator(caseSensitive).compare(o1.getName(), o2.getName());
+            }
+        };
+    }
     /**
      * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
      * Collections of the resulting Map are created using the given {@link Supplier} instance.

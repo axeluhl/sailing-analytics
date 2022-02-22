@@ -5,7 +5,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,8 +29,11 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
+import com.mongodb.ConnectionString;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -36,11 +41,18 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -49,6 +61,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -58,7 +71,54 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
-      
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock;
+    
+    @SuppressWarnings("unchecked")
+    public MediaReplicationTest() {
+        this(mock(FullyInitializedReplicableTracker.class));
+    }
+    
+    private MediaReplicationTest(FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock) {
+        super(new ServerReplicationTestSetUp() {
+            @Override
+            public RacingEventServiceImpl createNewReplica() {
+                final MongoDBConfiguration masterMongoDBConfig = mongoDBService.getConfiguration();
+                final ConnectionString masterMongoDbUri = masterMongoDBConfig.getMongoClientURI();
+                final MongoDBConfiguration proxyReplicaMongoDBConfig = new MongoDBConfiguration(
+                        masterMongoDBConfig.getHostname(), masterMongoDBConfig.getPort(),
+                        masterMongoDBConfig.getDatabaseName() + "-replica"); // use to construct basic MongoDB URI for replica DB name
+                final ConnectionString replicaMongoDbUri = new ConnectionString(proxyReplicaMongoDBConfig.getMongoClientURI().toString()+
+                        (proxyReplicaMongoDBConfig.getMongoClientURI().getConnectionString().indexOf("?") < 0 ? "?" : "&") +
+                            masterMongoDbUri.getConnectionString().substring(masterMongoDbUri.getConnectionString().indexOf("?")+1));
+                final MongoDBService replicaMongoDBService = new MongoDBConfiguration(replicaMongoDbUri).getService();
+                final RacingEventServiceImpl result = new RacingEventServiceImpl(
+                        (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
+                            return new RacingEventServiceImpl.ConstructorParameters() {
+                                private final DomainObjectFactory domainObjectFactory =
+                                        PersistenceFactory.INSTANCE.getDomainObjectFactory(replicaMongoDBService,
+                                                // replica gets its own base DomainFactory:
+                                                new DomainFactoryImpl(raceLogResolver));
+                                private final MongoObjectFactory replicaMongoObjectFactory = PersistenceFactory.INSTANCE
+                                        .getMongoObjectFactory(replicaMongoDBService);
+                                @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
+                                @Override public MongoObjectFactory getMongoObjectFactory() { return replicaMongoObjectFactory; }
+                                @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
+                                @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
+                            };
+                        }, MediaDBFactory.INSTANCE.getMediaDB(replicaMongoDBService), EmptyWindStore.INSTANCE,
+                        EmptySensorFixStore.INSTANCE, /* serviceFinderFactory */ null, null,
+                        /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
+                        /* restoreTrackedRaces */ false, /* security service tracker */ securityServiceTrackerMock,
+                        /* sharedSailingData */ null, /* replicationServiceTracker */ null,
+                        /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                        /* resultUrlRegistryServiceTracker */ null);
+                result.addMasterDataClassLoader(this.getClass().getClassLoader());
+                return result;
+            }
+        });
+        this.securityServiceTrackerMock = securityServiceTrackerMock;
+    }
+    
     private void waitSomeTime() throws InterruptedException {
         Thread.sleep(1000); // wait for JMS to deliver the message and the message to be applied
     }
@@ -193,10 +253,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testMasterDataImportForMediaTracks() throws MalformedURLException, IOException, InterruptedException,
             ClassNotFoundException {
-
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
         User currentUser = new UserImpl("test", "email@test", Collections.emptyMap(), null);
-
         SecurityService securityService = Mockito.mock(SecurityService.class);
         Mockito.doReturn(defaultTenant).when(securityService).getServerGroup();
         Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
@@ -208,10 +266,10 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                 .hasCurrentUserServerPermission(ServerActions.CAN_EXPORT_MASTERDATA);
         Mockito.doReturn(true).when(securityService).hasCurrentUserOneOfExplicitPermissions(
                 Mockito.any(WithQualifiedObjectIdentifier.class), Matchers.<PublicReadableActions> anyVararg());
-
         // Setup source service
         RacingEventServiceImpl sourceService = Mockito.spy(new RacingEventServiceImpl());
         Mockito.doReturn(securityService).when(sourceService).getSecurityService();
+        when(securityServiceTrackerMock.getInitializedService(0)).thenReturn(securityService);
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         String regattaName1 = "49er";
         String regattaName2 = "49er FX";
@@ -231,7 +289,6 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new MillisecondsTimePoint(0),
                 MillisecondsDurationImpl.ONE_HOUR, MimeType.mp4, assignedRaces);
         sourceService.mediaTrackAdded(trackOnSource);
-
         Collection<String> raceColumnNames = Arrays.asList(raceName1, raceName2, raceName3, raceName4, raceName5);
         Regatta regatta = TrackBasedTest.createTestRegatta(regattaName1, raceColumnNames);
         sourceService.addRegattaWithoutReplication(regatta);

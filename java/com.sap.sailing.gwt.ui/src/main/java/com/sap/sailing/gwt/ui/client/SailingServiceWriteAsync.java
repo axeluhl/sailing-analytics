@@ -57,6 +57,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -68,6 +69,8 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -154,7 +157,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
 
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
-            Set<Triple<String, String, String>> toTriples, int priority, AsyncCallback<Void> callback);
+            Set<Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority, AsyncCallback<Void> callback);
 
     void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, 
             MarkDTO markDTO, AsyncCallback<Void> callback);
@@ -309,9 +312,15 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             String updateURL, String updateUsername, String updatePassword, String eventName,
             String manage2SailEventUrl, AsyncCallback<Void> asyncCallback);
 
-
     void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
+
+    void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs, boolean trackWind,
+            boolean correctWindByDeclination, String yellowBrickUsername, String yellowBrickPassword,
+            AsyncCallback<Void> callback);
+
+    void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
+            String yellowBrickPassword, AsyncCallback<Void> callback);
 
     void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations,
             AsyncCallback<Void> callback);
@@ -445,6 +454,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<UUID> leaderboardGroupIDs,
             AsyncCallback<EventDTO> callback);
+
+    void updateEvent(EventDTO eventDTO, AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURL,
@@ -618,5 +629,11 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, 
             AsyncCallback<MarkTrackDTO> callback);
 
-    void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
+    void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> callback);
+
+    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration, AsyncCallback<Void> callback);
+
+    void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> selectedSet, AsyncCallback<Void> callback);
+
+    void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
 }

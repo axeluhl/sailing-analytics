@@ -125,7 +125,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 timewidth = newwidth;
             }
             for (PathCanvasOverlay path : pathOverlays) {
-                String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime())));
+                String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathDurationMillis())));
                 drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.getPathColor(),
                         path.getName(), timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)));
                 index++;

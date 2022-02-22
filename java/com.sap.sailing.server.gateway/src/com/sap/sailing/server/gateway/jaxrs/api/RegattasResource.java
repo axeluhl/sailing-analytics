@@ -113,7 +113,6 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformance
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseWithGeometryJsonSerializer;
@@ -159,6 +158,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
@@ -1768,7 +1768,8 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/markpassings")
-    public Response getMarkPassings(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+    public Response getMarkPassings(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+    		@QueryParam("leaderboard") String leaderboardName) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1783,9 +1784,13 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
                         .build();
             } else {
+                final Leaderboard leaderboard = leaderboardName == null
+                        ? getService().getLeaderboardByName(regattaName)
+                        : getService().getLeaderboardByName(leaderboardName);
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 getSecurityService().checkCurrentUserReadPermission(trackedRace);
-                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(/* use now-livedelay as time point for mark ranks */ null);
+                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer(leaderboard,
+                		/* use now-livedelay as time point for mark ranks */ null);
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 return Response.ok(streamingOutput(jsonMarkPassings)).build();
             }

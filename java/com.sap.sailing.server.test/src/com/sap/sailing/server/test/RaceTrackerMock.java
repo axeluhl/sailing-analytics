@@ -10,9 +10,10 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.WindStore;
 
-public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
+public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl<RaceTrackingConnectivityParameters> {
     
     private Long id;
     private Regatta regatta;

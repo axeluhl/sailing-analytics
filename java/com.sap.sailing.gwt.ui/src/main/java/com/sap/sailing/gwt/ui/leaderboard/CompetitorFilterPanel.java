@@ -90,6 +90,9 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
                 final List<String> result = new ArrayList<>(Arrays.asList(competitor.getName().toLowerCase(), competitor.getShortName()));
                 if (competitor.hasBoat()) {
                     result.add(((CompetitorWithBoatDTO) competitor).getSailID().toLowerCase());
+                    if (((CompetitorWithBoatDTO) competitor).getBoat().getName() != null) {
+                        result.add(((CompetitorWithBoatDTO) competitor).getBoat().getName().toLowerCase());
+                    }
                 }
                 return result;
             }

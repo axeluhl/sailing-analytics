@@ -63,6 +63,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
@@ -86,6 +87,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogExcludeWindSourcesEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
@@ -381,10 +383,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public RaceIdentifier loadRaceIdentifier(Document dbObject) {
         RaceIdentifier result = null;
-        String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
-        String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
-        if (regattaName != null && raceName != null) {
-            result = new RegattaNameAndRaceName(regattaName, raceName);
+        if (dbObject != null) {
+            String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
+            String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
+            if (regattaName != null && raceName != null) {
+                result = new RegattaNameAndRaceName(regattaName, raceName);
+            }
         }
         return result;
     }
@@ -793,7 +797,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (raceIdentifiersPerFleet != null) {
             for (String escapedFleetName : raceIdentifiersPerFleet.keySet()) {
                 String fleetName = MongoUtils.unescapeDollarAndDot(escapedFleetName);
-                result.put(fleetName, loadRaceIdentifier((Document) raceIdentifiersPerFleet.get(fleetName)));
+                result.put(fleetName, loadRaceIdentifier((Document) raceIdentifiersPerFleet.get(escapedFleetName)));
             }
         }
         return result;
@@ -1002,7 +1006,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (constrainToWindSource != null) {
                 queryByName.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
             }
-            final FindIterable<Document> windFixesFoundByName = windTracks.find(queryByName);
+            final FindIterable<Document> windFixesFoundByName = windTracks.find(queryByName).batchSize(100000);
             if (windFixesFoundByName.iterator().hasNext()) {
                 List<Document> windFixesToMigrate = new ArrayList<>();
                 for (Document dbWind : windFixesFoundByName) {
@@ -1011,7 +1015,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     windFixesToMigrate.add(new MongoObjectFactoryImpl(database).storeWindTrackEntry(race, regattaName,
                             wind.getB(), wind.getA()));
                 }
-                final long size = windTracks.count(queryByName);
+                final long size = windTracks.countDocuments(queryByName);
                 logger.info("Migrating " + size + " wind fixes of regatta " + regattaName
                         + " and race " + race.getName() + " to ID-based keys");
                 windTracks.insertMany(windFixesToMigrate);
@@ -1665,6 +1669,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             resultEvent = loadRaceLogORCSetImpliedWindEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogResultsAreOfficialEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogResultsAreOfficialEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogExcludeWindSourcesEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogExcludeWindSourceEvent(createdAt, author, logicalTimePoint, passId, passId, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
@@ -2135,6 +2141,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final ORCCertificate certificate = new ORCCertificateJsonDeserializer().deserialize(json); 
         Serializable boatId = (Serializable) dbObject.get(FieldNames.RACE_LOG_BOAT_ID.name());
         return new RaceLogORCCertificateAssignmentEventImpl(createdAt, logicalTimePoint, author, id, passId, certificate, boatId);
+    }
+
+    private RaceLogExcludeWindSourcesEvent loadRaceLogExcludeWindSourceEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, int passId, Document dbObject)
+            throws JsonDeserializationException, ParseException {
+        final Set<WindSource> windSourcesToExclude = new HashSet<>();
+        final Iterable<?> dbWindSourcesToExclude = (Iterable<?>) dbObject.get(FieldNames.WIND_SOURCES_TO_EXCLUDE.name());
+        for (final Object dbWindSourceToExcludeObject : dbWindSourcesToExclude) {
+            final Document dbWindSourceToExclude = (Document) dbWindSourceToExcludeObject;
+            WindSourceType windSourceType = WindSourceType.valueOf((String) dbWindSourceToExclude.get(FieldNames.WIND_SOURCE_NAME.name()));
+            final WindSource windSourceToExclude;
+            if (dbWindSourceToExclude.containsKey(FieldNames.WIND_SOURCE_ID.name())) {
+                windSourceToExclude = new WindSourceWithAdditionalID(windSourceType,
+                        (String) dbWindSourceToExclude.get(FieldNames.WIND_SOURCE_ID.name()));
+            } else {
+                windSourceToExclude = new WindSourceImpl(windSourceType);
+            }
+            windSourcesToExclude.add(windSourceToExclude);
+        }
+        return new RaceLogExcludeWindSourcesEventImpl(createdAt, logicalTimePoint, author, id, passId, windSourcesToExclude);
     }
 
     @Override
@@ -2647,7 +2673,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         UUID originatingMarkPropertiesId = originatingMarkPropertiesIdObject == null ? null
                 : UUID.fromString(originatingMarkPropertiesIdObject.toString());
         MarkType markType = markTypeRaw == null ? null : MarkType.valueOf((String) markTypeRaw);
-
         Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markShortName, markType, markColor, markShape,
                 markPattern, originatingMarkTemplateId, originatingMarkPropertiesId);
         return mark;
@@ -2695,7 +2720,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // there is a corner case where tests can create just one competitor without boat
         // before we migrate we need to check if this case
         if (competitorsCollectionExist && !boatsCollectionCollectionExist) {
-            long competitorCount = orginalCompetitorCollection.count();
+            long competitorCount = orginalCompetitorCollection.countDocuments();
             if (competitorCount > 0) {
                 Document oneCompetitorDbObject = orginalCompetitorCollection.find().first();
                 Object boatObject = oneCompetitorDbObject.get(CompetitorJsonConstants.FIELD_BOAT);
@@ -2992,7 +3017,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final MongoCollection<Document> collection = database
                 .getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
         final FindIterable<Document> cursor = collection.find();
-        final long count = collection.count();
+        final long count = collection.countDocuments();
         logger.info("Restoring " + count + " races");
         final List<Document> restoreParameters = new ArrayList<>();
         // consume all elements quickly to avoid cursor/DB timeouts while restoring many races;

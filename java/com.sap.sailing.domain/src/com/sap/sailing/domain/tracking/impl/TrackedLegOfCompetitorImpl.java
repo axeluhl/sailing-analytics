@@ -460,7 +460,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, final RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         assert rankingInfo.getTimePoint().equals(timePoint); // the ranking info must be for timePoint
-        Distance result = null;
+        Distance result;
         final TimePoint competitorLegStartTime = getStartTime();
         if (competitorLegStartTime != null && !timePoint.before(competitorLegStartTime)) {
             // only deliver a result if the competitor has started the leg at or before timePoint
@@ -477,54 +477,62 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 effectiveRankingInfo = rankingInfo;
             }
             final Competitor competitorFarthestAhead = effectiveRankingInfo.getCompetitorFarthestAhead();
-            final TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(competitorFarthestAhead, effectiveTimePoint);
-            Position leaderPosition = getTrackedRace().getTrack(competitorFarthestAhead).getEstimatedPosition(effectiveTimePoint, /* extrapolate */ false);
-            Position currentPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(effectiveTimePoint, /* extrapolate */ false);
-            if (leaderPosition != null && currentPosition != null) {
+            if (competitorFarthestAhead == getCompetitor()) {
                 result = Distance.NULL;
-                boolean foundCompetitorsLeg = false;
-                getTrackedRace().getRace().getCourse().lockForRead();
-                try {
-                    for (Leg leg : getTrackedRace().getRace().getCourse().getLegs()) {
-                        if (leg == getLeg()) {
-                            foundCompetitorsLeg = true;
-                        }
-                        if (foundCompetitorsLeg) {
-                            // if the leaderLeg is null, the leader has already arrived
-                            if (leaderLeg == null || leg != leaderLeg.getLeg()) {
-                                // add distance to next mark
-                                Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), effectiveTimePoint);
-                                if (nextMarkPosition == null) {
-                                    result = null;
-                                    break;
-                                } else {
-                                    Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
-                                            .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, effectiveTimePoint, windPositionMode, cache);
-                                    if (distanceToNextMark != null) {
-                                        result = result.add(distanceToNextMark);
-                                    } else {
+            } else {
+                final TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(competitorFarthestAhead, effectiveTimePoint);
+                Position leaderPosition = getTrackedRace().getTrack(competitorFarthestAhead).getEstimatedPosition(effectiveTimePoint, /* extrapolate */ false);
+                Position currentPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(effectiveTimePoint, /* extrapolate */ false);
+                if (leaderPosition != null && currentPosition != null) {
+                    result = Distance.NULL;
+                    boolean foundCompetitorsLeg = false;
+                    getTrackedRace().getRace().getCourse().lockForRead();
+                    try {
+                        for (Leg leg : getTrackedRace().getRace().getCourse().getLegs()) {
+                            if (leg == getLeg()) {
+                                foundCompetitorsLeg = true;
+                            }
+                            if (foundCompetitorsLeg) {
+                                // if the leaderLeg is null, the leader has already finished the race
+                                if (leaderLeg == null || leg != leaderLeg.getLeg()) {
+                                    // add distance to next mark because the leader is not in the same leg (but ahead because it's the leader)
+                                    Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), effectiveTimePoint);
+                                    if (nextMarkPosition == null) {
                                         result = null;
                                         break;
+                                    } else {
+                                        Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
+                                                .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, effectiveTimePoint, windPositionMode, cache);
+                                        if (distanceToNextMark != null) {
+                                            result = result.add(distanceToNextMark);
+                                        } else {
+                                            result = null;
+                                            break;
+                                        }
                                     }
-                                }
-                                currentPosition = nextMarkPosition;
-                            } else {
-                                // we're now in the same leg with leader; compute windward distance to leader
-                                final Distance absoluteWindwardDistance = getTrackedRace().getTrackedLeg(leg)
-                                        .getAbsoluteWindwardDistance(currentPosition, leaderPosition, effectiveTimePoint, windPositionMode, cache);
-                                if (absoluteWindwardDistance != null) {
-                                    result = result.add(absoluteWindwardDistance);
+                                    currentPosition = nextMarkPosition;
                                 } else {
-                                    result = null;
+                                    // we're now in the same leg with leader; compute windward distance to leader
+                                    final Distance absoluteWindwardDistance = getTrackedRace().getTrackedLeg(leg)
+                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, effectiveTimePoint, windPositionMode, cache);
+                                    if (absoluteWindwardDistance != null) {
+                                        result = result.add(absoluteWindwardDistance);
+                                    } else {
+                                        result = null;
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
+                    } finally {
+                        getTrackedRace().getRace().getCourse().unlockAfterRead();
                     }
-                } finally {
-                    getTrackedRace().getRace().getCourse().unlockAfterRead();
+                } else {
+                    result = null;
                 }
             }
+        } else {
+            result = null;
         }
         return result;
     }
@@ -654,7 +662,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         if (hasFinishedLeg(timePoint)) {
                             // Yes, so the gap is the time period between the time points at which the leader and
                             // our competitor finished this leg.
-                            return whenLeaderFinishedLeg.until(getMarkPassingForLegEnd().getTimePoint()); 
+                            return whenLeaderFinishedLeg.until(getMarkPassingForLegEnd().getTimePoint());
                         } else {
                             if (windwardSpeed == null) {
                                 return null;

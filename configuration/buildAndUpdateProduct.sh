@@ -70,7 +70,7 @@ fi
 
 #reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 if [ "$SERVERS_HOME" = "" ]; then
-	SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
+    SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
 fi
 
 # x86 or x86_64 should work for most cases
@@ -293,6 +293,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/env-default-rules.sh $ACDIR/
@@ -725,7 +726,21 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     
         # make sure to honour the service configuration
         # needed to make sure that tests use the right servers
-        APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+        if [ -n "${MONGODB_HOST}" ]; then
+          APP_PARAMETERS="-Dmongo.host=${MONGODB_HOST} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${MONGODB_PORT}" ]; then
+          APP_PARAMETERS="-Dmongo.port=${MONGODB_PORT} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${EXPEDITION_PORT}" ]; then
+          APP_PARAMETERS="-Dexpedition.udp.port=${EXPEDITION_PORT} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${REPLICATION_HOST}" ]; then
+          APP_PARAMETERS="-Dreplication.exchangeHost=${REPLICATION_HOST} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${REPLICATION_CHANNEL}" ]; then
+          APP_PARAMETERS="-Dreplication.exchangeName=${REPLICATION_CHANNEL} ${APP_PARAMETERS}"
+        fi
     
         extra="$extra -P with-not-android-relevant,!with-mobile"
     
@@ -822,6 +837,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
 
@@ -927,6 +943,8 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/stop $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/status $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/refreshInstance.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/stopReplicating.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
 
         $SCP_CMD $PROJECT_HOME/java/target/http2udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/

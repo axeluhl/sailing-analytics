@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.Comparator;
 import java.util.function.Function;
 
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -20,30 +21,29 @@ import com.sap.sse.common.util.NaturalComparator;
 public class AbstractSortableTextColumn<T> extends TextColumn<T> {
     private final Function<T, String> stringSupplier;
 
+    private static <T> Comparator<T> getNaturalComparator(Function<T, String> stringSupplier, boolean caseSensitive) {
+        return (a, b) -> new NaturalComparator(caseSensitive).compare(stringSupplier.apply(a), stringSupplier.apply(b));
+    }
+    
     /**
-     * Clients need to specify a function that maps an object of type {@code T} to a {@link String}.
-     * That string will be used for display and is the basis for sorting the column, using a
-     * {@link NaturalComparator}.
+     * Clients need to specify a function that maps an object of type {@code T} to a {@link String}. That string will be
+     * used for display and is the basis for sorting the column, using a {@link NaturalComparator}, setting case
+     * sensitivity to {@code false}, meaning that during sorting case will be distinguished by default.
      */
-    public AbstractSortableTextColumn(Function<T, String> stringSupplier) {
-        super();
-        this.stringSupplier = stringSupplier;
+    public AbstractSortableTextColumn(Function<T, String> stringSupplier, ListHandler<T> listHandler) {
+        this(stringSupplier, listHandler, /* case sensitive */ false);
     }
     
     public AbstractSortableTextColumn(Function<T, String> stringSupplier, ListHandler<T> listHandler, boolean caseSensitive) {
-        this(stringSupplier);
-        setSortable(true);
-        listHandler.setComparator(this, (a, b) -> new NaturalComparator(caseSensitive).compare(stringSupplier.apply(a), stringSupplier.apply(b)));
+        this(stringSupplier, listHandler, getNaturalComparator(stringSupplier, caseSensitive));
     }
 
-    /**
-     * Same as {@link #AbstractSortableTextColumn(Function, ListHandler, boolean)}, setting case sensitivity to
-     * {@code false}, meaning that during sorting case will be distinguished by default.
-     */
-    public AbstractSortableTextColumn(Function<T, String> stringSupplier, ListHandler<T> listHandler) {
-        this(stringSupplier, listHandler, /* caseSensitive */ false);
+    public AbstractSortableTextColumn(Function<T, String> stringSupplier, ListHandler<T> listHandler, Comparator<T> comparator) {
+        this.stringSupplier = stringSupplier;
+        setSortable(true);
+        listHandler.setComparator(this, comparator);
     }
-    
+
     @Override
     public String getValue(T object) {
         return stringSupplier.apply(object);

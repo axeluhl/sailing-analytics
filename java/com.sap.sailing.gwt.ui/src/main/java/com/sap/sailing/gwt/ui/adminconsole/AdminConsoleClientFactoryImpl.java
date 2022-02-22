@@ -20,7 +20,6 @@ import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.TopLevelView;
-import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -28,7 +27,7 @@ import com.sap.sse.security.ui.client.WithSecurity;
 
 public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory {
 
-    private final WithSecurity securityProvider = new DefaultWithSecurityImpl();
+    private final WithSecurity securityProvider;
     private final EventBus eventBus = new SimpleEventBus();
     private final PlaceController placeController = new PlaceController(eventBus);
     private final ErrorReporter errorReporter = new DefaultErrorReporter<>(StringMessages.INSTANCE);
@@ -36,8 +35,9 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     private final TopLevelView topLevelView = new AdminConsoleTopLevelView(eventBus);
     private final SailingServiceWriteAsync sailingService;
 
-    public AdminConsoleClientFactoryImpl(final SailingServiceWriteAsync sailingService) {
+    public AdminConsoleClientFactoryImpl(final SailingServiceWriteAsync sailingService, WithSecurity securityProvider) {
         this.sailingService = sailingService;
+        this.securityProvider = securityProvider;
         registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         WhatsNewDialogFactory.register(getUserService(), sailingService);
     }

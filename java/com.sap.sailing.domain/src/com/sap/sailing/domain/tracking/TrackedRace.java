@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
 
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -25,6 +27,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -415,7 +418,8 @@ public interface TrackedRace
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
-     * Callers can freely iterate because a copied collection is returned. The {@link WindSourceType#COMBINED} wind source
+     * Callers can freely iterate because the set returned is weakly-consistent and never throws a {@link ConcurrentModificationException}
+     * upon iteration. The {@link WindSourceType#COMBINED} wind source
      * as well as the {@link WindSourceType#LEG_MIDDLE} sources are never part of the result.
      */
     Set<WindSource> getWindSources();
@@ -742,15 +746,14 @@ public interface TrackedRace
      *            if <code>true</code> and any cache update is currently going on, wait for the update to complete and
      *            then fetch the updated value; otherwise, serve this requests from whatever is currently in the cache
      */
-    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
-            throws NoWindException;
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis);
 
     /**
      * Same as {@link #getAverageAbsoluteCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
      * wind on leg and leg bearing is provided.
      */
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses);
 
@@ -918,6 +921,46 @@ public interface TrackedRace
     Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint);
 
     /**
+     * Tells how far, projected onto the wind for upwind/downwind and projected onto the course middle line for reaching
+     * starts, the given <code>competitor</code> was from the favored end of the start line at the time point of the
+     * given seconds before the start.
+     * <p>
+     * 
+     * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
+     * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
+     * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
+     */
+    Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart);
+
+    /**
+     * Like {@link #getWindwardDistanceToFavoredSideOfStartLine(Competitor, long)}, but with a cache to accelerate
+     * repetitive requests for wind and leg types.
+     */
+    Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    
+    /**
+     * Tells how far, projected onto the wind for upwind/downwind and projected onto the course middle line for reaching
+     * starts, the given <code>competitor</code> was from the favored end of the start line at the given
+     * <code>timePoint</code>. Using the {@link #getStartOfRace() race start time} for <code>timePoint</code>, this
+     * tells the competitor's distance to the line when the race was started.
+     * <p>
+     * 
+     * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
+     * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
+     * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
+     */
+    default Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        return getWindwardDistanceToFavoredSideOfStartLine(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    /**
+     * Like {@link #getWindwardDistanceToFavoredSideOfStartLine(Competitor, TimePoint)}, but with a cache to accelerate
+     * repetitive requests for wind and leg types.
+     */
+    Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    /**
      * When the <code>competitor</code> has started, this method returns the distance to the starboard end of the start line
      * or---if the start waypoint was a single mark---the distance to the single start mark at the time the competitor started.
      * If the competitor hasn't started yet, <code>null</code> is returned.
@@ -928,9 +971,60 @@ public interface TrackedRace
      * At the given timepoint and for the competitor, this method returns the distance to the starboard end of the start line
      * or---if the start waypoint was a single mark---the distance to the single start mark at the timepoint.
      * If the competitor hasn't started yet, <code>null</code> is returned.
-     * 
      */
     Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * At the given timepoint and for the competitor, this method returns the distance between the starboard end of the
+     * start line and the competitor position projected perpendicularly onto the line. If the start waypoint was a
+     * single mark, the distance between the start waypoint and the competitor position projected onto the hypothetical
+     * "start line" perpendicular to the bearing of the first leg at the timepoint is calculated. If the competitor
+     * hasn't started yet, <code>null</code> is returned.
+     */
+    Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * For all competitors in this race computes their
+     * {@link #getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor, TimePoint)} and puts the results in
+     * a {@link SortedMap}, sorted by ascending values, that can be used for quick competitor look-up and for quickly
+     * finding adjacent records, using {@link SortedMap#headMap(Object)} and {@link SortedMap#tailMap(Object)}.
+     * <p>
+     * 
+     * Competitors who are part of this race but for which no such {@link Distance} can be calculated, a record is
+     * put to the resulting map with a {@code null} value associated. Those entries are sorted to the end of the map,
+     * meaning that "{@code null} is greater" than other values.</p>
+     * 
+     * Results are cached in a fixed-size LRU cache which is invalidated by competitor or mark positions within the
+     * averaging time range of {@code timePoint}. With this, repeated requests for equal {@code timePoint}s have a good
+     * chance of being fulfilled from a previous computation result.<p>
+     * 
+     * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
+     * which both suggest the boat may not have made a serious attempt to start.
+     */
+    SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
+    
+    /**
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint, Function<Triple<Competitor, RaceColumn, TimePoint>, MaxPointsReason>)}, finds the
+     * next competitor to port regarding their start line projection at {@code timePoint}. Returns {@code null} if
+     * the start line cannot be determined or if there is no competitor further to port.<p>
+     * 
+     * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
+     * which both suggest the boat may not have made a serious attempt to start.
+     * @param maxPointsReasonSupplier TODO
+     */
+    Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint, BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
+    
+    /**
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint, Function<Triple<Competitor, RaceColumn, TimePoint>, MaxPointsReason>)}, finds the
+     * next competitor to starboard regarding their start line projection at {@code timePoint}. Returns {@code null} if
+     * the start line cannot be determined or if there is no competitor further to starboard.<p>
+     * 
+     * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
+     * which both suggest the boat may not have made a serious attempt to start.
+     * @param maxPointsReasonSupplier TODO
+     */
+    Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint, BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
     
     /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
@@ -976,7 +1070,7 @@ public interface TrackedRace
     /**
      * The average wind speed with confidence for this race.
      */
-    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint formTimePoint, TimePoint toTimePoint, int numberOfSamples);
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint fromTimePoint, TimePoint toTimePoint, int numberOfSamples);
     
     /**
      * Computes the center point of the course's marks at the given time point.
@@ -1278,4 +1372,11 @@ public interface TrackedRace
     void runSynchronizedOnStatus(Runnable runnable);
 
     boolean hasFinishedLoading();
+
+    /**
+     * Obtains the start line bearing and starboard mark position either from {@link #getStartLine(TimePoint)} if there
+     * is a real line configured, or for a start waypoint consisting of only a single mark trying to construct a
+     * hypothetical "line" perpendicular to the first leg's bearing.
+     */
+    Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
 }

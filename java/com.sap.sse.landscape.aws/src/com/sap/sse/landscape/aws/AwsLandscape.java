@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
-import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
@@ -91,6 +91,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
     
+    String MFA_TOKEN_CODE_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.mfatokencode";
+    
+    String SESSION_TOKEN_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.sessiontoken";
+    
     /**
      * The name of the tag used on {@link AwsInstance hosts} running one or more {@link MongoProcess}(es). The tag value
      * provides information about the replica sets and the ports on which the respective {@link MongoProcess} is listening.
@@ -146,7 +150,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * version of the landscape.
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey> obtain(String accessKey, String secret) {
         final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
         return result;
@@ -158,7 +162,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * client, a Route53 client, etc.
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String sessionToken) {
         final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, sessionToken);
         return result;
@@ -250,6 +254,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTag(Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier);
     
+    <HostT extends AwsInstance<ShardingKey>> HostT getHostByInstanceId(com.sap.sse.landscape.Region region, final String instanceId, HostSupplier<ShardingKey, HostT> hostSupplier);
+
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
      * instances returned have been in state RUNNING at the time of the request.
@@ -431,7 +437,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     
     LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey> alb);
 
-    Iterable<AvailabilityZone> getAvailabilityZones(Region awsRegion);
+    Iterable<AwsAvailabilityZone> getAvailabilityZones(Region awsRegion);
 
     AwsAvailabilityZone getAvailabilityZoneByName(Region region, String availabilityZoneName);
 
@@ -487,8 +493,14 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
                 healthCheckPath);
     }
 
+    /**
+     * @return {@code null} if a target group by the name specified isn't found in the {@code region}
+     */
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(Region region, String targetGroupName);
 
+    /**
+     * @return {@code null} if a target group by the ARN specified isn't found in the {@code region}
+     */
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(Region region, String targetGroupArn);
 
     Map<AwsInstance<ShardingKey>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey> targetGroup);
@@ -533,7 +545,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
      * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
      */
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
     
     /**
@@ -565,6 +577,12 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.
      */
     ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(Region region, String hostname);
+
+    /**
+     * Looks up the hostname in the DNS to get the CNAME, then extract the name and region ID from the A-record to which the CNAME
+     * points and search for the load balancer there.
+     */
+    ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(String hostname);
     
     /**
      * The default MongoDB configuration to connect to. See also {@link #MONGO_DEFAULT_REPLICA_SET_NAME} and
@@ -600,6 +618,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName);
 
+    MongoReplicaSet getDatabaseConfigurationForReplicaSet(String mongoReplicaSetName, Iterable<Pair<AwsInstance<ShardingKey>, Integer>> hostsAndPortsOfNodes);
+    
+    MongoProcessImpl getDatabaseConfigurationForSingleNode(AwsInstance<ShardingKey> host, int port);
+
     Iterable<MongoEndpoint> getMongoEndpoints(Region region);
 
     /**
@@ -627,7 +649,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * {@link ApplicationProcessHost}s. Callers have to provide the bi-function that produces instances of the desired
      * {@link ApplicationProcess} subtype for each server directory holding a process installation on that host.
      */
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<HostT> getApplicationProcessHostsByTag(Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier);
 
     /**
@@ -643,11 +665,25 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      *            an optional timeout for communicating with the application server(s) to try to read the application
      *            configuration; used, e.g., as timeout during establishing SSH connections
      */
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, HostSupplier<ShardingKey, HostT> hostSupplier,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    /**
+     * Like {@link #getApplicationReplicaSetsByTag(Region, String, HostSupplier, Optional, Optional, byte[])}, only that the tag's
+     * value can also be constrained using this method. This way, callers can, e.g., search for a specific replica set as long as
+     * the master runs on a dedicated host with only this replica set name in the {@code sailing-analytics-server} tag.<p>
+     * 
+     * If multiple replica sets matching the tag/value criterion are found, one of them is returned randomly.
+     */
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
+    AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSetByTagValue(
+            Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier,
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
 
     /**
      * Obtains session credentials using an MFA token code valid for the user for which this landscape object was authenticated
@@ -655,7 +691,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     void createLaunchConfigurationAndAutoScalingGroup(Region region, String replicaSetName, Optional<Tags> tags,
                     TargetGroup<ShardingKey> targetGroup, String keyName, InstanceType instanceType, String imageId,
                     AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas,
@@ -679,19 +715,28 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname);
 
+    Iterable<ResourceRecordSet> getResourceRecordSets(String hostname);
+    
     DNSCache getNewDNSCache();
 
     CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(Region region);
 
     CompletableFuture<Iterable<LaunchConfiguration>> getLaunchConfigurationsAsync(Region region);
 
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
             ProcessT master, Iterable<ProcessT> replicas);
 
     CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
 
+    /**
+     * updates minimum and desired size to {@code minSize}
+     */
     void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize);
 
     void updateReleaseInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release);
+
+    void updateImageInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami);
+
+    void updateInstanceTypeInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, InstanceType instanceType);
 }

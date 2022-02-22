@@ -25,7 +25,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ReadListener;
-import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -265,11 +264,15 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, ReplicationInstancesManager replicationInstancesManager,
                 ReplicaDescriptor replicaDescriptor, ReplicableInterface replica,
                 ReplicableInterface master, ReplicationService masterReplicationService)
-                throws IOException {
+                throws Exception {
             super(exchangeName, exchangeHost, 0, replicationInstancesManager, new SingletonReplicablesProvider(replica));
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
-            ss = new ServerSocket(0); // bind to any free port
+            ServerSocket mySs;
+            do {
+                mySs = new ServerSocket(0); // bind to any free port
+            } while (!ReplicationMasterDescriptor.getHttpRequestProtocol(mySs.getLocalPort()).equals("http")); // unless it is considered an https port by internal heuristics; then try again...
+            ss = mySs;
             this.masterReplicationService = masterReplicationService;
             final List<Replicable<?, ?>> replicablesToReplicate = new ArrayList<>();
             for (final String replicableIdAsString : replicaDescriptor.getReplicableIdsAsStrings()) {
@@ -392,7 +395,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             s.close();
                             logger.info("Request handled successfully.");
                         }
-                    } catch (IOException | ServletException e) {
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     } finally {
                         logger.info("replication servlet emulation done");
@@ -427,7 +430,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
 
         public ReplicationReceiverImpl startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
-                throws IOException {
+                throws Exception {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             QueueingConsumer consumer = master.getConsumer();

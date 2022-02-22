@@ -36,7 +36,8 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
     @Override
     public void start(RegattaMediaPlace myPlace, final AcceptsOneWidget contentArea) {
         ErrorAndBusyClientFactory errorAndBusyClientFactory = currentPresenter.getErrorAndBusyClientFactory();
-        final MediaPage mediaPage = new MediaPage(errorAndBusyClientFactory.createBusyView());
+        final MediaPage mediaPage = new MediaPage(errorAndBusyClientFactory.createBusyView(), currentPresenter.getEventBus(), 
+                currentPresenter.getUserService(), currentPresenter.getEventDTO());
         initWidget(mediaPage);
         currentPresenter.ensureMedia(new ActivityCallback<MediaDTO>(errorAndBusyClientFactory, contentArea) {
             @Override

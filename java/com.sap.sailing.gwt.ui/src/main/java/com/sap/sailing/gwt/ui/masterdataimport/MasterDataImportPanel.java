@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -231,7 +230,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         if (mediaTracksImported > 0) {
             presenter.getMediaTracksRefresher().reloadAndCallFillAll();
         }
-        Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
+        final Iterable<String> overwrittenRegattas = creationCount.getNamesOfOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
                 mediaTracksImported, trackedRacesImported, overwrittenRegattas);
         changeButtonStateAccordingToApplicationState();
@@ -266,11 +265,11 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
-            int regattasCreated, int mediaTracksImported, int trackedRacesImported, Set<String> overwrittenRegattas) {
+            int regattasCreated, int mediaTracksImported, int trackedRacesImported, Iterable<String> overwrittenRegattas) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
                 regattasCreated, mediaTracksImported, trackedRacesImported));
-        if (overwrittenRegattas.size() > 0) {
+        if (!Util.isEmpty(overwrittenRegattas)) {
             buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
             for (String regattaName : overwrittenRegattas) {
                 buffer.append(regattaName + "\n");

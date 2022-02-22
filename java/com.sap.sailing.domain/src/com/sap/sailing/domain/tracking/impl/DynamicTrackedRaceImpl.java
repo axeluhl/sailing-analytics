@@ -69,6 +69,7 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -133,18 +134,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.courseDesignChangedListeners = new HashSet<>();
         this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
-        
         gpsFixReceived = new AtomicBoolean(false);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
-            Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
-            for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
-                windSourcesToExclude.add(windSourceToExclude);
-            }
-            windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
-            setWindSourcesToExclude(windSourcesToExclude);
+            setWindSourcesToExclude(getWindSourcesToExclude()); // implicitly adds COURSE_BASED to the wind sources to exclude
         }
-        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -400,7 +394,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
             @Override
             public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack, AddResult addedOrReplaced) {
-                updated(fix.getTimePoint());
+                final TimePoint fixTimePoint = fix.getTimePoint();
+                updated(fixTimePoint);
+                final GPSFix lastFixBefore = result.getLastFixBefore(fixTimePoint);
+                final GPSFix firstFixAfter = result.getFirstFixAfter(fixTimePoint);
+                invalidateDistancesFromStarboardSideOfStartLineProjectedOntoLineCache(TimeRange.create(lastFixBefore==null?null:lastFixBefore.getTimePoint(),
+                        firstFixAfter==null?null:firstFixAfter.getTimePoint()));
                 triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark, firstFixInTrack, addedOrReplaced);
             }
@@ -522,10 +521,19 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    /**
+     * Adds the {@link WindSourceType#COURSE_BASED} wind source to those to exclude if the race is not
+     * {@link #raceIsKnownToStartUpwind known to start with an upwind leg}.
+     */
     @Override
-    public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        super.setWindSourcesToExclude(windSourcesToExclude);
-        notifyListenersWindSourcesToExcludeChanged(windSourcesToExclude);
+    public void setWindSourcesToExclude(final Iterable<? extends WindSource> windSourcesToExclude) {
+        final Set<WindSource> effectiveWindSourcesToExclude = new HashSet<>();
+        Util.addAll(windSourcesToExclude, effectiveWindSourcesToExclude);
+        if (!raceIsKnownToStartUpwind) {
+            effectiveWindSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
+        }
+        super.setWindSourcesToExclude(effectiveWindSourcesToExclude);
+        notifyListenersWindSourcesToExcludeChanged(effectiveWindSourcesToExclude);
     }
 
     @Override
@@ -1040,26 +1048,25 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded by this
-     * call, all listeners are notified about these existing wind fixes using their
+     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded into this
+     * new wind track, all listeners are notified about these existing wind fixes using their
      * {@link RaceChangeListener#windDataReceived(Wind, WindSource)} callback method. In particular this replicates all
      * wind fixes that may have been loaded from the wind store for the new track.
      */
     @Override
-    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        final WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
+    protected void notifyWindTrackHasBeenCreatedAndAddedToWindTracks(WindSource windSource, WindTrack windTrack) {
+        super.notifyWindTrackHasBeenCreatedAndAddedToWindTracks(windSource, windTrack);
         if (windSource.getType().canBeStored()) {
             // replicate all wind fixes that may have been loaded by the wind store
-            result.lockForRead();
+            windTrack.lockForRead();
             try {
-                for (Wind wind : result.getRawFixes()) {
+                for (Wind wind : windTrack.getRawFixes()) {
                     notifyListeners(wind, windSource); // Note that this doesn't notify the track's listeners but the tracked race's listeners.
                 } // In particular, the wind store won't receive events (again) for the wind fixes it already has.
             } finally {
-                result.unlockAfterRead();
+                windTrack.unlockAfterRead();
             }
         }
-        return result;
     }
 
     @Override
@@ -1080,9 +1087,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack, AddResult addedOrReplaced) {
         updated(fix.getTimePoint());
+        invalidateDistancesFromStarboardSideOfStartLineProjectedOntoLineCache(TimeRange.create(
+                fix.getTimePoint().minus(getMillisecondsOverWhichToAverageSpeed()),
+                fix.getTimePoint().plus(getMillisecondsOverWhichToAverageSpeed())));
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor, addedOrReplaced);
-        
         // getAndSet call is atomic which means, that it can be ensured that the listeners are notified only once
         final boolean oldGPSFixReceived = gpsFixReceived.getAndSet(true);
         if (!oldGPSFixReceived) {
@@ -1118,12 +1127,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public long getMillisecondsOverWhichToAverageWind() {
-        long result = 0; // default in case there is no competitor
-        for (WindSource windSource : getWindSources()) {
-            WindTrack someTrack = getOrCreateWindTrack(windSource);
-            result = someTrack.getMillisecondsOverWhichToAverageWind();
-        }
-        return result;
+        return this.millisecondsOverWhichToAverageWind;
     }
 
     @Override

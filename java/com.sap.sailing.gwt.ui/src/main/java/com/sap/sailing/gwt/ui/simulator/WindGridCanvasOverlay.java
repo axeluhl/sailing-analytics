@@ -113,10 +113,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         timePointWindDTOMap.clear();
         if (wl != null) {
             for (final SimulatorWindDTO w : wl.getMatrix()) {
-                if (!timePointWindDTOMap.containsKey(w.timepoint)) {
-                    timePointWindDTOMap.put(w.timepoint, new LinkedList<SimulatorWindDTO>());
+                if (!timePointWindDTOMap.containsKey(w.timepoint.asMillis())) {
+                    timePointWindDTOMap.put(w.timepoint.asMillis(), new LinkedList<SimulatorWindDTO>());
                 }
-                timePointWindDTOMap.get(w.timepoint).add(w);
+                timePointWindDTOMap.get(w.timepoint.asMillis()).add(w);
             }
 
             final SortByWindSpeed windSpeedSorter = new SortByWindSpeed();

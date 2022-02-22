@@ -9,10 +9,12 @@ import java.util.logging.Logger;
 import org.bson.Document;
 
 import com.mongodb.ClientSessionOptions;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.connection.ClusterConnectionMode;
 import com.mongodb.session.ClientSession;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -37,12 +39,12 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
     public MongoDatabase importDatabase(MongoDatabase from) throws URISyntaxException {
         final int BATCH_SIZE = 100;
         final MongoDatabase targetDatabase = getMongoDatabase(from.getName());
-        logger.info("Importing database "+from+" into "+targetDatabase);
+        logger.info("Importing database "+from.getName()+" into "+targetDatabase.getName()+" on "+this);
         for (final String collectionName : from.listCollectionNames()) {
             final MongoCollection<Document> sourceCollection = from.getCollection(collectionName);
             targetDatabase.createCollection(collectionName); // if we found it on the exporting side and it's empty it's important still to create it for equal hashes
             final MongoCollection<Document> targetCollection = targetDatabase.getCollection(collectionName);
-            logger.info("...importing "+sourceCollection.count()+" documents from collection "+collectionName+" from "+from+" into "+this);
+            logger.info("...importing "+sourceCollection.estimatedDocumentCount()+" documents from collection "+collectionName+" from "+from+" into "+this);
             List<Document> documentsToInsert = new ArrayList<>(BATCH_SIZE);
             int i=0;
             for (final Document document : sourceCollection.find()) {
@@ -63,27 +65,27 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
 
     @Override
     public boolean isInReplicaSet() throws URISyntaxException {
-        return getClient().getReplicaSetStatus() != null;
+        return getClient().getClusterDescription().getConnectionMode() != ClusterConnectionMode.SINGLE;
     }
     
     @Override
-    public MongoClientURI getMongoClientURI(Optional<Database> optionalDb) throws URISyntaxException {
-        return new MongoClientURI(getURI(optionalDb).toString());
+    public ConnectionString getConnectionString(Optional<Database> optionalDb) throws URISyntaxException {
+        return new ConnectionString(getURI(optionalDb).toString());
     }
     
     @Override
-    public MongoClientURI getMongoClientURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException {
-        return new MongoClientURI(getURI(optionalDb, timeoutEmptyMeaningForever).toString());
+    public ConnectionString getConnectionString(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException {
+        return new ConnectionString(getURI(optionalDb, timeoutEmptyMeaningForever).toString());
     }
     
     @Override
     public MongoClient getClient() throws URISyntaxException {
-        return new MongoClient(getMongoClientURI(Optional.empty()));
+        return MongoClients.create(getConnectionString(Optional.empty()));
     }
     
     @Override
     public MongoClient getClient(Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException {
-        return new MongoClient(getMongoClientURI(Optional.empty(), timeoutEmptyMeaningForever));
+        return MongoClients.create(getConnectionString(Optional.empty(), timeoutEmptyMeaningForever));
     }
     
     @Override

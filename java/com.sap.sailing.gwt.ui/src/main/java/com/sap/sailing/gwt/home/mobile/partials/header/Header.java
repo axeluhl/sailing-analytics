@@ -127,6 +127,9 @@ public class Header extends Composite implements HeaderConstants {
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
             logoAnchor.setHref("");
+            logoAnchor.setTitle(StringMessages.INSTANCE.sapSailingAnalytics());
+        } else {
+            logoAnchor.setHref(UriUtils.fromString(StringMessages.INSTANCE.sapAnalyticsURL()).asString());
         }
     }
 

@@ -60,7 +60,9 @@ public class RegisterView extends Composite {
         KeyUpHandler keyUpHandler = new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                String errorMessage = validator.validateUsernameAndPassword(usernameTextBox.getText(), passwordTextBox.getText(), password2TextBox.getText());
+                String errorMessage = validator.validateUsernameAndPassword(usernameTextBox.getText(),
+                        passwordTextBox.getText(), password2TextBox.getText(),
+                        /* reallyUseLeadingOrTrailingSpacesInUsername */ true);
                 if (errorMessage == null) {
                     errorMessageLabel.setText("");
                     signUpButton.setEnabled(true);

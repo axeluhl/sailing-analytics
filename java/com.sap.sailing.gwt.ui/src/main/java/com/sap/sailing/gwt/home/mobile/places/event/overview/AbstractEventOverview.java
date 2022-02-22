@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.event.overview;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.Panel;
@@ -17,6 +18,7 @@ import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public abstract class AbstractEventOverview extends AbstractEventView<EventViewBase.Presenter> {
     
@@ -59,7 +61,7 @@ public abstract class AbstractEventOverview extends AbstractEventView<EventViewB
     public void setMediaForImpressions(int nrOfImages, int nrOfVideos, Collection<SailingImageDTO> images) {
         impressionsUi.getElement().getStyle().setDisplay(Display.BLOCK);
         impressionsUi.setStatistis(nrOfImages, nrOfVideos);
-        impressionsUi.addImages(images);
+        impressionsUi.addImages(new LinkedHashSet<ImageDTO>(images));
         // TODO: desktop media navigation
         impressionsUi.setClickDestinaton(currentPresenter.getMediaPageNavigation());
     }

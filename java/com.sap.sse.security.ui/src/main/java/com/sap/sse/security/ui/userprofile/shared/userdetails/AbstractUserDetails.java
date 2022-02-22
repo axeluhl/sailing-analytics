@@ -91,7 +91,8 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         StrippedUserGroupDTO defaultTennant = currentUser.getDefaultTenant();
         defaultTenantUi.clear();
         int i = 0;
-        for (StrippedUserGroupDTO group : currentUser.getUserGroups()) {
+        for (StrippedUserGroupDTO group : Util.sortNamedCollection(currentUser.getUserGroups(),
+                /* caseSensitive */ false)) {
             defaultTenantUi.addItem(group.getName(), group.getId().toString());
             if (Util.equalsWithNull(group, defaultTennant)) {
                 defaultTenantUi.setSelectedIndex(i);

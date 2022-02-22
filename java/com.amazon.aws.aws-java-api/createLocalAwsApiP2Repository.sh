@@ -114,7 +114,9 @@ sed -i -e 's/^\( *\)version="[0-9.]*"/\1version="'${VERSION}'"/' ${FEATURE_XML}
 echo "Patching com.sap.sse.feature.runtime's feature.xml..."
 NEW_SSE_RUNTIME_FEATURE_XML_CONTENT=$( cat "${SSE_RUNTIME_FEATURE_XML}" |  awk -v VERSION=${VERSION} '
 /id="com.amazon.aws.aws-java-api"/ { IN_PLUGIN="true"; }
-{ if (IN_PLUGIN=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN="false"; } else print $0; }
+/id="com.amazon.aws.aws-java-api.source"/ { IN_PLUGIN_SOURCE="true"; }
+{ if (IN_PLUGIN=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN="false"; } else
+if (IN_PLUGIN_SOURCE=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN_SOURCE="false"; } else print $0; }
 ' )
 echo "${NEW_SSE_RUNTIME_FEATURE_XML_CONTENT}" >"${SSE_RUNTIME_FEATURE_XML}"
 echo "Patching update site's site.xml..."

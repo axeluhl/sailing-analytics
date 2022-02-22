@@ -32,7 +32,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -377,20 +376,14 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 name = "currentSpeedOverGround-kts";
-                if (currentLegEntry != null && currentLegEntry.currentSpeedOverGroundInKnots != null) {
-                    value = roundDouble(currentLegEntry.currentSpeedOverGroundInKnots, 2);
+                if (entry.currentSpeedAndCourseOverGround != null) {
+                    value = roundDouble(entry.currentSpeedAndCourseOverGround.getKnots(), 2);
                 }
                 break;
             case RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES:
                 name = "currentCourseOverGround-deg";
-                if (trackedRace != null) {
-                    final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    if (track != null) {
-                        final SpeedWithBearing speed = track.getEstimatedSpeed(timePoint);
-                        if (speed != null) {
-                            value = roundDouble(speed.getBearing().getDegrees(), 2);
-                        }
-                    }
+                if (entry.currentSpeedAndCourseOverGround != null) {
+                    value = roundDouble(entry.currentSpeedAndCourseOverGround.getBearing().getDegrees(), 2);
                 }
                 break;
             case RACE_CURRENT_POSITION_LAT_DEG:

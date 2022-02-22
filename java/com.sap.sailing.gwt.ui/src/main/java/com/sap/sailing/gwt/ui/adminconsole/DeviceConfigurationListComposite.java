@@ -133,9 +133,8 @@ public class DeviceConfigurationListComposite extends Composite  {
         identifierNameColumn.setSortable(true);
         columnSortHandler.setComparator(identifierNameColumn, (r1, r2) -> r1.name.compareTo(r2.name));
         table.addColumn(identifierNameColumn, stringMessages.device());
-
-        final TextColumn<DeviceConfigurationWithSecurityDTO> deviceConfigurationUUidColumn = new AbstractSortableTextColumn<DeviceConfigurationWithSecurityDTO>(
-                config -> config.id == null ? "<null>" : config.id.toString());
+        final TextColumn<DeviceConfigurationWithSecurityDTO> deviceConfigurationUUIDColumn = new AbstractSortableTextColumn<DeviceConfigurationWithSecurityDTO>(
+                config -> config.id == null ? "<null>" : config.id.toString(), columnSortHandler);
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
         final AccessControlledActionsColumn<DeviceConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
@@ -163,7 +162,7 @@ public class DeviceConfigurationListComposite extends Composite  {
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
-        table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
+        table.addColumn(deviceConfigurationUUIDColumn, stringMessages.id());
         table.addColumn(actionColumn, stringMessages.actions());
         return table;
     }

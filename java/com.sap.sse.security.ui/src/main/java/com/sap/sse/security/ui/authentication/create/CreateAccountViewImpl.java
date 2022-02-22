@@ -76,7 +76,7 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         usernameUi.addKeyUpHandler(new FieldKeyUpHandler() {
             @Override
             void updateFieldValue() {
-                presenter.onChangeUsername(usernameUi.getValue());
+                presenter.onChangeUsername(usernameUi.getValue().trim());
             }
         });
         nameUi.addKeyUpHandler(new FieldKeyUpHandler() {

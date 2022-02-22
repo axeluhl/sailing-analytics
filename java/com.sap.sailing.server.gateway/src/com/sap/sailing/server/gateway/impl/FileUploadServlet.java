@@ -54,12 +54,10 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                 fileExtension = ".png";
             } else if (fileType.equals("image/gif")) {
                 fileExtension = ".gif";
-            } else if (fileType.startsWith("video/")) {
-                fileExtension = "."+fileType.substring(fileType.indexOf('/')+1);
             } else {
                 int lastDot = fileName.lastIndexOf(".");
                 if (lastDot > 0) {
-                    fileExtension = fileName.substring(lastDot);
+                    fileExtension = fileName.substring(lastDot).toLowerCase();
                 } else {
                     fileExtension = "";
                 }
@@ -67,7 +65,8 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             try {
                 if (fileItem.getSize() > 1024l * 1024l * MAX_SIZE_IN_MB) {
                     final String errorMessage = "Image is larger than " + MAX_SIZE_IN_MB + "MB";
-                    logger.warning("Ignoring file storage request because file "+fileName+" is larger than "+MAX_SIZE_IN_MB+"MB");
+                    logger.warning("Ignoring file storage request because file " + fileName + " is larger than "
+                            + MAX_SIZE_IN_MB + "MB");
                     result.put(FileUploadConstants.STATUS, Status.INTERNAL_SERVER_ERROR.name());
                     result.put(FileUploadConstants.MESSAGE, errorMessage);
                 } else {

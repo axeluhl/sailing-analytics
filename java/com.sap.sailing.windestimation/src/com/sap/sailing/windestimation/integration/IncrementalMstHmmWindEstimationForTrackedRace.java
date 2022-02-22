@@ -54,7 +54,6 @@ import com.sap.sse.common.Util.Pair;
 public class IncrementalMstHmmWindEstimationForTrackedRace implements IncrementalWindEstimation {
 
     private static final double WIND_COURSE_TOLERANCE_IN_DEGREES_TO_IGNORE_FOR_REUSE = 1.0;
-    private static final double DEFAULT_BASE_CONFIDENCE = 0.01;
     private final IncrementalMstManeuverGraphGenerator mstManeuverGraphGenerator;
     private final MstBestPathsCalculator bestPathsCalculator;
     private final WindTrackCalculator windTrackCalculator;
@@ -69,7 +68,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
             ManeuverClassifiersCache maneuverClassifiersCache,
             GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache) {
         this.estimatedWindTrack = new WindTrackWithConfidenceForEachWindFixImpl(millisecondsOverWhichToAverage,
-                DEFAULT_BASE_CONFIDENCE,
+                WindSourceType.MANEUVER_BASED_ESTIMATION.getBaseConfidence(),
                 WindSourceType.MANEUVER_BASED_ESTIMATION.useSpeed() && polarDataService != null,
                 IncrementalMstHmmWindEstimationForTrackedRace.class.getSimpleName()+" "+
                 trackedRace.getRaceIdentifier(), false, windTrackWithConfidences);

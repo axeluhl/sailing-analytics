@@ -16,6 +16,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SecurityService.RoleCopyListener;
+import com.sap.sse.security.ShiroWildcardPermissionFromParts;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -82,7 +83,8 @@ public class SailingHierarchyOwnershipUpdater {
 
     private void updateGroupOwnershipForEventHierarchyInternal(Event event) {
         updateGroupOwner(event.getIdentifier());
-        SailingHierarchyWalker.walkFromEvent(event, false, new EventHierarchyVisitor() {
+        SailingHierarchyWalker.walkFromEvent(event, /* includeLeaderboardGroupsWithOverallLeaderboard */ false,
+                new EventHierarchyVisitor() {
             @Override
             public void visit(Leaderboard leaderboard, Set<LeaderboardGroup> leaderboardGroups) {
                 updateGroupOwnershipForLeaderboardHierarchyInternal(leaderboard);
@@ -90,20 +92,23 @@ public class SailingHierarchyOwnershipUpdater {
 
             @Override
             public void visit(LeaderboardGroup leaderboardGroup) {
-                // No LeaderboardGroups with overall leaderboard are visited -> no infinite recursion occurs
-                updateGroupOwnershipForLeaderboardGroupHierarchyInternal(leaderboardGroup);
+                // leaderboard groups with overall leaderboard may be visited if all their leaderboards belong
+                // to the "event", but the process won't recurse back into "event" as we pass it explicitly as
+                // an event not to visit
+                updateGroupOwnershipForLeaderboardGroupHierarchyInternal(leaderboardGroup, /* exclude */ event);
             }
         });
     }
 
     public void updateGroupOwnershipForLeaderboardGroupHierarchy(LeaderboardGroup leaderboardGroup) {
-        updateGroupOwnershipForLeaderboardGroupHierarchyInternal(leaderboardGroup);
+        updateGroupOwnershipForLeaderboardGroupHierarchyInternal(leaderboardGroup, /* eventToExclude */ null);
         commitChanges();
     }
 
-    private void updateGroupOwnershipForLeaderboardGroupHierarchyInternal(LeaderboardGroup leaderboardGroup) {
+    private void updateGroupOwnershipForLeaderboardGroupHierarchyInternal(LeaderboardGroup leaderboardGroup, Event eventToExclude) {
         updateGroupOwner(leaderboardGroup.getIdentifier());
-        SailingHierarchyWalker.walkFromLeaderboardGroup(service, leaderboardGroup, true,
+        SailingHierarchyWalker.walkFromLeaderboardGroup(service, leaderboardGroup,
+                /* includeEventsIfLeaderboardGroupHasOverallLeaderboard */ true,
                 new LeaderboardGroupHierarchyVisitor() {
                     @Override
                     public void visit(Leaderboard leaderboard) {
@@ -112,9 +117,11 @@ public class SailingHierarchyOwnershipUpdater {
 
                     @Override
                     public void visit(Event event) {
-                        // Only events of LeaderboardGroups with overall leaderboard are visited -> no infinite
-                        // recursion occurs
-                        updateGroupOwnershipForEventHierarchyInternal(event);
+                        if (event != eventToExclude) {
+                            // Only events of LeaderboardGroups with overall leaderboard are visited -> no infinite
+                            // recursion occurs
+                            updateGroupOwnershipForEventHierarchyInternal(event);
+                        }
                     }
                 });
     }
@@ -155,10 +162,8 @@ public class SailingHierarchyOwnershipUpdater {
     private void updateGroupOwner(QualifiedObjectIdentifier id) {
         final OwnershipAnnotation ownership = securityService.getOwnership(id);
         if (updateStrategy.needsUpdate(id, ownership)) {
-            String permissionToCheck = id.getTypeIdentifier() + WildcardPermission.PART_DIVIDER_TOKEN
-                    + DefaultActions.CHANGE_OWNERSHIP.name() + WildcardPermission.PART_DIVIDER_TOKEN
-                    + id.getTypeRelativeObjectIdentifier();
-            SecurityUtils.getSubject().checkPermission(permissionToCheck);
+            final WildcardPermission permission = id.getPermission(DefaultActions.CHANGE_OWNERSHIP);
+            SecurityUtils.getSubject().checkPermission(new ShiroWildcardPermissionFromParts(permission));
             objectsToUpdateOwnershipsFor.add(id);
         }
     }

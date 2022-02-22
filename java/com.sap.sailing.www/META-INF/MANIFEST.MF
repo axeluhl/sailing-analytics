@@ -10,6 +10,7 @@ Web-ContextPath: /
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0"
 Bundle-ClassPath: .
+Export-Package: com.sap.sailing.www
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.debranding,
  com.sap.sse.security,

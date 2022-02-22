@@ -10,7 +10,6 @@ public class LeaderboardConfigImagesBarCell extends DefaultActionsImagesBarCell 
     public static final String ACTION_EDIT_SCORES = "ACTION_EDIT_SCORES";
     public static final String ACTION_EDIT_COMPETITORS = "ACTION_EDIT_COMPETITORS";
     public static final String ACTION_CONFIGURE_URL = "ACTION_CONFIGURE_URL";
-    public static final String ACTION_EXPORT_XML = "ACTION_EXPORT_XML";
     public static final String ACTION_OPEN_COACH_DASHBOARD = "ACTION_OPEN_COACH_DASHBOARD";
     public static final String ACTION_SHOW_REGATTA_LOG = "ACTION_SHOW_REGATTA_LOG";
     public static final String ACTION_CREATE_PAIRINGLIST = "ACTION_CREATE_PAIRINGLIST";
@@ -33,7 +32,6 @@ public class LeaderboardConfigImagesBarCell extends DefaultActionsImagesBarCell 
                 new ImageSpec(ACTION_CONFIGURE_URL, stringMessages.actionConfigureUrl(),
                         resources.settingsActionIcon()),
                 getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec(),
-                new ImageSpec(ACTION_EXPORT_XML, stringMessages.actionExportXML(), resources.exportXMLIcon()),
                 new ImageSpec(ACTION_OPEN_COACH_DASHBOARD, stringMessages.actionOpenDashboard(),
                         resources.openCoachDashboard()),
                 new ImageSpec(ACTION_SHOW_REGATTA_LOG, stringMessages.regattaLog(), resources.flagIcon()),

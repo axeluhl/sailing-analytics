@@ -35,7 +35,7 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
     private final String swissTimingUrl;
     private final transient SwissTimingReplayService replayService;
     
-    class SwissTimingReplayRaceTracker extends AbstractRaceTrackerImpl {
+    class SwissTimingReplayRaceTracker extends AbstractRaceTrackerImpl<SwissTimingReplayConnectivityParameters> {
         private final WindStore windStore;
         private SwissTimingReplayToDomainAdapter listener;
 

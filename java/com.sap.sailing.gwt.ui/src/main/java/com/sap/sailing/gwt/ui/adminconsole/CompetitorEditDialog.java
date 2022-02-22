@@ -115,9 +115,9 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         this.displayColorTextBox = createColorTextBox(competitorToEdit.getColor()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         DialogUtils.makeCountrySelection(this.threeLetterIocCountryCode, competitorToEdit.getThreeLetterIocCountryCode());
-        this.flagImageURL = new URLFieldWithFileUpload(stringMessages);
+        this.flagImageURL = new URLFieldWithFileUpload(stringMessages, "image/*");
         this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
-        this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages, "image/*");
         this.imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
         this.yardstickLabel = new Label(stringMessages.yardstickNumber(yardstickScale));
         this.yardstickNumber = createDoubleBox(competitorToEdit.getTimeOnTimeFactor() == null ? null

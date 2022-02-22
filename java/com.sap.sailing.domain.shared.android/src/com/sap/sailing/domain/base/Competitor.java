@@ -26,6 +26,7 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
 
     boolean hasEmail();
 
+    @Dimension(messageKey="ShortName", ordinal=12)
     String getShortName();
 
     /**

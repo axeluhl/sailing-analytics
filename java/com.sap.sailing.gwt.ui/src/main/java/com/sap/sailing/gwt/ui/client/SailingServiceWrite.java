@@ -72,6 +72,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -83,6 +84,8 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -297,6 +300,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             List<VideoDTO> videos, List<UUID> leaderboardGroupIds)
             throws UnauthorizedException;
 
+    EventDTO updateEvent(EventDTO eventDTO) throws UnauthorizedException, IOException;
+
     EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURLString,
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
@@ -432,6 +437,13 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, boolean useOfficialEventsToUpdateRaceLog,
             String tracTracUsername, String tracTracPassword) throws UnauthorizedException, Exception;
+
+    void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
+            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
+            String yellowBrickPassword) throws Exception;
+
+    void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
+            String yellowBrickPassword);
 
     MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
             Position fixedPosition);
@@ -619,9 +631,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      */
     void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples) throws UnauthorizedException, NotFoundException;
+
     /**
-     * @param priority
-     *            TODO
      * @param raceLogFrom
      *            identifies the race log to copy from by its leaderboard name, race column name and fleet name
      * @param raceLogsTo
@@ -629,7 +640,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      * @throws NotFoundException
      */
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
-            Set<Triple<String, String, String>> toTriples, int priority)
+            Set<Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
             throws UnauthorizedException, NotFoundException;
     
     /**
@@ -694,4 +705,9 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     List<DeviceMappingDTO> getDeviceMappings(String leaderboardName)
             throws UnauthorizedException, DoesNotHaveRegattaLogException, TransformationException, NotFoundException;
 
+    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) throws UnauthorizedException;
+
+    void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> singletonList);
+
+    void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject);
 }

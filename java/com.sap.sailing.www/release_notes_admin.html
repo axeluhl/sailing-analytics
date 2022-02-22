@@ -11,7 +11,7 @@
     <div class="logoAndTitlePanel">
         <script>
             if (!${applicationScope['clientConfigurationContext.debrandingActive']}){
-                document.write("<a class=\"sapLogo\" href=\"http://www.sap.com\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n");
+                document.write("<a class=\"sapLogo\" href=\"https://www.sap.com?campaigncode=CRM-XH21-OSP-Sailing\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n");
             }
         </script>
         <div class="sailingAnalyticsLabelPanel">
@@ -23,6 +23,165 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">February 2022</h2>
+          <ul class="bulletList">
+            <li>The policy for selecting replication instances can now be switched for running replica sets.
+                Users now have the possibility to switch from a replica running on a shared instance to
+                the use of dedicated replica instances, fully managed by the auto-scaling group. Conversely,
+                a replica set using only fully-managed dedicated replica instances can be switched (back)
+                to a more cost-efficient, yet still highly available replica running on a shared instance
+                if workload does not require additional replicas launched by the auto-scaling group.</li>
+            <li>A replica set's master process can now be moved to a different instance. Users can choose
+                between moving to a shared or a dedicated instance. With this, a replica set that started
+                out in an inexpensive shared set-up can me modified so that it uses a dedicated master instance.
+                Furthermore, with this a scale-up and scale-down for the instance hosting the master process
+                is now supported.</li>
+            <li>Added a Remove button for application replica sets that is mutli-selection aware.</li>
+            <li>The instance type of the replicas managed by a replica set's auto-scaling group can now be
+                modified, and one by one, the replicas in the set managed by the auto-scaling group will
+                be migrated to the new instance type, always keeping at least as many replicas available
+                as there were when the action was started. Available as action icon and as multi selection-aware
+                action button.</li>
+          </ul>
+          <h2 class="articleSubheadline">January 2022</h2>
+          <ul class="bulletList">
+            <li>Landscape management now offers to upgrade auto-scaling groups after an AMI update.</li>
+            <li>Replica sets can now also be managed on shared instances. This goes for new master processes which
+                can be deployed into the instance hosting another replica set's master process, or into a new
+                instance prepared for being shared. Alternatively to having the auto-scaling group provide a
+                dedicated first replica to increase availability, users can now choose to have a replica be deployed
+                to a shared instance that runs in an availability zone different from that of the one hosting the
+                replica set's master process. If no such shared instance with the port required by the new
+                replica set available, a new one is created in an availability zone other than the one hosting
+                this replica set's master process, and the first replica is deployed onto that.<p>
+                With these steps, operators are now able to set up new replica sets using only shared
+                instances when starting. While auto-scaling replicas will still be launched into new
+                dedicated instances when the workload requires it, small-scale set-ups with low workloads
+                can now be mapped very cost-effectively.</li>
+          </ul>
+          <h2 class="articleSubheadline">December 2021</h2>
+          <ul class="bulletList">
+            <li>The import of data from another server ("Advanced - Master Data Import") now waits for tracked races
+                to have finished loading when tracking the races imported has been requested. In this case, the
+                sub-progress of that step is determined by the share of races that already have finished loading.</li>
+          </ul>
+          <h2 class="articleSubheadline">October 2021</h2>
+          <ul class="bulletList">
+			<li>Added "Elan 350" boat class</li>
+			<li>Added "IRC" as a class</li>
+			<li>Fixed issue with mixed-up boat ID and competitor ID during competitor import</li>
+			<li>A new experimental connector for YellowBrick is now provided. Provide a "race URL" such
+			    as "rmsr2021" to start tracking a race. It is advisable to import competitors up-front.
+			    A CSV file, as exported, e.g., from Excel, that has the column headers
+			    <ul>
+			      <li>Race Name</li>
+			      <li>Sail Number</li>
+			      <li>Model</li>
+			      <li>loa</li>
+			      <li>Entrant</li>
+			      <li>Country</li>
+			      <li>Skipper</li>
+			      <li>cat-IRC</li>
+			      <li>IRC</li>
+			      <li>MOCRA</li>
+			      <li>DH</li>
+			      <li>ORC only</li>
+			      <li>YellowBrick Name</li>
+			      <li>Competitor ID</li>
+			    </ul>
+			    will be parsed properly. The "YellowBrick Name" column must contain the name
+			    exactly as it appears in the YellowBrick API for the boat. The "Competitor ID"
+			    column must be constructed as "YB-{raceURL}-{YellowBrick Name}". For example,
+			    if your race URL is "rmsr2021" and a competitor has the YellowBrick Name "BAIT" then
+			    the "Competitor ID" must be "YB-rmsr2021-BAIT".<p>
+			    The IRC column holds the handicap ToT / TMF / TCC value (e.g., 1.013) The "cat-IRC"
+			    is a category / classification, such as "Class 5" which will show in the competitor
+			    import as a suggestion for the fleet name. MOCRA, DH, and ORC only are columns which
+			    may be empty or have any non-empty string such as "x", indicating that the competitor
+			    is competing in the MOCRA, Double-Handed, and/or ORC class. If the "cat-IRC" is "undefined"
+			    then "ORC only" competitors will have "ORC" suggested as the race name and fleet name.<p>
+			    The connector will ask for new positions every minute which is safely below the request
+			    quota of once every five seconds set by YellowBrick. If the newest fix is more than 24h
+			    old, the tracker stops requesting new positions automatically.
+			</li>
+			<li>It is now possible to copy course marks, course definitions and marks' tracking device
+			    associations from one regatta to another. Use the "Copy Course and Competitors" action icon
+			    in the "Connectors - Smartphone Tracking" race column list bottom left.</li>
+                    </ul>
+          <h2 class="articleSubheadline">September 2021</h2>
+          <ul class="bulletList">
+			<li>Let Igtimi connections that search devices while holding locks time out after 10s.
+			    This avoids rare deadlock issues in case the Igtimi servers may not deliver an answer.</li>
+			<li>Landscape management now offers an implementation for archiving an application replica set.</li>
+          </ul>
+          <h2 class="articleSubheadline">August 2021</h2>
+          <ul class="bulletList">
+			<li>Added boat classes iQFOil Men/Women/Youth</li>
+          </ul>
+          <h2 class="articleSubheadline">July 2021</h2>
+          <ul class="bulletList">
+			<li>Creating and editing a Regatta object now uses the already loaded Events with their course areas
+			    to offer the event and course area selection in the Regatta dialog. This accelerates opening
+			    the dialog significantly, especially when used on a server with many events, such as the archive
+			    server or any public server such as my.sapsailing.com.</li>
+			<li>Fixed a problem with Manage2Sail competitor import which had been introduced when the YachtScoring
+			    competitor import had been added.</li>
+			<li>In order to restrict an overwhelming and uselessly long list of objects to select from, object lists
+			    are now reduced in several more places, based on permissions. For example, a user will only be offered
+			    those Leaderboard Groups for selection in the Event create/edit dialog that the user has the
+			    <tt>UPDATE</tt> permission for. Likewise, the events providing the course areas to select from
+			    are restricted when creating/editing a Regatta or a Flexible Leaderboard and when setting up a
+			    Race Manager App device configuration. The same applies to the
+			    list of events shown in the select box in the Manage2Sail Regatta Structure Import panel. Also,
+			    the leaderboards table in the "Leaderboards / Leaderboard groups" panel now has a filter checkbox
+			    that by default displays only those leaderboards that the user has the <tt>UPDATE</tt> permission
+			    for.</li>
+			<li>A problem with uninitialized race timings may have led to endless loops trying to identify a valid
+			    time range for wind sampling. This has been fixed now.</li>
+			<li>A Slovenian translation of the user interface has been added.</li>
+		        <li>The IOC code for "Russian Olympic Committee" is now available under the "ROC" abbreviation.</li>
+		        <li>Empty Igtimi WindBot messages, such as a COG message with no payload, no longer causes an uncaught
+		            exception but is now handled properly and logged accordingly. Other fixes in the same message now
+		            are processed as they should.</li>
+		        <li>After Igtimi changed their WebSocket implementation, we had to lower the heartbeat sending interval
+		            from 120s to 15s which now avoids connection interrupts.</li>
+		        <li>The <tt>/sailingserver/api/v2/leaderboards/{leaderboard-name}</tt> API now also delivers the
+		            <tt>currentSpeedOverGround-kts</tt> field if the competitor is not yet in the race.</li>
+		        <li>The <tt>/sailingserver/api/v1/regattas/{regattaName}/races/{raceName}/markpassings</tt> API method
+		            has been extended to also deliver the "raw" passing order (which can vary from the tracked rank, e.g.,
+		            because a handicap ranking metric is in use), as well as a hypothetical score that one gets by passing
+		            the passing order through the scoring scheme and applying penalties or score corrections. Furthermore,
+		            the IRM/MaxPointsReason is output. See
+		            <a href="/sailingserver/webservices/api/v1/raceMarkPassingsGetDoc.html">/sailingserver/webservices/api/v1/raceMarkPassingsGetDoc.html</a>
+		            for more details.</li>
+                    </ul>
+                    <h2 class="articleSubheadline">June 2021</h2>
+                    <ul class="bulletList">
+                        <li>Infer a tracking start/end time from race start/end time only if the regatta is marked accordingly.</li>
+                        <li>Bugfix in landscape management: when upgrading a replica set whose SERVER_NAME property does
+			                not equal the hostname used to address it, the temporary replica was trying to replicate
+			                from {SERVER_NAME}.sapsailing.com instead of {hostname}.sapsailing.com.</li>
+			<li>GRIB file import in the "Tracked Races / Wind" panel now turns each position into a separate wind source,
+			    leading to better visual interpolation in streamlet display on map.</li>
+			<li>The de-selection of wind sources for particular races in the tab "Tracked Races / Wind" is now stored persistently.
+			    This way, the de-selection survives re-loading of the race as well as re-starting or upgrading a server.</li>
+                    </ul>
+                    <h2 class="articleSubheadline">May 2021</h2>
+                    <ul class="bulletList">
+                        <li>Added the RS21 boat class including logo, hull length and visualization type as a pre-defined boat class.</li>
+                        <li>Fixed an error regarding removing of non-transitive roles.</li>
+                        <li>Fixed problem with changing the ownership hierarchy of event series that have a leaderboard group
+                            with an overall leaderboard.</li>
+                        <li>Bugfix: When selecting "ORC Performance Curve (&gt;>=2015, leader as baseline)" the certificate management button
+                            was missing in the Regatta panel in the AdminConsole. This has now been fixed.</li>
+                        <li>Bugfix: When an incomplete ORC certificate that is missing allowances for certain pre-configured
+			    course types, such as "non-Spinnaker," then loading those certificates after a server re-start
+			    failed. This problem has now been fixed, and such missing allowances will be represented as 0.0s values.</li>
+			<li>Bugfix: ORC leg parameters editor reported tracked TWA flipped by 180°.</li>
+			<li>Added "sanfrancisco" as a new WindFinder spot collection, covering several stations around the San Francisco Bay</li>
+			<li>Bugfix for a regression: Updating the TracTrac live delay stopped working when no "official result reconciliation"
+			    was selected.</li>
+                    </ul>
                     <h2 class="articleSubheadline">April 2021</h2>
                     <ul class="bulletList">
                         <li>The <tt>/sailingserver/api/v1/wind/putWind</tt> method now has a missing null check in case

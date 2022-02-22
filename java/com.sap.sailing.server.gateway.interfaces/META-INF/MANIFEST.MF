@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Interface
+Bundle-SymbolicName: com.sap.sailing.server.gateway.interfaces
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sailing.server.gateway.interface
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.sap.sailing.server.gateway.interfaces
+Import-Package: com.sap.sailing.domain.common,
+ com.sap.sse.common
+Require-Bundle: org.json.simple,
+ com.sap.sailing.domain,
+ com.sap.sse.shared.android,
+ org.apache.httpcomponents.httpclient
+Bundle-ActivationPolicy: lazy
