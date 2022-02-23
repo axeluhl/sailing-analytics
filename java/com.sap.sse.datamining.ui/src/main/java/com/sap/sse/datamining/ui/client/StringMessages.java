@@ -96,6 +96,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String followingStatisticsAreNotSupportedByAggregatorWarning();
     String configureQueryParametersDialog();
     String parameterType();
+    String allValues();
     String listOfValues();
     String containsText();
     String endsWithText();

@@ -465,3 +465,10 @@ input.magnifier {
     border-color: #939393;
     background-color: #ffb700;
 }
+
+.gwt-ToggleButton-up.query-parameter {
+    background-color: #a6a6a6;
+}
+.gwt-ToggleButton-up-hovering.query-parameter {
+    background-color: #7c7c7c;
+}

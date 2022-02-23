@@ -57,6 +57,7 @@ import com.sap.sse.datamining.shared.impl.dto.parameters.EndsWithFilterParameter
 import com.sap.sse.datamining.shared.impl.dto.parameters.StartsWithFilterParameter;
 import com.sap.sse.datamining.shared.impl.dto.parameters.TextConstrainedFilterParameter;
 import com.sap.sse.datamining.shared.impl.dto.parameters.ValueListFilterParameter;
+import com.sap.sse.datamining.shared.impl.dto.parameters.WildcardParameter;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
@@ -73,10 +74,12 @@ import com.sap.sse.gwt.client.shared.controls.AbstractObjectRenderer;
 public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<SerializableSettings> { 
     
     private enum FilterParameterType {
-        ValueList, Contains, StartsWith, EndsWith;
+        All, ValueList, Contains, StartsWith, EndsWith;
         
         public static FilterParameterType fromParameter(FilterDimensionParameter parameter) {
-            if (parameter instanceof ValueListFilterParameter) {
+            if (parameter instanceof WildcardParameter) {
+                return All;
+            } else if (parameter instanceof ValueListFilterParameter) {
                 return ValueList;
             } else if (parameter instanceof ContainsTextFilterParameter) {
                 return Contains;
@@ -91,6 +94,8 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         
         public String getDisplayString(StringMessages stringMessages) {
             switch (this) {
+            case All:
+                return stringMessages.allValues();
             case ValueList:
                 return stringMessages.listOfValues();
             case Contains:
@@ -99,13 +104,12 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
                 return stringMessages.endsWithText();
             case StartsWith:
                 return stringMessages.startsWithText();
-            default:
-                throw new IllegalStateException("Display string for " + this + " not available");
             }
+            throw new IllegalStateException("Display string for " + this + " not available");
         }
         
         public boolean isTextConstrained() {
-            return this != ValueList;
+            return this != ValueList && this != All;
         }
     }
 
@@ -143,14 +147,17 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     private FunctionDTO dimension;
     
     private Consumer<Optional<FilterDimensionParameter>> onApply;
+    private final Runnable onClose;
     
     public ConfigureQueryParametersDialog(DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, DataMiningSession session, DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+            ErrorReporter errorReporter, DataMiningSession session, DataRetrieverChainDefinitionProvider retrieverChainProvider,
+            Runnable onClose) {
         super(null, null);
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.session = session;
         this.retrieverChainProvider = retrieverChainProvider;
+        this.onClose = onClose;
         
         // Header Controls
         retrieverLevelLabel = new Label();
@@ -167,7 +174,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
             }
         });
         parameterTypeSelectionBox.addValueChangeHandler(event -> showCreationControlsFor(event.getValue()));
-        parameterTypeSelectionBox.setValue(FilterParameterType.ValueList);
+        parameterTypeSelectionBox.setValue(FilterParameterType.All);
         parameterTypeSelectionBox.setAcceptableValues(Arrays.asList(FilterParameterType.values()));
         
         // Content Controls
@@ -202,10 +209,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         
         // Dialog Buttons
         Button closeButton = new Button(getDataMiningStringMessages().cancel());
-        closeButton.addClickHandler((e) -> {
-            hide();
-            clearForm();
-        });
+        closeButton.addClickHandler((e) -> close());
         
         Button applyButton = new Button(getDataMiningStringMessages().apply());
         applyButton.addClickHandler(e -> applyParameter());
@@ -304,7 +308,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         this.retrieverLevel = data.getRetrieverLevel();
         this.dimension = data.getDimension();
         
-        this.updateCreationControlsAndContent(FilterParameterType.ValueList);
+        this.updateCreationControlsAndContent(FilterParameterType.All);
         this.onApply = onApply;
         dialog.center();
     }
@@ -321,6 +325,8 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         }
         
         this.updateCreationControlsAndContent(FilterParameterType.fromParameter(parameter));
+        this.onApply = onApply;
+        dialog.center();
     }
     
     private void updateCreationControlsAndContent(FilterParameterType parameterType) {
@@ -332,7 +338,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         busyIndicator.setBusy(true);
         HashSet<FunctionDTO> dimensionDTOs = new HashSet<>();
         dimensionDTOs.add(dimension);
-        // TODO Filter values by current selection for WYSIWYG effect?
         dataMiningService.getDimensionValuesFor(session, retrieverChainProvider.getDataRetrieverChainDefinition(), retrieverLevel,
                 dimensionDTOs, retrieverChainProvider.getRetrieverSettings(), /*filterSelection*/ new HashMap<>(), LocaleInfo.getCurrentLocale().getLocaleName(),
                 new AsyncCallback<QueryResultDTO<HashSet<Object>>>() {
@@ -363,8 +368,30 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     }
     
     private void showCreationControlsFor(FilterParameterType type) {
-        final StringMessages stringMessages = getDataMiningStringMessages(); 
-        if (type.isTextConstrained()) {
+        final StringMessages stringMessages = getDataMiningStringMessages();
+        if (type == FilterParameterType.All) {
+            filterPanel.getTextBox().getElement().setPropertyString("placeholder", stringMessages.search());
+            filterInputToApply = filterPanel.getTextBox().getValue();
+            filterPanel.search(null);
+            
+            gridLabel.setText(getDataMiningStringMessages().itemsMatchingTextConstraint());
+            if (dataGrid.getColumn(0) == checkboxColumn) {                
+                dataGrid.removeColumn(checkboxColumn);
+                dataGrid.setColumnWidth(0, "100%");
+            }
+            dataGrid.setSelectionModel(null);
+            
+            // Update styles
+            final Style headerStyle = gridHeaderContainer.getElement().getStyle();
+            headerStyle.setProperty("flexDirection", "column");
+            headerStyle.setProperty("justifyContent", null);
+            headerStyle.setProperty("alignItems", null);
+            headerStyle.setMarginBottom(0, Unit.PX);
+            
+            final Style filterPanelStyle = filterPanel.getElement().getStyle();
+            filterPanelStyle.setMarginBottom(10, Unit.PX);
+            filterPanelStyle.setWidth(100, Unit.PCT);
+        } else if (type.isTextConstrained()) {
             filterPanel.getTextBox().getElement().setPropertyString("placeholder", type.getDisplayString(stringMessages));
             if (filterInputToApply != null) {
                 filterPanel.getTextBox().setValue(filterInputToApply);
@@ -424,9 +451,11 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     }
     
     private void applyParameter() {
-        hide();
         FilterDimensionParameter parameter;
         switch (getSelectedParameterType()) {
+        case All:
+            parameter = new WildcardParameter(retrieverLevel, dimension);
+            break;
         case ValueList:
             parameter = new ValueListFilterParameter(retrieverLevel, dimension, new HashSet<>(selectionModel.getSelectedSet()));
             break;
@@ -443,11 +472,13 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
             throw new IllegalStateException("Not implemented for '" + getSelectedParameterType() + "'");
         }
         onApply.accept(Optional.of(parameter));
-        clearForm();
+        close();
     }
     
-    public void hide() {
+    private void close() {
         dialog.hide();
+        clearForm();
+        onClose.run();
     }
     
     private void clearForm() {

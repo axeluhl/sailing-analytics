@@ -60,6 +60,7 @@ import com.sap.sse.datamining.ui.client.event.CreateFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
 import com.sap.sse.datamining.ui.client.event.EditFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.FilterParametersChangedEvent;
+import com.sap.sse.datamining.ui.client.event.FilterParametersDialogClosedEvent;
 import com.sap.sse.datamining.ui.client.execution.ManagedDataMiningQueryCallback;
 import com.sap.sse.datamining.ui.client.execution.SimpleManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
@@ -226,6 +227,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         Image parameterIcon = new Image(Resources.parameterIcon().getSafeUri());
         parameterIcon.setSize("16px", "16px");
         ToggleButton parameterSettingsButton = new ToggleButton(parameterIcon);
+        parameterSettingsButton.addStyleName("query-parameter");
         parameterSettingsButton.addClickHandler(e -> {
             if (this.parameter == null) {                
                 DataMiningEventBus.fire(
@@ -234,6 +236,10 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
             } else {
                 DataMiningEventBus.fire(new EditFilterParameterEvent(parameter));
             }
+        });
+        DataMiningEventBus.addHandler(FilterParametersDialogClosedEvent.TYPE, event -> {
+            this.parameter = event.getParameter(this.retrieverLevel, this.dimension);
+            parameterSettingsButton.setDown(parameter != null);
         });
         headerPanel.add(parameterSettingsButton);
         headerPanel.setCellHorizontalAlignment(parameterSettingsButton, HasHorizontalAlignment.ALIGN_RIGHT);

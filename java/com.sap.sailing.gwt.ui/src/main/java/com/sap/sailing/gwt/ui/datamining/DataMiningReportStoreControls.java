@@ -48,13 +48,14 @@ import com.sap.sse.datamining.ui.client.event.CreateFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
 import com.sap.sse.datamining.ui.client.event.EditFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.FilterParametersChangedEvent;
+import com.sap.sse.datamining.ui.client.event.FilterParametersDialogClosedEvent;
 import com.sap.sse.datamining.ui.client.selection.ConfigureQueryParametersDialog;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
- * UI Panel with the three buttons to load, store and remove and the suggest box to select a stored data mining query by
+ * UI Panel with the three buttons to load, store and remove and the suggest box to select a stored data mining report by
  * name.
  */
 public class DataMiningReportStoreControls extends Composite {
@@ -129,7 +130,7 @@ public class DataMiningReportStoreControls extends Composite {
         applyReportBusyIndicator.add(glass);
         applyReportBusyIndicator.add(labeledBusyIndicator);
 
-        configureQueryParametersDialog = new ConfigureQueryParametersDialog(dataMiningService, errorReporter, session, retrieverChainProvider);
+        configureQueryParametersDialog = new ConfigureQueryParametersDialog(dataMiningService, errorReporter, session, retrieverChainProvider, this::onDialogClose);
         DataMiningEventBus.addHandler(CreateFilterParameterEvent.TYPE, this::onCreateFilterParameter);
         DataMiningEventBus.addHandler(EditFilterParameterEvent.TYPE, this::onEditFilterParameter);
         
@@ -209,6 +210,11 @@ public class DataMiningReportStoreControls extends Composite {
             });
             DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, activeIndex));
         });
+    }
+    
+    private void onDialogClose() {
+        final int activeIndex = resultsPresenter.getCurrentPresenterIndex();
+        DataMiningEventBus.fire(new FilterParametersDialogClosedEvent(filterParameters, activeIndex));
     }
 
     private DataMiningReportDTO buildReport() {
