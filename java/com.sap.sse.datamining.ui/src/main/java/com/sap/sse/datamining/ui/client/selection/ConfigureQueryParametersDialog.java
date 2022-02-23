@@ -213,6 +213,8 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         
         Button applyButton = new Button(getDataMiningStringMessages().apply());
         applyButton.addClickHandler(e -> applyParameter());
+        dataGrid.addRowCountChangeHandler((e) -> applyButton.setEnabled(e.getNewRowCount() > 0));
+        selectionModel.addSelectionChangeHandler((e) -> applyButton.setEnabled(selectionModel.getSelectedSet().size() > 0));
         
         // Layout
         FlowPanel controlsPanel = new FlowPanel();
@@ -274,12 +276,15 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     }
     
     private DataGrid<Serializable> createFilterValuesGrid() {
+        final StringMessages stringMessages = getDataMiningStringMessages();
+        
         DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
         DataGrid<Serializable> filterValues = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
         filterValues.setAutoHeaderRefreshDisabled(true);
         filterValues.setAutoFooterRefreshDisabled(true);
         filterValues.addStyleName("dataMiningBorderTop");
         filterValues.setHeight(FilterValuesGridHeight);
+        filterValues.setEmptyTableWidget(new Label(stringMessages.noMatchingValuesOrNoFilter()));
         
         // TODO Replace with SelectionCheckboxColumn like in TracTracEventManagementPanel?
         Column<Serializable, ?> checkboxColumn = new Column<Serializable, Boolean>(new CheckboxCell(true, false)) {
@@ -547,8 +552,11 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
                 return true;
             }
             
-            final String text = object.toString().toUpperCase();
             final String constraint = filterPanel.getTextBox().getValue().trim().toUpperCase();
+            if (constraint.isEmpty()) {
+                return false;
+            }
+            final String text = object.toString().toUpperCase();
             switch (selectedParameterType) {
             case Contains:
                 return text.contains(constraint);
