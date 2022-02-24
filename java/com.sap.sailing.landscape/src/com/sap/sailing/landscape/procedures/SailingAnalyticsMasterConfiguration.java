@@ -24,7 +24,8 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
         @Override
         protected Map<ProcessConfigurationVariable, String> getUserData() {
             final Map<ProcessConfigurationVariable, String> result = new HashMap<>(super.getUserData());
-            result.put(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-master-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
+            // TODO bug5684: maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing? It would allow us to keep the knowledge about which SecurityService is being replicated by a master by default in one place.
+            result.put(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-master-server");
             return result;
         }
 
