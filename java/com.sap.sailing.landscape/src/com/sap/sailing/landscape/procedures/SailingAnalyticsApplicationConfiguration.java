@@ -33,6 +33,8 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
      * <li>If no {@link #setExpeditionPort(int) expedition UDP port} is provided, the {@link #DEFAULT_EXPEDITION_PORT} is used (2010).</li>
      * <li>If no {@link #setServerDirectory(String) server directory} is specified, it defaults to {@link ApplicationProcessHost#DEFAULT_SERVER_PATH}.</li>
      * <li>If no {@link #setRelease(Release) release} is specified, it defaults to {@link SailingReleaseRepository#getLatestMasterRelease()}.</li>
+     * <li>The {@link DefaultProcessConfigurationVariables#ADDITIONAL_JAVA_ARGS} variable is extended by system properties that configure
+     *     security, landscape data, and basic sailing master data to be shared across the {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME} domain.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -165,9 +167,14 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         }
         
         /**
+         * Subclasses may re-define but should by default call this implementation to start with and return a new,
+         * extended sequence of strings.
+         * 
          * @return the additional strings to append, separated by spaced, to the
          *         {@link DefaultProcessConfigurationVariables#ADDITIONAL_JAVA_ARGS ${ADDITIONAL_JAVA_ARGS}} variable.
-         *         An example string in the resulting sequence could be {@code "-Da=b"}
+         *         An example string in the resulting sequence could be {@code "-Da=b"}. This implementation returns the
+         *         system properties required to configure security shared across the
+         *         {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME} domain.
          */
         protected Iterable<String> getAdditionalJavaArgs() {
             return getAdditionalJavaArgsForSharedSecurity(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME, SharedLandscapeConstants.DEFAULT_SECURITY_SERVICE_REPLICA_SET_NAME);

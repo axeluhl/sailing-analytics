@@ -271,6 +271,11 @@ implements UserDataProvider {
                     && inboundReplicationConfiguration.get().getInboundMasterExchangeName() != null;
         }
         
+        protected boolean isInboundMasterServletHostSet() {
+            return inboundReplicationConfiguration != null && inboundReplicationConfiguration.isPresent()
+                    && inboundReplicationConfiguration.get().getMasterHostname() != null;
+        }
+        
         protected boolean isOutboundReplicationRabbitMQEndpointSet() {
             return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundRabbitMQEndpoint() != null;
         }

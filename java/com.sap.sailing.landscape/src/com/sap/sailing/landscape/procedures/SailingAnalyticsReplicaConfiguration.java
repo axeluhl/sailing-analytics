@@ -22,8 +22,7 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
      * <li>The {@link #getInboundReplicationConfiguration() inbound replication}
      * {@link InboundReplicationConfiguration#getInboundMasterExchangeName() exchange name} defaults to the
      * {@link #setServerName(String) server name} property</li>
-     * <li>The {@link DefaultProcessConfigurationVariables#USE_ENVIRONMENT} variable is set to
-     * {@code "live-replica-server"}.</li>
+     * <li>The {@link DefaultProcessConfigurationVariables#AUTO_REPLICATE} variable is set to {@code true}</li>
      * <li>If no {@link #setDatabaseName(String) database name is set} explicitly, it defaults to the
      * {@link #getServerName() server name} with the suffix {@code -replica} appended to it.</li>
      * <li>If no {@link #setDatabaseConfiguration(Database) database configuration is set} explicitly, it defaults
