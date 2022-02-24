@@ -27,6 +27,6 @@ public interface UserDataProvider {
     }
 
     static String getAsEnvironmentVariableAssignment(ProcessConfigurationVariable variable, String value) {
-        return variable+"=\""+value.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'")+"\"";
+        return variable+"=\""+value.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'").replaceAll("\\$", "\\\\\\$")+"\"";
     }
 }

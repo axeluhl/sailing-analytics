@@ -86,11 +86,10 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
         @Override
         protected Map<ProcessConfigurationVariable, String> getUserData() {
             final Map<ProcessConfigurationVariable, String> result = new HashMap<>(super.getUserData());
-            // TODO bug5684: maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
-            result.put(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-replica-server");
+            result.put(DefaultProcessConfigurationVariables.AUTO_REPLICATE, "true");
             return result;
         }
-        
+
         @Override
         protected String getDatabaseName() {
             return isDatabaseNameSet() ? super.getDatabaseName() : super.getDatabaseName()+DEFAULT_REPLICA_DATABASE_NAME_SUFFIX;

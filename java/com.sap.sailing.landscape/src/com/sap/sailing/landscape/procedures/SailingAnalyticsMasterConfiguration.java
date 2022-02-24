@@ -1,10 +1,17 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sailing.shared.server.SharedSailingData;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
+import com.sap.sse.landscape.aws.AwsLandscapeState;
+import com.sap.sse.security.SecurityService;
 
 public class SailingAnalyticsMasterConfiguration<ShardingKey>
 extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
@@ -21,11 +28,33 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends SailingAnalyticsApplicationConfiguration.BuilderImpl<BuilderT, SailingAnalyticsMasterConfiguration<ShardingKey>, ShardingKey>
     implements Builder<BuilderT, ShardingKey> {
+        /**
+         * The security-service application replica set currently has a deviating, non-default RabbitMQ exchange name
+         * used for its replication. By default, exchanges are named after the replica set name, but here the legacy
+         * name has an underscore instead of a dash.
+         */
+        private static final String SECURITY_SERVICE_EXCHANGE_NAME = "security_service";
+
         @Override
         protected Map<ProcessConfigurationVariable, String> getUserData() {
             final Map<ProcessConfigurationVariable, String> result = new HashMap<>(super.getUserData());
-            // TODO bug5684: maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing? It would allow us to keep the knowledge about which SecurityService is being replicated by a master by default in one place.
-            result.put(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-master-server");
+            result.put(DefaultProcessConfigurationVariables.REPLICATE_ON_START,
+                    Util.join(",", SecurityService.REPLICABLE_FULLY_QUALIFIED_CLASSNAME,
+                                   SharedSailingData.REPLICABLE_FULLY_QUALIFIED_CLASSNAME,
+                                   AwsLandscapeState.REPLICABLE_FULLY_QUALIFIED_CLASSNAME));
+            result.put(DefaultProcessConfigurationVariables.REPLICATE_MASTER_SERVLET_HOST,
+                    getDefaultSecurityServiceReplicaSetHostname(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME,
+                                                                SharedLandscapeConstants.DEFAULT_SECURITY_SERVICE_REPLICA_SET_NAME));
+            result.put(DefaultProcessConfigurationVariables.REPLICATE_MASTER_EXCHANGE_NAME, SECURITY_SERVICE_EXCHANGE_NAME);
+            return result;
+        }
+
+        @Override
+        protected Iterable<String> getAdditionalJavaArgs() {
+            final List<String> result = new ArrayList<>();
+            Util.addAll(super.getAdditionalJavaArgs(), result);
+            result.add(getAdditionalJavaArgForWindEstimation(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME));
+            result.add(getAdditionalJavaArgForPolarData(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME));
             return result;
         }
 
