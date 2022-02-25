@@ -4,7 +4,14 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +21,9 @@ import com.sap.sailing.selenium.api.event.SecurityApi.AccessToken;
 import com.sap.sailing.selenium.api.event.SecurityApi.Hello;
 import com.sap.sailing.selenium.api.event.SecurityApi.User;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.security.util.RemoteServerUtil;
+import com.sap.sse.security.util.SecuredServer;
+import com.sap.sse.security.util.impl.SecuredServerImpl;
 
 public class SecurityApiTest extends AbstractSeleniumTest {
     private static final String USERNAME = "max";
@@ -42,5 +52,26 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         final Hello hello = securityApi.sayHello(adminCtx);
         assertEquals("Responded principal of hello is different!", "admin", hello.getPrincipal());
         assertEquals("Responded authenticated of hello is different!", true, hello.isAuthenticated());
+    }
+
+    @Test
+    public void testSecuredServerGetUsername() throws ClientProtocolException, IOException, ParseException {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final SecuredServer securedServer = createSecuredServer(adminCtx);
+        assertEquals(ApiContext.ADMIN_USERNAME, securedServer.getUsername());
+    }
+
+    private SecuredServerImpl createSecuredServer(final ApiContext adminCtx) throws MalformedURLException {
+        return new SecuredServerImpl(new URL(adminCtx.getContextRoot()),
+                RemoteServerUtil.resolveBearerTokenForRemoteServer(adminCtx.getContextRoot(), ApiContext.ADMIN_USERNAME,
+                        ApiContext.ADMIN_PASSWORD));
+    }
+
+    @Test
+    public void testSecuredServerGetUserGroupId() throws ClientProtocolException, IOException, ParseException {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final SecuredServer securedServer = createSecuredServer(adminCtx);
+        assertNotNull(securedServer.getUserGroupIdByName("admin-tenant"));
+        assertNull(securedServer.getUserGroupIdByName("this-group-does-not-exist"));
     }
 }

@@ -37,15 +37,15 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/restsecurity/usergroup")
 public class UserGroupResource extends AbstractSecurityResource {
-
-    private static final String KEY_ROLE_NAME = "roleName";
-    private static final String KEY_FOR_ALL = "forAll";
-    private static final String KEY_ROLE_ID = "roleId";
-    private static final String KEY_USERNAME = "username";
-    private static final String KEY_ROLES = "roles";
-    private static final String KEY_USERS = "users";
-    private static final String KEY_GROUP_NAME = "groupName";
-    private static final String KEY_GROUP_ID = "groupId";
+    public static final String RESTSECURITY_USERGROUP = "/restsecurity/usergroup";
+    public static final String KEY_ROLE_NAME = "roleName";
+    public static final String KEY_FOR_ALL = "forAll";
+    public static final String KEY_ROLE_ID = "roleId";
+    public static final String KEY_USERNAME = "username";
+    public static final String KEY_ROLES = "roles";
+    public static final String KEY_USERS = "users";
+    public static final String KEY_GROUP_NAME = "groupName";
+    public static final String KEY_GROUP_ID = "groupId";
 
     @Path("{groupId}")
     @GET

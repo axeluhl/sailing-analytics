@@ -46,7 +46,7 @@ public final class RemoteServerUtil {
     private static String resolveBearerTokenForRemoteServer(URL base, String username, String password) throws Exception {
         String token = "";
         if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-            String path = "/security/api/restsecurity/access_token";
+            String path = "/security/api"+SecurityResource.RESTSECURITY+SecurityResource.ACCESS_TOKEN_METHOD;
             URL serverAddress = createRemoteServerUrl(base, path, null);
             URLConnection connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
                     t -> {

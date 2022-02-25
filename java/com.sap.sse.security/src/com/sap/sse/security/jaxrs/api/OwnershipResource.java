@@ -36,15 +36,16 @@ import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
-@Path("/restsecurity/ownership")
+@Path(OwnershipResource.RESTSECURITY_OWNERSHIP)
 public class OwnershipResource extends AbstractSecurityResource {
-    private static final String KEY_OBJECT_ID = "objectId";
-    private static final String KEY_OBJECT_TYPE = "objectType";
-    private static final String KEY_USERNAME = "username";
-    private static final String KEY_GROUP_ID = "groupId";
-    private static final String KEY_ACL = "acl";
-    private static final String KEY_ACTIONS = "actions";
-    private static final String KEY_DISPLAY_NAME = "displayName";
+    public static final String RESTSECURITY_OWNERSHIP = "/restsecurity/ownership";
+    public static final String KEY_OBJECT_ID = "objectId";
+    public static final String KEY_OBJECT_TYPE = "objectType";
+    public static final String KEY_USERNAME = "username";
+    public static final String KEY_GROUP_ID = "groupId";
+    public static final String KEY_ACL = "acl";
+    public static final String KEY_ACTIONS = "actions";
+    public static final String KEY_DISPLAY_NAME = "displayName";
 
     @Path("{objectType}/{typeRelativeObjectId}")
     @PUT
