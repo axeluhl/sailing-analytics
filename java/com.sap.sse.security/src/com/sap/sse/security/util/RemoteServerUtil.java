@@ -37,10 +37,14 @@ public final class RemoteServerUtil {
      */
     public static String resolveBearerTokenForRemoteServer(String hostname, int port, String username, String password) {
         try {
-            return resolveBearerTokenForRemoteServer(new URL(port==443?"https":"http", hostname, port, ""), username, password);
+            return resolveBearerTokenForRemoteServer(getBaseServerUrl(hostname, port), username, password);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static URL getBaseServerUrl(String hostname, int port) throws MalformedURLException {
+        return new URL(port==443?"https":"http", hostname, port, "");
     }
     
     private static String resolveBearerTokenForRemoteServer(URL base, String username, String password) throws Exception {

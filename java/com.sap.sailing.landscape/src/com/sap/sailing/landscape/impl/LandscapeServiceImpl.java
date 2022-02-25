@@ -19,6 +19,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -56,6 +58,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.ReplicationCredentials;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -89,6 +92,7 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -144,11 +148,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder =
                 createMasterConfigurationBuilder(name, masterReplicationBearerToken, optionalMemoryInMegabytesOrNull,
                         newSharedMasterInstance ? optionalMemoryTotalSizeFactorOrNull : null, region, release);
-        InboundReplicationConfiguration inboundMasterReplicationConfiguration = masterConfigurationBuilder.getInboundReplicationConfiguration().get();
-        final String securityBearerToken = inboundMasterReplicationConfiguration.getReplicationCredentials().getBearerToken(
+        final InboundReplicationConfiguration inboundMasterReplicationConfiguration = masterConfigurationBuilder.getInboundReplicationConfiguration().get();
+        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name, inboundMasterReplicationConfiguration.getReplicationCredentials(),
                 inboundMasterReplicationConfiguration.getMasterHostname(), inboundMasterReplicationConfiguration.getMasterHttpPort());
-        
-        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         masterHostBuilder
             .setInstanceType(InstanceType.valueOf(newSharedMasterInstance ? sharedInstanceType : dedicatedInstanceType))
@@ -279,10 +281,12 @@ public class LandscapeServiceImpl implements LandscapeService {
                     Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
-        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(replicaSetName);
         final AppConfigBuilderT masterConfigurationBuilder = createMasterConfigurationBuilder(replicaSetName,
                 masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
                 region, release);
+        final InboundReplicationConfiguration inboundMasterReplicationConfiguration = masterConfigurationBuilder.getInboundReplicationConfiguration().get();
+        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(replicaSetName, inboundMasterReplicationConfiguration.getReplicationCredentials(),
+                inboundMasterReplicationConfiguration.getMasterHostname(), inboundMasterReplicationConfiguration.getMasterHttpPort());
         final SailingAnalyticsProcess<String> master = deployProcessToSharedInstance(hostToDeployTo,
                 masterConfigurationBuilder, optionalKeyName, privateKeyEncryptionPassphrase);
         final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
@@ -660,8 +664,19 @@ public class LandscapeServiceImpl implements LandscapeService {
                 : SailingReleaseRepository.INSTANCE.getRelease(releaseNameOrNullForLatestMaster);
     }
 
-    private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName) {
+    private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName, ReplicationCredentials replicationCredentials,
+            String securityServiceHostname, Integer securityServicePort) throws MalformedURLException, ClientProtocolException, IOException, ParseException {
         final String serverGroupName = serverName + ServerInfo.SERVER_GROUP_NAME_SUFFIX;
+        final String securityBearerToken = replicationCredentials.getBearerToken(securityServiceHostname, securityServicePort);
+        final SailingServerFactory sailingServerFactory = sailingServerFactoryTracker.getService();
+        final SailingServer securityServiceServer = sailingServerFactory.getSailingServer(
+                RemoteServerUtil.getBaseServerUrl(securityServiceHostname, securityServicePort), securityBearerToken);
+        final UUID userGroupId = securityServiceServer.getUserGroupIdByName(serverGroupName);
+        // TODO bug5684: use this userGroupId instead of the following old code to check existence, then ownership!
+        if (userGroupId != null) {
+            // TODO bug5684: check ownership; SecuredServer now needs something like getOwnership(...)
+        }
+
         final UserGroup existingServerGroup = getSecurityService().getUserGroupByName(serverGroupName);
         final UserGroup serverGroup;
         if (existingServerGroup == null) {
