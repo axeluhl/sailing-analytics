@@ -49,7 +49,7 @@ public interface SecuredServer {
 
     /**
      * If the user authenticated for this server is permitted to update the user group identified by the {@code userGroupId}, the
-     * current user is added to the group.
+     * current user is added to the group. If the current user is already part of the group, this method does nothing.
      */
     void addUserToGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException;
 
@@ -58,4 +58,6 @@ public interface SecuredServer {
      * user authenticated for this server, and the user will be added to the group.
      */
     UUID createUserGroupAndAddCurrentUser(String serverGroupName) throws ClientProtocolException, IOException, ParseException;
+
+    Iterable<String> getNamesOfUsersInGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException;
 }

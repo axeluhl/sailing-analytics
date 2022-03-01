@@ -60,7 +60,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.Release;
-import com.sap.sse.landscape.ReplicationCredentials;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -150,8 +149,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder =
                 createMasterConfigurationBuilder(name, masterReplicationBearerToken, optionalMemoryInMegabytesOrNull,
                         newSharedMasterInstance ? optionalMemoryTotalSizeFactorOrNull : null, region, release);
+        final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
         final InboundReplicationConfiguration inboundMasterReplicationConfiguration = masterConfigurationBuilder.getInboundReplicationConfiguration().get();
-        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name, inboundMasterReplicationConfiguration.getReplicationCredentials(),
+        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name, bearerTokenUsedByReplicas,
                 inboundMasterReplicationConfiguration.getMasterHostname(), inboundMasterReplicationConfiguration.getMasterHttpPort());
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         masterHostBuilder
@@ -171,7 +171,6 @@ public class LandscapeServiceImpl implements LandscapeService {
         final StartSailingAnalyticsMasterHost<String> masterHostStartProcedure = masterHostBuilder.build();
         masterHostStartProcedure.run();
         final SailingAnalyticsProcess<String> master = masterHostStartProcedure.getSailingAnalyticsProcess();
-        final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result =
             createLoadBalancingAndAutoScalingSetup(landscape, region, name, master, release, dedicatedInstanceType,
                 dynamicLoadBalancerMapping, optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName,
@@ -287,11 +286,11 @@ public class LandscapeServiceImpl implements LandscapeService {
                 masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
                 region, release);
         final InboundReplicationConfiguration inboundMasterReplicationConfiguration = masterConfigurationBuilder.getInboundReplicationConfiguration().get();
-        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(replicaSetName, inboundMasterReplicationConfiguration.getReplicationCredentials(),
+        final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
+        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(replicaSetName, bearerTokenUsedByReplicas,
                 inboundMasterReplicationConfiguration.getMasterHostname(), inboundMasterReplicationConfiguration.getMasterHttpPort());
         final SailingAnalyticsProcess<String> master = deployProcessToSharedInstance(hostToDeployTo,
                 masterConfigurationBuilder, optionalKeyName, privateKeyEncryptionPassphrase);
-        final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
             createLoadBalancingAndAutoScalingSetup(landscape, region, replicaSetName, master, release, replicaInstanceType, dynamicLoadBalancerMapping,
                 optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName, /* use default AMI as replica machine image */ Optional.empty(),
@@ -666,15 +665,15 @@ public class LandscapeServiceImpl implements LandscapeService {
                 : SailingReleaseRepository.INSTANCE.getRelease(releaseNameOrNullForLatestMaster);
     }
 
-    private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName, ReplicationCredentials replicationCredentials,
-            String securityServiceHostname, Integer securityServicePort) throws MalformedURLException, ClientProtocolException, IOException, ParseException {
+    private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName,
+            String bearerTokenUsedByReplicas, String securityServiceHostname,
+            Integer securityServicePort)
+            throws MalformedURLException, ClientProtocolException, IOException, ParseException {
         final String serverGroupName = serverName + ServerInfo.SERVER_GROUP_NAME_SUFFIX;
-        final String securityBearerToken = replicationCredentials.getBearerToken(securityServiceHostname, securityServicePort);
         final SailingServerFactory sailingServerFactory = sailingServerFactoryTracker.getService();
         final SailingServer securityServiceServer = sailingServerFactory.getSailingServer(
-                RemoteServerUtil.getBaseServerUrl(securityServiceHostname, securityServicePort), securityBearerToken);
+                RemoteServerUtil.getBaseServerUrl(securityServiceHostname, securityServicePort==null?443:securityServicePort), bearerTokenUsedByReplicas);
         final UUID userGroupId = securityServiceServer.getUserGroupIdByName(serverGroupName);
-        // TODO bug5684: use this userGroupId instead of the following old code to check existence, then ownership!
         if (userGroupId != null) {
             final TypeRelativeObjectIdentifier serverGroupTypeRelativeObjectId = new TypeRelativeObjectIdentifier(userGroupId.toString());
             final Iterable<Pair<WildcardPermission, Boolean>> permissions = securityServiceServer.hasPermissions(Arrays.asList(

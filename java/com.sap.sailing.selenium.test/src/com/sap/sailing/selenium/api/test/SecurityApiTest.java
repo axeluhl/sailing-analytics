@@ -25,6 +25,7 @@ import com.sap.sailing.selenium.api.event.SecurityApi.AccessToken;
 import com.sap.sailing.selenium.api.event.SecurityApi.Hello;
 import com.sap.sailing.selenium.api.event.SecurityApi.User;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -108,6 +109,8 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
         final UUID humbaGroupId = securedServer.createUserGroupAndAddCurrentUser("Humba");
+        final Iterable<String> usernamesInGroup = securedServer.getNamesOfUsersInGroup(humbaGroupId);
+        assertTrue(Util.contains(usernamesInGroup, ApiContext.ADMIN_USERNAME));
         try {
             securedServer.addUserToGroup(humbaGroupId);
             fail("Expected exception because user admin should already be part of group");

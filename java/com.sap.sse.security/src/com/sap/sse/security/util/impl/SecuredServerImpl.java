@@ -29,6 +29,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.jaxrs.api.OwnershipResource;
 import com.sap.sse.security.jaxrs.api.SecurityResource;
@@ -152,15 +153,27 @@ public class SecuredServerImpl implements SecuredServer {
     }
 
     @Override
+    public Iterable<String> getNamesOfUsersInGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException {
+        final URL addUserToGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP + "/"+userGroupId.toString());
+        final HttpGet getRequest = new HttpGet(addUserToGroupUrl.toString());
+        final Pair<Object, Integer> result = getJsonParsedResponse(getRequest);
+        final JSONObject userGroupJson = (JSONObject) result.getA();
+        final JSONArray usersInGroup = (JSONArray) userGroupJson.get(UserGroupResource.KEY_USERS);
+        return Util.map(usersInGroup, u->u.toString());
+    }
+
+    @Override
     public void addUserToGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException {
         final String username = getUsername();
-        final URL createUserGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP +
-                "/"+userGroupId.toString()+UserGroupResource.USER+"/"+username);
-        final HttpPut putRequest = new HttpPut(createUserGroupUrl.toString());
-        final Pair<Object, Integer> result = getJsonParsedResponse(putRequest);
-        final Integer status = result.getB();
-        if (status < 200 || status >= 300) {
-            throw new IllegalArgumentException("Couldn't add user "+username+" to user group with ID "+userGroupId+": "+result.getA());
+        if (!Util.contains(getNamesOfUsersInGroup(userGroupId), username)) {
+            final URL addUserToGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP +
+                    "/"+userGroupId.toString()+UserGroupResource.USER+"/"+username);
+            final HttpPut putRequest = new HttpPut(addUserToGroupUrl.toString());
+            final Pair<Object, Integer> result = getJsonParsedResponse(putRequest);
+            final Integer status = result.getB();
+            if (status < 200 || status >= 300) {
+                throw new IllegalArgumentException("Couldn't add user "+username+" to user group with ID "+userGroupId+": "+result.getA());
+            }
         }
     }
 
