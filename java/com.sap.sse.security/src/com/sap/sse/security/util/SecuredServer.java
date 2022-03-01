@@ -36,7 +36,7 @@ public interface SecuredServer {
      * Looks for a group with the name provided in parameter {@code userGroupName}. If found, the group's {@link UUID} is
      * returned, otherwise {@code null}.
      */
-    UUID getUserGroupIdByName(String userGroupName) throws MalformedURLException, ClientProtocolException, IOException, ParseException;
+    UUID getUserGroupIdByName(String userGroupName) throws MalformedURLException, ClientProtocolException, IOException, ParseException, IllegalAccessException;
 
     Pair<UUID, String> getGroupAndUserOwner(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId)
             throws ClientProtocolException, IOException, ParseException;
@@ -57,7 +57,7 @@ public interface SecuredServer {
      * Create a user group named {@code serverGroupName} if no group by that name exists yet. The group will be owned by the
      * user authenticated for this server, and the user will be added to the group.
      */
-    UUID createUserGroupAndAddCurrentUser(String serverGroupName) throws ClientProtocolException, IOException, ParseException;
+    UUID createUserGroupAndAddCurrentUser(String serverGroupName) throws ClientProtocolException, IOException, ParseException, IllegalAccessException;
 
     Iterable<String> getNamesOfUsersInGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException;
 }

@@ -78,7 +78,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testSecuredServerGetUserGroupId() throws ClientProtocolException, IOException, ParseException {
+    public void testSecuredServerGetUserGroupId() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
         assertNotNull(securedServer.getUserGroupIdByName("admin-tenant"));
@@ -86,7 +86,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testGetOwnership() throws ClientProtocolException, IOException, ParseException {
+    public void testGetOwnership() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
         final UUID adminTenantGroupId = securedServer.getUserGroupIdByName("admin-tenant");
@@ -95,7 +95,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testCreateUserGroup() throws ClientProtocolException, IOException, ParseException {
+    public void testCreateUserGroup() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
         final UUID humbaGroupId = securedServer.createUserGroupAndAddCurrentUser("Humba");
@@ -105,7 +105,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testAddUserToGroup() throws ClientProtocolException, IOException, ParseException {
+    public void testAddUserToGroup() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
         final UUID humbaGroupId = securedServer.createUserGroupAndAddCurrentUser("Humba");
@@ -120,7 +120,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testGetPermissions() throws ClientProtocolException, IOException, ParseException {
+    public void testGetPermissions() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
         final UUID adminTenantGroupId = securedServer.getUserGroupIdByName("admin-tenant");

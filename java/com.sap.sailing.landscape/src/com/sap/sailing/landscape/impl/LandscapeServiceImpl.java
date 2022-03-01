@@ -668,7 +668,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName,
             String bearerTokenUsedByReplicas, String securityServiceHostname,
             Integer securityServicePort)
-            throws MalformedURLException, ClientProtocolException, IOException, ParseException {
+            throws MalformedURLException, ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final String serverGroupName = serverName + ServerInfo.SERVER_GROUP_NAME_SUFFIX;
         final SailingServerFactory sailingServerFactory = sailingServerFactoryTracker.getService();
         final SailingServer securityServiceServer = sailingServerFactory.getSailingServer(

@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -24,6 +26,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HTTP;
+import org.apache.shiro.authz.AuthorizationException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -91,7 +94,7 @@ public class SecuredServerImpl implements SecuredServer {
     }
     
     @Override
-    public UUID getUserGroupIdByName(String userGroupName) throws ClientProtocolException, IOException, ParseException {
+    public UUID getUserGroupIdByName(String userGroupName) throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final URL getUserGroupIdByNameUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP
                 + "?" + UserGroupResource.KEY_GROUP_NAME+"="+userGroupName);
         final HttpGet getRequest = new HttpGet(getUserGroupIdByNameUrl.toString());
@@ -100,6 +103,8 @@ public class SecuredServerImpl implements SecuredServer {
         if (result.getB() >= 200 && result.getB() < 300) {
             final JSONObject groupJson = (JSONObject) result.getA();
             groupId = groupJson == null ? null : UUID.fromString(groupJson.get(UserGroupResource.KEY_GROUP_ID).toString());
+        } else if (result.getB() == Response.Status.FORBIDDEN.getStatusCode() || result.getB() == Response.Status.UNAUTHORIZED.getStatusCode()) {
+            throw new AuthorizationException("Not allowed to access group "+userGroupName+": "+result.getA());
         } else {
             groupId = null;
         }
@@ -157,6 +162,9 @@ public class SecuredServerImpl implements SecuredServer {
         final URL addUserToGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP + "/"+userGroupId.toString());
         final HttpGet getRequest = new HttpGet(addUserToGroupUrl.toString());
         final Pair<Object, Integer> result = getJsonParsedResponse(getRequest);
+        if (result.getB() == Response.Status.FORBIDDEN.getStatusCode() || result.getB() == Response.Status.UNAUTHORIZED.getStatusCode()) {
+            throw new AuthorizationException("Not allowed to access group with ID "+userGroupId+": "+result.getA());
+        }
         final JSONObject userGroupJson = (JSONObject) result.getA();
         final JSONArray usersInGroup = (JSONArray) userGroupJson.get(UserGroupResource.KEY_USERS);
         return Util.map(usersInGroup, u->u.toString());
@@ -171,14 +179,16 @@ public class SecuredServerImpl implements SecuredServer {
             final HttpPut putRequest = new HttpPut(addUserToGroupUrl.toString());
             final Pair<Object, Integer> result = getJsonParsedResponse(putRequest);
             final Integer status = result.getB();
-            if (status < 200 || status >= 300) {
+            if (status == Response.Status.FORBIDDEN.getStatusCode() || status == Response.Status.UNAUTHORIZED.getStatusCode()) {
+                throw new AuthorizationException("Not allowed to access group with ID "+userGroupId+": "+result.getA());
+            } else if (status < 200 || status >= 300) {
                 throw new IllegalArgumentException("Couldn't add user "+username+" to user group with ID "+userGroupId+": "+result.getA());
             }
         }
     }
 
     @Override
-    public UUID createUserGroupAndAddCurrentUser(String userGroupName) throws ClientProtocolException, IOException, ParseException {
+    public UUID createUserGroupAndAddCurrentUser(String userGroupName) throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final UUID result;
         if (getUserGroupIdByName(userGroupName) == null) {
             final JSONObject paramPayload = new JSONObject();
@@ -187,9 +197,16 @@ public class SecuredServerImpl implements SecuredServer {
             final HttpPut putRequest = new HttpPut(createUserGroupUrl.toString());
             putRequest.setEntity(new StringEntity(paramPayload.toJSONString()));
             putRequest.setHeader(HTTP.CONTENT_TYPE, "application/json");
-            final JSONObject userGroupJson = (JSONObject) getJsonParsedResponse(putRequest).getA();
-            final UUID newGroupId = UUID.fromString(userGroupJson.get(UserGroupResource.KEY_GROUP_ID).toString());
-            result = newGroupId;
+            final Pair<Object, Integer> response = getJsonParsedResponse(putRequest);
+            if (response.getA() instanceof JSONObject) {
+                final JSONObject userGroupJson = (JSONObject) response.getA();
+                final UUID newGroupId = UUID.fromString(userGroupJson.get(UserGroupResource.KEY_GROUP_ID).toString());
+                result = newGroupId;
+            } else if (response.getB() == Response.Status.FORBIDDEN.getStatusCode() || response.getB() == Response.Status.UNAUTHORIZED.getStatusCode()) {
+                throw new AuthorizationException("Not allowed to create group "+userGroupName+": "+response.getA());
+            } else {
+                throw new IllegalArgumentException("Error trying to create user group "+userGroupName+": "+response.getA());
+            }
         } else {
             logger.warning("User group name "+userGroupName+" already exists on server "+getBaseUrl()+". Not creating again.");
             result = null;
