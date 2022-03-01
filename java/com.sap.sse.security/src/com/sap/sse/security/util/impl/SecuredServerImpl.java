@@ -23,6 +23,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HTTP;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -159,7 +160,7 @@ public class SecuredServerImpl implements SecuredServer {
             final URL createUserGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP);
             final HttpPut putRequest = new HttpPut(createUserGroupUrl.toString());
             putRequest.setEntity(new StringEntity(paramPayload.toJSONString()));
-            putRequest.setHeader("Content-type", "application/json");
+            putRequest.setHeader(HTTP.CONTENT_TYPE, "application/json");
             final JSONObject userGroupJson = (JSONObject) getJsonParsedResponse(putRequest).getA();
             final UUID newGroupId = UUID.fromString(userGroupJson.get(UserGroupResource.KEY_GROUP_ID).toString());
             result = newGroupId;
