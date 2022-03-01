@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.shiro.authz.AuthorizationException;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -89,10 +90,10 @@ import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -675,26 +676,29 @@ public class LandscapeServiceImpl implements LandscapeService {
         final UUID userGroupId = securityServiceServer.getUserGroupIdByName(serverGroupName);
         // TODO bug5684: use this userGroupId instead of the following old code to check existence, then ownership!
         if (userGroupId != null) {
-            final Pair<UUID, String> serverGroupOwnership = securityServiceServer.getGroupAndUserOwner(
-                    SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(userGroupId.toString()));
-            final Pair<UUID, String> serverOwnership = securityServiceServer.getGroupAndUserOwner(SecuredSecurityTypes.SERVER,
-                    new TypeRelativeObjectIdentifier(serverName));
-            // TODO bug5684: check ownerships and permissions; user should have CREATE and UPDATE permission at least, probably also DELETE?
-        }
-        final UserGroup existingServerGroup = getSecurityService().getUserGroupByName(serverGroupName);
-        final UserGroup serverGroup;
-        if (existingServerGroup == null) {
-            final UUID serverGroupId = UUID.randomUUID();
-            // FIXME bug5678: if this runs on a server with separate security realm, using the local security service doesn't help!
-            serverGroup = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.USER_GROUP,
-                    new TypeRelativeObjectIdentifier(serverGroupId.toString()), /* securityDisplayName */ serverGroupName,
-                    (Callable<UserGroup>)()->getSecurityService().createUserGroup(serverGroupId, serverGroupName));
-        } else {
-            serverGroup = existingServerGroup;
-            final User currentUser = getSecurityService().getCurrentUser();
-            if (!Util.contains(serverGroup.getUsers(), currentUser) && getSecurityService().hasCurrentUserUpdatePermission(serverGroup)) {
-                getSecurityService().addUserToUserGroup(serverGroup, currentUser);
+            final TypeRelativeObjectIdentifier serverGroupTypeRelativeObjectId = new TypeRelativeObjectIdentifier(userGroupId.toString());
+            final Iterable<Pair<WildcardPermission, Boolean>> permissions = securityServiceServer.hasPermissions(Arrays.asList(
+                    SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.CREATE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.READ, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.DELETE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(DefaultActions.CREATE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(DefaultActions.READ, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(DefaultActions.DELETE, serverGroupTypeRelativeObjectId)));
+            for (final Pair<WildcardPermission, Boolean> permission : permissions) {
+                if (!permission.getB()) {
+                    final String msg = "Subject "+securityServiceServer.getUsername()+" on server "+securityServiceHostname+
+                            " is not allowed "+permission.getA()+". Not allowing to create application replica set for "+serverName;
+                    logger.warning(msg);
+                    throw new AuthorizationException(msg);
+                }
             }
+            // Now we know the user is permitted to create/read/update/delete the user group and the server object in the remote
+            // security realm that the application replica set's master process will use if it existed already. Add the user to the group
+            securityServiceServer.addUserToGroup(userGroupId);
+        } else {
+            securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
         }
     }
 

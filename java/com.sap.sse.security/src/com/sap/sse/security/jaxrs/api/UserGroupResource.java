@@ -25,9 +25,9 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
@@ -35,7 +35,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
-@Path("/restsecurity/usergroup")
+@Path(UserGroupResource.RESTSECURITY_USERGROUP)
 public class UserGroupResource extends AbstractSecurityResource {
     public static final String RESTSECURITY_USERGROUP = "/restsecurity/usergroup";
     public static final String KEY_ROLE_NAME = "roleName";

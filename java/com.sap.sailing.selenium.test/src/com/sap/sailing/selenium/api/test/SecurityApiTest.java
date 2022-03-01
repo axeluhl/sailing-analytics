@@ -93,6 +93,16 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testCreateUserGroup() throws ClientProtocolException, IOException, ParseException {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final SecuredServer securedServer = createSecuredServer(adminCtx);
+        final UUID humbaGroupId = securedServer.createUserGroupAndAddCurrentUser("Humba");
+        assertNotNull(humbaGroupId);
+        final UUID humbaGroupIdAgain = securedServer.createUserGroupAndAddCurrentUser("Humba");
+        assertNull(humbaGroupIdAgain);
+    }
+
+    @Test
     public void testGetPermissions() throws ClientProtocolException, IOException, ParseException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);

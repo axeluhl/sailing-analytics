@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -17,7 +18,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONArray;
@@ -36,6 +39,8 @@ import com.sap.sse.security.util.SecuredServer;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class SecuredServerImpl implements SecuredServer {
+    private static final Logger logger = Logger.getLogger(SecuredServerImpl.class.getName());
+
     private final String bearerToken;
     private final URL baseUrl;
 
@@ -137,7 +142,32 @@ public class SecuredServerImpl implements SecuredServer {
         final Object usernameValue = accessTokenJson.get(SecurityResource.USERNAME);
         final String username = usernameValue == null ? null : usernameValue.toString();
         return username;
+    }
+
+    @Override
+    public void addUserToGroup(UUID userGroupId) {
+        // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public UUID createUserGroupAndAddCurrentUser(String userGroupName) throws ClientProtocolException, IOException, ParseException {
+        final UUID result;
+        if (getUserGroupIdByName(userGroupName) == null) {
+            final JSONObject paramPayload = new JSONObject();
+            paramPayload.put(UserGroupResource.KEY_GROUP_NAME, userGroupName);
+            final URL createUserGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP);
+            final HttpPut putRequest = new HttpPut(createUserGroupUrl.toString());
+            putRequest.setEntity(new StringEntity(paramPayload.toJSONString()));
+            putRequest.setHeader("Content-type", "application/json");
+            final JSONObject userGroupJson = (JSONObject) getJsonParsedResponse(putRequest).getA();
+            final UUID newGroupId = UUID.fromString(userGroupJson.get(UserGroupResource.KEY_GROUP_ID).toString());
+            result = newGroupId;
+        } else {
+            logger.warning("User group name "+userGroupName+" already exists on server "+getBaseUrl()+". Not creating again.");
+            result = null;
+        }
+        return result;
     }
 
     @Override

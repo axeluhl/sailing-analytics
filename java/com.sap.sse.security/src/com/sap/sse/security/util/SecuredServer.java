@@ -42,4 +42,16 @@ public interface SecuredServer {
      * The name of the user authenticated by the credentials used by this facade object.
      */
     String getUsername() throws MalformedURLException, ClientProtocolException, IOException, ParseException;
+
+    /**
+     * If the user authenticated for this server is permitted to update the user group identified by the {@code userGroupId}, the
+     * current user is added to the group.
+     */
+    void addUserToGroup(UUID userGroupId);
+
+    /**
+     * Create a user group named {@code serverGroupName} if no group by that name exists yet. The group will be owned by the
+     * user authenticated for this server, and the user will be added to the group.
+     */
+    UUID createUserGroupAndAddCurrentUser(String serverGroupName) throws ClientProtocolException, IOException, ParseException;
 }
