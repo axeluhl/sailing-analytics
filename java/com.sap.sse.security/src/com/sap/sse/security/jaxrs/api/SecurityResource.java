@@ -60,6 +60,8 @@ public class SecurityResource extends AbstractSecurityResource {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String ACCESS_TOKEN = "access_token";
+    public static final String PERMISSION = "permission";
+    public static final String GRANTED = "granted";
     public static final String ACCESS_TOKEN_METHOD = "/"+ACCESS_TOKEN;
 
     /**
@@ -77,7 +79,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @GET
     @Path(USERS_WITH_PERMISSION_METHOD)
     @Produces("text/plain;charset=UTF-8")
-    public Response getUsersWithPermission(@QueryParam("permission") String permission) {
+    public Response getUsersWithPermission(@QueryParam(PERMISSION) String permission) {
         final TimePoint start = TimePoint.now();
         try {
             final WildcardPermission wildcardPermission = new WildcardPermission(permission);
@@ -338,13 +340,13 @@ public class SecurityResource extends AbstractSecurityResource {
     @GET
     @Path(HAS_PERMISSION_METHOD)
     @Produces("application/json;charset=UTF-8")
-    public Response getPermission(@QueryParam("permission") final List<String> permissionsAsStrings) {
+    public Response getPermission(@QueryParam(PERMISSION) final List<String> permissionsAsStrings) {
         final JSONArray result = new JSONArray();
         for (final String permissionAsString : permissionsAsStrings) {
             final JSONObject entry = new JSONObject();
             result.add(entry);
-            entry.put("permission", permissionAsString);
-            entry.put("granted", SecurityUtils.getSubject().isPermitted(permissionAsString));
+            entry.put(PERMISSION, permissionAsString);
+            entry.put(GRANTED, SecurityUtils.getSubject().isPermitted(permissionAsString));
         }
         return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build(); 
     }

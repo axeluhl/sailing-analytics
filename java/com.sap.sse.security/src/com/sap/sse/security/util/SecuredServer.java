@@ -1,6 +1,7 @@
 package com.sap.sse.security.util;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WildcardPermission;
 
 /**
  * Represents a remote instance of a server process or an entire application replica set with a master and zero or more
@@ -35,6 +37,7 @@ public interface SecuredServer {
     Pair<UUID, String> getGroupAndUserOwner(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId)
             throws ClientProtocolException, IOException, ParseException;
 
+    Iterable<Pair<WildcardPermission, Boolean>> hasPermissions(Iterable<WildcardPermission> permissions) throws UnsupportedEncodingException, MalformedURLException, ClientProtocolException, IOException, ParseException;
     /**
      * The name of the user authenticated by the credentials used by this facade object.
      */

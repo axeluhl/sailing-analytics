@@ -56,6 +56,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReplicationCredentials;
@@ -674,9 +675,12 @@ public class LandscapeServiceImpl implements LandscapeService {
         final UUID userGroupId = securityServiceServer.getUserGroupIdByName(serverGroupName);
         // TODO bug5684: use this userGroupId instead of the following old code to check existence, then ownership!
         if (userGroupId != null) {
-            // TODO bug5684: check ownership; SecuredServer now needs something like getOwnership(...)
+            final Pair<UUID, String> serverGroupOwnership = securityServiceServer.getGroupAndUserOwner(
+                    SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(userGroupId.toString()));
+            final Pair<UUID, String> serverOwnership = securityServiceServer.getGroupAndUserOwner(SecuredSecurityTypes.SERVER,
+                    new TypeRelativeObjectIdentifier(serverName));
+            // TODO bug5684: check ownerships and permissions; user should have CREATE and UPDATE permission at least, probably also DELETE?
         }
-
         final UserGroup existingServerGroup = getSecurityService().getUserGroupByName(serverGroupName);
         final UserGroup serverGroup;
         if (existingServerGroup == null) {

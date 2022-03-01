@@ -5,6 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.http.HttpRequest;
@@ -17,6 +20,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -27,6 +31,7 @@ import com.sap.sse.security.jaxrs.api.SecurityResource;
 import com.sap.sse.security.jaxrs.api.UserGroupResource;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.util.SecuredServer;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
@@ -80,9 +85,9 @@ public class SecuredServerImpl implements SecuredServer {
     
     @Override
     public UUID getUserGroupIdByName(String userGroupName) throws ClientProtocolException, IOException, ParseException {
-        final URL getRemoteReferencesUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP
+        final URL getUserGroupIdByNameUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP
                 + "?" + UserGroupResource.KEY_GROUP_NAME+"="+userGroupName);
-        final HttpGet getRequest = new HttpGet(getRemoteReferencesUrl.toString());
+        final HttpGet getRequest = new HttpGet(getUserGroupIdByNameUrl.toString());
         final JSONObject groupJson = (JSONObject) getJsonParsedResponse(getRequest).getA();
         final UUID groupId = groupJson == null ? null : UUID.fromString(groupJson.get(UserGroupResource.KEY_GROUP_ID).toString());
         return groupId;
@@ -90,9 +95,9 @@ public class SecuredServerImpl implements SecuredServer {
 
     @Override
     public Pair<UUID, String> getGroupAndUserOwner(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId) throws ClientProtocolException, IOException, ParseException {
-        final URL getRemoteReferencesUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + OwnershipResource.RESTSECURITY_OWNERSHIP
+        final URL getGroupAndUserOwnerUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + OwnershipResource.RESTSECURITY_OWNERSHIP
                 + "/" + type.getName() + "/" + typeRelativeObjectId.toString());
-        final HttpGet getRequest = new HttpGet(getRemoteReferencesUrl.toString());
+        final HttpGet getRequest = new HttpGet(getGroupAndUserOwnerUrl.toString());
         final JSONObject ownershipJson = (JSONObject) getJsonParsedResponse(getRequest).getA();
         final Object groupIdValue = ownershipJson.get(OwnershipResource.KEY_GROUP_ID);
         final UUID groupId = groupIdValue == null ? null : UUID.fromString(groupIdValue.toString());
@@ -102,9 +107,32 @@ public class SecuredServerImpl implements SecuredServer {
     }
     
     @Override
+    public Iterable<Pair<WildcardPermission, Boolean>> hasPermissions(Iterable<WildcardPermission> permissions) throws ClientProtocolException, IOException, ParseException {
+        final StringBuilder sb = new StringBuilder(SECURITY_API_PREFIX + SecurityResource.RESTSECURITY + SecurityResource.HAS_PERMISSION_METHOD + "?");
+        for (final WildcardPermission permission : permissions) {
+            sb.append(SecurityResource.PERMISSION);
+            sb.append('=');
+            sb.append(URLEncoder.encode(permission.toString(), "UTF-8"));
+            sb.append('&');
+        }
+        sb.delete(sb.length()-1, sb.length());
+        final URL getPermissionsUrl = new URL(getBaseUrl(), sb.toString());
+        final HttpGet getRequest = new HttpGet(getPermissionsUrl.toString());
+        final JSONArray permissionsJson = (JSONArray) getJsonParsedResponse(getRequest).getA();
+        final List<Pair<WildcardPermission, Boolean>> result = new ArrayList<>();
+        for (final Object o : permissionsJson) {
+            final JSONObject permissionAndGranted = (JSONObject) o;
+            final String permissionAsString = permissionAndGranted.get(SecurityResource.PERMISSION).toString();
+            final Boolean permissionGranted = (Boolean) permissionAndGranted.get(SecurityResource.GRANTED);
+            result.add(new Pair<>(new WildcardPermission(permissionAsString), permissionGranted));
+        }
+        return result;
+    }
+
+    @Override
     public String getUsername() throws ClientProtocolException, IOException, ParseException {
-        final URL getRemoteReferencesUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + SecurityResource.RESTSECURITY + SecurityResource.ACCESS_TOKEN_METHOD);
-        final HttpGet getRequest = new HttpGet(getRemoteReferencesUrl.toString());
+        final URL getUsernameUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + SecurityResource.RESTSECURITY + SecurityResource.ACCESS_TOKEN_METHOD);
+        final HttpGet getRequest = new HttpGet(getUsernameUrl.toString());
         final JSONObject accessTokenJson = (JSONObject) getJsonParsedResponse(getRequest).getA();
         final Object usernameValue = accessTokenJson.get(SecurityResource.USERNAME);
         final String username = usernameValue == null ? null : usernameValue.toString();
