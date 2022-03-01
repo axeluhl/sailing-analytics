@@ -73,7 +73,7 @@ public class SecuredServerImpl implements SecuredServer {
             jsonParseResult = new JSONParser()
                     .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
         } catch (ParseException e) {
-            jsonParseResult = null;
+            jsonParseResult = new String(bos.toByteArray());
         }
         return new Pair<>(jsonParseResult, response.getStatusLine().getStatusCode());
     }
@@ -94,8 +94,14 @@ public class SecuredServerImpl implements SecuredServer {
         final URL getUserGroupIdByNameUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP
                 + "?" + UserGroupResource.KEY_GROUP_NAME+"="+userGroupName);
         final HttpGet getRequest = new HttpGet(getUserGroupIdByNameUrl.toString());
-        final JSONObject groupJson = (JSONObject) getJsonParsedResponse(getRequest).getA();
-        final UUID groupId = groupJson == null ? null : UUID.fromString(groupJson.get(UserGroupResource.KEY_GROUP_ID).toString());
+        final Pair<Object, Integer> result = getJsonParsedResponse(getRequest);
+        final UUID groupId;
+        if (result.getB() >= 200 && result.getB() < 300) {
+            final JSONObject groupJson = (JSONObject) result.getA();
+            groupId = groupJson == null ? null : UUID.fromString(groupJson.get(UserGroupResource.KEY_GROUP_ID).toString());
+        } else {
+            groupId = null;
+        }
         return groupId;
     }
 
@@ -146,9 +152,16 @@ public class SecuredServerImpl implements SecuredServer {
     }
 
     @Override
-    public void addUserToGroup(UUID userGroupId) {
-        // TODO Auto-generated method stub
-        
+    public void addUserToGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException {
+        final String username = getUsername();
+        final URL createUserGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP +
+                "/"+userGroupId.toString()+UserGroupResource.USER+"/"+username);
+        final HttpPut putRequest = new HttpPut(createUserGroupUrl.toString());
+        final Pair<Object, Integer> result = getJsonParsedResponse(putRequest);
+        final Integer status = result.getB();
+        if (status < 200 || status >= 300) {
+            throw new IllegalArgumentException("Couldn't add user "+username+" to user group with ID "+userGroupId+": "+result.getA());
+        }
     }
 
     @Override

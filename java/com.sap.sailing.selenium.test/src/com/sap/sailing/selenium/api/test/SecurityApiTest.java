@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -100,6 +101,19 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         assertNotNull(humbaGroupId);
         final UUID humbaGroupIdAgain = securedServer.createUserGroupAndAddCurrentUser("Humba");
         assertNull(humbaGroupIdAgain);
+    }
+
+    @Test
+    public void testAddUserToGroup() throws ClientProtocolException, IOException, ParseException {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final SecuredServer securedServer = createSecuredServer(adminCtx);
+        final UUID humbaGroupId = securedServer.createUserGroupAndAddCurrentUser("Humba");
+        try {
+            securedServer.addUserToGroup(humbaGroupId);
+            fail("Expected exception because user admin should already be part of group");
+        } catch (IllegalArgumentException e) {
+            // this is expected because the current user "admin" is expected to already be part of the group
+        }
     }
 
     @Test

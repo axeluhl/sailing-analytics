@@ -46,6 +46,7 @@ public class UserGroupResource extends AbstractSecurityResource {
     public static final String KEY_USERS = "users";
     public static final String KEY_GROUP_NAME = "groupName";
     public static final String KEY_GROUP_ID = "groupId";
+    public static final String USER = "/user";
 
     @Path("{groupId}")
     @GET
@@ -231,7 +232,7 @@ public class UserGroupResource extends AbstractSecurityResource {
         return response;
     }
 
-    @Path("{groupId}/user/{username}")
+    @Path("{groupId}"+USER+"/{username}")
     @PUT
     @Produces("application/json;charset=UTF-8")
     public Response addUserToUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,

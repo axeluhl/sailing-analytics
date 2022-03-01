@@ -32,6 +32,10 @@ public interface SecuredServer {
     
     String getBearerToken();
 
+    /**
+     * Looks for a group with the name provided in parameter {@code userGroupName}. If found, the group's {@link UUID} is
+     * returned, otherwise {@code null}.
+     */
     UUID getUserGroupIdByName(String userGroupName) throws MalformedURLException, ClientProtocolException, IOException, ParseException;
 
     Pair<UUID, String> getGroupAndUserOwner(HasPermissions type, TypeRelativeObjectIdentifier typeRelativeObjectId)
@@ -47,7 +51,7 @@ public interface SecuredServer {
      * If the user authenticated for this server is permitted to update the user group identified by the {@code userGroupId}, the
      * current user is added to the group.
      */
-    void addUserToGroup(UUID userGroupId);
+    void addUserToGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException;
 
     /**
      * Create a user group named {@code serverGroupName} if no group by that name exists yet. The group will be owned by the
