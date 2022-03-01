@@ -121,7 +121,7 @@ public class OwnershipResource extends AbstractSecurityResource {
         final OwnershipAnnotation existingOwnership = getService().getOwnership(identifier);
         final JSONObject result = new JSONObject();
         result.put(KEY_OBJECT_TYPE, objectType);
-        result.put(KEY_OBJECT_ID, identifier.getTypeRelativeObjectIdentifier());
+        result.put(KEY_OBJECT_ID, identifier.getTypeRelativeObjectIdentifier().toString());
         result.put(KEY_GROUP_ID, existingOwnership == null || existingOwnership.getAnnotation().getTenantOwner() == null ? null : existingOwnership.getAnnotation().getTenantOwner().getId().toString());
         result.put(KEY_USERNAME, existingOwnership == null || existingOwnership.getAnnotation().getUserOwner() == null ? null : existingOwnership.getAnnotation().getUserOwner().getName());
         result.put(KEY_DISPLAY_NAME, existingOwnership == null || existingOwnership.getDisplayNameOfAnnotatedObject() == null ? null : existingOwnership.getDisplayNameOfAnnotatedObject());

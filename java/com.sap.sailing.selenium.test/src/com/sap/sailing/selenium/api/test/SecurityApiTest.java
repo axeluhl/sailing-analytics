@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
@@ -21,6 +22,9 @@ import com.sap.sailing.selenium.api.event.SecurityApi.AccessToken;
 import com.sap.sailing.selenium.api.event.SecurityApi.Hello;
 import com.sap.sailing.selenium.api.event.SecurityApi.User;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.security.util.SecuredServer;
 import com.sap.sse.security.util.impl.SecuredServerImpl;
@@ -73,5 +77,14 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         final SecuredServer securedServer = createSecuredServer(adminCtx);
         assertNotNull(securedServer.getUserGroupIdByName("admin-tenant"));
         assertNull(securedServer.getUserGroupIdByName("this-group-does-not-exist"));
+    }
+
+    @Test
+    public void testGetOwnership() throws ClientProtocolException, IOException, ParseException {
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final SecuredServer securedServer = createSecuredServer(adminCtx);
+        final UUID adminTenantGroupId = securedServer.getUserGroupIdByName("admin-tenant");
+        final Pair<UUID, String> userAndGroupOwner = securedServer.getGroupAndUserOwner(SecuredSecurityTypes.USER_GROUP, new TypeRelativeObjectIdentifier(adminTenantGroupId.toString()));
+        assertEquals(adminTenantGroupId, userAndGroupOwner.getA());
     }
 }
