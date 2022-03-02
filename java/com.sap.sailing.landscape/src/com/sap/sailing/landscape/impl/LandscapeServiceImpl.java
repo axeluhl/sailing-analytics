@@ -695,7 +695,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             }
             // Now we know the user is permitted to create/read/update/delete the user group and the server object in the remote
             // security realm that the application replica set's master process will use if it existed already. Add the user to the group
-            securityServiceServer.addUserToGroup(userGroupId);
+            securityServiceServer.addCurrentUserToGroup(userGroupId);
         } else {
             securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
         }

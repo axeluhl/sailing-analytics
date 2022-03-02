@@ -3,10 +3,10 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -105,17 +105,23 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void testAddUserToGroup() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
+    public void testAddUserToAndRemoveUserFromGroup() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
         final UUID humbaGroupId = securedServer.createUserGroupAndAddCurrentUser("Humba");
-        final Iterable<String> usernamesInGroup = securedServer.getNamesOfUsersInGroup(humbaGroupId);
-        assertTrue(Util.contains(usernamesInGroup, ApiContext.ADMIN_USERNAME));
-        try {
-            securedServer.addUserToGroup(humbaGroupId);
-            fail("Expected exception because user admin should already be part of group");
-        } catch (IllegalArgumentException e) {
-            // this is expected because the current user "admin" is expected to already be part of the group
+        {
+            final Iterable<String> usernamesInGroup = securedServer.getNamesOfUsersInGroup(humbaGroupId);
+            assertTrue(Util.contains(usernamesInGroup, ApiContext.ADMIN_USERNAME));
+        }
+        securedServer.removeCurrentUserFromGroup(humbaGroupId);
+        {
+            final Iterable<String> usernamesInGroup = securedServer.getNamesOfUsersInGroup(humbaGroupId);
+            assertFalse(Util.contains(usernamesInGroup, ApiContext.ADMIN_USERNAME));
+        }
+        securedServer.addCurrentUserToGroup(humbaGroupId);
+        {
+            final Iterable<String> usernamesInGroup = securedServer.getNamesOfUsersInGroup(humbaGroupId);
+            assertTrue(Util.contains(usernamesInGroup, ApiContext.ADMIN_USERNAME));
         }
     }
 

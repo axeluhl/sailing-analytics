@@ -19,6 +19,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -71,15 +72,20 @@ public class SecuredServerImpl implements SecuredServer {
         final HttpClient client = createHttpClient();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final HttpResponse response = client.execute(request);
-        response.getEntity().writeTo(bos);
+        final int statusCode = response.getStatusLine().getStatusCode();
         Object jsonParseResult;
-        try {
-            jsonParseResult = new JSONParser()
-                    .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
-        } catch (ParseException e) {
-            jsonParseResult = new String(bos.toByteArray());
+        if (statusCode == Response.Status.NO_CONTENT.getStatusCode()) {
+            jsonParseResult = null;
+        } else {
+            response.getEntity().writeTo(bos);
+            try {
+                jsonParseResult = new JSONParser()
+                        .parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
+            } catch (ParseException e) {
+                jsonParseResult = new String(bos.toByteArray());
+            }
         }
-        return new Pair<>(jsonParseResult, response.getStatusLine().getStatusCode());
+        return new Pair<>(jsonParseResult, statusCode);
     }
 
     private CloseableHttpClient createHttpClient() {
@@ -171,8 +177,7 @@ public class SecuredServerImpl implements SecuredServer {
     }
 
     @Override
-    public void addUserToGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException {
-        final String username = getUsername();
+    public void addUserToGroup(UUID userGroupId, String username) throws ClientProtocolException, IOException, ParseException {
         if (!Util.contains(getNamesOfUsersInGroup(userGroupId), username)) {
             final URL addUserToGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP +
                     "/"+userGroupId.toString()+UserGroupResource.USER+"/"+username);
@@ -183,6 +188,22 @@ public class SecuredServerImpl implements SecuredServer {
                 throw new AuthorizationException("Not allowed to access group with ID "+userGroupId+": "+result.getA());
             } else if (status < 200 || status >= 300) {
                 throw new IllegalArgumentException("Couldn't add user "+username+" to user group with ID "+userGroupId+": "+result.getA());
+            }
+        }
+    }
+
+    @Override
+    public void removeUserFromGroup(UUID userGroupId, String username) throws ClientProtocolException, IOException, ParseException {
+        if (Util.contains(getNamesOfUsersInGroup(userGroupId), username)) {
+            final URL removeUserFromGroupUrl = new URL(getBaseUrl(), SECURITY_API_PREFIX + UserGroupResource.RESTSECURITY_USERGROUP +
+                    "/"+userGroupId.toString()+UserGroupResource.USER+"/"+username);
+            final HttpDelete putRequest = new HttpDelete(removeUserFromGroupUrl.toString());
+            final Pair<Object, Integer> result = getJsonParsedResponse(putRequest);
+            final Integer status = result.getB();
+            if (status == Response.Status.FORBIDDEN.getStatusCode() || status == Response.Status.UNAUTHORIZED.getStatusCode()) {
+                throw new AuthorizationException("Not allowed to access group with ID "+userGroupId+": "+result.getA());
+            } else if (status < 200 || status >= 300) {
+                throw new IllegalArgumentException("Couldn't remove user "+username+" from user group with ID "+userGroupId+": "+result.getA());
             }
         }
     }

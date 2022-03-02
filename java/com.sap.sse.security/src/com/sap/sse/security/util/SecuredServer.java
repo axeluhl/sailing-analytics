@@ -51,7 +51,30 @@ public interface SecuredServer {
      * If the user authenticated for this server is permitted to update the user group identified by the {@code userGroupId}, the
      * current user is added to the group. If the current user is already part of the group, this method does nothing.
      */
-    void addUserToGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException;
+    default void addCurrentUserToGroup(UUID userGroupId) throws ClientProtocolException, IOException, ParseException {
+        addUserToGroup(userGroupId, getUsername());
+    }
+
+    /**
+     * If the user authenticated for this server is permitted to update the user group identified by the
+     * {@code userGroupId}, the user specified by {@code username} is added to the group. If the current user is already
+     * part of the group, this method does nothing.
+     */
+    void addUserToGroup(UUID userGroupId, String username) throws ClientProtocolException, IOException, ParseException;
+    
+    /**
+     * If the user authenticated for this server is permitted to update the user group identified by the {@code userGroupId}, the
+     * current user is removed from the group. If the current user is not part of the group, this method does nothing.
+     */
+    default void removeCurrentUserFromGroup(UUID userGroupId) throws ClientProtocolException, MalformedURLException, IOException, ParseException {
+        removeUserFromGroup(userGroupId, getUsername());
+    }
+
+    /**
+     * If the user authenticated for this server is permitted to update the user group identified by the {@code userGroupId}, the
+     * user specified by {@code username} is removed from the group. If the current user is not part of the group, this method does nothing.
+     */
+    void removeUserFromGroup(UUID userGroupId, String username) throws ClientProtocolException, IOException, ParseException;
 
     /**
      * Create a user group named {@code serverGroupName} if no group by that name exists yet. The group will be owned by the
