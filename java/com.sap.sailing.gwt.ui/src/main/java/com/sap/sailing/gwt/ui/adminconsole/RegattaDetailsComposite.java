@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
@@ -51,6 +52,7 @@ import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+
 
 
 public class RegattaDetailsComposite extends Composite {
@@ -114,7 +116,7 @@ public class RegattaDetailsComposite extends Composite {
         competitorRegistrationType = createLabelAndValueWidget(grid, currentRow++, stringMessages.competitorRegistrationType(), "CompetitorRegistrationTypeLabel");
         buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
-        scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
+        scoringSystem = createLabelAndValueWidget(grid, currentRow, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
         registrationLinkWithQRCodeOpenButton = addRegistrationLinkOpenButton(grid, currentRow++, stringMessages.registrationLink(), "RegistrationLinkWithQRCodeDialog");
         seriesTable = createRegattaSeriesTable(presenter.getUserService());
@@ -131,7 +133,7 @@ public class RegattaDetailsComposite extends Composite {
         vPanel.add(seriesTable);
         initWidget(mainPanel);
     }
-
+    
     private Label createLabelAndValueWidget(Grid grid, int row, String label, String debugId) {
         Label valueLabel = new Label();
         valueLabel.ensureDebugId(debugId);
@@ -139,7 +141,7 @@ public class RegattaDetailsComposite extends Composite {
         grid.setWidget(row , 1, valueLabel);
         return valueLabel;
     }
-
+ 
     private Button addRegistrationLinkOpenButton(Grid grid, int row, String label, String debugId) {
         grid.setWidget(row , 0, new Label(label + ":"));
         Button button = new Button(stringMessages.registrationLinkShare(), new ClickHandler() {

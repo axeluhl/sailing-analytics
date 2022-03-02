@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sailing.domain.common.security.SecuredDomainType.EVENT;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -17,6 +19,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.ui.adminconsole.help.AdminConsoleHelpButtonResources;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -28,6 +32,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationDetailComposite.DeviceConfigurationFactory {
@@ -46,7 +51,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         this.sailingServiceWrite = presenter.getSailingService();
         this.userService = presenter.getUserService();
         this.stringMessages = stringMessages;
-        this.errorReporter = presenter.getErrorReporter();
+        this.errorReporter = presenter.getErrorReporter(); 
         listComposite = new DeviceConfigurationListComposite(sailingServiceWrite, errorReporter, stringMessages, userService);
         refreshableMultiSelectionModel = listComposite.getSelectionModel();
         detailComposite = setupUi(presenter);
@@ -74,6 +79,9 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     }
 
     private void setupControlPanel(VerticalPanel mainPanel) {
+    	final VerticalPanel panel = new VerticalPanel();
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
+        panel.add(buttonPanel);
         HorizontalPanel deviceManagementControlPanel = new HorizontalPanel();
         deviceManagementControlPanel.setSpacing(5);
         addConfigurationButton = new Button(stringMessages.addConfiguration());
@@ -97,8 +105,12 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                 listComposite.refreshTable();
             }
         });
+        buttonPanel.addUnsecuredWidget(new HelpButton(AdminConsoleHelpButtonResources.INSTANCE, 
+                stringMessages.adminconsoleRaceManagerAppGeneralInfo(), "https://support.sapsailing.com/hc/en-us/articles/360019799279-How-to-work-with-the-SAP-Sailing-Race-Manager-app"));
         deviceManagementControlPanel.add(refreshConfigurationsButton);
+        deviceManagementControlPanel.add(panel);
         mainPanel.add(deviceManagementControlPanel);
+        
     }
 
     private DeviceConfigurationDetailComposite setupConfigurationPanels(VerticalPanel mainPanel, Presenter presenter) {
@@ -151,11 +163,11 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                                 errorReporter.reportError(caught.getMessage());
                             }
                         }));
-                    }
+                    };
                 
                     @Override
                     public void cancel() { }
-                }).show();
+               }).show();
             }
     
             @Override

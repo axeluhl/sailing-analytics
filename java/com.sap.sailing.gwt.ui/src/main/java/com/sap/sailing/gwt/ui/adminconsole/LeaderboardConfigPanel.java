@@ -65,6 +65,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
@@ -74,6 +75,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
+import com.sap.sailing.gwt.ui.adminconsole.help.AdminConsoleHelpButtonResources;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.Refresher;
@@ -165,6 +167,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardRemoveButton = buttonPanel.addRemoveAction(stringMessages.remove(), leaderboardSelectionModel, true,
                 () -> removeLeaderboards(leaderboardSelectionModel.getSelectedSet()));
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
+
+        buttonPanel.addUnsecuredWidget(new HelpButton(AdminConsoleHelpButtonResources.INSTANCE, 
+                stringMessages.adminconsoleLeaderboardsGeneralInfo(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4"));
     }
 
     @Override
