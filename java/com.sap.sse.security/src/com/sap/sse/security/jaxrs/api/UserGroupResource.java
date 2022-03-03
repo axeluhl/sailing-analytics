@@ -25,9 +25,9 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
@@ -35,17 +35,18 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
-@Path("/restsecurity/usergroup")
+@Path(UserGroupResource.RESTSECURITY_USERGROUP)
 public class UserGroupResource extends AbstractSecurityResource {
-
-    private static final String KEY_ROLE_NAME = "roleName";
-    private static final String KEY_FOR_ALL = "forAll";
-    private static final String KEY_ROLE_ID = "roleId";
-    private static final String KEY_USERNAME = "username";
-    private static final String KEY_ROLES = "roles";
-    private static final String KEY_USERS = "users";
-    private static final String KEY_GROUP_NAME = "groupName";
-    private static final String KEY_GROUP_ID = "groupId";
+    public static final String RESTSECURITY_USERGROUP = "/restsecurity/usergroup";
+    public static final String KEY_ROLE_NAME = "roleName";
+    public static final String KEY_FOR_ALL = "forAll";
+    public static final String KEY_ROLE_ID = "roleId";
+    public static final String KEY_USERNAME = "username";
+    public static final String KEY_ROLES = "roles";
+    public static final String KEY_USERS = "users";
+    public static final String KEY_GROUP_NAME = "groupName";
+    public static final String KEY_GROUP_ID = "groupId";
+    public static final String USER = "/user";
 
     @Path("{groupId}")
     @GET
@@ -231,7 +232,7 @@ public class UserGroupResource extends AbstractSecurityResource {
         return response;
     }
 
-    @Path("{groupId}/user/{username}")
+    @Path("{groupId}"+USER+"/{username}")
     @PUT
     @Produces("application/json;charset=UTF-8")
     public Response addUserToUserGroup(@PathParam(KEY_GROUP_ID) String userGroupId,

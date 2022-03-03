@@ -22,8 +22,7 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
      * <li>The {@link #getInboundReplicationConfiguration() inbound replication}
      * {@link InboundReplicationConfiguration#getInboundMasterExchangeName() exchange name} defaults to the
      * {@link #setServerName(String) server name} property</li>
-     * <li>The {@link DefaultProcessConfigurationVariables#USE_ENVIRONMENT} variable is set to
-     * {@code "live-replica-server"}.</li>
+     * <li>The {@link DefaultProcessConfigurationVariables#AUTO_REPLICATE} variable is set to {@code true}</li>
      * <li>If no {@link #setDatabaseName(String) database name is set} explicitly, it defaults to the
      * {@link #getServerName() server name} with the suffix {@code -replica} appended to it.</li>
      * <li>If no {@link #setDatabaseConfiguration(Database) database configuration is set} explicitly, it defaults
@@ -86,10 +85,10 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
         @Override
         protected Map<ProcessConfigurationVariable, String> getUserData() {
             final Map<ProcessConfigurationVariable, String> result = new HashMap<>(super.getUserData());
-            result.put(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-replica-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
+            result.put(DefaultProcessConfigurationVariables.AUTO_REPLICATE, "true");
             return result;
         }
-        
+
         @Override
         protected String getDatabaseName() {
             return isDatabaseNameSet() ? super.getDatabaseName() : super.getDatabaseName()+DEFAULT_REPLICA_DATABASE_NAME_SUFFIX;
