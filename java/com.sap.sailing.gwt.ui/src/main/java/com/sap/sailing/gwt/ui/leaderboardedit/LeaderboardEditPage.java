@@ -118,7 +118,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
                 StrippedLeaderboardDTO leaderboardWithSecurity) {
             final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                     .createStoredSettingsLocatorForEditableLeaderboard(editableLeaderboardContextDefinition);
-            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), leaderboardWithSecurity);
+            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
             EditableLeaderboardLifecycle rootComponentLifeCycle = 
                     new EditableLeaderboardLifecycle(StringMessages.INSTANCE, leaderboardWithSecurity, 
                             getAvailableDetailTypesForLeaderboardResult, paywallResolver);

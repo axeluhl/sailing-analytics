@@ -31,14 +31,14 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService, PaywallResolver raceboardPaywallResolver, 
-            PaywallResolver leaderboardPaywallResolver, Iterable<DetailType> availableDetailTypes, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService, PaywallResolver paywallResolver, 
+            Iterable<DetailType> availableDetailTypes, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         this.stringMessages = stringMessages;
-        raceMapLifecycle = new RaceMapLifecycle(stringMessages, raceboardPaywallResolver);
+        raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolver, raceDTO);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         maneuverTableLifecycle = new ManeuverTableLifecycle(stringMessages);
         leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages, availableDetailTypes,
-                leaderboard.canBoatsOfCompetitorsChangePerRace, leaderboardPaywallResolver);
+                leaderboard.canBoatsOfCompetitorsChangePerRace, paywallResolver, leaderboard);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, competitorChartAllowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages, userService, raceDTO);

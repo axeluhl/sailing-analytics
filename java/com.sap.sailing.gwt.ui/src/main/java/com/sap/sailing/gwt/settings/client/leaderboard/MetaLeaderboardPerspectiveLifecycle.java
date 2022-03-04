@@ -13,7 +13,7 @@ public class MetaLeaderboardPerspectiveLifecycle extends AbstractLeaderboardPers
     
     public MetaLeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
         super(stringMessages, leaderboard, true, availableDetailTypes, paywallResolver);
-        multiLeaderboardPanelLifecycle = new MultipleMultiLeaderboardPanelLifecycle(stringMessages, availableDetailTypes, paywallResolver);
+        multiLeaderboardPanelLifecycle = new MultipleMultiLeaderboardPanelLifecycle(stringMessages, availableDetailTypes, paywallResolver, leaderboard);
         addLifeCycle(multiLeaderboardPanelLifecycle);
     }
 

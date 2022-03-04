@@ -18,7 +18,7 @@ public class EditableLeaderboardLifecycle extends AbstractMultiRaceLeaderboardPa
     public SettingsDialogComponent<EditableLeaderboardSettings> getPerspectiveOwnSettingsDialogComponent(
             EditableLeaderboardSettings settings) {
         return new EditableLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages,
-                availableDetailTypes, canBoatInfoBeShown, leaderboardPaywallResolver);
+                availableDetailTypes, canBoatInfoBeShown, paywallResolver, leaderboardDTO);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class EditableLeaderboardLifecycle extends AbstractMultiRaceLeaderboardPa
     public SettingsDialogComponent<EditableLeaderboardSettings> getSettingsDialogComponent(
             EditableLeaderboardSettings settings) {
         return new EditableLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages,
-                availableDetailTypes, canBoatInfoBeShown, leaderboardPaywallResolver);
+                availableDetailTypes, canBoatInfoBeShown, paywallResolver, leaderboardDTO);
     }
 
     @Override

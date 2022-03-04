@@ -22,17 +22,16 @@ public class LeaderboardWithZoomingPerspectiveLifecycle extends AbstractPerspect
     public static final String ID = "lbwh";
 
     public LeaderboardWithZoomingPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes,
-            PaywallResolver leaderboardPaywallResolver) {
+            PaywallResolver paywallResolver) {
         this.stringMessages = stringMessages;
-        this.leaderboardPanelLifecycle = new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages, availableDetailTypes, leaderboardPaywallResolver);
+        this.leaderboardPanelLifecycle = new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages, availableDetailTypes, paywallResolver);
         this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +
                 (leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName()),
                         stringMessages);
-        
         addLifeCycle(leaderboardPanelLifecycle);
         addLifeCycle(sapHeaderLifecycle);
     }
-    
+
     @Override
     public LeaderboardWithZoomingPerspectiveSettings createPerspectiveOwnDefaultSettings() {
         return new LeaderboardWithZoomingPerspectiveSettings();

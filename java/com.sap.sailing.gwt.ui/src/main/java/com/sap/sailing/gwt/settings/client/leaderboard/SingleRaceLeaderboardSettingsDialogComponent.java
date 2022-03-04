@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
@@ -17,8 +18,8 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     private CheckBox showRaceRankColumn;
     
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
-            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolver leaderboardPaywallResolver) {
-        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true, leaderboardPaywallResolver);
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboarDTO) {
+        super(initialSettings, stringMessages, availableDetailTypes, /* canBoatInfoBeShown */ true, paywallResolver, leaderboarDTO);
     }
 
     @Override

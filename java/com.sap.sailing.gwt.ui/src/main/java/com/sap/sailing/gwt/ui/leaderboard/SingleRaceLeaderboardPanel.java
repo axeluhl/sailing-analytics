@@ -259,7 +259,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     @Override
     public SettingsDialogComponent<SingleRaceLeaderboardSettings> getSettingsDialogComponent(
             SingleRaceLeaderboardSettings useTheseSettings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages, availableDetailTypes, leaderboardPaywallResolver);
+        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages, availableDetailTypes, paywallResolver, leaderboard);
     }
 
     @Override

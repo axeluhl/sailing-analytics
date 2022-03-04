@@ -159,7 +159,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
             MultiRaceLeaderboardSettings useTheseSettings) {
         return new MultiRaceLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
-                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo(), leaderboardPaywallResolver);
+                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo(), paywallResolver, leaderboard);
     }
 
     @Override

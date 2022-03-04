@@ -30,7 +30,7 @@ public class OverallLeaderboardPanelLifecycle extends MultiRaceLeaderboardPanelL
     
     @Override
     public MultiRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(MultiRaceLeaderboardSettings settings) {
-        return new OverallLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages, availableDetailTypes, leaderboardPaywallResolver);
+        return new OverallLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages, availableDetailTypes, paywallResolver, leaderboardDTO);
     }
 
 }

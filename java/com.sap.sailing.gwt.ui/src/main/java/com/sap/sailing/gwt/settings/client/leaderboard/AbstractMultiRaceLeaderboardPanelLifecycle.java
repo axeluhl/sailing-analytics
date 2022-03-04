@@ -13,21 +13,23 @@ public abstract class AbstractMultiRaceLeaderboardPanelLifecycle<T extends Leade
 
     protected final List<String> namesOfRaceColumns;
     protected final boolean canBoatInfoBeShown;
-    protected final PaywallResolver leaderboardPaywallResolver;
+    protected final PaywallResolver paywallResolver;
+    protected final AbstractLeaderboardDTO leaderboardDTO;
     
     public AbstractMultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, PaywallResolver leaderboardPaywallResolver) {
-        this(leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>(),
+            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+        this(leaderboard, leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>(),
                 leaderboard != null ? !leaderboard.canBoatsOfCompetitorsChangePerRace : false, stringMessages,
-                availableDetailTypes, leaderboardPaywallResolver);
+                availableDetailTypes, paywallResolver);
     }
     
-    protected AbstractMultiRaceLeaderboardPanelLifecycle(List<String> namesOfRaceColumns, boolean canBoatInfoBeShown, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, PaywallResolver leaderboardPaywallResolver) {
+    protected AbstractMultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, List<String> namesOfRaceColumns, boolean canBoatInfoBeShown, StringMessages stringMessages,
+            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
         super(stringMessages, availableDetailTypes);
         this.namesOfRaceColumns = namesOfRaceColumns;
         this.canBoatInfoBeShown = canBoatInfoBeShown;
-        this.leaderboardPaywallResolver = leaderboardPaywallResolver;
+        this.paywallResolver = paywallResolver;
+        this.leaderboardDTO = leaderboard;
     }
     
     public abstract T extractUserSettings(T currentLeaderboardSettings);
@@ -35,8 +37,4 @@ public abstract class AbstractMultiRaceLeaderboardPanelLifecycle<T extends Leade
     public abstract SettingsDialogComponent<T> getSettingsDialogComponent(T settings);
 
     public abstract T createDefaultSettings();
-    
-    public PaywallResolver getLeaderboardPaywallResolver() {
-        return leaderboardPaywallResolver;
-    }
 }

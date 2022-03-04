@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.common.client.premium.SailingPremiumCheckBox;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -51,10 +52,11 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected T initialSettings;
     protected Iterable<DetailType> availableDetailTypes;
     
-    protected final PaywallResolver leaderboardPaywallResolver;
+    protected final PaywallResolver paywallResolver;
+    private final AbstractLeaderboardDTO leaderboardDTO;
 
     protected LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail, PaywallResolver leaderboardPaywallResolver) {
+            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail, PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.canBoatInfoBeShownAsOverallDetail = canBoatInfoBeShownAsOverallDetail;
@@ -63,7 +65,8 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         this.availableDetailTypes = availableDetailTypes;
-        this.leaderboardPaywallResolver = leaderboardPaywallResolver;
+        this.paywallResolver = paywallResolver;
+        this.leaderboardDTO = leaderboardDTO;
     }
 
     protected FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
@@ -290,7 +293,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     }
 
     protected PremiumCheckBox createPremiumCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip, Action premiumAction) {
-        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, premiumAction, leaderboardPaywallResolver);
+        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, premiumAction, paywallResolver, leaderboardDTO);
         dialog.registerCheckbox(premiumCheckBox.getCheckBox());
         premiumCheckBox.ensureDebugId(DebugIdHelper.createDebugId(label) + CHECK_BOX_DEBUGID_CONSTANT);
         premiumCheckBox.setValue(selected);

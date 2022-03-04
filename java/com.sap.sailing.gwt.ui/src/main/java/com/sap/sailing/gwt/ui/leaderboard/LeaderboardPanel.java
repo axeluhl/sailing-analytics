@@ -74,7 +74,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
@@ -128,6 +127,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
@@ -236,6 +236,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     protected LeaderboardDTO leaderboard;
+    final Map<Action, Boolean> premiumLeaderboardPermissions = new HashMap<>();
 
     private final TotalRankColumn totalRankColumn;
     
@@ -337,7 +338,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private HandlerRegistration leaderboardAsTableSelectionModelRegistration;
 
     private final FlowPanel contentPanel = new FlowPanel();
-    protected final PaywallResolver leaderboardPaywallResolver;
+    protected final PaywallResolver paywallResolver;
 
     private HorizontalPanel refreshAndSettingsPanel;
     private Label scoreCorrectionLastUpdateTimeLabel;
@@ -473,28 +474,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         LEG_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
-        this.leaderboardPaywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory(), 
-                leaderboardName, SecuredDomainType.LEADERBOARD, new AsyncCallback<PaywallResolver>() {
-                    @Override
-                    public void onSuccess(PaywallResolver resolver) {
-                        Set<DetailType> removableDetailTypes = new HashSet<DetailType>(); 
-                        for (DetailType detailType: overallDetailColumnMap.keySet()) {
-                            if (detailType.getPremiumAction() != null 
-                                    && !resolver.hasPermission(detailType.getPremiumAction())) {
-                                removableDetailTypes.add(detailType);
-                            }
-                        }
-                        for (DetailType detailType: removableDetailTypes) {
-                            overallDetailColumnMap.remove(detailType);
-                        }
-                    }
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error while init Paywall Resolver." , caught);
-                    }
-                });
+        this.paywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory());
         overallDetailColumnMap = createOverallDetailColumnMap();
-
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
         }
@@ -2592,6 +2573,18 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * values on the columns.
      */
     public void updateLeaderboard(LeaderboardDTO leaderboard) {
+        if (this.leaderboard == null && leaderboard != null) {
+            GWT.log("+++++ init");
+            GWT.log("### overallDetailColumnMap: " + overallDetailColumnMap);
+            Set<Action> premiumLeaderboardActions = DetailType
+                    .getAllPremiumActionsFromSubset(overallDetailColumnMap.keySet());
+            premiumLeaderboardPermissions.clear();
+            premiumLeaderboardPermissions.putAll(paywallResolver
+                    .getHasPermissionMap(premiumLeaderboardActions, leaderboard));
+            GWT.log("### premiumLeaderboardPermissions: " + premiumLeaderboardPermissions);
+        } else {
+            GWT.log("+++++ changed");
+        }
         if (leaderboard != null) {
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
                     leaderboard);
@@ -2885,7 +2878,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         // getAvailableOverallDetailColumnTypes()
         for (DetailType overallDetailType : DetailType.getAvailableOverallDetailColumnTypes()) {
             if (selectedOverallDetailColumns.contains(overallDetailType)
-                    && overallDetailColumnMap.containsKey(overallDetailType)) {
+                    && overallDetailColumnMap.containsKey(overallDetailType)
+                    && (overallDetailType.getPremiumAction() == null
+                            || premiumLeaderboardPermissions.get(overallDetailType.getPremiumAction()))) {
                 overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
             }
         }
@@ -3652,9 +3647,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         textRenderer.accept(sb);
         sb.appendHtmlConstant("</div>");
     }
-    
-    public PaywallResolver getLeaderboardPaywallResolver() {
-        return leaderboardPaywallResolver;
-    }
 
+    public PaywallResolver getPaywallResolver() {
+        return this.paywallResolver;
+    }
 }

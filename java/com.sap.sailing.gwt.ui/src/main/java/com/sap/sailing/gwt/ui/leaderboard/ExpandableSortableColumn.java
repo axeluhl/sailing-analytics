@@ -83,7 +83,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
         Set<DetailType> removableDetailTypes = new HashSet<>();
         for (DetailType detailType: detailColumnsMap.keySet()) {
             if (detailType.getPremiumAction() != null 
-                    && !leaderboardPanel.getLeaderboardPaywallResolver().hasPermission(detailType.getPremiumAction())) {
+                    && !leaderboardPanel.getPaywallResolver().hasPermission(detailType.getPremiumAction(), this.leaderboardPanel.leaderboard)) {
                 removableDetailTypes.add(detailType);
             }
         }

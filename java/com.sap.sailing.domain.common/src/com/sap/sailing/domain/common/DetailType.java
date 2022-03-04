@@ -8,7 +8,9 @@ import static com.sap.sse.common.SortingOrder.NONE;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import com.sap.sse.common.SortingOrder;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -214,6 +216,9 @@ public enum DetailType implements Serializable {
 
     private SortingOrder defaultSortingOrder;
     
+    /**
+     * TODO:
+     */
     private Action premiumAction;
 
     private final String[] oldNames;
@@ -605,5 +610,35 @@ public enum DetailType implements Serializable {
             }
         }
         throw new IllegalArgumentException("Could not restore " + value + " to an DetailType enum");
+    }
+
+    /**
+     * Get a list of all defined {@link Action}s from all possible {@link DetailType}s).
+     * 
+     * @return a {@link Set} of all Actions which are defined on the {@link DetailType}s.
+     */
+    public static Set<Action> getAllPremiumActionsFromAll() {
+        final Set<Action> premiumLeaderboardActions = new HashSet<>();
+        for (DetailType detailType : DetailType.values()) {
+            premiumLeaderboardActions.add(detailType.getPremiumAction());
+        }
+        return premiumLeaderboardActions;
+    }
+
+    /**
+     * Get a list of all defined {@link Action}s from a list (mostly a subset of all possible {@link DetailType}s).
+     * 
+     * @param detailTypes
+     *            a list of DetailType
+     * @return a {@link Set} of all Actions which are defined on the given {@link DetailType}s.
+     */
+    public static Set<Action> getAllPremiumActionsFromSubset(Iterable<DetailType> detailTypes) {
+        final Set<Action> premiumLeaderboardActions = new HashSet<>();
+        for (DetailType detailType : detailTypes) {
+            if (detailType.getPremiumAction() != null) {
+                premiumLeaderboardActions.add(detailType.getPremiumAction());
+            }
+        }
+        return premiumLeaderboardActions;
     }
 }

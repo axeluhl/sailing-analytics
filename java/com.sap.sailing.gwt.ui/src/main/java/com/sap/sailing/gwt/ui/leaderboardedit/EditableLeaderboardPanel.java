@@ -1410,7 +1410,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     public SettingsDialogComponent<EditableLeaderboardSettings> getSettingsDialogComponent(
             EditableLeaderboardSettings useTheseSettings) {
         return new EditableLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
-                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo(), leaderboardPaywallResolver);
+                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo(), paywallResolver, leaderboard);
     }
 
     @Override

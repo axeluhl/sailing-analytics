@@ -209,9 +209,9 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         } else {
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider, competitorsAndBoats); // show no competitors
         }
-        final PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), 
-                /* FIXME: 5510 Premium features wont work without raceDTO context */ null);
-        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages(), paywallResolver), raceMapSettings,
+        final PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        // TODO: set RaceDTO to RaceMapLifecycle to enable premium functions
+        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages(), paywallResolver, null), raceMapSettings,
                 getSailingService(), asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
                 raceMapResources, /* showHeaderPanel */ false, new DefaultQuickFlagDataProvider(), paywallResolver,

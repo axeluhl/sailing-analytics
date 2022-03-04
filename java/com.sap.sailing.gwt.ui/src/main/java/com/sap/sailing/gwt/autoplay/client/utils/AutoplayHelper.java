@@ -291,9 +291,9 @@ public class AutoplayHelper {
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
                 /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false);
-        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
-                /* FIXME: 5510 Premium features wont work without raceDTO context */ null);
-        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver);
+        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
+        // TODO: set RaceDTO to RaceMapLifecycle to enable premium functions
+        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver, null);
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, competitorsAndTheirBoats);
         RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
                 /* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);

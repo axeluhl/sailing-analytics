@@ -19,7 +19,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
@@ -122,32 +121,19 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
         }
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                 .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition, mode != null ? mode.name() : null);
-        PaywallResolver raceboardPaywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), raceboardData.getRace());
-        new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), getLeaderboardName(), 
-                SecuredDomainType.LEADERBOARD, new AsyncCallback<PaywallResolver>() {
-                    
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
+                raceboardData.getLeaderboard(), StringMessages.INSTANCE,
+                raceboardData.getDetailTypesForCompetitorChart(), getUserService(), paywallResolver,
+                raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardData.getRace());
+        RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(),
+                storageDefinition);
+        componentContext.getInitialSettings(
+                new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override
-                    public void onSuccess(PaywallResolver resolver) {
-                        final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
-                                raceboardData.getLeaderboard(), StringMessages.INSTANCE,
-                                raceboardData.getDetailTypesForCompetitorChart(), getUserService(), raceboardPaywallResolver, resolver,
-                                raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardData.getRace());
-                        RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(),
-                                storageDefinition);
-                        componentContext.getInitialSettings(
-                                new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
-                                    @Override
-                                    public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings) {
-                                        createPerspective(mode, componentContext, settings, raceboardData, lifeCycle,
-                                                raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardContextDefinition);
-                                    }
-                                });
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-                        
+                    public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings) {
+                        createPerspective(mode, componentContext, settings, raceboardData, lifeCycle,
+                                raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardContextDefinition);
                     }
                 });
         

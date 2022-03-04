@@ -13,14 +13,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration.OnSettingsCallback;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinitionImpl;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayType;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -30,10 +28,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartView {
@@ -151,44 +146,17 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
 
     @UiHandler("settingsButton")
     void onOpenSettings(ClickEvent event) {
-        if (selectedLeaderboard instanceof SecuredDTO) {
-            PaywallResolver leaderboardPaywallResolver = new PaywallResolver(currentPresenter.getUserService(),
-                    currentPresenter.getSubscriptionServiceFactory(), (SecuredDTO) selectedLeaderboard);
-            selectedAutoPlayType.getConfig().openSettingsDialog(selectedEvent, selectedLeaderboard,
-                    new OnSettingsCallback() {
-                        @Override
-                        public void newSettings(PerspectiveCompositeSettings<?> newSettings, String urlWithSettings) {
-                            settings = newSettings;
-                            updateURL(urlWithSettings);
-                        }
-                    }, settings, apcd, currentPresenter.getUserService(),
-                    currentPresenter.getSubscriptionServiceFactory(), leaderboardPaywallResolver);
-        } else {
-            new PaywallResolver(currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(),
-                    selectedLeaderboard.getName(), SecuredDomainType.LEADERBOARD, new AsyncCallback<PaywallResolver>() {
-
-                        @Override
-                        public void onSuccess(PaywallResolver resolver) {
-                            selectedAutoPlayType.getConfig().openSettingsDialog(selectedEvent, selectedLeaderboard,
-                                    new OnSettingsCallback() {
-                                        @Override
-                                        public void newSettings(PerspectiveCompositeSettings<?> newSettings,
-                                                String urlWithSettings) {
-                                            settings = newSettings;
-                                            updateURL(urlWithSettings);
-                                        }
-                                    }, settings, apcd, currentPresenter.getUserService(),
-                                    currentPresenter.getSubscriptionServiceFactory(), resolver);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Notification.notify(StringMessages.INSTANCE.error(), NotificationType.ERROR);
-                            GWT.log("Error while init PaywallResolver", caught);
-                        }
-                    });
-        }
-
+        PaywallResolver paywallResolver = new PaywallResolver(currentPresenter.getUserService(),
+                currentPresenter.getSubscriptionServiceFactory());
+        selectedAutoPlayType.getConfig().openSettingsDialog(selectedEvent, selectedLeaderboard,
+                new OnSettingsCallback() {
+                    @Override
+                    public void newSettings(PerspectiveCompositeSettings<?> newSettings, String urlWithSettings) {
+                        settings = newSettings;
+                        updateURL(urlWithSettings);
+                    }
+                }, settings, apcd, currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(),
+                paywallResolver);
     }
 
     private boolean validate() {

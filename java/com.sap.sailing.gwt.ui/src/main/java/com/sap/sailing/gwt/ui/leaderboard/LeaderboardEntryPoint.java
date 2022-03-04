@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
@@ -144,7 +143,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                     }
                                 });
                         if (leaderboardDTO.type.isMetaLeaderboard()) {
-                            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), leaderboardName, SecuredDomainType.LEADERBOARD);
+                            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
                             // overall
                             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
                                     stringmessages, leaderboardDTO, result, paywallResolver);
@@ -176,7 +175,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                         }
                                     });
                         } else {
-                            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory(), leaderboardName, SecuredDomainType.LEADERBOARD);
+                            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
                             LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
                                     StringMessages.INSTANCE, leaderboardDTO, result, paywallResolver);
                             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(

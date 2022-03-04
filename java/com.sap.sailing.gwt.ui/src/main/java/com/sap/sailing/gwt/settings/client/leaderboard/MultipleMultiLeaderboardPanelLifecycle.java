@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 import java.util.Collections;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
@@ -14,8 +15,8 @@ public class MultipleMultiLeaderboardPanelLifecycle extends MultiRaceLeaderboard
     public static final String MID = "mlb";
 
     public MultipleMultiLeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, 
-            PaywallResolver paywallResolver) {
-        super(Collections.emptyList(), false, stringMessages, availableDetailTypes, paywallResolver);
+            PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
+        super(leaderboardDTO, Collections.emptyList(), false, stringMessages, availableDetailTypes, paywallResolver);
     }
 
     @Override

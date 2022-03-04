@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -154,5 +155,10 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public SubscriptionServiceFactory getSubscriptionServiceFactory() {
         return clientFactory.getSubscriptionServiceFactory();
+    }
+    
+    @Override
+    public SailingServiceAsync getSailingService() {
+        return clientFactory.getSailingService();
     }
 }

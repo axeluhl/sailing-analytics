@@ -299,7 +299,7 @@ public class RaceBoardPanel
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
         quickFlagDataProvider = new QuickFlagDataFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
-        final PaywallResolver paywallResolverRace = new PaywallResolver(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory(), raceDTO);
+        final PaywallResolver paywallResolverRace = new PaywallResolver(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory());
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 

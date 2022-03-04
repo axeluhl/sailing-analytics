@@ -4,7 +4,6 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
@@ -66,7 +65,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
 
     protected ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory,
             String placeToken, Iterable<DetailType> availableDetailTypes) {
-        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory, leaderboardName, SecuredDomainType.LEADERBOARD);
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
         final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes, paywallResolver);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesOverallLeaderboard(leaderboardName);
 

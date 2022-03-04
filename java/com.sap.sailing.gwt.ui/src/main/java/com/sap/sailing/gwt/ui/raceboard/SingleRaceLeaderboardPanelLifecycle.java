@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.dom.client.Document;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
@@ -18,14 +19,16 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     private final boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard;
     private final boolean canBoatsOfCompetitorsChangePerRace;
-    private final PaywallResolver leaderboardPaywallResolver;
+    private final PaywallResolver paywallResolver;
+    private final AbstractLeaderboardDTO leaderboardDTO;
 
     public SingleRaceLeaderboardPanelLifecycle(final StringMessages stringMessages,
-            final Iterable<DetailType> availableDetailTypes, final boolean canBoatsOfCompetitorsChangePerRace, PaywallResolver leaderboardPaywallResolver) {
+            final Iterable<DetailType> availableDetailTypes, final boolean canBoatsOfCompetitorsChangePerRace, PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
         super(stringMessages, availableDetailTypes);
         this.isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
-        this.leaderboardPaywallResolver = leaderboardPaywallResolver;
+        this.paywallResolver = paywallResolver;
+        this.leaderboardDTO = leaderboardDTO;
     }
     
     @Override
@@ -55,6 +58,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     @Override
     public SingleRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(SingleRaceLeaderboardSettings settings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages, availableDetailTypes, leaderboardPaywallResolver);
+        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages, availableDetailTypes, paywallResolver, leaderboardDTO);
     }
 }
