@@ -42,6 +42,7 @@ See the server logs like this:
 ```
     tail -f logs/sailing0.log.0
 ```
+Connect to your server at ``http://localhost:8888`` and find its administration console at ``http://localhost:8888/gwt/AdminConsole.html``. The first-time default login user is ``admin`` with default password ``admin`` (please change).
 
 ## Docker
 

@@ -23,7 +23,9 @@ Require-Bundle: com.sap.sse.landscape,
  com.sap.sse.landscape.aws.common,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain,
- com.sap.sailing.landscape.common
+ com.sap.sailing.landscape.common,
+ com.sap.sailing.shared.server,
+ org.apache.shiro.core
 Export-Package: com.sap.sailing.landscape,
  com.sap.sailing.landscape.impl,
  com.sap.sailing.landscape.procedures
