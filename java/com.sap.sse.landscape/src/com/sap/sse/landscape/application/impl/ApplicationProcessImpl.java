@@ -92,12 +92,17 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             throws Exception {
         // TODO figure this out using the /gwt/status "health check" REST end point; we need to separate the various parameters in the status output's "buildversion" field into separate fields
         final Pattern pattern = Pattern.compile("^[^-]*-([^ ]*) System:");
-        final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
+        final String versionTxt = getVersionTxt(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         final Release result;
-        if (matcher.find()) {
-            result = new ReleaseImpl(matcher.group(1), releaseRepository);
-        } else {
+        if (versionTxt == null) {
             result = null;
+        } else {
+            final Matcher matcher = pattern.matcher(versionTxt);
+            if (matcher.find()) {
+                result = new ReleaseImpl(matcher.group(1), releaseRepository);
+            } else {
+                result = null;
+            }
         }
         return result;
     }
@@ -115,6 +120,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     * @return {@code null} in case the connection attempt timed out
      */
     private String getVersionTxt(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return getFileContents(getServerDirectory(optionalTimeout)+"/"+VERSION_TXT, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
@@ -152,7 +158,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
-     * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     * by evaluating the {@code env.sh} file on the {@link #getHost() host} or the connection to the host timed out.
      */
     @Override
     public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout,
@@ -160,13 +166,22 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return getEnvShValueFor(getHost(), getServerDirectory(optionalTimeout), variableName, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
+    /**
+     * @return {@code null} in case the connection attempt timed out
+     */
     protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        final String variableValue = sshChannel.runCommandAndReturnStdoutAndLogStderr(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
-                                                "echo \"${"+variableName+"}\"", /* stderr prefix */ null, /* stderr log level */ null);
-        return variableValue.endsWith("\n") ? variableValue.substring(0, variableValue.length()-1) : variableValue;
+        final String result;
+        if (sshChannel == null) {
+            result = null;
+        } else {
+            final String variableValue = sshChannel.runCommandAndReturnStdoutAndLogStderr(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
+                                                    "echo \"${"+variableName+"}\"", /* stderr prefix */ null, /* stderr log level */ null);
+            result = variableValue.endsWith("\n") ? variableValue.substring(0, variableValue.length()-1) : variableValue;
+        }
+        return result;
     }
     
     /**
@@ -204,16 +219,26 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return getFileContents(getEnvShPath(optionalTimeout), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
+    /**
+     * @return {@code null} in case the connection attempt timed out
+     */
     protected String getFileContents(String path, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
+        String result;
         final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        try {final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
-            sftpChannel.get(path, bos);
-            return bos.toString();
-        } finally {
-            sftpChannel.getSession().disconnect();
+        if (sftpChannel == null) {
+            // timeout
+            result = null;
+        } else {
+            try {final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
+                sftpChannel.get(path, bos);
+                result = bos.toString();
+            } finally {
+                sftpChannel.getSession().disconnect();
+            }
         }
+        return result;
     }
     
     /**
