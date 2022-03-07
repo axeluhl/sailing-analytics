@@ -73,8 +73,8 @@ public class ChargebeeSubscription extends Subscription {
             TimePoint manualUpdatedAt) {
         super(subscriptionId, planId, customerId, trialStart, trialEnd, subscriptionStatus, paymentStatus,
                 transactionType, transactionStatus, invoiceId, invoiceStatus, reoccuringPaymentValue, currencyCode,
-                subscriptionCreatedAt, subscriptionUpdatedAt, subscriptionActivatedAt, nextBillingAt, cancelledAt,
-                currentTermEnd, latestEventTime, manualUpdatedAt, ChargebeeSubscriptionProvider.PROVIDER_NAME);
+                subscriptionCreatedAt, subscriptionUpdatedAt, subscriptionActivatedAt, nextBillingAt, currentTermEnd, 
+                cancelledAt, latestEventTime, manualUpdatedAt, ChargebeeSubscriptionProvider.PROVIDER_NAME);
     }
 
     @Override
