@@ -12,7 +12,7 @@ public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspect
     public LeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, Iterable<DetailType> availableDetailTypes,
             PaywallResolver paywallResolver) {
         super(stringMessages, leaderboard, false, availableDetailTypes, paywallResolver);
-        addLifeCycle(new OverallLeaderboardPanelLifecycle(null, stringMessages, availableDetailTypes, paywallResolver));
+        addLifeCycle(new OverallLeaderboardPanelLifecycle(leaderboard, stringMessages, availableDetailTypes, paywallResolver));
     }
 
     @Override
