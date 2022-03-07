@@ -51,7 +51,6 @@ public class SubscriptionWebHookEvent {
     private static final String CURRENT_TERM_END = "current_term_end";
     private static final String CANCELLED_AT = "cancelled_at";
     private static final String SUBSCRIPTION_ACTIVATED_AT = "subscription_activated_at";
-    private static final String REOCURRING_PAYMENT_VALUE = "reocurring_payment_value";
     private static final String CURRENCY_CODE = "currency_code";
 
     private final JSONObject eventJSON;
@@ -194,7 +193,17 @@ public class SubscriptionWebHookEvent {
     }
     
     public Integer getReocurringPaymentValue() {
-        return getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, REOCURRING_PAYMENT_VALUE);
+        int reocurringPaymentValue = 0;
+        final JSONArray subscriptionItems = getJsonValue(content, SUBSCRIPTION_JSON_OBJECT, "subscription_items");
+        if (subscriptionItems != null) {
+            for (int i = 0; i < subscriptionItems.size(); i++) {
+                final Long amount = getJsonValue((JSONObject) subscriptionItems.get(i), "amount");
+                if (amount != null) {
+                    reocurringPaymentValue += amount;
+                }
+            }
+        }
+        return reocurringPaymentValue;
     }
     
     public String getCurrencyCode() {

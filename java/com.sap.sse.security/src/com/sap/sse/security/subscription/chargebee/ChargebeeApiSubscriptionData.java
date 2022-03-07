@@ -45,13 +45,24 @@ public class ChargebeeApiSubscriptionData {
         final String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
                 invoiceStatus);
         final String planId = getPlanId(subscriptionPlanProvider);
+        final int reoccuringPaymentValue = calculateReoccuringPaymentValue();
         return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
                 getTime(subscription.trialStart()), getTime(subscription.trialEnd()), subscriptionStatus, paymentStatus,
-                transactionType, transactionStatus, invoiceId, invoiceStatus, subscription.mrr(),
+                transactionType, transactionStatus, invoiceId, invoiceStatus, reoccuringPaymentValue,
                 subscription.currencyCode(), getTime(subscription.createdAt()), getTime(subscription.updatedAt()),
                 getTime(subscription.activatedAt()), getTime(subscription.nextBillingAt()),
                 getTime(subscription.currentTermEnd()), getTime(subscription.cancelledAt()), TimePoint.now(),
                 com.sap.sse.security.shared.subscription.Subscription.emptyTime());
+    }
+
+    private int calculateReoccuringPaymentValue() {
+        int reoccuringPaymentValue = 0;
+        for (SubscriptionItem item : subscription.subscriptionItems()){
+            if(item.amount() != null) {
+                reoccuringPaymentValue += item.amount();
+            }
+        }
+        return reoccuringPaymentValue;
     }
     
     private String getPlanId(SubscriptionPlanProvider subscriptionPlanProvider) {
