@@ -74,12 +74,12 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         this.valueProvider = new SubscriptionsValueProvider(i18n);
         initSubscriptionsTable(presenter);
     }
-
+    
     @UiHandler("subscribeButtonUi")
     public void onSubscribeClicked(final ClickEvent event) {
         presenter.navigateToSubscribe();
     }
-
+    
     @Override
     public void updateView(final SubscriptionListDTO subscriptions) {
         subscribeButtonUi.setEnabled(true);
@@ -92,11 +92,9 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         }
         setVisible(true);
     }
-
+    
     private void initSubscriptionsTable(final Presenter presenter) {
-
         subscriptionsUi.setRowStyles((row, index) -> local_res.css().defaultTableRow());
-
         final Column<SubscriptionDTO, ?> nameColumn = new TextColumn<SubscriptionDTO>() {
             @Override
             public String getValue(final SubscriptionDTO object) {
@@ -105,30 +103,22 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         };
         nameColumn.setCellStyleNames(local_res.css().fontWeightBold());
         subscriptionsUi.addColumn(nameColumn, i18n.name());
-
         subscriptionsUi.addColumn(new Column<SubscriptionDTO, SafeHtml>(new SafeHtmlCell()) {
-
             @Override
             public SafeHtml getValue(final SubscriptionDTO object) {
                 return valueProvider.getSubscriptionStatusLabel(object);
             }
-
         }, i18n.status());
-
         addDateTimeColumn(i18n.createdAt(), SubscriptionDTO::getCreatedAt);
-
         addDateTimeColumn(i18n.currentTermEnd(), valueProvider::getTermEnd);
-
         final Column<SubscriptionDTO, String> cancelColumn = new Column<SubscriptionDTO, String>(new ButtonCell()) {
-
             @Override
             public void render(final Context context, final SubscriptionDTO object, final SafeHtmlBuilder sb) {
-                final UnaryOperator<SafeHtml> template = object.isCancelled()
+                final UnaryOperator<SafeHtml> template = object.isCancelled() || !object.isRenewing()
                         ? UserProfileResources.TEMPLATE::disabledButtonCell
                         : UserProfileResources.TEMPLATE::removeButtonCell;
                 sb.append(template.apply(SimpleSafeHtmlRenderer.getInstance().render(getValue(object))));
             }
-
             @Override
             public String getValue(final SubscriptionDTO object) {
                 return i18n.cancelSubscription();
@@ -145,7 +135,6 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             }
         });
         subscriptionsUi.addColumn(cancelColumn);
-
         subscriptionsUi.setTableBuilder(new DefaultCellTableBuilder<SubscriptionDTO>(subscriptionsUi) {
             @Override
             public void buildRowImpl(final SubscriptionDTO rowValue, final int absRowIndex) {
@@ -166,7 +155,6 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
                 }
                 tr.endTR();
             }
-
             private void addTextCell(final TableRowBuilder tr, final String text, final String... classNames) {
                 final StringJoiner styles = new StringJoiner(" ");
                 Stream.of(classNames).forEach(styles::add);
@@ -174,7 +162,6 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
                 td.startDiv().className(styles.toString()).text(text).endDiv();
                 td.endTD();
             }
-
             private void addImageCell(final TableRowBuilder tr, final DataResource image) {
                 final TableCellBuilder td = tr.startTD().className(cellTable.getResources().style().cell());
                 td.startImage().src(image.getSafeUri().asString()).width(24).endImage();
