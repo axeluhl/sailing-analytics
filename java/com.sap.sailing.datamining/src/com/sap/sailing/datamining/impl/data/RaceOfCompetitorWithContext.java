@@ -76,11 +76,11 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public String getSailID() {
+    public Boat getBoat() {
         Boat boatOfCompetitor = getTrackedRace().getBoatOfCompetitor(getCompetitor());
-        return boatOfCompetitor != null ? boatOfCompetitor.getSailID() : null;
+        return boatOfCompetitor;
     }
-    
+
     @Override
     public ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart() {
         Double normalizedDistance = getNormalizedDistanceToStarboardSideAtStartOfCompetitor();

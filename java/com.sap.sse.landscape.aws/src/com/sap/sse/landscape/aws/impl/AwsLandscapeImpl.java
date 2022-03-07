@@ -39,6 +39,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.NamedWithIDImpl;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
@@ -93,6 +94,7 @@ import software.amazon.awssdk.services.acm.model.CertificateStatus;
 import software.amazon.awssdk.services.autoscaling.AutoScalingAsyncClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -200,7 +202,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState) {
         this(awsLandscapeState,
-             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
+             System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
     }
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey) {
@@ -632,6 +635,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, RRType type, String value) {
         return getRoute53Client().changeResourceRecordSets(ChangeResourceRecordSetsRequest.builder().hostedZoneId(hostedZoneId)
                 .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.DELETE)
+                        // TODO using the DEFAULT_DNS_TTL_MILLIS is a bit unclean here; if the record has been modified manually or the default has changed, removal will fail
                         .resourceRecordSet(ResourceRecordSet.builder().name(hostname).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
                                 .resourceRecords(ResourceRecord.builder().value(value).build()).build()).build()).build()).build()).
                 changeInfo();
@@ -671,7 +675,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public AmazonMachineImage<ShardingKey> getLatestImageWithTag(com.sap.sse.landscape.Region region, String tagName, String tagValue) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
-                .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
+                .describeImages(DescribeImagesRequest.builder().filters(
+                        Filter.builder().name("tag:"+tagName).values(tagValue).build(),
+                        Filter.builder().name("state").values("available").build()).build()); // only use available images, see bug 5679
         return new AmazonMachineImageImpl<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region, this);
     }
     
@@ -795,7 +801,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      * @return
      */
     private AwsCredentials getCredentials() {
-        return sessionToken.map(nonEmptySessionToken->(AwsCredentials) AwsSessionCredentials.create(accessKeyId, secretAccessKey, sessionToken.get()))
+        return sessionToken.map(nonEmptySessionToken->(AwsCredentials) AwsSessionCredentials.create(accessKeyId, secretAccessKey, nonEmptySessionToken))
                 .orElse(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
     }
     
@@ -1027,14 +1033,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
-        return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
-                        .names(targetGroupName).build()).targetGroups().iterator().next();
+        return Util.first(getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
+                        .names(targetGroupName).build()).targetGroups());
     }
     
     @Override
     public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(com.sap.sse.landscape.Region region, String targetGroupArn) {
-        return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
-                        .targetGroupArns(targetGroupArn).build()).targetGroups().iterator().next();
+        return Util.first(getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
+                        .targetGroupArns(targetGroupArn).build()).targetGroups());
     }
     
     @Override
@@ -1164,15 +1170,73 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private String getNonDNSMappedLoadBalancerName(String wildcardDomain) {
         return DEFAULT_NON_DNS_MAPPED_ALB_NAME + wildcardDomain.replaceAll("\\.", "-");
     }
+    
+    /**
+     * @param hostname example: {@code NLB-sapsailing-dot-com-f937a5b33246d221.elb.eu-west-1.amazonaws.com} or
+     * {@code DNSMapped-0-1286577811.eu-west-1.elb.amazonaws.com}. The ".elb." part may occur before or after
+     * the region identifier.
+     */
+    private boolean isLoadBalancerDNSName(String hostname) {
+        return getLoadBalancerDescriptorForDNSName(hostname) != null;
+    }
+
+    private static class LoadBalancerDescriptor extends NamedWithIDImpl {
+        private static final long serialVersionUID = 5813730385448660098L;
+        private final Region region;
+
+        public LoadBalancerDescriptor(String name, String id, Region region) {
+            super(name, id);
+            this.region = region;
+        }
+
+        public Region getRegion() {
+            return region;
+        }
+    }
+    
+    private LoadBalancerDescriptor getLoadBalancerDescriptorForDNSName(String hostname) {
+        final String loadBalancerNameAndIdPattern = "([^.]*)-([^.-]*)";
+        final String amazonAwsComSuffixPattern = "amazonaws\\.com";
+        final String elbInfixPattern = "\\.elb\\.";
+        final String regionIdPattern = "([^.]*)";
+        final Pattern p1 = Pattern.compile("^"+loadBalancerNameAndIdPattern+elbInfixPattern+regionIdPattern+"\\."+amazonAwsComSuffixPattern+"$");
+        final Pattern p2 = Pattern.compile("^"+loadBalancerNameAndIdPattern+"\\."+regionIdPattern+elbInfixPattern+amazonAwsComSuffixPattern+"$");
+        final Matcher m1 = p1.matcher(hostname);
+        final Matcher result;
+        if (m1.matches()) {
+            result = m1;
+        } else {
+            final Matcher m2 = p2.matcher(hostname);
+            if (m2.matches()) {
+                result = m2;
+            } else {
+                result = null;
+            }
+        }
+        return result == null ? null : new LoadBalancerDescriptor(result.group(1), result.group(2), Region.of(result.group(3)));
+    }
 
     @Override
-    public ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(
-            com.sap.sse.landscape.Region region, String hostname) {
+    public ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(String hostname) {
+        return Util.stream(getResourceRecordSets(hostname))
+                    .filter(rrs->rrs.type() == RRType.CNAME)
+                    .flatMap(rrs->rrs.resourceRecords().stream())
+                    .filter(rr->isLoadBalancerDNSName(rr.value()))
+                    .map(rr->getLoadBalancerDescriptorForDNSName(rr.value()))
+                    .findAny()
+                    .map(lbDesc->getLoadBalancerByName(lbDesc.getName(), new AwsRegion(lbDesc.getRegion(), this)))
+                    .orElse(null);
+    }
+    
+    @Override
+    public ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(com.sap.sse.landscape.Region region, String hostname) {
         final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers();
         for (final LoadBalancer lb : response.loadBalancers()) {
             final ApplicationLoadBalancer<ShardingKey> alb = new ApplicationLoadBalancerImpl<>(region, lb, this);
             for (final Rule rule : alb.getRules()) {
-                if (rule.conditions().stream().filter(r->r.hostHeaderConfig().values().contains(hostname)).findAny().isPresent()) {
+                if (rule.conditions().stream().filter(
+                        r->r.hostHeaderConfig() != null && r.hostHeaderConfig().values().contains(hostname))
+                        .findAny().isPresent()) {
                     return alb;
                 }
             }
@@ -1503,6 +1567,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
+    public Iterable<ResourceRecordSet> getResourceRecordSets(String hostname) {
+        final Route53Client route53Client = getRoute53Client();
+        final String hostedZoneId = getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname));
+        return Util.filter(route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname)).resourceRecordSets(),
+                resourceRecordSet->AwsLandscape.removeTrailingDotFromHostname(resourceRecordSet.name()).equals(hostname));
+    }
+    
+    @Override
     public CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> getLoadBalancersAsync(com.sap.sse.landscape.Region region) {
         return getLoadBalancingAsyncClient(getRegion(region)).describeLoadBalancers().handleAsync((response, exception)->
             Util.map(response.loadBalancers(), lb->new ApplicationLoadBalancerImpl<ShardingKey>(region, lb, this)));
@@ -1666,58 +1738,49 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public void updateReleaseInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release) {
         logger.info("Adjusting release for auto-scaling group "+autoScalingGroup.getName()+" to "+release);
-        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
         final String releaseName = release.getName();
+        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
         final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
         final String oldUserData = new String(Base64.getDecoder().decode(oldLaunchConfiguration.userData().getBytes()));
         final String newUserData = oldUserData.replaceFirst(
                 "(?m)^"+DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=(.*)$",
                 DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=\""+release.getName()+"\"");
-        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
-        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
-        autoScalingClient.createLaunchConfiguration(b->b
-                .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())
-                .blockDeviceMappings(oldLaunchConfiguration.blockDeviceMappings())
-                .classicLinkVPCId(oldLaunchConfiguration.classicLinkVPCId())
-                .classicLinkVPCSecurityGroups(oldLaunchConfiguration.classicLinkVPCSecurityGroups())
-                .ebsOptimized(oldLaunchConfiguration.ebsOptimized())
-                .iamInstanceProfile(oldLaunchConfiguration.iamInstanceProfile())
-                .imageId(oldLaunchConfiguration.imageId())
-                .instanceMonitoring(oldLaunchConfiguration.instanceMonitoring())
-                .instanceType(oldLaunchConfiguration.instanceType())
-                .keyName(oldLaunchConfiguration.keyName())
-                .launchConfigurationName(newLaunchConfigurationName)
-                .placementTenancy(oldLaunchConfiguration.placementTenancy())
-                .securityGroups(oldLaunchConfiguration.securityGroups())
-                .spotPrice(oldLaunchConfiguration.spotPrice())
-                .userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
-        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+        updateLaunchConfiguration(region, autoScalingGroup, newLaunchConfigurationName,
+                b->b.userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
+    }
+    
+    private CreateLaunchConfigurationRequest.Builder copyLaunchConfigurationToCreateRequestBuilder(LaunchConfiguration launchConfigurationToCopy) {
+        return CreateLaunchConfigurationRequest.builder()
+            .associatePublicIpAddress(launchConfigurationToCopy.associatePublicIpAddress())
+            .blockDeviceMappings(launchConfigurationToCopy.blockDeviceMappings())
+            .classicLinkVPCId(launchConfigurationToCopy.classicLinkVPCId())
+            .classicLinkVPCSecurityGroups(launchConfigurationToCopy.classicLinkVPCSecurityGroups())
+            .ebsOptimized(launchConfigurationToCopy.ebsOptimized())
+            .iamInstanceProfile(launchConfigurationToCopy.iamInstanceProfile())
+            .imageId(launchConfigurationToCopy.imageId())
+            .instanceMonitoring(launchConfigurationToCopy.instanceMonitoring())
+            .instanceType(launchConfigurationToCopy.instanceType())
+            .keyName(launchConfigurationToCopy.keyName())
+            .launchConfigurationName(launchConfigurationToCopy.launchConfigurationName())
+            .placementTenancy(launchConfigurationToCopy.placementTenancy())
+            .securityGroups(launchConfigurationToCopy.securityGroups())
+            .spotPrice(launchConfigurationToCopy.spotPrice())
+            .userData(launchConfigurationToCopy.userData());
     }
 
     @Override
     public void updateImageInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, AmazonMachineImage<ShardingKey> ami) {
         logger.info("Adjusting AMI for auto-scaling group "+autoScalingGroup.getName()+" to "+ami);
-        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
-        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
         final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, ami.getId());
-        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
-        autoScalingClient.createLaunchConfiguration(b->b
-                .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())
-                .blockDeviceMappings(oldLaunchConfiguration.blockDeviceMappings())
-                .classicLinkVPCId(oldLaunchConfiguration.classicLinkVPCId())
-                .classicLinkVPCSecurityGroups(oldLaunchConfiguration.classicLinkVPCSecurityGroups())
-                .ebsOptimized(oldLaunchConfiguration.ebsOptimized())
-                .iamInstanceProfile(oldLaunchConfiguration.iamInstanceProfile())
-                .imageId(ami.getId())
-                .instanceMonitoring(oldLaunchConfiguration.instanceMonitoring())
-                .instanceType(oldLaunchConfiguration.instanceType())
-                .keyName(oldLaunchConfiguration.keyName())
-                .launchConfigurationName(newLaunchConfigurationName)
-                .placementTenancy(oldLaunchConfiguration.placementTenancy())
-                .securityGroups(oldLaunchConfiguration.securityGroups())
-                .spotPrice(oldLaunchConfiguration.spotPrice())
-                .userData(oldLaunchConfiguration.userData()));
-        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
+        updateLaunchConfiguration(region, autoScalingGroup, newLaunchConfigurationName, b->b.imageId(ami.getId()));
+    }
+
+    @Override
+    public void updateInstanceTypeInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, InstanceType instanceType) {
+        logger.info("Adjusting instance type for auto-scaling group "+autoScalingGroup.getName()+" to "+instanceType);
+        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        final String newLaunchConfigurationName = oldLaunchConfiguration.launchConfigurationName()+"-"+instanceType.name();
+        updateLaunchConfiguration(region, autoScalingGroup, newLaunchConfigurationName, b->b.instanceType(instanceType.toString()));
     }
 
     private void updateLaunchConfigurationForAutoScalingGroup(final AutoScalingClient autoScalingClient,
@@ -1729,6 +1792,42 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .launchConfigurationName(newLaunchConfigurationName));
         logger.info("Removing old launch configuration "+oldLaunchConfiguration.launchConfigurationName());
         autoScalingClient.deleteLaunchConfiguration(b->b.launchConfigurationName(oldLaunchConfiguration.launchConfigurationName()));
+    }
+    
+    /**
+     * Creates a copy of the {@code autoScalingGroup}'s launch configuration (see also
+     * {@link #copyLaunchConfigurationToCreateRequestBuilder(LaunchConfiguration)}) and adjusts it by letting the
+     * {@code builderConsumer} apply changes to the copy builder. The new launch configuration is created and set as the
+     * {@code autoScalingGroup}'s new launch configuration. Its previous launch configuration is removed in the process.
+     * 
+     * @param newLaunchConfigurationName
+     *            must not be {@code null} and must not equal the current name of the auto-scaling group's launch
+     *            configuration; will be used to set the new launch configuration's name by calling
+     *            {@link CreateLaunchConfigurationRequest.Builder#launchConfigurationName(String)}. By making this a
+     *            mandatory parameter, callers cannot forget specifying a new name.
+     * 
+     * @see #updateLaunchConfigurationForAutoScalingGroup(AutoScalingClient, AwsAutoScalingGroup, LaunchConfiguration,
+     *      String)
+     */
+    private void updateLaunchConfiguration(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, 
+            String newLaunchConfigurationName, Consumer<CreateLaunchConfigurationRequest.Builder> builderConsumer) {
+        if (newLaunchConfigurationName == null) {
+            throw new NullPointerException("New launch configuration name for auto-scaling group "+autoScalingGroup.getName()+" must not be null");
+        }
+        logger.info("Adjusting launch configuration for auto-scaling group "+autoScalingGroup.getName());
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        if (newLaunchConfigurationName.equals(oldLaunchConfiguration.launchConfigurationName())) {
+            throw new IllegalArgumentException("New launch configuration name "+newLaunchConfigurationName+" for auto-scaling group "+
+                    autoScalingGroup.getName()+" equals the old one");
+        }
+        final CreateLaunchConfigurationRequest.Builder createLaunchConfigurationRequestBuilder = copyLaunchConfigurationToCreateRequestBuilder(oldLaunchConfiguration);
+        builderConsumer.accept(createLaunchConfigurationRequestBuilder);
+        createLaunchConfigurationRequestBuilder.launchConfigurationName(newLaunchConfigurationName);
+        final CreateLaunchConfigurationRequest createLaunchConfigurationRequest = createLaunchConfigurationRequestBuilder.build();
+        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
+        autoScalingClient.createLaunchConfiguration(createLaunchConfigurationRequest);
+        updateLaunchConfigurationForAutoScalingGroup(autoScalingClient, autoScalingGroup, oldLaunchConfiguration, newLaunchConfigurationName);
     }
 
     @Override

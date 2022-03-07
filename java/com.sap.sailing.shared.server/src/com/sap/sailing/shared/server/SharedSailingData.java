@@ -18,6 +18,7 @@ import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.shared.server.impl.ReplicatingSharedSailingData;
+import com.sap.sailing.shared.server.impl.SharedSailingDataImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.OperationWithResult;
@@ -46,7 +47,8 @@ import com.sap.sse.security.shared.impl.UserGroup;
  *
  */
 public interface SharedSailingData extends ReplicableWithObjectInputStream<ReplicatingSharedSailingData, OperationWithResult<ReplicatingSharedSailingData, ?>> {
-    
+    String REPLICABLE_FULLY_QUALIFIED_CLASSNAME = SharedSailingDataImpl.class.getName();
+
     Iterable<MarkProperties> getAllMarkProperties(Iterable<String> tagsToFilterFor);
     
     Iterable<MarkTemplate> getAllMarkTemplates();

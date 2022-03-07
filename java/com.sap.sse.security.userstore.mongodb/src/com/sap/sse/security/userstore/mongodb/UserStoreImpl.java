@@ -1193,7 +1193,7 @@ public class UserStoreImpl implements UserStore {
             }
             userMap.put(key, value);
         }
-        if (mongoObjectFactory != null) {
+        if (store && mongoObjectFactory != null) {
             mongoObjectFactory.storePreferences(username, userMap);
         }
     }

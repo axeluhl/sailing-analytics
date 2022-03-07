@@ -36,7 +36,12 @@
                 out in an inexpensive shared set-up can me modified so that it uses a dedicated master instance.
                 Furthermore, with this a scale-up and scale-down for the instance hosting the master process
                 is now supported.</li>
-            <li>Added a Remove button for application replica sets that is mutli-selection aware.
+            <li>Added a Remove button for application replica sets that is mutli-selection aware.</li>
+            <li>The instance type of the replicas managed by a replica set's auto-scaling group can now be
+                modified, and one by one, the replicas in the set managed by the auto-scaling group will
+                be migrated to the new instance type, always keeping at least as many replicas available
+                as there were when the action was started. Available as action icon and as multi selection-aware
+                action button.</li>
           </ul>
           <h2 class="articleSubheadline">January 2022</h2>
           <ul class="bulletList">

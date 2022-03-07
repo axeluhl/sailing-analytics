@@ -8,6 +8,8 @@ if [ "${EXIT_CODE}" = "255" ]; then
     message="AWS MFA token seems to have expired. aws ec2 describe-instances exited with code ${EXIT_CODE}. Not messaging you again. Try another awsmfa as root@sapsailing.com's tmux."
     echo "${message}" | notify-operators "AWS MFA token expired"
     touch "${EXPIRY_MARKER_FILE}"
+  else
+    echo "AWS MFA token expired, but we had sent e-mail already."
   fi
 else
   # Discover replicas

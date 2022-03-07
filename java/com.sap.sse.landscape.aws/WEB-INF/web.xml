@@ -42,7 +42,7 @@
 
   <servlet>
     <servlet-name>Jersey REST API</servlet-name>
-    <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+    <servlet-class>com.sap.sse.security.jaxrs.RestServletContainer</servlet-class>
     <init-param>
       <param-name>javax.ws.rs.Application</param-name>
       <param-value>com.sap.sse.landscape.aws.restapi.RestApiApplication</param-value>

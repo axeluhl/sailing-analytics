@@ -140,17 +140,18 @@
 <setEntry value="com.chargebee.chargebee-java@default:default"/>
 <setEntry value="com.jcraft.jsch@default:default"/>
 <setEntry value="com.amazon.aws.aws-java-api@default:default"/>
+<setEntry value="com.amazon.aws.aws-java-api.source@default:default"/>
 <setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="org.objectweb.asm.commons@default:default"/>
 <setEntry value="org.objectweb.asm.tree@default:default"/>
 <setEntry value="org.eclipse.jetty.apache-jsp@4:true"/>
+<setEntry value="org.eclipse.jetty.apache-jsp.source@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.jsp@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.jsp.source@default:default"/>
 <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
 <setEntry value="org.apache.aries.spifly.dynamic.bundle@3:true"/>
 <setEntry value="org.mortbay.jasper.apache-el@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-jsp@default:default"/>
-<setEntry value="org.mortbay.jasper.apache-jsp.source@default:default"/>
 <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
 <setEntry value="org.apache.taglibs.standard-impl@default:default"/>
 <setEntry value="org.apache.taglibs.taglibs-standard-spec@default:default"/>
@@ -163,6 +164,10 @@
 <setEntry value="org.eclipse.jetty.jndi@default:default"/>
 <setEntry value="org.eclipse.jetty.plus@default:default"/>
 <setEntry value="com.sap.db.jdbc@default:default"/>
+<setEntry value="com.sap.db.jdbc.source@default:default"/>
+<setEntry value="org.osgi.service.packageadmin@default:default"/>
+<setEntry value="org.osgi.service.url@default:default"/>
+<setEntry value="com.google.code.findbugs.jsr305@default:default"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>

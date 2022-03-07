@@ -16,6 +16,7 @@ public interface Boat extends NamedWithID, IsManagedByCache<SharedDomainFactory<
     @Dimension(messageKey="SailID")
     String getSailID();
     
+    @Dimension(messageKey="Color")
     Color getColor();
     
     /**

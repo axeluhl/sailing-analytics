@@ -1895,7 +1895,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && (fix.getTimePoint().before(toTimePointExcluding) ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
-                            Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
+                            final Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
                             final SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(fix.getTimePoint());
                             Tack tack = wind == null? null : trackedRace.getTack(estimatedSpeed, wind, fix.getTimePoint());
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
