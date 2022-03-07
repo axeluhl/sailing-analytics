@@ -92,7 +92,6 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
         }
         return subscriptionDto;
     }
-    
     private TimePoint getTime(Timestamp timeStamp) {
         return timeStamp == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
                 : TimePoint.of(timeStamp);
