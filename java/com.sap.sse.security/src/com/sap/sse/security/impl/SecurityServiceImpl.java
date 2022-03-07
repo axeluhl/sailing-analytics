@@ -175,8 +175,8 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
-import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
+import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -2327,33 +2327,41 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
-        return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
+        return object == null ? true
+                : SecurityUtils.getSubject().isPermitted(
+                        object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
     }
 
     @Override
     public boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
-        return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+        return object == null ? true
+                : SecurityUtils.getSubject().isPermitted(
+                        object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
     }
 
     @Override
     public boolean hasCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
-        return object == null ? true :
-            SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
+        return object == null ? true
+                : SecurityUtils.getSubject().isPermitted(
+                        object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
     }
 
-    public boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+    @Override
+    public boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
         boolean isPermitted = true;
         if (object != null) {
             for (int i = 0; i < actions.length; i++) {
-                isPermitted &= SecurityUtils.getSubject().isPermitted(object.getPermissionType().getStringPermissionForObject(actions[i], object));
+                isPermitted &= SecurityUtils.getSubject()
+                        .isPermitted(object.getPermissionType().getStringPermissionForObject(actions[i], object));
             }
         }
         return isPermitted;
     }
 
-    public boolean hasCurrentUserOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+    @Override
+    public boolean hasCurrentUserOneOfExplicitPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
         boolean result = object == null;
         if (object != null) {
             for (com.sap.sse.security.shared.HasPermissions.Action action : actions) {
@@ -2369,21 +2377,24 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
+            SecurityUtils.getSubject().checkPermission(
+                    object.getPermissionType().getStringPermissionForObject(DefaultActions.READ, object));
         }
     }
 
     @Override
     public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+            SecurityUtils.getSubject().checkPermission(
+                    object.getPermissionType().getStringPermissionForObject(DefaultActions.UPDATE, object));
         }
     }
 
     @Override
     public void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
         if (object != null) {
-            SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
+            SecurityUtils.getSubject().checkPermission(
+                    object.getPermissionType().getStringPermissionForObject(DefaultActions.DELETE, object));
         }
     }
 
@@ -2395,10 +2406,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+    public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
         if (object != null) {
             for (int i = 0; i < actions.length; i++) {
-                SecurityUtils.getSubject().checkPermission(object.getPermissionType().getStringPermissionForObject(actions[i], object));
+                SecurityUtils.getSubject()
+                        .checkPermission(object.getPermissionType().getStringPermissionForObject(actions[i], object));
             }
         }
     }
@@ -2650,6 +2663,16 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                     if (!foundCurrentSubscription && ((!subscription.hasPlan()
                             && subscription.getProviderName().equals(newSubscription.getProviderName()))
                             || subscription.getPlanId().equals(newSubscription.getPlanId()))) {
+                        // In some cases there is no invoice or transaction information. E.g. if the subscription has
+                        // been cancelled.
+                        // To ensure we still have information about previous payments, the subscription is patched.
+                        if (subscription.getTransactionStatus() != null
+                                && newSubscription.getTransactionStatus() == null) {
+                            newSubscription.patchTransactionData(subscription);
+                        }
+                        if (subscription.getInvoiceId() != null && newSubscription.getInvoiceId() == null) {
+                            newSubscription.patchInvoiceData(subscription);
+                        }
                         newSubscriptionList.add(newSubscription);
                         foundCurrentSubscription = true;
                     } else {
@@ -2664,7 +2687,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         return newUserSubscriptions;
     }
-
+    
     /**
      * Add or remove subscription plan's roles for user
      */

@@ -88,4 +88,26 @@ public class ChargebeeSubscription extends Subscription {
                         && paymentStatus.equals(PAYMENT_STATUS_SUCCESS) && transactionType != null
                         && transactionType.equals(TRANSACTION_TYPE_PAYMENT)));
     }
+
+    @Override
+    public void patchTransactionData(Subscription subscription) {
+        if(subscription.getTransactionStatus() != null) {
+            transactionStatus = subscription.getTransactionStatus();
+        }
+        if(subscription.getTransactionType() != null) {
+            transactionType = subscription.getTransactionType();
+        }
+        paymentStatus = determinePaymentStatus(transactionType, transactionStatus, invoiceStatus);
+    }
+
+    @Override
+    public void patchInvoiceData(Subscription subscription) {
+        if(subscription.getInvoiceId() != null) {
+            invoiceId = subscription.getInvoiceId();
+        }
+        if(subscription.getInvoiceStatus() != null) {
+            invoiceId = subscription.getInvoiceStatus();
+        }
+        paymentStatus = determinePaymentStatus(transactionType, transactionStatus, invoiceStatus);
+    }
 }
