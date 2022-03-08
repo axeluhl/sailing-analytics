@@ -283,8 +283,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void addSecurityInformation(SecuredDTO securedDTO) {
+    public SecuredDTO addSecurityInformation(SecuredDTO securedDTO) {
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDTO);
+        return securedDTO;
     }
 
     @Override

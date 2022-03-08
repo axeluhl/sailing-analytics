@@ -18,15 +18,15 @@ public class EssentialSecuredDTO extends SecurityInformationDTO implements Secur
     private static final long serialVersionUID = -5174060227113723186L;
 
     private HasPermissions permissionType;
-    private String idAsString;
+    private String[] typeRelativeObjectIdentifierParts;
     private String name;
 
     @Deprecated
     EssentialSecuredDTO() {
     }
 
-    public EssentialSecuredDTO(String idAsString, HasPermissions permissionType, String name) {
-        this.idAsString = idAsString;
+    public EssentialSecuredDTO(HasPermissions permissionType, String name, String... typeRelativeObjectIdentifierParts) {
+        this.typeRelativeObjectIdentifierParts = typeRelativeObjectIdentifierParts;
         this.permissionType = permissionType;
         this.name = name;
     }
@@ -37,7 +37,7 @@ public class EssentialSecuredDTO extends SecurityInformationDTO implements Secur
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return new TypeRelativeObjectIdentifier(idAsString);
+        return new TypeRelativeObjectIdentifier(typeRelativeObjectIdentifierParts);
     }
 
     @Override

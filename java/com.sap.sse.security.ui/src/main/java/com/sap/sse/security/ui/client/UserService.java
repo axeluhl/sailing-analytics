@@ -451,22 +451,36 @@ public class UserService {
      * Checks whether the user has the permission to the given action for the given object.
      */
     public boolean hasPermission(SecuredDTO securedDTO, Action action) {
+        final boolean result;
         if (securedDTO == null) {
-            return false;
-        }
-        return PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
+            result = false;
+        } else {
+            result = PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
                 anonymousUser, securedDTO.getOwnership(), securedDTO.getAccessControlList());
+        }
+        return result;
     }
     
     /**
-     * Checks whether the user has the permission to the given action for the given object.
+     * From a {@link HasPermissions} permission type, an object name and the type-relative object identifier parts this
+     * method constructs a full-fledged {@link SecuredDTO} and asks the server to fill in the corresponding security
+     * information, in particular the ownership and ACL data. The {@link SecuredDTO} that the server has augmented this
+     * way is sent to the {@code callback}'s {@link AsyncCallback#onSuccess(Object) onSuccess} method where it can,
+     * e.g., be used for a permission check as in {@link #hasPermission(SecuredDTO, Action)}.
+     * <p>
+     * 
+     * This is useful in case a full-fledged {@link SecuredDTO} is not available on the client for some entity, but all
+     * information about its type and ID are available. Imagine, for example, a situation where an identifier for a race
+     * is available on the client, and a permission check needs to be performed for the race identified this way.
+     * Instead of implementing a service that returns the full {@code RaceDTO} with large amounts of data attached that
+     * is not needed for the security check, this method can be used to obtain a proxy that is sufficient to check
+     * whether the current user has the permission to execute a specific action.
      */
-    public void createEssentialSecuredDTOByIdAndType(String id, HasPermissions permissionType, final AsyncCallback<EssentialSecuredDTO> callback) {
-        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(id, permissionType, id);
-        userManagementService.addSecurityInformation(secureDTO, new AsyncCallback<Void>() {
-            
+    public void createEssentialSecuredDTOByIdAndType(HasPermissions permissionType, String name, String[] typeRelativeObjectIdentifierParts, final AsyncCallback<SecuredDTO> callback) {
+        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(permissionType, name, typeRelativeObjectIdentifierParts);
+        userManagementService.addSecurityInformation(secureDTO, new AsyncCallback<SecuredDTO>() {
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(SecuredDTO result) {
                 callback.onSuccess(secureDTO);
             }
             

@@ -87,5 +87,5 @@ public interface UserManagementService extends RemoteService {
 
     ArrayList<HasPermissions> getAllHasPermissions();
 
-    void addSecurityInformation(SecuredDTO securedDTO);
+    SecuredDTO addSecurityInformation(SecuredDTO securedDTO);
 }

@@ -94,5 +94,12 @@ public interface UserManagementServiceAsync {
 
     void getAllHasPermissions(AsyncCallback<ArrayList<HasPermissions>> callback);
 
-    void addSecurityInformation(SecuredDTO securedDTO, AsyncCallback<Void> callback);
+    /**
+     * Adds security information (ownership, ACLs) to the {@link SecuredDTO} passed as parameter, in place. See
+     * {@link SecuredDTO#setOwnership(com.sap.sse.security.shared.dto.OwnershipDTO)} and
+     * {@link SecuredDTO#setAccessControlList(AccessControlListDTO)}. The DTO augmented this way is returned by the
+     * method, hence the security information added will be serialized to the client which can then receive it
+     * in the {@code callback} passed.
+     */
+    void addSecurityInformation(SecuredDTO securedDTO, AsyncCallback<SecuredDTO> callback);
 }
