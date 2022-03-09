@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -19,6 +19,9 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.client.ClientProtocolException;
+import org.apache.shiro.authz.AuthorizationException;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -54,6 +57,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -85,10 +89,11 @@ import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -141,10 +146,13 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AwsLandscape<String> landscape = getLandscape();
         final AwsRegion region = new AwsRegion(regionId, landscape);
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
-        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder =
                 createMasterConfigurationBuilder(name, masterReplicationBearerToken, optionalMemoryInMegabytesOrNull,
                         newSharedMasterInstance ? optionalMemoryTotalSizeFactorOrNull : null, region, release);
+        final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
+        final InboundReplicationConfiguration inboundMasterReplicationConfiguration = masterConfigurationBuilder.getInboundReplicationConfiguration().get();
+        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name, bearerTokenUsedByReplicas,
+                inboundMasterReplicationConfiguration.getMasterHostname(), inboundMasterReplicationConfiguration.getMasterHttpPort());
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         masterHostBuilder
             .setInstanceType(InstanceType.valueOf(newSharedMasterInstance ? sharedInstanceType : dedicatedInstanceType))
@@ -163,7 +171,6 @@ public class LandscapeServiceImpl implements LandscapeService {
         final StartSailingAnalyticsMasterHost<String> masterHostStartProcedure = masterHostBuilder.build();
         masterHostStartProcedure.run();
         final SailingAnalyticsProcess<String> master = masterHostStartProcedure.getSailingAnalyticsProcess();
-        final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result =
             createLoadBalancingAndAutoScalingSetup(landscape, region, name, master, release, dedicatedInstanceType,
                 dynamicLoadBalancerMapping, optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName,
@@ -275,13 +282,15 @@ public class LandscapeServiceImpl implements LandscapeService {
                     Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
-        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(replicaSetName);
         final AppConfigBuilderT masterConfigurationBuilder = createMasterConfigurationBuilder(replicaSetName,
                 masterReplicationBearerToken, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
                 region, release);
+        final InboundReplicationConfiguration inboundMasterReplicationConfiguration = masterConfigurationBuilder.getInboundReplicationConfiguration().get();
+        final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
+        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(replicaSetName, bearerTokenUsedByReplicas,
+                inboundMasterReplicationConfiguration.getMasterHostname(), inboundMasterReplicationConfiguration.getMasterHttpPort());
         final SailingAnalyticsProcess<String> master = deployProcessToSharedInstance(hostToDeployTo,
                 masterConfigurationBuilder, optionalKeyName, privateKeyEncryptionPassphrase);
-        final String bearerTokenUsedByReplicas = getEffectiveBearerToken(replicaReplicationBearerToken);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
             createLoadBalancingAndAutoScalingSetup(landscape, region, replicaSetName, master, release, replicaInstanceType, dynamicLoadBalancerMapping,
                 optionalKeyName, privateKeyEncryptionPassphrase, optionalDomainName, /* use default AMI as replica machine image */ Optional.empty(),
@@ -656,22 +665,39 @@ public class LandscapeServiceImpl implements LandscapeService {
                 : SailingReleaseRepository.INSTANCE.getRelease(releaseNameOrNullForLatestMaster);
     }
 
-    private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName) {
+    private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName,
+            String bearerTokenUsedByReplicas, String securityServiceHostname,
+            Integer securityServicePort)
+            throws MalformedURLException, ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final String serverGroupName = serverName + ServerInfo.SERVER_GROUP_NAME_SUFFIX;
-        final UserGroup existingServerGroup = getSecurityService().getUserGroupByName(serverGroupName);
-        final UserGroup serverGroup;
-        if (existingServerGroup == null) {
-            final UUID serverGroupId = UUID.randomUUID();
-            // FIXME bug5678: if this runs on a server with separate security realm, using the local security service doesn't help!
-            serverGroup = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.USER_GROUP,
-                    new TypeRelativeObjectIdentifier(serverGroupId.toString()), /* securityDisplayName */ serverGroupName,
-                    (Callable<UserGroup>)()->getSecurityService().createUserGroup(serverGroupId, serverGroupName));
-        } else {
-            serverGroup = existingServerGroup;
-            final User currentUser = getSecurityService().getCurrentUser();
-            if (!Util.contains(serverGroup.getUsers(), currentUser) && getSecurityService().hasCurrentUserUpdatePermission(serverGroup)) {
-                getSecurityService().addUserToUserGroup(serverGroup, currentUser);
+        final SailingServerFactory sailingServerFactory = sailingServerFactoryTracker.getService();
+        final SailingServer securityServiceServer = sailingServerFactory.getSailingServer(
+                RemoteServerUtil.getBaseServerUrl(securityServiceHostname, securityServicePort==null?443:securityServicePort), bearerTokenUsedByReplicas);
+        final UUID userGroupId = securityServiceServer.getUserGroupIdByName(serverGroupName);
+        if (userGroupId != null) {
+            final TypeRelativeObjectIdentifier serverGroupTypeRelativeObjectId = new TypeRelativeObjectIdentifier(userGroupId.toString());
+            final Iterable<Pair<WildcardPermission, Boolean>> permissions = securityServiceServer.hasPermissions(Arrays.asList(
+                    SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.CREATE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.READ, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.USER_GROUP.getPermissionForTypeRelativeIdentifier(DefaultActions.DELETE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(DefaultActions.CREATE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(DefaultActions.READ, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, serverGroupTypeRelativeObjectId),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(DefaultActions.DELETE, serverGroupTypeRelativeObjectId)));
+            for (final Pair<WildcardPermission, Boolean> permission : permissions) {
+                if (!permission.getB()) {
+                    final String msg = "Subject "+securityServiceServer.getUsername()+" on server "+securityServiceHostname+
+                            " is not allowed "+permission.getA()+". Not allowing to create application replica set for "+serverName;
+                    logger.warning(msg);
+                    throw new AuthorizationException(msg);
+                }
             }
+            // Now we know the user is permitted to create/read/update/delete the user group and the server object in the remote
+            // security realm that the application replica set's master process will use if it existed already. Add the user to the group
+            securityServiceServer.addCurrentUserToGroup(userGroupId);
+        } else {
+            securityServiceServer.createUserGroupAndAddCurrentUser(serverGroupName);
         }
     }
 
@@ -685,6 +711,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setServerName(replicaSetName)
             .setRelease(release)
             .setRegion(region)
+            // TODO bug5684: probably this is the place to add the REPLICATE_MASTER_SERVLET_HOST/REPLICATE_MASTER_EXCHANGE_NAME variables to point to a default security service?
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(bearerTokenUsedByMaster)).build());
         applyMemoryConfigurationToApplicationConfigurationBuilder(masterConfigurationBuilder, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
         return masterConfigurationBuilder;

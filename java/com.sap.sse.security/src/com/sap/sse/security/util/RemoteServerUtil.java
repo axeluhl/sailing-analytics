@@ -37,16 +37,20 @@ public final class RemoteServerUtil {
      */
     public static String resolveBearerTokenForRemoteServer(String hostname, int port, String username, String password) {
         try {
-            return resolveBearerTokenForRemoteServer(new URL(port==443?"https":"http", hostname, port, ""), username, password);
+            return resolveBearerTokenForRemoteServer(getBaseServerUrl(hostname, port), username, password);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static URL getBaseServerUrl(String hostname, int port) throws MalformedURLException {
+        return new URL(port==443?"https":"http", hostname, port, "");
     }
     
     private static String resolveBearerTokenForRemoteServer(URL base, String username, String password) throws Exception {
         String token = "";
         if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-            String path = "/security/api/restsecurity/access_token";
+            String path = "/security/api"+SecurityResource.RESTSECURITY+SecurityResource.ACCESS_TOKEN_METHOD;
             URL serverAddress = createRemoteServerUrl(base, path, null);
             URLConnection connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
                     t -> {

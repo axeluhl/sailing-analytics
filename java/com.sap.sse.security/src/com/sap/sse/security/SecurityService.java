@@ -21,6 +21,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
+import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.interfaces.UserImpl;
@@ -67,6 +68,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     String ALL_USERNAME = "<all>";
     String TENANT_SUFFIX = "-tenant";
+    String REPLICABLE_FULLY_QUALIFIED_CLASSNAME = SecurityServiceImpl.class.getName();
 
     SecurityManager getSecurityManager();
 
