@@ -266,7 +266,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                             public void cancel() {
                             }
                         }).show();
-            }	
+            }
         });
         overwriteRegattaConfigurationBox.setValue(currentRegattaConfiguration != null);
         editButton.setEnabled(currentRegattaConfiguration != null);

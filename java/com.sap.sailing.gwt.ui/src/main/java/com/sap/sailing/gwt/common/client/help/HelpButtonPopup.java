@@ -27,23 +27,16 @@ class HelpButtonPopup extends Composite {
 
     private final PopupPanel popupPanel = new PopupPanel(true, false);
 
-    HelpButtonPopup(final HelpButtonResources resources) {
+    HelpButtonPopup(final HelpButtonResources resources, String description, String url) {
         this.local_res = resources;
         initWidget(uiBinder.createAndBindUi(this));
         this.popupPanel.addStyleName(resources.style().popup());
         this.popupPanel.setWidget(this);
-    }
-
-    void setText(final String text) {
-        this.textUi.setInnerText(text);
-    }
-
-    void setLinkUrl(final String url) {
-        this.linkUi.setHref(url);
+		this.textUi.setInnerText(description);
+		this.linkUi.setHref(url);
     }
 
     void showRelativeTo(final Widget relativeTo) {
         this.popupPanel.showRelativeTo(relativeTo);
     }
-
 }

@@ -13,14 +13,11 @@ public interface HelpButtonResources {
 
         @ClassName("help-icon")
         String icon();
-
         @ClassName("help-popup")
         String popup();
 
         String content();
-
         String text();
-
         String link();
     }
 
