@@ -375,6 +375,11 @@ public class LandscapeServiceImpl implements LandscapeService {
                         SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE,
                         new SailingAnalyticsHostSupplier<String>(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
                         Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+        if (archiveReplicaSet == null) {
+            final String msg = "Couldn't find archive replica set tagged as "+SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE;
+            logger.severe(msg);
+            throw new IllegalArgumentException(msg);
+        }
         logger.info("Found ARCHIVE replica set " + archiveReplicaSet + " with master " + archiveReplicaSet.getMaster());
         final UUID idForProgressTracking = UUID.randomUUID();
         final RedirectDTO defaultRedirect = RedirectDTO.from(getDefaultRedirectPath(applicationReplicaSetToArchive.getDefaultRedirectRule()));
