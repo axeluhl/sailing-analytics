@@ -419,7 +419,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         progressOverlay.add(progressSpinner);
         progressOverlay.add(counter);
         progressOverlay.setVisible(false);
-        final Timer t = new Timer(){
+        final Timer t = new Timer() {
             public void run() {
                 requestProgressPercentage(this, counter);
             }

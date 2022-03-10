@@ -329,9 +329,11 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.InitialLoadClassLoaderRegistry;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.replication.interfaces.impl.InitialLoadClassLoaderRegistryImpl;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -342,7 +344,6 @@ import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.HttpUrlConnectionHelper;
-import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.ThreadLocalTransporter;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -543,10 +544,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
      * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
      * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
      */
-    private final Set<ClassLoader> masterDataClassLoaders = Collections.synchronizedSet(new HashSet<>());
+    private final InitialLoadClassLoaderRegistry masterDataClassLoaders = new InitialLoadClassLoaderRegistryImpl();
     
-    private final JoinedClassLoader joinedClassLoader;
-
     private SailingServerConfiguration sailingServerConfiguration;
 
     private final TrackedRegattaListenerManager trackedRegattaListener;
@@ -817,8 +816,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         this.notificationService = sailingNotificationService;
         final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
-        this.masterDataClassLoaders.add(this.getClass().getClassLoader());
-        joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
+        this.masterDataClassLoaders.addMasterDataClassLoader(this.getClass().getClassLoader());
         this.baseDomainFactory = constructorParameters.getBaseDomainFactory();
         populateBoatClasses(this.baseDomainFactory);
         this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
@@ -927,6 +925,10 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         if (anniversaryRaceDeterminator.isEnabled()) {
             this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
         }
+    }
+    
+    public InitialLoadClassLoaderRegistry getMasterDataClassLoaders() {
+        return masterDataClassLoaders;
     }
 
     @Override
@@ -3368,7 +3370,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     
     @Override
     public ClassLoader getDeserializationClassLoader() {
-        return joinedClassLoader;
+        return masterDataClassLoaders.getCombinedMasterDataClassLoader();
     }
 
     @Override
@@ -4469,24 +4471,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             return null;
         }
         return bundleContext.getService(ref);
-    }
-
-    public void addMasterDataClassLoader(ClassLoader classLoader) {
-        synchronized (masterDataClassLoaders) {
-            masterDataClassLoaders.add(classLoader);
-        }
-    }
-
-    public void removeMasterDataClassLoader(ClassLoader classLoader) {
-        synchronized (masterDataClassLoaders) {
-            masterDataClassLoaders.remove(classLoader);
-        }
-    }
-    
-    @Override
-    public ClassLoader getCombinedMasterDataClassLoader() {
-        JoinedClassLoader joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
-        return joinedClassLoader;
     }
 
     public void setPolarDataService(PolarDataService service) {

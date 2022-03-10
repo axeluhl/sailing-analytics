@@ -67,6 +67,7 @@ import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.interfaces.impl.ServiceTrackerForInitialLoadClassLoaderRegistration;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SecurityUrlPathProvider;
@@ -278,8 +279,8 @@ public class Activator implements BundleActivator {
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker, sharedSailingDataTracker,
                 replicationServiceTracker, scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
-        final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(
-                context, racingEventService);
+        final ServiceTrackerForInitialLoadClassLoaderRegistration mdiClassLoaderCustomizer = new ServiceTrackerForInitialLoadClassLoaderRegistration(
+                context, racingEventService.getMasterDataClassLoaders());
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class, mdiClassLoaderCustomizer);
         masterDataImportClassLoaderServiceTracker.open();
@@ -348,36 +349,6 @@ public class Activator implements BundleActivator {
         // load has been finished in case this is a replica with auto-replication.
         racingEventService.ensureOwnerships();
         racingEventService.migrateCompetitorNotificationPreferencesWithCompetitorNames();
-    }
-
-    private class MasterDataImportClassLoaderServiceTrackerCustomizer implements
-            ServiceTrackerCustomizer<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> {
-        private final BundleContext context;
-        private RacingEventServiceImpl racingEventService;
-        public MasterDataImportClassLoaderServiceTrackerCustomizer(BundleContext context,
-                RacingEventServiceImpl racingEventService) {
-            this.context = context;
-            this.racingEventService = racingEventService;
-        }
-
-        @Override
-        public MasterDataImportClassLoaderService addingService(
-                ServiceReference<MasterDataImportClassLoaderService> reference) {
-            MasterDataImportClassLoaderService service = context.getService(reference);
-            racingEventService.addMasterDataClassLoader(service.getClassLoader());
-            return service;
-        }
-
-        @Override
-        public void modifiedService(ServiceReference<MasterDataImportClassLoaderService> reference,
-                MasterDataImportClassLoaderService service) {
-        }
-
-        @Override
-        public void removedService(ServiceReference<MasterDataImportClassLoaderService> reference,
-                MasterDataImportClassLoaderService service) {
-            racingEventService.removeMasterDataClassLoader(service.getClassLoader());
-        }
     }
 
     private class PolarDataServiceTrackerCustomizer
