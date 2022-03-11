@@ -1229,7 +1229,8 @@ public class LandscapeServiceImpl implements LandscapeService {
                 for (final SailingAnalyticsProcess<String> nonAutoScalingReplica : replicaSet.getReplicas()) {
                     if (!nonAutoScalingReplica.getHost().isManagedByAutoScalingGroup()) {
                         logger.info("Found replica "+nonAutoScalingReplica+" to be not managed by auto-scaling group "+replicaSet.getAutoScalingGroup().getName()+
-                                ". Stopping it...");
+                                ". Removing it from Target Group and stopping it...");
+                        replicaSet.getPublicTargetGroup().removeTarget(nonAutoScalingReplica.getHost());
                         nonAutoScalingReplica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                     }
                 }
