@@ -112,7 +112,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                         /* sharedSailingData */ null, /* replicationServiceTracker */ null,
                         /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
                         /* resultUrlRegistryServiceTracker */ null);
-                result.getMasterDataClassLoaders().addMasterDataClassLoader(this.getClass().getClassLoader());
+                result.getMasterDataClassLoaders().addClassLoader(this.getClass().getClassLoader());
                 return result;
             }
         });
@@ -330,7 +330,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             // is known during de-serialization because anonymous inner classes from that bundle may be used
             // in the object graph, e.g., for RankingMetricConstructor objects based on locally-instantiated lambda
             // expressions
-            fmaster.getMasterDataClassLoaders().addMasterDataClassLoader(this.getClass().getClassLoader());
+            fmaster.getMasterDataClassLoaders().addClassLoader(this.getClass().getClassLoader());
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, fmaster,
                     currentUser, null);

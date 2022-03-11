@@ -26,6 +26,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.MasterDataImportClassLoaderService;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
@@ -57,7 +58,7 @@ import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
 import com.sap.sailing.shared.server.SharedSailingData;
-import com.sap.sse.MasterDataImportClassLoaderService;
+import com.sap.sse.classloading.ServiceTrackerCustomizerForClassLoaderSupplierRegistrations;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.mail.MailService;
@@ -67,7 +68,6 @@ import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.interfaces.impl.ServiceTrackerForInitialLoadClassLoaderRegistration;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SecurityUrlPathProvider;
@@ -279,15 +279,10 @@ public class Activator implements BundleActivator {
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker, sharedSailingDataTracker,
                 replicationServiceTracker, scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
-        final ServiceTrackerForInitialLoadClassLoaderRegistration mdiClassLoaderCustomizer = new ServiceTrackerForInitialLoadClassLoaderRegistration(
-                context, racingEventService.getMasterDataClassLoaders());
-        masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
-                context, MasterDataImportClassLoaderService.class, mdiClassLoaderCustomizer);
-        masterDataImportClassLoaderServiceTracker.open();
-        for (final ServiceReference<MasterDataImportClassLoaderService> mdiClassLoaderService : masterDataImportClassLoaderServiceTracker
-                .getServiceReferences()) {
-            mdiClassLoaderCustomizer.addingService(mdiClassLoaderService);
-        }
+        // start watching out for MasterDataImportClassLoaderService instances in the OSGi service registry and manage
+        // the combined class loader accordingly:
+        masterDataImportClassLoaderServiceTracker = ServiceTrackerCustomizerForClassLoaderSupplierRegistrations
+                .createServiceTracker(context, MasterDataImportClassLoaderService.class, racingEventService.getMasterDataClassLoaders());
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));

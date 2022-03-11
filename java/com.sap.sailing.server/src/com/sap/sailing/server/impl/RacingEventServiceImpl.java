@@ -109,6 +109,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.MasterDataImportClassLoaderService;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -307,7 +308,6 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
-import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
@@ -329,17 +329,16 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.InitialLoadClassLoaderRegistry;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
-import com.sap.sse.replication.interfaces.impl.InitialLoadClassLoaderRegistryImpl;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.util.RemoteServerUtil;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -541,10 +540,10 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     /**
      * A synchronized set of the class loaders to use for importing master data. See also {@link MasterDataImportClassLoaderService},
-     * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
+     * {@link #addClassLoader(ClassLoader)} and {@link #removeClassLoader(ClassLoader)}. In order to loop over
      * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
      */
-    private final InitialLoadClassLoaderRegistry masterDataClassLoaders = new InitialLoadClassLoaderRegistryImpl();
+    private final ClassLoaderRegistry masterDataClassLoaders = ClassLoaderRegistry.createInstance();
     
     private SailingServerConfiguration sailingServerConfiguration;
 
@@ -816,7 +815,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         this.notificationService = sailingNotificationService;
         final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
-        this.masterDataClassLoaders.addMasterDataClassLoader(this.getClass().getClassLoader());
+        this.masterDataClassLoaders.addClassLoader(this.getClass().getClassLoader());
         this.baseDomainFactory = constructorParameters.getBaseDomainFactory();
         populateBoatClasses(this.baseDomainFactory);
         this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
@@ -927,7 +926,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         }
     }
     
-    public InitialLoadClassLoaderRegistry getMasterDataClassLoaders() {
+    public ClassLoaderRegistry getMasterDataClassLoaders() {
         return masterDataClassLoaders;
     }
 

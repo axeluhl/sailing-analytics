@@ -16,10 +16,12 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.ServerInfo;
+import com.sap.sse.classloading.ServiceTrackerCustomizerForClassLoaderSupplierRegistrations;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SecurityServiceInitialLoadClassLoaderSupplier;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
@@ -203,6 +205,9 @@ public class Activator implements BundleActivator {
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         context.registerService(HasPermissionsProvider.class, SecuredSecurityTypes::getAllInstances, null);
+        ServiceTrackerCustomizerForClassLoaderSupplierRegistrations.createServiceTracker(bundleContext,
+                SecurityServiceInitialLoadClassLoaderSupplier.class,
+                initialSecurityService.getInitialLoadClassLoaderRegistry());
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
     

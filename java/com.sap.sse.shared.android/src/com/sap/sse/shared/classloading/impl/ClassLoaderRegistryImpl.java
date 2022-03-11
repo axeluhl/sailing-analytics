@@ -1,30 +1,29 @@
-package com.sap.sse.replication.interfaces.impl;
+package com.sap.sse.shared.classloading.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sse.MasterDataImportClassLoaderService;
-import com.sap.sse.replication.InitialLoadClassLoaderRegistry;
-import com.sap.sse.util.JoinedClassLoader;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
+import com.sap.sse.shared.classloading.JoinedClassLoader;
 
-public class InitialLoadClassLoaderRegistryImpl implements InitialLoadClassLoaderRegistry {
+public class ClassLoaderRegistryImpl implements ClassLoaderRegistry {
     /**
      * A synchronized set of the class loaders to use for importing master data. See also {@link MasterDataImportClassLoaderService},
-     * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
+     * {@link #addClassLoader(ClassLoader)} and {@link #removeClassLoader(ClassLoader)}. In order to loop over
      * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
      */
     private final Set<ClassLoader> masterDataClassLoaders = Collections.synchronizedSet(new HashSet<>());
     
     @Override
-    public void addMasterDataClassLoader(ClassLoader classLoader) {
+    public void addClassLoader(ClassLoader classLoader) {
         synchronized (masterDataClassLoaders) {
             masterDataClassLoaders.add(classLoader);
         }
     }
 
     @Override
-    public void removeMasterDataClassLoader(ClassLoader classLoader) {
+    public void removeClassLoader(ClassLoader classLoader) {
         synchronized (masterDataClassLoaders) {
             masterDataClassLoaders.remove(classLoader);
         }

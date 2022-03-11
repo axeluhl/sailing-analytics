@@ -14,6 +14,7 @@ public class Activator implements BundleActivator {
         final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         final SailingServerFactory sailingServerFactory = new SailingServerFactoryImpl(securityServiceTracker);
         context.registerService(SailingServerFactory.class, sailingServerFactory, null);
+        context.registerService(SecurityServiceInitialLoadClassLoaderSupplierImpl.class, new SecurityServiceInitialLoadClassLoaderSupplierImpl(), null);
     }
 
     @Override
