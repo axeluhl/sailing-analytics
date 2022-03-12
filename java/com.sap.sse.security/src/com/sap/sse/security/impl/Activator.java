@@ -101,6 +101,8 @@ public class Activator implements BundleActivator {
      * {@link #sharedAcrossSubdomainsOf} then a non-{@code null} value should be provided here, too.
      */
     private final String baseUrlForCrossDomainStorage;
+
+    private ServiceTracker<SecurityServiceInitialLoadClassLoaderSupplier, SecurityServiceInitialLoadClassLoaderSupplier> classLoaderSupplierServiceTracker;
     
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
@@ -205,9 +207,11 @@ public class Activator implements BundleActivator {
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         context.registerService(HasPermissionsProvider.class, SecuredSecurityTypes::getAllInstances, null);
-        ServiceTrackerCustomizerForClassLoaderSupplierRegistrations.createClassLoaderSupplierServiceTracker(bundleContext,
-                SecurityServiceInitialLoadClassLoaderSupplier.class,
-                initialSecurityService.getInitialLoadClassLoaderRegistry());
+        classLoaderSupplierServiceTracker =
+                ServiceTrackerCustomizerForClassLoaderSupplierRegistrations.createClassLoaderSupplierServiceTracker(bundleContext,
+                    SecurityServiceInitialLoadClassLoaderSupplier.class,
+                    initialSecurityService.getInitialLoadClassLoaderRegistry());
+        logger.info("Successfully created service tracker for class loader suppliers: "+classLoaderSupplierServiceTracker);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
     
