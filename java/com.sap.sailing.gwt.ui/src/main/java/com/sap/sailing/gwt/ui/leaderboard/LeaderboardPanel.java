@@ -2573,17 +2573,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * values on the columns.
      */
     public void updateLeaderboard(LeaderboardDTO leaderboard) {
-        if (this.leaderboard == null && leaderboard != null) {
-            GWT.log("+++++ init");
-            GWT.log("### overallDetailColumnMap: " + overallDetailColumnMap);
+        if (leaderboard != null) {
+            // check premium leaderboard permissions only on total set of actions defined on DetailType (should be less)
+            // instead of call hasPermission on each single DetailType and collect result in premiumLeaderboardPermissions map.
             Set<Action> premiumLeaderboardActions = DetailType
                     .getAllPremiumActionsFromSubset(overallDetailColumnMap.keySet());
             premiumLeaderboardPermissions.clear();
             premiumLeaderboardPermissions.putAll(paywallResolver
                     .getHasPermissionMap(premiumLeaderboardActions, leaderboard));
-            GWT.log("### premiumLeaderboardPermissions: " + premiumLeaderboardPermissions);
-        } else {
-            GWT.log("+++++ changed");
         }
         if (leaderboard != null) {
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
