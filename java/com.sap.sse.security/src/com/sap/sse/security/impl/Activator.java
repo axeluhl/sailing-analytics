@@ -205,7 +205,7 @@ public class Activator implements BundleActivator {
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         context.registerService(HasPermissionsProvider.class, SecuredSecurityTypes::getAllInstances, null);
-        ServiceTrackerCustomizerForClassLoaderSupplierRegistrations.createServiceTracker(bundleContext,
+        ServiceTrackerCustomizerForClassLoaderSupplierRegistrations.createClassLoaderSupplierServiceTracker(bundleContext,
                 SecurityServiceInitialLoadClassLoaderSupplier.class,
                 initialSecurityService.getInitialLoadClassLoaderRegistry());
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");

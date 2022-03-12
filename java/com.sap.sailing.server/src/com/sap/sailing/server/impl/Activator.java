@@ -282,7 +282,7 @@ public class Activator implements BundleActivator {
         // start watching out for MasterDataImportClassLoaderService instances in the OSGi service registry and manage
         // the combined class loader accordingly:
         masterDataImportClassLoaderServiceTracker = ServiceTrackerCustomizerForClassLoaderSupplierRegistrations
-                .createServiceTracker(context, MasterDataImportClassLoaderService.class, racingEventService.getMasterDataClassLoaders());
+                .createClassLoaderSupplierServiceTracker(context, MasterDataImportClassLoaderService.class, racingEventService.getMasterDataClassLoaders());
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));

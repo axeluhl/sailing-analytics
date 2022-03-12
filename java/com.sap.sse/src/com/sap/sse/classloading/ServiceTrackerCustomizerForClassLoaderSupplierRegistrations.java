@@ -31,14 +31,22 @@ public class ServiceTrackerCustomizerForClassLoaderSupplierRegistrations<C exten
     private final BundleContext context;
     private ClassLoaderRegistry classLoaderRegistry;
     
-    public static <C extends ClassLoaderSupplier> ServiceTracker<C, C> createServiceTracker(BundleContext context, Class<C> clazz, ClassLoaderRegistry classLoaderRegistry) {
+    /**
+     * Creates and returns a service tracker for services of type {@code clazz} which is some {@link ClassLoaderSupplier} subtype.
+     * The service tracker uses a "customizer" (basically a callback) which keeps the {@code classLoaderRegistry} up to date
+     * with the class loaders supplied by the services tracked.
+     */
+    public static <C extends ClassLoaderSupplier> ServiceTracker<C, C> createClassLoaderSupplierServiceTracker(BundleContext context, Class<C> clazz, ClassLoaderRegistry classLoaderRegistry) {
         // start watching out for MasterDataImportClassLoaderService instances in the OSGi service registry and manage
         // the combined class loader accordingly:
         final ServiceTrackerCustomizerForClassLoaderSupplierRegistrations<C> serviceTrackerCustomizer =
                 new ServiceTrackerCustomizerForClassLoaderSupplierRegistrations<>(context, classLoaderRegistry);
         ServiceTracker<C, C> serviceTracker = ServiceTrackerFactory.createAndOpen(context, clazz, serviceTrackerCustomizer);
-        for (final ServiceReference<C> mdiClassLoaderService : serviceTracker.getServiceReferences()) {
-            serviceTrackerCustomizer.addingService(mdiClassLoaderService);
+        final ServiceReference<C>[] serviceReferences = serviceTracker.getServiceReferences();
+        if (serviceReferences != null) {
+            for (final ServiceReference<C> mdiClassLoaderService : serviceReferences) {
+                serviceTrackerCustomizer.addingService(mdiClassLoaderService);
+            }
         }
         return serviceTracker;
     }
