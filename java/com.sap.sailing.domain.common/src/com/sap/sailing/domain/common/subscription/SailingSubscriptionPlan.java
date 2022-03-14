@@ -45,7 +45,6 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
             Stream.of(new SubscriptionPrice(YEARLY_PLAN_ITEMPRICE_ID, YEARLY_PLAN_PRICE, USD_CURRENCY_CODE,
                     PaymentInterval.YEAR)).collect(Collectors.toSet()),
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
-
     public static final SubscriptionPlan WEEKLY = new SailingSubscriptionPlan(WEEKLY_PLAN_ID,
             Stream.of(new SubscriptionPrice(WEEKLY_PLAN_ITEMPRICE_ID, WEEKLY_PLAN_PRICE, USD_CURRENCY_CODE,
                     PaymentInterval.WEEK)).collect(Collectors.toSet()),
