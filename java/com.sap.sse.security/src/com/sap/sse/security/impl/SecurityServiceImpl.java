@@ -2890,8 +2890,32 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         } else {
             assert currentSubscription.getPlanId().equals(newSubscription.getPlanId());
             // in this case user roles will be needed to update only when subscription active status is changed
-            result = newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
+            if (newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription()) {
+                result = true;
+            } else {
+                result = checkIfRolesDiffer(user, newSubscription);
+            }
         }
+        return result;
+    }
+
+    private boolean checkIfRolesDiffer(User user, Subscription newSubscription) {
+        final boolean result;
+        final SubscriptionPlan subscriptionPlanById = getSubscriptionPlanById(newSubscription.getPlanId());
+        boolean foundAll = true;
+        for (SubscriptionPlanRole planRole : subscriptionPlanById.getRoles()) {
+            boolean found = false;
+            for (Role userRole : user.getRoles()) {
+                if (userRole.getRoleDefinition().getId().equals(planRole.getRoleId())) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                foundAll = false;
+                break;
+            }
+        }
+        result = foundAll;
         return result;
     }
 
