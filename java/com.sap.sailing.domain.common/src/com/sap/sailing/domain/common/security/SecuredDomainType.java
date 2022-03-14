@@ -55,7 +55,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
         DETAIL_TIMER,
         EXPORT,
         SIMULATOR,
-        VIEWSTREAMLETS;
+        VIEWSTREAMLETS,
+        VIEWANALYSISCHARTS;
 
         private static final Action[] ALL_ACTIONS = DefaultActions.plus(
                 CAN_REPLAY_DURING_LIVE_RACES,
