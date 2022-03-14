@@ -60,27 +60,27 @@ public abstract class Subscription implements Serializable {
      * subscription only if the subscription is turned to active(after trial period) If user has successfully paid for
      * the subscription, this has value success, otherwise no_success
      */
-    private final String paymentStatus;
+    protected String paymentStatus;
 
     /**
      * Subscription latest invoice id
      */
-    private final String invoiceId;
+    protected String invoiceId;
 
     /**
      * Subscription latest invoice status
      */
-    private final String invoiceStatus;
+    protected String invoiceStatus;
 
     /**
      * Subscription transaction type
      */
-    private final String transactionType;
+    protected String transactionType;
 
     /**
      * Subscription transaction status
      */
-    private final String transactionStatus;
+    protected String transactionStatus;
 
     /**
      * Record the creating time of the subscription
@@ -278,6 +278,34 @@ public abstract class Subscription implements Serializable {
                 || getLatestEventTime().asMillis() > otherSubscription.getLatestEventTime().asMillis();
     }
 
+    public TimePoint getCancelledAt() {
+        return cancelledAt;
+    }
+    
+    public Integer getReoccuringPaymentValue() {
+        return reoccuringPaymentValue;
+    }
+    
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+    
+    /**
+     * If the transaction data was not part of the returned api or webhook event, it is patched from the previous
+     * subscription to retain information.
+     * 
+     * @param subscription
+     */
+    public abstract void patchTransactionData(Subscription subscription);
+
+    /**
+     * If the invoice data was not part of the returned api or webhook event, it is patched from the previous
+     * subscription to retain information.
+     * 
+     * @param subscription
+     */
+    public abstract void patchInvoiceData(Subscription subscription);
+    
     @Override
     public String toString() {
         return "Subscription [subscriptionId=" + subscriptionId + ", planId=" + planId + ", customerId=" + customerId
@@ -291,17 +319,4 @@ public abstract class Subscription implements Serializable {
                 + ", latestEventTime=" + latestEventTime + ", manualUpdatedAt=" + manualUpdatedAt + ", providerName="
                 + providerName + "]";
     }
-
-    public TimePoint getCancelledAt() {
-        return cancelledAt;
-    }
-
-    public Integer getReoccuringPaymentValue() {
-        return reoccuringPaymentValue;
-    }
-
-    public String getCurrencyCode() {
-        return currencyCode;
-    }
-
 }

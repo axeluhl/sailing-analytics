@@ -8,6 +8,7 @@ public class ChargebeeSubscriptionDTO extends SubscriptionDTO {
 
     private static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
     private static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
+    private static final String SUBSCRIPTION_STATUS_NON_RENEWING = "non_renewing";
     private static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
     private static final String SUBSCRIPTION_STATUS_CANCELLED = "cancelled";
     private static final String TRANSACTION_TYPE_REFUND = "refund";
@@ -31,7 +32,7 @@ public class ChargebeeSubscriptionDTO extends SubscriptionDTO {
 
     @Override
     public boolean isActive() {
-        return SUBSCRIPTION_STATUS_ACTIVE.equals(getSubscriptionStatus());
+        return SUBSCRIPTION_STATUS_ACTIVE.equals(getSubscriptionStatus()) || SUBSCRIPTION_STATUS_NON_RENEWING.equals(getSubscriptionStatus());
     }
 
     @Override

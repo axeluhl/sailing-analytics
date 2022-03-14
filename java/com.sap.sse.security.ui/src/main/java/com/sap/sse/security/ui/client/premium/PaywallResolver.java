@@ -57,7 +57,9 @@ public class PaywallResolver {
     }
 
     public boolean hasPermission(final Action action, final SecuredDTO dtoContext) {
-        return userService.hasPermission(dtoContext, action);
+        boolean hasPermission = userService.hasPermission(dtoContext, action);
+        GWT.log("**** hasPermission: " + hasPermission + ", action: " + action + ", context: " + dtoContext);
+        return hasPermission;
     }
 
     /**

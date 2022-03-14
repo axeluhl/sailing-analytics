@@ -88,7 +88,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             }
         }
         if (isOutdated) {
-            logger.info(() -> "Webhook event is outdated and won't be processed");
+            logger.info(() -> "Webhook event " + event.getEventType() + " is outdated and won't be processed");
         }
         return isOutdated;
     }

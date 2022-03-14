@@ -51,11 +51,12 @@ public class ChargebeeCancelSubscriptionTask
                 status = status.toLowerCase();
             }
             // TODO: check status before send cancel request. Check if already CANCELED or NON_RENEWING.
-            if (sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
+            if (sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)
+                    || sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_NON_RENEWING)) {
                 onDone(new SubscriptionCancelResult(/* success */ true, sub));
             } else {
-                requestProcessor.addRequest(
-                        new ChargebeeCancelSubscriptionRequest(subscriptionId, this, requestProcessor, chargebeeApiServiceParams));
+                requestProcessor.addRequest(new ChargebeeCancelSubscriptionRequest(subscriptionId, this,
+                        requestProcessor, chargebeeApiServiceParams));
             }
         } else {
             onDone(new SubscriptionCancelResult(/* success */false, /* subscription */null, /* deleted */true));
@@ -67,7 +68,8 @@ public class ChargebeeCancelSubscriptionTask
         if (subscription != null) {
             Subscription sub = (new ChargebeeApiSubscriptionData(subscription, null, null))
                     .toSubscription(chargebeeApiServiceParams.getSubscriptionPlanProvider());
-            boolean success = sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
+            boolean success = sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)
+                    || sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_NON_RENEWING);
             onDone(new SubscriptionCancelResult(success, sub, /* deleted */ false));
         } else {
             onDone(new SubscriptionCancelResult(/* success */false, /* subscription */null, /* deleted */true));

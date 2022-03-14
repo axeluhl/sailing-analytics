@@ -42,33 +42,43 @@ public class ChargebeeApiSubscriptionData {
             invoiceId = invoice.id();
             invoiceStatus = stringToLowerCase(invoice.status().name());
         }
-        String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
+        final String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
                 invoiceStatus);
-        String planId = getPlanId(subscriptionPlanProvider);
+        final String planId = getPlanId(subscriptionPlanProvider);
+        final int reoccuringPaymentValue = calculateReoccuringPaymentValue();
         return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
                 getTime(subscription.trialStart()), getTime(subscription.trialEnd()), subscriptionStatus, paymentStatus,
-                transactionType, transactionStatus, invoiceId, invoiceStatus, subscription.mrr(),
+                transactionType, transactionStatus, invoiceId, invoiceStatus, reoccuringPaymentValue,
                 subscription.currencyCode(), getTime(subscription.createdAt()), getTime(subscription.updatedAt()),
                 getTime(subscription.activatedAt()), getTime(subscription.nextBillingAt()),
                 getTime(subscription.currentTermEnd()), getTime(subscription.cancelledAt()), TimePoint.now(),
                 com.sap.sse.security.shared.subscription.Subscription.emptyTime());
     }
+
+    private int calculateReoccuringPaymentValue() {
+        int reoccuringPaymentValue = 0;
+        for (SubscriptionItem item : subscription.subscriptionItems()){
+            if(item.amount() != null) {
+                reoccuringPaymentValue += item.amount();
+            }
+        }
+        return reoccuringPaymentValue;
+    }
     
     private String getPlanId(SubscriptionPlanProvider subscriptionPlanProvider) {
-        String planId = null;
         for(SubscriptionItem item : subscription.subscriptionItems()) {
             if(item.itemType().equals(ItemType.PLAN)) {
                 final String itemPriceId = item.itemPriceId();
                 for(SubscriptionPlan plan : subscriptionPlanProvider.getAllSubscriptionPlans().values()) {
                     for(SubscriptionPrice price : plan.getPrices()) {
-                        if(price.getPriceId().equals(itemPriceId));{
-                            planId = plan.getId();
+                        if(price.getPriceId().equals(itemPriceId)){
+                            return plan.getId();
                         }
                     }
                 }
             }
         }
-        return planId;
+        return null;
     }
     
     private TimePoint getTime(Timestamp millis) {

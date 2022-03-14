@@ -76,10 +76,11 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                     break;
                 }
             }
+            final String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus, invoiceStatus);
             final Subscription subscription = new ChargebeeSubscription(contentSubscription.id(), plan.getId(),
                     customerId, trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
                     trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialEnd),
-                    contentSubscription.status().name().toLowerCase(), null, transactionType, transactionStatus,
+                    contentSubscription.status().name().toLowerCase(), paymentStatus, transactionType, transactionStatus,
                     invoiceId, invoiceStatus, contentSubscription.mrr(), contentSubscription.currencyCode(), getTime(contentSubscription.createdAt()),
                     getTime(contentSubscription.updatedAt()), getTime(contentSubscription.activatedAt()),
                     getTime(contentSubscription.nextBillingAt()), getTime(contentSubscription.currentTermEnd()),
@@ -92,7 +93,6 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
         }
         return subscriptionDto;
     }
-    
     private TimePoint getTime(Timestamp timeStamp) {
         return timeStamp == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
                 : TimePoint.of(timeStamp);

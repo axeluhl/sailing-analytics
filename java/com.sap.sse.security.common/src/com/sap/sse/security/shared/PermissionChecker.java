@@ -11,6 +11,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.HasPermissions.Action;
