@@ -32,8 +32,11 @@ public abstract class PremiumButton extends PremiumUiElement implements HasAllKe
         @ClassName("premium-container")
         String premiumContainer();
 
-        @ClassName("premium-check-box")
-        String premiumCheckBox();
+        @ClassName("premium-button")
+        String premiumButton();
+
+        @ClassName("non-premium-button")
+        String nonPremiumButton();
 
         @ClassName("premium-permitted")
         String premiumPermitted();
@@ -54,6 +57,7 @@ public abstract class PremiumButton extends PremiumUiElement implements HasAllKe
     protected final Button button;
 
     private final ConfirmationDialog subscribeDialog;
+    protected final Action action;
 
     /**
      * A Composite component, that includes a checkbox and an additional premium icon, indicating that the feature to be
@@ -61,8 +65,19 @@ public abstract class PremiumButton extends PremiumUiElement implements HasAllKe
      */
     protected PremiumButton(final String label, final Action action, final PaywallResolver paywallResolver) {
         super(action, paywallResolver);
-        this.image = createPremiumIcon();
+        this.action = action;
         this.button = new Button(label);
+        if(action != null) {
+            this.image = createPremiumIcon();
+        }else {
+            // If no action was given, image remains empty and premium css classes are removed.
+            image = new Image();
+            image.setVisible(false);
+            button.removeStyleDependentName("premium-button");
+            button.removeStyleName("premium-button");
+            button.addStyleDependentName("non-premium-button");
+            button.addStyleName("non-premium-button");
+        }
         initWidget(uiBinder.createAndBindUi(this));
         this.subscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
                 i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(),
@@ -82,13 +97,17 @@ public abstract class PremiumButton extends PremiumUiElement implements HasAllKe
         if (!hasPermission()) {
             this.updateUserPermission();
             subscribeDialog.center();
+        }else {
+            this.button.click();
         }
     }
 
     @Override
     protected void onUserPermissionUpdate(final boolean isPermitted) {
         button.setEnabled(isEnabled() && isPermitted);
-        container.setStyleName(style.premiumPermitted(), isPermitted);
+        if(action != null) {
+            container.setStyleName(style.premiumPermitted(), isPermitted);
+        }
     }
 
     @Override

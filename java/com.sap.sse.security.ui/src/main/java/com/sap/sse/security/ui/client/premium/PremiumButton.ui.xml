@@ -22,6 +22,15 @@
             margin: 1px 3px;
             vertical-align: bottom;
         }
+        
+        .premium-container {
+	       display: inline-block;
+        }
+        
+        .non-premium-button {
+	       border: none;
+	       outline: none;
+        }
     </ui:style>
     <g:FocusPanel ui:field="container">
         <g:FlowPanel addStyleNames="{style.premium-container}">

@@ -23,7 +23,9 @@ public class SailingPremiumButton extends PremiumButton {
     @Override
     protected void onUserPermissionUpdate(final boolean isPermitted) {
         super.onUserPermissionUpdate(isPermitted);
-        image.setUrl((isPermitted ? INSTANCE.premiumIconPermitted() : INSTANCE.premiumIcon()).getSafeUri());
+        if(action != null) {
+            image.setUrl((isPermitted ? INSTANCE.premiumIconPermitted() : INSTANCE.premiumIcon()).getSafeUri());
+        }
     }
 
     @Override

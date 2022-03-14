@@ -8,8 +8,8 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 
 public abstract class PremiumUiElement extends Composite implements HasEnabled {
 
-    protected final Action action;
-    protected final PaywallResolver paywallResolver;
+    private final Action action;
+    private final PaywallResolver paywallResolver;
     private final HandlerRegistration handlerRegistration;
 
     /**
