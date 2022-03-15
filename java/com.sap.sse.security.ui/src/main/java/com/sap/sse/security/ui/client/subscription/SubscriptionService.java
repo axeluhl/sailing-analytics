@@ -34,4 +34,6 @@ public interface SubscriptionService<C, P> extends RemoteService {
 
     SubscriptionPlanDTO getSubscriptionPlanById(String planId);
 
+    boolean isUserInPossessionOfRoles(String planId) throws UserManagementException;
+
 }

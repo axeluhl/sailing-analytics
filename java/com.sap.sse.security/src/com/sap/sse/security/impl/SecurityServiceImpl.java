@@ -2893,29 +2893,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             if (newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription()) {
                 result = true;
             } else {
-                result = checkIfRolesDiffer(user, newSubscription);
+                final SubscriptionPlan subscriptionPlanById = getSubscriptionPlanById(newSubscription.getPlanId());
+                result = !subscriptionPlanById.isUserInPossessionOfRoles(user);
             }
         }
-        return result;
-    }
-
-    private boolean checkIfRolesDiffer(User user, Subscription newSubscription) {
-        final boolean result;
-        final SubscriptionPlan subscriptionPlanById = getSubscriptionPlanById(newSubscription.getPlanId());
-        boolean foundAll = true;
-        for (SubscriptionPlanRole planRole : subscriptionPlanById.getRoles()) {
-            boolean found = false;
-            for (Role userRole : user.getRoles()) {
-                if (userRole.getRoleDefinition().getId().equals(planRole.getRoleId())) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                foundAll = false;
-                break;
-            }
-        }
-        result = !foundAll;
         return result;
     }
 

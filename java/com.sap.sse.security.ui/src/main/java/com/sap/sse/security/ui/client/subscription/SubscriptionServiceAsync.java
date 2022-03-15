@@ -19,4 +19,6 @@ public interface SubscriptionServiceAsync<C, P> {
     public void getUnlockingSubscriptionplans(WildcardPermission permission, AsyncCallback<ArrayList<String>> callback);
 
     public void getSubscriptionPlanById(String planId, AsyncCallback<SubscriptionPlanDTO> callback);
+    
+    void isUserInPossessionOfRoles(String planId, AsyncCallback<Boolean> callback);
 }
