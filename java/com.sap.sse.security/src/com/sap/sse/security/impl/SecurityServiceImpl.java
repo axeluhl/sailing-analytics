@@ -2915,7 +2915,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 break;
             }
         }
-        result = foundAll;
+        result = !foundAll;
         return result;
     }
 
