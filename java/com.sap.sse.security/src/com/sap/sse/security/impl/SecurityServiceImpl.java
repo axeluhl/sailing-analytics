@@ -2908,6 +2908,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             for (Role userRole : user.getRoles()) {
                 if (userRole.getRoleDefinition().getId().equals(planRole.getRoleId())) {
                     found = true;
+                    break;
                 }
             }
             if (!found) {
