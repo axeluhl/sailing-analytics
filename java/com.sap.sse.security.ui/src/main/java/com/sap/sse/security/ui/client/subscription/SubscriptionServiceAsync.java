@@ -10,7 +10,7 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 public interface SubscriptionServiceAsync<C, P> {
     public void prepareCheckout(String planId, AsyncCallback<P> data);
 
-    public void getSubscriptions(AsyncCallback<SubscriptionListDTO> subscription);
+    public void getSubscriptions(Boolean activeOnly, AsyncCallback<SubscriptionListDTO> subscription);
 
     public void getConfiguration(AsyncCallback<C> callback);
     
@@ -18,7 +18,7 @@ public interface SubscriptionServiceAsync<C, P> {
     
     public void getUnlockingSubscriptionplans(WildcardPermission permission, AsyncCallback<ArrayList<String>> callback);
 
-    public void getSubscriptionPlanById(String planId, AsyncCallback<SubscriptionPlanDTO> callback);
+    public void getSubscriptionPlanDTOById(String planId, AsyncCallback<SubscriptionPlanDTO> callback);
     
     void isUserInPossessionOfRoles(String planId, AsyncCallback<Boolean> callback);
 }

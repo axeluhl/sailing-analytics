@@ -84,7 +84,7 @@ public class UserSubscriptionsPresenter<C extends WithUserService & WithSecurity
 
     private void fetchSubscription() {
         try {
-            factory.getDefaultAsyncService().getSubscriptions(new AsyncCallback<SubscriptionListDTO>() {
+            factory.getDefaultAsyncService().getSubscriptions(false, new AsyncCallback<SubscriptionListDTO>() {
                 @Override
                 public void onSuccess(final SubscriptionListDTO result) {
                     if (result != null && result.getError() != null && !result.getError().isEmpty()) {

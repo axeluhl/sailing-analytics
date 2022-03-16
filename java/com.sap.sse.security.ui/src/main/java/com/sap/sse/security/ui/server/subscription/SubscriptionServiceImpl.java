@@ -131,11 +131,15 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         getSecurityService().updateUserSubscription(user.getName(), subscription);
     }
 
-    /**
-     * Return true if user already subscribed to plan
-     */
-    protected boolean isUserSubscribedToPlan(User user, String planId) {
-        return isValidSubscription(user.getSubscriptionByPlan(planId));
+    protected boolean isSubscribedToMutuallyExclusivePlan(User user, SubscriptionPlan newPlan) {
+        for (Subscription sub : user.getSubscriptions()) {
+            SubscriptionPlan subscribedPlan = getSecurityService().getSubscriptionPlanById(sub.getPlanId());
+            if (isValidSubscription(sub) && !isSubscriptionCancelled(sub)
+                    && Util.containsAny(subscribedPlan.getPlanCategories(), newPlan.getPlanCategories())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -222,5 +226,5 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     
     protected abstract String getProviderName();
     
-   
+    protected abstract boolean isSubscriptionCancelled(Subscription subscription);
 }

@@ -26,13 +26,13 @@ public interface SubscriptionService<C, P> extends RemoteService {
     /**
      * Fetch user current subscription data from database
      */
-    public SubscriptionListDTO getSubscriptions();
+    public SubscriptionListDTO getSubscriptions(Boolean activeOnly);
     
     public ArrayList<SubscriptionPlanDTO> getAllSubscriptionPlans();
     
     public ArrayList<String> getUnlockingSubscriptionplans(WildcardPermission permission) throws UserManagementException;
 
-    SubscriptionPlanDTO getSubscriptionPlanById(String planId);
+    SubscriptionPlanDTO getSubscriptionPlanDTOById(String planId);
 
     boolean isUserInPossessionOfRoles(String planId) throws UserManagementException;
 

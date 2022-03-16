@@ -20,15 +20,27 @@ public abstract class SubscriptionPlan implements Serializable{
     private static final long serialVersionUID = -555811806344107292L;
     private final String id;
     private final Set<SubscriptionPrice> prices;
+    private final Set<PlanCategory> planCategory;
+    private final Boolean isOneTimePlan;
     /**
      * Roles assigned for this plan, if user subscribe to the plan then the user will be assigned these roles
      */
     private final SubscriptionPlanRole[] roles;
     
-    protected SubscriptionPlan(String id, Set<SubscriptionPrice> prices, SubscriptionPlanRole[] roles) {
+    /*
+     * Used to make Plans of the same category mutually exclusive.
+     */
+    public enum PlanCategory {
+        PREMIUM;
+    }
+    
+    protected SubscriptionPlan(String id, Set<SubscriptionPrice> prices, Set<PlanCategory> planCategory,
+            Boolean isOneTimePlan, SubscriptionPlanRole[] roles) {
         this.id = id;
         this.roles = roles;
         this.prices = prices;
+        this.planCategory = planCategory;
+        this.isOneTimePlan = isOneTimePlan;
     }
 
     public String getId() {
@@ -43,6 +55,14 @@ public abstract class SubscriptionPlan implements Serializable{
         return roles;
     }
     
+    public Set<PlanCategory> getPlanCategories() {
+        return planCategory;
+    }
+    
+    public Boolean getIsOneTimePlan() {
+        return isOneTimePlan;
+    }
+
     public boolean isUserInPossessionOfRoles(User user) {
         boolean foundAll = true;
         for (SubscriptionPlanRole planRole : getRoles()) {
@@ -88,5 +108,4 @@ public abstract class SubscriptionPlan implements Serializable{
             return false;
         return true;
     }
-
 }

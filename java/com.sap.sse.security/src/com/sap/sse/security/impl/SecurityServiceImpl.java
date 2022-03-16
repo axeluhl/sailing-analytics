@@ -2881,9 +2881,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             result = false;
         } else if (currentSubscription == null) {
             // A case when there's no current subscription for a plan, if the plan's new subscription is active then
-            // user roles need to be updated with granted new roles, otherwise if currently user has active subscription
-            // then premium roles need to be removed
-            result = newSubscription.isActiveSubscription() || user.hasActiveSubscription();
+            // user roles need to be updated with granted new roles. Further, if the user is 
+            // somehow in possession of roles he should not posess, the roles must be removed
+            final SubscriptionPlan subscriptionPlanById = getSubscriptionPlanById(newSubscription.getPlanId());
+            result = newSubscription.isActiveSubscription() || subscriptionPlanById.isUserInPossessionOfRoles(user);
         } else if (newSubscription == null) {
             // In case new subscription is null, user's subscriptions won't be changed
             result = false;

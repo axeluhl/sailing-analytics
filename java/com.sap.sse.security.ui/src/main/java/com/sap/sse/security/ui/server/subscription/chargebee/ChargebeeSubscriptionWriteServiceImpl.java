@@ -89,7 +89,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                     getTime(contentSubscription.nextBillingAt()), getTime(contentSubscription.currentTermEnd()),
                     getTime(contentSubscription.cancelledAt()), Subscription.emptyTime(), Subscription.emptyTime());
             updateUserSubscription(user, subscription);
-            subscriptionDto = getSubscriptions();
+            subscriptionDto = getSubscriptions(true);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in saving subscription", e);
             subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
