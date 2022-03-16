@@ -67,7 +67,7 @@ public class ChargebeeSubscriptionServiceImpl extends
             if(planForPrice == null) {
                 throw new IllegalArgumentException("No matching subscription plan found for given price id");
             }else if(planForPrice.getIsOneTimePlan() && user.hasAnySubscription(planForPrice.getId())) {
-                throw new IllegalArgumentException("Plan can only be subscribed for once");
+                throw new IllegalArgumentException("Plan can only be subscribed once");
             }else if(isSubscribedToMutuallyExclusivePlan(user, planForPrice)) {
                 throw new IllegalArgumentException("User has already subscribed to mutually exclusive plan");
             }else {

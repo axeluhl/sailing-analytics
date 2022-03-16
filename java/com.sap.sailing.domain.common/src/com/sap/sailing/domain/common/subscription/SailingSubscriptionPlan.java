@@ -52,7 +52,7 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
     public static final SubscriptionPlan TRIAL = new SailingSubscriptionPlan(TRIAL_PLAN_ID,
             Stream.of(new SubscriptionPrice(TRIAL_PLAN_ITEMPRICE_ID, TRIAL_PLAN_PRICE, USD_CURRENCY_CODE,
-                    PaymentInterval.DAY)).collect(Collectors.toSet()), Stream.of(PlanCategory.PREMIUM).collect(Collectors.toSet()), false,
+                    PaymentInterval.DAY)).collect(Collectors.toSet()), Stream.of(PlanCategory.PREMIUM).collect(Collectors.toSet()), true,
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
 
     public static Map<Serializable, SubscriptionPlan> getAllInstances() {
