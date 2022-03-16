@@ -370,11 +370,16 @@ public class LandscapeServiceImpl implements LandscapeService {
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet, MongoEndpoint moveDatabaseHere,
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
-        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> archiveReplicaSet = getLandscape()
-                .getApplicationReplicaSetByTagValue(new AwsRegion(regionId, getLandscape()),
-                        SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE,
-                        new SailingAnalyticsHostSupplier<String>(), LandscapeService.WAIT_FOR_PROCESS_TIMEOUT,
-                        Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
+        final AwsRegion region = new AwsRegion(regionId, getLandscape());
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> archiveReplicaSet = getApplicationReplicaSet(
+                region, SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME,
+                LandscapeService.WAIT_FOR_PROCESS_TIMEOUT.get().asMillis(), optionalKeyName,
+                passphraseForPrivateKeyDecryption);
+        if (archiveReplicaSet == null) {
+            final String msg = "Couldn't find archive replica set tagged as "+SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME;
+            logger.severe(msg);
+            throw new IllegalArgumentException(msg);
+        }
         logger.info("Found ARCHIVE replica set " + archiveReplicaSet + " with master " + archiveReplicaSet.getMaster());
         final UUID idForProgressTracking = UUID.randomUUID();
         final RedirectDTO defaultRedirect = RedirectDTO.from(getDefaultRedirectPath(applicationReplicaSetToArchive.getDefaultRedirectRule()));
@@ -418,7 +423,6 @@ public class LandscapeServiceImpl implements LandscapeService {
                     for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
                         Util.addAll(eids, eventIDs);
                     }
-                    final AwsRegion region = new AwsRegion(regionId, getLandscape());
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
                             getLandscape().getCentralReverseProxy(region);
                     // TODO bug5311: when refactoring this for general scope migration, moving to a dedicated replica set will not require this
@@ -801,6 +805,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             createLaunchConfigurationAndAutoScalingGroupBuilder.setImage(
                     StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder)
                         .setLandscape(getLandscape())
+                        .setRegion(region)
                         .getMachineImage());
         }
         if (optionalKeyName != null) {
@@ -1224,7 +1229,8 @@ public class LandscapeServiceImpl implements LandscapeService {
                 for (final SailingAnalyticsProcess<String> nonAutoScalingReplica : replicaSet.getReplicas()) {
                     if (!nonAutoScalingReplica.getHost().isManagedByAutoScalingGroup()) {
                         logger.info("Found replica "+nonAutoScalingReplica+" to be not managed by auto-scaling group "+replicaSet.getAutoScalingGroup().getName()+
-                                ". Stopping it...");
+                                ". Removing it from Target Group and stopping it...");
+                        replicaSet.getPublicTargetGroup().removeTarget(nonAutoScalingReplica.getHost());
                         nonAutoScalingReplica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                     }
                 }

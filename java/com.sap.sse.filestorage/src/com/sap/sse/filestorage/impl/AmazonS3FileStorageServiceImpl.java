@@ -128,7 +128,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             throw new InvalidPropertiesException("invalid bucket", new Pair<FileStorageServiceProperty, String>(
                     bucketName, "bucket does not exist"));
         } catch (Exception e) {
-            throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket" + e.getCause(), e,
+            throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket: " + e.getCause(), e,
                     new Pair<FileStorageServiceProperty, String>(accessId, "seems to be invalid"),
                     new Pair<FileStorageServiceProperty, String>(accessKey, "seems to be invalid"));
         }

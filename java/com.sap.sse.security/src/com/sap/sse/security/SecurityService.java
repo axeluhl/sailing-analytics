@@ -50,6 +50,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -738,4 +739,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     default HasPermissions getHasPermissionsByName(String securedTypeName) {
         return Util.first(Util.filter(getAllHasPermissions(), hp->hp.getName().equals(securedTypeName)));
     }
+
+    ClassLoaderRegistry getInitialLoadClassLoaderRegistry();
 }

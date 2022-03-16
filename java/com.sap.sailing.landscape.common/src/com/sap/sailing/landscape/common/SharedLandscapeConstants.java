@@ -52,7 +52,7 @@ public interface SharedLandscapeConstants {
      */
     String SAILING_ANALYTICS_APPLICATION_HOST_TAG = "sailing-analytics-server";
 
-    String ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE = "ARCHIVE";
+    String ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME = "ARCHIVE";
 
     /**
      * Value of the {@link #SAILSAILING_ANALYTICS_APPLICATION_HOST_TAGING_ANALYTICS_APPLICATION_HOST_TAG} tag
