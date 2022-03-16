@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.ui.authentication.WithUserService;
 import com.sap.sse.security.ui.client.UserService;
@@ -51,27 +52,34 @@ public class UserSubscriptionsPresenter<C extends WithUserService & WithSecurity
 
     @Override
     public void cancelSubscription(final String planId, final String providerName) {
-        try {
-            final SubscriptionWriteServiceAsync<?, ?, ?> service = factory.getWriteAsyncServiceByProvider(providerName);
-            service.cancelSubscription(planId, new AsyncCallback<Boolean>() {
-                @Override
-                public void onSuccess(final Boolean result) {
-                    if (!result) {
-                        showError(StringMessages.INSTANCE.failedCancelSubscription());
-                    } else {
-                        userService.updateUser(true);
-                        fetchSubscription();
-                    }
-                }
+        ConfirmationDialog.create(StringMessages.INSTANCE.confirmCancelSubscriptionTitle(),
+                StringMessages.INSTANCE.confirmCancelSubscriptionText(), StringMessages.INSTANCE.confirm(),
+                StringMessages.INSTANCE.cancel(), (cancel) -> {
+                    if (cancel) {
+                        try {
+                            final SubscriptionWriteServiceAsync<?, ?, ?> service = factory
+                                    .getWriteAsyncServiceByProvider(providerName);
+                            service.cancelSubscription(planId, new AsyncCallback<Boolean>() {
+                                @Override
+                                public void onSuccess(final Boolean result) {
+                                    if (!result) {
+                                        showError(StringMessages.INSTANCE.failedCancelSubscription());
+                                    } else {
+                                        userService.updateUser(true);
+                                        fetchSubscription();
+                                    }
+                                }
 
-                @Override
-                public void onFailure(final Throwable caught) {
-                    showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
-                }
-            });
-        } catch (final InvalidSubscriptionProviderException e) {
-            onInvalidSubscriptionProviderError(e);
-        }
+                                @Override
+                                public void onFailure(final Throwable caught) {
+                                    showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
+                                }
+                            });
+                        } catch (final InvalidSubscriptionProviderException e) {
+                            onInvalidSubscriptionProviderError(e);
+                        }
+                    }
+                }).center();
     }
 
     private void fetchSubscription() {

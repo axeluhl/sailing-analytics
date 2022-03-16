@@ -97,6 +97,13 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         });
         return result;
     }
+    
+    @Override
+    public boolean isUserInPossessionOfRoles(String priceId) throws UserManagementException {
+        final User currentUser = getCurrentUser();
+        final SubscriptionPlan plan = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
+        return plan.isUserInPossessionOfRoles(currentUser);
+    }
 
     private CompletableFuture<SecurityService> initSecurityService() {
         final FullyInitializedReplicableTracker<SecurityService> tracker = FullyInitializedReplicableTracker
@@ -214,4 +221,6 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     }
     
     protected abstract String getProviderName();
+    
+   
 }

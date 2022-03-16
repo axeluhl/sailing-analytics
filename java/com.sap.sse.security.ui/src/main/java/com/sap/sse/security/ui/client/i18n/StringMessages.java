@@ -213,4 +213,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String streamletsOverlayFeature();
     String subscriptionSuggestionTitle(); 
     String takeMeToSubscriptions();
+    String errorPollingCheckoutResults();
+    String paymentUnfinished();
+    String paymentFinished();
 }

@@ -136,5 +136,4 @@ public class ChargebeeSubscriptionServiceImpl extends
         final SubscriptionPlan subscriptionPlanById = getSecurityService().getSubscriptionPlanById(planId);
         return subscriptionPlanById == null ? null : convertToDto(subscriptionPlanById);
     }
-
 }

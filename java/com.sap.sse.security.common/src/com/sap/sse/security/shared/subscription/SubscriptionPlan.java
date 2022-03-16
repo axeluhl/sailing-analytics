@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
 
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+
 /**
  * Payment subscription plans. A subscription plan has a name, a {@link String}-based ID, and a set of
  * {@link SubscriptionPlanRole roles} it grants to a subscribing user. These roles can specify how they are to be
@@ -38,6 +41,24 @@ public abstract class SubscriptionPlan implements Serializable{
 
     public SubscriptionPlanRole[] getRoles() {
         return roles;
+    }
+    
+    public boolean isUserInPossessionOfRoles(User user) {
+        boolean foundAll = true;
+        for (SubscriptionPlanRole planRole : getRoles()) {
+            boolean found = false;
+            for (Role userRole : user.getRoles()) {
+                if (userRole.getRoleDefinition().getId().equals(planRole.getRoleId())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                foundAll = false;
+                break;
+            }
+        }
+        return foundAll;
     }
     
     @Override
