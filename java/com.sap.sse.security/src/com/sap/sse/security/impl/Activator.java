@@ -16,10 +16,12 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.ServerInfo;
+import com.sap.sse.classloading.ServiceTrackerCustomizerForClassLoaderSupplierRegistrations;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SecurityServiceInitialLoadClassLoaderSupplier;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
@@ -101,6 +103,8 @@ public class Activator implements BundleActivator {
      * {@link #sharedAcrossSubdomainsOf} then a non-{@code null} value should be provided here, too.
      */
     private final String baseUrlForCrossDomainStorage;
+
+    private ServiceTracker<SecurityServiceInitialLoadClassLoaderSupplier, SecurityServiceInitialLoadClassLoaderSupplier> classLoaderSupplierServiceTracker;
     
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
@@ -216,6 +220,11 @@ public class Activator implements BundleActivator {
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         context.registerService(HasPermissionsProvider.class, SecuredSecurityTypes::getAllInstances, null);
         context.registerService(SubscriptionPlanProvider.class, SSESubscriptionPlan::getAllInstances, null);
+        classLoaderSupplierServiceTracker =
+                ServiceTrackerCustomizerForClassLoaderSupplierRegistrations.createClassLoaderSupplierServiceTracker(bundleContext,
+                    SecurityServiceInitialLoadClassLoaderSupplier.class,
+                    initialSecurityService.getInitialLoadClassLoaderRegistry());
+        logger.info("Successfully created service tracker for class loader suppliers: "+classLoaderSupplierServiceTracker);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
     

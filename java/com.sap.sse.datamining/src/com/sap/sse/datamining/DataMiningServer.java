@@ -26,7 +26,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.util.JoinedClassLoader;
+import com.sap.sse.shared.classloading.JoinedClassLoader;
 
 
 public interface DataMiningServer {

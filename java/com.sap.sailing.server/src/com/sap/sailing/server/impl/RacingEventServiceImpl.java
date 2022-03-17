@@ -109,6 +109,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.MasterDataImportClassLoaderService;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -307,7 +308,6 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
-import com.sap.sse.MasterDataImportClassLoaderService;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
@@ -340,11 +340,11 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.util.RemoteServerUtil;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.HttpUrlConnectionHelper;
-import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.ThreadLocalTransporter;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -542,13 +542,11 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     /**
      * A synchronized set of the class loaders to use for importing master data. See also {@link MasterDataImportClassLoaderService},
-     * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
+     * {@link #addClassLoader(ClassLoader)} and {@link #removeClassLoader(ClassLoader)}. In order to loop over
      * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
      */
-    private final Set<ClassLoader> masterDataClassLoaders = Collections.synchronizedSet(new HashSet<>());
+    private final ClassLoaderRegistry masterDataClassLoaders = ClassLoaderRegistry.createInstance();
     
-    private final JoinedClassLoader joinedClassLoader;
-
     private SailingServerConfiguration sailingServerConfiguration;
 
     private final TrackedRegattaListenerManager trackedRegattaListener;
@@ -819,8 +817,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         this.notificationService = sailingNotificationService;
         final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
-        this.masterDataClassLoaders.add(this.getClass().getClassLoader());
-        joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
+        this.masterDataClassLoaders.addClassLoader(this.getClass().getClassLoader());
         this.baseDomainFactory = constructorParameters.getBaseDomainFactory();
         populateBoatClasses(this.baseDomainFactory);
         this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
@@ -929,6 +926,10 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         if (anniversaryRaceDeterminator.isEnabled()) {
             this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
         }
+    }
+    
+    public ClassLoaderRegistry getMasterDataClassLoaders() {
+        return masterDataClassLoaders;
     }
 
     @Override
@@ -3388,7 +3389,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     
     @Override
     public ClassLoader getDeserializationClassLoader() {
-        return joinedClassLoader;
+        return masterDataClassLoaders.getCombinedMasterDataClassLoader();
     }
 
     @Override
@@ -4489,24 +4490,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             return null;
         }
         return bundleContext.getService(ref);
-    }
-
-    public void addMasterDataClassLoader(ClassLoader classLoader) {
-        synchronized (masterDataClassLoaders) {
-            masterDataClassLoaders.add(classLoader);
-        }
-    }
-
-    public void removeMasterDataClassLoader(ClassLoader classLoader) {
-        synchronized (masterDataClassLoaders) {
-            masterDataClassLoaders.remove(classLoader);
-        }
-    }
-    
-    @Override
-    public ClassLoader getCombinedMasterDataClassLoader() {
-        JoinedClassLoader joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
-        return joinedClassLoader;
     }
 
     public void setPolarDataService(PolarDataService service) {

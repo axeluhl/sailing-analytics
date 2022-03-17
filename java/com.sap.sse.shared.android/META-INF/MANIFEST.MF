@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sse.common,
  org.json.simple;bundle-version="1.1.0"
 Export-Package: com.sap.sse.concurrent,
+ com.sap.sse.shared.classloading,
  com.sap.sse.shared.json,
  com.sap.sse.shared.media,
  com.sap.sse.shared.media.impl,

@@ -52,6 +52,7 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -760,4 +761,5 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     SubscriptionPlan getSubscriptionPlanByItemPriceId(String itemPriceId);
     
+    ClassLoaderRegistry getInitialLoadClassLoaderRegistry();
 }

@@ -1711,13 +1711,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final boolean exportTrackedRacesAndStartTracking) {
         final UUID importOperationId = UUID.randomUUID();
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
+        final String targetServerBearerToken;
+        if (!Util.hasLength(targetServerUsername) || !Util.hasLength(targetServerPassword)) {
+            targetServerBearerToken = getSecurityService().getOrCreateAccessToken(getSecurityService().getCurrentUser().getName());
+        } else {
+            targetServerBearerToken = null;
+        }
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
             @Override
             public void run() {
                 getService().importMasterData(urlAsString, leaderboardGroupIds, override, compress, exportWind,
-                        exportDeviceConfigurations, targetServerUsername, targetServerPassword, /* targetServerBeararToken */ null,
+                        exportDeviceConfigurations, targetServerUsername, targetServerPassword, targetServerBearerToken,
                         exportTrackedRacesAndStartTracking, importOperationId);
             }
         };
