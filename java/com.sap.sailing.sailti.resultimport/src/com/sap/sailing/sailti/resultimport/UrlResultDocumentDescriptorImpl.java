@@ -1,10 +1,12 @@
 package com.sap.sailing.sailti.resultimport;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-
+import org.apache.commons.io.IOUtils;
 import com.sap.sailing.domain.common.CompetitorGenderType;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sse.common.TimePoint;
@@ -68,12 +70,20 @@ public class UrlResultDocumentDescriptorImpl implements ResultDocumentDescriptor
     public TimePoint getLastModified() {
         return lastModified;
     }
+    
+    public static InputStream getInputStreamReplacingRaceNumberByInteger(InputStream input) throws IOException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        IOUtils.copyLarge(input, bos);
+        final String documentAsString = new String(bos.toByteArray());
+        final String fixedString = documentAsString.replaceAll("RaceNumber=\"([0-9]*)\\.0\"", "RaceNumber=\"$1\"");
+        return new ByteArrayInputStream(fixedString.getBytes());
+    }
 
     @Override
     public InputStream getInputStream() {
         try {
             URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(documentURL);
-            InputStream inputStream = (InputStream) eventResultConn.getContent();
+            InputStream inputStream = getInputStreamReplacingRaceNumberByInteger((InputStream) eventResultConn.getContent());
             return inputStream;
         } catch (IOException e) {
             e.printStackTrace();

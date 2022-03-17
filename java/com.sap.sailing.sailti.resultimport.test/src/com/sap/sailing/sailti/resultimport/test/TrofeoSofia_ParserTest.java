@@ -28,8 +28,14 @@ import com.sap.sse.common.Util;
 
 public class TrofeoSofia_ParserTest extends AbstractTrofeoSofiaTest {
     @Test
-    public void testSimpleParsingSomeYachtscoringDocuments() throws JAXBException, IOException {
+    public void testSimpleParsingSomeSailtiDocuments470Men() throws JAXBException, IOException {
         RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(TROFEO_SOFIA_TESTFILE_XRR_470_MEN), TROFEO_SOFIA_EVENT_NAME).parse();
+        assertNotNull(regattaResults);
+    }
+
+    @Test
+    public void testSimpleParsingSomeSailtiDocuments470Women() throws JAXBException, IOException {
+        RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(TROFEO_SOFIA_TESTFILE_XRR_470_WOMEN), TROFEO_SOFIA_EVENT_NAME).parse();
         assertNotNull(regattaResults);
     }
 
@@ -43,7 +49,7 @@ public class TrofeoSofia_ParserTest extends AbstractTrofeoSofiaTest {
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForTrofeoSofia470Men = hasResultsFor.get(TROFEO_SOFIA_EVENT_NAME);
         assertNotNull(resultsForTrofeoSofia470Men);
-        assertEquals(2, resultsForTrofeoSofia470Men.size());
+        assertEquals(3, resultsForTrofeoSofia470Men.size());
     }
     
     @Test
@@ -54,8 +60,8 @@ public class TrofeoSofia_ParserTest extends AbstractTrofeoSofiaTest {
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(TROFEO_SOFIA_EVENT_NAME);
         com.sap.sse.common.Util.Pair<String, TimePoint> resultFor470Men = null;
-        for(com.sap.sse.common.Util.Pair<String, TimePoint> result: resultsForKeyWestRaceWeek) {
-            if(result.getA().equals(BOAT_CLASS_470_MEN)) {
+        for (com.sap.sse.common.Util.Pair<String, TimePoint> result : resultsForKeyWestRaceWeek) {
+            if (result.getA().equals(BOAT_CLASS_470_MEN)) {
                 resultFor470Men = result;
                 break;
             }
@@ -66,6 +72,6 @@ public class TrofeoSofia_ParserTest extends AbstractTrofeoSofiaTest {
         assertNotNull(_J111Result);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = _J111Result.getScoreCorrectionsForRaces();
         assertNotNull(scoreCorrectionsForRaces);
-        assertEquals(8, Util.size(scoreCorrectionsForRaces)); 
+        assertEquals(11, Util.size(scoreCorrectionsForRaces)); 
     }
 }

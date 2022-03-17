@@ -34,12 +34,12 @@ public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumen
         List<ResultDocumentDescriptor> result = new ArrayList<>();
         for (URL url : resultUrlProvider.getReadableUrls()) {
             URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
-            InputStream is = (InputStream) eventResultConn.getContent();
-            Parser parser = parserFactory.createParser(is, url.toString());
+            final InputStream is = (InputStream) eventResultConn.getContent();
+            final Parser parser = parserFactory.createParser(is, url.toString());
             try {
-                RegattaResults xrrParserResult = parser.parse();
+                final RegattaResults xrrParserResult = parser.parse();
                 if (xrrParserResult != null) {
-                    List<ResultDocumentDescriptor> resultDocumentDescriptors = resolveResultDocumentDescriptors(xrrParserResult, url);
+                    final List<ResultDocumentDescriptor> resultDocumentDescriptors = resolveResultDocumentDescriptors(xrrParserResult, url);
                     if (resultDocumentDescriptors != null) {
                         result.addAll(resultDocumentDescriptors);
                     }

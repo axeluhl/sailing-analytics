@@ -20,7 +20,6 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
-
     private ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
     public void start(BundleContext bundleContext) throws Exception {
