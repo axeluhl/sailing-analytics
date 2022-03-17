@@ -1,4 +1,4 @@
-package com.sap.sailing.yachtscoring.resultimport.test;
+package com.sap.sailing.sailti.resultimport.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -22,14 +22,14 @@ import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.ResultUrlRegistryImpl;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.RegattaResults;
-import com.sap.sailing.yachtscoring.resultimport.ScoreCorrectionProviderImpl;
+import com.sap.sailing.sailti.resultimport.ScoreCorrectionProviderImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-public class CharlstonRaceWeek2015_ParserTest extends AbstractCharlstonRaceWeek2015Test {
+public class TrofeoSofia_ParserTest extends AbstractTrofeoSofiaTest {
     @Test
     public void testSimpleParsingSomeYachtscoringDocuments() throws JAXBException, IOException {
-        RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(CHARLSTONRACEWEEK2015_TESTFILE_XRR), CHARLSTONRACEWEEK2015_EVENT_NAME).parse();
+        RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(TROFEO_SOFIA_TESTFILE_XRR_470_MEN), TROFEO_SOFIA_EVENT_NAME).parse();
         assertNotNull(regattaResults);
     }
 
@@ -41,11 +41,9 @@ public class CharlstonRaceWeek2015_ParserTest extends AbstractCharlstonRaceWeek2
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(
                 getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        
-        Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(CHARLSTONRACEWEEK2015_EVENT_NAME);
-        assertNotNull(resultsForKeyWestRaceWeek);
-
-        assertEquals(2, resultsForKeyWestRaceWeek.size());
+        Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForTrofeoSofia470Men = hasResultsFor.get(TROFEO_SOFIA_EVENT_NAME);
+        assertNotNull(resultsForTrofeoSofia470Men);
+        assertEquals(2, resultsForTrofeoSofia470Men.size());
     }
     
     @Test
@@ -54,18 +52,17 @@ public class CharlstonRaceWeek2015_ParserTest extends AbstractCharlstonRaceWeek2
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(
                 getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(CHARLSTONRACEWEEK2015_EVENT_NAME);
-        com.sap.sse.common.Util.Pair<String, TimePoint> resultForJ111 = null;
+        Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(TROFEO_SOFIA_EVENT_NAME);
+        com.sap.sse.common.Util.Pair<String, TimePoint> resultFor470Men = null;
         for(com.sap.sse.common.Util.Pair<String, TimePoint> result: resultsForKeyWestRaceWeek) {
-            if(result.getA().equals(BOAT_CLASS_J111)) {
-                resultForJ111 = result;
+            if(result.getA().equals(BOAT_CLASS_470_MEN)) {
+                resultFor470Men = result;
                 break;
             }
         }
-        assertNotNull(resultForJ111);
-        
-        RegattaScoreCorrections _J111Result = scoreCorrectionProvider.getScoreCorrections(CHARLSTONRACEWEEK2015_EVENT_NAME, BOAT_CLASS_J111,
-                resultForJ111.getB());
+        assertNotNull(resultFor470Men);
+        RegattaScoreCorrections _J111Result = scoreCorrectionProvider.getScoreCorrections(TROFEO_SOFIA_EVENT_NAME, BOAT_CLASS_470_MEN,
+                resultFor470Men.getB());
         assertNotNull(_J111Result);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = _J111Result.getScoreCorrectionsForRaces();
         assertNotNull(scoreCorrectionsForRaces);
