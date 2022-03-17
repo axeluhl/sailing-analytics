@@ -232,6 +232,6 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
 
     private boolean isArchiveServer(SailingAnalyticsHost<String> host) {
         return host.getInstance().tags().stream().filter(tag->tag.key().equals(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG)
-                && tag.value().equals(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_HOST_TAG_VALUE)).findAny().isPresent();
+                && tag.value().equals(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME)).findAny().isPresent();
     }
 }

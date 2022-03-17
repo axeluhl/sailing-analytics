@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse,
+ com.sap.sse.classloading,
  com.sap.sse.gateway,
  com.sap.sse.i18n,
  com.sap.sse.i18n.impl,
