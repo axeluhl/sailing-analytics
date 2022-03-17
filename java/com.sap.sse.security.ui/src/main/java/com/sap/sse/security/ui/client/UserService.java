@@ -30,6 +30,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
@@ -476,8 +477,8 @@ public class UserService {
      * is not needed for the security check, this method can be used to obtain a proxy that is sufficient to check
      * whether the current user has the permission to execute a specific action.
      */
-    public void createEssentialSecuredDTOByIdAndType(HasPermissions permissionType, String name, String[] typeRelativeObjectIdentifierParts, final AsyncCallback<SecuredDTO> callback) {
-        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(permissionType, name, typeRelativeObjectIdentifierParts);
+    public void createEssentialSecuredDTOByIdAndType(HasPermissions permissionType, String name, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, final AsyncCallback<SecuredDTO> callback) {
+        final EssentialSecuredDTO secureDTO = new EssentialSecuredDTO(permissionType, name, typeRelativeObjectIdentifier);
         userManagementService.addSecurityInformation(secureDTO, new AsyncCallback<SecuredDTO>() {
             @Override
             public void onSuccess(SecuredDTO result) {

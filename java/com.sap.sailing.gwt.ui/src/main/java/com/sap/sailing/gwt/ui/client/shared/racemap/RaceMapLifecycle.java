@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
@@ -14,15 +14,15 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
 
     private final StringMessages stringMessages;
     private final PaywallResolver paywallResolver;
-    private final RaceDTO raceDTO;
+    private final SecuredDTO raceDTO;
     
-    public RaceMapLifecycle(StringMessages stringMessages, PaywallResolver paywallResolver, RaceDTO raceDTO) {
+    public RaceMapLifecycle(StringMessages stringMessages, PaywallResolver paywallResolver, SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
         this.paywallResolver = paywallResolver;
         this.raceDTO = raceDTO;
     }
 
-    public RaceDTO getRaceDTO() {
+    public SecuredDTO getRaceDTO() {
         return raceDTO;
     }
 

@@ -402,6 +402,4 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private HttpSession getHttpSession() {
         return getThreadLocalRequest().getSession();
     }
-
-
 }

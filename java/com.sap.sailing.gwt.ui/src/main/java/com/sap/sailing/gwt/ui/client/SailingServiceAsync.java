@@ -103,6 +103,7 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -394,8 +395,8 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean> regattaLogCallBack);
 
-    void getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName,
-            AsyncCallback<RegattaAndRaceIdentifier> asyncCallback);
+    void getRaceIdentifierAndTrackedRaceSecuredDTO(String regattaLikeName, String raceColumnName, String fleetName,
+            AsyncCallback<Pair<RegattaAndRaceIdentifier, SecuredDTO>> asyncCallback);
 
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> callback);

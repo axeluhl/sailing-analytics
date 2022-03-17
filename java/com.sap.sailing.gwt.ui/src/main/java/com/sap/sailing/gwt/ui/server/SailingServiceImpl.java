@@ -479,6 +479,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -486,6 +487,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
+import com.sap.sse.security.ui.shared.EssentialSecuredDTO;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -5102,8 +5104,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName) {
+    public Pair<RegattaAndRaceIdentifier, SecuredDTO> getRaceIdentifierAndTrackedRaceSecuredDTO(String regattaLikeName, String raceColumnName, String fleetName) {
         RegattaAndRaceIdentifier result = null;
+        String raceName = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(regattaLikeName);
         getSecurityService().checkCurrentUserReadPermission(leaderboard);
         if (leaderboard != null) {
@@ -5115,11 +5118,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     getSecurityService().checkCurrentUserReadPermission(trackedRace);
                     if (trackedRace != null) {
                         result = trackedRace.getRaceIdentifier();
+                        raceName = trackedRace.getRace().getName();
                     }
                 }
             }
         }
-        return result;
+        final EssentialSecuredDTO trackedRaceSecuredDTOProxy = result == null ? null :
+            new EssentialSecuredDTO(RaceDTO.getPermissionTypeForClass(), raceName, result.getTypeRelativeObjectIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), trackedRaceSecuredDTOProxy);
+        return new Pair<>(result, trackedRaceSecuredDTOProxy);
     }
 
     @Override

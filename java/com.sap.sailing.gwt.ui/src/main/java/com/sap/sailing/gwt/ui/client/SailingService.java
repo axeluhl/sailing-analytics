@@ -105,6 +105,7 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to the time-dependent
@@ -360,8 +361,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     boolean doesRegattaLogContainCompetitors(String name)
             throws UnauthorizedException, DoesNotHaveRegattaLogException, NotFoundException;
 
-    RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName)
-            throws UnauthorizedException;
+    Pair<RegattaAndRaceIdentifier, SecuredDTO> getRaceIdentifierAndTrackedRaceSecuredDTO(String regattaLikeName,
+            String raceColumnName, String fleetName);
 
     Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimes(String leaderboardName,
             String raceColumnName, String fleetName) throws UnauthorizedException, NotFoundException;
