@@ -31,7 +31,7 @@ import com.sap.sse.common.Util;
 public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider implements ScoreCorrectionProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = 222663322974305822L;
-    private static final String NAME = "YachtScoring XRR Result Importer";
+    private static final String NAME = "Sailti XRR Result Importer";
     private static final String EVENT_ID_REGEX = "^\\d+$";
     private static final String EVENT_ID_TEMPLATE = "https://www.yachtscoring.com/results_xrr_auto.cfm?eid=%s";
 
