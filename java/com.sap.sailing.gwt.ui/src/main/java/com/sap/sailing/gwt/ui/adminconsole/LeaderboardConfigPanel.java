@@ -168,7 +168,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 () -> removeLeaderboards(leaderboardSelectionModel.getSelectedSet()));
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
         buttonPanel.addUnsecuredWidget(new HelpButton(AdminConsoleHelpButtonResources.INSTANCE, 
-                stringMessages.adminconsoleLeaderboardsGeneralInfo(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4"));
+                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4"));
     }
 
     @Override

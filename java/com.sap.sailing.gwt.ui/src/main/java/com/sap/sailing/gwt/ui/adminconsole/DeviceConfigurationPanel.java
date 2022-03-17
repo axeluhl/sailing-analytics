@@ -100,7 +100,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
             }
         });
         deviceManagementControlPanel.add(new HelpButton(AdminConsoleHelpButtonResources.INSTANCE, 
-                stringMessages.adminconsoleRaceManagerAppGeneralInfo(), "https://support.sapsailing.com/hc/en-us/articles/360019799279-How-to-work-with-the-SAP-Sailing-Race-Manager-app"));
+                stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/360019799279-How-to-work-with-the-SAP-Sailing-Race-Manager-app"));
         deviceManagementControlPanel.add(refreshConfigurationsButton);
         mainPanel.add(deviceManagementControlPanel);
     }

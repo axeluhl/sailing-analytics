@@ -2388,9 +2388,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String timePointOfLastFix();
     String copyMarkDeviceMappings();
     String errorLoadingPolarDataForBoatClass(String boatClass, String message);
-    String adminconsoleEventsGeneralInfo();
-    String adminconsoleRegattasGeneralInfo();
-    String adminconsoleLeaderboardsGeneralInfo();
-    String adminconsoleRaceManagerAppGeneralInfo();
-    String adminconsoleRegattasEditCompetitorsInfo();
+    String videoGuide();
+    String orcExplanation();
 }
