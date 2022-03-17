@@ -17,6 +17,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.ui.adminconsole.help.AdminConsoleHelpButtonResources;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -97,6 +99,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                 listComposite.refreshTable();
             }
         });
+        deviceManagementControlPanel.add(new HelpButton(AdminConsoleHelpButtonResources.INSTANCE, 
+                stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/360019799279-How-to-work-with-the-SAP-Sailing-Race-Manager-app"));
         deviceManagementControlPanel.add(refreshConfigurationsButton);
         mainPanel.add(deviceManagementControlPanel);
     }
