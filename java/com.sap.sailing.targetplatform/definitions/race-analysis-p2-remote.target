@@ -196,6 +196,10 @@
 <plugin id="com.github.haifengl.smile-data"/>
 <plugin id="com.github.haifengl.smile-graph"/>
 <plugin id="com.github.haifengl.smile-math"/>
+<plugin id="com.github.haifengl.smile-core.source"/>
+<plugin id="com.github.haifengl.smile-data.source"/>
+<plugin id="com.github.haifengl.smile-graph.source"/>
+<plugin id="com.github.haifengl.smile-math.source"/>
 <plugin id="org.owasp.encoder"/>
 <plugin id="org.apache.shiro.core.source"/>
 <plugin id="org.apache.shiro.ehcache.source"/>
