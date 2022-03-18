@@ -84,7 +84,10 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
                     private int counter = 0;
                     @Override
                     public void run() {
-                        if (counter == 10 || updateProcessed.get()) {
+                        if (counter == 10) {
+                            view.onUnfinishedPayment(StringMessages.INSTANCE.errorPollingCheckoutResults());
+                            this.cancel();
+                        }else if (updateProcessed.get()){
                             this.cancel();
                         }
                         service.isUserInPossessionOfRoles(planId, new AsyncCallback<Boolean>() {

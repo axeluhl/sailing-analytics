@@ -66,9 +66,11 @@ public class ChargebeeSubscriptionServiceImpl extends
             final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
             if(planForPrice == null) {
                 throw new IllegalArgumentException("No matching subscription plan found for given price id");
-            }
-            if (!isUserSubscribedToPlan(user, planForPrice.getId())
-                    || isSubscriptionCancelled(user.getSubscriptionByPlan(planForPrice.getId()))) {
+            }else if(planForPrice.getIsOneTimePlan() && user.hasAnySubscription(planForPrice.getId())) {
+                throw new IllegalArgumentException("Plan can only be subscribed once");
+            }else if(isSubscribedToMutuallyExclusivePlan(user, planForPrice)) {
+                throw new IllegalArgumentException("User has already subscribed to mutually exclusive plan");
+            }else {
                 final Pair<String, String> usernames = getUserFirstAndLastName(user);
                 final String locale = user.getLocaleOrDefault().getLanguage();
                 final Result result = HostedPage.checkoutNewForItems()
@@ -79,9 +81,6 @@ public class ChargebeeSubscriptionServiceImpl extends
                         .customerLocale(locale).billingAddressFirstName(usernames.getA())
                         .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
                 response.setHostedPageJSONString(result.hostedPage().toJson());
-            } else {
-                response.setError(
-                        "User has already subscribed to " + planForPrice.getId() + " plan");
             }
         } catch (final Exception e) {
             logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
@@ -91,7 +90,7 @@ public class ChargebeeSubscriptionServiceImpl extends
     }
 
     @Override
-    public SubscriptionListDTO getSubscriptions() {
+    public SubscriptionListDTO getSubscriptions(Boolean activeOnly) {
         SubscriptionListDTO subscriptionDto = null;
         try {
             final User user = getCurrentUser();
@@ -99,7 +98,7 @@ public class ChargebeeSubscriptionServiceImpl extends
             if (subscriptions != null) {
                 final List<SubscriptionDTO> itemList = new ArrayList<>();
                 for (final Subscription subscription : subscriptions) {
-                    if (subscription.hasSubscriptionId() && !isSubscriptionCancelled(subscription)) {
+                    if (subscription.hasSubscriptionId() && (!activeOnly || !isSubscriptionCancelled(subscription))) {
                         itemList.add(
                                 new ChargebeeSubscriptionDTO(subscription.getPlanId(), subscription.getSubscriptionId(),
                                         subscription.getSubscriptionStatus(), subscription.getPaymentStatus(),
@@ -117,7 +116,6 @@ public class ChargebeeSubscriptionServiceImpl extends
             logger.log(Level.SEVERE, "Error in getting subscription ", e);
             subscriptionDto = new SubscriptionListDTO(null, e.getMessage());
         }
-
         return subscriptionDto;
     }
 
@@ -125,14 +123,15 @@ public class ChargebeeSubscriptionServiceImpl extends
     protected String getProviderName() {
         return ChargebeeSubscriptionProvider.PROVIDER_NAME;
     }
-
+    
+    @Override
     protected boolean isSubscriptionCancelled(final Subscription subscription) {
         return subscription != null
                 && subscription.getSubscriptionStatus().equalsIgnoreCase(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
     }
 
     @Override
-    public SubscriptionPlanDTO getSubscriptionPlanById(final String planId) {
+    public SubscriptionPlanDTO getSubscriptionPlanDTOById(final String planId) {
         final SubscriptionPlan subscriptionPlanById = getSecurityService().getSubscriptionPlanById(planId);
         return subscriptionPlanById == null ? null : convertToDto(subscriptionPlanById);
     }

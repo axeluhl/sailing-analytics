@@ -421,18 +421,29 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
         }
         return null;
     }
-
+    
     @Override
-    public boolean hasActiveSubscription() {
+    public boolean hasActiveSubscription(String planId) {
         boolean result = false;
         if (subscriptions != null && subscriptions.length > 0) {
             for (Subscription subscription : subscriptions) {
-                if (subscription.isActiveSubscription()) {
+                if (subscription.isActiveSubscription() && subscription.getPlanId() != null
+                        && subscription.getPlanId().equals(planId)) {
                     result = true;
                     break;
                 }
             }
         }
         return result;
+    }
+
+    @Override
+    public boolean hasAnySubscription(String planId) {
+        for (Subscription subscription : subscriptions) {
+            if (subscription.getPlanId().equals(planId)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
