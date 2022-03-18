@@ -31,7 +31,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  *
  */
 public class SimpleModelsTrainingPart1 {
-    private static final int NUMBER_OF_THREADS = 3;
+    private static final int NUMBER_OF_THREADS = 15;
     private static ExecutorService executorService;
 
     public static void main(String[] args) throws Exception {
