@@ -13,12 +13,12 @@ import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractTrofeoSofiaTest extends AbstractSailtiEventResourceTest {
-    protected static final String TROFEO_SOFIA_TESTFILE_XRR_49ER = "20220317-1303_16_49er_SAILTI_v1.3.1.xml";
-    protected static final String TROFEO_SOFIA_TESTFILE_XRR_470_MEN = "20220317-1303_13_470_Men_SAILTI_v1.3.1.xml";
-    protected static final String TROFEO_SOFIA_TESTFILE_XRR_470_WOMEN = "20220317-1303_14_470_Women_SAILTI_v1.3.1.xml";
+    protected static final String TROFEO_SOFIA_TESTFILE_XRR_IQ_FOIL = "20220318-1003_335_IQ_FOIL_Men_SAILTI_v1.3.1.xml";
+    protected static final String TROFEO_SOFIA_TESTFILE_XRR_470_MEN = "20220318-1003_13_470_Men_SAILTI_v1.3.1.xml";
+    protected static final String TROFEO_SOFIA_TESTFILE_XRR_470_WOMEN = "20220318-1003_14_470_Women_SAILTI_v1.3.1.xml";
     protected static final String TROFEO_SOFIA_EVENT_NAME = "50 Trofeo S.A.R. Princesa Sofía IBEROSTAR";
     
-    protected static final String BOAT_CLASS_49ER = "49ER";
+    protected static final String BOAT_CLASS_49ER = "IQFoil Men";
     protected static final String BOAT_CLASS_470_MEN = "470 Men";
     protected static final String BOAT_CLASS_470_WOMEN = "470 Women";
     
@@ -36,7 +36,7 @@ public abstract class AbstractTrofeoSofiaTest extends AbstractSailtiEventResourc
                             null, new MillisecondsTimePoint(_470MenDate), TROFEO_SOFIA_EVENT_NAME , BOAT_CLASS_470_MEN, BOAT_CLASS_470_MEN));
                     result.add(new ResultDocumentDescriptorImpl(getInputStream(TROFEO_SOFIA_TESTFILE_XRR_470_WOMEN),
                             null, new MillisecondsTimePoint(_470WomenDate), TROFEO_SOFIA_EVENT_NAME , BOAT_CLASS_470_WOMEN, BOAT_CLASS_470_WOMEN));
-                    result.add(new ResultDocumentDescriptorImpl(getInputStream(TROFEO_SOFIA_TESTFILE_XRR_49ER),
+                    result.add(new ResultDocumentDescriptorImpl(getInputStream(TROFEO_SOFIA_TESTFILE_XRR_IQ_FOIL),
                             null, new MillisecondsTimePoint(_49erDate), TROFEO_SOFIA_EVENT_NAME , BOAT_CLASS_49ER, BOAT_CLASS_49ER));
                     return result;
                 } catch (Exception e) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sailing.org/techpages/resources/xml/sailingXRR_v1.3.1.xsd" Version="1.3.1" Type="SailingXRR" Date="2022-03-17" Time="13:14:39">
+<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sailing.org/techpages/resources/xml/sailingXRR_v1.3.1.xsd" Version="1.3.1" Type="SailingXRR" Date="2022-03-18" Time="10:47:12">
  <Person PersonID="226448" IFPersonID="JPNAK3" FamilyName="YOSHIDA" GivenName="Ai Kondo" NOC="JPN" Gender="female" Club="Benesse Holdings, Inc" ClassPersonID="" RFEVPersonID="" PassportPersonID="TG4597101"/>
  <Person PersonID="226449" IFPersonID="JPNMY16" FamilyName="YOSHIOKA" GivenName="Miho" NOC="JPN" Gender="female" Club="Benesse Holdings, Inc." ClassPersonID="" RFEVPersonID="" PassportPersonID="TK8687812"/>
  <Person PersonID="226450" IFPersonID="GERML40" FamilyName="LORENZ" GivenName="Marie" NOC="GER" Gender="female" ClassPersonID="" RFEVPersonID="" PassportPersonID="L3H92XG11"/>
@@ -316,17 +316,17 @@
   <Crew PersonID="226537" Position="C"/>
  </Team>
  <Event EventID="6443" IFEventID="ESP201903FIP" IFUploadCode="iJ108YkH0nfM6" Type="Regatta" Title="50 Trofeo S.A.R. Princesa Sofía IBEROSTAR">
-  <Race RaceID="45823" RaceNumber="1.0" RaceName="1" RaceStartDate="2019-04-01" RaceStartTime="00:00:00"/>
-  <Race RaceID="45852" RaceNumber="2.0" RaceName="2" RaceStartDate="2019-04-01" RaceStartTime="00:00:00"/>
-  <Race RaceID="45861" RaceNumber="3.0" RaceName="3" RaceStartDate="2019-04-02" RaceStartTime="00:00:00"/>
-  <Race RaceID="45876" RaceNumber="4.0" RaceName="4" RaceStartDate="2019-04-02" RaceStartTime="00:00:00"/>
-  <Race RaceID="45906" RaceNumber="5.0" RaceName="5" RaceStartDate="2019-04-03" RaceStartTime="00:00:00"/>
-  <Race RaceID="45927" RaceNumber="6.0" RaceName="6" RaceStartDate="2019-04-03" RaceStartTime="00:00:00"/>
-  <Race RaceID="45961" RaceNumber="7.0" RaceName="7" RaceStartDate="2019-04-04" RaceStartTime="00:00:00"/>
-  <Race RaceID="45979" RaceNumber="8.0" RaceName="8" RaceStartDate="2019-04-04" RaceStartTime="00:00:00"/>
-  <Race RaceID="46031" RaceNumber="9.0" RaceName="9" RaceStartDate="2019-04-05" RaceStartTime="00:00:00"/>
-  <Race RaceID="46052" RaceNumber="10.0" RaceName="10" RaceStartDate="2019-04-05" RaceStartTime="00:00:00"/>
-  <Race RaceID="46100" RaceNumber="11.0" RaceName="MR" RaceStartDate="2019-04-06" RaceStartTime="00:00:00"/>
+  <Race RaceID="45823" RaceNumber="1" RaceName="1" RaceStartDate="2019-04-01" RaceStartTime="00:00:00"/>
+  <Race RaceID="45852" RaceNumber="2" RaceName="2" RaceStartDate="2019-04-01" RaceStartTime="00:00:00"/>
+  <Race RaceID="45861" RaceNumber="3" RaceName="3" RaceStartDate="2019-04-02" RaceStartTime="00:00:00"/>
+  <Race RaceID="45876" RaceNumber="4" RaceName="4" RaceStartDate="2019-04-02" RaceStartTime="00:00:00"/>
+  <Race RaceID="45906" RaceNumber="5" RaceName="5" RaceStartDate="2019-04-03" RaceStartTime="00:00:00"/>
+  <Race RaceID="45927" RaceNumber="6" RaceName="6" RaceStartDate="2019-04-03" RaceStartTime="00:00:00"/>
+  <Race RaceID="45961" RaceNumber="7" RaceName="7" RaceStartDate="2019-04-04" RaceStartTime="00:00:00"/>
+  <Race RaceID="45979" RaceNumber="8" RaceName="8" RaceStartDate="2019-04-04" RaceStartTime="00:00:00"/>
+  <Race RaceID="46031" RaceNumber="9" RaceName="9" RaceStartDate="2019-04-05" RaceStartTime="00:00:00"/>
+  <Race RaceID="46052" RaceNumber="10" RaceName="10" RaceStartDate="2019-04-05" RaceStartTime="00:00:00"/>
+  <Race RaceID="46100" RaceNumber="11" RaceName="MR" RaceStartDate="2019-04-06" RaceStartTime="00:00:00"/>
   <Division DivisionID="8352" Type="FleetRace" Title="470 Women" ClassID="14" IFClassID="470" IFDivisionID="470" Gender="ALL">
    <RaceResult RaceID="45823" TeamID="JPN1" RacePoints="14" RaceRank="14"/>
    <RaceResult RaceID="45823" TeamID="GER77" RacePoints="39" RaceRank="38" ScoreCode="STP"/>

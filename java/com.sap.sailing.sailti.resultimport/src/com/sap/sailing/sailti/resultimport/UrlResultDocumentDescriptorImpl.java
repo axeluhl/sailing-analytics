@@ -1,18 +1,20 @@
 package com.sap.sailing.sailti.resultimport;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import org.apache.commons.io.IOUtils;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.common.CompetitorGenderType;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class UrlResultDocumentDescriptorImpl implements ResultDocumentDescriptor {
+    private static final Logger logger = Logger.getLogger(UrlResultDocumentDescriptorImpl.class.getName());
+
     private URL documentURL;  
     private String documentName;
     private TimePoint lastModified;
@@ -71,24 +73,18 @@ public class UrlResultDocumentDescriptorImpl implements ResultDocumentDescriptor
         return lastModified;
     }
     
-    public static InputStream getInputStreamReplacingRaceNumberByInteger(InputStream input) throws IOException {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        IOUtils.copyLarge(input, bos);
-        final String documentAsString = new String(bos.toByteArray());
-        final String fixedString = documentAsString.replaceAll("RaceNumber=\"([0-9]*)\\.0\"", "RaceNumber=\"$1\"");
-        return new ByteArrayInputStream(fixedString.getBytes());
-    }
-
     @Override
     public InputStream getInputStream() {
+        InputStream result;
         try {
-            URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(documentURL);
-            InputStream inputStream = getInputStreamReplacingRaceNumberByInteger((InputStream) eventResultConn.getContent());
-            return inputStream;
+            final URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(documentURL);
+            final InputStream inputStream = (InputStream) eventResultConn.getContent();
+            result = inputStream;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error trying to read Sailti document from "+documentURL);
+            result = null;
         }
-        return null;
+        return result;
     }
 
     @Override
