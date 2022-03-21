@@ -207,7 +207,15 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     
     protected SubscriptionPlanDTO convertToDto(SubscriptionPlan plan) {
         final boolean isUserSubscribedToPlan = isUserSubscribedToPlan(plan.getId());
-        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getPrices(), null);
+        boolean hasAnySubscription;
+        try {
+            final User currentUser = getCurrentUser();
+            hasAnySubscription = currentUser.hasAnySubscription(plan.getId());
+        } catch (UserManagementException e) {
+            hasAnySubscription = false;
+        }
+        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getPrices(),
+                plan.getPlanCategories(), hasAnySubscription, null);
     }
 
     private boolean isUserSubscribedToPlan(String planId) {
