@@ -68,7 +68,16 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
     public void onOpenCheckoutError(final String error) {
         Notification.notify(error, NotificationType.ERROR);
     }
-
+    
+    @Override
+    public void onFinishedPayment(final String message) {
+        Notification.notify(message, NotificationType.SUCCESS);
+    }
+    
+    @Override
+    public void onUnfinishedPayment(final String message) {
+        Notification.notify(message, NotificationType.WARNING);
+    }
     @Override
     public void resetSubscriptions() {
         container.resetSubscriptions();

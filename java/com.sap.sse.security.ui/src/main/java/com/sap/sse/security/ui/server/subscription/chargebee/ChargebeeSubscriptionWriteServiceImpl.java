@@ -76,6 +76,9 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                     break;
                 }
             }
+            if (plan == null) {
+                throw new IllegalArgumentException("No such Subscriptionplan");
+            }
             final String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus, invoiceStatus);
             final Subscription subscription = new ChargebeeSubscription(contentSubscription.id(), plan.getId(),
                     customerId, trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
@@ -86,7 +89,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                     getTime(contentSubscription.nextBillingAt()), getTime(contentSubscription.currentTermEnd()),
                     getTime(contentSubscription.cancelledAt()), Subscription.emptyTime(), Subscription.emptyTime());
             updateUserSubscription(user, subscription);
-            subscriptionDto = getSubscriptions();
+            subscriptionDto = getSubscriptions(true);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in saving subscription", e);
             subscriptionDto = new SubscriptionListDTO(null, e.getMessage());

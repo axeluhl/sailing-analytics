@@ -18,4 +18,21 @@ public interface SubscribeView {
      *            the {@link String error text} to show
      */
     public void onOpenCheckoutError(String error);
+
+    /**
+     * Called if payment has not yet finished.
+     *
+     * @param error
+     *            the {@link String error text} to show
+     */
+    void onUnfinishedPayment(String message);
+
+    /**
+     * Called if payment has finished (or Trial has begun)
+     * and the User has aquired the roles.
+     *
+     * @param error
+     *            the {@link String error text} to show
+     */
+    void onFinishedPayment(String message);
 }

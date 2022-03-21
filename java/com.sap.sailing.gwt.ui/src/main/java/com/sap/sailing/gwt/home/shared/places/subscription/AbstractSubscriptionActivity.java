@@ -68,7 +68,8 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                         private void addFreePlan(final SubscriptionView view) {
                             final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO(
                                     "free_subscription_plan" /* id */, /* isUserSubscribedToPlan */ false,
-                                    Collections.emptySet() /* prices */, null /* error */);
+                                    Collections.emptySet() /* prices */, /* planCategories */ Collections.emptySet(),
+                                    /* userWasAlreadySubscribedToOneTimePlan */ false, null /* error */);
                             view.addSubscriptionPlan(freePlan, Type.FREE, eventBus);
                         }
                     });

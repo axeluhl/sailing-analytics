@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Payment subscription plans. A subscription plan has a name, a {@link String}-based ID, and a set of
@@ -19,8 +20,9 @@ public class SSESubscriptionPlan extends SubscriptionPlan {
     private static final long serialVersionUID = 9061666338780737555L;
     private static final Map<String, SSESubscriptionPlan> plansById = new HashMap<String, SSESubscriptionPlan>();
 
-    private SSESubscriptionPlan(String id, HashSet<SubscriptionPrice> prices, SubscriptionPlanRole... roles) {
-        super(id, prices, roles);
+    private SSESubscriptionPlan(String id, HashSet<SubscriptionPrice> prices, Set<PlanCategory> planCategories,
+            Boolean isOneTimePlan, SubscriptionPlanRole... roles) {
+        super(id, prices, planCategories, isOneTimePlan, roles);
         plansById.put(id, this);
     }
     

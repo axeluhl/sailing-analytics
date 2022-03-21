@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 
 /**
@@ -15,7 +16,9 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
     private String id;
     private HashSet<SubscriptionPrice> prices = new HashSet<SubscriptionPrice>();
     private String error;
-    private boolean isUserSubscribedToPlan;
+    private Boolean isUserSubscribedToPlan;
+    private Set<PlanCategory> planCategory;
+    private Boolean userWasAlreadySubscribedToOneTimePlan;
 
     /**
      * For GWT Serialization only
@@ -24,11 +27,22 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
     public SubscriptionPlanDTO() {
     }
 
-    public SubscriptionPlanDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices, String error) {
+    public SubscriptionPlanDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices,
+            Set<PlanCategory> planCategory, boolean userWasAlreadySubscribedToOneTimePlan, String error) {
         this.id = id;
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
+        this.planCategory = planCategory;
+        this.userWasAlreadySubscribedToOneTimePlan = userWasAlreadySubscribedToOneTimePlan;
         this.prices = new HashSet<SubscriptionPrice>(prices);
         this.error = error;
+    }
+    
+    public Set<PlanCategory> getPlanCategory() {
+        return planCategory;
+    }
+    
+    public boolean isUserWasAlreadySubscribedToOneTimePlan() {
+        return userWasAlreadySubscribedToOneTimePlan;
     }
 
     public static long getSerialversionuid() {
@@ -44,10 +58,6 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
         return isUserSubscribedToPlan;
     }
 
-    public void setUserSubscribedToPlan(boolean isUserSubscribedToPlan) {
-        this.isUserSubscribedToPlan = isUserSubscribedToPlan;
-    }
-
     public String getError() {
         return error;
     }
@@ -59,10 +69,6 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
 
     public HashSet<SubscriptionPrice> getPrices() {
         return prices;
-    }
-
-    public void setPrices(HashSet<SubscriptionPrice> prices) {
-        this.prices = prices;
     }
 
     public void setError(String error) {

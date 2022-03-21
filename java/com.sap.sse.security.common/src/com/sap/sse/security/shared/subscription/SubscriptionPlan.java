@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
 
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+
 /**
  * Payment subscription plans. A subscription plan has a name, a {@link String}-based ID, and a set of
  * {@link SubscriptionPlanRole roles} it grants to a subscribing user. These roles can specify how they are to be
@@ -17,15 +20,27 @@ public abstract class SubscriptionPlan implements Serializable{
     private static final long serialVersionUID = -555811806344107292L;
     private final String id;
     private final Set<SubscriptionPrice> prices;
+    private final Set<PlanCategory> planCategory;
+    private final Boolean isOneTimePlan;
     /**
      * Roles assigned for this plan, if user subscribe to the plan then the user will be assigned these roles
      */
     private final SubscriptionPlanRole[] roles;
     
-    protected SubscriptionPlan(String id, Set<SubscriptionPrice> prices, SubscriptionPlanRole[] roles) {
+    /*
+     * Used to make Plans of the same category mutually exclusive.
+     */
+    public enum PlanCategory {
+        PREMIUM;
+    }
+    
+    protected SubscriptionPlan(String id, Set<SubscriptionPrice> prices, Set<PlanCategory> planCategory,
+            Boolean isOneTimePlan, SubscriptionPlanRole[] roles) {
         this.id = id;
         this.roles = roles;
         this.prices = prices;
+        this.planCategory = planCategory;
+        this.isOneTimePlan = isOneTimePlan;
     }
 
     public String getId() {
@@ -38,6 +53,32 @@ public abstract class SubscriptionPlan implements Serializable{
 
     public SubscriptionPlanRole[] getRoles() {
         return roles;
+    }
+    
+    public Set<PlanCategory> getPlanCategories() {
+        return planCategory;
+    }
+    
+    public Boolean getIsOneTimePlan() {
+        return isOneTimePlan;
+    }
+
+    public boolean isUserInPossessionOfRoles(User user) {
+        boolean foundAll = true;
+        for (SubscriptionPlanRole planRole : getRoles()) {
+            boolean found = false;
+            for (Role userRole : user.getRoles()) {
+                if (userRole.getRoleDefinition().getId().equals(planRole.getRoleId())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                foundAll = false;
+                break;
+            }
+        }
+        return foundAll;
     }
     
     @Override
@@ -67,5 +108,4 @@ public abstract class SubscriptionPlan implements Serializable{
             return false;
         return true;
     }
-
 }

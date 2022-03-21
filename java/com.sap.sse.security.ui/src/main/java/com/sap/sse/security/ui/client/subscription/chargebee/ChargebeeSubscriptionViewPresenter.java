@@ -1,5 +1,8 @@
 package com.sap.sse.security.ui.client.subscription.chargebee;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.subscription.SubscribeView;
@@ -32,7 +35,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
                             new CheckoutOption.SuccessCallback() {
                                 @Override
                                 public void call(final String hostedPageId) {
-                                    requestFinishingPlanUpdating(hostedPageId, view, fireUserUpdateEvent);
+                                    requestFinishingPlanUpdating(hostedPageId, view, fireUserUpdateEvent, planId);
                                 }
                             }, new CheckoutOption.ErrorCallback() {
                                 @Override
@@ -58,13 +61,14 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
     }
 
     private void requestFinishingPlanUpdating(final String hostedPageId, final SubscribeView view,
-            final Runnable fireUserUpdateEvent) {
+            final Runnable fireUserUpdateEvent, String planId) {
         final FinishCheckoutDTO data = new FinishCheckoutDTO();
         data.setHostedPageId(hostedPageId);
         writeService.finishCheckout(data, new AsyncCallback<SubscriptionListDTO>() {
             @Override
             public void onSuccess(final SubscriptionListDTO result) {
                 fireUserUpdateEvent.run();
+                longpoll(fireUserUpdateEvent);
                 Chargebee.getInstance().closeAll();
             }
 
@@ -72,6 +76,39 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
             public void onFailure(final Throwable caught) {
                 Chargebee.getInstance().closeAll();
                 view.onOpenCheckoutError(StringMessages.INSTANCE.errorSaveSubscription(caught.getMessage()));
+            }
+            
+            private void longpoll(final Runnable fireUserUpdateEvent) {
+                final AtomicBoolean updateProcessed = new AtomicBoolean(false);
+                new Timer() {
+                    private int counter = 0;
+                    @Override
+                    public void run() {
+                        if (counter == 10) {
+                            view.onUnfinishedPayment(StringMessages.INSTANCE.errorPollingCheckoutResults());
+                            this.cancel();
+                        }else if (updateProcessed.get()){
+                            this.cancel();
+                        }
+                        service.isUserInPossessionOfRoles(planId, new AsyncCallback<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean result) {
+                                if(result) {
+                                    updateProcessed.set(true);
+                                    fireUserUpdateEvent.run();
+                                    view.onFinishedPayment(StringMessages.INSTANCE.paymentFinished());
+                                }else {
+                                    view.onUnfinishedPayment(StringMessages.INSTANCE.paymentUnfinished());
+                                }
+                            }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                view.onOpenCheckoutError(StringMessages.INSTANCE.errorPollingCheckoutResults());
+                            }
+                        });
+                        counter++;
+                    }
+                }.scheduleRepeating(4000);
             }
         });
     }

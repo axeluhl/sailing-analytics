@@ -97,6 +97,13 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         });
         return result;
     }
+    
+    @Override
+    public boolean isUserInPossessionOfRoles(String priceId) throws UserManagementException {
+        final User currentUser = getCurrentUser();
+        final SubscriptionPlan plan = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
+        return plan.isUserInPossessionOfRoles(currentUser);
+    }
 
     private CompletableFuture<SecurityService> initSecurityService() {
         final FullyInitializedReplicableTracker<SecurityService> tracker = FullyInitializedReplicableTracker
@@ -124,11 +131,15 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         getSecurityService().updateUserSubscription(user.getName(), subscription);
     }
 
-    /**
-     * Return true if user already subscribed to plan
-     */
-    protected boolean isUserSubscribedToPlan(User user, String planId) {
-        return isValidSubscription(user.getSubscriptionByPlan(planId));
+    protected boolean isSubscribedToMutuallyExclusivePlan(User user, SubscriptionPlan newPlan) {
+        for (Subscription sub : user.getSubscriptions()) {
+            SubscriptionPlan subscribedPlan = getSecurityService().getSubscriptionPlanById(sub.getPlanId());
+            if (isValidSubscription(sub) && !isSubscriptionCancelled(sub)
+                    && Util.containsAny(subscribedPlan.getPlanCategories(), newPlan.getPlanCategories())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -196,7 +207,15 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     
     protected SubscriptionPlanDTO convertToDto(SubscriptionPlan plan) {
         final boolean isUserSubscribedToPlan = isUserSubscribedToPlan(plan.getId());
-        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getPrices(), null);
+        boolean hasAnySubscription;
+        try {
+            final User currentUser = getCurrentUser();
+            hasAnySubscription = currentUser.hasAnySubscription(plan.getId());
+        } catch (UserManagementException e) {
+            hasAnySubscription = false;
+        }
+        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getPrices(),
+                plan.getPlanCategories(), hasAnySubscription, null);
     }
 
     private boolean isUserSubscribedToPlan(String planId) {
@@ -214,4 +233,6 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     }
     
     protected abstract String getProviderName();
+    
+    protected abstract boolean isSubscriptionCancelled(Subscription subscription);
 }

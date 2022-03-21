@@ -36,26 +36,27 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
     private static final String YEARLY_PLAN_ITEMPRICE_ID = "yearly_premium_usd_yearly";
     private static final Map<String, SubscriptionPlan> plansById = new HashMap<>();
 
-    private SailingSubscriptionPlan(String id, Set<SubscriptionPrice> prices, SubscriptionPlanRole... roles) {
-        super(id, prices, roles);
+    private SailingSubscriptionPlan(String id, Set<SubscriptionPrice> prices, Set<PlanCategory> excludesPlanIds,
+            Boolean isOneTimePlan, SubscriptionPlanRole... roles) {
+        super(id, prices, excludesPlanIds, isOneTimePlan, roles);
         plansById.put(id, this);
     }
 
     public static final SubscriptionPlan YEARLY = new SailingSubscriptionPlan(YEARLY_PLAN_ID,
             Stream.of(new SubscriptionPrice(YEARLY_PLAN_ITEMPRICE_ID, YEARLY_PLAN_PRICE, USD_CURRENCY_CODE,
-                    PaymentInterval.YEAR)).collect(Collectors.toSet()),
+                    PaymentInterval.YEAR)).collect(Collectors.toSet()), Stream.of(PlanCategory.PREMIUM).collect(Collectors.toSet()), false,
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
-
     public static final SubscriptionPlan WEEKLY = new SailingSubscriptionPlan(WEEKLY_PLAN_ID,
             Stream.of(new SubscriptionPrice(WEEKLY_PLAN_ITEMPRICE_ID, WEEKLY_PLAN_PRICE, USD_CURRENCY_CODE,
-                    PaymentInterval.WEEK)).collect(Collectors.toSet()),
+                    PaymentInterval.WEEK)).collect(Collectors.toSet()), Stream.of(PlanCategory.PREMIUM).collect(Collectors.toSet()), false,
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
     public static final SubscriptionPlan TRIAL = new SailingSubscriptionPlan(TRIAL_PLAN_ID,
             Stream.of(new SubscriptionPrice(TRIAL_PLAN_ITEMPRICE_ID, TRIAL_PLAN_PRICE, USD_CURRENCY_CODE,
-                    PaymentInterval.DAY)).collect(Collectors.toSet()),
+                    PaymentInterval.DAY)).collect(Collectors.toSet()), Stream.of(PlanCategory.PREMIUM).collect(Collectors.toSet()), true,
             new SubscriptionPlanRole(PremiumRole.getRoleId()));
 
     public static Map<Serializable, SubscriptionPlan> getAllInstances() {
         return Collections.unmodifiableMap(plansById);
     }
+
 }
