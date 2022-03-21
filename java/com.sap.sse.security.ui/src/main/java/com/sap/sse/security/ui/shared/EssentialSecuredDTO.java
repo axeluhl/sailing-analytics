@@ -94,14 +94,11 @@ public class EssentialSecuredDTO extends SecurityInformationDTO implements Secur
         for (WildcardPermission permission : wildcardPermissions) {
             final Set<String> domains = permission.getParts().get(0);
             // Only get actions which are valid for given domain type
-            GWT.log("** domains: " + domains);
             if (domains.contains(permissionType.getName())) {
                 final Set<String> actions = permission.getParts().get(1);
-                GWT.log("** actions: " + actions);
                 wildcardsAsStringSet.addAll(actions);
             }
         }
-        GWT.log("**********  wildcardPermissions: " + wildcardsAsStringSet);
         // put all collected actions to default permission (null) entry.
         permissionMap.put(null, wildcardsAsStringSet);
         AccessControlListDTO accessControlListDTO = new AccessControlListDTO(permissionMap);
