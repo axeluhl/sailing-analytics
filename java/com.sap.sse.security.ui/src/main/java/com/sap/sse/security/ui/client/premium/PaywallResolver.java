@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -58,7 +57,6 @@ public class PaywallResolver {
 
     public boolean hasPermission(final Action action, final SecuredDTO dtoContext) {
         boolean hasPermission = userService.hasPermission(dtoContext, action);
-        GWT.log("**** hasPermission: " + hasPermission + ", action: " + action + ", context: " + dtoContext);
         return hasPermission;
     }
 
@@ -75,7 +73,6 @@ public class PaywallResolver {
     public Map<Action, Boolean> getHasPermissionMap(final Set<Action> premiumActions, final SecuredDTO dtoContext) {
         final Map<Action, Boolean> premiumPermissions = new HashMap<>();
         for (Action premiumAction : premiumActions) {
-            GWT.log("### getHasPermissionMap premiumActions: " + premiumActions + ", " + dtoContext);
             premiumPermissions.put(premiumAction, this.hasPermission(premiumAction, dtoContext));
         }
         return premiumPermissions;

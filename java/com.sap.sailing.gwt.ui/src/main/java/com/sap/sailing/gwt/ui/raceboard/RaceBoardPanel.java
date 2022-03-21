@@ -292,14 +292,14 @@ public class RaceBoardPanel
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
         raceMapResources.raceMapStyle().ensureInjected();
-        RaceMapLifecycle raceMapLifecycle = lifecycle.getRaceMapLifecycle();
+        final PaywallResolver paywallResolverRace = new PaywallResolver(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory());
+        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolverRace, raceDTO);
         RaceMapSettings defaultRaceMapSettings = settings.findSettingsByComponentId(raceMapLifecycle.getComponentId());
         RaceTimePanelLifecycle raceTimePanelLifecycle = lifecycle.getRaceTimePanelLifecycle();
         RaceTimePanelSettings raceTimePanelSettings = settings
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
         quickFlagDataProvider = new QuickFlagDataFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
-        final PaywallResolver paywallResolverRace = new PaywallResolver(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory());
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
