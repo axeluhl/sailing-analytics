@@ -22,6 +22,9 @@ import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBase
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
+import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -35,13 +38,32 @@ public class SimpleModelsTrainingPart1 {
     private static ExecutorService executorService;
 
     public static void main(String[] args) throws Exception {
-        new ManeuverForEstimationPersistenceManager().dropCollection();
+        final int percentForTraining;
+        final int percentForTesting;
+        if (args.length > 0) {
+            percentForTraining = Integer.valueOf(args[0]);
+        } else {
+            percentForTraining = 80;
+        }
+        if (args.length > 1) {
+            percentForTesting = Integer.valueOf(args[1]);
+        } else {
+            percentForTesting = 20;
+        }
+        final ManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager = new ManeuverForEstimationPersistenceManager();
+        final ModelStore modelStore;
+        if (args.length > 2) {
+            modelStore = new FileSystemModelStoreImpl(args[2]);
+        } else {
+            modelStore = new MongoDbModelStoreImpl(maneuverForEstimationPersistenceManager.getDb());
+        }
+        maneuverForEstimationPersistenceManager.dropCollection();
         new RegularManeuversForEstimationPersistenceManager().dropCollection();
         executeInThreadPool(() -> PolarDataImporter.main(args));
         executeInThreadPool(() -> ManeuverAndWindImporter.main(args));
         awaitThreadPoolCompletion();
         executeInThreadPool(() -> {
-            ManeuverClassifierTrainer.main(args);
+            ManeuverClassifierTrainer.train(percentForTraining, percentForTesting, modelStore);
             Thread.sleep(1000);
             PersistedManeuverClassifiersScorePrinter.main(args);
         });
@@ -61,6 +83,7 @@ public class SimpleModelsTrainingPart1 {
             AggregatedDistanceBasedTwdTransitionImporter.main(args);
         });
         awaitThreadPoolCompletion();
+        // FIXME bug5695: enforce monotonic "Zero Mean Sigma", then run SimpleModelsTrainingPart2
         do {
             AggregatedDurationDimensionPlot.main(args);
             showInfoAboutDataCleaning(AggregatedSingleDimensionType.DURATION);
