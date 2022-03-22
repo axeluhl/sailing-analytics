@@ -13,7 +13,6 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sse.gwt.resources.Highcharts;
 
 public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
-
     private final SimplePanel appWidget = new SimpleLayoutPanel();
 
     @Override

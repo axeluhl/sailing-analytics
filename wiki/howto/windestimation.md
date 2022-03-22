@@ -18,7 +18,8 @@ To complete the training process successfully, you need to make sure that you ha
 1. Run ``com.sap.sailing.windestimation.model.SimpleModelsTrainingPart1`` as a normal Java Application. If you would like to run this outside of your development environment, use "Export as..." in Eclipse, pick the launch configuration for ``SimpleModelsTrainingPart1`` and let the exporter pack all required dependencies into the single executable JAR file that you can send anywhere you would like to execute it and then run ``java -jar SimpleModelsTrainingPar1.jar`` or however you called the JAR file produced by the export. After this, all the necessary maneuver and wind data will be downloaded, pre-processed and maneuver classifiers get trained. You can use the usual MongoDB system properties to configure the database connection, such as ``-Dmongo.dbName=windestimation -Dmongo.port=10202 -Dmongo.host=dbserver.internal.sapsailing.com`` or ``"-Dmongo.uri=mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/windestimation?replicaSet=live&retryWrites=true"``. You have to provide the VM at least 16GB of RAM. Use ``-Xms16g -Xmx16g`` as VM arguments to accomplish this. A full command line could, e.g., look like this:
 ```
   java -Dmongo.dbName=windestimation -Dmongo.port=10202 -Dmongo.host=dbserver.internal.sapsailing.com -Xms16g -Xmx16g -jar SimpleModelsTrainingPart1.jar
-``` If you run this in a "headless" server environment, make sure the Java VM can show a dialog somewhere, e.g., on a VNC server. Example:
+```
+If you run this in a "headless" server environment, make sure the Java VM can show a dialog somewhere, e.g., on a VNC server. Example:
 ```
   vncserver -depth 24 -geometry 1600x900 :2
   export DISPLAY=:2.0
