@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.common.client.help;
 
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 
@@ -14,8 +15,10 @@ public class HelpButton extends Composite {
 		this.popup = new HelpButtonPopup(resources, description, url);
 		this.icon.addClickHandler(event -> popup.showRelativeTo(icon));
 		initWidget(icon);
+		this.setTitle(description);
         this.setDescription(description);
         this.setLinkUrl(url);
+        this.getElement().getStyle().setCursor(Cursor.POINTER); 
     }
 
     public void setDescription(final String description) {
