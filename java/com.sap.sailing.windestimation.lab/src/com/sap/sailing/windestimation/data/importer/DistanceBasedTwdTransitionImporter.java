@@ -43,7 +43,7 @@ public class DistanceBasedTwdTransitionImporter {
             for (PersistedElementsIterator<WindSourceWithFixes> otherWindSourcesIterator = windSourcesPersistenceManager
                     .getIteratorForEntriesIntersectingPeriodAndHigherThanDbId(
                             windSource.getWindSourceMetadata().getStartTime(),
-                            windSource.getWindSourceMetadata().getEndTime(), windSource.getDbId(),
+                            windSource.getWindSourceMetadata().getEndTime(), windSource.getDbId(), // probably the DB ID comparison was meant to eliminate swapped pairs
                             TOLERANCE_SECONDS); otherWindSourcesIterator.hasNext();) {
                 WindSourceWithFixes otherWindSource = otherWindSourcesIterator.next();
                 double distanceBetweenWindSourcesInMeters = windSource.getWindSourceMetadata().getFirstPosition()

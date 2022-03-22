@@ -26,6 +26,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -113,12 +114,18 @@ public class ManeuverAndWindImporter {
         return client;
     }
 
+    /**
+     * @param args
+     *            {@code args[0]} is expected to hold a bearer token that authenticates a user with {@code EXPORT}
+     *            access on all {@code TRACKED_RACE} objects. Races not readable / exportable will not have their data
+     *            considered.
+     */
     public static void main(String[] args) throws Exception {
         ManeuverAndWindImporter importer = new ManeuverAndWindImporter();
-        importer.importAllRegattas();
+        importer.importAllRegattas(args[0]);
     }
 
-    public void importAllRegattas() throws IllegalStateException, ClientProtocolException, IOException, ParseException,
+    public void importAllRegattas(String bearerToken) throws IllegalStateException, ClientProtocolException, IOException, ParseException,
             URISyntaxException, InterruptedException {
         skipRace = startFromRegattaName != null;
         LoggingUtil.logInfo("Importer for CompleteManeuverCurveWithEstimationData just started");
@@ -140,7 +147,7 @@ public class ManeuverAndWindImporter {
             String regattaName = (String) ((JSONObject) regattaJson).get("name");
             LoggingUtil.logInfo("Processing regatta nr. " + ++i + "/" + numberOfRegattas + " ("
                     + Math.round(100.0 * i / numberOfRegattas) + "%): \"" + regattaName + "\"");
-            importRegatta(regattaName, importStatistics);
+            importRegatta(regattaName, importStatistics, bearerToken);
         }
         executorService.shutdown();
         boolean success = executorService.awaitTermination(2, TimeUnit.HOURS);
@@ -168,7 +175,7 @@ public class ManeuverAndWindImporter {
                 + (duration.get(ChronoUnit.SECONDS) % 60) + "s");
     }
 
-    private void importRegatta(String regattaName, ImportStatistics importStatistics)
+    private void importRegatta(String regattaName, ImportStatistics importStatistics, String bearerToken)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
         HttpGet getRegatta = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName);
@@ -199,7 +206,7 @@ public class ManeuverAndWindImporter {
                         LoggingUtil.logInfo("Processing race nr. " + raceNumber + ": \"" + trackedRaceName + "\"");
                         executorService.execute(() -> {
                             try {
-                                importRace(regattaName, trackedRaceName, importStatistics);
+                                importRace(regattaName, trackedRaceName, importStatistics, bearerToken);
                             } catch (Exception e) {
                                 synchronized (importStatistics) {
                                     importStatistics.ingoredRaces += 1;
@@ -228,7 +235,7 @@ public class ManeuverAndWindImporter {
         return encodedUrlPathPart;
     }
 
-    private void importRace(String regattaName, String trackedRaceName, ImportStatistics importStatistics)
+    private void importRace(String regattaName, String trackedRaceName, ImportStatistics importStatistics, String bearerToken)
             throws Exception {
         if (skipRace) {
             if (regattaName.equals(startFromRegattaName)
@@ -244,6 +251,7 @@ public class ManeuverAndWindImporter {
                 + "/" + encodedRaceName;
         HttpGet getEstimationData = new HttpGet(urlPath + REST_API_ESTIMATION_DATA_PATH);
         HttpGet getWindData = new HttpGet(urlPath + REST_API_WIND_DATA_PATH);
+        getWindData.addHeader(new BasicHeader("Authorization", "Bearer " + bearerToken));
         JSONObject resultJson = getHttpResponseAsJson(regattaName, trackedRaceName, getEstimationData);
         parseManeuverData(regattaName, trackedRaceName, importStatistics, resultJson);
         resultJson = getHttpResponseAsJson(regattaName, trackedRaceName, getWindData);

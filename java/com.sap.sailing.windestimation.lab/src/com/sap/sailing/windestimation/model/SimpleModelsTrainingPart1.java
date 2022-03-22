@@ -19,8 +19,10 @@ import com.sap.sailing.windestimation.datavisualization.AggregatedDurationDimens
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierTrainer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.PersistedManeuverClassifiersScorePrinter;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionStdRegressorTrainer;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionStdRegressorTrainer;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelStore;
@@ -37,50 +39,61 @@ public class SimpleModelsTrainingPart1 {
     private static final int NUMBER_OF_THREADS = 15;
     private static ExecutorService executorService;
 
+    /**
+     * @param args
+     *            {@code args[0]} must contain a valid bearer token that authenticates a user with {@code EXPORT}
+     *            permission on the {@code TRACKED_RACE}s for wind data access. Only regattas/races are considered that
+     *            the user authenticated by this token can {@code READ}. {@code args[1]} may contain a percentage of the
+     *            maneuvers to use for training which defaults to 80; {@code args[2]} may contain a percentage of the
+     *            maneuvers to use for testing which defaults to 20. If {@code args[3]} is also provided, it is taken to
+     *            be the file system path for storing the models that result from the training process; with this, the
+     *            models are not stored in MongoDB which otherwise would be the default.
+     */
     public static void main(String[] args) throws Exception {
+        final String bearerToken = args[0];
         final int percentForTraining;
         final int percentForTesting;
-        if (args.length > 0) {
-            percentForTraining = Integer.valueOf(args[0]);
+        if (args.length > 1) {
+            percentForTraining = Integer.valueOf(args[1]);
         } else {
             percentForTraining = 80;
         }
-        if (args.length > 1) {
-            percentForTesting = Integer.valueOf(args[1]);
+        if (args.length > 2) {
+            percentForTesting = Integer.valueOf(args[2]);
         } else {
             percentForTesting = 20;
         }
         final ManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager = new ManeuverForEstimationPersistenceManager();
         final ModelStore modelStore;
-        if (args.length > 2) {
-            modelStore = new FileSystemModelStoreImpl(args[2]);
+        if (args.length > 3) {
+            modelStore = new FileSystemModelStoreImpl(args[3]);
         } else {
             modelStore = new MongoDbModelStoreImpl(maneuverForEstimationPersistenceManager.getDb());
         }
         maneuverForEstimationPersistenceManager.dropCollection();
         new RegularManeuversForEstimationPersistenceManager().dropCollection();
         executeInThreadPool(() -> PolarDataImporter.main(args));
-        executeInThreadPool(() -> ManeuverAndWindImporter.main(args));
+        executeInThreadPool(() -> ManeuverAndWindImporter.main(new String[] { bearerToken }));
         awaitThreadPoolCompletion();
         executeInThreadPool(() -> {
             ManeuverClassifierTrainer.train(percentForTraining, percentForTesting, modelStore);
             Thread.sleep(1000);
-            PersistedManeuverClassifiersScorePrinter.main(args);
+            PersistedManeuverClassifiersScorePrinter.main(new String[0]);
         });
         executeInThreadPool(() -> {
-            DistanceBasedTwdTransitionImporter.main(args);
+            DistanceBasedTwdTransitionImporter.main(new String[0]);
         });
         executeInThreadPool(() -> {
-            DurationBasedTwdTransitionImporter.main(args);
+            DurationBasedTwdTransitionImporter.main(new String[0]);
         });
         awaitThreadPoolCompletion();
         AggregatedDurationBasedTwdTransitionImporter.createPersistenceManagerAndEnsureIndex();
         AggregatedDistanceBasedTwdTransitionImporter.createPersistenceManagerAndEnsureIndex();
         executeInThreadPool(() -> {
-            AggregatedDurationBasedTwdTransitionImporter.main(args);
+            AggregatedDurationBasedTwdTransitionImporter.main(new String[0]);
         });
         executeInThreadPool(() -> {
-            AggregatedDistanceBasedTwdTransitionImporter.main(args);
+            AggregatedDistanceBasedTwdTransitionImporter.main(new String[0]);
         });
         awaitThreadPoolCompletion();
         // FIXME bug5695: enforce monotonic "Zero Mean Sigma", then run SimpleModelsTrainingPart2
@@ -99,6 +112,12 @@ public class SimpleModelsTrainingPart1 {
         showInfoAboutIntervalAdjustments(DistanceBasedTwdTransitionRegressorModelContext.class,
                 DistanceValueRange.class);
         showInfoAboutRunPart2();
+        // FIXME bug5695: now comes "part 2"
+        DurationBasedTwdTransitionStdRegressorTrainer.train(modelStore);
+        DistanceBasedTwdTransitionStdRegressorTrainer.train(modelStore);
+        Thread.sleep(1000);
+        ExportedModelsGenerator.main(new String[0]);
+        LoggingUtil.logInfo("Model training finished. You can upload the generated file to a server instance.");
     }
 
     private static int askDataCleaningFinished(AggregatedSingleDimensionType dimension) {
