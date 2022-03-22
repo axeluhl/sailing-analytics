@@ -708,11 +708,9 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     .addStyleDependentName("Closed-" + associatedComponent.getDependentCssClassName());
             splitterTogglerButton
                     .ensureDebugId("SplitLayoutPanelToggleButton-" + associatedComponent.getDependentCssClassName());
-            splitterTogglerInternalButton.addClickHandler(new ClickHandler() {
+            Runnable evaluateAndRenderSplitterWithButtons = new Runnable() {
                 @Override
-                public void onClick(ClickEvent event) {
-                    event.preventDefault();
-                    event.stopPropagation();
+                public void run() {
                     boolean componentWasVisibleUntilNow = associatedComponent.isVisible();
                     if (associatedComponent instanceof HasAvailabilityCheck && !associatedComponent.isVisible()) {
                         ((HasAvailabilityCheck) associatedComponent).checkBackendAvailability(available -> {
@@ -726,7 +724,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                                 componentWasVisibleUntilNow);
                     }
                 }
-
+                
                 private void proceed(final Consumer<Boolean> forceLayoutCallback, final Splitter splitter,
                         final Component<?> associatedComponent, final PremiumToggleButton splitterTogglerButton,
                         boolean componentWasVisibleUntilNow) {
@@ -758,7 +756,17 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     ensureVerticalToggleButtonPosition();
                     forceLayoutCallback.accept(componentWasVisibleUntilNow);
                 }
+                
+            };
+            splitterTogglerInternalButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    evaluateAndRenderSplitterWithButtons.run();
+                }
             });
+            splitterTogglerButton.addRunOnUserPermissionChanged(evaluateAndRenderSplitterWithButtons);
             buttonFlowPanel.add(splitterTogglerButton);
             bottom += splitterTogglerInternalButton.getOffsetHeight() + 100;
         }

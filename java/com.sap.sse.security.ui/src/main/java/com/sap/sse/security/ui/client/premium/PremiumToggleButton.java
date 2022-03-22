@@ -55,6 +55,7 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
     private final ConfirmationDialog subscribeDialog;
     protected final Action action;
     private final Component<?> associatedComponent;
+    private Runnable evaluateAndRenderSplitterWithButtons;
 
     /**
      * A Composite component, that includes a checkbox and an additional premium icon, indicating that the feature to be
@@ -104,8 +105,8 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
         if(action != null) {
             container.setStyleName(style.premiumPermitted(), isPermitted);
             container.setStyleName(style.notPremiumPermitted(), !isPermitted);
-            if(!isPermitted && visible) {
-                button.click();
+            if(!isPermitted && visible && evaluateAndRenderSplitterWithButtons != null) {
+                evaluateAndRenderSplitterWithButtons.run();
             }
         }
         button.setEnabled(isEnabled() && isPermitted);
@@ -128,5 +129,9 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
     
     public FocusPanel getFocusPanel() {
         return this.container;
+    }
+
+    public void addRunOnUserPermissionChanged(Runnable evaluateAndRenderSplitterWithButtons) {
+        this.evaluateAndRenderSplitterWithButtons = evaluateAndRenderSplitterWithButtons;
     }
 }
