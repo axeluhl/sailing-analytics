@@ -3066,8 +3066,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final String leaderboardName) throws NoWindException {
         CompetitorsRaceDataDTO result = null;
         final TrackedRace trackedRace = getExistingTrackedRace(race);
-        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
+            if (detailType.getPremiumAction() != null) {
+                getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, detailType.getPremiumAction());
+            }
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             final TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
