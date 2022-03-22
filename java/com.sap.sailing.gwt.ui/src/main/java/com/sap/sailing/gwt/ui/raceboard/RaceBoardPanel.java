@@ -561,10 +561,12 @@ public class RaceBoardPanel
         setLeaderboardVisible(showLeaderboard);
         leaderboardPanel.setAutoExpandPreSelected(initialPerspectiveOwnSettings.isAutoExpandPreSelectedRace());
         if (showChartMarkEditMediaButtonsAndVideo) {
-            setWindChartVisible(initialPerspectiveOwnSettings.isShowWindChart());
-            setCompetitorChartVisible(initialPerspectiveOwnSettings.isShowCompetitorsChart());
+            //TODO bug5672 Shift to Settings based handling of these permission checks, instead of manually checking 
+            final boolean hasAnalasysChartPermission = paywallResolver.hasPermission(TrackedRaceActions.VIEWANALYSISCHARTS);
+            setWindChartVisible(hasAnalasysChartPermission && initialPerspectiveOwnSettings.isShowWindChart());
+            setCompetitorChartVisible(hasAnalasysChartPermission && initialPerspectiveOwnSettings.isShowCompetitorsChart());
+            setManeuverTableVisible(hasAnalasysChartPermission && initialPerspectiveOwnSettings.isShowManeuver());
             setTagPanelVisible(initialPerspectiveOwnSettings.isShowTags());
-            setManeuverTableVisible(initialPerspectiveOwnSettings.isShowManeuver());
         }
         // make sure to load leaderboard data for filtering to work
         if (!showLeaderboard) {

@@ -1,6 +1,5 @@
 package com.sap.sse.security.ui.client.premium;
 
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Image;
@@ -10,7 +9,6 @@ public abstract class PremiumUiElement extends Composite implements HasEnabled {
 
     private final Action action;
     private final PaywallResolver paywallResolver;
-    private final HandlerRegistration handlerRegistration;
 
     /**
      * Flag to keep track of the actual enabled/disabled state of this UI component independent of the representing
@@ -22,8 +20,7 @@ public abstract class PremiumUiElement extends Composite implements HasEnabled {
     protected PremiumUiElement(final Action action, final PaywallResolver paywallResolver) {
         this.action = action;
         this.paywallResolver = paywallResolver;
-        this.handlerRegistration = paywallResolver
-                .registerUserStatusEventHandler((user, preAuth) -> updateUserPermission());
+        paywallResolver.registerUserStatusEventHandler((user, preAuth) -> updateUserPermission());
     }
 
     @Override
@@ -54,9 +51,5 @@ public abstract class PremiumUiElement extends Composite implements HasEnabled {
     protected Image createPremiumIcon() {
         return new Image(PremiumIconRessource.INSTANCE.premiumIcon().getSafeUri());
     }
-
-    @Override
-    protected void onUnload() {
-        handlerRegistration.removeHandler();
-    }
+    
 }

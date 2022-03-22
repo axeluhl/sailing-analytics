@@ -5,14 +5,16 @@ import static com.sap.sailing.gwt.common.client.premium.SailingPremiumIconRessou
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
-import com.sap.sse.security.ui.client.premium.PremiumButton;
+import com.sap.sse.security.ui.client.premium.PremiumToggleButton;
 
-public class SailingPremiumButton extends PremiumButton {
+public class SailingPremiumToggleButton extends PremiumToggleButton {
 
-    public SailingPremiumButton(final String label, final Action action, final PaywallResolver paywallResolver) {
-        super(label, action, paywallResolver);
+    public SailingPremiumToggleButton(final String label, final Action action, final PaywallResolver paywallResolver,
+            Component<?> associatedComponent) {
+        super(label, action, paywallResolver, associatedComponent);
     }
 
     @Override

@@ -1,0 +1,39 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+    <ui:style type="com.sap.sse.security.ui.client.premium.PremiumToggleButton.Style">
+        .premium-container {
+            cursor: pointer;
+            display: inline-block;
+            padding-top: 5px;
+        }
+        
+        .premium-icon {
+            width: 20px;
+            height: 20px;
+            margin: 1px 3px;
+            vertical-align: middle;
+        }
+        
+        .premium-button {
+        	pointer-events: none;
+        	background-color: transparent !important; 
+        	color: black;
+        }
+        
+        .premium-permitted {
+            border: 1px solid #cecece;
+        }
+        
+        .not-premium-permitted {
+            border: 1px solid rgb(239, 170, 0);
+        }
+        
+        </ui:style>
+    <g:FocusPanel ui:field="container">
+        <g:FlowPanel addStyleNames="{style.premium-container}">
+            <g:Button ui:field="button" addStyleNames="{style.premium-button}"/>
+            <g:Image ui:field="image" addStyleNames="{style.premium-icon}"/>
+        </g:FlowPanel>
+    </g:FocusPanel>
+</ui:UiBinder> 

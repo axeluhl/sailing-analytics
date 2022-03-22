@@ -43,14 +43,14 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
-import com.sap.sailing.gwt.common.client.premium.SailingPremiumButton;
+import com.sap.sailing.gwt.common.client.premium.SailingPremiumToggleButton;
 import com.sap.sailing.gwt.ui.client.shared.charts.HasAvailabilityCheck;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
-import com.sap.sse.security.ui.client.premium.PremiumButton;
+import com.sap.sse.security.ui.client.premium.PremiumToggleButton;
 
 /**
  * A panel that adds user-positioned splitters between each of its child widgets. These splitters have draggers
@@ -227,7 +227,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         private final Widget dragger;
 
         private boolean hasToggleButtonsAssociated;
-        private final PremiumButton splitterToggleButton;
+        private final PremiumToggleButton splitterToggleButton;
         private Panel toggleButtonsPanel;
 
         /**
@@ -248,15 +248,15 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             this.reverse = reverse;
             this.associatedComponent = associatedComponent;
             this.hasToggleButtonsAssociated = false;
-            this.splitterToggleButton = new SailingPremiumButton(associatedComponent.getLocalizedShortName(), action,
-                    paywallResolver);
+            this.splitterToggleButton = new SailingPremiumToggleButton(associatedComponent.getLocalizedShortName(),
+                    action, paywallResolver, associatedComponent);
         }
 
         public Component<?> getAssociatedComponent() {
             return associatedComponent;
         }
 
-        public PremiumButton getToggleButton() {
+        public PremiumToggleButton getToggleButton() {
             return this.splitterToggleButton;
         }
 
@@ -682,7 +682,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (additionalButtonsAndStyles != null) {
             for (Pair<Button, String> buttonAndComponentPair : additionalButtonsAndStyles) {
                 Button button = buttonAndComponentPair.getA();
-                button.setStyleName(buttonStyleName);
+                button.setStylePrimaryName(buttonStyleName);
                 button.addStyleDependentName("Closed-"+buttonAndComponentPair.getB());
                 if (Document.get().getClientWidth() <= 1024) {
                     button.addStyleDependentName("Small-"+buttonAndComponentPair.getB());
@@ -693,15 +693,26 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         int bottom = 0;
         for (final Splitter splitter : splitters) {
             final Component<?> associatedComponent = splitter.getAssociatedComponent();
-            final PremiumButton splitterTogglerButton = splitter.getToggleButton();
+            final PremiumToggleButton splitterTogglerButton = splitter.getToggleButton();
+            final Button splitterTogglerInternalButton = splitterTogglerButton.getInternalButton();
             splitterTogglerButton.getElement().getStyle().setBottom(bottom, Unit.PX);
-            splitterTogglerButton.setStyleName(buttonStyleName);
+            // In the Constructor of PremiumButton, a style might have been set and interpreted as primary style. 
+            // To avoid overriding it, it is reassigned here.
+            final String oldPrimaryStyleName = splitterTogglerButton.getStylePrimaryName();
+            splitterTogglerButton.setStylePrimaryName(buttonStyleName);
+            if(oldPrimaryStyleName != null && !"".equals(oldPrimaryStyleName)) {
+                splitterTogglerButton.addStyleName(oldPrimaryStyleName);
+            }
             splitterTogglerButton.addStyleDependentName("Closed");
-            splitterTogglerButton.addStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
-            splitterTogglerButton.ensureDebugId("SplitLayoutPanelToggleButton-" + associatedComponent.getDependentCssClassName());
-            splitterTogglerButton.addClickHandler(new ClickHandler() { 
+            splitterTogglerButton
+                    .addStyleDependentName("Closed-" + associatedComponent.getDependentCssClassName());
+            splitterTogglerButton
+                    .ensureDebugId("SplitLayoutPanelToggleButton-" + associatedComponent.getDependentCssClassName());
+            splitterTogglerInternalButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     boolean componentWasVisibleUntilNow = associatedComponent.isVisible();
                     if (associatedComponent instanceof HasAvailabilityCheck && !associatedComponent.isVisible()) {
                         ((HasAvailabilityCheck) associatedComponent).checkBackendAvailability(available -> {
@@ -717,10 +728,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 }
 
                 private void proceed(final Consumer<Boolean> forceLayoutCallback, final Splitter splitter,
-                        final Component<?> associatedComponent, final PremiumButton splitterTogglerButton,
+                        final Component<?> associatedComponent, final PremiumToggleButton splitterTogglerButton,
                         boolean componentWasVisibleUntilNow) {
                     associatedComponent.setVisible(!componentWasVisibleUntilNow);
-                    // TODO: Safe to remove style management here? Will also be handled by "componentViewer.forceLayout();" => duplicated style management
+                    // TODO: Safe to remove style management here? Will also be handled by
+                    // "componentViewer.forceLayout();" => duplicated style management
                     splitter.setVisible(!componentWasVisibleUntilNow);
                     splitter.setDraggerVisible(!componentWasVisibleUntilNow);
                     if (!componentWasVisibleUntilNow == true) {
@@ -730,21 +742,25 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     }
                     if (!componentWasVisibleUntilNow) {
                         splitterTogglerButton.removeStyleDependentName("Closed");
-                        splitterTogglerButton.removeStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
+                        splitterTogglerButton
+                                .removeStyleDependentName("Closed-" + associatedComponent.getDependentCssClassName());
                         splitterTogglerButton.addStyleDependentName("Open");
-                        splitterTogglerButton.addStyleDependentName("Open-"+associatedComponent.getDependentCssClassName());
+                        splitterTogglerButton
+                                .addStyleDependentName("Open-" + associatedComponent.getDependentCssClassName());
                     } else {
                         splitterTogglerButton.removeStyleDependentName("Open");
-                        splitterTogglerButton.removeStyleDependentName("Open-"+associatedComponent.getDependentCssClassName());
+                        splitterTogglerButton
+                                .removeStyleDependentName("Open-" + associatedComponent.getDependentCssClassName());
                         splitterTogglerButton.addStyleDependentName("Closed");
-                        splitterTogglerButton.addStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
+                        splitterTogglerButton
+                                .addStyleDependentName("Closed-" + associatedComponent.getDependentCssClassName());
                     }
                     ensureVerticalToggleButtonPosition();
                     forceLayoutCallback.accept(componentWasVisibleUntilNow);
                 }
             });
             buttonFlowPanel.add(splitterTogglerButton);
-            bottom += splitterTogglerButton.getOffsetHeight() + 100;
+            bottom += splitterTogglerInternalButton.getOffsetHeight() + 100;
         }
         return buttonFlowPanel;
     }
@@ -782,20 +798,26 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             }
         }
         if (!splitterVisibleAndComponentVisible.isEmpty()) {
-            VSplitter lastSplitterVisibleAndComponentVisible = splitterVisibleAndComponentVisible.get(splitterVisibleAndComponentVisible.size()-1);
+            VSplitter lastSplitterVisibleAndComponentVisible = splitterVisibleAndComponentVisible
+                    .get(splitterVisibleAndComponentVisible.size() - 1);
             if (!lastSplitterVisibleAndComponentVisible.hasToggleButtonsAssociated()) {
                 Panel panel = splitterWithToggleButtons.removeToggleButtons();
                 lastSplitterVisibleAndComponentVisible.addToogleButtons(panel);
+                // The onUserPermissionChange Handler is removed when the widget is unloaded, 
+                //hence it is re-registered here.
+//                splitterWithToggleButtons.getToggleButton().registerHandler();
                 lastSplitterVisibleAndComponentVisible.setSplitterSize(verticalSplitterSize);
             }
         } else {
             if (!splitterVisibleButComponentnNotVisible.isEmpty()) {
                 // there is no splitter that has a component visible
                 // take the last one and add buttons there
-                VSplitter lastSplitterVisibleButComponentNotVisible = splitterVisibleButComponentnNotVisible.get(splitterVisibleButComponentnNotVisible.size()-1);
+                VSplitter lastSplitterVisibleButComponentNotVisible = splitterVisibleButComponentnNotVisible
+                        .get(splitterVisibleButComponentnNotVisible.size() - 1);
                 if (!lastSplitterVisibleButComponentNotVisible.hasToggleButtonsAssociated()) {
                     Panel panel = splitterWithToggleButtons.removeToggleButtons();
                     lastSplitterVisibleButComponentNotVisible.addToogleButtons(panel);
+//                    lastSplitterVisibleButComponentNotVisible.getToggleButton().registerHandler();
                     lastSplitterVisibleButComponentNotVisible.setSplitterSize(verticalSplitterSize);
                 }
             }
