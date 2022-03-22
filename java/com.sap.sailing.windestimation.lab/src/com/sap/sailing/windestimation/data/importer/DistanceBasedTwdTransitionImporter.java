@@ -46,6 +46,8 @@ public class DistanceBasedTwdTransitionImporter {
                             windSource.getWindSourceMetadata().getEndTime(), windSource.getDbId(), // probably the DB ID comparison was meant to eliminate swapped pairs
                             TOLERANCE_SECONDS); otherWindSourcesIterator.hasNext();) {
                 WindSourceWithFixes otherWindSource = otherWindSourcesIterator.next();
+                // FIXME: is this really not considering moving wind sources, such as a wind sensor mounted to a chase / jury / umpire boat or a moving mark?
+                // FIXME: and why is it then re-evaluated 
                 double distanceBetweenWindSourcesInMeters = windSource.getWindSourceMetadata().getFirstPosition()
                         .getDistance(otherWindSource.getWindSourceMetadata().getFirstPosition()).getMeters();
                 if (distanceBetweenWindSourcesInMeters <= MAX_DISTANCE_METERS

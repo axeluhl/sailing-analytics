@@ -96,7 +96,8 @@ public class SimpleModelsTrainingPart1 {
             AggregatedDistanceBasedTwdTransitionImporter.main(new String[0]);
         });
         awaitThreadPoolCompletion();
-        // FIXME bug5695: enforce monotonic "Zero Mean Sigma", then run SimpleModelsTrainingPart2
+        // FIXME bug5695: enforce monotonic "Zero Mean Sigma", maybe considering number of values that formed the aggregate, then run SimpleModelsTrainingPart2
+        // Idea: rather ignore a value with low number of samples and use values with higher number of samples (getNumberOfValues) if there are different ways to achieve monotonicity
         do {
             AggregatedDurationDimensionPlot.main(args);
             showInfoAboutDataCleaning(AggregatedSingleDimensionType.DURATION);
