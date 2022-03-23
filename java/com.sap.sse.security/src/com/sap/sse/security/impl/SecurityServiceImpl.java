@@ -2887,7 +2887,11 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             // user roles need to be updated with granted new roles. Further, if the user is 
             // somehow in possession of roles he should not posess, the roles must be removed
             final SubscriptionPlan subscriptionPlanById = getSubscriptionPlanById(newSubscription.getPlanId());
-            result = newSubscription.isActiveSubscription() || subscriptionPlanById.isUserInPossessionOfRoles(user);
+            if(subscriptionPlanById == null) {
+                result = false;
+            }else {
+                result = newSubscription.isActiveSubscription() || subscriptionPlanById.isUserInPossessionOfRoles(user);
+            }
         } else {
             assert currentSubscription.getPlanId().equals(newSubscription.getPlanId());
             // in this case user roles will be needed to update only when subscription active status is changed
