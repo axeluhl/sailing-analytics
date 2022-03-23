@@ -16,7 +16,7 @@ public class TestXrrFileNamePattern {
     public void testXrrFileNamePatternWithSimpleExample() throws ParseException {
         final SailtiEventResultsParserImpl parser = new SailtiEventResultsParserImpl();
         final String sample = "XML-Pelicano_131_5430_20220314190806.xml";
-        final Matcher matcher = parser.xrrFileNamePattern.matcher(sample);
+        final Matcher matcher = SailtiEventResultsParserImpl.xrrFileNamePattern.matcher(sample);
         assertTrue(matcher.matches());
         assertEquals("Pelicano", parser.getBoatClassName(matcher));
         final TimePoint expectedPublishedAtTimePoint = TimePoint.of(new SimpleDateFormat("yyyyMMddhhmmssX").parse("20220314190806Z"));
