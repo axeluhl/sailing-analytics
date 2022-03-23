@@ -17,11 +17,11 @@ public class TestXrrFileNamePattern {
     @Test
     public void testXrrFileNamePatternWithSimpleExample() throws ParseException, MalformedURLException {
         final SailtiEventResultsParserImpl parser = new SailtiEventResultsParserImpl(new URL("http://localhost"));
-        final String sample = "XML-Pelicano_131_5430_20220314190806.xml";
-        final Matcher matcher = SailtiEventResultsParserImpl.xrrFileNamePattern.matcher(sample);
+        final String sample = "<p>470 Men<br/><a href=\"/uploaded_files/XML-Pelicano_131_2360_20190406143343.xml\">";
+        final Matcher matcher = SailtiEventResultsParserImpl.classAndXrrLinkPattern.matcher(sample);
         assertTrue(matcher.matches());
-        assertEquals("Pelicano", parser.getBoatClassName(matcher));
-        final TimePoint expectedPublishedAtTimePoint = TimePoint.of(new SimpleDateFormat("yyyyMMddhhmmssX").parse("20220314190806Z"));
+        assertEquals("470 Men", parser.getBoatClassName(matcher));
+        final TimePoint expectedPublishedAtTimePoint = TimePoint.of(new SimpleDateFormat("yyyyMMddhhmmssX").parse("20190406143343Z"));
         assertEquals(expectedPublishedAtTimePoint, parser.getTimePoint(matcher));
     }
 }

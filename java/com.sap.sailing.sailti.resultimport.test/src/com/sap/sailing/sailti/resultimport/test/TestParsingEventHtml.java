@@ -28,7 +28,7 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
 public class TestParsingEventHtml {
     @Test
     public void parseOldEventHtml() throws IOException {
-        final EventResultDescriptor eventResults = new SailtiEventResultsParserImpl(new URL("http://localhost")).getEventResult(getClass().getResourceAsStream("/EventTestHtml.xml"));
+        final EventResultDescriptor eventResults = new SailtiEventResultsParserImpl(new URL("http://localhost/12345")).getEventResult(getClass().getResourceAsStream("/EventTestHtml.xml"));
         assertEquals(10, eventResults.getRegattaResults().size());
     }
 

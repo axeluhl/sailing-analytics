@@ -71,8 +71,13 @@ public class SailtiEventResultsParserImpl implements SailtiEventResultsParser {
                     eventName = getEventId();
                 } else {
                     final URL xrrFinalUrl = regattaResults.iterator().next().getXrrFinalUrl();
-                    final RegattaResults anyXrr = ParserFactory.INSTANCE.createParser(
-                            HttpUrlConnectionHelper.redirectConnection(xrrFinalUrl).getInputStream(), xrrFinalUrl.toString()).parse();
+                    RegattaResults anyXrr = null;
+                    try {
+                        anyXrr = ParserFactory.INSTANCE.createParser(
+                                HttpUrlConnectionHelper.redirectConnection(xrrFinalUrl).getInputStream(), xrrFinalUrl.toString()).parse();
+                    } catch (Exception e) {
+                        logger.warning("Couldn't read XRR document from "+xrrFinalUrl+" to obtain event name; using event ID "+getEventId()+" instead");
+                    }
                     if (anyXrr == null) {
                         eventName = getEventId();
                     } else {
