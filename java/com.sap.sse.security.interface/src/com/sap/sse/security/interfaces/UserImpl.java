@@ -440,7 +440,7 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     @Override
     public boolean hasAnySubscription(String planId) {
         for (Subscription subscription : subscriptions) {
-            if (subscription.getPlanId().equals(planId)) {
+            if (planId.equals(subscription.getPlanId())) {
                 return true;
             }
         }
