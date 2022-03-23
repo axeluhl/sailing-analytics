@@ -24,6 +24,10 @@ public class DistanceBasedTwdTransitionImporter {
     public static final int MIN_DISTANCE_METERS = 10;
 
     public static void main(String[] args) throws UnknownHostException {
+        new DistanceBasedTwdTransitionImporter().importDistanceBasedTwdTransition();
+    }
+    
+    public void importDistanceBasedTwdTransition() throws UnknownHostException {
         LoggingUtil.logInfo("###################\r\nDistance based TWD transitions Import started");
         WindSourcesPersistenceManager windSourcesPersistenceManager = new WindSourcesPersistenceManager();
         SingleDimensionBasedTwdTransitionPersistenceManager distanceBasedTwdTransitionPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(

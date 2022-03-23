@@ -72,28 +72,28 @@ public class SimpleModelsTrainingPart1 {
         }
         maneuverForEstimationPersistenceManager.dropCollection();
         new RegularManeuversForEstimationPersistenceManager().dropCollection();
-        executeInThreadPool(() -> PolarDataImporter.main(args));
-        executeInThreadPool(() -> ManeuverAndWindImporter.main(new String[] { bearerToken }));
+        executeInThreadPool(() -> new PolarDataImporter().importPolarData());
+        executeInThreadPool(() -> new ManeuverAndWindImporter().importAllRegattas(bearerToken));
         awaitThreadPoolCompletion();
         executeInThreadPool(() -> {
             ManeuverClassifierTrainer.train(percentForTraining, percentForTesting, modelStore);
             Thread.sleep(1000);
-            PersistedManeuverClassifiersScorePrinter.main(new String[0]);
+            new PersistedManeuverClassifiersScorePrinter().printManeuverClassifiersScore();
         });
         executeInThreadPool(() -> {
-            DistanceBasedTwdTransitionImporter.main(new String[0]);
+            new DistanceBasedTwdTransitionImporter().importDistanceBasedTwdTransition();
         });
         executeInThreadPool(() -> {
-            DurationBasedTwdTransitionImporter.main(new String[0]);
+            new DurationBasedTwdTransitionImporter().importDurationBasedTwdTransition();
         });
         awaitThreadPoolCompletion();
         AggregatedDurationBasedTwdTransitionImporter.createPersistenceManagerAndEnsureIndex();
         AggregatedDistanceBasedTwdTransitionImporter.createPersistenceManagerAndEnsureIndex();
         executeInThreadPool(() -> {
-            AggregatedDurationBasedTwdTransitionImporter.main(new String[0]);
+            new AggregatedDurationBasedTwdTransitionImporter().importAggregatedDurationBasedTwdTransition();
         });
         executeInThreadPool(() -> {
-            AggregatedDistanceBasedTwdTransitionImporter.main(new String[0]);
+            new AggregatedDistanceBasedTwdTransitionImporter().importAggregatedDistanceBasedTwdTransition();
         });
         awaitThreadPoolCompletion();
         // FIXME bug5695: enforce monotonic "Zero Mean Sigma", maybe considering number of values that formed the aggregate, then run SimpleModelsTrainingPart2
