@@ -33,7 +33,7 @@ public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider imple
     private static final long serialVersionUID = 222663322974305822L;
     private static final String NAME = "Sailti XRR Result Importer";
     private static final String EVENT_ID_REGEX = "^\\d+$";
-    private static final String EVENT_ID_TEMPLATE = "https://www.sailti.com/results_xrr_auto.cfm?eid=%s";
+    private static final String EVENT_ID_TEMPLATE = "https://www.trofeoprincesasofia.org/default/racesajax/race-results-ws/token/%s";
 
     private final ParserFactory parserFactory;
     private final ResultDocumentProvider documentProvider;
@@ -125,7 +125,7 @@ public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider imple
 
     @Override
     public String getOptionalSampleURL() {
-        return String.format(EVENT_ID_TEMPLATE, /* event ID */ "1220");
+        return String.format(EVENT_ID_TEMPLATE, /* event ID */ "2360");
     }
 
 }
