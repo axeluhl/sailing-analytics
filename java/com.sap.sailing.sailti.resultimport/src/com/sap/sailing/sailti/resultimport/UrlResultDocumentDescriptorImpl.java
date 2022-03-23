@@ -15,13 +15,13 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
 public class UrlResultDocumentDescriptorImpl implements ResultDocumentDescriptor {
     private static final Logger logger = Logger.getLogger(UrlResultDocumentDescriptorImpl.class.getName());
 
-    private URL documentURL;  
-    private String documentName;
-    private TimePoint lastModified;
-    private String eventName;
-    private String regattaName;
-    private String boatClass;
-    private CompetitorGenderType competitorGenderType;
+    private final URL documentURL;  
+    private final String documentName;
+    private final TimePoint lastModified;
+    private final String eventName;
+    private final String regattaName;
+    private final String boatClass;
+    private final CompetitorGenderType competitorGenderType;
 
     public UrlResultDocumentDescriptorImpl(URL documentURL, String documentName, TimePoint lastModified) {
         this(documentURL, documentName, lastModified, null, null, null, null);

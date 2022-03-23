@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,11 +11,6 @@ import com.sap.sailing.domain.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
-import com.sap.sailing.xrr.resultimport.impl.XRRParserUtil;
-import com.sap.sailing.xrr.schema.Division;
-import com.sap.sailing.xrr.schema.Event;
-import com.sap.sailing.xrr.schema.RegattaResults;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
@@ -34,34 +28,6 @@ public class SailtiResultDocumentProvider implements ResultDocumentProvider {
         this.resultUrlProvider = resultUrlProvider;
     }
 
-    public List<ResultDocumentDescriptor> resolveResultDocumentDescriptors(RegattaResults xrrParserResult, URL url) {
-        List<ResultDocumentDescriptor> result = new ArrayList<>();
-        final TimePoint xrrDocumentDateAndTime = XRRParserUtil.calculateTimePointForRegattaResults(xrrParserResult);
-        for (Object o : xrrParserResult.getPersonOrBoatOrTeam()) {
-            if (o instanceof Event) {
-                Event event = (Event) o;
-                String eventName = event.getTitle();
-                for (Object d: event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                    if (d instanceof Division) {
-                        Division division = (Division) d;
-                        String regattaName = division.getTitle();
-                        String boatClass = division.getTitle();
-                        try {
-                            String requestUrl = url.toString() + "&Class=" + URLEncoder.encode(boatClass, "UTF-8");
-                            URL urlByClass = new URL(requestUrl);
-                            result.add(new UrlResultDocumentDescriptorImpl(urlByClass, requestUrl, xrrDocumentDateAndTime,
-                                    eventName, regattaName, boatClass));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    
-
     private URL getDocumentUrlForRegatta(RegattaResultDescriptor regattaResult) {
         return regattaResult.getXrrFinalUrl();
     }
@@ -73,8 +39,8 @@ public class SailtiResultDocumentProvider implements ResultDocumentProvider {
     @Override
     public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
-        SailtiEventResultsParserImpl parser = new SailtiEventResultsParserImpl();
         for (URL url : resultUrlProvider.getReadableUrls()) {
+            SailtiEventResultsParserImpl parser = new SailtiEventResultsParserImpl(url);
             URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
             EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
             addResultsForEvent(result, eventResult);

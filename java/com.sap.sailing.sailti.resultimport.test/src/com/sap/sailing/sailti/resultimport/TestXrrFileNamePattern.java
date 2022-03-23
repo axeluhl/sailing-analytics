@@ -3,6 +3,8 @@ package com.sap.sailing.sailti.resultimport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
@@ -13,8 +15,8 @@ import com.sap.sse.common.TimePoint;
 
 public class TestXrrFileNamePattern {
     @Test
-    public void testXrrFileNamePatternWithSimpleExample() throws ParseException {
-        final SailtiEventResultsParserImpl parser = new SailtiEventResultsParserImpl();
+    public void testXrrFileNamePatternWithSimpleExample() throws ParseException, MalformedURLException {
+        final SailtiEventResultsParserImpl parser = new SailtiEventResultsParserImpl(new URL("http://localhost"));
         final String sample = "XML-Pelicano_131_5430_20220314190806.xml";
         final Matcher matcher = SailtiEventResultsParserImpl.xrrFileNamePattern.matcher(sample);
         assertTrue(matcher.matches());
