@@ -18,6 +18,13 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
+/**
+ * Assumes that the single document referenced by the URL through the {@link ResultUrlProvider} passed to the
+ * constructor is the single XRR document to read.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumentProvider {
     private static final Logger logger = Logger.getLogger(UrlBasedXRRResultDocumentProvider.class.getName());
     

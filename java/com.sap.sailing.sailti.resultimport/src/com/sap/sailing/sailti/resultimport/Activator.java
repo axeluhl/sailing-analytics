@@ -17,8 +17,7 @@ public class Activator implements BundleActivator {
         resultUrlRegistryServiceTracker = ServiceTrackerFactory.createAndOpen(bundleContext, ResultUrlRegistry.class,
                 new ResultUrlRegistryServiceTrackerCustomizer(bundleContext) {
                     @Override
-                    protected ScoreCorrectionProvider configureScoreCorrectionProvider(
-                            ResultUrlRegistry resultUrlRegistry) {
+                    protected ScoreCorrectionProvider configureScoreCorrectionProvider(ResultUrlRegistry resultUrlRegistry) {
                         final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(
                                 ParserFactory.INSTANCE, resultUrlRegistry);
                         return service;

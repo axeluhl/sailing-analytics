@@ -47,7 +47,7 @@ public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider imple
     public ScoreCorrectionProviderImpl(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
         super(resultUrlRegistry);
         this.parserFactory = parserFactory;
-        this.documentProvider = new SailtiResultDocumentProvider(this, parserFactory);
+        this.documentProvider = new SailtiResultDocumentProvider(this);
     }
 
     @Override
