@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.persistence.impl;
+package com.sap.sailing.domain.persistence;
 
 
 public enum FieldNames {

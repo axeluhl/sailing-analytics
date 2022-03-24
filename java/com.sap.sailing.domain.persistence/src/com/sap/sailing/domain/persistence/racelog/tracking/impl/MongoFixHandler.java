@@ -2,7 +2,7 @@ package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
 import org.bson.Document;
 
-import com.sap.sailing.domain.persistence.impl.FieldNames;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;

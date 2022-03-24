@@ -41,6 +41,7 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithComplete
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForDataAnalysisPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWindSourcesPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.WindByTimePersistenceManager;
 import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
 import com.sap.sailing.windestimation.data.serialization.LabeledManeuverForEstimationJsonSerializer;
 import com.sap.sailing.windestimation.data.serialization.ManeuverForDataAnalysisJsonSerializer;
@@ -71,6 +72,7 @@ public class ManeuverAndWindImporter {
     private final RaceWithManeuverForDataAnalysisPersistenceManager maneuverForDataAnalysisPersistenceManager;
     private final RaceWithManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager;
     private final RaceWithWindSourcesPersistenceManager raceWithWindSourcesPersistenceManager;
+    private final WindByTimePersistenceManager windByTimePersistenceManager;
     private final CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer maneuverForDataAnalysisTransformer;
     private final CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
@@ -81,6 +83,7 @@ public class ManeuverAndWindImporter {
 
     public ManeuverAndWindImporter() throws UnknownHostException {
         this.completeManeuverCurvePersistanceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
+        this.windByTimePersistenceManager = new WindByTimePersistenceManager();
         this.maneuverForDataAnalysisPersistenceManager = new RaceWithManeuverForDataAnalysisPersistenceManager();
         this.maneuverForEstimationPersistenceManager = new RaceWithManeuverForEstimationPersistenceManager();
         this.raceWithWindSourcesPersistenceManager = new RaceWithWindSourcesPersistenceManager();
@@ -122,7 +125,7 @@ public class ManeuverAndWindImporter {
      */
     public static void main(String[] args) throws Exception {
         ManeuverAndWindImporter importer = new ManeuverAndWindImporter();
-        importer.importAllRegattas(args[0]);
+        importer.importAllRegattas(args.length > 0 ? /* bearerToken */ args[0] : null);
     }
 
     public void importAllRegattas(String bearerToken) throws IllegalStateException, ClientProtocolException, IOException, ParseException,
@@ -135,6 +138,7 @@ public class ManeuverAndWindImporter {
             maneuverForDataAnalysisPersistenceManager.dropCollection();
             maneuverForEstimationPersistenceManager.dropCollection();
             raceWithWindSourcesPersistenceManager.dropCollection();
+            windByTimePersistenceManager.dropCollection();
         }
         LoggingUtil.logInfo("Fetching all existing regatta names");
         ImportStatistics importStatistics = new ImportStatistics();
@@ -251,7 +255,9 @@ public class ManeuverAndWindImporter {
                 + "/" + encodedRaceName;
         HttpGet getEstimationData = new HttpGet(urlPath + REST_API_ESTIMATION_DATA_PATH);
         HttpGet getWindData = new HttpGet(urlPath + REST_API_WIND_DATA_PATH);
-        getWindData.addHeader(new BasicHeader("Authorization", "Bearer " + bearerToken));
+        if (bearerToken != null) {
+            getWindData.addHeader(new BasicHeader("Authorization", "Bearer " + bearerToken));
+        }
         JSONObject resultJson = getHttpResponseAsJson(regattaName, trackedRaceName, getEstimationData);
         parseManeuverData(regattaName, trackedRaceName, importStatistics, resultJson);
         resultJson = getHttpResponseAsJson(regattaName, trackedRaceName, getWindData);
@@ -259,10 +265,11 @@ public class ManeuverAndWindImporter {
     }
 
     private void parseWindData(String regattaName, String trackedRaceName, ImportStatistics importStatistics,
-            JSONObject resultJson) {
+            JSONObject resultJson) throws JsonDeserializationException {
         JSONArray windSourcesJson = (JSONArray) resultJson.get(RaceWindJsonSerializer.WIND_SOURCES);
         if (windSourcesJson != null) {
             raceWithWindSourcesPersistenceManager.add(regattaName, trackedRaceName, resultJson);
+            windByTimePersistenceManager.add(windSourcesJson);
             long windFixesCount = 0;
             for (Object windSourceObj : windSourcesJson) {
                 JSONArray windFixesJson = (JSONArray) ((JSONObject) windSourceObj).get(RaceWindJsonSerializer.FIXES);
