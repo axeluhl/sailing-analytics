@@ -200,6 +200,7 @@
 <setEntry value="com.sap.sailing.barbados.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.sailwave.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.manage2sail.resultimport@4:true"/>
+<setEntry value="com.sap.sailing.sailti.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.yachtscoring.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.velum.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.monitoring@7:true"/>

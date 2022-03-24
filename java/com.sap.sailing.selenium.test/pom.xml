@@ -195,6 +195,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.sailti.resultimport</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.yachtscoring.resultimport</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
