@@ -132,11 +132,14 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     }
 
     protected boolean isSubscribedToMutuallyExclusivePlan(User user, SubscriptionPlan newPlan) {
-        for (Subscription sub : user.getSubscriptions()) {
-            SubscriptionPlan subscribedPlan = getSecurityService().getSubscriptionPlanById(sub.getPlanId());
-            if (isValidSubscription(sub) && !isSubscriptionCancelled(sub)
-                    && Util.containsAny(subscribedPlan.getPlanCategories(), newPlan.getPlanCategories())) {
-                return true;
+        final Iterable<Subscription> subscriptions = user.getSubscriptions();
+        if (subscriptions != null) {
+            for (Subscription sub : subscriptions) {
+                SubscriptionPlan subscribedPlan = getSecurityService().getSubscriptionPlanById(sub.getPlanId());
+                if (isValidSubscription(sub) && !isSubscriptionCancelled(sub)
+                        && Util.containsAny(subscribedPlan.getPlanCategories(), newPlan.getPlanCategories())) {
+                    return true;
+                }
             }
         }
         return false;

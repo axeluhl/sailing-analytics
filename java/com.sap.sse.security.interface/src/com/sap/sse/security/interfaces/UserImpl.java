@@ -439,9 +439,11 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
 
     @Override
     public boolean hasAnySubscription(String planId) {
-        for (Subscription subscription : subscriptions) {
-            if (planId.equals(subscription.getPlanId())) {
-                return true;
+        if (subscriptions != null && subscriptions.length > 0) {
+            for (Subscription subscription : subscriptions) {
+                if (planId.equals(subscription.getPlanId())) {
+                    return true;
+                }
             }
         }
         return false;
