@@ -277,8 +277,6 @@
             "acknowledgements": [
                 "Hyperic SIGAR includes some third-party open source components in its distribution. The list below identifies the community or organization and links to their appropriate license terms. The Hyperic team would like to thank all the communities of the projects listed below for their contributions.",
                 "---------------------------------------------------------------------",
-                "The following components are included without modification: ",
-                " - log4j - Information: http://logging.apache.org/ License: http://www.apache.org/licenses/LICENSE-2.0",
                 "The following components are included with modification:",
                 " - cpptasks - Information: http://ant-contrib.sourceforge.net/ License: http://ant-contrib.sourceforge.net/LICENSE.txt",
                 " - (portions of) APR - Information: http://apr.apache.org/ License: http://www.apache.org/licenses/LICENSE-2.0",

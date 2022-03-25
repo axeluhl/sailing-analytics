@@ -91,7 +91,6 @@ implements Procedure<ShardingKey> {
     ApplicationConfigurationT extends SailingAnalyticsApplicationConfiguration<ShardingKey>,
     ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>>
     extends AbstractAwsProcedureImpl.Builder<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey> {
-        BuilderT setHostToDeployTo(SailingAnalyticsHost<ShardingKey> hostToDeployTo);
         BuilderT setKeyName(String keyName);
         BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
     }
@@ -102,13 +101,15 @@ implements Procedure<ShardingKey> {
     extends AbstractAwsProcedureImpl.BuilderImpl<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey>
     implements Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> {
         private final SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey> applicationConfigurationBuilder;
-        private SailingAnalyticsHost<ShardingKey> hostToDeployTo;
+        private final SailingAnalyticsHost<ShardingKey> hostToDeployTo;
         private Optional<String> optionalKeyName = Optional.empty();
         private byte[] privateKeyEncryptionPassphrase;
 
-        protected BuilderImpl(SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey> applicationConfigurationBuilder) {
+        protected BuilderImpl(SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey> applicationConfigurationBuilder,
+                SailingAnalyticsHost<ShardingKey> hostToDeployTo) {
             super();
             this.applicationConfigurationBuilder = applicationConfigurationBuilder;
+            this.hostToDeployTo = hostToDeployTo;
         }
         
         @Override
@@ -182,12 +183,6 @@ implements Procedure<ShardingKey> {
             return (AwsLandscape<ShardingKey>) super.getLandscape();
         }
 
-        @Override
-        public BuilderT setHostToDeployTo(SailingAnalyticsHost<ShardingKey> hostToDeployTo) {
-            this.hostToDeployTo = hostToDeployTo;
-            return self();
-        }
-        
         protected SailingAnalyticsHost<ShardingKey> getHostToDeployTo() {
             return hostToDeployTo;
         }
@@ -228,11 +223,12 @@ implements Procedure<ShardingKey> {
     public static <BuilderT extends Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, HostT extends AwsInstance<ShardingKey>,
     ApplicationConfigurationT extends SailingAnalyticsApplicationConfiguration<ShardingKey>,
     ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>>
-    Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> builder(ApplicationConfigurationBuilderT applicationConfigurationBuilder) {
+    Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> builder(ApplicationConfigurationBuilderT applicationConfigurationBuilder,
+            SailingAnalyticsHost<ShardingKey> hostToDeployTo) {
         @SuppressWarnings("unchecked")
         final SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey> applicationConfigurationBuilderCast =
                 (SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>) applicationConfigurationBuilder;
-        return new BuilderImpl<>(applicationConfigurationBuilderCast);
+        return new BuilderImpl<>(applicationConfigurationBuilderCast, hostToDeployTo);
     }
     
     protected DeployProcessOnMultiServer(BuilderImpl<?, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> builder) throws Exception {
@@ -258,7 +254,7 @@ implements Procedure<ShardingKey> {
                     "mkdir -p "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
                     "sudo /usr/local/bin/cp_root_mail_properties "+applicationConfiguration.getServerName()+"; "+
                     "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
-                    "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments().replaceAll("\"", "\\\\\"")+
+                    "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments().replaceAll("\"", "\\\\\"").replaceAll("\\$", "\\\\\\$")+
                     "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start\";"+ // SAILING_USER ends here
                     // from here on as root:
                     "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+

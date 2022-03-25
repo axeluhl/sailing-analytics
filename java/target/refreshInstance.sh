@@ -46,9 +46,9 @@ checks ()
     JAVA_BINARY=$JAVA_HOME/bin/java
     if [[ ! -d "$JAVA_HOME" ]]; then
         echo "Could not find $JAVA_BINARY set in env.sh. Trying to find the correct one..."
-        JAVA_VERSION=$(java -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
-        if [ "$JAVA_VERSION" -lt 17 ]; then
-            echo "The current Java version ($JAVA_VERSION) does not match the requirements (>= 1.7)."
+	JAVA_VERSION=$(java -version 2>&1 | sed 's/^\(java version "\(.*\)\.\(.*\)\..*"\)\|\(openjdk version "\(.*\)\.\(.*\)\.\(.*\)" .*\)$/\3\5/; 1q')
+        if [ "$JAVA_VERSION" -lt 7 -o "$JAVA_VERSION" -gt 8 ]; then
+            echo "The current Java version ($JAVA_VERSION) does not match the requirements (>= Java 7, <= Java 8)."
             exit 10
         fi
         JAVA_BINARY=`which java`

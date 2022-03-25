@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.data;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -25,8 +26,8 @@ public interface HasRaceOfCompetitorContext {
     @Dimension(messageKey="TackAtStart", ordinal=12)
     Tack getTackAtStart() throws NoWindException;
     
-    @Dimension(messageKey="SailID")
-    public String getSailID();
+    @Connector(messageKey="Boat")
+    Boat getBoat();
     
     @Dimension(messageKey="DistanceToStarboardSideAtStartOfCompetitor", ordinal=13)
     ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart();

@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
+import com.sap.sailing.domain.common.impl.BaseMasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.server.gateway.serialization.impl.DataImportProgressJsonSerializer;
 import com.sap.sse.common.Util;
@@ -30,44 +31,14 @@ public class DataImportProgressJsonDeserializer implements JsonDeserializer<Data
         }
         final JSONObject objectCountsJson = (JSONObject) object.get(DataImportProgressJsonSerializer.RESULT);
         if (objectCountsJson != null) {
-            final MasterDataImportObjectCreationCount objectCounts = new MasterDataImportObjectCreationCount() {
-                private static final long serialVersionUID = 4004959619812197098L;
-
-                @Override
-                public int getLeaderboardCount() {
-                    return ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.LEADERBOARD_COUNT)).intValue();
-                }
-    
-                @Override
-                public int getLeaderboardGroupCount() {
-                    return ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.LEADERBOARD_GROUP_COUNT)).intValue();
-                }
-    
-                @Override
-                public int getEventCount() {
-                    return ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.EVENT_COUNT)).intValue();
-                }
-    
-                @Override
-                public int getRegattaCount() {
-                    return ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.REGATTA_COUNT)).intValue();
-                }
-    
-                @Override
-                public int getMediaTrackCount() {
-                    return ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.MEDIA_TRACK_COUNT)).intValue();
-                }
-    
-                @Override
-                public Iterable<String> getOverwrittenRegattaNames() {
-                    return Util.map(((JSONArray) objectCountsJson.get(DataImportProgressJsonSerializer.OVERWRITTEN_REGATTA_NAMES)), o->o.toString());
-                }
-    
-                @Override
-                public int getTrackedRacesCount() {
-                    return ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.TRACKED_RACES_COUNT)).intValue();
-                }
-            };
+            final MasterDataImportObjectCreationCount objectCounts = new BaseMasterDataImportObjectCreationCountImpl(
+                    ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.LEADERBOARD_COUNT)).intValue(),
+                    ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.LEADERBOARD_GROUP_COUNT)).intValue(),
+                    ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.EVENT_COUNT)).intValue(),
+                    ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.REGATTA_COUNT)).intValue(),
+                    ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.MEDIA_TRACK_COUNT)).intValue(),
+                    ((Number) objectCountsJson.get(DataImportProgressJsonSerializer.TRACKED_RACES_COUNT)).intValue(),
+                    Util.map(((JSONArray) objectCountsJson.get(DataImportProgressJsonSerializer.OVERWRITTEN_REGATTA_NAMES)), o->o.toString()));
             result.setResult(objectCounts);
         }
         return result;

@@ -42,7 +42,7 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
     private BsonArray toDBObject(Double[] data) {
         BsonArray result = new BsonArray();
         for (Double value : data) {
-            result.add(value==null?null:new BsonDouble(value));
+            result.add(value==null?new BsonDouble(0.0):new BsonDouble(value));
         }
         return result;
     }
@@ -52,6 +52,8 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
         List<Number> dbValues = (List<Number>) dbObject;
         Double[] result = new Double[dbValues.size()];
         for (int i = 0 ; i < dbValues.size() ; i++) {
+            // for backward compatibility, check for null; starting with MongoDB Java driver 4.4.2
+            // it became impossible to *write* null values in a BsonArray, however.
             result[i] = dbValues.get(i) == null ? null : dbValues.get(i).doubleValue();
         }
         return result;

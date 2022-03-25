@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.domain.base.MasterDataImportClassLoaderService;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
-import com.sap.sse.MasterDataImportClassLoaderService;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());

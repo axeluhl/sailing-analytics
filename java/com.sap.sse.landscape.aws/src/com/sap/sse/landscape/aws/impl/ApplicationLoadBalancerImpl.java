@@ -15,6 +15,7 @@ import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -210,7 +211,18 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
     
     @Override
-    public Rule createDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+    public Rule getDefaultRedirectRule(String hostName, PlainRedirectDTO redirect) {
+        final Rule defaultRedirectRule = createDefaultRedirectRule(hostName, redirect.getPath(), redirect.getQuery());
+        return defaultRedirectRule;
+    }
+
+    /**
+     * Creates a new rule in the HTTPS listener of this load balancer. The rule fires when {@code "/"} is
+     * the path ("empty" path) and the hostname header matches the value provided by the {@code hostname}
+     * parameter. It sends a redirecting response with status code 302, redirecting to the same host, same
+     * protocol and port and the path specified by the {@code pathWithLeadingSlash} parameter.<p>
+     */
+    private Rule createDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query) {
         return getDefaultRedirectRuleBuilder(hostname, pathWithLeadingSlash, query).build();
     }
 

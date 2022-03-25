@@ -798,8 +798,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     FileStorageManagementService getFileStorageManagementService();
 
-    ClassLoader getCombinedMasterDataClassLoader();
-
     /**
      * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
      * is already available, the {@code callback} is invoked immediately. If the {@link RaceTracker} isn't available

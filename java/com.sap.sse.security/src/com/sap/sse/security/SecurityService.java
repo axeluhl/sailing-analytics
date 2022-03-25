@@ -21,6 +21,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
+import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.interfaces.UserImpl;
@@ -49,6 +50,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -67,6 +69,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     String ALL_USERNAME = "<all>";
     String TENANT_SUFFIX = "-tenant";
+    String REPLICABLE_FULLY_QUALIFIED_CLASSNAME = SecurityServiceImpl.class.getName();
 
     SecurityManager getSecurityManager();
 
@@ -736,4 +739,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     default HasPermissions getHasPermissionsByName(String securedTypeName) {
         return Util.first(Util.filter(getAllHasPermissions(), hp->hp.getName().equals(securedTypeName)));
     }
+
+    ClassLoaderRegistry getInitialLoadClassLoaderRegistry();
 }

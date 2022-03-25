@@ -10,6 +10,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
@@ -120,10 +121,11 @@ public class ParserImpl implements Parser {
                             } else {
                                 divisionBoatClassAndGender = divisionBoatClass;
                             }
-                            if (!boatClassNameFilter.isPresent()
-                                    || boatClassNameFilter.get().equalsIgnoreCase(divisionBoatClass)
-                                    || boatClassNameFilter.get().equalsIgnoreCase(divisionBoatClassAndGender)
-                                    || boatClassNameFilter.get().contains(divisionBoatClassAndGender)) {
+                            final String unifiedBoatClassNameFilter = boatClassNameFilter.map(n->BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(n)).orElse(null);
+                            if (unifiedBoatClassNameFilter == null
+                                    || unifiedBoatClassNameFilter.equals(BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(divisionBoatClass))
+                                    || unifiedBoatClassNameFilter.equals(BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(divisionBoatClassAndGender))
+                                    || unifiedBoatClassNameFilter.contains(BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(divisionBoatClassAndGender))) {
                                 return new XRRRegattaResultsAsScoreCorrections(event, division, scoreCorrectionProvider, this);
                             }
                         }

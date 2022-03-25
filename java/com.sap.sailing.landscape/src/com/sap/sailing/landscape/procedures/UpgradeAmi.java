@@ -15,6 +15,7 @@ import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
@@ -72,6 +73,7 @@ extends StartEmptyServer<UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsH
 implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(UpgradeAmi.class.getName());
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
+    private static final String IMAGE_UPGRADE_USER_DATA = "image-upgrade";
     
     private final AwsRegion region;
     private final String upgradedImageName;
@@ -145,15 +147,19 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         private BuilderImpl() {
             super();
-            setNoShutdown(false);
         }
         
         @Override
         protected String getImageType() {
-            return super.getImageType() == null ? getMachineImage() == null ? IMAGE_TYPE_TAG_VALUE_SAILING :
+            return super.getImageType() == null ? getMachineImage() == null ? SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING :
                 Util.stream(getMachineImage().getTags()).filter(tag->tag.key().equals(AwsLandscape.IMAGE_TYPE_TAG_NAME)).findAny()
-                    .map(tag->tag.value()).orElse(IMAGE_TYPE_TAG_VALUE_SAILING)
+                    .map(tag->tag.value()).orElse(SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING)
                 : super.getImageType();
+        }
+
+        @Override
+        protected String getInstanceName() {
+            return super.getInstanceName() == null ? IMAGE_UPGRADE_USER_DATA+" for "+getMachineImage().getId() : super.getInstanceName();
         }
 
         @Override
@@ -333,6 +339,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         waitForShutdown = !builder.isNoShutdown();
         deviceNamesToSnapshotBaseNames = builder.getDeviceNamesToSnapshotBaseNames();
         keyPairIsTemporaryAndNeedsToBeRemovedWhenDone = builder.isKeyPairIsTemporaryAndNeedsToBeRemovedWhenDone();
+        addUserData(Collections.singleton(IMAGE_UPGRADE_USER_DATA));
     }
     
     @Override

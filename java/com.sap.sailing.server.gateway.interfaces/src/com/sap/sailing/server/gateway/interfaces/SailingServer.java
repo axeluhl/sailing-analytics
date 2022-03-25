@@ -11,12 +11,13 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sse.security.util.SecuredServer;
 import com.sap.sse.shared.json.JsonDeserializationException;
 
 /**
- * Represents a remote instance of a server process running the Sailing Analytics and exposes various methods as a
- * convenient Java API which are implemented using the remote server's REST API. In short, this is a Java facade for a
- * REST API.
+ * Represents a remote instance of a server process or an entire application replica set with a master and zero or more
+ * replicas, running the Sailing Analytics, and exposes various methods as a convenient Java API which are implemented
+ * using the remote server's REST API. In short, this is a Java facade for a REST API.
  * <p>
  * 
  * Objects of this type manage authentication information required for executing its methods as part of their immutable
@@ -26,8 +27,12 @@ import com.sap.sse.shared.json.JsonDeserializationException;
  * authenticated session and then uses that session user's bearer token, assuming that the server to be represented by
  * this object shares its security service with the server where this object is constructed.
  * <p>
+ * 
+ * Constructs objects whose type conforms with this interface by using {@link SailingServerFactory}.
+ * 
+ * @author Axel Uhl (d043530)
  */
-public interface SailingServer {
+public interface SailingServer extends SecuredServer {
     /**
      * The server's base URL, ending with a slash "/" character
      */
@@ -56,6 +61,12 @@ public interface SailingServer {
      */
     CompareServersResult compareServers(Optional<SailingServer> a, SailingServer b, Optional<Iterable<UUID>> leaderboardGroupIds) throws Exception;
 
+    /**
+     * Obtains the {@link RemoteSailingServerReference}s established in this server. These references point to
+     * other servers / application replica sets and make those other servers' content visible in the events list
+     * on this server. As users navigate to those other servers' events they leave the scope of this server. The
+     * remote references can optionally specify a set of events to include / exclude. 
+     */
     Iterable<RemoteSailingServerReference> getRemoteServerReferences() throws JsonDeserializationException,
             MalformedURLException, ClientProtocolException, IOException, ParseException;
 
@@ -70,14 +81,14 @@ public interface SailingServer {
      * 
      * @return the reference added or the existing reference found
      */
-    RemoteSailingServerReference addRemoteServerReference(SailingServer referencedServer,
-            boolean includeSpecifiedEvents)
+    RemoteSailingServerReference addRemoteServerReference(SailingServer referencedServer, boolean includeSpecifiedEvents)
             throws JsonDeserializationException, ClientProtocolException, IOException, ParseException;
     
     /**
      * @return the reference removed, or {@code null} if no such reference was found
      */
-    RemoteSailingServerReference removeRemoteServerReference(SailingServer referencedServer) throws JsonDeserializationException, ClientProtocolException, IOException, ParseException;
+    RemoteSailingServerReference removeRemoteServerReference(SailingServer referencedServer)
+            throws JsonDeserializationException, ClientProtocolException, IOException, ParseException;
     
     /**
      * Ensures that a remote sailing server reference to {@code referencedServer} exists and includes the events

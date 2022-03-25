@@ -8,12 +8,12 @@ public interface MasterDataImportObjectCreationCount extends Serializable {
     int getLeaderboardGroupCount();
 
     int getEventCount();
-
+    
     int getRegattaCount();
 
     int getMediaTrackCount();
 
-    Iterable<String> getOverwrittenRegattaNames();
+    Iterable<String> getNamesOfOverwrittenRegattaNames();
 
     int getTrackedRacesCount();
 }

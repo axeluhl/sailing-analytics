@@ -32,8 +32,8 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.ConcurrentHashBag;

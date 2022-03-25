@@ -104,7 +104,8 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         private static final Action[] ALL_ACTIONS = new Action[] { CONFIGURE_FILE_STORAGE, CONFIGURE_LOCAL_SERVER,
                 CONFIGURE_REMOTE_INSTANCES, CREATE_OBJECT, CAN_IMPORT_MASTERDATA, CAN_EXPORT_MASTERDATA, DATA_MINING,
                 REPLICATE, START_REPLICATION, READ_REPLICATOR, THREADS,
-                DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL, DefaultActions.UPDATE };
+                DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL, DefaultActions.CREATE, DefaultActions.DELETE,
+                DefaultActions.READ, DefaultActions.UPDATE };
     }
 
     /**
