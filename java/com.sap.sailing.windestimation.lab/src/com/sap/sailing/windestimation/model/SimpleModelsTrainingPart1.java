@@ -139,32 +139,6 @@ public class SimpleModelsTrainingPart1 {
         }
     }
 
-    private static int askDataCleaningFinished(AggregatedSingleDimensionType dimension) {
-        Object[] options = { "Continue with model training", "Restart Graphical Tool" };
-        int res = JOptionPane.showOptionDialog(null,
-                "Have you finished the data cleansing for the " + dimension + " dimension?",
-                "Continue with model training?", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
-                options, options[0]);
-        switch (res) {
-        case 0:
-            return JOptionPane.YES_OPTION;
-        case 1:
-            return JOptionPane.NO_OPTION;
-        }
-        return JOptionPane.CLOSED_OPTION;
-    }
-
-    private static void showInfoAboutRunPart2() {
-        JOptionPane.showMessageDialog(null, "Now, run the class \"" + SimpleModelsTrainingPart2.class.getName()
-                + "\".\nThis will complete the training process.");
-    }
-
-    private static void showInfoAboutDataCleaning(AggregatedSingleDimensionType dimension) {
-        JOptionPane.showMessageDialog(null, "Now, clean the data for the " + dimension
-                + " dimension.\nRemove instances from MongoDB collection \"" + dimension.getCollectionName()
-                + "\"\nwhich do not make sense and cause implausible zig zag sections\nwithin \"Zero mean sigma\" curve.\n\nClose the graphical tool, when you are done to resume the model training.");
-    }
-
     private static void showInfoAboutIntervalAdjustments(Class<?> classToAdjust, Class<?> valueRangeEnum) {
         JOptionPane.showMessageDialog(null, "Now, open the source code of the class \"" + classToAdjust.getName()
                 + "\".\nScroll down to the definition of the inner enum \"" + valueRangeEnum.getSimpleName()
