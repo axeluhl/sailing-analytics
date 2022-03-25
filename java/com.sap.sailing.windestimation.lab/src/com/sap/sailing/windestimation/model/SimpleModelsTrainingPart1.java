@@ -1,10 +1,17 @@
 package com.sap.sailing.windestimation.model;
 
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import org.json.simple.parser.ParseException;
+
+import com.sap.sailing.windestimation.data.AggregatedSingleDimensionBasedTwdTransition;
 import com.sap.sailing.windestimation.data.importer.AggregatedDistanceBasedTwdTransitionImporter;
 import com.sap.sailing.windestimation.data.importer.AggregatedDurationBasedTwdTransitionImporter;
 import com.sap.sailing.windestimation.data.importer.DistanceBasedTwdTransitionImporter;
@@ -13,21 +20,23 @@ import com.sap.sailing.windestimation.data.importer.ManeuverAndWindImporter;
 import com.sap.sailing.windestimation.data.importer.PolarDataImporter;
 import com.sap.sailing.windestimation.data.persistence.maneuver.ManeuverForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager.AggregatedSingleDimensionType;
 import com.sap.sailing.windestimation.datavisualization.AggregatedDistanceDimensionPlot;
 import com.sap.sailing.windestimation.datavisualization.AggregatedDurationDimensionPlot;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierTrainer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.PersistedManeuverClassifiersScorePrinter;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext;
-import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionStdRegressorTrainer;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionStdRegressorTrainer;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext;
-import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionStdRegressorTrainer;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionStdRegressorTrainer;
 import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
+import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -36,6 +45,8 @@ import com.sap.sse.util.ThreadPoolUtil;
  *
  */
 public class SimpleModelsTrainingPart1 {
+    private static final Logger logger = Logger.getLogger(SimpleModelsTrainingPart1.class.getName());
+
     private static final int NUMBER_OF_THREADS = 15;
     private static ExecutorService executorService;
 
@@ -96,29 +107,36 @@ public class SimpleModelsTrainingPart1 {
             new AggregatedDistanceBasedTwdTransitionImporter().importAggregatedDistanceBasedTwdTransition();
         });
         awaitThreadPoolCompletion();
-        // FIXME bug5695: enforce monotonic "Zero Mean Sigma", maybe considering number of values that formed the aggregate, then run SimpleModelsTrainingPart2
-        // Idea: rather ignore a value with low number of samples and use values with higher number of samples (getNumberOfValues) if there are different ways to achieve monotonicity
-        do {
-            AggregatedDurationDimensionPlot.main(args);
-            showInfoAboutDataCleaning(AggregatedSingleDimensionType.DURATION);
-            AggregatedDurationDimensionPlot.awaitWindowClosed();
-        } while (JOptionPane.YES_OPTION != askDataCleaningFinished(AggregatedSingleDimensionType.DURATION));
-        showInfoAboutIntervalAdjustments(DurationBasedTwdTransitionRegressorModelContext.class,
-                DurationValueRange.class);
-        do {
-            AggregatedDistanceDimensionPlot.main(args);
-            showInfoAboutDataCleaning(AggregatedSingleDimensionType.DISTANCE);
-            AggregatedDistanceDimensionPlot.awaitWindowClosed();
-        } while (JOptionPane.YES_OPTION != askDataCleaningFinished(AggregatedSingleDimensionType.DISTANCE));
-        showInfoAboutIntervalAdjustments(DistanceBasedTwdTransitionRegressorModelContext.class,
-                DistanceValueRange.class);
-        showInfoAboutRunPart2();
-        // FIXME bug5695: now comes "part 2"
+        // The following code would open pop-up windows that display charts of original TWD regressions before cleansing:
+        AggregatedDurationDimensionPlot.main(args);
+        AggregatedDistanceDimensionPlot.main(args);
+        enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType.DURATION);
+        enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType.DISTANCE);
+        // The following code would open pop-up windows that display charts of original and "cleansed" TWD regressions:
+        AggregatedDurationDimensionPlot.main(args);
+        showInfoAboutIntervalAdjustments(DurationBasedTwdTransitionRegressorModelContext.class, DurationValueRange.class);
+        AggregatedDistanceDimensionPlot.main(args);
+        showInfoAboutIntervalAdjustments(DistanceBasedTwdTransitionRegressorModelContext.class, DistanceValueRange.class);
         DurationBasedTwdTransitionStdRegressorTrainer.train(modelStore);
         DistanceBasedTwdTransitionStdRegressorTrainer.train(modelStore);
         Thread.sleep(1000);
         ExportedModelsGenerator.main(new String[0]);
         LoggingUtil.logInfo("Model training finished. You can upload the generated file to a server instance.");
+    }
+
+    private static void enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType dimensionType) throws UnknownHostException, JsonDeserializationException, ParseException {
+        final AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(dimensionType);
+        final List<AggregatedSingleDimensionBasedTwdTransition> allAggregatedElements = persistenceManager.getAllElements();
+        Collections.sort(allAggregatedElements, (ae1, ae2)->Double.compare(ae1.getDimensionValue(), ae2.getDimensionValue()));
+        double previousZeroMeanSigma = -1;
+        for (final AggregatedSingleDimensionBasedTwdTransition aggregate : allAggregatedElements) {
+            if (aggregate.getZeroMeanStd() >= previousZeroMeanSigma) {
+                previousZeroMeanSigma = aggregate.getZeroMeanStd();
+            } else {
+                logger.info("Removing aggregate for dimension value "+aggregate.getDimensionValue()+" (dimension "+dimensionType.name()+") to achieve monotonic growth");
+                persistenceManager.remove(aggregate);
+            }
+        }
     }
 
     private static int askDataCleaningFinished(AggregatedSingleDimensionType dimension) {
