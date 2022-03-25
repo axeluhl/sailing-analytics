@@ -8,7 +8,6 @@ import org.bson.Document;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.Wind;
@@ -36,8 +35,8 @@ public class WindByTimePersistenceManager {
     public WindByTimePersistenceManager() throws UnknownHostException {
         MongoDBService mongoDbService = MongoDBConfiguration.getDefaultConfiguration().getService();
         database = mongoDbService.getDB();
-        final Document indexes = new Document(FieldNames.TIME_AS_MILLIS.name(), 1);
-        getCollection().createIndex(indexes);
+        final Document indexeSortedByTime = new Document(FieldNames.TIME_AS_MILLIS.name(), 1);
+        getCollection().createIndex(indexeSortedByTime);
         mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
     }
@@ -65,7 +64,12 @@ public class WindByTimePersistenceManager {
     
     public Iterable<Wind> getWindNewerThan(TimePoint timePoint) {
         final long millis = timePoint.asMillis();
-        final Document queryByTime = new Document(FieldNames.TIME_AS_MILLIS.name(), "{$gt: "+millis+"}");
-        return Util.map(getCollection().find(queryByTime, Document.class), windDocument->domainObjectFactory.loadWind(windDocument));
+        final Document queryByTime = new Document(FieldNames.TIME_AS_MILLIS.name(), new Document("$gt", millis));
+        final Document sorting = new Document(FieldNames.TIME_AS_MILLIS.name(), 1);
+        return Util.map(getCollection().find(queryByTime, Document.class).sort(sorting), windDocument->domainObjectFactory.loadWind(windDocument));
+    }
+
+    public long countElements() {
+        return getCollection().estimatedDocumentCount();
     }
 }
