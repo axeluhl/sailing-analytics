@@ -43,31 +43,25 @@ class UserSubscriptionItem extends Composite {
         final MobileSection mobileSection = uiBinder.createAndBindUi(this);
         mobileSection.setEdgeToEdgeContent(true);
         initWidget(mobileSection);
-
         this.valueProvider = new SubscriptionsValueProvider(i18n);
-        if (subscription.isCancelled()) {
+        if (subscription.isCancelled() || !subscription.isRenewing()) {
             this.cancelCallback = () -> {};
             cancelControlUi.setEnabled(false);
         } else {
             this.cancelCallback = () -> presenter.cancelSubscription(subscription.getSubscriptionPlanId(),
                     subscription.getProvider());
         }
-
         sectionHeaderUi.setSectionTitle(valueProvider.getSubscriptionName(subscription));
         sectionHeaderUi.setLabelType(valueProvider.getSubscriptionStatusLabelType(subscription));
-
         addInfo(i18n.createdAt(), subscription.getCreatedAt());
         addInfo(i18n.currentTermEnd(), valueProvider.getTermEnd(subscription));
-
         valueProvider.configurePaymentStatusElement(subscription, this::addInfo, this::addInfo);
-
-        if (subscription.isCancelled()) {
+        if (!subscription.isInTrial() && (subscription.isCancelled() || !subscription.isRenewing())) {
             addInfo(i18n.cancelledAt(), subscription.getCancelledAt());
         } else if (subscription.isRenewing()) {
             addInfo(i18n.nextBillingAt(), subscription.getNextBillingAt());
             addInfo("", valueProvider.getRecurringPayment(subscription));
         }
-
         sectionHeaderUi.initCollapsibility(contentContainerUi.getElement(), false);
     }
 
