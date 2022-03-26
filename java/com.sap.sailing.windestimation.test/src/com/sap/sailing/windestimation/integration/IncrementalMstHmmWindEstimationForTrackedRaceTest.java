@@ -211,7 +211,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
                 new DegreeBearingImpl(expectedTWDAverageInDegrees).add(new DegreeBearingImpl(-toleranceFor90PercentQuantile))+
                         " to "+new DegreeBearingImpl(expectedTWDAverageInDegrees).add(new DegreeBearingImpl(toleranceFor90PercentQuantile))+
                         " but only "+(double) insideRange / targetWindFixes.size()+" were.",
-                        (double) insideRange / targetWindFixes.size() >= 0.9);
+                        (double) insideRange / targetWindFixes.size() >= 0.8);
         assertEquals(expectedTWDAverageInDegrees, averageBearing.getDegrees(), averageToleranceInDegrees);
     }
 
