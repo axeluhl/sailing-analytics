@@ -13,12 +13,12 @@
             font-weight: bold;
         }
         .image {
-            width: 24px;
+	       height: 1em !important;
         }
     </ui:style>
     <div class="{res.mainCss.spacermarginbottomsmall} {style.container}">
         <span ui:field="labelUi" class="{style.label}"/>
         <span ui:field="valueUi"/>
-        <img ui:field="imageUi" />
+        <img ui:field="imageUi" class="{style.image}" />
     </div>
 </ui:UiBinder> 
