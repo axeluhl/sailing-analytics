@@ -86,7 +86,7 @@ done
 echo >>${WRAPPER_BUNDLE}/${BUILD_PROPERTIES_FILE}
 echo "Building the wrapper bundle..."
 cd ..
-mvn clean install
+mvn ${extra} clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
 mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
@@ -122,7 +122,7 @@ echo "${NEW_SSE_RUNTIME_FEATURE_XML_CONTENT}" >"${SSE_RUNTIME_FEATURE_XML}"
 echo "Patching update site's site.xml..."
 sed -i -e 's/com.amazon.aws.aws-java-api\(\.source\)\?_\([0-9.]*\)\.jar/com.amazon.aws.aws-java-api\1_'${VERSION}'.jar/' -e '/feature url=/s/version="[0-9.]*"/version="'${VERSION}'"/' ${SITE_XML}
 echo "Building update site..."
-mvn clean install
+mvn ${extra} clean install
 echo "Patching SDK version ${VERSION} in target platform definition ${TARGET_DEFINITION}..."
 sed -i -e 's/<unit id="com.amazon.aws.aws-java-api.feature.group" version="[0-9.]*"\/>/<unit id="com.amazon.aws.aws-java-api.feature.group" version="'${VERSION}'"\/>/' ${TARGET_DEFINITION}
 echo "You may test your target platform locally by creating race-analysis-p2-local.target by running the script createLocalTargetDef.sh."
