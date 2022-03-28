@@ -177,6 +177,7 @@ import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.util.RemoteServerUtil;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -230,6 +231,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     private final PermissionChangeListeners permissionChangeListeners;
     
+    private final ClassLoaderRegistry initialLoadClassLoaderRegistry = ClassLoaderRegistry.createInstance();
+    
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
@@ -263,6 +266,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider,
             String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+        initialLoadClassLoaderRegistry.addClassLoader(getClass().getClassLoader());
         if (hasPermissionsProvider == null) {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
         }
@@ -296,6 +300,16 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         aclResolver = new SecurityServiceAclResolver(accessControlStore);
     }
     
+    @Override
+    public ClassLoader getDeserializationClassLoader() {
+        return initialLoadClassLoaderRegistry.getCombinedMasterDataClassLoader();
+    }
+
+    @Override
+    public ClassLoaderRegistry getInitialLoadClassLoaderRegistry() {
+        return initialLoadClassLoaderRegistry;
+    }
+
     private ReplicatingCacheManager loadReplicationCacheManagerContents() {
         logger.info("Loading session cache manager contents");
         int count = 0;

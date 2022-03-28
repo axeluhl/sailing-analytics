@@ -1,4 +1,4 @@
-FROM docker.sapsailing.com:443/sapjvm8:8.1.084
+FROM docker.sapsailing.com:443/sapjvm8:8.1.085
 LABEL maintainer=axel.uhl@sap.com
 # Download and extract the release
 WORKDIR /home/sailing/servers/server

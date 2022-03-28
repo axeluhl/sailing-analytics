@@ -72,7 +72,7 @@ public class MasterDataImporter {
         RegattaImpl.setOngoingMasterDataImport(new MasterDataImportInformation(raceLogStore));
         final ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         final TopLevelMasterData topLevelMasterData;
-        Thread.currentThread().setContextClassLoader(racingEventService.getCombinedMasterDataClassLoader());
+        Thread.currentThread().setContextClassLoader(racingEventService.getDeserializationClassLoader());
         try {
             @SuppressWarnings("unchecked")
             final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
