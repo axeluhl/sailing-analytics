@@ -5,13 +5,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -21,34 +19,12 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
 
     private static PremiumToggleButtonUiBinder uiBinder = GWT.create(PremiumToggleButtonUiBinder.class);
 
-    interface PremiumToggleButtonUiBinder extends UiBinder<FocusPanel, PremiumToggleButton> {
-    }
-
-    interface Style extends CssResource {
-        @ClassName("premium-container")
-        String premiumContainer();
-
-        @ClassName("premium-button")
-        String premiumButton();
-
-        @ClassName("premium-permitted")
-        String premiumPermitted();
-
-        @ClassName("premium-icon")
-        String premiumIcon();
-        
-        @ClassName("not-premium-permitted")
-        String notPremiumPermitted();
-    }
+    interface PremiumToggleButtonUiBinder extends UiBinder<FocusPanel, PremiumToggleButton> {}
 
     @UiField
     StringMessages i18n;
     @UiField
-    Style style;
-    @UiField
-    FocusPanel container;
-    @UiField(provided = true)
-    protected final Image image;
+    protected FocusPanel container;
     @UiField(provided = true)
     protected final Button button;
     
@@ -64,15 +40,10 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
     protected PremiumToggleButton(final String label, final Action action, final PaywallResolver paywallResolver,
             Component<?> associatedComponent) {
         super(action, paywallResolver);
+        PremiumToogleButtonResource.INSTANCE.css().ensureInjected();
         this.action = action;
         this.associatedComponent = associatedComponent;
         this.button = new Button(label);
-        if (action != null) {
-            this.image = createPremiumIcon();
-        } else {
-            image = new Image();
-            image.setVisible(false);
-        }
         initWidget(uiBinder.createAndBindUi(this));
         this.subscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
                 i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(),
@@ -103,11 +74,16 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
     protected void onUserPermissionUpdate(final boolean isPermitted) {
         boolean visible = associatedComponent.isVisible();
         if(action != null) {
-            container.setStyleName(style.premiumPermitted(), isPermitted);
-            container.setStyleName(style.notPremiumPermitted(), !isPermitted);
+            this.addStyleName(PremiumToogleButtonResource.INSTANCE.css().premiumActive());
+            button.setStyleName(PremiumToogleButtonResource.INSTANCE.css().premiumPermitted(), isPermitted);
+            button.setStyleName(PremiumToogleButtonResource.INSTANCE.css().notPremiumPermitted(), !isPermitted);
             if(!isPermitted && visible && evaluateAndRenderSplitterWithButtons != null) {
                 evaluateAndRenderSplitterWithButtons.run();
             }
+        } else {
+            this.removeStyleName(PremiumToogleButtonResource.INSTANCE.css().premiumActive());
+            button.removeStyleName(PremiumToogleButtonResource.INSTANCE.css().premiumPermitted());
+            button.removeStyleName(PremiumToogleButtonResource.INSTANCE.css().notPremiumPermitted());
         }
         button.setEnabled(isEnabled() && isPermitted);
     }
