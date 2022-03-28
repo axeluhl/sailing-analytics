@@ -3988,9 +3988,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
                 getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                         SecuredDomainType.RESULT_IMPORT_URL,
                         new TypeRelativeObjectIdentifier(resultUrlProvider.getName(), url.toString()), url.toString(),
-                        () -> {
-                            resultUrlRegistry.registerResultUrl(resultProviderName, url);
-                        });
+                        () -> resultUrlRegistry.registerResultUrl(resultProviderName, url));
             });
         });
     }
