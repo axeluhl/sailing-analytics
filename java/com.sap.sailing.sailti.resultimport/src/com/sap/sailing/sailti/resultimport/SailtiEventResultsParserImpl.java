@@ -38,6 +38,7 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
 public class SailtiEventResultsParserImpl implements SailtiEventResultsParser {
     private static final Logger logger = Logger.getLogger(SailtiEventResultsParserImpl.class.getName());
     
+    static final Pattern eventNamePattern = Pattern.compile("<h2>([^<]*)</h2>");
     static final Pattern xrrFileNamePattern = Pattern.compile("XML-([^_]*)_([0-9][0-9]*)_([0-9][0-9]*)_([0-9]*).xml");
     static final Pattern classAndXrrLinkPattern = Pattern.compile("<p>([^<]*)<br/>\\s*<a *href=\"(([^\"]*)"+xrrFileNamePattern+")\"\\s*>");
 
@@ -61,13 +62,17 @@ public class SailtiEventResultsParserImpl implements SailtiEventResultsParser {
                 while ((line = br.readLine()) != null) {
                     eventHtml.append(line);
                 }
-                final Matcher matcher = classAndXrrLinkPattern.matcher(eventHtml.toString());
+                final String eventHtmlAsString = eventHtml.toString();
+                final Matcher matcher = classAndXrrLinkPattern.matcher(eventHtmlAsString);
                 while (matcher.find()) {
                     regattaResults.add(new RegattaResultDescriptor(matcher.group(1)+"/"+matcher.group(5)+"/"+matcher.group(6), matcher.group(1), getBoatClassName(matcher),
                             new URL(baseUrl, getAbsoluteXrrUrlPath(matcher)), getTimePoint(matcher)));
                 }
                 final String eventName;
-                if (regattaResults.isEmpty()) {
+                final Matcher eventNameMatcher = eventNamePattern.matcher(eventHtmlAsString);
+                if (eventNameMatcher.find()) {
+                    eventName = eventNameMatcher.group(1);
+                } else if (regattaResults.isEmpty()) {
                     eventName = getEventId();
                 } else {
                     final URL xrrFinalUrl = regattaResults.iterator().next().getXrrFinalUrl();
