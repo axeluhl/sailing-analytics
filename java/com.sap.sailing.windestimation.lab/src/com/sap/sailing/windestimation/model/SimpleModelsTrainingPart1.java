@@ -98,8 +98,6 @@ public class SimpleModelsTrainingPart1 {
             new DurationBasedTwdTransitionImporter().importDurationBasedTwdTransition();
         });
         awaitThreadPoolCompletion();
-        AggregatedDurationBasedTwdTransitionImporter.createPersistenceManagerAndEnsureIndex();
-        AggregatedDistanceBasedTwdTransitionImporter.createPersistenceManagerAndEnsureIndex();
         executeInThreadPool(() -> {
             new AggregatedDurationBasedTwdTransitionImporter().importAggregatedDurationBasedTwdTransition();
         });
