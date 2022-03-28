@@ -30,8 +30,8 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
     private static final long serialVersionUID = 2563619370274543312L;
     private static final String YEARLY_PLAN_ID = "yearly_premium";
     private static final String WEEKLY_PLAN_ID = "weekly_premium";
-    private static final String TRIAL_PLAN_ID = "Trial";
-    private static final String TRIAL_PLAN_ITEMPRICE_ID = "Trial-USD-Daily";
+    private static final String TRIAL_PLAN_ID = "trial_premium";
+    private static final String TRIAL_PLAN_ITEMPRICE_ID = "trial_premium_usd_daily";
     private static final String WEEKLY_PLAN_ITEMPRICE_ID = "weekly_premium_usd_weekly";
     private static final String YEARLY_PLAN_ITEMPRICE_ID = "yearly_premium_usd_yearly";
     private static final Map<String, SubscriptionPlan> plansById = new HashMap<>();

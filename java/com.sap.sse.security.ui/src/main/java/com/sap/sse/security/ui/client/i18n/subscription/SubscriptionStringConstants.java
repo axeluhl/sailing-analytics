@@ -28,11 +28,10 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String weekly_premium_description();
     String weekly_premium_info();
     String[] weekly_premium_features();
-    String Trial_name();
-    String Trial_description();
-    String Trial_info();
-    String[] Trial_features();
-    String trial_subscription_plan_shortname();
+    String trial_premium_name();
+    String trial_premium_description();
+    String trial_premium_info();
+    String[] trial_premium_features();
     String free_subscription_plan_shortname();
     String premium_subscription_plan_shortname();
     String datamining_subscription_plan_shortname();
