@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -145,6 +146,8 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
 
     @UiHandler("settingsButton")
     void onOpenSettings(ClickEvent event) {
+        PaywallResolver paywallResolver = new PaywallResolver(currentPresenter.getUserService(),
+                currentPresenter.getSubscriptionServiceFactory());
         selectedAutoPlayType.getConfig().openSettingsDialog(selectedEvent, selectedLeaderboard,
                 new OnSettingsCallback() {
                     @Override
@@ -152,7 +155,8 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
                         settings = newSettings;
                         updateURL(urlWithSettings);
                     }
-                }, settings, apcd, currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory());
+                }, settings, apcd, currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(),
+                paywallResolver);
     }
 
     private boolean validate() {

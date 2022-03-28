@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -43,6 +44,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
@@ -291,27 +293,41 @@ public class AutoplayHelper {
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
                 /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false);
-        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory,
-                /* FIXME: 5510 Premium features wont work without raceDTO context */ null);
-        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver);
-        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, competitorsAndTheirBoats);
-        RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
-                /* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
-        for (Entry<CompetitorDTO, BoatDTO> entry : competitorsAndTheirBoats.entrySet()) {
-            competitorSelectionProvider.setBoat(entry.getKey(), entry.getValue());
-        }
-        competitorSelectionProvider.setCompetitors(competitors);
-        RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
-                asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
-                new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
-                raceMapResources, false, provider, paywallResolver, /* isSimulationEnabled */false);
-        raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
-                serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-        raceboardTimer.setPlayMode(PlayModes.Live);
-        // wait for one update
-        raceboardPerspective.onResize();
-        callback.onSuccess(
-                new RVWrapper(raceboardPerspective, competitorSelectionProvider, raceboardTimer, creationTimeProvider));
+        final PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
+        userService.createEssentialSecuredDTOByIdAndType(currentLiveRace.getPermissionType(), currentLiveRace.getName(),
+                currentLiveRace.getTypeRelativeObjectIdentifier(), new AsyncCallback<SecuredDTO>() {
+
+                    @Override
+                    public void onSuccess(SecuredDTO raceDtoProxy) {
+                        RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE,
+                                paywallResolver, raceDtoProxy);
+                        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace,
+                                competitorsAndTheirBoats);
+                        RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
+                                /* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
+                        for (Entry<CompetitorDTO, BoatDTO> entry : competitorsAndTheirBoats.entrySet()) {
+                            competitorSelectionProvider.setBoat(entry.getKey(), entry.getValue());
+                        }
+                        competitorSelectionProvider.setCompetitors(competitors);
+                        RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings,
+                                sailingService, asyncActionsExecutor, errorReporter, raceboardTimer,
+                                competitorSelectionProvider, new RaceCompetitorSet(competitorSelectionProvider),
+                                StringMessages.INSTANCE, currentLiveRace, raceMapResources, false, provider,
+                                paywallResolver, /* isSimulationEnabled */false);
+                        raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
+                                serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
+                        raceboardTimer.setPlayMode(PlayModes.Live);
+                        // wait for one update
+                        raceboardPerspective.onResize();
+                        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider,
+                                raceboardTimer, creationTimeProvider));
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        LOGGER.log(Level.SEVERE, "Cannot create essential raceDTO", caught);
+                    }
+                });
     }
 
 }

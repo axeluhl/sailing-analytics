@@ -20,7 +20,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.common.TimePoint;
@@ -70,7 +69,7 @@ public class ExpeditionAllInOneAfterImportHandler {
             Iterable<TimePoint> startTimes, final SailingServiceWriteAsync sailingServiceWrite,
             final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
             Refresher<BoatDTO> boatsRefresher, Refresher<RegattaDTO> regattasRefresher,
-            Refresher<EventDTO> eventsRefresher, Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
+            Refresher<EventDTO> eventsRefresher, Refresher<StrippedLeaderboardDTO> leaderboardsRefresher,
             Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher, final ErrorReporter errorReporter,
             final StringMessages stringMessages, Displayer<RegattaDTO> regattaOracleToRefresh) {
         this.leaderboardGroupName = leaderboardGroupName;
@@ -114,17 +113,17 @@ public class ExpeditionAllInOneAfterImportHandler {
                         });
                         regattasRefresher.callFillAndReloadInitially(regattaOracleToRefresh);
                         sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
-                                new DataLoadingCallback<StrippedLeaderboardDTOWithSecurity>() {
+                                new DataLoadingCallback<StrippedLeaderboardDTO>() {
                             @Override
-                            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                            public void onSuccess(StrippedLeaderboardDTO result) {
                                 leaderboard = result;
-                                leaderboardsRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<StrippedLeaderboardDTOWithSecurity>() {
+                                leaderboardsRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<StrippedLeaderboardDTO>() {
                                     @Override
-                                    public boolean representSameEntity(StrippedLeaderboardDTOWithSecurity dto1, StrippedLeaderboardDTOWithSecurity dto2) {
+                                    public boolean representSameEntity(StrippedLeaderboardDTO dto1, StrippedLeaderboardDTO dto2) {
                                         return dto1.getName().equals(dto2.getName());
                                     }
                                     @Override
-                                    public int hashCode(StrippedLeaderboardDTOWithSecurity t) {
+                                    public int hashCode(StrippedLeaderboardDTO t) {
                                         return t.getName().hashCode();
                                     }
                                 });

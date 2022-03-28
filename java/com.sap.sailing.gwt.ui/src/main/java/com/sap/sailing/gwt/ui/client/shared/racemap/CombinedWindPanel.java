@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
@@ -37,7 +38,7 @@ public class CombinedWindPanel extends FlowPanel {
     private final CoordinateSystem coordinateSystem;
     
     public CombinedWindPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
-            StringMessages stringMessages, CoordinateSystem coordinateSystem, PaywallResolver paywallResolver) {
+            StringMessages stringMessages, CoordinateSystem coordinateSystem, PaywallResolver paywallResolver, SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
@@ -45,7 +46,7 @@ public class CombinedWindPanel extends FlowPanel {
         addStyleName(raceMapStyle.raceMapIndicatorPanel());
         addStyleName(raceMapStyle.combinedWindPanel());
         // premium feature control
-        if (paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
+        if (paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceDTO)) {
             addStyleName(raceMapStyle.premiumActive());
         } else {
             addStyleName(raceMapStyle.premiumReady());
@@ -56,7 +57,7 @@ public class CombinedWindPanel extends FlowPanel {
         ConfirmationDialog subscribeDialog = ConfirmationDialog.create(stringMessages.subscriptionSuggestionTitle(),
                 stringMessages.pleaseSubscribeToUseSpecific(stringMessages.streamletsOverlayFeature()),
                 stringMessages.takeMeToSubscriptions(), stringMessages.cancel(),
-                () -> paywallResolver.getUnlockingSubscriptionPlans(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS,
+                () -> paywallResolver.getUnlockingSubscriptionPlans(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceDTO,
                         (unlockingPlans) -> Window
                                 .open(EntryPointLinkFactory.createSubscriptionPageLink(unlockingPlans), "_blank", "")));
         transformer = raceMapResources.getCombinedWindIconTransformer();
@@ -67,7 +68,7 @@ public class CombinedWindPanel extends FlowPanel {
         paywallResolver.registerUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                final boolean hasPermission = paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS);
+                final boolean hasPermission = paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceDTO);
                 if (hasPermission) {
                     removeStyleName(raceMapStyle.premiumReady());
                     addStyleName(raceMapStyle.premiumActive());
@@ -81,7 +82,7 @@ public class CombinedWindPanel extends FlowPanel {
         canvas.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final boolean hasPermission = paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS);
+                final boolean hasPermission = paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceDTO);
                 updateSettings(map, hasPermission);
                 if(!hasPermission) {
                     subscribeDialog.center();

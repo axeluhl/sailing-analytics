@@ -31,6 +31,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 
 /**
@@ -46,6 +47,7 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
     private final Widget currentContentWidget;
     private final MultiRaceLeaderboardPanel leaderboardPanel;
     private final StringMessages stringMessages;
+    private final WithSecurity withSecurity;
     
     public MultiRaceLeaderboardWithZoomingPerspective(Component<?> parent,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<LeaderboardWithZoomingPerspectiveSettings>> componentContext,
@@ -54,9 +56,10 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
             SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
-            boolean startInFullScreenMode, Iterable<DetailType> availableDetailTypes) {
+            boolean startInFullScreenMode, Iterable<DetailType> availableDetailTypes, WithSecurity withSecurity) {
         super(parent, componentContext, lifecycle, settings);
         this.stringMessages = stringMessages;
+        this.withSecurity = withSecurity;
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
@@ -197,7 +200,7 @@ public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspect
                 /* showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,
-                new ClassicLeaderboardStyle(), FlagImageResolverImpl.get(), availableDetailTypes);
+                new ClassicLeaderboardStyle(), FlagImageResolverImpl.get(), availableDetailTypes, withSecurity);
 
         return leaderboardPanel;
     }

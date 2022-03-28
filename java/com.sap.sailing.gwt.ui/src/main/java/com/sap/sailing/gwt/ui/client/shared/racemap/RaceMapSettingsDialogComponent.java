@@ -34,6 +34,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 
@@ -69,13 +70,15 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
     private CheckBox showEstimatedDuration;
     private final PaywallResolver paywallResolver;
+    private final SecuredDTO raceDTO;
     
     public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages,
-            boolean hasPolar, PaywallResolver paywallResolver) {
+            boolean hasPolar, PaywallResolver paywallResolver, SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
         this.initialSettings = settings;
         this.hasPolar = hasPolar;
         this.paywallResolver = paywallResolver;
+        this.raceDTO = raceDTO;
     }
 
     @Override
@@ -95,12 +98,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         windUpCheckbox.ensureDebugId("windUpCheckBox");
         vp.add(windUpCheckbox);
         showWindStreamletOverlayCheckbox = dialog.create(() -> new SailingPremiumCheckBox(
-                stringMessages.showWindStreamletOverlay(), VIEWSTREAMLETS, paywallResolver));
+                stringMessages.showWindStreamletOverlay(), VIEWSTREAMLETS, paywallResolver, raceDTO));
         showWindStreamletOverlayCheckbox.ensureDebugId("showWindStreamletOverlayCheckBox");
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
         showWindStreamletColorsCheckbox = dialog.create(() -> new SailingPremiumCheckBox(
-                stringMessages.showWindStreamletColors(), VIEWSTREAMLETS, paywallResolver));
+                stringMessages.showWindStreamletColors(), VIEWSTREAMLETS, paywallResolver, raceDTO));
         showWindStreamletColorsCheckbox.setEnabled(initialSettings.isShowWindStreamletOverlay());
         showWindStreamletColorsCheckbox.setValue(initialSettings.isShowWindStreamletColors());
         showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckBoxIntended");
@@ -113,7 +116,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             showEstimatedDuration.setValue(initialSettings.isShowEstimatedDuration());
             vp.add(showEstimatedDuration);
             showSimulationOverlayCheckbox = dialog.create(() -> new SailingPremiumCheckBox(
-                    stringMessages.showSimulationOverlay(), TrackedRaceActions.SIMULATOR, paywallResolver));
+                    stringMessages.showSimulationOverlay(), TrackedRaceActions.SIMULATOR, paywallResolver, raceDTO));
             showSimulationOverlayCheckbox.ensureDebugId("showSimulationOverlayCheckBox");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
             vp.add(showSimulationOverlayCheckbox);

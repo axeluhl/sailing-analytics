@@ -5,12 +5,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
 public abstract class PremiumUiElement extends Composite implements HasEnabled {
 
     protected final Action action;
     protected final PaywallResolver paywallResolver;
     private final HandlerRegistration handlerRegistration;
+    private final SecuredDTO contextDTO;
 
     /**
      * Flag to keep track of the actual enabled/disabled state of this UI component independent of the representing
@@ -19,9 +21,10 @@ public abstract class PremiumUiElement extends Composite implements HasEnabled {
      */
     private boolean enabled = true;
 
-    protected PremiumUiElement(final Action action, final PaywallResolver paywallResolver) {
+    protected PremiumUiElement(final Action action, final PaywallResolver paywallResolver, final SecuredDTO contextDTO) {
         this.action = action;
         this.paywallResolver = paywallResolver;
+        this.contextDTO = contextDTO;
         this.handlerRegistration = paywallResolver
                 .registerUserStatusEventHandler((user, preAuth) -> updateUserPermission());
     }
@@ -37,7 +40,7 @@ public abstract class PremiumUiElement extends Composite implements HasEnabled {
     }
 
     protected final boolean hasPermission() {
-        return paywallResolver.hasPermission(action);
+        return paywallResolver.hasPermission(action, contextDTO);
     }
 
     protected final void updateUserPermission() {

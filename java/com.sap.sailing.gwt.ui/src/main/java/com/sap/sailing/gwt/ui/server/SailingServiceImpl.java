@@ -386,7 +386,6 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
@@ -480,6 +479,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -487,6 +487,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
+import com.sap.sse.security.ui.shared.EssentialSecuredDTO;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -835,6 +836,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
                 LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint,
                         namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, getService(), baseDomainFactory, fillTotalPointsUncorrected);
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), leaderboardDTO);
                 LeaderboardDTO previousLeaderboardDTO = null;
                 synchronized (leaderboardByNameResultsCacheById) {
                     leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
@@ -842,12 +844,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         previousLeaderboardDTO = leaderboardByNameResultsCacheById.get(previousLeaderboardId);
                     }
                 }
-                // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
+                // Set storeLeaderboardForTesting to true if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
                 // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
                 // The leaderboard that the test wants to use is that of the 505 Worlds 2013, obtained for
                 // an expanded Race R9 at time 2013-05-03T19:17:09Z after the last competitor tracked has finished the last leg. The
                 // total distance traveled in meters has to be expanded for the test to work.
-                boolean storeLeaderboardForTesting = false;
+                final boolean storeLeaderboardForTesting = false;
                 if (storeLeaderboardForTesting) {
                     ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("C:/data/SAP/sailing/workspace/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
                     oos.writeObject(leaderboardDTO);
@@ -871,7 +873,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 } else {
                     final IncrementalLeaderboardDTO incrementalResult;
                     if (cachedDiff == null) {
-                        IncrementalLeaderboardDTO preResult = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
+                        final IncrementalLeaderboardDTO preResult = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
                         synchronized (leaderboardDifferenceCacheByIdPair) {
                             leaderboardDifferenceCacheByIdPair.put(new com.sap.sse.common.Util.Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()), preResult);
                         }
@@ -1701,7 +1703,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             leaderboardGroupName, leaderboardGroupId, raceDTO.getRaceIdentifier());
                     Iterable<DetailType> availableDetailTypesForLeaderboard = getAvailableDetailTypesForLeaderboard(
                             leaderboardName, raceDTO.getRaceIdentifier());
-                    StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
+                    StrippedLeaderboardDTO leaderboardDTO = createStrippedLeaderboardDTO(
                             leaderboard, false,
                             false);
                     final TrackingConnectorInfo trackingConnectorInfo = trackedRace.getTrackingConnectorInfo();
@@ -2379,19 +2381,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() {
+    public List<StrippedLeaderboardDTO> getLeaderboardsWithSecurity() {
         final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 leaderboards.values(),
-                leaderboard -> createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false));
+                leaderboard -> createStrippedLeaderboardDTO(leaderboard, false, false));
     }
 
     @Override
-    public StrippedLeaderboardDTOWithSecurity getLeaderboardWithSecurity(String leaderboardName) {
+    public StrippedLeaderboardDTO getLeaderboardWithSecurity(String leaderboardName) {
         Leaderboard leaderboard = getLeaderboardAndCheckReadPermission(leaderboardName);
-        final StrippedLeaderboardDTOWithSecurity result;
+        final StrippedLeaderboardDTO result;
         if (leaderboard != null) {
-            result = createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false);
+            result = createStrippedLeaderboardDTO(leaderboard, false, false);
         } else {
             result = null;
         }
@@ -2423,31 +2425,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     /**
-     * Creates a {@link LeaderboardDTO} for <code>leaderboard</code> and fills in the name, race master data
-     * in the form of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints carried points}
-     * and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
-     * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
-     * is used for {@link LeaderboardDTO#competitorDisplayNames}.<br />
-     * If <code>withGeoLocationData</code> is <code>true</code> the geographical location of all races will be determined.
-     */
-    private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData) {
-        StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO(leaderboard.getName(), convertToBoatClassDTO(leaderboard.getBoatClass()));
-        fillLeaderboardData(leaderboard, withGeoLocationData, withStatisticalData, leaderboardDTO);
-        return leaderboardDTO;
-    }
-
-    /**
      * Creates a {@link LeaderboardDTO} for <code>leaderboard</code> and fills in the name, race master data in the form
      * of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints carried points} and
      * the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
      * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
      * is used for {@link LeaderboardDTO#competitorDisplayNames}.<br />
      * If <code>withGeoLocationData</code> is <code>true</code> the geographical location of all races will be
-     * determined.
+     * determined.<p>
+     * Security information in the form of ownership and ACL is added to the DTO.
      */
-    protected StrippedLeaderboardDTOWithSecurity createStrippedLeaderboardDTOWithSecurity(Leaderboard leaderboard,
-            boolean withGeoLocationData, boolean withStatisticalData) {
-        StrippedLeaderboardDTOWithSecurity leaderboardDTO = new StrippedLeaderboardDTOWithSecurity(
+    protected StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData) {
+        StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO(
                 leaderboard.getName(), convertToBoatClassDTO(leaderboard.getBoatClass()));
         fillLeaderboardData(leaderboard, withGeoLocationData, withStatisticalData, leaderboardDTO);
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), leaderboardDTO);
@@ -3078,8 +3066,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final String leaderboardName) throws NoWindException {
         CompetitorsRaceDataDTO result = null;
         final TrackedRace trackedRace = getExistingTrackedRace(race);
-        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
+            if (detailType.getPremiumAction() != null) {
+                getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, detailType.getPremiumAction());
+            }
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             final TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
@@ -3482,7 +3473,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
         for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             try {
-                groupDTO.leaderboards.add(createStrippedLeaderboardDTOWithSecurity(leaderboard, withGeoLocationData, withStatisticalData));
+                groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }
@@ -5116,8 +5107,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName) {
+    public Pair<RegattaAndRaceIdentifier, SecuredDTO> getRaceIdentifierAndTrackedRaceSecuredDTO(String regattaLikeName, String raceColumnName, String fleetName) {
         RegattaAndRaceIdentifier result = null;
+        String raceName = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(regattaLikeName);
         getSecurityService().checkCurrentUserReadPermission(leaderboard);
         if (leaderboard != null) {
@@ -5129,11 +5121,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     getSecurityService().checkCurrentUserReadPermission(trackedRace);
                     if (trackedRace != null) {
                         result = trackedRace.getRaceIdentifier();
+                        raceName = trackedRace.getRace().getName();
                     }
                 }
             }
         }
-        return result;
+        final EssentialSecuredDTO trackedRaceSecuredDTOProxy = result == null ? null :
+            new EssentialSecuredDTO(RaceDTO.getPermissionTypeForClass(), raceName, result.getTypeRelativeObjectIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), trackedRaceSecuredDTOProxy);
+        return new Pair<>(result, trackedRaceSecuredDTOProxy);
     }
 
     @Override

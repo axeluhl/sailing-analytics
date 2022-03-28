@@ -2,7 +2,10 @@ package com.sap.sse.security.ui.client.premium;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -24,17 +27,15 @@ public class PaywallResolver {
 
     private final UserService userService;
     private final SubscriptionServiceFactory subscriptionServiceFactory;
-    private final SecuredDTO dtoContext;
 
-    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory,
-            final SecuredDTO dtoContext) {
+    public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory) {
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
         subscriptionServiceFactory.initializeProviders();
-        this.dtoContext = dtoContext;
     }
 
-    public void getUnlockingSubscriptionPlans(final Action action, final Consumer<List<String>> callback) {
+    public void getUnlockingSubscriptionPlans(final Action action, final SecuredDTO dtoContext,
+            final Consumer<List<String>> callback) {
         final WildcardPermission permission = dtoContext == null
                 ? WildcardPermission.builder().withActions(action).build()
                 : dtoContext.getIdentifier().getPermission(action);
@@ -54,8 +55,27 @@ public class PaywallResolver {
                 });
     }
 
-    public boolean hasPermission(final Action action) {
-        return userService.hasPermission(dtoContext, action);
+    public boolean hasPermission(final Action action, final SecuredDTO dtoContext) {
+        boolean hasPermission = userService.hasPermission(dtoContext, action);
+        return hasPermission;
+    }
+
+    /**
+     * Get all HasPermissions of a set of actions.
+     * 
+     * @param premiumActions
+     *            A set of premium actions.
+     * @param dtoContext
+     *            the context DTO (SecuredDTO)
+     * 
+     * @return a Map of HasPermissions results based on a set of premium {@link Action}s.
+     */
+    public Map<Action, Boolean> getHasPermissionMap(final Set<Action> premiumActions, final SecuredDTO dtoContext) {
+        final Map<Action, Boolean> premiumPermissions = new HashMap<>();
+        for (Action premiumAction : premiumActions) {
+            premiumPermissions.put(premiumAction, this.hasPermission(premiumAction, dtoContext));
+        }
+        return premiumPermissions;
     }
 
     public SubscriptionWriteServiceAsync<?, ?, ?> getSubscriptionWriteService() {

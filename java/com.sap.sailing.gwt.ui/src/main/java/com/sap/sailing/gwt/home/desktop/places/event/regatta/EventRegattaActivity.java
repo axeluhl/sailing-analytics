@@ -33,6 +33,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 /**
  * Base Activity for all desktop single-regatta-event/series-event pages as well as the pages for one regatta of a
@@ -167,6 +168,11 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     public UserService getUserService() {
         return clientFactory.getUserService();
+    }
+
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return clientFactory.getSubscriptionServiceFactory();
     }
     
     @Override
