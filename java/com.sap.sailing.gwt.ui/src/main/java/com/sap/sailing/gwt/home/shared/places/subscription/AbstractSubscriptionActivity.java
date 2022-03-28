@@ -20,6 +20,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     private final SubscriptionClientFactory clientFactory;
     private final SubscriptionPlace subscriptionsPlace;
     private final SubscriptionView view;
+    private boolean isMailVerificationRequired;
 
     protected AbstractSubscriptionActivity(final SubscriptionPlace place,
             final SubscriptionClientFactory clientFactory) {
@@ -32,11 +33,27 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         Window.setTitle(subscriptionsPlace.getTitle());
         view.setPresenter(this);
-        renderSubscriptions(eventBus);
-        eventBus.addHandler(AuthenticationContextEvent.TYPE, event-> {
+        try {
+            clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
+                    .isMailVerificationRequired(new AsyncCallback<Boolean>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            clientFactory.createErrorView(StringMessages.INSTANCE.currentlyUnableToSubscribe(), caught);
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            isMailVerificationRequired = Boolean.valueOf(result);
+                            renderSubscriptions(eventBus);
+                        }
+                    });
+        } catch (InvalidSubscriptionProviderException e) {
+            clientFactory.createErrorView(StringMessages.INSTANCE.currentlyUnableToSubscribe(), e);
+        }
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, event -> {
             renderSubscriptions(eventBus);
         });
-        
+
         panel.setWidget(view);
     }
     
@@ -62,7 +79,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
 
                         @Override
                         public void onFailure(final Throwable caught) {
-                            clientFactory.createErrorView("TODO Failed to load subscription plans", caught);
+                            clientFactory.createErrorView(StringMessages.INSTANCE.currentlyUnableToSubscribe(), caught);
                         }
 
                         private void addFreePlan(final SubscriptionView view) {
@@ -87,7 +104,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
             view.onOpenCheckoutError(e.toString());
         }
     }
-
+    
     @Override
     public AuthenticationContext getAuthenticationContext() {
         return clientFactory.getAuthenticationManager().getAuthenticationContext();
@@ -99,6 +116,11 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
 
     private void onInvalidSubscriptionProviderError(final InvalidSubscriptionProviderException exc) {
         clientFactory.createErrorView(StringMessages.INSTANCE.errorInvalidSubscritionProvider(exc.getMessage()), exc);
+    }
+
+    @Override
+    public boolean isMailVerificationRequired() {
+        return isMailVerificationRequired;
     }
 
 }

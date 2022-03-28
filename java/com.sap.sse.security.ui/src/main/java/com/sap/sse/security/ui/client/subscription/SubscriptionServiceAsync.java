@@ -21,4 +21,6 @@ public interface SubscriptionServiceAsync<C, P> {
     public void getSubscriptionPlanDTOById(String planId, AsyncCallback<SubscriptionPlanDTO> callback);
     
     void isUserInPossessionOfRoles(String planId, AsyncCallback<Boolean> callback);
+    
+    void isMailVerificationRequired(AsyncCallback<Boolean> callback);
 }

@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
+import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
@@ -63,6 +64,9 @@ public class ChargebeeSubscriptionServiceImpl extends
         final PrepareCheckoutDTO response = new PrepareCheckoutDTO();
         try {
             final User user = getCurrentUser();
+            if(!ServerStartupConstants.SUBSCRIPTIONS_DISABLE_EMAIL_VERIFICATION_REQUIRED && !user.isEmailValidated()) {
+                throw new IllegalArgumentException("User mail must be validated");
+            }
             final SubscriptionPlan planForPrice = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
             if(planForPrice == null) {
                 throw new IllegalArgumentException("No matching subscription plan found for given price id");

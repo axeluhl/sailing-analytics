@@ -36,4 +36,6 @@ public interface SubscriptionService<C, P> extends RemoteService {
 
     boolean isUserInPossessionOfRoles(String planId) throws UserManagementException;
 
+    boolean isMailVerificationRequired();
+
 }

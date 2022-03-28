@@ -209,6 +209,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String pleaseSubscribeToUse();
     String pleaseSubscribeToUseSpecific(String actionName);
     String notLoggedIn();
+    String mailNotValidated();
     String streamletsOverlayFeature();
     String subscriptionSuggestionTitle(); 
     String takeMeToSubscriptions();

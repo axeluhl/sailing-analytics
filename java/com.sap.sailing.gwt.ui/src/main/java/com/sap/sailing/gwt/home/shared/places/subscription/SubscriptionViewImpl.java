@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardCo
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public class SubscriptionViewImpl extends Composite implements SubscriptionView {
@@ -31,13 +32,17 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
         case HIGHLIGHT:
         case DEFAULT:
             container.addSubscription(new SubscriptionCard(plan, type, (price) -> {
-                if (presenter.getAuthenticationContext().isLoggedIn()) {
+                final AuthenticationContext authenticationContext = presenter.getAuthenticationContext();
+                if (!authenticationContext.isLoggedIn()) {
+                    onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
+                    presenter.toggleAuthenticationFlyout();
+                } else if(presenter.isMailVerificationRequired() && !authenticationContext.getCurrentUser().isEmailValidated()) {
+                    onOpenCheckoutError(StringMessages.INSTANCE.mailNotValidated());
+                    presenter.toggleAuthenticationFlyout();
+                }else {
                     if (price != null) {
                         presenter.startSubscription(price.getPriceId());
                     }
-                } else {
-                    onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
-                    presenter.toggleAuthenticationFlyout();
                 }
             }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;

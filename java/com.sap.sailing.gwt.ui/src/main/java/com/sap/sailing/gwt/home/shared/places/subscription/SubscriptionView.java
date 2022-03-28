@@ -24,7 +24,8 @@ public interface SubscriptionView extends SubscribeView, IsWidget {
         void toggleAuthenticationFlyout();
 
         AuthenticationContext getAuthenticationContext();
-
+        
+        boolean isMailVerificationRequired();
     }
 
 }

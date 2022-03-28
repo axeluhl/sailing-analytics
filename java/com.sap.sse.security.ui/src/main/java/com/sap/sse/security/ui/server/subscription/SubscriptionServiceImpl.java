@@ -21,6 +21,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
@@ -103,6 +104,11 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         final User currentUser = getCurrentUser();
         final SubscriptionPlan plan = getSecurityService().getSubscriptionPlanByItemPriceId(priceId);
         return plan.isUserInPossessionOfRoles(currentUser);
+    }
+    
+    @Override
+    public boolean isMailVerificationRequired() {
+        return !ServerStartupConstants.SUBSCRIPTIONS_DISABLE_EMAIL_VERIFICATION_REQUIRED;
     }
 
     private CompletableFuture<SecurityService> initSecurityService() {
