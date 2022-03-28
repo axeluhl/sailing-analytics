@@ -556,7 +556,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         } else {
             defaultStartTime = getTrackingStartTime();
         }
-        NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
+        final NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
                 MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(), storageServiceAvailable,
                 new DialogCallback<MediaTrack>() {
                     @Override

@@ -1,4 +1,4 @@
-package com.sap.sse.util;
+package com.sap.sse.shared.classloading;
 
 import java.util.Set;
 
