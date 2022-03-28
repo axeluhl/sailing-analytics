@@ -122,7 +122,7 @@ public class SimpleModelsTrainingPart1 {
         LoggingUtil.logInfo("Model training finished. You can upload the generated file to a server instance.");
     }
 
-    private static void enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType dimensionType) throws UnknownHostException, JsonDeserializationException, ParseException {
+    static void enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType dimensionType) throws UnknownHostException, JsonDeserializationException, ParseException {
         final AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(dimensionType);
         final List<AggregatedSingleDimensionBasedTwdTransition> allAggregatedElements = persistenceManager.getAllElements();
         Collections.sort(allAggregatedElements, (ae1, ae2)->Double.compare(ae1.getDimensionValue(), ae2.getDimensionValue()));
