@@ -36,7 +36,7 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -420,14 +420,14 @@ public abstract class CourseManagementWidget implements IsWidget {
     
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, String leaderboardName) {
         this.sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
-                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Notification.notify(caught.getMessage(), NotificationType.ERROR);
                     }
 
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                    public void onSuccess(StrippedLeaderboardDTO result) {
                         updateWaypointsAndControlPointsForSecuredObject(raceCourseDTO, result);
                     }
                 });

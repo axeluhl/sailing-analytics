@@ -23,6 +23,7 @@ import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
@@ -42,14 +43,14 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
                     public void onSuccess(Iterable<DetailType> result) {
                         StrippedLeaderboardDTO leaderBoardDTO = AutoplayHelper.getSelectedLeaderboard(initialEventData,
                                 context.getLeaderboardName());
+                        PaywallResolver paywallResolver = new PaywallResolver(cf.getUserService(), cf.getSubscriptionServiceFactory());
                         AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(
-                                leaderBoardDTO, cf.getUserService(), cf.getSubscriptionServiceFactory(), result);
+                                leaderBoardDTO, cf.getUserService(), paywallResolver, result);
                         cf.setAutoPlayContext(new AutoPlayContextImpl(autoplayLifecycle,
                                 (PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>) settings,
                                 AutoPlayClassicConfiguration.this, context, initialEventData));
                         // start sixty inch slide loop nodes...
-                        RootNodeClassic root = new RootNodeClassic(cf);
-                        root.start(cf.getEventBus());
+                        new RootNodeClassic(cf).start(cf.getEventBus());
                     }
                 });
     }
@@ -57,7 +58,8 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     @Override
     public void openSettingsDialog(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
             OnSettingsCallback settingsCallback, PerspectiveCompositeSettings<?> settings,
-            AutoPlayContextDefinition apcd, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory) {
+            AutoPlayContextDefinition apcd, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory,
+            PaywallResolver paywallResolver) {
         DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
             @Override
             public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
@@ -69,8 +71,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
             public void cancel() {
             }
         };
-        
-        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService, subscriptionServiceFactory,
+        AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService, paywallResolver,
                 Arrays.asList(DetailType.values()));
         @SuppressWarnings("unchecked")
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings = settings != null

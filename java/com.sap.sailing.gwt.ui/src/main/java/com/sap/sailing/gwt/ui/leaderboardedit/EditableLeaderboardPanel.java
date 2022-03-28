@@ -98,6 +98,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.WithSecurity;
 
 /**
  * An editable version of the {@link ClassicLeaderboardPanel} which allows a user to enter carried / accumulated
@@ -699,11 +700,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
             final SailingServiceWriteAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent, Iterable<DetailType> availableDetailTypes, 
-            EditableLeaderboardSettings settings) {
+            EditableLeaderboardSettings settings, WithSecurity sailingCF) {
         super(null, context, sailingServiceWrite, asyncActionsExecutor, settings,
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
-                FlagImageResolverImpl.get(), availableDetailTypes);
+                FlagImageResolverImpl.get(), availableDetailTypes, sailingCF);
         initialize(settings);
         this.showCarryColumn = settings.getShowCarryColumn();
         this.sailingServiceWrite = sailingServiceWrite;
@@ -1409,7 +1410,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     public SettingsDialogComponent<EditableLeaderboardSettings> getSettingsDialogComponent(
             EditableLeaderboardSettings useTheseSettings) {
         return new EditableLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
-                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo());
+                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo(), paywallResolver, leaderboard);
     }
 
     @Override

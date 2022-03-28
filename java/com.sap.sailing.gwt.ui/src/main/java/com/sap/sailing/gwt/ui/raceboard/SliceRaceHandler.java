@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.race.TrackedRaceCreationResultDialog;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -76,7 +76,7 @@ public class SliceRaceHandler {
     
     private boolean canSlice = false;
 
-    private final StrippedLeaderboardDTOWithSecurity leaderboardDTO;
+    private final StrippedLeaderboardDTO leaderboardDTO;
 
     private RaceWithCompetitorsAndBoatsDTO raceDTO;
 
@@ -86,7 +86,7 @@ public class SliceRaceHandler {
     public SliceRaceHandler(SailingServiceWriteAsync sailingServiceWrite, SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
             final String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName, UUID eventId,
-            StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO, StringMessages stringMessages) {
+            StrippedLeaderboardDTO leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO, StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.sailingService = sailingService;
         this.userService = userService;

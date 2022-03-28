@@ -76,7 +76,6 @@ import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
@@ -104,6 +103,7 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -192,7 +192,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
-    void getLeaderboardsWithSecurity(AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>> callback);
+    void getLeaderboardsWithSecurity(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     /**
      * The key set of the map returned contains all fleets of the race column identified by the combination of
@@ -280,7 +280,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
 
-    void getLeaderboardWithSecurity(String leaderboardName, AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
+    void getLeaderboardWithSecurity(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
 
     void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
 
@@ -395,8 +395,8 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean> regattaLogCallBack);
 
-    void getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName,
-            AsyncCallback<RegattaAndRaceIdentifier> asyncCallback);
+    void getRaceIdentifierAndTrackedRaceSecuredDTO(String regattaLikeName, String raceColumnName, String fleetName,
+            AsyncCallback<Pair<RegattaAndRaceIdentifier, SecuredDTO>> asyncCallback);
 
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> callback);

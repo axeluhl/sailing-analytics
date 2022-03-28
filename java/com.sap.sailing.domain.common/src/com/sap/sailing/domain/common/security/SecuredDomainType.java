@@ -43,12 +43,17 @@ public class SecuredDomainType extends HasPermissionsImpl {
 
     public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA");
 
-    public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD");
+    public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD", DefaultActions
+            .plus(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION));
 
     public static final HasPermissions LEADERBOARD_GROUP = new SecuredDomainType("LEADERBOARD_GROUP");
 
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE",
             TrackedRaceActions.ALL_ACTIONS);
+    
+    public static enum LeaderboardActions implements Action {
+        PREMIUM_LEADERBOARD_INFORMATION
+    }
     
     public static enum TrackedRaceActions implements Action {
         CAN_REPLAY_DURING_LIVE_RACES,

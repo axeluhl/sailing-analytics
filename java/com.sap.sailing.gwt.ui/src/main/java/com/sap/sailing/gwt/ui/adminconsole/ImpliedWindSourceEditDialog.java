@@ -22,7 +22,7 @@ import com.sap.sailing.domain.common.orc.impl.OwnMaxImpliedWindImpl;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -43,7 +43,7 @@ public class ImpliedWindSourceEditDialog extends DataEntryDialog<ImpliedWindSour
     
     public ImpliedWindSourceEditDialog(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceSlot,
             final ImpliedWindSource previousImpliedWindSource,
-            Iterable<StrippedLeaderboardDTOWithSecurity> availableLeaderboards, final StringMessages stringMessages,
+            Iterable<StrippedLeaderboardDTO> availableLeaderboards, final StringMessages stringMessages,
             ErrorReporter errorReporter, SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             DialogCallback<ImpliedWindSource> callback) {
         super(stringMessages.impliedWindSource(),
@@ -103,13 +103,13 @@ public class ImpliedWindSourceEditDialog extends DataEntryDialog<ImpliedWindSour
     }
 
     private RaceColumnDTOAndFleetDTOWithNameBasedEquality getLeaderboardNameAndRaceColumnNameAndFleetName(
-            OtherRaceAsImpliedWindSource previousImpliedWindSource, Iterable<StrippedLeaderboardDTOWithSecurity> availableLeaderboards) {
+            OtherRaceAsImpliedWindSource previousImpliedWindSource, Iterable<StrippedLeaderboardDTO> availableLeaderboards) {
         final RaceColumnDTOAndFleetDTOWithNameBasedEquality result;
         if (previousImpliedWindSource == null || previousImpliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace() == null) {
             result = null;
         } else {
             RaceColumnDTOAndFleetDTOWithNameBasedEquality preResult = null;
-            for (final StrippedLeaderboardDTOWithSecurity leaderboard : availableLeaderboards) {
+            for (final StrippedLeaderboardDTO leaderboard : availableLeaderboards) {
                 if (leaderboard.getName().equals(previousImpliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getA())) {
                     final RaceColumnDTO raceColumn = leaderboard.getRaceColumnByName(previousImpliedWindSource.getLeaderboardAndRaceColumnAndFleetOfDefiningRace().getB());
                     if (raceColumn != null) {

@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public abstract class PremiumCheckBox extends PremiumUiElement implements HasValue<Boolean>, HasAllKeyHandlers {
@@ -59,8 +60,8 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
      * A Composite component, that includes a checkbox and an additional premium icon, indicating that the feature to be
      * enabled is a premium feature if the user does not have the permission.
      */
-    protected PremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver) {
-        super(action, paywallResolver);
+    protected PremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver, final SecuredDTO contextDTO) {
+        super(action, paywallResolver, contextDTO);
         this.image = createPremiumIcon();
         this.checkBox = new CheckBox(label);
 
@@ -68,7 +69,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
 
         this.subscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
                 i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(),
-                () -> paywallResolver.getUnlockingSubscriptionPlans(action, this::onSubscribeDialogConfirmation));
+                () -> paywallResolver.getUnlockingSubscriptionPlans(action, contextDTO, this::onSubscribeDialogConfirmation));
         updateUserPermission();
     }
 
@@ -136,6 +137,10 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
     }
 
     public FocusWidget getFocusWidget() {
+        return this.checkBox;
+    }
+    
+    public CheckBox getCheckBox() {
         return this.checkBox;
     }
 }

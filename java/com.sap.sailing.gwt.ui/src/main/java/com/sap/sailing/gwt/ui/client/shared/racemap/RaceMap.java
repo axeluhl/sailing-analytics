@@ -662,7 +662,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         panelForRightHeaderLabels.setHeight("60px");
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
-        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, paywallResolver);
+        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, paywallResolver, raceMapLifecycle.getRaceDTO());
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(false);
@@ -829,7 +829,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
                                 && settings.isShowWindStreamletOverlay()
-                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
                         }
                     }
@@ -841,7 +841,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             public void run() {
                                 if (zoomingAnimationsInProgress == 1) {
                                     simulationOverlay.setVisible(settings.isShowSimulationOverlay()
-                                            && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR));
+                                            && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR, raceMapLifecycle.getRaceDTO()));
                                 }
                                 zoomingAnimationsInProgress--;
                             }
@@ -862,7 +862,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         refreshMapWithoutAnimation();
                         if (streamletOverlay != null 
                                 && settings.isShowWindStreamletOverlay()
-                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                             streamletOverlay.onDragEnd();
                         }
                     }
@@ -871,7 +871,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     currentlyDragging = true;
                     if (streamletOverlay != null 
                             && settings.isShowWindStreamletOverlay()
-                            && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
+                            && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                         streamletOverlay.onDragStart();
                     }
                 });
@@ -891,7 +891,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if (streamletOverlay != null 
                                 && settings.isShowWindStreamletOverlay()
-                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
+                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                             streamletOverlay.setCanvasSettings();
                         }
                         if (!currentlyDragging) {
@@ -936,7 +936,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 streamletOverlay.addToMap();
                 streamletOverlay.setColors(settings.isShowWindStreamletColors());
                 if (settings.isShowWindStreamletOverlay()
-                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS)) {
+                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                     streamletOverlay.setVisible(true);
                 }
                 // determine availability of polar diagram
@@ -947,7 +947,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         () -> updateSettings(new RaceMapSettings(settings, false)));
                 simulationOverlay.addToMap();
                 showSimulationOverlay(settings.isShowSimulationOverlay()
-                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR));
+                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR, raceMapLifecycle.getRaceDTO()));
                 metricOverlay = new DetailTypeMetricOverlay(getMap(), 0, coordinateSystem, stringMessages);
                 metricOverlay.setVisible(false);
                 metricOverlay.addToMap();
@@ -1516,7 +1516,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             }
                         }
                         quickFlagDataProvider.quickRanksReceivedFromServer(raceMapDataDTO.quickRanks);
-                        if (settings.isShowSimulationOverlay() && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR)) {
+                        if (settings.isShowSimulationOverlay() && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR, raceMapLifecycle.getRaceDTO())) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                             simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
@@ -3092,7 +3092,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent(RaceMapSettings settings) {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, hasPolar, paywallResolver);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, hasPolar, paywallResolver, raceMapLifecycle.getRaceDTO());
     }
 
     @Override
@@ -3146,7 +3146,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay() 
-                    && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS));
+                    && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO()));
             streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {
@@ -3154,7 +3154,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             showSimulationOverlay(newSettings.isShowSimulationOverlay()
-                    && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR));
+                    && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR, raceMapLifecycle.getRaceDTO()));
         }
         if (newSettings.isWindUp() != settings.isWindUp()) {
             requiresUpdateCoordinateSystem = true;

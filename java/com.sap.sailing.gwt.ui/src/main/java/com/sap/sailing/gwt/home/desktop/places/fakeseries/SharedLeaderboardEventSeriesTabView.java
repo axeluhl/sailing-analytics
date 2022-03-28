@@ -16,6 +16,8 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -29,7 +31,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
     }
 
     protected void createSharedLeaderboardPanel(String leaderboardName,
-            EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager, UserService userService,
+            EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory,
             String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer, Iterable<DetailType> availableDetailTypes) {
         
         // FIXME remove
@@ -37,7 +39,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
                 .getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
 
         final ComponentContext<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, userService,
-                placeToken, availableDetailTypes);
+                subscriptionServiceFactory, placeToken, availableDetailTypes);
         componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
             @Override
             public void onSuccess(MultiRaceLeaderboardSettings leaderboardSettings) {
@@ -61,9 +63,10 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
         });
     }
 
-    protected ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
+    protected ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory,
             String placeToken, Iterable<DetailType> availableDetailTypes) {
-        final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes);
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
+        final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes, paywallResolver);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesOverallLeaderboard(leaderboardName);
 
         final ComponentContext<MultiRaceLeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(

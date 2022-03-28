@@ -10,6 +10,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.gwt.settings.UrlBuilderUtil;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public abstract class AutoPlayConfiguration {
@@ -22,7 +23,8 @@ public abstract class AutoPlayConfiguration {
      */
     public void openSettingsDialog(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
             OnSettingsCallback holder, PerspectiveCompositeSettings<?> settings, AutoPlayContextDefinition apcd,
-            UserService userService, SubscriptionServiceFactory subscriptionServiceFactory) {
+            UserService userService, SubscriptionServiceFactory subscriptionServiceFactory,
+            PaywallResolver leaderboarPaywallResolver) {
         Notification.notify("This configuration does not have settings", NotificationType.WARNING);
     }
 

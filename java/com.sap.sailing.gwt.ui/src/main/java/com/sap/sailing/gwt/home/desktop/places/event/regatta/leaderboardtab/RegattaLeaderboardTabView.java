@@ -164,10 +164,12 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             if (leaderboardPanel == null) {
                 loadAvailableDetailTypes(leaderboardName, contentArea, result -> 
                 createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager,
-                        currentPresenter.getUserService(), /* FIXME placeToken */ null, leaderboardConsumer, result));
+                        currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(),
+                        /* FIXME placeToken */ null, leaderboardConsumer, result));
             } else if ( /* FIXME placeToken not empty */ false) {
                 loadAvailableDetailTypes(leaderboardName, contentArea,
-                        result -> createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(),
+                        result -> createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), 
+                                currentPresenter.getSubscriptionServiceFactory(),
                                 /* FIXME placeToken */ null, result).getInitialSettings(
                                         new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
                                             @Override

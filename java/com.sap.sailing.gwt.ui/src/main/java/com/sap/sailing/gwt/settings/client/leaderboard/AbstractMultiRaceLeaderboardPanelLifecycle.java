@@ -7,24 +7,29 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public abstract class AbstractMultiRaceLeaderboardPanelLifecycle<T extends LeaderboardSettings> extends LeaderboardPanelLifecycle<T> {
 
     protected final List<String> namesOfRaceColumns;
     protected final boolean canBoatInfoBeShown;
+    protected final PaywallResolver paywallResolver;
+    protected final AbstractLeaderboardDTO leaderboardDTO;
     
     public AbstractMultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes) {
-        this(leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>(),
+            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+        this(leaderboard, leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>(),
                 leaderboard != null ? !leaderboard.canBoatsOfCompetitorsChangePerRace : false, stringMessages,
-                availableDetailTypes);
+                availableDetailTypes, paywallResolver);
     }
     
-    protected AbstractMultiRaceLeaderboardPanelLifecycle(List<String> namesOfRaceColumns, boolean canBoatInfoBeShown, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes) {
+    protected AbstractMultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, List<String> namesOfRaceColumns, boolean canBoatInfoBeShown, StringMessages stringMessages,
+            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
         super(stringMessages, availableDetailTypes);
         this.namesOfRaceColumns = namesOfRaceColumns;
         this.canBoatInfoBeShown = canBoatInfoBeShown;
+        this.paywallResolver = paywallResolver;
+        this.leaderboardDTO = leaderboard;
     }
     
     public abstract T extractUserSettings(T currentLeaderboardSettings);
