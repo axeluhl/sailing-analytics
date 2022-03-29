@@ -104,7 +104,7 @@ public class ChargebeeSubscription extends Subscription {
             invoiceId = subscription.getInvoiceId();
         }
         if(subscription.getInvoiceStatus() != null) {
-            invoiceId = subscription.getInvoiceStatus();
+            invoiceStatus = subscription.getInvoiceStatus();
         }
         paymentStatus = determinePaymentStatus(transactionType, transactionStatus, invoiceStatus);
     }
