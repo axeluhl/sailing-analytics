@@ -235,7 +235,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         } else {
             windChart = null;
         }
-        createRaceBoardInOneScreenMode(raceMap, windChart);
+        createRaceBoardInOneScreenMode(raceMap, windChart, paywallResolver, raceDTOProxy);
         timeRangeWithZoomProvider.setTimeRange(new MillisecondsTimePoint(timer.getTime()).minus(Duration.ONE_MINUTE.times(15)).asDate(),
                 new MillisecondsTimePoint(timer.getTime()).plus(Duration.ONE_MINUTE.times(3)).asDate());
         timer.setTime(timer.getTime().getTime()-1000l);
@@ -251,8 +251,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         return result;
     }
 
-    private void createRaceBoardInOneScreenMode(final RaceMap raceMap, final WindChart windChart) {
-        final TouchSplitLayoutPanel panel = new TouchSplitLayoutPanel(/* horizontal splitter width */ 3, /* vertical splitter height */ 25);
+    private void createRaceBoardInOneScreenMode(final RaceMap raceMap, final WindChart windChart, PaywallResolver paywallResolver, SecuredDTO dtoContext) {
+        final TouchSplitLayoutPanel panel = new TouchSplitLayoutPanel(/* horizontal splitter width */ 3, /* vertical splitter height */ 25, paywallResolver, dtoContext);
         if (windChart != null) {
             panel.insert(windChart.getEntryWidget(), windChart, Direction.SOUTH, DEFAULT_WIND_CHART_HEIGHT);
         }

@@ -51,8 +51,8 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by

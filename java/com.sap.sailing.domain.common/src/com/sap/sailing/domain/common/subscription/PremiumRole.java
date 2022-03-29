@@ -20,13 +20,15 @@ public class PremiumRole extends RolePrototype {
     PremiumRole() {
         super("premium", ROLE_ID.toString(),
                 WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
-                        .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS,
-                                SecuredDomainType.TrackedRaceActions.SIMULATOR)
-                        .build(),
-                WildcardPermission.builder().withTypes(SecuredDomainType.SIMULATOR).withActions(DefaultActions.READ)
-                        .build(),
+                        .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build(),
+                WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
+                        .withActions(SecuredDomainType.TrackedRaceActions.SIMULATOR).build(),
+                WildcardPermission.builder().withTypes(SecuredDomainType.SIMULATOR)
+                        .withActions(DefaultActions.READ).build(),
                 WildcardPermission.builder().withTypes(SecuredSecurityTypes.USER)
                         .withActions(SecuredSecurityTypes.UserActions.BE_PREMIUM).build(),
+                WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
+                        .withActions(SecuredDomainType.TrackedRaceActions.VIEWANALYSISCHARTS).build(),
                 WildcardPermission.builder().withTypes(SecuredDomainType.LEADERBOARD)
                         .withActions(SecuredDomainType.LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION).build());
     }

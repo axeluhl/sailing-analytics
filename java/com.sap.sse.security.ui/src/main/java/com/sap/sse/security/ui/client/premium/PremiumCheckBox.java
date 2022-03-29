@@ -64,9 +64,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
         super(action, paywallResolver, contextDTO);
         this.image = createPremiumIcon();
         this.checkBox = new CheckBox(label);
-
         initWidget(uiBinder.createAndBindUi(this));
-
         this.subscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
                 i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(),
                 () -> paywallResolver.getUnlockingSubscriptionPlans(action, contextDTO, this::onSubscribeDialogConfirmation));
