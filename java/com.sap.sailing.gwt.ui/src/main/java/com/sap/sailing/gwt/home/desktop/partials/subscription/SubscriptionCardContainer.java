@@ -50,31 +50,28 @@ public class SubscriptionCardContainer extends Composite {
 
     public SubscriptionCardContainer() {
         initWidget(uiBinder.createAndBindUi(this));
-        
         featureGrid = new Grid(2, 3);
-        
-        Label freePlanTitle = new Label(SubscriptionStringConstants.INSTANCE.free_subscription_plan_shortname());
+        final Label freePlanTitle = new Label(SubscriptionStringConstants.INSTANCE.free_subscription_plan_shortname());
         freePlanTitle.addStyleName(SubscriptionCardResources.INSTANCE.css().featureHeader());
         featureGrid.setWidget(0, 1, freePlanTitle);
-        Label premiumPlanTitle = new Label(SubscriptionStringConstants.INSTANCE.premium_subscription_plan_shortname());
+        final Label premiumPlanTitle = new Label(SubscriptionStringConstants.INSTANCE.premium_subscription_plan_shortname());
         premiumPlanTitle.addStyleName(SubscriptionCardResources.INSTANCE.css().featureHeader());
         featureGrid.setWidget(0, 2, premiumPlanTitle);
-
         addFeatureWithLink("features_organize_events", true, true);
         addFeature("features_events_with_more_regatta", true, true);
         addFeatureWithLink("features_connect_to_tractrac", true, true);
         addFeature("features_imports", true, true);
         addFeature("features_media_management", true, true);
         addFeature("features_limited_live_analytics", true, true);
-        addFeature("features_full_live_analytics", false, true);
-        addFeature("features_analytic_charts", false, true);
-        addFeature("features_map_analytics", false, true);
+        addFeature("features_media_tags", true, true);
+        addFeature("features_scoring", true, true);
+        addFeature("features_wind_analytics", false, true);
         addFeature("features_maneuver_analytics", false, true);
-        addFeature("features_media_tags", false, true);
-        addFeature("features_scoring", false, true);
-        
+        addFeature("features_competitor_analytics", false, true);
+        addFeature("features_advanced_leaderboard_info", false, true);
+        addFeature("features_simulator", false, true);
+        addFeature("features_map_analytics", false, true);
         features.add(featureGrid);
-        
         emailContact.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

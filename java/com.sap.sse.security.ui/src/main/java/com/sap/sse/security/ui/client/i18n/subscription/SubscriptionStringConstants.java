@@ -36,6 +36,18 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String premium_subscription_plan_shortname();
     String datamining_subscription_plan_shortname();
 
+    String features_map_analytics_title();
+    String features_map_analytics_description();
+    String features_simulator_title();
+    String features_simulator_description();
+    String features_advanced_leaderboard_info_title();
+    String features_advanced_leaderboard_info_description();
+    String features_competitor_analytics_title();
+    String features_competitor_analytics_description();
+    String features_maneuver_analytics_title();
+    String features_maneuver_analytics_description();
+    String features_wind_analytics_title();
+    String features_wind_analytics_description();
     String features_limited_live_analytics_title();
     String features_limited_live_analytics_description();
     String features_full_live_analytics_title();
@@ -55,10 +67,6 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String features_media_management_description();
     String features_analytic_charts_title();
     String features_analytic_charts_description();
-    String features_map_analytics_title();
-    String features_map_analytics_description();
-    String features_maneuver_analytics_title();
-    String features_maneuver_analytics_description();
     String features_media_tags_title();
     String features_media_tags_description();
     String features_scoring_title();
