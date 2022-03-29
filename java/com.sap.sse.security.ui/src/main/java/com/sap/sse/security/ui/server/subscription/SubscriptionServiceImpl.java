@@ -216,15 +216,28 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
     
     protected SubscriptionPlanDTO convertToDto(SubscriptionPlan plan) {
         final boolean isUserSubscribedToPlan = isUserSubscribedToPlan(plan.getId());
-        boolean hasAnySubscription;
-        try {
-            final User currentUser = getCurrentUser();
-            hasAnySubscription = currentUser.hasAnySubscription(plan.getId());
-        } catch (UserManagementException e) {
-            hasAnySubscription = false;
+        boolean isUserSubscribedToPlanCategory = false;
+        boolean hasHadSubscriptionForOneTimePlan;
+        if(isUserSubscribedToPlan) {
+            isUserSubscribedToPlanCategory = true;
+            hasHadSubscriptionForOneTimePlan = plan.getIsOneTimePlan();
+        }else {
+            for (SubscriptionPlan subscriptionPlan : getSecurityService().getAllSubscriptionPlans().values()) {
+                if(isUserSubscribedToPlan(subscriptionPlan.getId()) 
+                        && Util.containsAny(plan.getPlanCategories(), subscriptionPlan.getPlanCategories())) {
+                    isUserSubscribedToPlanCategory = true;
+                    break;
+                }
+            }
+            try {
+                final User currentUser = getCurrentUser();
+                hasHadSubscriptionForOneTimePlan = currentUser.hasAnySubscription(plan.getId()) && plan.getIsOneTimePlan();
+            } catch (UserManagementException e) {
+                hasHadSubscriptionForOneTimePlan = false;
+            }
         }
         return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getPrices(),
-                plan.getPlanCategories(), hasAnySubscription, null);
+                plan.getPlanCategories(), hasHadSubscriptionForOneTimePlan, isUserSubscribedToPlanCategory, null);
     }
 
     private boolean isUserSubscribedToPlan(String planId) {

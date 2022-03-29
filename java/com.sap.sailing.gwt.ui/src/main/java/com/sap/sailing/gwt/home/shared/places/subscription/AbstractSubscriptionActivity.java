@@ -66,8 +66,10 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                             view.resetSubscriptions();
                             addFreePlan(view);
                             result.forEach(plan -> {
-                                if (checkIfUserIsOwnerOfThePlan(plan)) {
+                                if (checkIfUserIsOwnerOfThePlan(plan) || checkIfUserIsSubscribedToPlanCategory(plan)) {
                                     view.addSubscriptionPlan(plan, Type.OWNER, eventBus);
+                                } else if (checkIfUserWasAlreadySubscribedToOneTimePlan(plan)) {
+                                    view.addSubscriptionPlan(plan, Type.ONETIMELOCK, eventBus);
                                 } else if (subscriptionsPlace.getPlansToHighlight()
                                         .contains(plan.getSubscriptionPlanId())) {
                                     view.addSubscriptionPlan(plan, Type.HIGHLIGHT, eventBus);
@@ -86,7 +88,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                             final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO(
                                     "free_subscription_plan" /* id */, /* isUserSubscribedToPlan */ false,
                                     Collections.emptySet() /* prices */, /* planCategories */ Collections.emptySet(),
-                                    /* userWasAlreadySubscribedToOneTimePlan */ false, null /* error */);
+                                    /* userWasAlreadySubscribedToOneTimePlan */ false, false, null /* error */);
                             view.addSubscriptionPlan(freePlan, Type.FREE, eventBus);
                         }
                     });
@@ -112,6 +114,14 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
 
     private boolean checkIfUserIsOwnerOfThePlan(final SubscriptionPlanDTO plan) {
         return plan.isUserSubscribedToPlan();
+    }
+    
+    private boolean checkIfUserWasAlreadySubscribedToOneTimePlan(final SubscriptionPlanDTO plan) {
+        return plan.isUserWasAlreadySubscribedToOneTimePlan();
+    }
+    
+    private boolean checkIfUserIsSubscribedToPlanCategory(final SubscriptionPlanDTO plan) {
+        return plan.isUserSubscribedToPlanCategory();
     }
 
     private void onInvalidSubscriptionProviderError(final InvalidSubscriptionProviderException exc) {

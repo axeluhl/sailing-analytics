@@ -33,7 +33,7 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 public class SubscriptionCard extends Composite {
 
     public static enum Type {
-        FREE, OWNER, HIGHLIGHT, INDIVIDUAL, DEFAULT
+        FREE, OWNER, HIGHLIGHT, INDIVIDUAL, DEFAULT, ONETIMELOCK
     }
 
     private static SubscriptionUiBinder uiBinder = GWT.create(SubscriptionUiBinder.class);
@@ -141,6 +141,11 @@ public class SubscriptionCard extends Composite {
             addStyleName(OWNED_STYLE);
             highlightHeader.add(new Label(i18n.subscriptionOwnerHeaderText()));
             button.setText(i18n.userManagement());
+            break;
+        case ONETIMELOCK:
+            addStyleName(OWNED_STYLE);
+            highlightHeader.add(new Label(i18n.subscriptionOneTimePlanLockedText()));
+            button.getElement().getStyle().setDisplay(Display.NONE);
             break;
         case INDIVIDUAL:
             addStyleName(INDIVIDUAL_STYLE);

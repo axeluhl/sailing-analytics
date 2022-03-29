@@ -50,6 +50,10 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
             container.addSubscription(new SubscriptionCard(plan, type, price -> presenter.manageSubscriptions(),
                     eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
+        case ONETIMELOCK:
+            container.addSubscription(new SubscriptionCard(plan, type, price -> {},
+                    eventBus, presenter.getAuthenticationContext().isLoggedIn()));
+            break;
         case INDIVIDUAL:
             container.addSubscription(
                     new SubscriptionCard(plan, type, price -> Window.Location.assign("mailto:info@sapsailing.com"),

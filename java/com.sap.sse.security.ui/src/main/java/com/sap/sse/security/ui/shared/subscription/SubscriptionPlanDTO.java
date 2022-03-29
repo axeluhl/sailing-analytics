@@ -19,6 +19,7 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
     private Boolean isUserSubscribedToPlan;
     private Set<PlanCategory> planCategory;
     private Boolean userWasAlreadySubscribedToOneTimePlan;
+    private Boolean isUserSubscribedToPlanCategory;
 
     /**
      * For GWT Serialization only
@@ -28,11 +29,13 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
     }
 
     public SubscriptionPlanDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices,
-            Set<PlanCategory> planCategory, boolean userWasAlreadySubscribedToOneTimePlan, String error) {
+            Set<PlanCategory> planCategory, boolean userWasAlreadySubscribedToOneTimePlan,
+            boolean isUserSubscribedToPlanCategory, String error) {
         this.id = id;
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
         this.planCategory = planCategory;
         this.userWasAlreadySubscribedToOneTimePlan = userWasAlreadySubscribedToOneTimePlan;
+        this.isUserSubscribedToPlanCategory = isUserSubscribedToPlanCategory;
         this.prices = new HashSet<SubscriptionPrice>(prices);
         this.error = error;
     }
@@ -69,6 +72,10 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
 
     public HashSet<SubscriptionPrice> getPrices() {
         return prices;
+    }
+
+    public boolean isUserSubscribedToPlanCategory() {
+        return isUserSubscribedToPlanCategory;
     }
 
     public void setError(String error) {
