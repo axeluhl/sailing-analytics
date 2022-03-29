@@ -34,7 +34,7 @@ download_and_install_latest_sap_jvm_8() {
     cd /opt
     rm -rf sapjvm_8
     if [ -f SIGNATURE.SMF ]; then
-      rm SIGNATURE.SMF
+      rm -f SIGNATURE.SMF
     fi
     unzip ${TMP}/sapjvm8-linux-x64.zip >>/var/log/sailing.err
     rm -f ${TMP}/sapjvm8-linux-x64.zip
