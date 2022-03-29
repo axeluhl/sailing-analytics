@@ -104,3 +104,6 @@ if [ -z "${MEMORY}" ]; then
   fi
   export MEMORY="${MEMORY_PER_INSTANCE_IN_MB}m"
 fi
+if [ -n ${CHARGEBEE_SITE} -a -n ${CHARGEBEE_APIKEY} ]; then
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dchargebee.site=${CHARGEBEE_SITE} -Dchargebee.apikey=${CHARGEBEE_APIKEY}"
+fi
