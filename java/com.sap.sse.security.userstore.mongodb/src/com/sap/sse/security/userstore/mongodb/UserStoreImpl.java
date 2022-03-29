@@ -543,6 +543,7 @@ public class UserStoreImpl implements UserStore {
         RoleDefinition roleDefinition = roleDefinitions.get(roleDefinitionId);
         roleDefinition = new RoleDefinitionImpl(roleDefinitionId, roleDefinition.getName(), permissions);
         mongoObjectFactory.storeRoleDefinition(roleDefinition);
+        roleDefinition.setPermissions(permissions);
     }
 
     @Override
