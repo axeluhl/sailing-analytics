@@ -1,7 +1,6 @@
 package com.sap.sse.security.ui.client.subscription.chargebee;
 
 import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
-import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -64,7 +63,7 @@ public class ChargebeeSubscriptionClientProvider implements SubscriptionClientPr
     public void registerAsyncService(String serviceBasePath) {
         String servicePath = serviceBasePath + "/" + getProviderName();
         EntryPointHelper.registerASyncService((ServiceDefTarget) getSubscriptionService(), servicePath,
-                HEADER_FORWARD_TO_REPLICA);
+                HEADER_FORWARD_TO_MASTER);
         EntryPointHelper.registerASyncService((ServiceDefTarget) getSubscriptionWriteService(), servicePath,
                 HEADER_FORWARD_TO_MASTER);
     }
