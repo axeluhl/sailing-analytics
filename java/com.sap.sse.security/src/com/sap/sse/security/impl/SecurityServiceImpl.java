@@ -2601,6 +2601,20 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                         + (currentSubscription != null ? currentSubscription.toString() : "null"));
                 logger.info(() -> "New plan subscription: "
                         + (newSubscription != null ? newSubscription.toString() : "null"));
+                // In some cases there is no invoice or transaction information. E.g. if the subscription has
+                // been cancelled.
+                // To ensure information about previous payments is preserved, the subscription is patched.
+                if (currentSubscription != null && newSubscription != null
+                        && newSubscription.getSubscriptionId() != null
+                        && newSubscription.getSubscriptionId().equals(currentSubscription.getSubscriptionId())) {
+                    if (currentSubscription.getTransactionStatus() != null
+                            && newSubscription.getTransactionStatus() == null) {
+                        newSubscription.patchTransactionData(currentSubscription);
+                    }
+                    if (currentSubscription.getInvoiceId() != null && newSubscription.getInvoiceId() == null) {
+                        newSubscription.patchInvoiceData(currentSubscription);
+                    }
+                }
                 if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
                     updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
                 }
@@ -2677,16 +2691,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                     if (!foundCurrentSubscription && ((!subscription.hasPlan()
                             && subscription.getProviderName().equals(newSubscription.getProviderName()))
                             || subscription.getPlanId().equals(newSubscription.getPlanId()))) {
-                        // In some cases there is no invoice or transaction information. E.g. if the subscription has
-                        // been cancelled.
-                        // To ensure we still have information about previous payments, the subscription is patched.
-                        if (subscription.getTransactionStatus() != null
-                                && newSubscription.getTransactionStatus() == null) {
-                            newSubscription.patchTransactionData(subscription);
-                        }
-                        if (subscription.getInvoiceId() != null && newSubscription.getInvoiceId() == null) {
-                            newSubscription.patchInvoiceData(subscription);
-                        }
                         newSubscriptionList.add(newSubscription);
                         foundCurrentSubscription = true;
                     } else {
