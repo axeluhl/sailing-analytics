@@ -24,7 +24,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
 
     @Override
     public void startCheckout(final String planId, final SubscribeView view, final Runnable fireUserUpdateEvent) {
-        service.prepareCheckout(planId, new AsyncCallback<PrepareCheckoutDTO>() {
+        writeService.prepareCheckout(planId, new AsyncCallback<PrepareCheckoutDTO>() {
             @Override
             public void onSuccess(final PrepareCheckoutDTO hostedPage) {
                 if (hostedPage.getError() != null && !hostedPage.getError().isEmpty()) {

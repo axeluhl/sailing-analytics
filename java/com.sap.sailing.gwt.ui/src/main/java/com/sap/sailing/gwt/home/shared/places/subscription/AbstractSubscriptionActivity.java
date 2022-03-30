@@ -34,7 +34,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
         Window.setTitle(subscriptionsPlace.getTitle());
         view.setPresenter(this);
         try {
-            clientFactory.getSubscriptionServiceFactory().getDefaultAsyncService()
+            clientFactory.getSubscriptionServiceFactory().getDefaultWriteAsyncService()
                     .isMailVerificationRequired(new AsyncCallback<Boolean>() {
                         @Override
                         public void onFailure(Throwable caught) {

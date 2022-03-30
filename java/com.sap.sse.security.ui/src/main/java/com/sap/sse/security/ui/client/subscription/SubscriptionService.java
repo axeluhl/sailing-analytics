@@ -11,31 +11,19 @@ import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 /**
  * Base subscription remote service interface for all payment provider services
  */
-public interface SubscriptionService<C, P> extends RemoteService {
-    /**
-     * Return provider configuration that will be required for client to setup
-     */
-    public C getConfiguration();
-    
-    /**
-     * Prepare checkout for a plan, and return necessary data from payment provider for starting checkout process. This
-     * is place where we will build customer data and request for checkout token from payment service provider
-     */
-    public P prepareCheckout(String planId);
+public interface SubscriptionService extends RemoteService {
 
     /**
      * Fetch user current subscription data from database
      */
     public SubscriptionListDTO getSubscriptions(Boolean activeOnly);
-    
+
     public ArrayList<SubscriptionPlanDTO> getAllSubscriptionPlans();
-    
+
     public ArrayList<String> getUnlockingSubscriptionplans(WildcardPermission permission) throws UserManagementException;
 
     SubscriptionPlanDTO getSubscriptionPlanDTOById(String planId);
 
     boolean isUserInPossessionOfRoles(String planId) throws UserManagementException;
-
-    boolean isMailVerificationRequired();
 
 }

@@ -21,7 +21,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
@@ -47,7 +46,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
  * regarding logic, or initialize any custom service logics, particular child implementation should override
  * {@code initService} method
  */
-public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet implements SubscriptionService<C, P> {
+public abstract class SubscriptionServiceImpl extends RemoteServiceServlet implements SubscriptionService {
     private static final long serialVersionUID = -2953209842119970755L;
     private static final Logger logger = Logger.getLogger(SubscriptionServiceImpl.class.getName());
 
@@ -106,10 +105,6 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         return plan.isUserInPossessionOfRoles(currentUser);
     }
     
-    @Override
-    public boolean isMailVerificationRequired() {
-        return !ServerStartupConstants.SUBSCRIPTIONS_DISABLE_EMAIL_VERIFICATION_REQUIRED;
-    }
 
     private CompletableFuture<SecurityService> initSecurityService() {
         final FullyInitializedReplicableTracker<SecurityService> tracker = FullyInitializedReplicableTracker
