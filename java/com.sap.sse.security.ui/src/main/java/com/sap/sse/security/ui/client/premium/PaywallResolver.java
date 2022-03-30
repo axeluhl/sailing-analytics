@@ -28,6 +28,7 @@ public class PaywallResolver {
 
     private final UserService userService;
     private final SubscriptionServiceFactory subscriptionServiceFactory;
+    private boolean isDisabled;
 
     public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory) {
         this.userService = userService;
@@ -57,7 +58,9 @@ public class PaywallResolver {
     }
 
     public boolean hasPermission(final Action action, final SecuredDTO dtoContext) {
-        if(action != null) {
+        if(isDisabled) {
+            return true;
+        }else if(action != null) {
             return userService.hasPermission(dtoContext, action);
         }else {
             return userService.hasPermission(dtoContext, DefaultActions.READ);
@@ -103,5 +106,13 @@ public class PaywallResolver {
     public HandlerRegistration registerUserStatusEventHandler(final UserStatusEventHandler handler) {
         userService.addUserStatusEventHandler(handler);
         return () -> userService.removeUserStatusEventHandler(handler);
+    }
+
+    /**
+     * TODO Bug 5696 WHen bug is resolved, this workaround is no longer necessary.
+     * @param isDisabled
+     */
+    public void setDisabled(boolean isDisabled) {
+        this.isDisabled = isDisabled;
     }
 }

@@ -61,7 +61,9 @@ public class SecuredDomainType extends HasPermissionsImpl {
         EXPORT,
         SIMULATOR,
         VIEWSTREAMLETS,
-        VIEWANALYSISCHARTS;
+        VIEWANALYSISCHARTS,
+        //TODO Bug 5696 WHen bug is resolved, this workaround is no longer necessary.
+        BYPASSPAYWALLFOREMBEDDEDMAPANDWINDCHART;
 
         private static final Action[] ALL_ACTIONS = DefaultActions.plus(
                 CAN_REPLAY_DURING_LIVE_RACES,
