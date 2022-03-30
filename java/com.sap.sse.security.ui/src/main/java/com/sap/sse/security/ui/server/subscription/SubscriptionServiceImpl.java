@@ -142,7 +142,7 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         if (subscriptions != null) {
             for (Subscription sub : subscriptions) {
                 SubscriptionPlan subscribedPlan = getSecurityService().getSubscriptionPlanById(sub.getPlanId());
-                if (isValidSubscription(sub) && !isSubscriptionCancelled(sub)
+                if (subscribedPlan != null && isValidSubscription(sub) && !isSubscriptionCancelled(sub)
                         && Util.containsAny(subscribedPlan.getPlanCategories(), newPlan.getPlanCategories())) {
                     return true;
                 }
