@@ -35,7 +35,6 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String free_subscription_plan_shortname();
     String premium_subscription_plan_shortname();
     String datamining_subscription_plan_shortname();
-
     String features_map_analytics_title();
     String features_map_analytics_description();
     String features_simulator_title();
