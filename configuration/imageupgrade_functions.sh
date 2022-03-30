@@ -22,7 +22,7 @@ run_git_pull() {
 }
 
 download_and_install_latest_sap_jvm_8() {
-  echo "Downloading and installing latest SAP JVM 8 to /opt/sapjvm_8" >>/var/log/sailing
+  echo "Downloading and installing latest SAP JVM 8 to /opt/sapjvm_8" >>/var/log/sailing.err
   vmpath=$( curl -s --cookie eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt https://tools.hana.ondemand.com | grep additional/sapjvm-8\..*-linux-x64.zip | head -1 | sed -e 's/^.*a href="\(additional\/sapjvm-8\..*-linux-x64\.zip\)".*/\1/' )
   if [ -n "${vmpath}" ]; then
     echo "Found VM version ${vmpath}; upgrading installation at /opt/sapjvm_8" >>/var/log/sailing.err
@@ -30,15 +30,15 @@ download_and_install_latest_sap_jvm_8() {
       TMP=/tmp
     fi
     echo "Downloading SAP JVM 8 as ZIP file to ${TMP}/sapjvm8-linux-x64.zip" >>/var/log/sailing.err
-    curl --cookie eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt "https://tools.hana.ondemand.com/additional/sapjvm-8.1.084-linux-x64.zip" > ${TMP}/sapjvm8-linux-x64.zip 2>>/var/log/sailing.err
+    curl --cookie eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt "https://tools.hana.ondemand.com/${vmpath}" > ${TMP}/sapjvm8-linux-x64.zip 2>>/var/log/sailing.err
     cd /opt
     rm -rf sapjvm_8
     if [ -f SIGNATURE.SMF ]; then
-      rm SIGNATURE.SMF
+      rm -f SIGNATURE.SMF
     fi
     unzip ${TMP}/sapjvm8-linux-x64.zip >>/var/log/sailing.err
-    rm ${TMP}/sapjvm8-linux-x64.zip
-    rm SIGNATURE.SMF
+    rm -f ${TMP}/sapjvm8-linux-x64.zip
+    rm -f SIGNATURE.SMF
   else
     echo "Did not find SAP JVM 8 at tools.hana.ondemand.com; not trying to upgrade" >>/var/log/sailing.err
   fi

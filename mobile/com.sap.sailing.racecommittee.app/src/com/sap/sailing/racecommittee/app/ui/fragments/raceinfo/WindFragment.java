@@ -6,10 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.Browser;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
@@ -435,6 +438,14 @@ public class WindFragment extends BaseFragment
         String mapUrl = WindHelper.generateMapURL(getActivity(), getRace(), true, false, false, true);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(mapUrl));
+        final Context context = requireContext();
+        final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        final String accessToken = pref.getString(context.getString(com.sap.sailing.android.shared.R.string.preference_access_token_key), null);
+        if (accessToken != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString("Authorization", "Bearer " + accessToken);
+            intent.putExtra(Browser.EXTRA_HEADERS, bundle);
+        }
         startActivity(intent);
     }
 
