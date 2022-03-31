@@ -28,7 +28,7 @@ public class DashboardClientFactoryImpl implements DashboardClientFactory{
     public DashboardClientFactoryImpl() {
         dispatch = new DashboardDispatchSystemImpl();
         securityProvider = new DefaultWithSecurityImpl();
-        sailingService = SailingServiceHelper.createSailingServiceInstance(true);
+        sailingService = SailingServiceHelper.createSailingServiceInstance();
         dashboardFiveSecondsTimer = new Timer(PlayModes.Live);
         dashboardFiveSecondsTimer.setRefreshInterval(DASHBOARD_RERFRESH_INTERVAL);
     }
