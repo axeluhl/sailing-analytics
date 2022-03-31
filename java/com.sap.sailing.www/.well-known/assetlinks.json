@@ -1,0 +1,5 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target" : { "namespace": "android_app", "package_name": "com.sap.sailing.racecommittee.app",
+               "sha256_cert_fingerprints": ["D4:C2:5C:14:6B:B2:EA:63:78:E9:1B:36:B7:82:A9:69:3B:65:8D:6B:60:4C:32:8D:AB:C8:5B:54:30:05:ED:AC", "SAP-Signature-Fingerprint TODO" ] }
+}]
