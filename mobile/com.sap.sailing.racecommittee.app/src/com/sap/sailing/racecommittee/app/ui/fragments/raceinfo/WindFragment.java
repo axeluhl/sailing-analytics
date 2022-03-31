@@ -15,6 +15,7 @@ import android.preference.PreferenceManager;
 import android.provider.Browser;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -436,17 +437,16 @@ public class WindFragment extends BaseFragment
     private void loadRaceMap() {
         //Build complete race map URL
         String mapUrl = WindHelper.generateMapURL(getActivity(), getRace(), true, false, false, true);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(mapUrl));
+        final CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
         final Context context = requireContext();
         final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         final String accessToken = pref.getString(context.getString(com.sap.sailing.android.shared.R.string.preference_access_token_key), null);
         if (accessToken != null) {
             Bundle bundle = new Bundle();
             bundle.putString("Authorization", "Bearer " + accessToken);
-            intent.putExtra(Browser.EXTRA_HEADERS, bundle);
+            customTabsIntent.intent.putExtra(Browser.EXTRA_HEADERS, bundle);
         }
-        startActivity(intent);
+        customTabsIntent.launchUrl(context, Uri.parse(mapUrl));
     }
 
     /**
