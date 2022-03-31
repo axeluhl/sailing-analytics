@@ -31,6 +31,9 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -88,10 +91,12 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public class WindFragment extends BaseFragment
@@ -134,17 +139,9 @@ public class WindFragment extends BaseFragment
     private List<ManagedRace> mSelectedRaces;
     private List<ManagedRace> mManagedRaces;
     private LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
-
-    /**
-     * Used when loading the wind map in {@link #loadRaceMap()} to validate that web site and app
-     * belong together and thus non-whitelisted CORS headers such as "Authorization" shall be
-     * allowed to be passed along in a {@link CustomTabsIntent}.
-     */
-    private CustomTabsSession mCustomTabsSession;
-
-    private CustomTabsServiceConnection mCustomTabsServiceConnection;
-
-    private String mMapUrl;
+    private View mMapLayout;
+    private WebView mMapWebView;
+    private Button mMapHide;
 
     public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
         WindFragment fragment = new WindFragment();
@@ -197,6 +194,7 @@ public class WindFragment extends BaseFragment
 
         mHeaderLayout = ViewHelper.get(layout, R.id.header_layout);
         mContentLayout = ViewHelper.get(layout, R.id.content_layout);
+        mMapLayout = ViewHelper.get(layout, R.id.map_layout);
 
         mHeaderText = ViewHelper.get(layout, R.id.header_text);
         mHeaderWindSensor = ViewHelper.get(layout, R.id.wind_sensor);
@@ -221,7 +219,8 @@ public class WindFragment extends BaseFragment
             mWindInputSpeed.addTextChangedListener(new DecimalInputTextWatcher(mWindInputSpeed, 1));
         }
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
-
+        mMapWebView = ViewHelper.get(layout, R.id.web_view);
+        mMapHide = ViewHelper.get(layout, R.id.position_hide);
         mReceiver = new IsTrackedReceiver(mContentMapShow);
 
         ImageView editCourse = ViewHelper.get(layout, R.id.edit_course);
@@ -237,6 +236,15 @@ public class WindFragment extends BaseFragment
     }
 
     @Override
+    public boolean onBackPressed() {
+        if (mMapHide == null && mContentLayout.getVisibility() == View.GONE) {
+            setupLayouts(false);
+            return true;
+        }
+        return super.onBackPressed();
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (mHeaderWindSensor != null) {
@@ -248,10 +256,8 @@ public class WindFragment extends BaseFragment
         }
         setupButtons();
         setupWindSpeedPicker();
-        setupLayouts();
-
+        setupLayouts(false);
         refreshUI(false);
-
         if (hasPermissions()) {
             // Check the location settings
             checkLocationSettings();
@@ -266,47 +272,6 @@ public class WindFragment extends BaseFragment
         if (mCompassView != null) {
             mCompassView.setDirectionListener(this);
         }
-        // Set up a CustomTabsCallback that launches the intent after session validated.
-        CustomTabsCallback callback = new CustomTabsCallback() {
-            @Override
-            public void onRelationshipValidationResult(int relation, @NonNull Uri requestedOrigin,
-                                                       boolean result, @Nullable Bundle extras) {
-                // Launch custom tabs intent after session was validated as the same origin.
-                final CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder(mCustomTabsSession)
-                        .setShowTitle(false).build();
-                final Context context = requireContext();
-                final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-                final String accessToken = pref.getString(context.getString(com.sap.sailing.android.shared.R.string.preference_access_token_key), null);
-                if (accessToken != null) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("Authorization", "Bearer " + accessToken);
-                    customTabsIntent.intent.putExtra(Browser.EXTRA_HEADERS, bundle);
-                }
-                customTabsIntent.launchUrl(context, Uri.parse(mMapUrl));
-            }
-        };
-        // set up a CustomTabsServiceConnection which can be used in loadRaceMap
-        // to validate that the web site loaded in the browser and this app belong
-        // to each other and thus an Authorization header may be sent in the
-        // CustomTabsIntent.
-        mCustomTabsServiceConnection = new CustomTabsServiceConnection() {
-            @Override
-            public void onCustomTabsServiceConnected(@NonNull ComponentName name, @NonNull CustomTabsClient client) {
-                // Create session after service connected.
-                mCustomTabsSession = client.newSession(callback);
-                client.warmup(0);
-            }
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) { }
-        };
-        CustomTabsClient.bindCustomTabsService(getActivity(), CustomTabsClient.getPackageName(requireContext(),
-                Arrays.asList("com.android.chrome")), mCustomTabsServiceConnection);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        requireContext().unbindService(mCustomTabsServiceConnection);
     }
 
     @Override
@@ -437,8 +402,10 @@ public class WindFragment extends BaseFragment
         if (mContentMapShow != null) {
             // disable functionality at first. will be enabled after contacting the server if race is tracked
             mContentMapShow.setEnabled(false);
-            mContentMapShow.setOnClickListener(v -> loadRaceMap(/* showWindCharts */  /* showStreamlets */  /* showSimulation */
-                    /* showMapControls */));
+            mContentMapShow.setOnClickListener(v -> setupLayouts(true));
+        }
+        if (mMapHide != null) {
+            mMapHide.setOnClickListener(v -> setupLayouts(false));
         }
     }
 
@@ -476,7 +443,7 @@ public class WindFragment extends BaseFragment
         picker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
     }
 
-    private void setupLayouts() {
+    private void setupLayouts(boolean showMap) {
         if (mHeaderLayout != null) {
             if (getArguments() != null
                     && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED) {
@@ -484,19 +451,37 @@ public class WindFragment extends BaseFragment
                     mHeaderLayout.setVisibility(View.GONE);
                 }
             } else {
-                mHeaderLayout.setVisibility(View.VISIBLE);
+                mHeaderLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
             }
         }
         if (mContentLayout != null) {
-            mContentLayout.setVisibility(View.VISIBLE);
+            mContentLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
+        }
+        if (mMapLayout != null) {
+            WebSettings settings = mMapWebView.getSettings();
+            if (showMap) {
+                settings.setJavaScriptEnabled(true);
+                loadRaceMap();
+                mMapLayout.setVisibility(View.VISIBLE);
+            } else {
+                mMapWebView.loadUrl("about:blank");
+                settings.setJavaScriptEnabled(false);
+                mMapLayout.setVisibility(View.GONE);
+            }
         }
     }
 
     private void loadRaceMap() {
         // Build complete race map URL
-        mMapUrl = WindHelper.generateMapURL(getActivity(), getRace(), true, false, false, true);
-        // Validate the session as the same origin to allow cross origin headers.
-        mCustomTabsSession.validateRelationship(CustomTabsService.RELATION_USE_AS_ORIGIN, Uri.parse(mMapUrl), null);
+        final String mapUrl = WindHelper.generateMapURL(getActivity(), getRace(), true, false, false, true);
+        final Context context = requireContext();
+        final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        final String accessToken = pref.getString(context.getString(com.sap.sailing.android.shared.R.string.preference_access_token_key), null);
+        final Map<String, String> headers = new HashMap<>();
+        if (accessToken != null) {
+            headers.put("Authorization", "Bearer " + accessToken);
+        }
+        mMapWebView.loadUrl(mapUrl, headers);
     }
 
     /**
