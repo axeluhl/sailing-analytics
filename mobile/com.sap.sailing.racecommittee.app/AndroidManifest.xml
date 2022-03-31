@@ -83,6 +83,14 @@
                     android:host="5z0o-alternate.app.link"
                     android:scheme="https" />
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="*.sapsailing.com"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity"
@@ -154,4 +162,9 @@
             android:name="io.branch.sdk.TestMode"
             android:value="false" /><!-- Set to true to use Branch_Test_Key (useful when simulating installs and/or switching between debug and production flavors) -->
     </application>
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
 </manifest>

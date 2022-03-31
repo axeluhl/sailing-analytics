@@ -86,6 +86,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -142,6 +143,8 @@ public class WindFragment extends BaseFragment
     private CustomTabsSession mCustomTabsSession;
 
     private CustomTabsServiceConnection mCustomTabsServiceConnection;
+
+    private String mMapUrl;
 
     public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
         WindFragment fragment = new WindFragment();
@@ -269,7 +272,8 @@ public class WindFragment extends BaseFragment
             public void onRelationshipValidationResult(int relation, @NonNull Uri requestedOrigin,
                                                        boolean result, @Nullable Bundle extras) {
                 // Launch custom tabs intent after session was validated as the same origin.
-                final CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder(mCustomTabsSession).build();
+                final CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder(mCustomTabsSession)
+                        .setShowTitle(false).build();
                 final Context context = requireContext();
                 final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
                 final String accessToken = pref.getString(context.getString(com.sap.sailing.android.shared.R.string.preference_access_token_key), null);
@@ -278,7 +282,7 @@ public class WindFragment extends BaseFragment
                     bundle.putString("Authorization", "Bearer " + accessToken);
                     customTabsIntent.intent.putExtra(Browser.EXTRA_HEADERS, bundle);
                 }
-                customTabsIntent.launchUrl(context, Uri.parse("https://dev.sapsailing.com/gwt/EmbeddedMapAndWindChart.html?regattaLikeName=SWC+2017+Hyeres+-+Formula+Kite&raceColumnName=M3&fleetName=Default&play=true"));
+                customTabsIntent.launchUrl(context, Uri.parse(mMapUrl));
             }
         };
         // set up a CustomTabsServiceConnection which can be used in loadRaceMap
@@ -291,14 +295,12 @@ public class WindFragment extends BaseFragment
                 // Create session after service connected.
                 mCustomTabsSession = client.newSession(callback);
                 client.warmup(0);
-                // Validate the session as the same origin to allow cross origin headers.
-                mCustomTabsSession.validateRelationship(CustomTabsService.RELATION_USE_AS_ORIGIN,
-                        Uri.parse("https://dev.sapsailing.com/gwt/EmbeddedMapAndWindChart.html?regattaLikeName=SWC+2017+Hyeres+-+Formula+Kite&raceColumnName=M3&fleetName=Default&play=true"), null);
             }
             @Override
             public void onServiceDisconnected(ComponentName componentName) { }
         };
-        CustomTabsClient.bindCustomTabsService(getActivity(), CustomTabsClient.getPackageName(requireContext(), null), mCustomTabsServiceConnection);
+        CustomTabsClient.bindCustomTabsService(getActivity(), CustomTabsClient.getPackageName(requireContext(),
+                Arrays.asList("com.android.chrome")), mCustomTabsServiceConnection);
     }
 
     @Override
@@ -492,7 +494,9 @@ public class WindFragment extends BaseFragment
 
     private void loadRaceMap() {
         // Build complete race map URL
-        final String mapUrl = WindHelper.generateMapURL(getActivity(), getRace(), true, false, false, true);
+        mMapUrl = WindHelper.generateMapURL(getActivity(), getRace(), true, false, false, true);
+        // Validate the session as the same origin to allow cross origin headers.
+        mCustomTabsSession.validateRelationship(CustomTabsService.RELATION_USE_AS_ORIGIN, Uri.parse(mMapUrl), null);
     }
 
     /**
