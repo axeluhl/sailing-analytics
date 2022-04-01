@@ -53,8 +53,6 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
 
     @Override
     protected ChargebeeInternalApiRequestWrapper createRequest() {
-        logger.info(() -> "Fetching subscription list, user: " + user.getName() + ", offset: "
-                + (offset == null ? "" : offset));
         SubscriptionListRequest request = Subscription.list().limit(100).customerId().is(user.getName())
                 .includeDeleted(false).sortByCreatedAt(SortOrder.DESC);
         if (offset != null && !offset.isEmpty()) {

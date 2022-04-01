@@ -80,11 +80,9 @@ public class ChargebeeSubscription extends Subscription {
     @Override
     public boolean isActiveSubscription() {
         String subscriptionStatus = getSubscriptionStatus();
-        String paymentStatus = getPaymentStatus();
         return subscriptionStatus != null && (subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL)
-                || ((subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE)
-                || subscriptionStatus.equals(SUBSCRIPTION_NON_RENEWING)) && paymentStatus != null
-                        && paymentStatus.equals(PAYMENT_STATUS_SUCCESS)));
+                || subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE)
+                || subscriptionStatus.equals(SUBSCRIPTION_NON_RENEWING));
     }
 
     @Override
