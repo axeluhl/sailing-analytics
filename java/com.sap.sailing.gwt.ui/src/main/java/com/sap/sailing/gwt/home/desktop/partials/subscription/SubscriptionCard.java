@@ -44,6 +44,7 @@ public class SubscriptionCard extends Composite {
     private static final String SUBSCRIPTION_STYLE = SubscriptionCardResources.INSTANCE.css().subscription();
     private static final String FREE_STYLE = SubscriptionCardResources.INSTANCE.css().free();
     private static final String PRICE_STYLE = SubscriptionCardResources.INSTANCE.css().price();
+    private static final String PRICE_INFO_STYLE = SubscriptionCardResources.INSTANCE.css().priceInfo();
     private static final String SELECTED_STYLE = SubscriptionCardResources.INSTANCE.css().selected();
 
     interface SubscriptionUiBinder extends UiBinder<Widget, SubscriptionCard> {
@@ -90,13 +91,14 @@ public class SubscriptionCard extends Composite {
         } else {
             currentPrice = null;
         }
+        final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
         if (priceList != null && !priceList.isEmpty()) {
             for (SubscriptionPrice subscriptionPrice: priceList) {
                 FocusPanel price = new FocusPanel();
                 price.addStyleName(PRICE_STYLE);
                 String intervalTranslated = SubscriptionStringConstants.INSTANCE.getString("payment_interval_" + subscriptionPrice.getPaymentInterval().name());
                 String priceText =  NumberFormat.getCurrencyFormat("USD").format(subscriptionPrice.getPrice())
-                        + " /" + intervalTranslated;
+                        + " / " + intervalTranslated;
                 price.add(new Label(priceText));
                 if (subscriptionPrice.equals(currentPrice)) {
                     price.addStyleName(SELECTED_STYLE);
@@ -112,6 +114,11 @@ public class SubscriptionCard extends Composite {
                     }
                 });
                 prices.add(price);
+                Label priceInfo = new Label(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanPriceInfoMessageKey()));
+                priceInfo.addStyleName(PRICE_INFO_STYLE);
+                if (priceInfo.getText().trim().length() > 0) {
+                    prices.add(priceInfo);
+                }
             }
             // TODO: Implement new Price handling
         } else {
@@ -171,7 +178,6 @@ public class SubscriptionCard extends Composite {
         default:
             break;
         }       
-        final SailingSubscriptionStringConstants subscriptionStringConstants = SailingSubscriptionStringConstants.INSTANCE;
         title.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanNameMessageKey()));
         description.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanDescMessageKey()));
         info.setInnerText(subscriptionStringConstants.getString(subscriptionPlanDTO.getSubscriptionPlanInfoMessageKey()));

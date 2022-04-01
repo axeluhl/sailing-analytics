@@ -23,6 +23,7 @@ public interface SubscriptionCardResources extends SharedHomeResources {
         String description();
         String info();
         String price();
+        String priceInfo();
         String selected();
         String prices();
         String features();
