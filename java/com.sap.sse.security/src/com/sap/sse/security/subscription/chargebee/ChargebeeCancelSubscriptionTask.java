@@ -50,7 +50,6 @@ public class ChargebeeCancelSubscriptionTask
             if (status != null) {
                 status = status.toLowerCase();
             }
-            // TODO: check status before send cancel request. Check if already CANCELED or NON_RENEWING.
             if (sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)
                     || sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_NON_RENEWING)) {
                 onDone(new SubscriptionCancelResult(/* success */ true, sub));
