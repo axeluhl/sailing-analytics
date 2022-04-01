@@ -5,6 +5,7 @@ public interface HasSubscriptionMessageKeys{
     public static final String NAME_MESSAGE_KEY_SUFFX = "_name";
     public static final String DESC_MESSAGE_KEY_SUFFX = "_description";
     public static final String INFO_MESSAGE_KEY_SUFFIX = "_info";
+    public static final String PRICE_INFO_MESSAGE_KEY_SUFFIX = "_price_info";
     
     String getSubscriptionPlanId();
     
@@ -22,5 +23,9 @@ public interface HasSubscriptionMessageKeys{
 
     default public String getSubscriptionPlanFeatureMessageKey() {
         return getSubscriptionPlanId() + FEATURES_MESSAGE_KEY_SUFFX;
+    }
+
+    default public String getSubscriptionPlanPriceInfoMessageKey() {
+        return getSubscriptionPlanId() + PRICE_INFO_MESSAGE_KEY_SUFFIX;
     }
 }
