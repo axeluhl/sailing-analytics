@@ -25,7 +25,7 @@ import com.sap.sse.security.shared.subscription.SubscriptionPrice.PaymentInterva
 public class SailingSubscriptionPlan extends SubscriptionPlan {
     private static final String USD_CURRENCY_CODE = "usd";
     private static final BigDecimal YEARLY_PLAN_PRICE = new BigDecimal(49.99);
-    private static final BigDecimal WEEKLY_PLAN_PRICE = new BigDecimal(4.99);
+    private static final BigDecimal WEEKLY_PLAN_PRICE = new BigDecimal(8.99);
     private static final BigDecimal TRIAL_PLAN_PRICE = new BigDecimal(0);
     private static final long serialVersionUID = 2563619370274543312L;
     private static final String YEARLY_PLAN_ID = "yearly_premium";
