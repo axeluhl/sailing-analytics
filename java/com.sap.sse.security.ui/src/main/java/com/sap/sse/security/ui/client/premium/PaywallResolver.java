@@ -33,7 +33,6 @@ public class PaywallResolver {
     public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory) {
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
-        subscriptionServiceFactory.initializeProviders();
     }
 
     public void getUnlockingSubscriptionPlans(final Action action, final SecuredDTO dtoContext,
