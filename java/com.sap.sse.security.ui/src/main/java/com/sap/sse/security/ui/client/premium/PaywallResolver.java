@@ -58,11 +58,11 @@ public class PaywallResolver {
     }
 
     public boolean hasPermission(final Action action, final SecuredDTO dtoContext) {
-        if(isDisabled) {
+        if (isDisabled) {
             return true;
-        }else if(action != null) {
+        } else if (action != null) {
             return userService.hasPermission(dtoContext, action);
-        }else {
+        } else {
             return userService.hasPermission(dtoContext, DefaultActions.READ);
         }
     }

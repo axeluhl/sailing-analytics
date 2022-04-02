@@ -3,11 +3,9 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
@@ -79,17 +77,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
         this.enableExpansion = enableExpansion;
         this.leaderboardPanel = leaderboardPanel;
         this.detailSelection = detailSelection;
-        detailColumnsMap = getDetailColumnMap(leaderboardPanel, stringConstants, detailHeaderStyle, detailColumnStyle);
-        Set<DetailType> removableDetailTypes = new HashSet<>();
-        for (DetailType detailType: detailColumnsMap.keySet()) {
-            if (detailType.getPremiumAction() != null 
-                    && !leaderboardPanel.getPaywallResolver().hasPermission(detailType.getPremiumAction(), this.leaderboardPanel.leaderboard)) {
-                removableDetailTypes.add(detailType);
-            }
-        }
-        for (DetailType detailType: removableDetailTypes) {
-            detailColumnsMap.remove(detailType);
-        }
+        this.detailColumnsMap = getDetailColumnMap(leaderboardPanel, stringConstants, detailHeaderStyle, detailColumnStyle);
     }
     
     /**
@@ -131,7 +119,10 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
             result = new ArrayList<AbstractSortableColumnWithMinMax<LeaderboardRowDTO,?>>();
             for (DetailType detailColumnType : detailSelection) {
                 AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> selectedColumn = detailColumnsMap.get(detailColumnType);
-                if (selectedColumn != null) {
+                if (selectedColumn != null &&
+                        (detailColumnType.getPremiumAction() == null ||
+                         getLeaderboardPanel().getPaywallResolver().hasPermission(
+                                 detailColumnType.getPremiumAction(), this.getLeaderboardPanel().getLeaderboard()))) {
                     result.add(selectedColumn);
                 }
             }

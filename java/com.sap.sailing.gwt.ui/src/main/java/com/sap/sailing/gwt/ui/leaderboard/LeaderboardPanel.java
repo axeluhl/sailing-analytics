@@ -692,7 +692,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     public void updateSettings(final LS newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
-
         if (newSettings.getOverallDetailsToShow() != null) {
             setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), DetailType.getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
@@ -731,7 +730,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     removeBusyTask();
                 }
             }
-
         };
         boolean newShallAddOverallDetails = shallAddOverallDetails();
         if (oldShallAddOverallDetails == newShallAddOverallDetails || oldShallAddOverallDetails
@@ -1497,7 +1495,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
-
             if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_BOATS)) {
                 if (boatInfoColumn == null) {
                     BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> getLeaderboard()
@@ -1506,7 +1503,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
                 result.add(boatInfoColumn);
             }
-
             if (isExpanded() && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
