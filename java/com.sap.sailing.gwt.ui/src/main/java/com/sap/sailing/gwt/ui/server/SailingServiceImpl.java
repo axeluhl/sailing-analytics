@@ -3068,7 +3068,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
-            if (detailType.getPremiumAction() != null) {
+            if (detailType.getPremiumAction() != null && trackedRace.getPermissionType().supports(detailType.getPremiumAction())) {
                 getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, detailType.getPremiumAction());
             }
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
