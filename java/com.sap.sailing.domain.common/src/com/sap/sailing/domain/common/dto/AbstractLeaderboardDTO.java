@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common.dto;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -11,10 +10,17 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.NamedDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
-public abstract class AbstractLeaderboardDTO extends NamedDTO implements Serializable {
+public abstract class AbstractLeaderboardDTO extends NamedDTO implements SecuredDTO {
     private static final long serialVersionUID = -205106531931903527L;
 
     private List<RaceColumnDTO> races;
@@ -22,6 +28,9 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
     public Map<CompetitorDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
+    
+    private OwnershipDTO ownership;
+    private AccessControlListDTO acl;
     
     /**
      * Set to the non-<code>null</code> regatta name if this DTO represents a <code>RegattaLeaderboard</code>.
@@ -47,6 +56,40 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
     
     public AbstractLeaderboardDTO(BoatClassDTO boatClass) {
         this(/* name */ "", boatClass);
+    }
+    
+    @Override
+    public AccessControlListDTO getAccessControlList() {
+        return acl;
+    }
+
+    @Override
+    public OwnershipDTO getOwnership() {
+        return ownership;
+    }
+
+    @Override
+    public void setAccessControlList(AccessControlListDTO acl) {
+        this.acl = acl;
+    }
+
+    @Override
+    public void setOwnership(OwnershipDTO ownership) {
+        this.ownership = ownership;
+    }
+    
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.LEADERBOARD;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getName());
     }
     
     public BoatClassDTO getBoatClass() {

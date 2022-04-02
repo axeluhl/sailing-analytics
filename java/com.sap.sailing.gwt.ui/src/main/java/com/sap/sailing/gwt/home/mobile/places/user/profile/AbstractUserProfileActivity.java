@@ -9,7 +9,7 @@ public abstract class AbstractUserProfileActivity extends AbstractActivity imple
 
     protected final MobileApplicationClientFactory clientFactory;
 
-    protected AbstractUserProfileActivity(MobileApplicationClientFactory clientFactory) {
+    protected AbstractUserProfileActivity(final MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
     }
     
@@ -36,6 +36,11 @@ public abstract class AbstractUserProfileActivity extends AbstractActivity imple
     @Override
     public PlaceNavigation<? extends AbstractUserProfilePlace> getSailorProfilesNavigation() {
         return clientFactory.getNavigator().getSailorProfilesNavigation();
+    }
+
+    @Override
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserSubscriptionsNavigation() {
+        return clientFactory.getNavigator().getUserSubscriptionsNavigation();
     }
 
 }

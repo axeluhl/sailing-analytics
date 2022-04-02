@@ -11,6 +11,9 @@ public abstract class RolePrototype implements NamedWithID {
 
     private static final long serialVersionUID = -3911998376131317304L;
     
+    /*
+     * Might be used in Stringmessages to identify SubscriptionplanRoles. Do check and validate before changing.
+     */
     private final UUID id;
     private final String name;
     private final Set<WildcardPermission> permissions;

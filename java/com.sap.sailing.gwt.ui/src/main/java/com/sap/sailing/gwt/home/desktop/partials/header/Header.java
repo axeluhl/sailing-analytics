@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
@@ -51,12 +52,17 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
@@ -67,14 +73,18 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Anchor startPageLinkMenu;
     @UiField Anchor eventsPageLinkMenu;
     @UiField Anchor solutionsPageLinkMenu;
+    @UiField Anchor subscriptionsPageLinkMenu;
     @UiField Anchor adminConsolePageLinkMenu;
     @UiField Anchor dataMiningPageLinkMenu;
+    @UiField Anchor strategySimulatorPageLinkMenu;
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
+    @UiField Anchor subscriptionsPageLink;
     @UiField AnchorElement logoAnchor;
     @UiField Anchor adminConsolePageLink;
     @UiField Anchor dataMiningPageLink;
+    @UiField Anchor strategySimulatorPageLink;
     @UiField TextBox searchText;
     @UiField Button searchButton;
     @UiField Anchor hamburgerMenuIcon;
@@ -82,6 +92,7 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Element centerMenuPanel;
     @UiField Anchor usermenu;
     @UiField ImageElement logoImage;
+    @UiField Element usermenuPremium;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     private final List<Anchor> links;
@@ -89,6 +100,7 @@ public class Header extends Composite implements HeaderConstants {
     private final PlaceNavigation<StartPlace> homeNavigation;
     private final PlaceNavigation<EventsPlace> eventsNavigation;
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
+    private final PlaceNavigation<SubscriptionPlace> subscriptionsNavigation;
     private final AuthenticationMenuView authenticationMenuView;
     
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
@@ -226,26 +238,32 @@ public class Header extends Composite implements HeaderConstants {
         menuToDropDownItemMap.put(startPageLink, startPageLinkMenu);
         menuToDropDownItemMap.put(eventsPageLink, eventsPageLinkMenu);
         menuToDropDownItemMap.put(solutionsPageLink, solutionsPageLinkMenu);
+        menuToDropDownItemMap.put(subscriptionsPageLink, subscriptionsPageLinkMenu);
         menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
         menuToDropDownItemMap.put(dataMiningPageLink, dataMiningPageLinkMenu);
+        menuToDropDownItemMap.put(strategySimulatorPageLink, strategySimulatorPageLinkMenu);
 
         headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
         final DropdownHandler dropdownHandler = new DropdownHandler(hamburgerMenuIcon, headerNavigationDropDownMenuContainer);
         menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, hamburgerMenuIcon, centerMenuPanel);
         Window.addResizeHandler(menuItemVisibilityHandler);
-        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, adminConsolePageLink, dataMiningPageLink });
+        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, subscriptionsPageLink, adminConsolePageLink, dataMiningPageLink });
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
         solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
+        subscriptionsNavigation = navigator.getSubscriptionsNavigation();
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
+        subscriptionsPageLink.setHref(subscriptionsNavigation.getTargetUrl());
         // make the Admin and DataMining links visible only for signed-in users
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
         dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
-        // initially hide admin console and data mining in hamburger menu
+        strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.NONE);
+        // initially hide admin console, data mining and strategy simulator in hamburger menu
         menuItemVisibilityHandler.addIgnore(adminConsolePageLink);
         menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
+        menuItemVisibilityHandler.addIgnore(strategySimulatorPageLink);
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             AuthenticationContext authContext = event.getCtx();
             // make it point to the current server if the user has CREATE_OBJECT permission there
@@ -280,7 +298,25 @@ public class Header extends Composite implements HeaderConstants {
                 dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
                 menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
             }
+            if (authContext.hasPermission(NamedSecuredObjectDTO.create(authContext.getServerInfo().getName(),
+                    SecuredDomainType.SIMULATOR, new TypeRelativeObjectIdentifier(authContext.getServerInfo().getName())),
+                    DefaultActions.READ)) {
+                strategySimulatorPageLinkMenu.setHref(STRATEGY_SIMULATOR_PATH);
+                strategySimulatorPageLinkMenu.setTarget(STRATEGY_SIMULATOR_WINDOW);
+                strategySimulatorPageLink.setHref(STRATEGY_SIMULATOR_PATH);
+                strategySimulatorPageLink.setTarget(STRATEGY_SIMULATOR_WINDOW);
+                strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                menuItemVisibilityHandler.removeIgnore(strategySimulatorPageLink);
+            } else {
+                strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.NONE);
+                menuItemVisibilityHandler.addIgnore(strategySimulatorPageLink);
+            }
             menuItemVisibilityHandler.refreshVisibilityDeferred();
+            if (authContext.hasPermission(authContext.getCurrentUser(), UserActions.BE_PREMIUM)) {
+                usermenuPremium.getStyle().setDisplay(Display.BLOCK);
+            } else {
+                usermenuPremium.getStyle().setDisplay(Display.NONE);
+            }
         });
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addFocusHandler((focusEvent) -> menuItemVisibilityHandler.refreshVisibility(370));
@@ -314,6 +350,7 @@ public class Header extends Composite implements HeaderConstants {
         }
         logoImage.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "logoImage");
         solutionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "solutionsPageLink");
+        subscriptionsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "subscriptionsPageLink");
         logoAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "logoAnchor");
         eventsPageLink.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "eventsPage");
         //remaining entries please see at registration for AuthenticationContextEvent 
@@ -335,6 +372,11 @@ public class Header extends Composite implements HeaderConstants {
         handleClickEvent(e, solutionsNavigation, solutionsPageLink);
     }
 
+    @UiHandler({ "subscriptionsPageLink", "subscriptionsPageLinkMenu" })
+    public void goToSubscriptions(ClickEvent e) {
+        handleClickEvent(e, subscriptionsNavigation, subscriptionsPageLink);
+    }
+
     @UiHandler("searchButton")
     void searchButtonClick(ClickEvent event) {
         PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText
@@ -352,6 +394,8 @@ public class Header extends Composite implements HeaderConstants {
             setActiveLink(startPageLink);
         } else if(place instanceof SolutionsPlace) {
             setActiveLink(solutionsPageLink);
+        } else if(place instanceof SubscriptionPlace) {
+            setActiveLink(subscriptionsPageLink);
         } else {
             setActiveLink(null);
         }

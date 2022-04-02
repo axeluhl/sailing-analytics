@@ -7,6 +7,11 @@
 # of this file as there could be overwritten ones!
 # *******************************************************
 
+# Source secrets if available; they may be overwritten in the user data section and by an environment.
+if [ -f configuration/secrets ]; then
+  . configuration/secrets
+fi
+
 # Set the heap size here if you want to override the default which
 # will compute a MEMORY assignment from the total
 # memory installed in the machine and the number of server instances to

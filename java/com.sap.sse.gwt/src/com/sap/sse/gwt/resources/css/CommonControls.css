@@ -162,6 +162,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
+	display: flex;
 	position: absolute;
 	right: 10px;
 	top: 3px;

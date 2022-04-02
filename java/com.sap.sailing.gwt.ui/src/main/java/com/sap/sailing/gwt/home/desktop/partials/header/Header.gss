@@ -151,6 +151,7 @@
   margin-left: 1rem;
   cursor: pointer;
   margin-right: 1rem;
+  position: relative;
 }
 .user_menu_button.open {
   background-image: resourceUrl('loggedout');
@@ -161,7 +162,21 @@
 .user_menu_button.loggedin.open {
   background-image: resourceUrl('loggedinOpen');
 }
-
+.user_menu_button span.premium {
+  display: none;
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  margin: 0;
+  padding: 0 3px;
+  font-size: 9px;
+  font-weight: bold;
+  color: #fff;
+  background: #efaa00;
+  line-height: 12px;
+  border-radius: 0.33em;
+}
 .header_navigation_icon {
   width: 1rem;
   height: 1.333rem;
@@ -179,4 +194,21 @@
 .header_navigation_iconactive {
 /*   background-image: resourceUrl('navigation_hover'); */
 }
-
+.sitenavigation .subscriptions:before {
+  content: "";
+  position: absolute;
+  background: resourceUrl('crown');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center left;
+  -webkit-transform: rotate(-30deg);
+  -moz-transform: rotate(-30deg);
+  -ms-transform: rotate(-30deg);
+  -o-transform: rotate(-30deg);
+  transform: rotate(-30deg);
+  height: 37px;
+  width: 15px;
+  margin-left: -6px;
+}
+.sitenavigation .subscriptions {
+}

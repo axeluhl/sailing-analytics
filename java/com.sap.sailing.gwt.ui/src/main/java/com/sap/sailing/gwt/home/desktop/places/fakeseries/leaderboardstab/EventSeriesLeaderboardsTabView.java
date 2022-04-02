@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -29,10 +30,13 @@ import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -81,42 +85,54 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                         public void onSuccess(Iterable<DetailType> result) {
                             final boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                                     LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-                            final ComponentContext<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(
-                                    leaderboardName, currentPresenter.getUserService(), /* FIXME placeToken */ null, result);
-                            componentContext.getInitialSettings(
-                                    new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
-                                        @Override
-                                        public void onSuccess(MultiRaceLeaderboardSettings settings) {
-                                            MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager
-                                                    .createMultiLeaderboardPanel(null, componentContext, settings, null, // TODO: preselectedLeaderboardName
-                                                            "leaderboardGroupName", leaderboardName, true, // TODO @FM this information came from place, now hard coded. check with frank
-                                                            autoExpandLastRaceColumn, result);
-                                            leaderboardPanel.addAttachHandler(new Handler() {
+                            currentPresenter.getSailingService().getLeaderboard(leaderboardName, new AsyncCallback<StrippedLeaderboardDTO>() {
+                                
+                                @Override
+                                public void onSuccess(StrippedLeaderboardDTO leaderboardDTO) {
+                                    final ComponentContext<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(
+                                            leaderboardName, currentPresenter.getUserService(), currentPresenter.getSubscriptionServiceFactory(), /* FIXME placeToken */ null, result, leaderboardDTO);
+                                    componentContext.getInitialSettings(
+                                            new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
                                                 @Override
-                                                public void onAttachOrDetach(AttachEvent event) {
-                                                    if (!event.isAttached()) {
-                                                        componentContext.dispose();
+                                                public void onSuccess(MultiRaceLeaderboardSettings settings) {
+                                                    MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager
+                                                            .createMultiLeaderboardPanel(null, componentContext, settings, null, // TODO: preselectedLeaderboardName
+                                                                    "leaderboardGroupName", leaderboardName, true, // TODO @FM this information came from place, now hard coded. check with frank
+                                                                    autoExpandLastRaceColumn, result);
+                                                    leaderboardPanel.addAttachHandler(new Handler() {
+                                                        @Override
+                                                        public void onAttachOrDetach(AttachEvent event) {
+                                                            if (!event.isAttached()) {
+                                                                componentContext.dispose();
+                                                            }
+                                                        }
+                                                    });
+                                                    initWidget(
+                                                            ourUiBinder.createAndBindUi(EventSeriesLeaderboardsTabView.this));
+                                                    leaderboard.setMultiLeaderboard(leaderboardPanel,
+                                                            currentPresenter.getAutoRefreshTimer());
+                                                    leaderboardPanel
+                                                            .addLeaderboardUpdateListener(EventSeriesLeaderboardsTabView.this);
+                                                    if (currentPresenter.getSeriesDTO()
+                                                            .getState() != EventSeriesState.RUNNING) {
+                                                        // TODO: this.leaderboard.hideRefresh();
+                                                    } else {
+                                                        // Turn on auto refresh button at parent leaderboard
+                                                        leaderboard.turnOnAutoPlay();
                                                     }
+                                                    regattaAnalyticsManager.hideCompetitorChart();
+                                                    leaderboardPanel.setVisible(true);
+                                                    contentArea.setWidget(EventSeriesLeaderboardsTabView.this);
                                                 }
                                             });
-                                            initWidget(
-                                                    ourUiBinder.createAndBindUi(EventSeriesLeaderboardsTabView.this));
-                                            leaderboard.setMultiLeaderboard(leaderboardPanel,
-                                                    currentPresenter.getAutoRefreshTimer());
-                                            leaderboardPanel
-                                                    .addLeaderboardUpdateListener(EventSeriesLeaderboardsTabView.this);
-                                            if (currentPresenter.getSeriesDTO()
-                                                    .getState() != EventSeriesState.RUNNING) {
-                                                // TODO: this.leaderboard.hideRefresh();
-                                            } else {
-                                                // Turn on auto refresh button at parent leaderboard
-                                                leaderboard.turnOnAutoPlay();
-                                            }
-                                            regattaAnalyticsManager.hideCompetitorChart();
-                                            leaderboardPanel.setVisible(true);
-                                            contentArea.setWidget(EventSeriesLeaderboardsTabView.this);
-                                        }
-                                    });
+                                }
+                                
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    // TODO Auto-generated method stub
+                                    
+                                }
+                            });
                         }
 
                         @Override
@@ -140,8 +156,9 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     }
 
     private ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
-            String placeToken, Iterable<DetailType> availableDetailTypes) {
-        final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(StringMessages.INSTANCE, availableDetailTypes);
+            SubscriptionServiceFactory subscriptionServiceFactory, String placeToken, Iterable<DetailType> availableDetailTypes, AbstractLeaderboardDTO leaderboardDTO) {
+        PaywallResolver paywallResolver = new PaywallResolver(userService, subscriptionServiceFactory);
+        final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(StringMessages.INSTANCE, availableDetailTypes, paywallResolver, leaderboardDTO);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesRegattaLeaderboards(leaderboardName);
 
         final ComponentContext<MultiRaceLeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(

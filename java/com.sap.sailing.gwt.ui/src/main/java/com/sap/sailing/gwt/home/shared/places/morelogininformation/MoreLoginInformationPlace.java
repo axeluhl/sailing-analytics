@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.shared.places.morelogininformation;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.place.shared.Prefix;
+import com.sap.sailing.gwt.common.client.navigation.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
-import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 
 /**
  * Place that leads users to a page showing the benefits of logging in on sapsailing.com.

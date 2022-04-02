@@ -41,6 +41,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -65,8 +66,9 @@ public class SecurityResourceTest {
             store.ensureServerGroupExists();
             accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
-            service = new SecurityServiceImpl(/* mailServiceTracker */ null,
-                    store, accessControlStore, /* hasPermissionsProvider */ SecuredSecurityTypes::getAllInstances);
+            service = new SecurityServiceImpl(/* mailServiceTracker */ null, store, accessControlStore,
+                    /* hasPermissionsProvider */SecuredSecurityTypes::getAllInstances,
+                    SSESubscriptionPlan::getAllInstances);
             service.initialize();
             Activator.setSecurityService(service);
             SecurityUtils.setSecurityManager(service.getSecurityManager());

@@ -31,6 +31,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -70,7 +71,8 @@ public class PrivilegeEscalationTest {
         userGroup.add(user2);
         userStore.updateUserGroup(userGroup);
         accessControlStore = new AccessControlStoreImpl(userStore);
-        securityService = new SecurityServiceImpl(null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
+        securityService = new SecurityServiceImpl(null, userStore, accessControlStore,
+                SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
         securityService.initialize();
         rd = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
                 Collections.singleton(type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));

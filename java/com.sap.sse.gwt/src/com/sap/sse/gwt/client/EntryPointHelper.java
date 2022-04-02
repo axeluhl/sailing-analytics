@@ -48,8 +48,9 @@ public class EntryPointHelper {
                 super.doFinish(rb);
                 if (specialHeaders != null && specialHeaders.length > 0) {
                     for (Pair<String, String> header : specialHeaders) {
-                        if (header != null)
+                        if (header != null) {
                             rb.setHeader(header.getA(), header.getB());
+                        }
                     }
                 }
                 rb.setHeader(HttpRequestHeaderConstants.HEADER_KEY_LOCALE, LocaleInfo.getCurrentLocale().getLocaleName());

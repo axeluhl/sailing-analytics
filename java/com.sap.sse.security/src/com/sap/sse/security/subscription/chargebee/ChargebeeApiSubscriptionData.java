@@ -1,9 +1,16 @@
 package com.sap.sse.security.subscription.chargebee;
 
+import java.sql.Timestamp;
+
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Subscription;
+import com.chargebee.models.Subscription.SubscriptionItem;
+import com.chargebee.models.Subscription.SubscriptionItem.ItemType;
 import com.chargebee.models.Transaction;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 
 public class ChargebeeApiSubscriptionData {
@@ -11,14 +18,14 @@ public class ChargebeeApiSubscriptionData {
     private final Invoice invoice;
     private final Transaction transaction;
 
-    public ChargebeeApiSubscriptionData(com.chargebee.models.Subscription subscription, Invoice invoice,
+    public ChargebeeApiSubscriptionData(Subscription subscription, Invoice invoice,
             Transaction transaction) {
         this.subscription = subscription;
         this.invoice = invoice;
         this.transaction = transaction;
     }
 
-    public ChargebeeSubscription toSubscription() {
+    public ChargebeeSubscription toSubscription(SubscriptionPlanProvider subscriptionPlanProvider) {
         String subscriptionStatus = null;
         if (subscription.status() != null) {
             subscriptionStatus = stringToLowerCase(subscription.status().name());
@@ -35,13 +42,48 @@ public class ChargebeeApiSubscriptionData {
             invoiceId = invoice.id();
             invoiceStatus = stringToLowerCase(invoice.status().name());
         }
-        String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
+        final String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
                 invoiceStatus);
-        return new ChargebeeSubscription(subscription.id(), subscription.planId(), subscription.customerId(),
-                TimePoint.of(subscription.trialStart()), TimePoint.of(subscription.trialEnd()), subscriptionStatus,
-                paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus,
-                TimePoint.of(subscription.createdAt()), TimePoint.of(subscription.updatedAt()), TimePoint.now(),
-                TimePoint.now());
+        final String planId = getPlanId(subscriptionPlanProvider);
+        final int reoccuringPaymentValue = calculateReoccuringPaymentValue();
+        return new ChargebeeSubscription(subscription.id(), planId, subscription.customerId(),
+                getTime(subscription.trialStart()), getTime(subscription.trialEnd()), subscriptionStatus, paymentStatus,
+                transactionType, transactionStatus, invoiceId, invoiceStatus, reoccuringPaymentValue,
+                subscription.currencyCode(), getTime(subscription.createdAt()), getTime(subscription.updatedAt()),
+                getTime(subscription.activatedAt()), getTime(subscription.nextBillingAt()),
+                getTime(subscription.currentTermEnd()), getTime(subscription.cancelledAt()), TimePoint.now(),
+                com.sap.sse.security.shared.subscription.Subscription.emptyTime());
+    }
+
+    private int calculateReoccuringPaymentValue() {
+        int reoccuringPaymentValue = 0;
+        for (SubscriptionItem item : subscription.subscriptionItems()){
+            if(item.amount() != null) {
+                reoccuringPaymentValue += item.amount();
+            }
+        }
+        return reoccuringPaymentValue;
+    }
+    
+    private String getPlanId(SubscriptionPlanProvider subscriptionPlanProvider) {
+        for(SubscriptionItem item : subscription.subscriptionItems()) {
+            if(item.itemType().equals(ItemType.PLAN)) {
+                final String itemPriceId = item.itemPriceId();
+                for(SubscriptionPlan plan : subscriptionPlanProvider.getAllSubscriptionPlans().values()) {
+                    for(SubscriptionPrice price : plan.getPrices()) {
+                        if(price.getPriceId().equals(itemPriceId)){
+                            return plan.getId();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    private TimePoint getTime(Timestamp millis) {
+        return millis == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime()
+                : TimePoint.of(millis);
     }
 
     private String stringToLowerCase(String str) {

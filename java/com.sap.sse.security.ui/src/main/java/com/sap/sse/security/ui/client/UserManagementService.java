@@ -17,6 +17,7 @@ import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -85,4 +86,6 @@ public interface UserManagementService extends RemoteService {
     SuccessInfo logout() throws org.apache.shiro.authz.UnauthorizedException;
 
     ArrayList<HasPermissions> getAllHasPermissions();
+
+    SecuredDTO addSecurityInformation(SecuredDTO securedDTO);
 }

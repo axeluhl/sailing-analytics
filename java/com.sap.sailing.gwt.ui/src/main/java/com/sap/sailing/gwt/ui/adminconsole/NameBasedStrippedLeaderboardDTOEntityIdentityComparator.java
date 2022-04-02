@@ -1,17 +1,17 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 
-public class NameBasedStrippedLeaderboardDTOEntityIdentityComparator implements EntityIdentityComparator<StrippedLeaderboardDTOWithSecurity> {
+public class NameBasedStrippedLeaderboardDTOEntityIdentityComparator implements EntityIdentityComparator<StrippedLeaderboardDTO> {
     @Override
-    public boolean representSameEntity(StrippedLeaderboardDTOWithSecurity dto1,
-            StrippedLeaderboardDTOWithSecurity dto2) {
+    public boolean representSameEntity(StrippedLeaderboardDTO dto1,
+            StrippedLeaderboardDTO dto2) {
         return dto1.getName().equals(dto2.getName());
     }
 
     @Override
-    public int hashCode(StrippedLeaderboardDTOWithSecurity t) {
+    public int hashCode(StrippedLeaderboardDTO t) {
         return t.getName().hashCode();
     }
 }

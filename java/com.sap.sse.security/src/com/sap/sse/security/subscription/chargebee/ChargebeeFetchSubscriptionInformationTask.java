@@ -1,7 +1,5 @@
 package com.sap.sse.security.subscription.chargebee;
 
-import java.util.logging.Logger;
-
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Transaction;
@@ -15,8 +13,6 @@ import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
  */
 public class ChargebeeFetchSubscriptionInformationTask
         implements ChargebeeInvoiceRequest.OnResultListener, ChargebeeTransactionRequest.OnResultListener {
-
-    private static final Logger logger = Logger.getLogger(ChargebeeFetchSubscriptionInformationTask.class.getName());
 
     public static interface OnResultListener {
         void onSubscriptionDataResult(String subscriptionId, ChargebeeApiSubscriptionData subscription);
@@ -43,8 +39,6 @@ public class ChargebeeFetchSubscriptionInformationTask
     }
 
     public void run() {
-        logger.info(() -> "Fetch Chargebee subscription information, user: " + user.getName() + ", subscription "
-                + subscription.id());
         requestProcessor.addRequest(new ChargebeeInvoiceRequest(user, subscription.id(), this, requestProcessor, chargebeeApiServiceParams));
         requestProcessor.addRequest(new ChargebeeTransactionRequest(user, subscription.id(), this, requestProcessor, chargebeeApiServiceParams));
     }
