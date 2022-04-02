@@ -17,7 +17,7 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
     Date asDate();
     
     static TimePoint of(Date date) {
-        return new MillisecondsTimePoint(date);
+        return date == null ? null : new MillisecondsTimePoint(date);
     }
     
     static TimePoint of(Long millis) {

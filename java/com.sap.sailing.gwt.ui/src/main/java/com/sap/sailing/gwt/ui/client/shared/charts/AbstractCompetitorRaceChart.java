@@ -120,8 +120,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      */
     private long effectiveStepSize = -1;
     
-    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionsExecutorForCompetitorRaceData;
-    
+    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionsExecutorForCompetitorRaceDataForPrimary;
+
+    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionsExecutorForCompetitorRaceDataForSecondary;
+
     AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
             RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
@@ -130,7 +132,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             boolean allowTimeAdjust, String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
-        this.timeRangeActionsExecutorForCompetitorRaceData = new TimeRangeActionsExecutor<>();
+        this.timeRangeActionsExecutorForCompetitorRaceDataForPrimary = new TimeRangeActionsExecutor<>();
+        this.timeRangeActionsExecutorForCompetitorRaceDataForSecondary = new TimeRangeActionsExecutor<>();
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -254,9 +257,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // If the time interval is too long and the step size too small, the number of fixes the query would have to
             // produce may exceed any reasonable limit. Therefore, we limit the number of fixes that such a query may ask
             // for:
-            doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedFirstDetailType(), primary);
+            doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedFirstDetailType(), primary, timeRangeActionsExecutorForCompetitorRaceDataForPrimary);
             if (getSelectedSecondDetailType() != null) {
-                doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedSecondDetailType(), secondary);
+                doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedSecondDetailType(), secondary, timeRangeActionsExecutorForCompetitorRaceDataForSecondary);
             }
         }
     }
@@ -276,7 +279,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
-            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve, final TimingHolder tholder) {
+            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve, final TimingHolder tholder,
+            TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionExecutor) {
         long effectiveStepSize = getEffectiveStepSize(from, to);
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, effectiveStepSize, selectedDataTypeToRetrieve,
@@ -359,7 +363,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 return new Triple<>(competitorRaceData, timeRange.from().asDate(), timeRange.to().asDate());
             }
         };
-        timeRangeActionsExecutorForCompetitorRaceData.execute(getCompetitorsRaceDataAction, dataLoadedCallback);
+        timeRangeActionExecutor.execute(getCompetitorsRaceDataAction, dataLoadedCallback);
     }
 
     /**
