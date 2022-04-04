@@ -703,6 +703,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.isShowCompetitorNationality = isShowCompetitorNationality;
     }
 
+    @Override
     public void updateSettings(final LS newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
