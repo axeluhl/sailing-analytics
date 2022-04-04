@@ -2916,6 +2916,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             }else {
                 result = newSubscription.isActiveSubscription() || subscriptionPlanById.isUserInPossessionOfRoles(user);
             }
+        } else if (!newSubscription.hasPlan()) {
+            // New subscription doesn't have plan id, that means it's an empty subscription model which is used for
+            // clearing all user subscriptions
+            result = true;
         } else {
             assert currentSubscription.getPlanId().equals(newSubscription.getPlanId());
             // in this case user roles will be needed to update only when subscription active status is changed
