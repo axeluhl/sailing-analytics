@@ -3,7 +3,6 @@ package com.sap.sse.security.subscription.chargebee;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.chargebee.APIException;
 import com.chargebee.ListResult;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Subscription.SubscriptionListRequest;
@@ -50,7 +49,7 @@ public class ChargebeeSubscriptionRequest extends ChargebeeApiRequest {
     }
 
     @Override
-    protected void handleError(APIException e, Runnable reschedule) {
+    protected void handleError(Exception e) {
         logger.log(Level.SEVERE, "Fetch Chargebee subscription failed, subscription id: " + subscriptionId, e);
         onDone(null);
     }

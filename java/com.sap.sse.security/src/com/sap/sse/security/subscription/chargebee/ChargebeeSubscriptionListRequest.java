@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.chargebee.APIException;
 import com.chargebee.ListResult;
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Subscription;
@@ -63,15 +62,10 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest {
     }
 
     @Override
-    protected void handleError(APIException e, Runnable reschedule) {
+    protected void handleError(Exception e) {
         logger.log(Level.SEVERE, "Fetching subscription list failed, offset: "
                 + (offset == null ? "" : offset), e);
-        // The request is rescheduled, since the upgradeTask might still be running. 
-        if(e.httpStatusCode == 429) {
-            reschedule.run();
-        }else {
-            onDone(null, null);
-        }
+        onDone(null, null);
     }
 
     private void processListResult(ListResult result) {

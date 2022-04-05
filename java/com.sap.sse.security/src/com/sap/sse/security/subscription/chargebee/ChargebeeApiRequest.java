@@ -1,5 +1,8 @@
 package com.sap.sse.security.subscription.chargebee;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.chargebee.APIException;
 import com.chargebee.ApiResponse;
 import com.sap.sse.security.subscription.SubscriptionApiBaseService;
@@ -17,6 +20,8 @@ import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
  * {@link #processResult(ChargebeeInternalApiRequestWrapper) processes the results}.
  */
 public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
+    
+    private static final Logger logger = Logger.getLogger(ChargebeeApiRequest.class.getName());
     private final SubscriptionApiRequestProcessor requestProcessor;
     private final SubscriptionApiBaseService chargebeeApiServiceParams;
 
@@ -30,9 +35,17 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
         ChargebeeInternalApiRequestWrapper request = createRequest();
         if (request != null) {
             try {
+                request.request();
                 processResult(request);
             } catch (APIException e) {
-                handleError(e, () -> requestProcessor.rescheduleRequestAfterRateLimitExceeded(this));
+                if (e.httpStatusCode == 429) {
+                    logger.log(Level.SEVERE, "API rate limit reached, rescheduling request");
+                    requestProcessor.rescheduleRequestAfterRateLimitExceeded(this);
+                } else {
+                    handleError(e);
+                }
+            } catch (Exception e) {
+                handleError(e);
             }
         }
     }
@@ -46,7 +59,7 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
 
     protected abstract void processResult(ChargebeeInternalApiRequestWrapper request);
 
-    protected abstract void handleError(APIException e, Runnable reschedule);
+    protected abstract void handleError(Exception e);
 
     protected SubscriptionApiRequestProcessor getRequestProcessor() {
         return requestProcessor;
