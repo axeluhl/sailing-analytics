@@ -3,6 +3,7 @@ package com.sap.sse.security.subscription.chargebee;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.chargebee.APIException;
 import com.chargebee.Result;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Subscription.CancelForItemsRequest;
@@ -47,7 +48,7 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
     }
 
     @Override
-    protected void handleError(Exception e, Runnable reschedule) {
+    protected void handleError(APIException e, Runnable reschedule) {
         logger.log(Level.SEVERE, "Cancel Chargebee subscription failed, subscription id: " + subscriptionId, e);
         onDone(null);
     }

@@ -1,5 +1,6 @@
 package com.sap.sse.security.subscription.chargebee;
 
+import com.chargebee.APIException;
 import com.chargebee.ApiResponse;
 import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequest;
@@ -29,13 +30,8 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
         ChargebeeInternalApiRequestWrapper request = createRequest();
         if (request != null) {
             try {
-                request.request();
-                if (!isRateLimitReached(request.getResponse())) {
-                    processResult(request);
-                } else {
-                    requestProcessor.rescheduleRequestAfterRateLimitExceeded(this);
-                }
-            } catch (Exception e) {
+                processResult(request);
+            } catch (APIException e) {
                 handleError(e, () -> requestProcessor.rescheduleRequestAfterRateLimitExceeded(this));
             }
         }
@@ -50,13 +46,9 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
 
     protected abstract void processResult(ChargebeeInternalApiRequestWrapper request);
 
-    protected abstract void handleError(Exception e, Runnable reschedule);
+    protected abstract void handleError(APIException e, Runnable reschedule);
 
     protected SubscriptionApiRequestProcessor getRequestProcessor() {
         return requestProcessor;
-    }
-
-    private boolean isRateLimitReached(ApiResponse response) {
-        return response.httpCode() == 429;
     }
 }
