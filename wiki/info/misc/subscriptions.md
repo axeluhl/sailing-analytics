@@ -4,7 +4,7 @@
 
 The subscription overview page includes a set of subscription cards, like the free plan but also the plans subscribable by Chargebee.
 
-Additionally there is a detailed list of all features which are included in a paid subscription.
+Additionally there is a detailed list of all features which are included in a paid/trial subscription.
 
 ### Add a subscription plan
 
@@ -25,6 +25,8 @@ Additionally there is a detailed list of all features which are included in a pa
 		- A short description of the plan content (`<H4>`)
 	- `<PLAN-ID>_info`
 		- Can be uses for additional info (`<H5>`)
+	- `<PLAN-ID>_price_info`
+		- It's a red rubber stamp over the price. It will only be rendered if not empty text is existing.
 	- `<PLAN-ID>_features`
 		- Comma separated list of feature labels
 
