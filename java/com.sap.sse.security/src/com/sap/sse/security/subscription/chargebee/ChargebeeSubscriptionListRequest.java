@@ -62,10 +62,11 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest {
     }
 
     @Override
-    protected void handleError(Exception e) {
+    protected void handleError(Exception e, Runnable reschedule) {
         logger.log(Level.SEVERE, "Fetching subscription list failed, offset: "
-                + (offset == null ? "" : offset));
-        onDone(null, null);
+                + (offset == null ? "" : offset), e);
+        // The request is rescheduled, since the upgradeTask might still be running. 
+        reschedule.run();
     }
 
     private void processListResult(ListResult result) {

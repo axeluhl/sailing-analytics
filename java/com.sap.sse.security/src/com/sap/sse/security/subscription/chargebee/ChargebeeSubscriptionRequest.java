@@ -49,7 +49,7 @@ public class ChargebeeSubscriptionRequest extends ChargebeeApiRequest {
     }
 
     @Override
-    protected void handleError(Exception e) {
+    protected void handleError(Exception e, Runnable reschedule) {
         logger.log(Level.SEVERE, "Fetch Chargebee subscription failed, subscription id: " + subscriptionId, e);
         onDone(null);
     }

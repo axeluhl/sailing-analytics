@@ -36,7 +36,7 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
                     requestProcessor.rescheduleRequestAfterRateLimitExceeded(this);
                 }
             } catch (Exception e) {
-                handleError(e);
+                handleError(e, () -> requestProcessor.rescheduleRequestAfterRateLimitExceeded(this));
             }
         }
     }
@@ -50,7 +50,7 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
 
     protected abstract void processResult(ChargebeeInternalApiRequestWrapper request);
 
-    protected abstract void handleError(Exception e);
+    protected abstract void handleError(Exception e, Runnable reschedule);
 
     protected SubscriptionApiRequestProcessor getRequestProcessor() {
         return requestProcessor;
