@@ -219,7 +219,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors,
             Date from, Date to, long stepSizeInMs, DetailType detailType, String leaderboardGroupName,
-            UUID leaderboardGroupId, String leaderboardName) throws NoWindException, UnauthorizedException;
+            UUID leaderboardGroupId, String leaderboardName) throws NoWindException, UnauthorizedException, NotFoundException;
 
     Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws UnauthorizedException, Exception;
 

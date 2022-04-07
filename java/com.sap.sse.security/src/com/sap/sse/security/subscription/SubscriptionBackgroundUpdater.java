@@ -33,7 +33,7 @@ public class SubscriptionBackgroundUpdater {
         if (!started) {
             logger.info(() -> "Start subscription background update task");
             executor.scheduleAtFixedRate(new SubscriptionUpdateTask(securityService, subscriptionApiServiceTracker),
-                    /* initial */ 0, /* period */ 12, TimeUnit.HOURS);
+                    /* initial */ 1, /* period */ 720, TimeUnit.MINUTES);
         }
     }
 }

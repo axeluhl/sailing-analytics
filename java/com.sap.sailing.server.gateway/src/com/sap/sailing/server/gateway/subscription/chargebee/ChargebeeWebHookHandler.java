@@ -41,6 +41,8 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                     processEvent(event, user);
                 }
                 sendSuccess(response);
+            } else {
+                logger.warning("User "+event.getCustomerId()+" not found. Ignoring Chargebee webhook callback for that user.");
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to proccess Chargebee subscription webhook event "

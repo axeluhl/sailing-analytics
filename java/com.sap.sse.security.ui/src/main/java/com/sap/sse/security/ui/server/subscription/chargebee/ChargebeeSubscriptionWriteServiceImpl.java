@@ -74,7 +74,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             final Timestamp trialEnd = contentSubscription.trialEnd();
             //TODO: bug5510 this ignores potential Addons or Charges contained in the Subscription
             SubscriptionPlan plan = null;
-            for(SubscriptionItem item : contentSubscription.subscriptionItems()) {
+            for (SubscriptionItem item : contentSubscription.subscriptionItems()) {
                 if(item.itemType().equals(ItemType.PLAN)) {
                     final String itemPriceId = item.itemPriceId();
                     plan = getSecurityService().getSubscriptionPlanByItemPriceId(itemPriceId);

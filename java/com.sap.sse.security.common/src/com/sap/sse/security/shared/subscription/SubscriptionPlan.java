@@ -16,7 +16,7 @@ import com.sap.sse.security.shared.impl.User;
  * 
  * @author Tu Tran
  */
-public abstract class SubscriptionPlan implements Serializable{
+public abstract class SubscriptionPlan implements Serializable {
     private static final long serialVersionUID = -555811806344107292L;
     private final String id;
     private final Set<SubscriptionPrice> prices;

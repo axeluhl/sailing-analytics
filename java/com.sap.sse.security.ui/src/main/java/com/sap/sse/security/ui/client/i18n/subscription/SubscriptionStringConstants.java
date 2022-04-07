@@ -55,15 +55,12 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String features_limited_live_analytics_description();
     String features_full_live_analytics_title();
     String features_full_live_analytics_description();
-    String features_full_live_analytics_link();
     String features_organize_events_title();
     String features_organize_events_description();
-    String features_organize_events_link();
     String features_events_with_more_regatta_title();
     String features_events_with_more_regatta_description();
     String features_connect_to_tractrac_title();
     String features_connect_to_tractrac_description();
-    String features_connect_to_tractrac_link();
     String features_imports_title();
     String features_imports_description();
     String features_media_management_title();

@@ -33,7 +33,6 @@ public class PaywallResolver {
     public PaywallResolver(final UserService userService, final SubscriptionServiceFactory subscriptionServiceFactory) {
         this.userService = userService;
         this.subscriptionServiceFactory = subscriptionServiceFactory;
-        subscriptionServiceFactory.initializeProviders();
     }
 
     public void getUnlockingSubscriptionPlans(final Action action, final SecuredDTO dtoContext,
@@ -58,11 +57,11 @@ public class PaywallResolver {
     }
 
     public boolean hasPermission(final Action action, final SecuredDTO dtoContext) {
-        if(isDisabled) {
+        if (isDisabled) {
             return true;
-        }else if(action != null) {
+        } else if (action != null) {
             return userService.hasPermission(dtoContext, action);
-        }else {
+        } else {
             return userService.hasPermission(dtoContext, DefaultActions.READ);
         }
     }
