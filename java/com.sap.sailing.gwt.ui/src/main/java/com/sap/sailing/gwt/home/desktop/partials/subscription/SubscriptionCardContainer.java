@@ -33,6 +33,7 @@ public class SubscriptionCardContainer extends Composite {
 
     private static final String SUPPORT_EMAIL = "support@sapsailing.com";
     private static SubscriptionContainerUiBinder uiBinder = GWT.create(SubscriptionContainerUiBinder.class);
+    private static final SubscriptionStringConstants subscriptionStringMessages = SubscriptionStringConstants.INSTANCE;
 
     @UiField
     Button businessModelInfoButton;
@@ -51,74 +52,50 @@ public class SubscriptionCardContainer extends Composite {
     public SubscriptionCardContainer() {
         initWidget(uiBinder.createAndBindUi(this));
         featureGrid = new Grid(2, 3);
-        final Label freePlanTitle = new Label(SubscriptionStringConstants.INSTANCE.free_subscription_plan_shortname());
+        final Label freePlanTitle = new Label(subscriptionStringMessages.free_subscription_plan_shortname());
         freePlanTitle.addStyleName(SubscriptionCardResources.INSTANCE.css().featureHeader());
         featureGrid.setWidget(0, 1, freePlanTitle);
-        final Label premiumPlanTitle = new Label(SubscriptionStringConstants.INSTANCE.premium_subscription_plan_shortname());
+        final Label premiumPlanTitle = new Label(subscriptionStringMessages.premium_subscription_plan_shortname());
         premiumPlanTitle.addStyleName(SubscriptionCardResources.INSTANCE.css().featureHeader());
         featureGrid.setWidget(0, 2, premiumPlanTitle);
-        addFeatureWithLink("features_organize_events", true, true);
-        addFeature("features_events_with_more_regatta", true, true);
-        addFeatureWithLink("features_connect_to_tractrac", true, true);
-        addFeature("features_imports", true, true);
-        addFeature("features_media_management", true, true);
-        addFeature("features_limited_live_analytics", true, true);
-        addFeature("features_media_tags", true, true);
-        addFeature("features_scoring", true, true);
-        addFeature("features_wind_analytics", false, true);
-        addFeature("features_maneuver_analytics", false, true);
-        addFeature("features_competitor_analytics", false, true);
-        addFeature("features_advanced_leaderboard_info", false, true);
-        addFeature("features_simulator", false, true);
-        addFeature("features_map_analytics", false, true);
+        addFeatureWithLink(subscriptionStringMessages.features_organize_events_title(),
+                           subscriptionStringMessages.features_organize_events_description(),
+                           "https://support.sapsailing.com/hc/en-us/articles/360018169799-Create-a-simple-event-on-my-sapsailing-com",
+                           true, true);
+        addFeature(subscriptionStringMessages.features_events_with_more_regatta_title(), subscriptionStringMessages.features_events_with_more_regatta_description(), true, true);
+        addFeatureWithLink(subscriptionStringMessages.features_connect_to_tractrac_title(),
+                           subscriptionStringMessages.features_connect_to_tractrac_description(),
+                           "https://tractrac.com/", true, true);
+        addFeature(subscriptionStringMessages.features_imports_title(), subscriptionStringMessages.features_imports_description(), true, true);
+        addFeature(subscriptionStringMessages.features_media_management_title(), subscriptionStringMessages.features_media_management_description(), true, true);
+        addFeature(subscriptionStringMessages.features_limited_live_analytics_title(), subscriptionStringMessages.features_limited_live_analytics_description(), true, true);
+        addFeature(subscriptionStringMessages.features_media_tags_title(), subscriptionStringMessages.features_media_tags_description(), true, true);
+        addFeature(subscriptionStringMessages.features_scoring_title(), subscriptionStringMessages.features_scoring_description(), true, true);
+        addFeature(subscriptionStringMessages.features_wind_analytics_title(), subscriptionStringMessages.features_wind_analytics_description(), false, true);
+        addFeature(subscriptionStringMessages.features_maneuver_analytics_title(), subscriptionStringMessages.features_maneuver_analytics_description(), false, true);
+        addFeature(subscriptionStringMessages.features_competitor_analytics_title(), subscriptionStringMessages.features_competitor_analytics_description(), false, true);
+        addFeature(subscriptionStringMessages.features_advanced_leaderboard_info_title(), subscriptionStringMessages.features_advanced_leaderboard_info_description(), false, true);
+        addFeature(subscriptionStringMessages.features_simulator_title(), subscriptionStringMessages.features_simulator_description(), false, true);
+        addFeature(subscriptionStringMessages.features_map_analytics_title(), subscriptionStringMessages.features_map_analytics_description(), false, true);
         features.add(featureGrid);
         emailContact.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 Window.Location.assign("mailto:" + SUPPORT_EMAIL
-                        + "?subject=" + UriUtils.encode(SubscriptionStringConstants.INSTANCE.support_subject()));
+                        + "?subject=" + UriUtils.encode(subscriptionStringMessages.support_subject()));
             }
         });
     }
     
-    private void addFeature(String featureKey, boolean free, boolean premium) {
-        // get size but index starts with 0 therefore row count is current index + 1
-        int currentRowIndex = featureGrid.getRowCount();
-        featureGrid.resizeRows(currentRowIndex + 1);
-        
-        VerticalPanel line = new VerticalPanel();
-        Label title = new Label(SubscriptionStringConstants.INSTANCE.getString(featureKey + "_title"));
-        title.addStyleName(SubscriptionCardResources.INSTANCE.css().featureTitle());
-        line.add(title);
-        Label description = new Label(SubscriptionStringConstants.INSTANCE.getString(featureKey + "_description"));
+    private void addFeature(final String titleString, final String descriptionString, boolean free, boolean premium) {
+        Label description = new Label(descriptionString);
         description.addStyleName(SubscriptionCardResources.INSTANCE.css().featureDescription());
-        line.add(description);
-        featureGrid.setWidget(currentRowIndex, 0, line);
-        if (free) {
-            FlowPanel check = new FlowPanel();
-            check.add(new Image(SharedDesktopResources.INSTANCE.dropdownCheck().getSafeUri()));
-            check.addStyleName(SubscriptionCardResources.INSTANCE.css().featureCheck());
-            featureGrid.setWidget(currentRowIndex, 1, check);
-        }
-        if (premium) {
-            FlowPanel check = new FlowPanel();
-            check.add(new Image(SharedDesktopResources.INSTANCE.dropdownCheck().getSafeUri()));
-            check.addStyleName(SubscriptionCardResources.INSTANCE.css().featureCheck());
-            featureGrid.setWidget(currentRowIndex, 2, check);
-        }
+        addFeatureWithDescription(titleString, free, premium, description);
     }
-    
-    private void addFeatureWithLink(String featureKey, boolean free, boolean premium) {
-        // get size but index starts with 0 therefore row count is current index + 1
-        int currentRowIndex = featureGrid.getRowCount();
-        featureGrid.resizeRows(currentRowIndex + 1);
-        VerticalPanel line = new VerticalPanel();
-        Label title = new Label(SubscriptionStringConstants.INSTANCE.getString(featureKey + "_title"));
-        title.addStyleName(SubscriptionCardResources.INSTANCE.css().featureTitle());
-        line.add(title);
+
+    private void addFeatureWithLink(final String titleString, final String descriptionString, final String link, boolean free, boolean premium) {
         SimplePanel descriptionWithLink = new SimplePanel();
-        String link = SubscriptionStringConstants.INSTANCE.getString(featureKey + "_link");
-        HTML exampleLink = new HTML(SubscriptionStringConstants.INSTANCE.getString(featureKey + "_description")+ "&nbsp;<a href=\"" 
+        HTML exampleLink = new HTML(descriptionString+ "&nbsp;<a href=\"" 
                 + new SafeHtmlBuilder().appendEscaped(link).toSafeHtml().asString()
                 + "\" title=\"" + StringMessages.INSTANCE.moreInfo() + "\""
                 + " class=\"" + SubscriptionCardResources.INSTANCE.css().featureLink() + "\""
@@ -127,22 +104,34 @@ public class SubscriptionCardContainer extends Composite {
                 + "</a>");
         descriptionWithLink.addStyleName(SubscriptionCardResources.INSTANCE.css().featureDescription());
         descriptionWithLink.add(exampleLink);
-        line.add(descriptionWithLink);
+        addFeatureWithDescription(titleString, free, premium, descriptionWithLink);
+    }
+
+    private void addFeatureWithDescription(final String titleString, boolean free, boolean premium, Widget description) {
+        // get size but index starts with 0 therefore row count is current index + 1
+        int currentRowIndex = featureGrid.getRowCount();
+        featureGrid.resizeRows(currentRowIndex + 1);
+        VerticalPanel line = new VerticalPanel();
+        Label title = new Label(titleString);
+        title.addStyleName(SubscriptionCardResources.INSTANCE.css().featureTitle());
+        line.add(title);
+        line.add(description);
         featureGrid.setWidget(currentRowIndex, 0, line);
         if (free) {
-            FlowPanel check = new FlowPanel();
-            check.add(new Image(SharedDesktopResources.INSTANCE.dropdownCheck().getSafeUri()));
-            check.addStyleName(SubscriptionCardResources.INSTANCE.css().featureCheck());
-            featureGrid.setWidget(currentRowIndex, 1, check);
+            createCheckMark(currentRowIndex, 1);
         }
         if (premium) {
-            FlowPanel check = new FlowPanel();
-            check.add(new Image(SharedDesktopResources.INSTANCE.dropdownCheck().getSafeUri()));
-            check.addStyleName(SubscriptionCardResources.INSTANCE.css().featureCheck());
-            featureGrid.setWidget(currentRowIndex, 2, check);
+            createCheckMark(currentRowIndex, 2);
         }
     }
 
+    private void createCheckMark(int currentRowIndex, final int column) {
+        FlowPanel check = new FlowPanel();
+        check.add(new Image(SharedDesktopResources.INSTANCE.dropdownCheck().getSafeUri()));
+        check.addStyleName(SubscriptionCardResources.INSTANCE.css().featureCheck());
+        featureGrid.setWidget(currentRowIndex, column, check);
+    }
+    
     public void addSubscription(SubscriptionCard subscription) {
         if (!isSubscriptionPlanExisting(subscription.getSubscriptionPlanDTO().getSubscriptionPlanId())) {
             container.add(subscription);
@@ -178,9 +167,9 @@ public class SubscriptionCardContainer extends Composite {
     @UiHandler("businessModelInfoButton")
     void onClick(ClickEvent e) {
         VerticalPanel content = new VerticalPanel();
-        HTMLPanel title = new HTMLPanel("h1", SubscriptionStringConstants.INSTANCE.businessModelTitle());
+        HTMLPanel title = new HTMLPanel("h1", subscriptionStringMessages.businessModelTitle());
         content.add(title);
-        Label body = new Label(SubscriptionStringConstants.INSTANCE.businessModelDescription());
+        Label body = new Label(subscriptionStringMessages.businessModelDescription());
         content.add(body);
         PopupPanel popup = new PopupPanel();
         popup.setWidget(content);

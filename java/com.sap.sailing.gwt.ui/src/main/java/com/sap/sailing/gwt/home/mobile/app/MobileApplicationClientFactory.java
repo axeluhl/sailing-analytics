@@ -81,7 +81,6 @@ public class MobileApplicationClientFactory extends
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
         WhatsNewDialogFactory.register(getUserService(), placeController);
-
         authenticationManager.checkNewUserPopup(() -> root.setSubHeaderContent(null), dismissCallback -> {
             final LoginHintContent content = new LoginHintContent(() -> {
                 root.setSubHeaderContent(null);

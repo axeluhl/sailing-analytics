@@ -1264,7 +1264,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         if (nonAutoScalingReplica.isEmpty()) {
             logger.info("No replica found for replica set "+replicaSet.getName()+
-                    " that is not managed by auto-scaling group "+autoScalingGroup.getName()+
+                    " that is not managed by auto-scaling group "+(autoScalingGroup==null?"null":autoScalingGroup.getName())+
                     ". Launching one on an eligible shared instance.");
             nonAutoScalingReplica.add(launchUnmanagedReplica(replicaSet, replicaSet.getMaster().getHost().getRegion(), optionalKeyName,
                     privateKeyEncryptionPassphrase, getEffectiveBearerToken(replicaReplicationBearerToken), optionalMemoryInMegabytesOrNull,

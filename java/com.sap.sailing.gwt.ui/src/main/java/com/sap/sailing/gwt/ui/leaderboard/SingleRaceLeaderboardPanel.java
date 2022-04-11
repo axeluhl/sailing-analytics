@@ -228,7 +228,6 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     protected void postApplySettings(LeaderboardSettings newSettings,
             List<ExpandableSortableColumn<?>> columnsToExpandAgain) {
         super.postApplySettings(newSettings, columnsToExpandAgain);
-
         if (notSortedYet) {
             final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(preSelectedRace.getRaceName());
             if (raceColumnByRaceName != null) {

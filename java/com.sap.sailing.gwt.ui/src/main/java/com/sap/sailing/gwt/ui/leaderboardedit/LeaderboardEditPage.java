@@ -45,6 +45,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     
     private String leaderboardName;
     private EditableLeaderboardContextDefinition editableLeaderboardContextDefinition;
+    private SAPSailingHeaderWithAuthentication header;
     
     @Override
     protected void doOnModuleLoad() {
@@ -116,6 +117,9 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
         @Override
         public void onSuccess(
                 StrippedLeaderboardDTO leaderboardWithSecurity) {
+            if (leaderboardWithSecurity != null && leaderboardWithSecurity.getDisplayName() != null) {
+                header.setHeaderTitle(getHeaderTitle(leaderboardWithSecurity.getDisplayName()));
+            }
             final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                     .createStoredSettingsLocatorForEditableLeaderboard(editableLeaderboardContextDefinition);
             PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
@@ -125,10 +129,8 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
             ComponentContext<EditableLeaderboardSettings> context = 
                     new ComponentContextWithSettingsStorage<>(
                     rootComponentLifeCycle, getUserService(), storageDefinition);
-            
             authorizedContentDecorator.setPermissionToCheck(
                     leaderboardWithSecurity, DefaultActions.UPDATE);
-            
             context.getInitialSettings(new OnSettingsLoadedCallback<EditableLeaderboardSettings>() {
                 @Override
                 public void onSuccess(EditableLeaderboardSettings settings) {
@@ -162,8 +164,7 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     }
 
     private SAPHeaderWithAuthentication initHeader() {
-        SAPSailingHeaderWithAuthentication header = 
-                new SAPSailingHeaderWithAuthentication(getStringMessages().editScores());
+        header = new SAPSailingHeaderWithAuthentication(getHeaderTitle(leaderboardName));
         header.getElement().getStyle().setWidth(100, Unit.PCT);
         return header;
     }
@@ -171,6 +172,10 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
     @Override
     public String getLeaderboardName() {
         return leaderboardName;
+    }
+
+    private String getHeaderTitle(String leaderboardDisplayName) {
+        return leaderboardDisplayName + ": " + getStringMessages().editScores();
     }
 
 }

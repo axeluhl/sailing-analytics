@@ -3063,13 +3063,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
             final long stepSizeInMillis, final DetailType detailType, final String leaderboardGroupName, final UUID leaderboardGroupId, 
-            final String leaderboardName) throws NoWindException {
+            final String leaderboardName) throws NoWindException, NotFoundException {
         CompetitorsRaceDataDTO result = null;
         final TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
-            if (detailType.getPremiumAction() != null) {
-                getSecurityService().checkCurrentUserExplicitPermissions(trackedRace, detailType.getPremiumAction());
+            final Leaderboard leaderboard;
+            if (detailType.getPremiumAction() != null && (leaderboard=getLeaderboardByName(leaderboardName)).getPermissionType().supports(detailType.getPremiumAction())) {
+                getSecurityService().checkCurrentUserExplicitPermissions(leaderboard, detailType.getPremiumAction());
             }
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);

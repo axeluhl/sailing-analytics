@@ -19,6 +19,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.classloading.ServiceTrackerCustomizerForClassLoaderSupplierRegistrations;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SecurityServiceInitialLoadClassLoaderSupplier;
@@ -284,7 +285,10 @@ public class Activator implements BundleActivator {
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore, subscriptionPlanProvider);
                     applyCustomizations();
                     migrate(userStore, securityService.get());
-                    startSubscriptionDataUpdateTask(bundleContext);
+                    final ReplicationMasterDescriptor masterDescriptor = securityService.get().getMasterDescriptor();
+                    if (masterDescriptor == null) {
+                        startSubscriptionDataUpdateTask(bundleContext);
+                    }
                 } catch (InterruptedException | UserStoreManagementException | ExecutionException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }

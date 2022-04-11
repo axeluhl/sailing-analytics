@@ -126,8 +126,11 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
@@ -475,6 +478,19 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
         this.paywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory());
+        // Now register a user status event handler that notices changes in user sign-in/out or premium status change.
+        // Leaderboard columns can depend on permissions, and currently (and we should change that!) the filtering
+        // happens in the LeaderboardSettingsComponentDialog. Therefore, in order to filter the current settings
+        // based on the user permissions it is currently required to instantiate (but not show) a settings dialog
+        // that is initialized with the current settings, then retrieving the filtered settings using getResult() and
+        // updating those using updateSettings(...).
+        sailingCF.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                final LS adjustedSettingsAfterUserChange = new SettingsDialog<LS>(LeaderboardPanel.this, stringMessages).getResult();
+                updateSettings(adjustedSettingsAfterUserChange);
+            }
+        });
         overallDetailColumnMap = createOverallDetailColumnMap();
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
@@ -576,13 +592,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     protected void initialize(LS settings) {
         setDefaultRaceColumnSelection(settings);
-
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
         updateSettings(settings);
         style.afterConstructorHook(this);
-        
         //ensure proper margin styling
         contentPanel.add(new Label());
     }
@@ -689,10 +703,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.isShowCompetitorNationality = isShowCompetitorNationality;
     }
 
+    @Override
     public void updateSettings(final LS newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
-
         if (newSettings.getOverallDetailsToShow() != null) {
             setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), DetailType.getAvailableOverallDetailColumnTypes(),
                     selectedOverallDetailColumns);
@@ -731,7 +745,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     removeBusyTask();
                 }
             }
-
         };
         boolean newShallAddOverallDetails = shallAddOverallDetails();
         if (oldShallAddOverallDetails == newShallAddOverallDetails || oldShallAddOverallDetails
@@ -1492,12 +1505,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren() {
+        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren(boolean filterByPermissions) {
             List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new ArrayList<>();
-            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
+            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren(filterByPermissions)) {
                 result.add(column);
             }
-
             if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_BOATS)) {
                 if (boatInfoColumn == null) {
                     BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> getLeaderboard()
@@ -1506,7 +1518,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
                 result.add(boatInfoColumn);
             }
-
             if (isExpanded() && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
@@ -2469,6 +2480,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         addColumnStyles(/* startColumn */columnIndex);
     }
 
+    /**
+     * Looks up the column {@code c} in the {@link #getLeaderboardTable() leaderboard table} and if found,
+     * removes it. If not found, nothing happens.
+     */
     protected void removeColumn(Column<LeaderboardRowDTO, ?> c) {
         int columnIndex = getLeaderboardTable().getColumnIndex(c);
         if (columnIndex != -1) {
