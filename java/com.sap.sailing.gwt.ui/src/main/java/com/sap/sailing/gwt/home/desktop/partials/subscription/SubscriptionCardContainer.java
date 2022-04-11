@@ -133,7 +133,7 @@ public class SubscriptionCardContainer extends Composite {
     }
     
     public void addSubscription(SubscriptionCard subscription) {
-        if (!isSubscriptionPlanExisting(subscription.getSubscriptionPlanDTO().getSubscriptionPlanId())) {
+        if (!isSubscriptionPlanExisting(subscription.getSubscriptionCategoryDTO().getSubscriptionCategoryId())) {
             container.add(subscription);
         }
     }
@@ -143,7 +143,7 @@ public class SubscriptionCardContainer extends Composite {
         for (int i = 0; i < container.getWidgetCount(); i++) {
             if (container.getWidget(i) instanceof SubscriptionCard) {
                 SubscriptionCard card = (SubscriptionCard)container.getWidget(i);
-                if (card.getSubscriptionPlanDTO().getSubscriptionPlanId().equals(planId)) {
+                if (card.getSubscriptionCategoryDTO().getSubscriptionCategoryId().equals(planId)) {
                     isExisting = true;
                     break;
                 }

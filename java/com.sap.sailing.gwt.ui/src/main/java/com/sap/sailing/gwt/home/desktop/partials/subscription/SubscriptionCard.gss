@@ -57,10 +57,6 @@
  }
 }
 
-.subscription.individual {
- order: 999;
-}
-
 .subscription.highlight {
  order: 1;
 }
@@ -170,12 +166,13 @@
  color: red;
  font-weight: bold;
  position: relative;
- top: -60px;
- right: -240px;
- transform: rotate(45deg);
+ top: -55px;
+ right: -270px;
+ transform: rotate(30deg);
+ font-size: 10px;
 }
 
-.free .price, .individual .price {
+.free .price {
  border-color: #f0ab00;
  background-color: #f0ab00;
  color: #fff;
@@ -186,7 +183,7 @@
  color: #fff;
 }
 
-.free .price:hover, .individual .price:hover {
+.free .price:hover {
  border-color: #d79900;
 }
 

@@ -5,11 +5,10 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.subscription.SubscribeView;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public interface SubscriptionView extends SubscribeView, IsWidget {
 
-    void addSubscriptionPlan(SubscriptionPlanDTO plan, final SubscriptionCard.Type type, final EventBus eventBus);
+    void addSubscriptionCategory(SubscriptionCategoryDTO plan, final SubscriptionCard.Type type, final EventBus eventBus);
     
     void resetSubscriptions();
 

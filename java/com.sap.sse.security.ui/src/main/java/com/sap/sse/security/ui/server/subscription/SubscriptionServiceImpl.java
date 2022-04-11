@@ -3,6 +3,7 @@ package com.sap.sse.security.ui.server.subscription;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -35,6 +36,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 import com.sap.sse.security.ui.server.Activator;
@@ -216,7 +218,7 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet imple
         if(isUserSubscribedToPlan) {
             isUserSubscribedToPlanCategory = true;
             hasHadSubscriptionForOneTimePlan = plan.getIsOneTimePlan();
-        }else {
+        } else {
             for (SubscriptionPlan subscriptionPlan : getSecurityService().getAllSubscriptionPlans().values()) {
                 if(isUserSubscribedToPlan(subscriptionPlan.getId()) 
                         && Util.containsAny(plan.getPlanCategories(), subscriptionPlan.getPlanCategories())) {
@@ -231,7 +233,13 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet imple
                 hasHadSubscriptionForOneTimePlan = false;
             }
         }
-        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, plan.getPrices(),
+        final boolean disablePrice = hasHadSubscriptionForOneTimePlan;
+        Set<SubscriptionPrice> prices = new HashSet<>();
+        plan.getPrices().forEach(price -> {
+            price.setDisablePlan(disablePrice);
+            prices.add(price);
+        });
+        return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, prices,
                 plan.getPlanCategories(), hasHadSubscriptionForOneTimePlan, isUserSubscribedToPlanCategory, null);
     }
 
