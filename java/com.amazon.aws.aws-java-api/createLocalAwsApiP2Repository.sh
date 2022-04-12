@@ -91,6 +91,9 @@ echo "In folder $(pwd) using: mvn clean install"
 mvn clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
+# Note: the JAR ends up in target/ because the SDK project does not use any parent pom, so
+# it doesn't inherit the output directory specification "bin/" from its parent, and
+# target/ is the default.
 mv target/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
 echo "Unpacking source bundles..."
 cd ${LIB}
