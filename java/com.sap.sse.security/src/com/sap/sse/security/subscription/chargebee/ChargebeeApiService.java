@@ -3,7 +3,6 @@ package com.sap.sse.security.subscription.chargebee;
 import com.chargebee.Environment;
 import com.sap.sse.common.Duration;
 import com.sap.sse.security.shared.SubscriptionPlanProvider;
-import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 import com.sap.sse.security.subscription.SubscriptionApiService;
@@ -61,9 +60,9 @@ public class ChargebeeApiService implements SubscriptionApiService {
     }
 
     @Override
-    public void getUserSubscriptions(User user, OnSubscriptionsResultListener listener) {
-        new ChargebeeFetchUserSubscriptionsTask(user, requestProcessor,
-                subscriptions -> listener.onSubscriptionsResult(user, subscriptions), this).run();
+    public void getUserSubscriptions(OnSubscriptionsResultListener listener) {
+        new ChargebeeFetchUserSubscriptionsTask(requestProcessor,
+                subscriptions -> listener.onSubscriptionsResult(subscriptions), this).run();
     }
 
     @Override

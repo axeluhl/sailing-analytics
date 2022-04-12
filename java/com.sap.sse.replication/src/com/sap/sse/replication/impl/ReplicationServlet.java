@@ -34,8 +34,8 @@ import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationServletActions;
 import com.sap.sse.replication.ReplicationServletActions.Action;
-import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.ReplicationStatus;
+import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -297,7 +297,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             throw e;
         }
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
-        logger.info("Applying operation of type " + operation.getClass().getName()
+        logger.info("Applying operation of type " + operation.getClassForLogging().getName()
                 + " received from replica to replicable " + replicable.toString());
         try {
             replicable.apply(operation);
