@@ -91,7 +91,7 @@ echo "In folder $(pwd) using: mvn clean install"
 mvn clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
-mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
+mv target/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
 echo "Unpacking source bundles..."
 cd ${LIB}
 for l in *-sources.jar; do
