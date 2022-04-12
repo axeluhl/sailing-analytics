@@ -4,7 +4,8 @@ source ./../../../configuration/correctFilePathInRelationToCurrentOs.sh
 base="../definitions/race-analysis-p2"
 remote_repo="https://p2.sapsailing.com/p2/sailing/"
 remote_repo_aws_sdk="https://p2.sapsailing.com/p2/aws-sdk/"
-#reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
+# reading the filepath and editing it, so it fits for eclipse
+# currently safely works for cygwin, gitbash and linux
 local_repo=$(correct_file_path  "`readlink -f ../../com.sap.sailing.targetplatform.base/target/repository/`")
 local_repo="file://$local_repo"
 local_repo_aws_sdk=$(correct_file_path  "`readlink -f ../../com.amazon.aws.aws-java-api.updatesite/target/repository/`")

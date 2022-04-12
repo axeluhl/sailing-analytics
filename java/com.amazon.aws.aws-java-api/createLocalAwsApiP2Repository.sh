@@ -86,8 +86,9 @@ done
 echo >>${WRAPPER_BUNDLE}/${BUILD_PROPERTIES_FILE}
 echo "Building the wrapper bundle..."
 cd ..
-echo "In folder $(pwd) using: mvn ${extra} clean install"
-mvn ${extra} clean install
+echo "NOT USING ${extra} arguments for Maven to avoid using local target definition already for building local repo"
+echo "In folder $(pwd) using: mvn clean install"
+mvn clean install
 mkdir -p ${UPDATE_SITE_PROJECT}/plugins/aws-sdk
 rm -rf ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/*
 mv bin/com.amazon.aws.aws-java-api-${VERSION}.jar ${UPDATE_SITE_PROJECT}/plugins/aws-sdk/
