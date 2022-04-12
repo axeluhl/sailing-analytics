@@ -16,8 +16,8 @@
       <tycho-version>1.6.0</tycho-version>
     </properties>		
 	<groupId>com.amazon.aws</groupId>
-	<version>1.0.0-SNAPSHOT</version>
 	<artifactId>com.amazon.aws.aws-java-api.updatesite</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 	<build>
 		<plugins>
 			<plugin>
