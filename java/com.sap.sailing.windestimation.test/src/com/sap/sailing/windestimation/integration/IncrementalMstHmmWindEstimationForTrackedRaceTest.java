@@ -2,7 +2,6 @@ package com.sap.sailing.windestimation.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.net.URI;
@@ -14,6 +13,7 @@ import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -82,7 +82,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom1.0To140.0.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom140.0To5394.0.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom5394.0ToMaximum.clf",
-            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Basic-5O5.clf" };
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Basic-5O5.clf",
+            "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Basic-All.clf" };
 
     protected final SimpleDateFormat dateFormat;
     private WindEstimationFactoryServiceImpl windEstimationFactoryService;
@@ -107,10 +108,19 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
                 new URL("file:///" + new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS, ReceiverType.MARKPOSITIONS });
-        final MillisecondsTimePoint timePointForFixes = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
-        getTrackedRace().getOrCreateWindTrack(new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, "Test")).add(
+        final MillisecondsTimePoint timePointForFixes = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23, 10, 00).getTime());
+        final WindSourceWithAdditionalID testWindSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, "Test");
+        getTrackedRace().getOrCreateWindTrack(testWindSource).add(
                 new WindImpl(new DegreePosition(54.48448470246412, 10.185846456327479),
                         timePointForFixes, new KnotSpeedWithBearingImpl(12.5, /* to */ new DegreeBearingImpl(60))));
+        final MillisecondsTimePoint timePointForFixes2 = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23, 10, 30).getTime());
+        getTrackedRace().getOrCreateWindTrack(testWindSource).add(
+                new WindImpl(new DegreePosition(54.48448470246412, 10.185846456327479),
+                        timePointForFixes2, new KnotSpeedWithBearingImpl(11.5, /* to */ new DegreeBearingImpl(58))));
+        final MillisecondsTimePoint timePointForFixes3 = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23, 10, 45).getTime());
+        getTrackedRace().getOrCreateWindTrack(testWindSource).add(
+                new WindImpl(new DegreePosition(54.4844847, 10.1858464),
+                        timePointForFixes3, new KnotSpeedWithBearingImpl(12.1, /* to */ new DegreeBearingImpl(59))));
         final PolarDataServiceImpl polarDataService = new PolarDataServiceImpl();
         getTrackedRace().setPolarDataService(polarDataService);
         polarDataService.insertExistingFixes(getTrackedRace());
@@ -189,23 +199,41 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         }
         Map<Pair<Position, TimePoint>, Wind> estimatedWindFixesMap = new TreeMap<>(
                 new TimePointAndPositionWithToleranceComparator());
+        int foundCount = 0;
         for (Wind wind : estimatedWindFixes) {
             Pair<Position, TimePoint> relativeTo = new Pair<>(wind.getPosition(), wind.getTimePoint());
             estimatedWindFixesMap.put(relativeTo, wind);
-            Wind targetWind = targetWindFixesMap.get(relativeTo);
-            if (targetWind == null) {
-                fail("Wind fix not present in target wind fixes set at: " + wind.getTimePoint() + " "
-                        + wind.getPosition());
-            } else if (targetWind.getBearing().getDifferenceTo(wind.getBearing()).abs().getDegrees() > 10) {
-                fail("TWD difference with target wind fix: " + wind.getTimePoint() + " " + wind.getPosition() + " "
-                        + targetWind.getBearing().getDifferenceTo(wind.getBearing()).abs().getDegrees() + " deg");
+            Wind targetWind = findWithinTolerance(targetWindFixesMap, relativeTo);
+            if (targetWind != null && targetWind.getBearing().getDifferenceTo(wind.getBearing()).abs().getDegrees() <= 10) {
+                foundCount++;
             }
         }
+        assertTrue((double) foundCount / (double) estimatedWindFixes.size() > PERCENT_QUANTILE);
+        foundCount = 0;
         for (Wind wind : targetWindFixes) {
-            if (!estimatedWindFixesMap.containsKey(new Pair<>(wind.getPosition(), wind.getTimePoint()))) {
-                fail("Target wind fix not present at: " + wind.getTimePoint() + " " + wind.getPosition());
+            if (findWithinTolerance(estimatedWindFixesMap, new Pair<>(wind.getPosition(), wind.getTimePoint())) != null) {
+                foundCount++;
             }
         }
+        assertTrue((double) foundCount / (double) targetWindFixes.size() > PERCENT_QUANTILE);
+    }
+
+    /**
+     * {@link Position} objects may deviate slightly, e.g., because they are represented in an internal
+     * compact format. Therefore, we don't simply {@link Map#get(Object) get} the object based on the {@code relativeTo}
+     * pair but we iterate the map's keys and try to match based on "reasonably close" which is defined to be
+     * less than 1/10000 of a lat/lng degree.
+     */
+    private Wind findWithinTolerance(Map<Pair<Position, TimePoint>, Wind> targetWindFixesMap,
+            Pair<Position, TimePoint> relativeTo) {
+        for (final Entry<Pair<Position, TimePoint>, Wind> e : targetWindFixesMap.entrySet()) {
+            if (Math.abs(e.getKey().getA().getLatDeg() - relativeTo.getA().getLatDeg()) < 1./10000.
+             && Math.abs(e.getKey().getA().getLngDeg() - relativeTo.getA().getLngDeg()) < 1./10000.
+             && e.getKey().getB().equals(relativeTo.getB())) {
+                return e.getValue();
+            }
+        }
+        return null;
     }
 
     private void assertMostFixesTWDAround(List<Wind> targetWindFixes, double expectedTWDAverageInDegrees, double toleranceForPercentQuantile, double averageToleranceInDegrees) {
