@@ -62,6 +62,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTracTracBasedTest {
 
+    private static final double PERCENT_QUANTILE = 0.8;
+
     public static final String[] modelFilesNames = {
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom0.0To10.0.clf",
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom10.0To912.0.clf",
@@ -156,7 +158,6 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
             estimatedWindTrackOfTrackedRace.unlockAfterRead();
         }
         Comparator<Wind> windFixesComparator = new Comparator<Wind>() {
-
             @Override
             public int compare(Wind o1, Wind o2) {
                 return o1.getTimePoint().compareTo(o2.getTimePoint());
@@ -164,7 +165,6 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         };
         Collections.sort(targetWindFixes, windFixesComparator);
         Collections.sort(estimatedWindFixes, windFixesComparator);
-
         Map<Pair<Position, TimePoint>, Wind> targetWindFixesMap = new TreeMap<>(
                 new TimePointAndPositionWithToleranceComparator());
         for (Wind wind : targetWindFixes) {
@@ -191,12 +191,12 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         }
     }
 
-    private void assertMostFixesTWDAround(List<Wind> targetWindFixes, double expectedTWDAverageInDegrees, double toleranceFor90PercentQuantile, double averageToleranceInDegrees) {
+    private void assertMostFixesTWDAround(List<Wind> targetWindFixes, double expectedTWDAverageInDegrees, double toleranceForPercentQuantile, double averageToleranceInDegrees) {
         int insideRange = 0;
         Bearing targetTWD = new DegreeBearingImpl(expectedTWDAverageInDegrees);
         ScalableBearing bearingSum = null;
         for (final Wind wind : targetWindFixes) {
-            if (wind.getFrom().getDifferenceTo(targetTWD).abs().getDegrees() <= toleranceFor90PercentQuantile) {
+            if (wind.getFrom().getDifferenceTo(targetTWD).abs().getDegrees() <= toleranceForPercentQuantile) {
                 insideRange++;
             }
             final ScalableBearing scalableBearing = new ScalableBearing(wind.getFrom());
@@ -207,11 +207,11 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
             }
         }
         final Bearing averageBearing = bearingSum.divide(targetWindFixes.size());
-        assertTrue("Expected at least 95% of the wind fixes to be in range "+
-                new DegreeBearingImpl(expectedTWDAverageInDegrees).add(new DegreeBearingImpl(-toleranceFor90PercentQuantile))+
-                        " to "+new DegreeBearingImpl(expectedTWDAverageInDegrees).add(new DegreeBearingImpl(toleranceFor90PercentQuantile))+
-                        " but only "+(double) insideRange / targetWindFixes.size()+" were.",
-                        (double) insideRange / targetWindFixes.size() >= 0.8);
+        assertTrue("Expected at least "+((int) (100*PERCENT_QUANTILE))+"% of the wind fixes to be in range "+
+                new DegreeBearingImpl(expectedTWDAverageInDegrees).add(new DegreeBearingImpl(-toleranceForPercentQuantile))+
+                        " to "+new DegreeBearingImpl(expectedTWDAverageInDegrees).add(new DegreeBearingImpl(toleranceForPercentQuantile))+
+                        " but only "+(int) (100*(double) insideRange / targetWindFixes.size())+"% were.",
+                        (double) insideRange / targetWindFixes.size() >= PERCENT_QUANTILE);
         assertEquals(expectedTWDAverageInDegrees, averageBearing.getDegrees(), averageToleranceInDegrees);
     }
 
