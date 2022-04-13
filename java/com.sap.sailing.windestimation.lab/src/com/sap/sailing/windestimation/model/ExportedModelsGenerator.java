@@ -28,6 +28,10 @@ public class ExportedModelsGenerator {
         } else {
             modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
         }
+        new ExportedModelsGenerator().export(modelStore);
+    }
+    
+    public void export(ModelStore modelStore) throws FileNotFoundException, IOException {
         LoggingUtil.logInfo("Generating a single file with all trained models started");
         ExportedModels exportedModels = new ExportedModels();
         List<ModelDomainType> nonEmptyDomainTypes = new ArrayList<>();

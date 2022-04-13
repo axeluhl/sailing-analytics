@@ -118,7 +118,7 @@ public class SimpleModelsTrainingPart1 {
         DurationBasedTwdTransitionStdRegressorTrainer.train(modelStore);
         DistanceBasedTwdTransitionStdRegressorTrainer.train(modelStore);
         Thread.sleep(1000);
-        ExportedModelsGenerator.main(new String[0]);
+        new ExportedModelsGenerator().export(modelStore);
         LoggingUtil.logInfo("Model training finished. You can upload the generated file to a server instance.");
     }
 
