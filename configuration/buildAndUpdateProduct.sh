@@ -619,11 +619,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
+	    # Build AWS API; its local repo must exist for creating the local target definition in the next step
+	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
 	    # create local target definition
 	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
 	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
-	    # Build AWS API with local target platform, so after $extra has been set to -Dp2-local
-	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
 	else
 	    echo "INFO: Using remote p2 repos (http://p2.sapsailing.com/p2/sailing/ and http://p2.sapsailing.com/p2/aws-sdk/)"
         fi
