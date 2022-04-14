@@ -53,7 +53,7 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
      * that they can be set just before this task is run.
      */
     public KnowsExecutorAndTracingGetImpl() {
-        WeakHashMap<ThreadLocal<Object>, Object> threadLocalValuesToInheritValue = new WeakHashMap<>();
+        final WeakHashMap<ThreadLocal<Object>, Object> threadLocalValuesToInheritValue = new WeakHashMap<>();
         final Thread currentThread = Thread.currentThread();
         handleThreadLocals(currentThread, inheritableThreadLocalsField, (key, value) -> {
             threadLocalValuesToInheritValue.put(key, value);

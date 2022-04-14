@@ -363,16 +363,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     break;
                 }
             }
-            if ((lastRaceTimesInfo.startOfRace == null && newRaceTimesInfo.startOfRace != null)
-                    || (lastRaceTimesInfo.startOfRace != null && newRaceTimesInfo.startOfRace == null)
-                    || (lastRaceTimesInfo.startOfRace != null && newRaceTimesInfo.startOfRace != null
-                    && lastRaceTimesInfo.startOfRace.getTime() != newRaceTimesInfo.startOfRace.getTime())) {
-                requiresMarkerUpdate = true;
-            }
-            if ((lastRaceTimesInfo.endOfRace == null && newRaceTimesInfo.endOfRace != null)
-                    || (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace == null)
-                    || (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace != null
-                    && lastRaceTimesInfo.endOfRace.getTime() != newRaceTimesInfo.endOfRace.getTime())) {
+            if (!requiresMarkerUpdate &&
+                (!Util.equalsWithNull(lastRaceTimesInfo.startOfRace, newRaceTimesInfo.startOfRace) ||
+                 !Util.equalsWithNull(lastRaceTimesInfo.endOfRace, newRaceTimesInfo.endOfRace))) {
                 requiresMarkerUpdate = true;
             }
         }

@@ -798,8 +798,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     FileStorageManagementService getFileStorageManagementService();
 
-    ClassLoader getCombinedMasterDataClassLoader();
-
     /**
      * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
      * is already available, the {@code callback} is invoked immediately. If the {@link RaceTracker} isn't available
@@ -1028,15 +1026,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void addOrReplaceExpeditionDeviceConfiguration(UUID deviceConfigurationId, String name, Integer expeditionBoatId);
 
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
-    
-    /**
-     * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
-     * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
-     * only username and password or bearer token, not the three of them. If none is provided but there is no user
-     * currently authenticated, {@code null} will be returned.<p>
-     */
-    String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
-            String targetServerPassword, String targetServerBearerToken);
     
     /**
      * Returns the number of tracked races that are not {@link TrackedRace#hasFinishedLoading() done with loading}.

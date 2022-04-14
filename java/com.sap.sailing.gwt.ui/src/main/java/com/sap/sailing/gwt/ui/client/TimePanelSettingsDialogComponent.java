@@ -5,11 +5,11 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> implements SettingsDialogComponent<T> {
@@ -23,10 +23,9 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> imple
     private static String STYLE_INPUT = "settingsDialogValue";
     private static String STYLE_BOXPANEL = "boxPanel";
 
-    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
+    private final SecuredDTO raceDTO;
 
-    public TimePanelSettingsDialogComponent(T settings, StringMessages stringMessages, UserService userService,
-            RaceWithCompetitorsAndBoatsDTO raceDTO) {
+    public TimePanelSettingsDialogComponent(T settings, StringMessages stringMessages, UserService userService, SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
         initialSettings = settings;
         this.userService = userService;

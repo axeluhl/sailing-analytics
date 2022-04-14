@@ -17,6 +17,7 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
 import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
@@ -47,6 +48,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
  * <li>If the HTTP request method is {@code GET} and the hostname header matches then forward to the "public" target
  * group</li>
  * <li>Forward all other requests with a matching hostname header to the "master" target group</li>
+ * <li>Redirect requests for the "/" path to {@code /index.html} (the "plain" redirect)</li>
  * </ol>
  * <p>
  * 
@@ -223,7 +225,7 @@ extends ProcedureWithTargetGroup<ShardingKey> {
     private Rule[] createRules() {
         final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
         int ruleCount = 0;
-        rules[ruleCount++] = getLoadBalancerUsed().createDefaultRedirectRule(getHostName(), "/index.html", /* query */ Optional.empty());
+        rules[ruleCount++] = getLoadBalancerUsed().getDefaultRedirectRule(getHostName(), new PlainRedirectDTO());
         rules[ruleCount++] = Rule.builder().conditions(
                 RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).build(),
                 getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).

@@ -52,7 +52,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 
-
 public class RegattaDetailsComposite extends Composite {
     static private final Logger logger = Logger.getLogger(RegattaDetailsComposite.class.getName());
     private RegattaDTO regatta;

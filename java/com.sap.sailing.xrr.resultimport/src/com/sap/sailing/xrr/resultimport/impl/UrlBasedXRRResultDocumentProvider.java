@@ -18,6 +18,13 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
+/**
+ * Assumes that the single document referenced by the URL through the {@link ResultUrlProvider} passed to the
+ * constructor is the single XRR document to read.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumentProvider {
     private static final Logger logger = Logger.getLogger(UrlBasedXRRResultDocumentProvider.class.getName());
     
@@ -34,12 +41,12 @@ public abstract class UrlBasedXRRResultDocumentProvider implements ResultDocumen
         List<ResultDocumentDescriptor> result = new ArrayList<>();
         for (URL url : resultUrlProvider.getReadableUrls()) {
             URLConnection eventResultConn = HttpUrlConnectionHelper.redirectConnection(url);
-            InputStream is = (InputStream) eventResultConn.getContent();
-            Parser parser = parserFactory.createParser(is, url.toString());
+            final InputStream is = (InputStream) eventResultConn.getContent();
+            final Parser parser = parserFactory.createParser(is, url.toString());
             try {
-                RegattaResults xrrParserResult = parser.parse();
+                final RegattaResults xrrParserResult = parser.parse();
                 if (xrrParserResult != null) {
-                    List<ResultDocumentDescriptor> resultDocumentDescriptors = resolveResultDocumentDescriptors(xrrParserResult, url);
+                    final List<ResultDocumentDescriptor> resultDocumentDescriptors = resolveResultDocumentDescriptors(xrrParserResult, url);
                     if (resultDocumentDescriptors != null) {
                         result.addAll(resultDocumentDescriptors);
                     }

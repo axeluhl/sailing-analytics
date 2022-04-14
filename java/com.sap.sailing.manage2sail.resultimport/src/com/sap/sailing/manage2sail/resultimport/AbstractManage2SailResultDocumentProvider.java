@@ -17,6 +17,15 @@ import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
+/**
+ * Assumes that a URL delivered by the {@link ResultUrlProvider} passed to the constructor points at an event overview
+ * document from where several XRR documents are referenced. A {@link Manage2SailEventResultsParserImpl} parser is then
+ * used to extract the individual XRR links from the event overview document, and a parser factory for XRR parsers is
+ * then used on the individual documents to produce {@link RegattaScoreCorrections} from the respective documents.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public abstract class AbstractManage2SailResultDocumentProvider implements ResultDocumentProvider {
     private final ResultUrlProvider resultUrlProvider;
 

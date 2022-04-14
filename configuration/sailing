@@ -40,7 +40,7 @@ start_tmux() {
 }
 
 start_servers() {
-        /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com 2>&1 >>/var/log/sailing.err
+        /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
 	cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
 	chown root /usr/local/bin/cp_root_mail_properties
 	chgrp root /usr/local/bin/cp_root_mail_properties
@@ -61,13 +61,13 @@ start_servers() {
 	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
 	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
 	    if [ "${FIRST_SERVER}" = "" ]; then
-	      echo "No SERVER_NAME provided; defaulting to \"server\" as the server directory name" >>/var/log/sailing.err
-	      FIRST_SERVER=server
+	      echo "No SERVER_NAME provided; not configuring/starting any application processes" >>/var/log/sailing.err
+	    else
+	      echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
+	      configure_and_start_server "${FIRST_SERVER}"
+	      create_basic_httpd_config "${FIRST_SERVER}"
+	      reload_httpd
 	    fi
-            echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
-	    configure_and_start_server "${FIRST_SERVER}"
-	    create_basic_httpd_config "${FIRST_SERVER}"
-	    reload_httpd
 	    echo 1 >"${REBOOT_INDICATOR}"
 	  fi
 	fi
@@ -84,7 +84,10 @@ configure_and_start_server() {
   chgrp sailing "${SERVERS_DIR}/${conf}"
   # If there is a secret /root/mail.properties, copy it into the default server's configuration directory:
   /usr/local/bin/cp_root_mail_properties "${conf}"
-  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start; ./defineReverseProxyMappings.sh" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  pushd ${SERVERS_DIR}/${conf}
+  ./defineReverseProxyMappings.sh 2>>/var/log/sailing.err >>/var/log/sailing.err
+  popd
   RETVAL=$?
   [ $RETVAL -eq 0 ] && success || failure
 }

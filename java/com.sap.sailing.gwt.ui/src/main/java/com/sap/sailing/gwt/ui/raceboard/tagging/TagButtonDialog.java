@@ -28,6 +28,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
+import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
@@ -206,8 +207,9 @@ public class TagButtonDialog extends DialogBox {
             @Override
             public void update(int index, TagButton button, String value) {
                 if (DefaultActions.DELETE.name().equals(value)) {
-                    new ConfirmationDialog(stringMessages, stringMessages.tagButtonConfirmDeletionHeading(),
-                            stringMessages.tagButtonConfirmDeletion(button.getTag()), (confirmed) -> {
+                    ConfirmationDialog.create(stringMessages.tagButtonConfirmDeletionHeading(),
+                            stringMessages.tagButtonConfirmDeletion(button.getTag()), 
+                            stringMessages.confirm(), stringMessages.cancel(), confirmed -> {
                                 if (confirmed) {
                                     taggingComponent.getTagButtons().remove(button);
                                     footerPanel.storeAllTagButtons();
@@ -215,7 +217,7 @@ public class TagButtonDialog extends DialogBox {
                                     footerPanel.recalculateHeight();
                                 }
                                 center();
-                            });
+                            }).center();
                 } else if (DefaultActions.UPDATE.name().equals(value)) {
                     selectedTagButton = button;
                     inputPanel.setTag(button.getTag());
@@ -315,16 +317,14 @@ public class TagButtonDialog extends DialogBox {
     private void onCancelTagButtonChangesPressed() {
         // ask user for confirmation to discard changes if values of input fields changed
         if (!inputPanel.compareFieldsToTagButton(selectedTagButton)) {
-            new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
-                    stringMessages.tagDiscardChanges(), confirmed -> {
-                        if (confirmed) {
-                            inputPanel.clearAllValues();
-                            tagPreviewPanel.renderPreview(inputPanel);
-                            tagButtonTable.setVisible(true);
-                            setButtonMode(false);
-                            center();
-                        }
-                    });
+            ConfirmationDialog.create(stringMessages.tagDiscardChangesHeading(), stringMessages.tagDiscardChanges(),
+                    stringMessages.confirm(), stringMessages.cancel(), () -> {
+                        inputPanel.clearAllValues();
+                        tagPreviewPanel.renderPreview(inputPanel);
+                        tagButtonTable.setVisible(true);
+                        setButtonMode(false);
+                        center();
+                    }).center();
         } else {
             inputPanel.clearAllValues();
             tagPreviewPanel.renderPreview(inputPanel);

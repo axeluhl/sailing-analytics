@@ -3,9 +3,9 @@ package com.sap.sailing.server.gateway.interfaces;
 import java.net.URL;
 
 /**
- * A factory service that obtains {@link SailingServer} instances which represent (usually remote) server processes,
- * identified by a {@link URL} that is used as the base to construct the REST API URLs, plus the authentication
- * information necessary to authenticate calls.
+ * A factory service that obtains {@link SailingServer} instances which represent (usually remote) server processes or
+ * entire application replica sets, identified by a {@link URL} that is used as the base to construct the REST API URLs,
+ * plus the authentication information necessary to authenticate calls.
  * <p>
  * 
  * Using {@link #getSailingServer(URL)} may be used to try authentication with the bearer token of the current local
@@ -13,7 +13,15 @@ import java.net.URL;
  * any form of authentication, restricting the services that can be invoked to those that are publicly accessible.
  * <p>
  * 
- * The "base URL" needs to contain protocol, host and port specification and an empty path or only "/" as path.
+ * The "base URL" needs to contain protocol, host and port specification and an empty path or only "/" as path. A
+ * utility for creating such a URL if only a hostname is known is {@code RemoteServerUtil.createBaseUrl(String)} in the
+ * {@code com.sap.sse.security} bundle.
+ * <p>
+ * 
+ * Another convenience for obtaining a bearer token in case an optional parameter triple of username/password and bearer
+ * token is provided is the {@code SecurityService.getOrCreateTargetServerBearerToken(...)} method which defaults to the
+ * current user's local bearer token in case neither a username/password combination nor an explicit bearer token are
+ * provided.
  * <p>
  * 
  * The intended use is through the OSGi service registry: clients are expected to discover and track an implementation

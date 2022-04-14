@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.json.simple.parser.ParseException;
 
@@ -40,6 +41,8 @@ import com.tractrac.util.lib.api.exceptions.TimeOutException;
  *
  */
 public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConnectivityParametersHandler {
+    private static final Logger logger = Logger.getLogger(TracTracConnectivityParamsHandler.class.getName());
+
     private static final String USE_INTERNAL_MARK_PASSING_ALGORITHM = "useInternalMarkPassingAlgorithm";
     private static final String USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG = "useOfficialEventsToUpdateRaceLog";
     private static final String TRAC_TRAC_USERNAME = "tracTracUsername";
@@ -146,13 +149,17 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
             throws MalformedURLException, IOException, ParseException, CreateModelException, URISyntaxException, TimeOutException {
         final IRace tractracRace = params.getTractracRace();
         final String jsonURL = tractracRace.getParameterSet().getParameter("eventJSON");
-        final String creatorName = SessionUtils.getPrincipal().toString();
-        final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, tractracRace.getEvent().getName(), jsonURL,
-                (params.getLiveURI() == null ? null : params.getLiveURI().toString()),
-                /* stored URI */ params.isReplayRace(tractracRace) ? null // we mainly want to enable the user to list the event's races again in case they are removed;
-                    : (params.getStoredURI() == null ? null : params.getStoredURI().toString()), // live/stored stuff comes from the tracking params
-                params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword());
-        tractracMongoObjectFactory.updateTracTracConfiguration(tracTracConfiguration);
-        securityService.setDefaultOwnershipIfNotSet(tracTracConfiguration.getIdentifier());
+        if (jsonURL == null) {
+            logger.warning("No eventJSON field set in TracTrac race "+tractracRace.getName()+". Cannot add configuration to list.");
+        } else {
+            final String creatorName = SessionUtils.getPrincipal().toString();
+            final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, tractracRace.getEvent().getName(), jsonURL,
+                    (params.getLiveURI() == null ? null : params.getLiveURI().toString()),
+                    /* stored URI */ params.isReplayRace(tractracRace) ? null // we mainly want to enable the user to list the event's races again in case they are removed;
+                        : (params.getStoredURI() == null ? null : params.getStoredURI().toString()), // live/stored stuff comes from the tracking params
+                    params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword());
+            tractracMongoObjectFactory.updateTracTracConfiguration(tracTracConfiguration);
+            securityService.setDefaultOwnershipIfNotSet(tracTracConfiguration.getIdentifier());
+        }
     }
 }

@@ -31,6 +31,12 @@ abstract public class AbstractSubscriptionDataHandler implements SubscriptionDat
         data.put(DataAttribute.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime().asMillis());
         data.put(DataAttribute.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt().asMillis());
         data.put(DataAttribute.PROVIDER_NAME.name(), subscription.getProviderName());
+        data.put(DataAttribute.REOCURRING_PAYMENT_VALUE.name(), subscription.getReoccuringPaymentValue());
+        data.put(DataAttribute.CURRENCY_CODE.name(), subscription.getCurrencyCode());
+        data.put(DataAttribute.SUBSCRIPTION_ACTIVATED_AT.name(), subscription.getSubscriptionActivatedAt().asMillis());
+        data.put(DataAttribute.NEXT_BILLING_AT.name(), subscription.getNextBillingAt().asMillis());
+        data.put(DataAttribute.CURRENT_TERM_END.name(), subscription.getCurrentTermEnd().asMillis());
+        data.put(DataAttribute.CANCELLED_AT.name(), subscription.getCancelledAt().asMillis());
         return data;
     }
 }

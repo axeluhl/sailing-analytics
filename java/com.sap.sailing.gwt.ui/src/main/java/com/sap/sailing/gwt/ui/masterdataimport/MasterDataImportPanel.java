@@ -230,7 +230,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         if (mediaTracksImported > 0) {
             presenter.getMediaTracksRefresher().reloadAndCallFillAll();
         }
-        final Iterable<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
+        final Iterable<String> overwrittenRegattas = creationCount.getNamesOfOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
                 mediaTracksImported, trackedRacesImported, overwrittenRegattas);
         changeButtonStateAccordingToApplicationState();

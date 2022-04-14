@@ -14,7 +14,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
         com.sap.sse.security.ui.client.i18n.StringMessages,
         com.sap.sse.gwt.adminconsole.StringMessages, CommonStringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
-    
+
     String manage2Sail();
     String raceCommitteeApp();
     String tracTracEvents();
@@ -887,7 +887,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String outlierMinimumNeighborhoodPctString();
     String oneOrMoreParametersAreEmpty();
     String errorWhileAddingSeriesToChart();
-    String generatingPolarSheet();    
+    String generatingPolarSheet();
     String dataCount();
     String generationFinished();
     String generating();
@@ -978,7 +978,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String classFlagHelpText(String procedure);
     String individualRecallHelpText();
     String resultEntryHelpText();
-    String startmodeFlags(); 
+    String startmodeFlags();
     String startmodeFlagsHelpText();
     String gateStart();
     String activatePathfinder();
@@ -1226,7 +1226,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String startBrowserFullscreen();
     String switchToLiveRaceAutomatically();
     String timeBeforeRaceStart();
-    String timeAfterRaceEnd(); 
+    String timeAfterRaceEnd();
     String showXYDiagram();
     String xyDiagram();
     String confidence();
@@ -1594,6 +1594,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String loadingRegattasAndRaces();
     String selectFromRacesWithOverlappingTimeRange();
     String finishTime(String timeAsString);
+    String finishDuration(String durationAsString);
     String showCompetitorCharts();
     String showWindChart();
     String watchLive();
@@ -1611,7 +1612,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String notificationAboutUpcomingRaces();
     String notificationRegattaConfigurationUpdatedUsingByMarks();
     String warningOverrideRegattaConfigurationCourseDesignerToByMarks();
-    String allRacesHaveBeenDenoted();    
+    String allRacesHaveBeenDenoted();
     String chartSelectionHint();
     String chooseALanguage();
     String solutions();
@@ -2315,6 +2316,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitorChartCheckBoxLabel();
     String filterSetNameCheckBoxLabel();
     String competitorSelectionCheckBoxLabel();
+    @Override
     String copyToClipboard();
     String maneuverCheckBoxLabel();
     String tagsCheckBoxLabel();
@@ -2324,27 +2326,36 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String whitelabelFooterLanguage();
     String whitelabelSailing();
     String subscription();
+    String premium();
+    String subscriptions();
     String noSubscriptions();
     String subscribe();
     String cancelSubscription();
+    String subscriptionOwnerHeaderText();
+    String subscriptionHighlightText();
+    String individual();
+    String free();
     String openPortal();
     String plans();
     String freePlan();
+    String currentTermEnd();
     String inTrial();
+    String cancelled();
     String paused();
     String trialText(String endIn, String endAt);
     String numHours(int hours);
     String numDays(int days);
     String numMinutes(int minutes);
+    String paymentStatus();
     String paymentStatusSuccess();
     String paymentStatusNoSuccess();
     String refunded();
+    String cancelledAt();
+    String nextBillingAt();
+    String currencyValue(double value, String currency);
     String errorLoadingUserSubscription(String errMessage);
-    String failGeneratingHostedPageObject();
-    String errorOpenCheckout(String errMessage);
     String failedCancelSubscription();
     String errorCancelSubscription(String errMessage);
-    String errorSaveSubscription(String errMessage);
     String errorInvalidSubscritionProvider(String errMessage);
     String unableToLoadCourseAreas(String message);
     String zoomCheckBoxLabel();
@@ -2363,6 +2374,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String includeAccessTokenForYourAccount();
     String alternateTextIfQRCodeTooBig();
     String pleaseUseHttpsForImageUrls();
+
+    String openInNewTab();
     String windAndCourse();
     String zoomIn();
     String zoomOut();
@@ -2383,4 +2396,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String yellowBrickEvents();
     String timePointOfLastFix();
     String copyMarkDeviceMappings();
+    String errorLoadingPolarDataForBoatClass(String boatClass, String message);
+    String confirmCancelSubscriptionTitle();
+    String confirmCancelSubscriptionText();
+    String videoGuide();
+    String orcExplanation();
+    String subscriptionOneTimePlanLockedText();
 }

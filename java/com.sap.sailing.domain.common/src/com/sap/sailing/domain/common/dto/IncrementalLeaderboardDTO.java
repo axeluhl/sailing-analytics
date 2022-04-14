@@ -58,6 +58,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     private boolean displayNameUnchanged;
     private boolean courseAreasUnchanged;
     private boolean boatClassUnchanged;
+    private boolean aclUnchanged;
+    private boolean ownershipUnchanged;
     
     /**
      * If a {@link LeaderboardEntryDTO} in {@link LeaderboardRowDTO#fieldsByRaceColumnName} is unchanged, this field
@@ -490,7 +492,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             // replace null values of Regatta specific competitor handicap values with the respective competitor's
             // default values
             for (LeaderboardRowDTO row : rows.values()) {
-                if(row != null) {
+                if (row != null) {
                     if (row.effectiveTimeOnDistanceAllowancePerNauticalMile == null) {
                         row.effectiveTimeOnDistanceAllowancePerNauticalMile = row.competitor
                                 .getTimeOnDistanceAllowancePerNauticalMile();
@@ -499,6 +501,12 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                         row.effectiveTimeOnTimeFactor = row.competitor.getTimeOnTimeFactor();
                     }
                 }
+            }
+            if (aclUnchanged) {
+                this.setAccessControlList(previousVersion.getAccessControlList());
+            }
+            if (ownershipUnchanged) {
+                this.setOwnership(previousVersion.getOwnership());
             }
         }
     }
@@ -535,6 +543,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         if (Util.equalsWithNull(this.getBoatClass(), previousVersion.getBoatClass())) {
             this.setBoatClass(null);
             this.boatClassUnchanged = true;
+        }
+        if (Util.equalsWithNull(this.getAccessControlList(), previousVersion.getAccessControlList())) {
+            this.setAccessControlList(null);
+            this.aclUnchanged = true;
+        }
+        if (Util.equalsWithNull(this.getOwnership(), previousVersion.getOwnership())) {
+            this.setOwnership(null);
+            this.ownershipUnchanged = true;
         }
         competitorIndexesInPreviousCompetitorsList = new int[competitors.size()];
         // for this stripping run, remembers the mapping of real CompetitorDTO objects to the compact form that only holds an int as reference to the

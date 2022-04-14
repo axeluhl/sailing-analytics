@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -27,11 +28,13 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
 public class PersistedManeuverClassifiersScorePrinter {
     private static final Logger logger = Logger.getLogger(PersistedManeuverClassifiersScorePrinter.class.getName());
     
-    private PersistedManeuverClassifiersScorePrinter() {
-    }
-
     public static void main(String[] args)
             throws MalformedURLException, ClassNotFoundException, IOException, InterruptedException {
+        new PersistedManeuverClassifiersScorePrinter().printManeuverClassifiersScore();
+    }
+
+    public void printManeuverClassifiersScore() throws MalformedURLException, IOException, InterruptedException,
+            ClassNotFoundException, UnknownHostException {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
         ModelStore classifierModelStore = new MongoDbModelStoreImpl(

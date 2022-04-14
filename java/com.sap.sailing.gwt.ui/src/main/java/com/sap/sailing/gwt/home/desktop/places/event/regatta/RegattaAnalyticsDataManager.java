@@ -63,7 +63,7 @@ public class RegattaAnalyticsDataManager {
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
                     /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true,
-                    new ClassicLeaderboardStyle(), flagImageResolver, availableDetailTypes);
+                    new ClassicLeaderboardStyle(), flagImageResolver, availableDetailTypes, sailingCF);
         }
         return leaderboardPanel;
     }

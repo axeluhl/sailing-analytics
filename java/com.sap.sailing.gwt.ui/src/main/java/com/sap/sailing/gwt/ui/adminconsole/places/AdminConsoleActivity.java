@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -32,6 +32,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AdminConsoleActivity extends AbstractActivity implements AdminConsoleView.Presenter {
     private Logger logger = Logger.getLogger(getClass().getName());
@@ -41,7 +42,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private SailingServiceWriteAsync sailingService;
     private AbstractAdminConsolePlace defaultPlace;
     
-    private final Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
+    private final Refresher<StrippedLeaderboardDTO> leaderboardsRefresher;
     private final Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher;
     private final Refresher<RegattaDTO> regattasRefresher;
     private final Refresher<EventDTO> eventsRefresher;
@@ -53,15 +54,15 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
-        leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTOWithSecurity>() {
+        leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTO>() {
             @Override
-            public void reload(AsyncCallback<Iterable<StrippedLeaderboardDTOWithSecurity>> callback) {
-                sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
-                        new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
+            public void reload(AsyncCallback<Iterable<StrippedLeaderboardDTO>> callback) {
+                sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
+                        new AsyncCallback<List<StrippedLeaderboardDTO>>() {
                             @Override
-                            public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> result) {
+                            public void onSuccess(List<StrippedLeaderboardDTO> result) {
                                 logger.log(Level.FINE, "reload LeaderboardDTO - success");
-                                callback.onSuccess(new ArrayList<StrippedLeaderboardDTOWithSecurity>(result));
+                                callback.onSuccess(new ArrayList<StrippedLeaderboardDTO>(result));
                             }
                             @Override
                             public void onFailure(Throwable t) {
@@ -192,7 +193,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     }
 
     @Override
-    public Refresher<StrippedLeaderboardDTOWithSecurity> getLeaderboardsRefresher() {
+    public Refresher<StrippedLeaderboardDTO> getLeaderboardsRefresher() {
         return leaderboardsRefresher;
     }
     
@@ -257,6 +258,11 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     @Override
     public UserService getUserService() {
         return clientFactory.getUserService();
+    }
+    
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return clientFactory.getSubscriptionServiceFactory();
     }
     
     @Override

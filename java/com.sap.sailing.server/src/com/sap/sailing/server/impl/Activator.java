@@ -26,11 +26,14 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.MasterDataImportClassLoaderService;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.subscription.PremiumRole;
+import com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -57,7 +60,7 @@ import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
 import com.sap.sailing.shared.server.SharedSailingData;
-import com.sap.sse.MasterDataImportClassLoaderService;
+import com.sap.sse.classloading.ServiceTrackerCustomizerForClassLoaderSupplierRegistrations;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.mail.MailService;
@@ -74,6 +77,7 @@ import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.util.GenericJSONPreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -224,9 +228,12 @@ public class Activator implements BundleActivator {
         final Dictionary<String, String> sailingSecurityUrlPathProviderProperties = new Hashtable<>();
         sailingSecurityUrlPathProviderProperties.put(TypeBasedServiceFinder.TYPE,
                 SecurityUrlPathProviderSailingImpl.APPLICATION);
-        context.registerService(SecurityUrlPathProvider.class, new SecurityUrlPathProviderSailingImpl(),
-                sailingSecurityUrlPathProviderProperties);
-        registrations.add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
+        registrations.add(context.registerService(SecurityUrlPathProvider.class,
+                new SecurityUrlPathProviderSailingImpl(), sailingSecurityUrlPathProviderProperties));
+        registrations
+                .add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
+        registrations.add(context.registerService(SubscriptionPlanProvider.class,
+                SailingSubscriptionPlan::getAllInstances, null));
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final Thread backgroundThread = new Thread(()->{
@@ -256,6 +263,9 @@ public class Activator implements BundleActivator {
                     }, "Waiting for replication service to tell whether this SecurityService will become a replica");
                     backgroundThread.setDaemon(true);
                     backgroundThread.start();
+                    // TODO: Registering SubscriptionPlan specific RoleDefinitions here requires additional maintenance. Consider
+                    // implementing another Construct like OSGIHasPermissionsProvider
+                    securityService.getOrCreateRoleDefinitionFromPrototype(PremiumRole.getInstance());
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),
@@ -278,15 +288,10 @@ public class Activator implements BundleActivator {
                 trackedRaceStatisticsCache, restoreTrackedRaces, securityServiceTracker, sharedSailingDataTracker,
                 replicationServiceTracker, scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
         notificationService.setRacingEventService(racingEventService);
-        final MasterDataImportClassLoaderServiceTrackerCustomizer mdiClassLoaderCustomizer = new MasterDataImportClassLoaderServiceTrackerCustomizer(
-                context, racingEventService);
-        masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
-                context, MasterDataImportClassLoaderService.class, mdiClassLoaderCustomizer);
-        masterDataImportClassLoaderServiceTracker.open();
-        for (final ServiceReference<MasterDataImportClassLoaderService> mdiClassLoaderService : masterDataImportClassLoaderServiceTracker
-                .getServiceReferences()) {
-            mdiClassLoaderCustomizer.addingService(mdiClassLoaderService);
-        }
+        // start watching out for MasterDataImportClassLoaderService instances in the OSGi service registry and manage
+        // the combined class loader accordingly:
+        masterDataImportClassLoaderServiceTracker = ServiceTrackerCustomizerForClassLoaderSupplierRegistrations
+                .createClassLoaderSupplierServiceTracker(context, MasterDataImportClassLoaderService.class, racingEventService.getMasterDataClassLoaders());
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class,
                 new PolarDataServiceTrackerCustomizer(context, racingEventService));
@@ -348,36 +353,6 @@ public class Activator implements BundleActivator {
         // load has been finished in case this is a replica with auto-replication.
         racingEventService.ensureOwnerships();
         racingEventService.migrateCompetitorNotificationPreferencesWithCompetitorNames();
-    }
-
-    private class MasterDataImportClassLoaderServiceTrackerCustomizer implements
-            ServiceTrackerCustomizer<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> {
-        private final BundleContext context;
-        private RacingEventServiceImpl racingEventService;
-        public MasterDataImportClassLoaderServiceTrackerCustomizer(BundleContext context,
-                RacingEventServiceImpl racingEventService) {
-            this.context = context;
-            this.racingEventService = racingEventService;
-        }
-
-        @Override
-        public MasterDataImportClassLoaderService addingService(
-                ServiceReference<MasterDataImportClassLoaderService> reference) {
-            MasterDataImportClassLoaderService service = context.getService(reference);
-            racingEventService.addMasterDataClassLoader(service.getClassLoader());
-            return service;
-        }
-
-        @Override
-        public void modifiedService(ServiceReference<MasterDataImportClassLoaderService> reference,
-                MasterDataImportClassLoaderService service) {
-        }
-
-        @Override
-        public void removedService(ServiceReference<MasterDataImportClassLoaderService> reference,
-                MasterDataImportClassLoaderService service) {
-            racingEventService.removeMasterDataClassLoader(service.getClassLoader());
-        }
     }
 
     private class PolarDataServiceTrackerCustomizer

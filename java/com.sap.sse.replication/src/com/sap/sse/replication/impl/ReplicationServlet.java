@@ -34,8 +34,8 @@ import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationServletActions;
 import com.sap.sse.replication.ReplicationServletActions.Action;
-import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.ReplicationStatus;
+import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -135,6 +135,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                             "HTTP output for initial load for " + req.getRemoteHost());
                     final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(countingOutputStream);
                     for (String replicableIdAsString : replicableIdsAsStrings) {
+                        logger.info("Serializing initial load for replicable "+replicableIdAsString+" for remote host "+req.getRemoteHost());
                         Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
                         if (replicable == null) {
                             final String msg = "Couldn't find replicable with ID "+replicableIdAsString+". Aborting serialization of initial load.";
@@ -144,6 +145,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                         }
                         try {
                             replicable.serializeForInitialReplication(compressingOutputStream);
+                            logger.info("Done serializing initial load for replicable "+replicableIdAsString+" for remote host "+req.getRemoteHost());
                         } catch (Exception e) {
                             logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
                             logger.log(Level.SEVERE, "doGet", e);
@@ -151,6 +153,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                             e.printStackTrace(resp.getWriter());
                         }
                     }
+                    logger.info("Done serializing initial loads for remote host "+req.getRemoteHost());
                     compressingOutputStream.finish();
                     countingOutputStream.close();
                     break;
@@ -294,7 +297,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             throw e;
         }
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
-        logger.info("Applying operation of type " + operation.getClass().getName()
+        logger.info("Applying operation of type " + operation.getClassForLogging().getName()
                 + " received from replica to replicable " + replicable.toString());
         try {
             replicable.apply(operation);

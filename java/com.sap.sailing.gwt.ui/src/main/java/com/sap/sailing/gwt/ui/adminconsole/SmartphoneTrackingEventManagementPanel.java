@@ -59,7 +59,6 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -144,44 +143,44 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     
     @Override
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService,
-            FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable,
+            FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
             AdminConsoleTableResources tableResources,
-            ListDataProvider<StrippedLeaderboardDTOWithSecurity> listDataProvider) {
-        ListHandler<StrippedLeaderboardDTOWithSecurity> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTOWithSecurity>(
+            ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
+        ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 filteredLeaderboardList.getList());
-        SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
                 leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getName();
             }
         };
         leaderboardNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardNameColumn,
-                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+                new Comparator<StrippedLeaderboardDTO>() {
             @Override
-                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+                    public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                 return new NaturalComparator(false).compare(o1.getName(), o2.getName());
             }
         });
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
             }
         };
         leaderboardDisplayNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn,
-                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
+                new Comparator<StrippedLeaderboardDTO>() {
                     @Override
-                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
+                    public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
                         return new NaturalComparator(false).compare(o1.getDisplayName(), o2.getDisplayName());
                     }
                 });
-        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
             }
         };
@@ -189,12 +188,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, (l1, l2)->
             Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
         final HasPermissions type = SecuredDomainType.EVENT;
-        final EditOwnershipDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configOwnership = EditOwnershipDialog
+        final EditOwnershipDialog.DialogConfig<StrippedLeaderboardDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementWriteService(), type, leaderboard -> listDataProvider.refresh(), stringMessages);
-        final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
+        final EditACLDialog.DialogConfig<StrippedLeaderboardDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type, leaderboard -> leaderboard.getAccessControlList(),
                 stringMessages);
-        final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn = AccessControlledActionsColumn
+        final AccessControlledActionsColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn = AccessControlledActionsColumn
                 .create(new RaceLogTrackingEventManagementImagesBarCell(stringMessages), userService);
         leaderboardActionColumn.addAction(
                 RaceLogTrackingEventManagementImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING, DefaultActions.UPDATE,
@@ -562,9 +561,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             }
         }
         boolean hasPermissionToChange = leaderboardSelectionModel.getSelectedSet().stream()
-                .filter(new Predicate<StrippedLeaderboardDTOWithSecurity>() {
+                .filter(new Predicate<StrippedLeaderboardDTO>() {
                     @Override
-                    public boolean test(StrippedLeaderboardDTOWithSecurity t) {
+                    public boolean test(StrippedLeaderboardDTO t) {
                         return userService.hasPermission(t, DefaultActions.UPDATE);
                     }
                 }).count() > 0;
@@ -965,7 +964,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         }).show();
     }
 
-    private void handleCompetitorRegistration(StrippedLeaderboardDTOWithSecurity t) {
+    private void handleCompetitorRegistration(StrippedLeaderboardDTO t) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
         new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingServiceWrite, userService,
@@ -994,7 +993,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 }).show();
     }
 
-    private void handleBoatRegistration(StrippedLeaderboardDTOWithSecurity t) {
+    private void handleBoatRegistration(StrippedLeaderboardDTO t) {
         if (t.canBoatsOfCompetitorsChangePerRace) {
             RegattaDTO regatta = getSelectedRegatta();
             String boatClassName = regatta.boatClass.getName();
@@ -1028,9 +1027,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         }
     }
 
-    private void handleDeviceMappings(StrippedLeaderboardDTOWithSecurity t) {
+    private void handleDeviceMappings(StrippedLeaderboardDTO t) {
         sailingServiceWrite.getSecretForRegattaByName(t.getName(), new AsyncCallback<String>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 // if this happens, the user did apparently not have sufficient rights.

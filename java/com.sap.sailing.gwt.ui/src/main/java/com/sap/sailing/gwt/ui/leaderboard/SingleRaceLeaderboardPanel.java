@@ -46,6 +46,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.WithSecurity;
 
 /**
  * This type of {@link LeaderboardPanel} shows a single race. When the leaderboard uses fleet racing, this will cause
@@ -73,12 +74,13 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller,LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            boolean enableSyncScroller,LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes,
+            WithSecurity withSecurity) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
                 adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style,
-                flagImageResolver, availableDetailTypes);
+                flagImageResolver, availableDetailTypes, withSecurity);
         assert preSelectedRace != null;
         this.preSelectedRace = preSelectedRace;
         this.showRaceRankColumn = settings.isShowRaceRankColumn();
@@ -226,7 +228,6 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     protected void postApplySettings(LeaderboardSettings newSettings,
             List<ExpandableSortableColumn<?>> columnsToExpandAgain) {
         super.postApplySettings(newSettings, columnsToExpandAgain);
-
         if (notSortedYet) {
             final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(preSelectedRace.getRaceName());
             if (raceColumnByRaceName != null) {
@@ -257,7 +258,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     @Override
     public SettingsDialogComponent<SingleRaceLeaderboardSettings> getSettingsDialogComponent(
             SingleRaceLeaderboardSettings useTheseSettings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages, availableDetailTypes);
+        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages, availableDetailTypes, paywallResolver, leaderboard);
     }
 
     @Override

@@ -23,8 +23,71 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
-                    <h2 class="articleSubheadline">October 2021</h2>
-                    <ul class="bulletList">
+          <h2 class="articleSubheadline">April 2022</h2>
+          <ul class="bulletList">
+            <li>Note: the new "paywall" has been activated. There is a new role called "premium" that
+                paying users can obtain. In case you have security super-powers you can add this role
+                to an event's user group and imply it to all its users if you want to relieve this event
+                from the restrictions of the paywall. Other than that we hope for your understanding
+                regarding the introduction of this subscription-based model as it helps us to keep the
+                SAP Sailing Analytics alive and available to you.</li>
+            <li>The page used to edit leaderboard scores now shows the name or display name of the
+                leaderboard in the header.</li>
+          </ul>
+          <h2 class="articleSubheadline">March 2022</h2>
+          <ul class="bulletList">
+            <li>The REST API calls for <tt>/sailingserver/api/v1/regattas/{regatta}/races/{race}/...</tt> that
+                export raw data now look for an HTTP request header field <tt>secondaryuserbearertoken</tt>
+                and if present, use its value to authenticate a user that then must have the <tt>TRACKED_RACE:EXPORT</tt>
+                permission for the race requested. Still, the regular ("primary") subject used to authenticate the
+                request must have the <tt>REGATTA:READ</tt> and the <tt>TRACKED_RACE:READ</tt> permission
+                for the respective entities.</li>
+            <li>A new result importer for use with <a href="https://www.sailti.com">sailti.com</a> has been added.</li>
+          </ul>
+          <h2 class="articleSubheadline">February 2022</h2>
+          <ul class="bulletList">
+            <li>The policy for selecting replication instances can now be switched for running replica sets.
+                Users now have the possibility to switch from a replica running on a shared instance to
+                the use of dedicated replica instances, fully managed by the auto-scaling group. Conversely,
+                a replica set using only fully-managed dedicated replica instances can be switched (back)
+                to a more cost-efficient, yet still highly available replica running on a shared instance
+                if workload does not require additional replicas launched by the auto-scaling group.</li>
+            <li>A replica set's master process can now be moved to a different instance. Users can choose
+                between moving to a shared or a dedicated instance. With this, a replica set that started
+                out in an inexpensive shared set-up can me modified so that it uses a dedicated master instance.
+                Furthermore, with this a scale-up and scale-down for the instance hosting the master process
+                is now supported.</li>
+            <li>Added a Remove button for application replica sets that is mutli-selection aware.</li>
+            <li>The instance type of the replicas managed by a replica set's auto-scaling group can now be
+                modified, and one by one, the replicas in the set managed by the auto-scaling group will
+                be migrated to the new instance type, always keeping at least as many replicas available
+                as there were when the action was started. Available as action icon and as multi selection-aware
+                action button.</li>
+          </ul>
+          <h2 class="articleSubheadline">January 2022</h2>
+          <ul class="bulletList">
+            <li>Landscape management now offers to upgrade auto-scaling groups after an AMI update.</li>
+            <li>Replica sets can now also be managed on shared instances. This goes for new master processes which
+                can be deployed into the instance hosting another replica set's master process, or into a new
+                instance prepared for being shared. Alternatively to having the auto-scaling group provide a
+                dedicated first replica to increase availability, users can now choose to have a replica be deployed
+                to a shared instance that runs in an availability zone different from that of the one hosting the
+                replica set's master process. If no such shared instance with the port required by the new
+                replica set available, a new one is created in an availability zone other than the one hosting
+                this replica set's master process, and the first replica is deployed onto that.<p>
+                With these steps, operators are now able to set up new replica sets using only shared
+                instances when starting. While auto-scaling replicas will still be launched into new
+                dedicated instances when the workload requires it, small-scale set-ups with low workloads
+                can now be mapped very cost-effectively.</li>
+          </ul>
+          <h2 class="articleSubheadline">December 2021</h2>
+          <ul class="bulletList">
+            <li>The import of data from another server ("Advanced - Master Data Import") now waits for tracked races
+                to have finished loading when tracking the races imported has been requested. In this case, the
+                sub-progress of that step is determined by the share of races that already have finished loading.</li>
+          </ul>
+          <h2 class="articleSubheadline">October 2021</h2>
+          <ul class="bulletList">
 			<li>Added "Elan 350" boat class</li>
 			<li>Added "IRC" as a class</li>
 			<li>Fixed issue with mixed-up boat ID and competitor ID during competitor import</li>

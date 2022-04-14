@@ -2,7 +2,7 @@ package com.sap.sse.security.subscription.chargebee;
 
 import com.chargebee.Environment;
 import com.sap.sse.common.Duration;
-import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 import com.sap.sse.security.subscription.SubscriptionApiService;
@@ -25,7 +25,11 @@ public class ChargebeeApiService implements SubscriptionApiService {
      */
     private static final Duration LIMIT_REACHED_RESUME_DELAY = Duration.ONE_MILLISECOND.times(65000);
 
-    public ChargebeeApiService(ChargebeeConfiguration configuration, SubscriptionApiRequestProcessor requestProcessor) {
+    protected final SubscriptionPlanProvider subscriptionPlanProvider;
+
+    public ChargebeeApiService(ChargebeeConfiguration configuration, SubscriptionApiRequestProcessor requestProcessor,
+            SubscriptionPlanProvider subscriptionPlanProvider) {
+        this.subscriptionPlanProvider = subscriptionPlanProvider;
         if (configuration != null) {
             Environment.configure(configuration.getSite(), configuration.getApiKey());
             active = true;
@@ -56,9 +60,9 @@ public class ChargebeeApiService implements SubscriptionApiService {
     }
 
     @Override
-    public void getUserSubscriptions(User user, OnSubscriptionsResultListener listener) {
-        new ChargebeeFetchUserSubscriptionsTask(user, requestProcessor,
-                subscriptions -> listener.onSubscriptionsResult(user, subscriptions), this).run();
+    public void getUserSubscriptions(OnSubscriptionsResultListener listener) {
+        new ChargebeeFetchUserSubscriptionsTask(requestProcessor,
+                subscriptions -> listener.onSubscriptionsResult(subscriptions), this).run();
     }
 
     @Override
@@ -71,4 +75,10 @@ public class ChargebeeApiService implements SubscriptionApiService {
     public SubscriptionDataHandler getDataHandler() {
         return new ChargebeeSubscriptionDataHandler();
     }
+
+    @Override
+    public SubscriptionPlanProvider getSubscriptionPlanProvider() {
+        return subscriptionPlanProvider;
+    }
+    
 }

@@ -6,7 +6,5 @@ public interface Region extends WithID {
     @Override
     String getId();
     
-    Iterable<AvailabilityZone> getAvailabilityZones();
-    
-    Iterable<SecurityGroup> getSecurityGroups();
+    AvailabilityZone[] getAvailabilityZones();
 }

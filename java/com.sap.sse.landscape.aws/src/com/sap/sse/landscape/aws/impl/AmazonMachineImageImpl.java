@@ -86,4 +86,9 @@ public class AmazonMachineImageImpl<ShardingKey> implements AmazonMachineImage<S
     public ImageState getState() {
         return image.state();
     }
+
+    @Override
+    public String toString() {
+        return "AMI [imageId=" + image.imageId() + ", region=" + region +"]";
+    }
 }

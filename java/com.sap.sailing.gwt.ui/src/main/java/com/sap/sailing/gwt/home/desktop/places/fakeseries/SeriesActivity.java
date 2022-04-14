@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -33,6 +34,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class SeriesActivity extends AbstractActivity implements SeriesView.Presenter {
 
@@ -148,5 +150,15 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public UserService getUserService() {
         return clientFactory.getUserService();
+    }
+    
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return clientFactory.getSubscriptionServiceFactory();
+    }
+    
+    @Override
+    public SailingServiceAsync getSailingService() {
+        return clientFactory.getSailingService();
     }
 }

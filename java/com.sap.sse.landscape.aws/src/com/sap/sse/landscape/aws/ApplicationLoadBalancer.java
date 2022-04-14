@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.aws.common.shared.PlainRedirectDTO;
+import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
@@ -97,6 +99,10 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     void deleteListener(Listener listener);
 
     Listener getListener(ProtocolEnum protocol);
+    
+    default Rule setDefaultRedirect(String hostname, RedirectDTO redirect) {
+        return setDefaultRedirect(hostname, redirect.getPath(), redirect.getQuery());
+    }
 
     /**
      * {@link #createDefaultRedirectRule(String, String, Optional) Creates} or updates a default re-direct rule in this
@@ -107,14 +113,8 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      * @return the {@link Rule} that represents the default re-direct
      */
     Rule setDefaultRedirect(String hostname, String path, Optional<String> query);
+    
+    Rule getDefaultRedirectRule(String hostName, PlainRedirectDTO plainRedirectDTO);
 
     RuleCondition createHostHeaderRuleCondition(String hostname);
-
-    /**
-     * Creates a new rule in the HTTPS listener of this load balancer. The rule fires when {@code "/"} is
-     * the path ("empty" path) and the hostname header matches the value provided by the {@code hostname}
-     * parameter. It sends a redirecting response with status code 302, redirecting to the same host, same
-     * protocol and port and the path specified by the {@code pathWithLeadingSlash} parameter.<p>
-     */
-    Rule createDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query);
 }
