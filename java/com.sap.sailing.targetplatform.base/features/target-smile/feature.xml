@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.sap.sailing.target.smile"
+      label="Statistical Machine Intelligence and Learning Engine"
+      version="1.0.0">
+
+   <description>
+      Java Server Pages libraries
+   </description>
+
+   <license url="">
+      NA.
+   </license>
+
+   <plugin
+         id="com.github.haifengl.smile-core"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-core.source"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-data"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-data.source"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-graph"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-graph.source"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-math"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-math.source"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+</feature>

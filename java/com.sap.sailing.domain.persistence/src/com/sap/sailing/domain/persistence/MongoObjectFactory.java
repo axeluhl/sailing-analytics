@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bson.Document;
+
 import com.mongodb.DBObject;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
@@ -19,6 +21,7 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -223,4 +226,6 @@ public interface MongoObjectFactory {
      * Stores determined Anniversary races.
      */
     void storeAnniversaryData(ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries);
+
+    Document storeWind(Wind wind);
 }

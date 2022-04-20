@@ -9,6 +9,10 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimen
 public class AggregatedDurationBasedTwdTransitionImporter {
 
     public static void main(String[] args) throws UnknownHostException {
+        new AggregatedDurationBasedTwdTransitionImporter().importAggregatedDurationBasedTwdTransition();
+    }
+    
+    public void importAggregatedDurationBasedTwdTransition() throws UnknownHostException {
         SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionBasedTwdTransitionPersistenceManager = createPersistenceManagerAndEnsureIndex();
         SingleDimensionTwdTransitionAggregationImporter importer = new SingleDimensionTwdTransitionAggregationImporter(
                 singleDimensionBasedTwdTransitionPersistenceManager, AggregatedSingleDimensionType.DURATION,

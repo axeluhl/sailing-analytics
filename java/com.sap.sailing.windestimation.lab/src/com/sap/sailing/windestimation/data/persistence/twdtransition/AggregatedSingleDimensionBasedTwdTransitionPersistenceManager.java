@@ -98,4 +98,10 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
 
     }
 
+    public void remove(AggregatedSingleDimensionBasedTwdTransition twdTransition) {
+        JSONObject jsonObject = serializer.serialize(twdTransition);
+        Document dbObject = parseJsonString(jsonObject.toString());
+        getDb().getCollection(getCollectionName()).deleteOne(dbObject);        
+    }
+
 }

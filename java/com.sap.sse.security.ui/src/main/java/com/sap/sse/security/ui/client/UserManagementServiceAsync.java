@@ -87,7 +87,6 @@ public interface UserManagementServiceAsync {
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
 
-
     void login(String username, String password, AsyncCallback<SuccessInfo> callback);
 
     void logout(AsyncCallback<SuccessInfo> callback);
