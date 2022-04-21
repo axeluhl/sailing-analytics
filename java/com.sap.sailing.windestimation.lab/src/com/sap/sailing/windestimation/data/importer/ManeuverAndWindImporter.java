@@ -356,10 +356,10 @@ public class ManeuverAndWindImporter {
                 Thread.sleep(10000);
                 lastException = e;
                 if (trackedRaceName == null) {
-                    LoggingUtil.logInfo("Connection error (" + i + "/10) while querying races of regatta \""
+                    LoggingUtil.logInfo("Connection error (" + i + "/10) "+e.getMessage()+" while querying races of regatta \""
                             + trackedRegattaName + "\", retrying...");
                 } else {
-                    LoggingUtil.logInfo("Connection error (" + i + "/10) while processing race \"" + trackedRaceName
+                    LoggingUtil.logInfo("Connection error (" + i + "/10) "+e.getMessage()+" while processing race \"" + trackedRaceName
                             + "\" of regatta \"" + trackedRegattaName + "\", retrying...");
                 }
             }
