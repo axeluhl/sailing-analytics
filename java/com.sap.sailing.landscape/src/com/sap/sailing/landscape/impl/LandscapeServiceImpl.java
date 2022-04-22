@@ -96,6 +96,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.JvmUtils;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -965,7 +966,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             // use it to set the upgrade replica's explicit memory size:
             final String memoryVariable = replica.getEnvShValueFor(DefaultProcessConfigurationVariables.MEMORY, WAIT_FOR_PROCESS_TIMEOUT,
                     optionalKeyName, privateKeyEncryptionPassphrase);
-            final Optional<Integer> megabytesFromJvmSize = Util.getMegabytesFromJvmSize(memoryVariable);
+            final Optional<Integer> megabytesFromJvmSize = JvmUtils.getMegabytesFromJvmSize(memoryVariable);
             logger.info("Determined replica set "+replicaSet.getName()+"'s replica memory size for replica "+replica+
                     " as "+memoryVariable+" which equals "+megabytesFromJvmSize+
                     "MB. Using for upgrade replica configuration with instance type "+instanceType+".");
