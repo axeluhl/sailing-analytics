@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sse.common.util.MappingIterable;
 import com.sap.sse.common.util.MappingIterator;
 import com.sap.sse.common.util.NaturalComparator;
@@ -1043,6 +1044,7 @@ public class Util {
      * 
      * If the pattern is not matched, an empty optional is returned, otherwise the memory size in megabytes.
      */
+    @GwtIncompatible
     public static Optional<Integer> getMegabytesFromJvmSize(String memoryVariable) {
         final Matcher m = Pattern.compile("([0-9][0-9]*)([mMgG]?)").matcher(memoryVariable);
         final Integer result;
