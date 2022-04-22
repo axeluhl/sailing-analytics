@@ -231,8 +231,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
         if (result == 0) {
             if (scoringScheme.isMedalWinAmountCriteria()) {
-                // if one reaches the target amount of races won then this has priority, else proceed with normal low
-                // points scoring (e.g., not enough races yet)
+                // if one reaches the target amount of races won then this has priority, else proceed with normal
+                // points-based scoring (e.g., not enough races yet)
                 result = compareByMedalRacesWon(numberOfMedalRacesWonO1, numberOfMedalRacesWonO2);
             }
             if (result == 0) {

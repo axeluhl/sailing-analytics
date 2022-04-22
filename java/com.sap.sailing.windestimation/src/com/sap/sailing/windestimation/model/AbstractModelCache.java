@@ -2,8 +2,11 @@ package com.sap.sailing.windestimation.model;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
+import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
@@ -22,6 +25,7 @@ import com.sap.sailing.windestimation.model.store.ModelStore;
  */
 public abstract class AbstractModelCache<InstanceType, MC extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, MC>>
         implements ModelCache<InstanceType, ModelType> {
+    private static final Logger logger = Logger.getLogger(AbstractModelCache.class.getName());
 
     private final ShortTimeAfterLastHitCache<MC, ModelType> modelCache;
     private final ModelLoader<InstanceType, MC, ModelType> modelLoader;
@@ -63,9 +67,14 @@ public abstract class AbstractModelCache<InstanceType, MC extends ModelContext<I
      * Preloads all the models from model store by means of model loader and puts them into the in-memory cache.
      */
     private void preloadAllModels() {
-        Map<MC, ModelType> bestModelsPerModelContext = modelLoader.loadBestModelsForAllContexts();
-        for (Entry<MC, ModelType> entry : bestModelsPerModelContext.entrySet()) {
-            modelCache.addToCache(entry.getKey(), entry.getValue());
+        try {
+            Map<MC, ModelType> bestModelsPerModelContext = modelLoader.loadBestModelsForAllContexts();
+            for (Entry<MC, ModelType> entry : bestModelsPerModelContext.entrySet()) {
+                modelCache.addToCache(entry.getKey(), entry.getValue());
+            }
+        } catch (ModelLoadingException e) {
+            logger.log(Level.SEVERE, "Problem loading wind estimation models: "+e.getMessage()+
+                    ". Leaving model cache empty. Perhaps the activator will try to import from elsewhere?", e);
         }
     }
 

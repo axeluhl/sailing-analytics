@@ -134,7 +134,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     
     /**
      * Used for the parallel execution of operations that don't
-     * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
+     * {@link RacingEventServiceOperation#requiresSynchronousExecution() require synchronous execution}.
      */
     private final static Executor executor = ThreadPoolUtil.INSTANCE
             .createForegroundTaskThreadPoolExecutor(ReplicationReceiverImpl.class.getName());

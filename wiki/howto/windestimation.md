@@ -15,6 +15,36 @@ To complete the training process successfully, you need to make sure that you ha
 
 ## Model training process
 
+### Docker-Based
+
+In our docker registry under ``docker.sapsailing.com:443`` there is a repository called ``windestimationtraining`` where images can be found to run the training process in a mostly automated way. All you need is an account for ``docker.sapsailing.com:443`` and an account on ``sapsailing.com`` that has the ``TRACKED_RACE:EXPORT`` permission for all races in the archive server (see the ``raw-data`` role). Furthermore, you need a MongoDB with approximately 100GB of available space. This can be a MongoDB replica set, of course. All you need is the URI to establish the connection.
+
+For your account that is equipped with the ``TRACKED_RACE:EXPORT`` permission you'll need the bearer token which you can obtain, when logged in on the web site, from [https://security-service.sapsailing.com/security/api/restsecurity/access_token](https://security-service.sapsailing.com/security/api/restsecurity/access_token). The value of the ``access_token`` attribute is what you will need in the following command:
+
+```
+   docker run --mount type=bind,source=/tmp/windEstimationModels.dat,target=/home/sailing/windEstimationModels.dat \
+              -m 10g --rm -it \
+              -e MONGODB_URI="mongodb://172.17.0.1/windestimation?retryWrites=true" \
+              -e BEARER_TOKEN="{your-bearer-token-here}" \
+              -e MEMORY=-Xmx8g \
+              docker.sapsailing.com:443/windestimationtraining:latest
+```
+
+### Creating the Docker Image for Model Training
+
+Under ``docker/Dockerfile_windestimation`` there is a docker file that can be used to produce the Docker image, given that a ``WindEstimationModelsTraining.jar`` exists under [https://static.sapsailing.com/WindEstimationModelsTraining.jar](https://static.sapsailing.com/WindEstimationModelsTraining.jar). Producing an image works like this:
+
+```
+    docker build --no-cache -f Dockerfile_windestimation -t docker.sapsailing.com:443/windestimationtraining:0.0.4,docker.sapsailing.com:443/windestimationtraining:latest
+```
+
+To produce the JAR file used for the Docker image creation, run an "Export" command in Eclipse, using "File - Export - Runnable JAR File" with the ``SimpleModelsTrainingPart1`` launch configuration. This will export a JAR that you can then upload to ``trac@sapsailing.com:static`` using a command such as
+```
+    scp WindEstimationModelsTraining.jar trac@sapsailing.com:static
+```
+
+### Traditional
+
 1. Run ``com.sap.sailing.windestimation.model.SimpleModelsTrainingPart1`` as a normal Java Application. If you would like to run this outside of your development environment, use "Export as..." in Eclipse, pick the launch configuration for ``SimpleModelsTrainingPart1`` and let the exporter pack all required dependencies into the single executable JAR file that you can send anywhere you would like to execute it and then run ``java -jar SimpleModelsTrainingPar1.jar`` or however you called the JAR file produced by the export. After this, all the necessary maneuver and wind data will be downloaded, pre-processed and maneuver classifiers get trained. You can use the usual MongoDB system properties to configure the database connection, such as ``-Dmongo.dbName=windestimation -Dmongo.port=10202 -Dmongo.host=dbserver.internal.sapsailing.com`` or ``"-Dmongo.uri=mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/windestimation?replicaSet=live&retryWrites=true"``. You have to provide the VM at least 16GB of RAM. Use ``-Xms16g -Xmx16g`` as VM arguments to accomplish this. A full command line could, e.g., look like this:
 ```
   java -Dmongo.dbName=windestimation -Dmongo.port=10202 -Dmongo.host=dbserver.internal.sapsailing.com -Xms16g -Xmx16g -jar SimpleModelsTrainingPart1.jar
