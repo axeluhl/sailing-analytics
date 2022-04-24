@@ -41,7 +41,7 @@ If successful (and you may want to remove the ``--rm`` option otherwise to allow
 Under ``docker/Dockerfile_windestimation`` there is a docker file that can be used to produce the Docker image, given that a ``WindEstimationModelsTraining.jar`` exists under [https://static.sapsailing.com/WindEstimationModelsTraining.jar](https://static.sapsailing.com/WindEstimationModelsTraining.jar). Producing an image works like this:
 
 ```
-    docker build --no-cache -f Dockerfile_windestimation -t docker.sapsailing.com:443/windestimationtraining:0.0.4,docker.sapsailing.com:443/windestimationtraining:latest
+    docker build --no-cache -f Dockerfile_windestimation -t docker.sapsailing.com:443/windestimationtraining:0.0.4 .
 ```
 
 To produce the JAR file used for the Docker image creation, run an "Export" command in Eclipse, using "File - Export - Runnable JAR File" with the ``SimpleModelsTrainingPart1`` launch configuration. This will export a JAR that you can then upload to ``trac@sapsailing.com:static`` using a command such as
