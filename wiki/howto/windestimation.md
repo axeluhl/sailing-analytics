@@ -29,6 +29,12 @@ For your account that is equipped with the ``TRACKED_RACE:EXPORT`` permission yo
               -e MEMORY=-Xmx8g \
               docker.sapsailing.com:443/windestimationtraining:latest
 ```
+If successful (and you may want to remove the ``--rm`` option otherwise to allow you to inspect logs after unsuccessful execution) you will find the output under ``/tmp/windEstimationModels.dat`` which you can upload as usual, e.g., as in
+```
+    curl -X POST -H "Content-Type: application/octet-stream" --data-binary @windEstimationModels.dat \
+                 -H "Authorization: Bearer 987235098w0t98yw409857098745=" \
+                 https://host.sapsailing.com/windestimation/api/windestimation_data
+```
 
 ### Creating the Docker Image for Model Training
 
