@@ -476,7 +476,15 @@ public class CandidateChooserImpl implements CandidateChooser {
     
     @Override
     public void updateEndProxyNodeWaypointIndex() {
+        // remove "end" from the fixed passings which is ordered by waypoint number; after the change,
+        // "end" may need to be at a different position in the navigable set.
+        for (final NavigableSet<Candidate> fixedPassingsForCompetitor : fixedPassings.values()) {
+            fixedPassingsForCompetitor.remove(end);
+        }
         end.setOneBasedWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints()+1);
+        for (final NavigableSet<Candidate> fixedPassingsForCompetitor : fixedPassings.values()) {
+            fixedPassingsForCompetitor.add(end);
+        }
     }
 
     @Override
