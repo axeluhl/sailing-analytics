@@ -709,6 +709,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(new Edge(
                         new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
                         ()->1.0, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
+                // find the shortest path from startOfFixedInterval to endOfFixedInterval:
                 while (!endFound) {
                     Util.Pair<Edge, Double> mostLikelyEdgeWithProbability = currentEdgesMoreLikelyFirst.pollFirst();
                     if (mostLikelyEdgeWithProbability == null) {
@@ -751,6 +752,14 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
                 startOfFixedInterval = endOfFixedInterval;
                 endOfFixedInterval = fixedPasses.higher(endOfFixedInterval);
+                if (endOfFixedInterval != null && endOfFixedInterval.getOneBasedIndexOfWaypoint() > end.getOneBasedIndexOfWaypoint()) {
+                    // we have fixed candidates for waypoints whose index exceeds that of the proxy "end" node;
+                    // this can happen, e.g., if fixed passings are being processed already before a course
+                    // definition has been received yet.  In this case we call off the search; the fixedPassings
+                    // contain the "end" node not at the end; an inconsistency which the next call to
+                    // updateEndProxyNodeWaypointIndex() is expected to fix during the next round of changes.
+                    endOfFixedInterval = null;
+                }
             }
             boolean changed = false;
             Map<Waypoint, MarkPassing> currentPasses = currentMarkPasses.get(c);
