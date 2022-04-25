@@ -60,7 +60,7 @@ public interface Operation<S> extends Cloneable {
      *         competitor's track within a race should return a key consisting of components identifying the competitor
      *         and the race.
      */
-    default Object getKeyForAsynchronousExection() {
+    default Object getKeyForAsynchronousExecution() {
         return getClass();
     }
 }

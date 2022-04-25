@@ -38,45 +38,60 @@ public class OperationQueueByKeyExecutor {
         this.monitorsPerKey = new ConcurrentHashMap<>();
     }
 
-    public void schedule(Object keyForAsynchronousExection, Runnable runnable) {
+    public void schedule(Object keyForAsynchronousExecution, Runnable runnable) {
         final Object monitorForKey;
         final Deque<Runnable> queueForKey;
+        final boolean queueCreated;
         synchronized (this) {
-            queueForKey = operationQueuesByKey.computeIfAbsent(keyForAsynchronousExection, key->new ConcurrentLinkedDeque<>());
-            if (queueForKey.isEmpty()) {
-                monitorForKey = new Object();
-                monitorsPerKey.put(keyForAsynchronousExection, monitorForKey);
+            if (operationQueuesByKey.containsKey(keyForAsynchronousExecution)) {
+                queueForKey = operationQueuesByKey.get(keyForAsynchronousExecution);
+                monitorForKey = monitorsPerKey.get(keyForAsynchronousExecution);
+                queueCreated = false;
             } else {
-                monitorForKey = monitorsPerKey.get(keyForAsynchronousExection);
+                queueForKey = new ConcurrentLinkedDeque<>();
+                queueCreated = true;
+                operationQueuesByKey.put(keyForAsynchronousExecution, queueForKey);
+                monitorForKey = new Object();
+                monitorsPerKey.put(keyForAsynchronousExecution, monitorForKey);
             }
         }
         synchronized (monitorForKey) {
-            if (queueForKey.isEmpty()) {
+            if (queueCreated) {
                 // the task can be scheduled already, even though the queue is still empty,
                 // because we're under the key's monitor, and all reading from the key-specific
                 // queue must happen under that same monitor
-                executor.execute(()->workOnQueueForKey(keyForAsynchronousExection));
+                executor.execute(()->workOnQueueForKey(keyForAsynchronousExecution));
             }
             queueForKey.add(runnable);
         }
     }
 
-    private void workOnQueueForKey(Object keyForAsynchronousExection) {
-        boolean finished = false;
-        while (!finished) {
-            final Runnable nextOperation;
-            synchronized (monitorsPerKey.get(keyForAsynchronousExection)) {
-                final Deque<Runnable> queueForKey = operationQueuesByKey.get(keyForAsynchronousExection);
-                nextOperation = queueForKey.pollFirst();
+    /**
+     * Removes operations from the queue for the {@code keyForAsynchronousExecution} which can be expected to not be
+     * empty when this method is called. Changes to the queue are done while {@code synchronized} on the
+     * {@link #monitorsPerKey monitor for the key}, in particular removing an element and deciding whether this
+     * task can end because the queue is empty and hence removing the queue and the monitor consistently.
+     */
+    private void workOnQueueForKey(Object keyForAsynchronousExecution) {
+        final Deque<Runnable> queueForKey;
+        Runnable nextOperation;
+        synchronized (monitorsPerKey.get(keyForAsynchronousExecution)) {
+            queueForKey = operationQueuesByKey.get(keyForAsynchronousExecution);
+            nextOperation = queueForKey.pollFirst();
+        }
+        do {
+            nextOperation.run();
+            synchronized (monitorsPerKey.get(keyForAsynchronousExecution)) {
                 if (queueForKey.isEmpty()) {
-                    finished = true;
+                    nextOperation = null;
                     synchronized (this) {
-                        monitorsPerKey.remove(keyForAsynchronousExection);
-                        operationQueuesByKey.remove(keyForAsynchronousExection);
+                        monitorsPerKey.remove(keyForAsynchronousExecution);
+                        operationQueuesByKey.remove(keyForAsynchronousExecution);
                     }
+                } else {
+                    nextOperation = queueForKey.pollFirst();
                 }
             }
-            nextOperation.run();
-        }
+        } while (nextOperation != null);
     }
 }

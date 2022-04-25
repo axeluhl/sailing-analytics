@@ -421,7 +421,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
         if (operation.requiresSynchronousExecution()) {
             runnable.run();
         } else {
-            operationQueueByKeyExecutor.schedule(operation.getKeyForAsynchronousExection(), runnable);
+            operationQueueByKeyExecutor.schedule(operation.getKeyForAsynchronousExecution(), runnable);
         }
         logger.finer(()->""+operationCount+": Done applying "+operation);
     }

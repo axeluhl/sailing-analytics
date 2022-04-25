@@ -40,18 +40,18 @@ public abstract class AbstractRaceOperation<ResultType> extends AbstractRacingEv
      * and a race-specific key component obtained through the {@link #getRaceSpecificKeyComponentForAsynchronousExecution()} method.
      */
     @Override
-    public Object getKeyForAsynchronousExection() {
+    public Object getKeyForAsynchronousExecution() {
         return new Triple<>(getClass(), raceIdentifier, getRaceSpecificKeyComponentForAsynchronousExecution());
     }
     
     /**
-     * To simplify the implementation of the {@link #getKeyForAsynchronousExection()} method, specializations can override
+     * To simplify the implementation of the {@link #getKeyForAsynchronousExecution()} method, specializations can override
      * this method to provide a race-specific key for the operation that is equal to that of other operations of the same type
      * if the operations may mutually block each other's execution.<p>
      * 
      * For example, an operation to add a GPS fix to a competitor's track within a race only needs to return the competitor ID
      * from this method; operation type and race identifier are contributed into a triple returned by this class's
-     * {@link #getKeyForAsynchronousExection()} implementation by default.
+     * {@link #getKeyForAsynchronousExecution()} implementation by default.
      * 
      * @return this default implementation returns {@code null}.
      */
