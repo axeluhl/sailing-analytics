@@ -758,6 +758,10 @@ public class CandidateChooserImpl implements CandidateChooser {
                     // definition has been received yet.  In this case we call off the search; the fixedPassings
                     // contain the "end" node not at the end; an inconsistency which the next call to
                     // updateEndProxyNodeWaypointIndex() is expected to fix during the next round of changes.
+                    logger.warning("In "+this+" the proxy end node's waypoint index "+end.getOneBasedIndexOfWaypoint()+
+                            " was exceeded by that of the fixed mark passing "+endOfFixedInterval+
+                            ". Stopping at "+end+" in this round; the end node will be updated soon and another round "+
+                            "of calculations will start, then with an up-to-date waypoint index for the end proxy node.");
                     endOfFixedInterval = null;
                 }
             }
