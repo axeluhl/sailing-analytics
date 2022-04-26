@@ -37,6 +37,27 @@ gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc" >/etc/yum.repos.d
    yum install -y mongodb-org-server mongodb-org-tools mongodb-org-shell docker
    chown mongod /var/lib/mongo
    chgrp mongod /var/lib/mongo
+```
+Now adjust the ``/etc/mongod.conf`` file in two places; one to restrict the cache size to limit MongoDB's memory use, and another one to expose MongoDB's default port ``27017`` also to the Docker network:
+
+```
+storage:
+  dbPath: /var/lib/mongo
+  journal:
+    enabled: true
++ wiredTiger:
++   engineConfig:
++     cacheSizeGB: 4
+...
+net:
+  port: 27017
+- bindIp: 127.0.0.1
++ bindIp: 172.17.0.1,127.0.0.1
+```
+
+Then continue as follows:
+
+```
    systemctl start mongod
    systemctl start docker
    touch /tmp/windEstimationModels.dat
