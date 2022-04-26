@@ -5,8 +5,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
+import java.util.logging.Logger;
+
+import com.sap.sse.common.TimePoint;
 
 public class OperationQueueByKeyExecutor {
+    private static final Logger logger = Logger.getLogger(OperationQueueByKeyExecutor.class.getName());
+
     private final Executor executor;
     
     /**
@@ -48,6 +53,7 @@ public class OperationQueueByKeyExecutor {
                 monitorForKey = monitorsPerKey.get(keyForAsynchronousExecution);
                 queueCreated = false;
             } else {
+                logger.fine(()->"Creating operation queue for key "+keyForAsynchronousExecution);
                 queueForKey = new ConcurrentLinkedDeque<>();
                 queueCreated = true;
                 operationQueuesByKey.put(keyForAsynchronousExecution, queueForKey);
@@ -74,6 +80,12 @@ public class OperationQueueByKeyExecutor {
      */
     private void workOnQueueForKey(Object keyForAsynchronousExecution) {
         final Deque<Runnable> queueForKey;
+        final int[] count = { 1 };
+        final TimePoint[] started = new TimePoint[1];
+        logger.fine(()->{
+            started[0] = TimePoint.now();
+            return "Started work on queue for key "+keyForAsynchronousExecution;
+        });
         Runnable nextOperation;
         synchronized (monitorsPerKey.get(keyForAsynchronousExecution)) {
             queueForKey = operationQueuesByKey.get(keyForAsynchronousExecution);
@@ -90,8 +102,11 @@ public class OperationQueueByKeyExecutor {
                     }
                 } else {
                     nextOperation = queueForKey.pollFirst();
+                    count[0]++;
                 }
             }
         } while (nextOperation != null);
+        logger.fine(()->"Terminating tasks for operation queue for key "+keyForAsynchronousExecution+" after running "+count[0]+" operations "+
+                "which took "+started[0].until(TimePoint.now()));
     }
 }
