@@ -367,6 +367,23 @@
 		"targetFileNamingConvention":"[filename].[extension]"
 	   }
 	 ]
+      },
+      {
+         "collectionName":"SailInsightReactNative",
+         "folders":[
+            {
+               "startingFolderPath":"mobile/sailinsight/src/i18n/translations
+               "sourceFilters":[
+                  "**/*.json"
+               ],
+               "excludedSourceFilters":[
+                "**/zh.json"
+                ],
+               "xlfFolderPath":"./XLF",
+               "targetFolderPath":".",
+               "pseudoLocFolderPath":"."
+            }
+         ]
       }
    ],
    "defaultConfiguration":{  
