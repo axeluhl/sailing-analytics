@@ -23,7 +23,7 @@ For your account that is equipped with the ``TRACKED_RACE:EXPORT`` permission yo
 
 ```
    docker run --mount type=bind,source=/tmp/windEstimationModels.dat,target=/home/sailing/windEstimationModels.dat \
-              -m 10g --rm -it \
+              -m 10g --rm -d \
               -e MONGODB_URI="mongodb://172.17.0.1/windestimation?retryWrites=true" \
               -e BEARER_TOKEN="{your-bearer-token-here}" \
               -e MEMORY=-Xmx8g \
