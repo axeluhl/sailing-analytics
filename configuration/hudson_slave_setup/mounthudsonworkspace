@@ -1,0 +1,7 @@
+#!/bin/bash
+# Expects an ephemeral volume to have been mounted at /ephemeral/data and
+# mounts that with a "bind" mount to /home/hudson/workspace.
+# The directory is then chown/chgrp'ed to hudson
+mount -o bind /ephemeral/data /home/hudson/workspace
+chgrp hudson /home/hudson/workspace
+chown hudson /home/hudson/workspace
