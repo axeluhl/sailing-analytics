@@ -162,14 +162,15 @@
  border-radius: 0.333333333333333em;
  border-color: red;
  /* display: inline; */
- padding: 4px;
  color: red;
  font-weight: bold;
  position: relative;
- top: -55px;
+ top: -45px;
  right: -270px;
  transform: rotate(30deg);
  font-size: 10px;
+ padding: 4px;
+ margin: -14px;
 }
 
 .free .price {
