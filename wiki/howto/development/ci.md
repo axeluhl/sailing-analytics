@@ -65,22 +65,32 @@ In order to elastically scale our build / CI infrastructure, we use AWS to provi
 The image has been crafted specifically to contain the tools required for the build (as of this writing in particular Google Chrome, chromedriver and an old Firefox 26.0, plus a current Maven installation and the JDKs required for the build). In order to set up such an image based on Ubuntu, consider running the following commands as root (see also https://tecadmin.net/setup-selenium-chromedriver-on-ubuntu/), starting as the "ubuntu" used:
 
 ```
+   scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
+   scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/hudson_slave_setup/* /tmp
    sudo -i
    apt-get update
    apt-get install -y unzip xvfb libxi6 libgconf-2-4
    curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
    echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
    apt-get -y update
+   apt-get -y upgrade
+   apt-get -y autoremove
    apt-get -y install google-chrome-stable
    cd /tmp
    wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
    cd /usr/bin
    unzip /tmp/chromedriver_linux64.zip
-   exit
-   scp trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
-   sudo -i
-   source /tmp/imageupgrade_functions.sh
+   mv /tmp/imageupgrade /usr/local/bin
+   mv /tmp/imageupgrade_functions.sh /usr/local/bin
+   mv /tmp/mounthudsonworkspace /usr/local/bin
+   mv /tmp/*.service /etc/systemd/system/
+   source /usr/local/bin/imageupgrade_functions.sh
    download_and_install_latest_sap_jvm_8
+   systemctl daemon-reload
+   adduser --system --shell /bin/bash --quiet --group --disabled-password hudson
+   sudo -u hudson mkdir /home/hudson/.ssh
+   echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6TjveiR+KkEbQQcAEcme6PCUHZLLU5ENRCXnXKaFolWrBj77xEMf3RrlLJ1TINepuwydHDtN5of0D1kjykAIlgZPeMYf9zq3mx0dQk/B2IEFSW8Mbj74mYDpQoUULwosSmWz3yAhfLRgE83C7Wvdb0ToBGVHeHba2IFsupnxU6gcInz8SfX3lP78mh4KzVkNmQdXkfEC2Qe/HUeDLdI8gqVtAOd0NKY8yv/LUf4JX8wlZb6rU9Y4nWDGbgcv/k8h67xYRI4YbtEDVkPBqCZux66JuwKF4uZ2q+rPZTYRYJWT8/0x1jz5W5DQtuDVITT1jb1YsriegOZgp9LfS11B7w== hudson@ip-172-31-28-17" >/home/hudson/.ssh/authorized_keys
+   sudo -u hudson wget -O /home/hudson/slave.jar "https://hudson.sapsailing.com/jnlpJars/slave.jar"
 ```
 
 Furthermore, the ephemeral storage is partitioned with a ``gpt`` label into a swap partition with 8GB and the remainder as an ``ext4`` partition mounted under ``/ephemeral/data`` with is then bound with a "bind" mount to ``/home/hudson/workspace``. See the ``/etc/systemd/system/mounthudsonworkspace.service`` systemd service definition on the slave instances. The ``launchhudsonslave`` script launches the instance, checks for it to enter the ``running`` state, then tries to connect using SSH with user ``hudson``. The respective keys are baked into the image and match up with the key stored in ``hudson@hudson.sapsailing.com:.ssh``.
