@@ -16,5 +16,6 @@ if echo "${METADATA}" | grep -q "^image-upgrade$"; then
   LOGON_USER_HOME=/home/ubuntu
   run_apt_update_upgrade
   download_and_install_latest_sap_jvm_8
+  run_git_pull
   finalize
 fi
