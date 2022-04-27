@@ -78,7 +78,7 @@ The image has been crafted specifically to contain the tools required for the bu
    echo "deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" >/etc/apt/sources.list.d/mongodb-org-4.4.list
    apt-get -y update
    apt-get -y upgrade
-   apt-get -y install google-chrome-stable mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws
+   apt-get -y install google-chrome-stable maven mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws
    apt-get -y autoremove
    cd /tmp
    wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip

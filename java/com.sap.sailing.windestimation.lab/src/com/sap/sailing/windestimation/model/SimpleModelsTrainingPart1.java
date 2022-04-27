@@ -58,7 +58,10 @@ public class SimpleModelsTrainingPart1 {
      *            maneuvers to use for training which defaults to 80; {@code args[2]} may contain a percentage of the
      *            maneuvers to use for testing which defaults to 20. If {@code args[3]} is also provided, it is taken to
      *            be the file system path for storing the models that result from the training process; with this, the
-     *            models are not stored in MongoDB which otherwise would be the default.
+     *            models are not stored in MongoDB which otherwise would be the default. If {@code args[4]} is provided and
+     *            is something that {@link Boolean#valueOf(String)} evaluates to {@code true} then visuals are presented
+     *            (requiring a display to be available to the Java process which may, e.g., not be the case for a docker
+     *            container) that show the results of outlier removal for the wind regressions.
      */
     public static void main(String[] args) throws Exception {
         final String bearerToken = args[0];
@@ -106,15 +109,20 @@ public class SimpleModelsTrainingPart1 {
         });
         awaitThreadPoolCompletion();
         // The following code would open pop-up windows that display charts of original TWD regressions before cleansing:
-        AggregatedDurationDimensionPlot.main(args);
-        AggregatedDistanceDimensionPlot.main(args);
+        final boolean showCharts = args.length > 4 && Boolean.valueOf(args[4]);
+        if (showCharts) {
+            AggregatedDurationDimensionPlot.main(args);
+            AggregatedDistanceDimensionPlot.main(args);
+        }
         enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType.DURATION);
         enforceMonotonicZeroMeanSigmaGrowth(AggregatedSingleDimensionType.DISTANCE);
         // The following code would open pop-up windows that display charts of original and "cleansed" TWD regressions:
-        AggregatedDurationDimensionPlot.main(args);
-        showInfoAboutIntervalAdjustments(DurationBasedTwdTransitionRegressorModelContext.class, DurationValueRange.class);
-        AggregatedDistanceDimensionPlot.main(args);
-        showInfoAboutIntervalAdjustments(DistanceBasedTwdTransitionRegressorModelContext.class, DistanceValueRange.class);
+        if (showCharts) {
+            AggregatedDurationDimensionPlot.main(args);
+            showInfoAboutIntervalAdjustments(DurationBasedTwdTransitionRegressorModelContext.class, DurationValueRange.class);
+            AggregatedDistanceDimensionPlot.main(args);
+            showInfoAboutIntervalAdjustments(DistanceBasedTwdTransitionRegressorModelContext.class, DistanceValueRange.class);
+        }
         DurationBasedTwdTransitionStdRegressorTrainer.train(modelStore);
         DistanceBasedTwdTransitionStdRegressorTrainer.train(modelStore);
         Thread.sleep(1000);
