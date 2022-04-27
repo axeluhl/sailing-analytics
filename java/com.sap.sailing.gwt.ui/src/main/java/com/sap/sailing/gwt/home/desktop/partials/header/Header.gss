@@ -194,7 +194,8 @@
 .header_navigation_iconactive {
 /*   background-image: resourceUrl('navigation_hover'); */
 }
-.sitenavigation .subscriptions:before {
+.sitenavigation .subscriptions:before,
+.sitenavigation_fixed .subscriptions:before {
   content: "";
   position: absolute;
   background: resourceUrl('crown');
@@ -212,3 +213,17 @@
 }
 .sitenavigation .subscriptions {
 }
+.sitenavigation .premium_feature,
+.sitenavigation_fixed .premium_feature {
+  color: #e3c861;
+}
+
+.sitenavigation .premium_feature.premium_hint,
+.sitenavigation_fixed .premium_feature.premium_hint {
+  background: resourceUrl('premiumIcon');
+  background-size: 15px;
+  background-repeat: no-repeat;
+  background-position: right 10px top 19px;
+  padding-right: 28px;
+}
+

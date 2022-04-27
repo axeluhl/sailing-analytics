@@ -28,9 +28,9 @@
           <g:Anchor ui:field="adminConsolePageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.manageEvents}" target="adminConsoleWindow"/>
           <g:Anchor ui:field="dataMiningPageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.dataMining}" target="dataMiningWindow"/>
+            styleName="{local_res.css.sitenavigation_link} {local_res.css.premium_feature}" text="{i18n.dataMining}" target="dataMiningWindow"/>
           <g:Anchor ui:field="strategySimulatorPageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n.simulator}" target="strategySimulatorWindow"/>
+            styleName="{local_res.css.sitenavigation_link} {local_res.css.premium_feature}" text="{i18n.simulator}" target="strategySimulatorWindow"/>
         </nav>
         <nav class="{local_res.css.sitenavigation_fixed}">
         <!-- -->
@@ -52,7 +52,7 @@
                 </li>
                 <li>
                     <g:Anchor ui:field="subscriptionsPageLinkMenu"
-                        styleName="{local_res.css.sitenavigation_link}"
+                        styleName="{local_res.css.sitenavigation_link} {local_res.css.subscriptions}"
                         text="{i18n.subscriptions}" />
                 </li>
                 <li>
@@ -62,12 +62,12 @@
                 </li>
                 <li>
                     <g:Anchor ui:field="dataMiningPageLinkMenu"
-                        styleName="{local_res.css.sitenavigation_link}"
+                        styleName="{local_res.css.sitenavigation_link} {local_res.css.premium_feature}"
                         text="{i18n.dataMining}" target="dataMiningWindow" />
                 </li>
                 <li>
                     <g:Anchor ui:field="strategySimulatorPageLinkMenu"
-                        styleName="{local_res.css.sitenavigation_link}"
+                        styleName="{local_res.css.sitenavigation_link} {local_res.css.premium_feature}"
                         text="{i18n.simulator}" target="strategySimulatorWindow" />
                 </li>
             </ul>

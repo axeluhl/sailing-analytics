@@ -85,8 +85,9 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
         @Override
         public void onSuccess(Iterable<DetailType> result) {
             SAPHeaderWithAuthentication header = initHeader();
+            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
             GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
-                    header.getAuthenticationMenuView());
+                    paywallResolver, header.getAuthenticationMenuView());
             AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                     genericSailingAuthentication);
             getSailingService().getLeaderboardWithSecurity(leaderboardName,

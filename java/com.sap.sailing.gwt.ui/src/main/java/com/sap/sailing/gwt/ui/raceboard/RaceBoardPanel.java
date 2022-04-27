@@ -557,7 +557,7 @@ public class RaceBoardPanel
         for (Pair<Component<?>, Action> componentAndAction : componentsForSideBySideViewer) {
             addChildComponent(componentAndAction.getA());
         }
-        this.setupUserManagementControlPanel(userService);
+        this.setupUserManagementControlPanel(userService, paywallResolver);
         mainPanel.add(mapViewer.getViewerWidget());
         boolean showLeaderboard = initialPerspectiveOwnSettings.isShowLeaderboard()
                 && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
@@ -594,10 +594,10 @@ public class RaceBoardPanel
         racetimePanel.setBarOverlays(overlays);
     }
 
-    private void setupUserManagementControlPanel(UserService userService) {
+    private void setupUserManagementControlPanel(UserService userService, PaywallResolver paywallResolver) {
         mainCss.ensureInjected();
         final FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, userManagementMenuView, display, 
+        final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, paywallResolver, userManagementMenuView, display, 
                 SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
         new RaceBoardLoginHintPopup(genericAuthentication.getAuthenticationManager());
     }

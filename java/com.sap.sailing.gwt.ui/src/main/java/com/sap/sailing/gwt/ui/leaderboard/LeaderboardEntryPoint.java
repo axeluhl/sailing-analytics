@@ -251,7 +251,8 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                 leaderboardDisplayName = leaderboardName;
             }
             SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
-            new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+            PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+            new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
             mainPanel.addNorth(header, 75);
         }
 
