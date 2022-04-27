@@ -68,8 +68,10 @@ The image has been crafted specifically to contain the tools required for the bu
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/hudson_slave_setup/* /tmp
    sudo -i
+   mkdir /opt/android-sdk-linux
+   echo "dev.internal.sapsailing.com:/home/hudson/android-sdk-linux /opt/android-sdk-linux nfs tcp,intr,timeo=100,retry=0" >>/etc/fstab
    apt-get update
-   apt-get install -y unzip xvfb libxi6 libgconf-2-4
+   apt-get install -y unzip xvfb libxi6 libgconf-2-4 nfs-common
    curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
    wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
    echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
@@ -98,6 +100,8 @@ The image has been crafted specifically to contain the tools required for the bu
    sudo -u hudson mkdir /home/hudson/.ssh
    sudo -u hudson chmod 700 /home/hudson/.ssh
    sudo -u hudson mkdir /home/hudson/workspace
+   sudo -u hudson git config --global user.email "hudson@sapsailing.com"
+   sudo -u hudson git config --global user.name "Hudson CI SAP Sailing Analytics"
    # Now add a password-less private ssh key "id_rsa" to /home/sailing/.ssh and make sure it is eligible to access trac@sapsailing.com
    chmod 600 /home/sailing/.ssh/id_*
    cp /home/sailing/.ssh/id_* /home/hudson/.ssh
