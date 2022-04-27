@@ -71,11 +71,13 @@ The image has been crafted specifically to contain the tools required for the bu
    apt-get update
    apt-get install -y unzip xvfb libxi6 libgconf-2-4
    curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
-   echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
+   wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+   echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+   echo "deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" >/etc/apt/sources.list.d/mongodb-org-4.4.list
    apt-get -y update
    apt-get -y upgrade
+   apt-get -y install google-chrome-stable mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws
    apt-get -y autoremove
-   apt-get -y install google-chrome-stable
    cd /tmp
    wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
    cd /usr/bin
@@ -87,8 +89,25 @@ The image has been crafted specifically to contain the tools required for the bu
    source /usr/local/bin/imageupgrade_functions.sh
    download_and_install_latest_sap_jvm_8
    systemctl daemon-reload
+   systemctl enable imageupgrade.service
+   systemctl enable mounthudsonworkspace.service
+   adduser --system --shell /bin/bash --quiet --group --disabled-password sailing
    adduser --system --shell /bin/bash --quiet --group --disabled-password hudson
+   sudo -u sailing mkdir /home/sailing/.ssh
+   sudo -u sailing chmod 700 /home/sailing/.ssh
    sudo -u hudson mkdir /home/hudson/.ssh
+   sudo -u hudson chmod 700 /home/hudson/.ssh
+   sudo -u hudson mkdir /home/hudson/workspace
+   # Now add a password-less private ssh key "id_rsa" to /home/sailing/.ssh and make sure it is eligible to access trac@sapsailing.com
+   chmod 600 /home/sailing/.ssh/id_*
+   cp /home/sailing/.ssh/id_* /home/hudson/.ssh
+   chown hudson /home/hudson/.ssh/*
+   chgrp hudson /home/hudson/.ssh/*
+   chmod 600 /home/hudson/.ssh/id_*
+   # ensure the host key of sapsailing.com is accepted:
+   sudo -u sailing ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls >/dev/null
+   sudo -u sailing git clone trac@sapsailing.com:/home/trac/git /home/sailing/code
+   sudo -u hudson ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls >/dev/null
    echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6TjveiR+KkEbQQcAEcme6PCUHZLLU5ENRCXnXKaFolWrBj77xEMf3RrlLJ1TINepuwydHDtN5of0D1kjykAIlgZPeMYf9zq3mx0dQk/B2IEFSW8Mbj74mYDpQoUULwosSmWz3yAhfLRgE83C7Wvdb0ToBGVHeHba2IFsupnxU6gcInz8SfX3lP78mh4KzVkNmQdXkfEC2Qe/HUeDLdI8gqVtAOd0NKY8yv/LUf4JX8wlZb6rU9Y4nWDGbgcv/k8h67xYRI4YbtEDVkPBqCZux66JuwKF4uZ2q+rPZTYRYJWT8/0x1jz5W5DQtuDVITT1jb1YsriegOZgp9LfS11B7w== hudson@ip-172-31-28-17" >/home/hudson/.ssh/authorized_keys
    sudo -u hudson wget -O /home/hudson/slave.jar "https://hudson.sapsailing.com/jnlpJars/slave.jar"
 ```
