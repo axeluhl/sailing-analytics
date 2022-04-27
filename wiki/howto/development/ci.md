@@ -103,6 +103,8 @@ The image has been crafted specifically to contain the tools required for the bu
    sudo -u hudson git config --global user.email "hudson@sapsailing.com"
    sudo -u hudson git config --global user.name "Hudson CI SAP Sailing Analytics"
    # Now add a password-less private ssh key "id_rsa" to /home/sailing/.ssh and make sure it is eligible to access trac@sapsailing.com
+   chown sailing /home/sailing/.ssh/id_*
+   chgrp sailing /home/sailing/.ssh/id_*
    chmod 600 /home/sailing/.ssh/id_*
    cp /home/sailing/.ssh/id_* /home/hudson/.ssh
    chown hudson /home/hudson/.ssh/*
