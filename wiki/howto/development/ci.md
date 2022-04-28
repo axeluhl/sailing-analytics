@@ -93,6 +93,7 @@ The image has been crafted specifically to contain the tools required for the bu
    systemctl daemon-reload
    systemctl enable imageupgrade.service
    systemctl enable mounthudsonworkspace.service
+   systemctl enable mongod.service
    adduser --system --shell /bin/bash --quiet --group --disabled-password sailing
    adduser --system --shell /bin/bash --quiet --group --disabled-password hudson
    sudo -u sailing mkdir /home/sailing/.ssh
