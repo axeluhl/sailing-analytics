@@ -174,7 +174,7 @@ public class UserService {
                 // ignore update events coming from this object itself
                 if (LOCAL_STORAGE_UPDATE_KEY.equals(event.getKey()) && event.getNewValue() != null
                         && !event.getNewValue().isEmpty() && !event.getNewValue().equals(id.toString())) {
-                    updateUser(/* Don't play endless ping-ping between instances! */ false);
+                    updateUser(/* Don't play endless ping-pong between instances! */ false);
                 }
             }
         });
@@ -203,7 +203,7 @@ public class UserService {
         userManagementService.getCurrentUser(
                 new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
-                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
+            public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, notifyOtherInstances);
             }
 

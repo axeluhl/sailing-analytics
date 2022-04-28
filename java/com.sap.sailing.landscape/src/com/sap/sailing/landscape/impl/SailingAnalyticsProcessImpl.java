@@ -245,5 +245,6 @@ implements SailingAnalyticsProcess<ShardingKey> {
                     "cd "+getServerDirectory(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT).replaceAll("\"", "\\\\\"")+"; "+
                     "./refreshInstance.sh install-release "+release.getName()+" && ./stop && ./start"+
                     "\"", "Refreshing process to release "+release.getName(), Level.INFO);
+        this.release = release;
     }
 }

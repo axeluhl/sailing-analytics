@@ -180,7 +180,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     
     @Override
     public Set<WindSource> getWindSources(WindSourceType type) {
-        final Set<WindSource> result = new HashSet<WindSource>();
+        final Set<WindSource> result = new HashSet<>();
         if (type == WindSourceType.COMBINED) {
             result.add(new WindSourceImpl(WindSourceType.COMBINED));
         } else if (type == WindSourceType.LEG_MIDDLE) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="195">
+<target name="Race Analysis Target" sequenceNumber="197">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -120,6 +120,7 @@
 <unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.smile.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
@@ -191,6 +192,14 @@
 <plugin id="org.apache.shiro.core"/>
 <plugin id="org.apache.shiro.ehcache"/>
 <plugin id="org.apache.shiro.web"/>
+<plugin id="com.github.haifengl.smile-core"/>
+<plugin id="com.github.haifengl.smile-data"/>
+<plugin id="com.github.haifengl.smile-graph"/>
+<plugin id="com.github.haifengl.smile-math"/>
+<plugin id="com.github.haifengl.smile-core.source"/>
+<plugin id="com.github.haifengl.smile-data.source"/>
+<plugin id="com.github.haifengl.smile-graph.source"/>
+<plugin id="com.github.haifengl.smile-math.source"/>
 <plugin id="org.owasp.encoder"/>
 <plugin id="org.apache.shiro.core.source"/>
 <plugin id="org.apache.shiro.ehcache.source"/>
@@ -268,7 +277,6 @@
 <plugin id="org.mongodb.driver-core.source"/>
 <plugin id="org.mongodb.driver-sync"/>
 <plugin id="org.mongodb.driver-sync.source"/>
-<plugin id="com.google.code.findbugs.jsr305"/>
 <plugin id="org.objenesis"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>

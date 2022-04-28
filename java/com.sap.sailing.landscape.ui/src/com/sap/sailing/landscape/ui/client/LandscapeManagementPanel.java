@@ -294,7 +294,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsTable.addColumn(masterInstanceIdColumn, stringMessages.masterInstanceId(),
                 (rs1, rs2)->new NaturalComparator().compare(rs1.getMaster().getHost().getInstanceId(), rs2.getMaster().getHost().getInstanceId()));
         applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint(),
-                (rs1, rs2)->rs1.getMaster().getStartTimePoint().compareTo(rs2.getMaster().getStartTimePoint()));
+                (rs1, rs2)->Comparator.nullsLast(Comparator.<TimePoint>naturalOrder()).compare(rs1.getMaster().getStartTimePoint(), rs2.getMaster().getStartTimePoint()));
         final SafeHtmlCell replicasCell = new SafeHtmlCell();
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> replicasColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(replicasCell) {
             @Override
