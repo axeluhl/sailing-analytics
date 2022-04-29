@@ -66,4 +66,5 @@ public interface OperationWithResult<S, R> extends Operation<S>, Serializable {
             throw new RuntimeException(e);
         }
     }
+
 }

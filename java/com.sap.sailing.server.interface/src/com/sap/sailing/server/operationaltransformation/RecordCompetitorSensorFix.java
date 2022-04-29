@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
+import com.sap.sse.common.Util.Pair;
 
 public class RecordCompetitorSensorFix extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = -7092704633177037511L;
@@ -29,6 +30,11 @@ public class RecordCompetitorSensorFix extends AbstractRaceOperation<Void> {
     @Override
     public boolean requiresSynchronousExecution() {
         return false;
+    }
+
+    @Override
+    protected Object getRaceSpecificKeyComponentForAsynchronousExecution() {
+        return new Pair<>(competitorID, trackName);
     }
 
     @Override
