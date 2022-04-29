@@ -24,7 +24,7 @@
             {  
                "startingFolderPath":"java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/subscription",
                "sourceFilters":[  
-                  "**/SubscriptionStringonstants*.properties"
+                  "**/SubscriptionStringConstants*.properties"
                ],
                "excludedSourceFilters":[
                	"**/*_zh.properties"
