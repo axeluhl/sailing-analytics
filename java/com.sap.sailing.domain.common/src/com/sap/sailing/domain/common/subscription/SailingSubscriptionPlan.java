@@ -73,21 +73,21 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
             TRIAL_DATA_MINING_ARCHIVE_PLAN_ID,
             Stream.of(new SubscriptionPrice(TRIAL_DATA_MINING_ARCHIVE_PLAN_ITEMPRICE_ID, new BigDecimal(0),
                     USD_CURRENCY_CODE, PaymentInterval.DAY, false)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING_ARCHIEVE).collect(Collectors.toSet()), true,
+            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), true,
             new SubscriptionPlanRole(PremiumRole.getRoleId()),
             new SubscriptionPlanRole(ArchiveDataMiningRole.getRoleId()));
     public static final SubscriptionPlan DATA_MINING_ARCHIVE_WEEKLY = new SailingSubscriptionPlan(
             WEEKLY_DATA_MINING_ARCHIVE_PLAN_ID,
             Stream.of(new SubscriptionPrice(WEEKLY_DATA_MINING_ARCHIVE_PLAN_ITEMPRICE_ID, new BigDecimal(89.99),
                     USD_CURRENCY_CODE, PaymentInterval.WEEK, true)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING_ARCHIEVE).collect(Collectors.toSet()), false,
+            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), false,
             new SubscriptionPlanRole(PremiumRole.getRoleId()),
             new SubscriptionPlanRole(ArchiveDataMiningRole.getRoleId()));
     public static final SubscriptionPlan DATA_MINING_ARCHIVE_YEARLY = new SailingSubscriptionPlan(
             YEARLY_DATA_MINING_ARCHIVE_PLAN_ID,
             Stream.of(new SubscriptionPrice(YEARLY_DATA_MINING_ARCHIVE_PLAN_ITEMPRICE_ID, new BigDecimal(499.99),
                     USD_CURRENCY_CODE, PaymentInterval.YEAR, false)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING_ARCHIEVE).collect(Collectors.toSet()), false,
+            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), false,
             new SubscriptionPlanRole(PremiumRole.getRoleId()),
             new SubscriptionPlanRole(ArchiveDataMiningRole.getRoleId()));
 
@@ -95,19 +95,19 @@ public class SailingSubscriptionPlan extends SubscriptionPlan {
             TRIAL_DATA_MINING_ALL_PLAN_ID,
             Stream.of(new SubscriptionPrice(TRIAL_DATA_MINING_ALL_PLAN_ITEMPRICE_ID, new BigDecimal(0),
                     USD_CURRENCY_CODE, PaymentInterval.DAY, false)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING_ALL).collect(Collectors.toSet()), true,
+            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), true,
             new SubscriptionPlanRole(PremiumRole.getRoleId()), new SubscriptionPlanRole(AllDataMiningRole.getRoleId()));
     public static final SubscriptionPlan DATA_MINING_ALL_WEEKLY = new SailingSubscriptionPlan(
             WEEKLY_DATA_MINING_ALL_PLAN_ID,
             Stream.of(new SubscriptionPrice(WEEKLY_DATA_MINING_ALL_PLAN_ITEMPRICE_ID, new BigDecimal(189.99),
                     USD_CURRENCY_CODE, PaymentInterval.WEEK, true)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING_ALL).collect(Collectors.toSet()), false,
+            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), false,
             new SubscriptionPlanRole(PremiumRole.getRoleId()), new SubscriptionPlanRole(AllDataMiningRole.getRoleId()));
     public static final SubscriptionPlan DATA_MINING_ALL_YEARLY = new SailingSubscriptionPlan(
             YEARLY_DATA_MINING_ALL_PLAN_ID,
             Stream.of(new SubscriptionPrice(YEARLY_DATA_MINING_ALL_PLAN_ITEMPRICE_ID, new BigDecimal(999.99),
                     USD_CURRENCY_CODE, PaymentInterval.YEAR, false)).collect(Collectors.toSet()),
-            Stream.of(PlanCategory.DATA_MINING_ALL).collect(Collectors.toSet()), false,
+            Stream.of(PlanCategory.DATA_MINING, PlanCategory.PREMIUM).collect(Collectors.toSet()), false,
             new SubscriptionPlanRole(PremiumRole.getRoleId()), new SubscriptionPlanRole(AllDataMiningRole.getRoleId()));
 
     public static Map<Serializable, SubscriptionPlan> getAllInstances() {
