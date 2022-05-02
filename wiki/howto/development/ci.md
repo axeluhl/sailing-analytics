@@ -62,7 +62,7 @@ The basic idea of setting up a build job is to create a so-called "free-style so
 
 In order to elastically scale our build / CI infrastructure, we use AWS to provide Hudson build slaves on demand. The Hudson Master (https://hudson.sapsailing.com) has a script obtained from our git at ``./configuration/launchhudsonslave`` which takes an Amazon Machine Image (AMI), launches it in our default region (eu-west-1) and connects to it. The AWS credentials are stored in the ``root`` account on ``hudson.sapsailing.com``, and the ``hudson`` user is granted access to the script by means of an ``/etc/sudoers.d`` entry.
 
-The image has been crafted specifically to contain the tools required for the build (as of this writing in particular Google Chrome, chromedriver and an old Firefox 26.0, plus a current Maven installation and the JDKs required for the build). In order to set up such an image based on Ubuntu, consider running the following commands as root (see also https://tecadmin.net/setup-selenium-chromedriver-on-ubuntu/), starting as the "ubuntu" used:
+The image has been crafted specifically to contain the tools required for the build. In order to set up such an image based on Ubuntu, consider running the following commands as root (see also https://tecadmin.net/setup-selenium-chromedriver-on-ubuntu/), on a fresh Ubuntu 20.04 instance with a 100GB root partition, starting as the "ubuntu" user:
 
 ```
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
@@ -78,7 +78,7 @@ The image has been crafted specifically to contain the tools required for the bu
    echo "deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" >/etc/apt/sources.list.d/mongodb-org-4.4.list
    apt-get -y update
    apt-get -y upgrade
-   apt-get -y install google-chrome-stable maven mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws
+   apt-get -y install google-chrome-stable maven rabbitmq-server mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws
    apt-get -y autoremove
    cd /tmp
    wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
@@ -94,6 +94,7 @@ The image has been crafted specifically to contain the tools required for the bu
    systemctl enable imageupgrade.service
    systemctl enable mounthudsonworkspace.service
    systemctl enable mongod.service
+   systemctl enable rabbitmq-server.service
    adduser --system --shell /bin/bash --quiet --group --disabled-password sailing
    adduser --system --shell /bin/bash --quiet --group --disabled-password hudson
    sudo -u sailing mkdir /home/sailing/.ssh
@@ -117,6 +118,8 @@ The image has been crafted specifically to contain the tools required for the bu
    sudo -u hudson mkdir /home/hudson/.m2
    sudo -u hudson cp /home/sailing/code/toolchains.xml /home/hudson/.m2
    sudo -u hudson ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls >/dev/null
+   echo "export JAVA_HOME=/opt/sapjvm_8" >/etc/profile.d/sapjvm.sh
+   chmod a+x /etc/profile.d/sapjvm.sh
    echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6TjveiR+KkEbQQcAEcme6PCUHZLLU5ENRCXnXKaFolWrBj77xEMf3RrlLJ1TINepuwydHDtN5of0D1kjykAIlgZPeMYf9zq3mx0dQk/B2IEFSW8Mbj74mYDpQoUULwosSmWz3yAhfLRgE83C7Wvdb0ToBGVHeHba2IFsupnxU6gcInz8SfX3lP78mh4KzVkNmQdXkfEC2Qe/HUeDLdI8gqVtAOd0NKY8yv/LUf4JX8wlZb6rU9Y4nWDGbgcv/k8h67xYRI4YbtEDVkPBqCZux66JuwKF4uZ2q+rPZTYRYJWT8/0x1jz5W5DQtuDVITT1jb1YsriegOZgp9LfS11B7w== hudson@ip-172-31-28-17" >/home/hudson/.ssh/authorized_keys
    sudo -u hudson wget -O /home/hudson/slave.jar "https://hudson.sapsailing.com/jnlpJars/slave.jar"
 ```
