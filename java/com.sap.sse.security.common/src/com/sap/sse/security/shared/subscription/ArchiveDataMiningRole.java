@@ -17,7 +17,7 @@ public class ArchiveDataMiningRole extends RolePrototype {
     ArchiveDataMiningRole() {
         super("archive_data_mining", ROLE_ID.toString(),
                 WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER)
-                        .withActions(SecuredSecurityTypes.ServerActions.DATA_MINING).withIds("archive").build());
+                        .withActions(SecuredSecurityTypes.ServerActions.DATA_MINING).withIds("ARCHIVE").build());
     }
 
     public static ArchiveDataMiningRole getInstance() {
