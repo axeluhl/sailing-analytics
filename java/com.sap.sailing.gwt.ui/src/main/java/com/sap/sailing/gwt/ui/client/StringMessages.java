@@ -436,6 +436,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointSystem();
     String scoringSchemeLowPointSystemFirstTwoWins();
     String scoringSchemeLowPointSystemFirstTwoWinsDescription();
+    String scoringSchemeLowPointSystemFirstThreeWins();
+    String scoringSchemeLowPointSystemFirstThreeWinsDescription();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
     String scoringSchemeWinnerGetsFive();

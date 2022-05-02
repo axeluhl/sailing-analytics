@@ -68,9 +68,14 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet imple
     public ArrayList<String> getUnlockingSubscriptionplans(WildcardPermission permission)
             throws UserManagementException {
         final ArrayList<String> result = new ArrayList<>();
-        final User currentUser = getCurrentUser();
+        final User currentUser;
+        if (getSecurityService().getCurrentUser() != null) {
+            currentUser = getSecurityService().getCurrentUser();
+        } else {
+            currentUser = getSecurityService().getAllUser();
+        }
         final SecurityService securityServiceInstance = getSecurityService();
-        User allUser = securityServiceInstance.getUserByName(SecurityService.ALL_USERNAME);
+        User allUser = getSecurityService().getAllUser();
         getSecurityService().getAllSubscriptionPlans().values().forEach((plan) -> {
             final Role[] subscriptionPlanUserRolesArray = getSecurityService().getSubscriptionPlanUserRoles(currentUser, plan);
             final Set<Role> subscriptionPlanUserRoles = Stream.of(subscriptionPlanUserRolesArray).collect(Collectors.toSet());

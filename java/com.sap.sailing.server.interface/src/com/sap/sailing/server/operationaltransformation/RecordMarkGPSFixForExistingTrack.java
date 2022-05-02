@@ -55,4 +55,8 @@ public class RecordMarkGPSFixForExistingTrack extends RecordMarkGPSFix {
         return false;
     }
 
+    @Override
+    protected Object getRaceSpecificKeyComponentForAsynchronousExecution() {
+        return markId;
+    }
 }

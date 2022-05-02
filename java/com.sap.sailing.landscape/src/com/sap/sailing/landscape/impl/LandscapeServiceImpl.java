@@ -58,6 +58,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -95,6 +96,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.JvmUtils;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -936,7 +938,8 @@ public class LandscapeServiceImpl implements LandscapeService {
      * <li>The new replicas will be named and tagged such that they can be recognized by an operator as dedicated
      * upgrade replicas</li>
      * <li>Instead of using the replica set's {@link AwsApplicationReplicaSet#getHostname() hostname} to identify the
-     * master process to replicate from, the replicas produced by this method use the master's IP address and port.</li>
+     * master process to replicate from, the replicas produced by this method use the master's IP address and port
+     * so that replication works also while the master is not registered with the replica set's master target group.</li>
      * </ul>
      * <p>
      * 
@@ -959,6 +962,14 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AwsRegion region = master.getHost().getRegion();
         for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
             final InstanceType instanceType = replica.getHost().getInstance().instanceType();
+            // Determine the replica node's current heap size configuration ("MEMORY" variable) and
+            // use it to set the upgrade replica's explicit memory size:
+            final String memoryVariable = replica.getEnvShValueFor(DefaultProcessConfigurationVariables.MEMORY, WAIT_FOR_PROCESS_TIMEOUT,
+                    optionalKeyName, privateKeyEncryptionPassphrase);
+            final Optional<Integer> megabytesFromJvmSize = JvmUtils.getMegabytesFromJvmSize(memoryVariable);
+            logger.info("Determined replica set "+replicaSet.getName()+"'s replica memory size for replica "+replica+
+                    " as "+memoryVariable+" which equals "+megabytesFromJvmSize+
+                    "MB. Using for upgrade replica configuration with instance type "+instanceType+".");
             final AppConfigBuilderT replicaConfigurationBuilder =
                     createReplicaConfigurationBuilder(region, replicaSet.getServerName(), master.getPort(),
                             release, replicationBearerToken, replicaSet.getHostname());
@@ -966,17 +977,20 @@ public class LandscapeServiceImpl implements LandscapeService {
             // old replica was running on a dedicated instance and therefore had a memory configuration that uses the
             // instance's available RAM, so will fit into the new dedicated temporary upgrade instance; or the
             // old replica was on a shared instance; in this case we'll over-provision, but it won't be long.
-            replicaConfigurationBuilder.setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
+            replicaConfigurationBuilder
+                .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                     .setMasterHostname(master.getHost().getPrivateAddress().getHostName())
                     .setMasterHttpPort(master.getPort())
                     .setCredentials(new BearerTokenReplicationCredentials(replicationBearerToken))
                     .build());
+            megabytesFromJvmSize.ifPresent(
+                    memoryInMegabytes->replicaConfigurationBuilder.setMemoryInMegabytes(memoryInMegabytes));
             final com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder =
                     StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
             replicaHostBuilder
                 .setInstanceName(StartSailingAnalyticsHost.INSTANCE_NAME_DEFAULT_PREFIX+replicaSet.getName()+TEMPORARY_UPGRADE_REPLICA_NAME_SUFFIX)
                 .setInstanceType(instanceType)
-                .setOptionalTimeout(LandscapeService.WAIT_FOR_HOST_TIMEOUT)
+                .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
                 .setLandscape(getLandscape())
                 .setRegion(region)
                 .setTags(Tags.with(UPGRADE_REPLICA_TAG_KEY, replicaSet.getName()));

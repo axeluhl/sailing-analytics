@@ -23,7 +23,9 @@
 	        pointer-events: none;
 	    }
         .premium-permitted .premium-container .premium-check-box input {
-            box-shadow: -1px 1px #ffffff, -3px 3px #d2af25;
+            -moz-box-shadow: -1px 1px 0 0 #ffffff, -3px 3px 0 0  #d2af25;
+            -webkit-box-shadow: -1px 1px 0 0 #ffffff, -3px 3px 0 0 #d2af25;
+            box-shadow: -1px 1px 0 0 #ffffff, -3px 3px 0 0 #d2af25;
         }
         .premium-container .premium-icon {
             width: 17px;

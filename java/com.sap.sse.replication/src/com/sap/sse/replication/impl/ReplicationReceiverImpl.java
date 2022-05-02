@@ -30,6 +30,7 @@ import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
@@ -134,11 +135,13 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     
     /**
      * Used for the parallel execution of operations that don't
-     * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
+     * {@link RacingEventServiceOperation#requiresSynchronousExecution() require synchronous execution}.
      */
     private final static Executor executor = ThreadPoolUtil.INSTANCE
             .createForegroundTaskThreadPoolExecutor(ReplicationReceiverImpl.class.getName());
 
+    private final OperationQueueByKeyExecutor operationQueueByKeyExecutor;
+    
     /**
      * @param master
      *            descriptor of the master server from which this replicator receives messages
@@ -158,6 +161,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
         this.replicableProvider = replicableProvider;
         this.suspended = startSuspended;
         this.consumer = consumer;
+        this.operationQueueByKeyExecutor = new OperationQueueByKeyExecutor(executor);
         try {
             _queue = QueueingConsumer.class.getDeclaredField("_queue");
             _queue.setAccessible(true);
@@ -391,6 +395,25 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
         }
     }
 
+    /**
+     * {@link Operation#requiresSynchronousExecution() Synchronous operations} are executed immediately by the current
+     * thread.
+     * <p>
+     * 
+     * For asynchronous operations we must make sure that those are keyed such that operations with different keys don't
+     * block each other. Otherwise, tasks that may end up in different threads of the {@link #executor} may need to wait
+     * for each other, such as when trying to insert many fixes into the track of the same object (see also bug 5518).
+     * With this, asynchronous operations with equal keys are added to a queue that is specific to that key, and a task per
+     * such queue is created.<p>
+     * 
+     * The handling of those queues for asynchronous operations makes sure that a task processing the queue is scheduled
+     * with the executor or already running if and only if there are operations in the queue. When the task removes the
+     * last operation from the queue, the queue is removed and the task decides to finish. From this point on, if another
+     * asynchronous operation with that same key arrives, a new queue and subsequently a new task will be created, and the
+     * task will be scheduled with the executor. These steps are performed under the necessary synchronization so that
+     * no race conditions can occur (such as the task deciding to finish, yet another operation getting added to the queue
+     * which hence gets dropped because then the queue would be deleted; or similar "desasters").
+     */
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final O operation, Replicable<S, O> replicable) {
         final int operationCount = ++operationCounter;
         logger.finer(()->""+operationCount+": Applying "+operation);
@@ -398,7 +421,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
         if (operation.requiresSynchronousExecution()) {
             runnable.run();
         } else {
-            executor.execute(runnable);
+            operationQueueByKeyExecutor.schedule(operation.getKeyForAsynchronousExecution(), runnable);
         }
         logger.finer(()->""+operationCount+": Done applying "+operation);
     }
