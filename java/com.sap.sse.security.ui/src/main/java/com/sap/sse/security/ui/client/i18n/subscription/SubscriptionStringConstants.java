@@ -20,22 +20,22 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String free_subscription_plan_description();
     String free_subscription_plan_info();
     String free_subscription_plan_price_info();
-    String[] free_subscription_plan_features();
+    String free_subscription_plan_features();
     String premium_name();
     String premium_description();
     String premium_price_info();
     String premium_info();
-    String[] premium_features();
+    String premium_features();
     String data_mining_archive_name();
     String data_mining_archive_description();
     String data_mining_archive_price_info();
     String data_mining_archive_info();
-    String[] data_mining_archive_features();
+    String data_mining_archive_features();
     String data_mining_all_name();
     String data_mining_all_description();
     String data_mining_all_price_info();
     String data_mining_all_info();
-    String[] data_mining_all_features();
+    String data_mining_all_features();
     String free_subscription_plan_shortname();
     String premium_subscription_plan_shortname();
     String datamining_subscription_plan_shortname();
@@ -71,4 +71,6 @@ public interface SubscriptionStringConstants extends ConstantsWithLookup {
     String features_media_tags_description();
     String features_scoring_title();
     String features_scoring_description();
+    String features_data_mining_title();
+    String features_data_mining_description();
 }

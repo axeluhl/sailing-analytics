@@ -245,7 +245,7 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet imple
             prices.add(price);
         });
         return new SubscriptionPlanDTO(plan.getId(), isUserSubscribedToPlan, prices,
-                plan.getPlanCategories(), hasHadSubscriptionForOneTimePlan, isUserSubscribedToPlanCategory, null);
+                plan.getPlanCategories(), hasHadSubscriptionForOneTimePlan, isUserSubscribedToPlanCategory, null, plan.getGroup());
     }
 
     private boolean isUserSubscribedToPlan(String planId) {

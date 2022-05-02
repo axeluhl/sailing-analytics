@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.places.subscription.SailingSubscriptionStringConstants;
-import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionCategoryDTO;
+import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionGroupDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
@@ -69,9 +69,9 @@ public class SubscriptionCard extends Composite {
 
     private final Consumer<SubscriptionPrice> subscriptionCallback;
     private SubscriptionPrice currentPrice;
-    private final SubscriptionCategoryDTO subscriptionCategoryDTO;
+    private final SubscriptionGroupDTO subscriptionCategoryDTO;
 
-    public <T> SubscriptionCard(SubscriptionCategoryDTO subscriptionCategroyDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
+    public <T> SubscriptionCard(SubscriptionGroupDTO subscriptionCategroyDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
         this.subscriptionCallback = subscriptionCallback;
         this.subscriptionCategoryDTO = subscriptionCategroyDTO;
         SubscriptionCardResources.INSTANCE.css().ensureInjected();
@@ -115,7 +115,7 @@ public class SubscriptionCard extends Composite {
                 if (!subscriptionPrice.getDisablePlan()) {
                     prices.add(price);
                 }
-                Label priceInfo = new Label(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionCategoryPriceInfoMessageKey()));
+                Label priceInfo = new Label(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupPriceInfoMessageKey()));
                 priceInfo.addStyleName(PRICE_INFO_STYLE);
                 if (Boolean.TRUE.equals(subscriptionPrice.getIsOneTimePayment())) {
                     prices.add(priceInfo);
@@ -173,10 +173,10 @@ public class SubscriptionCard extends Composite {
         default:
             break;
         }       
-        title.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionCategoryNameMessageKey()));
-        description.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionCategoryDescMessageKey()));
-        info.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionCategoryInfoMessageKey()));
-        final String[] featureStrings = subscriptionStringConstants.getStringArray(subscriptionCategroyDTO.getSubscriptionCategoryFeatureMessageKey());
+        title.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupNameMessageKey()));
+        description.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupDescMessageKey()));
+        info.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupInfoMessageKey()));
+        final String[] featureStrings = subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupFeatureMessageKey()).split("[|]");
         for (String featureString : featureStrings) {
             if(featureString != "") {
                 FlowPanel feature = new FlowPanel();
@@ -187,7 +187,7 @@ public class SubscriptionCard extends Composite {
         }
     }
     
-    public SubscriptionCategoryDTO getSubscriptionCategoryDTO() {
+    public SubscriptionGroupDTO getSubscriptionCategoryDTO() {
         return subscriptionCategoryDTO;
     }
 

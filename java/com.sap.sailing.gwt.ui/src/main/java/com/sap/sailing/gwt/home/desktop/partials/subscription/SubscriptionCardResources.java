@@ -40,6 +40,7 @@ public interface SubscriptionCardResources extends SharedHomeResources {
         String featureDescription();
         String featureLink();
         String featureCheck();
+        String featureNone();
         String featureHeader();
     }
 }

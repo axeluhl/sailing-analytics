@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard.Type;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
-import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanGroup;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
@@ -71,7 +71,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                         public void onSuccess(final ArrayList<SubscriptionPlanDTO> result) {
                             view.resetSubscriptions();
                             addFreePlan(view);
-                            Map<PlanCategory, SubscriptionCategoryDTO> categoryMap = new HashMap<PlanCategory, SubscriptionCategoryDTO>();
+                            Map<PlanGroup, SubscriptionGroupDTO> categoryMap = new HashMap<>();
                             result.forEach(plan -> {
                                 final Type type;
                                 if (checkIfUserIsOwnerOfThePlan(plan) || checkIfUserIsSubscribedToPlanCategory(plan)) {
@@ -81,33 +81,34 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                 } else {
                                     type = Type.DEFAULT;
                                 }
-                                plan.getPlanCategory().forEach(category -> {
-                                    final SubscriptionCategoryDTO categoryDTO;
-                                    if (categoryMap.containsKey(category)) {
-                                        categoryDTO = categoryMap.get(category);
-                                        plan.getPrices().forEach(price -> {
-                                            price.setDisablePlan(plan.isUserWasAlreadySubscribedToOneTimePlan());
-                                            categoryDTO.getPrices().add(price);
-                                        });
-                                    } else {
-                                        categoryDTO = new SubscriptionCategoryDTO(category.getId(), plan.isUserSubscribedToPlan(), plan.getPrices(), category, plan.isUserWasAlreadySubscribedToOneTimePlan(), plan.isUserSubscribedToPlanCategory(), plan.getError(), type);
-                                        categoryMap.put(category, categoryDTO);
-                                    }
-                                    categoryDTO.getPrices().forEach(price -> {
+                                final SubscriptionGroupDTO categoryDTO;
+                                if (categoryMap.containsKey(plan.getGroup())) {
+                                    categoryDTO = categoryMap.get(plan.getGroup());
+                                    plan.getPrices().forEach(price -> {
                                         price.setDisablePlan(plan.isUserWasAlreadySubscribedToOneTimePlan());
+                                        categoryDTO.getPrices().add(price);
                                     });
+                                } else {
+                                    categoryDTO = new SubscriptionGroupDTO(plan.getGroup().getId(),
+                                            plan.isUserSubscribedToPlan(), plan.getPrices(), plan.getGroup(),
+                                            plan.isUserWasAlreadySubscribedToOneTimePlan(),
+                                            plan.isUserSubscribedToPlanCategory(), plan.getError(), type);
+                                    categoryMap.put(plan.getGroup(), categoryDTO);
+                                }
+                                categoryDTO.getPrices().forEach(price -> {
+                                    price.setDisablePlan(plan.isUserWasAlreadySubscribedToOneTimePlan());
                                 });
                             });
-                            List<SubscriptionCategoryDTO> categories = new ArrayList<SubscriptionCategoryDTO>(categoryMap.values());
-                            categories.sort(new Comparator<SubscriptionCategoryDTO>() {
+                            List<SubscriptionGroupDTO> categories = new ArrayList<SubscriptionGroupDTO>(categoryMap.values());
+                            categories.sort(new Comparator<SubscriptionGroupDTO>() {
 
                                 @Override
-                                public int compare(SubscriptionCategoryDTO o1, SubscriptionCategoryDTO o2) {
-                                    return o1.getPlanCategory().compareTo(o2.getPlanCategory());
+                                public int compare(SubscriptionGroupDTO o1, SubscriptionGroupDTO o2) {
+                                    return o1.getGroup().compareTo(o2.getGroup());
                                 }
                             });
                             categories.forEach(category -> {
-                                GWT.log("Category: " + category.getSubscriptionCategoryId());
+                                GWT.log("Category: " + category.getSubscriptionGroupId());
                                 view.addSubscriptionCategory(category, category.getType(), eventBus);
                             });
                         }
@@ -118,7 +119,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                         }
 
                         private void addFreePlan(final SubscriptionView view) {
-                            final SubscriptionCategoryDTO freePlan = new SubscriptionCategoryDTO(
+                            final SubscriptionGroupDTO freePlan = new SubscriptionGroupDTO(
                                     "free_subscription_plan" /* id */, /* isUserSubscribedToPlan */ false,
                                     Collections.emptySet() /* prices */, /* planCategory */ null,
                                     /* userWasAlreadySubscribedToOneTimePlan */ false, /*isUserSubscribedToPlanCategory*/ false, null /* error */, Type.DEFAULT);

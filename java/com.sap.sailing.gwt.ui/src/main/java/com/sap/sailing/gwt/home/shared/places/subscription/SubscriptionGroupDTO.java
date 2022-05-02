@@ -5,13 +5,13 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard;
-import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanGroup;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 
 /**
  * A class to collect info from a bunch of SubscriptionPlanDTO which can be represented on one card.
  */
-public class SubscriptionCategoryDTO implements IsSerializable {
+public class SubscriptionGroupDTO implements IsSerializable {
     private static final long serialVersionUID = -3820239604039244557L;
 
     public static final String FEATURES_MESSAGE_KEY_SUFFX = "_features";
@@ -23,25 +23,25 @@ public class SubscriptionCategoryDTO implements IsSerializable {
     private final String id;
     private HashSet<SubscriptionPrice> prices = new HashSet<SubscriptionPrice>();
     private final Boolean isUserSubscribedToPlan;
-    private final PlanCategory planCategory;
+    private final PlanGroup group;
     private final Boolean userWasAlreadySubscribedToOneTimePlan;
-    private final Boolean isUserSubscribedToPlanCategory;
+    private final Boolean isUserSubscribedToGroup;
     private final SubscriptionCard.Type type;
 
-    public SubscriptionCategoryDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices,
-            PlanCategory planCategory, boolean userWasAlreadySubscribedToOneTimePlan,
-            boolean isUserSubscribedToPlanCategory, String error, SubscriptionCard.Type type) {
+    public SubscriptionGroupDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices,
+            PlanGroup group, boolean userWasAlreadySubscribedToOneTimePlan,
+            boolean isUserSubscribedToGroup, String error, SubscriptionCard.Type type) {
         this.id = id;
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
-        this.planCategory = planCategory;
+        this.group = group;
         this.userWasAlreadySubscribedToOneTimePlan = userWasAlreadySubscribedToOneTimePlan;
-        this.isUserSubscribedToPlanCategory = isUserSubscribedToPlanCategory;
+        this.isUserSubscribedToGroup = isUserSubscribedToGroup;
         this.prices = new HashSet<SubscriptionPrice>(prices);
         this.type = type;
     }
 
-    public PlanCategory getPlanCategory() {
-        return planCategory;
+    public PlanGroup getGroup() {
+        return group;
     }
 
     public boolean isUserWasAlreadySubscribedToOneTimePlan() {
@@ -52,7 +52,7 @@ public class SubscriptionCategoryDTO implements IsSerializable {
         return serialVersionUID;
     }
 
-    public String getSubscriptionCategoryId() {
+    public String getSubscriptionGroupId() {
         return id;
     }
 
@@ -64,31 +64,31 @@ public class SubscriptionCategoryDTO implements IsSerializable {
         return prices;
     }
 
-    public boolean isUserSubscribedToPlanCategory() {
-        return isUserSubscribedToPlanCategory;
+    public boolean isUserSubscribedToGroup() {
+        return isUserSubscribedToGroup;
     }
 
     public SubscriptionCard.Type getType() {
         return type;
     }
 
-    public String getSubscriptionCategoryNameMessageKey() {
+    public String getSubscriptionGroupNameMessageKey() {
         return id + NAME_MESSAGE_KEY_SUFFX;
     }
 
-    public String getSubscriptionCategoryDescMessageKey() {
+    public String getSubscriptionGroupDescMessageKey() {
         return id + DESC_MESSAGE_KEY_SUFFX;
     }
 
-    public String getSubscriptionCategoryInfoMessageKey() {
+    public String getSubscriptionGroupInfoMessageKey() {
         return id + INFO_MESSAGE_KEY_SUFFIX;
     }
 
-    public String getSubscriptionCategoryFeatureMessageKey() {
+    public String getSubscriptionGroupFeatureMessageKey() {
         return id + FEATURES_MESSAGE_KEY_SUFFX;
     }
 
-    public String getSubscriptionCategoryPriceInfoMessageKey() {
+    public String getSubscriptionGroupPriceInfoMessageKey() {
         return id + PRICE_INFO_MESSAGE_KEY_SUFFIX;
     }
 }
