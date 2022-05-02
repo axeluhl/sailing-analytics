@@ -15,7 +15,6 @@ public class PremiumRole extends RolePrototype {
     private static final UUID ROLE_ID = UUID.fromString("7021e7a2-569a-11ec-bf63-0242ac130002");
     private static final long serialVersionUID = 8032532973066767581L;
     private static final PremiumRole INSTANCE = new PremiumRole();
-    private static final String MESSAGE_KEY = "premium_role";
 
     PremiumRole() {
         super("premium", ROLE_ID.toString(),
@@ -39,9 +38,5 @@ public class PremiumRole extends RolePrototype {
 
     public static UUID getRoleId() {
         return ROLE_ID;
-    }
-
-    public static String getMessageKey() {
-        return MESSAGE_KEY;
     }
 }
