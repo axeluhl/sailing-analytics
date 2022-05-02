@@ -19,15 +19,65 @@ To complete the training process successfully, you need to make sure that you ha
 
 In our docker registry under ``docker.sapsailing.com:443`` there is a repository called ``windestimationtraining`` where images can be found to run the training process in a mostly automated way. All you need is an account for ``docker.sapsailing.com:443`` and an account on ``sapsailing.com`` that has the ``TRACKED_RACE:EXPORT`` permission for all races in the archive server (see the ``raw-data`` role). Furthermore, you need a MongoDB with approximately 100GB of available space. This can be a MongoDB replica set, of course. All you need is the URI to establish the connection.
 
+If you want to try the following on a plain Amazon Linux instance, try to start with an instance type that has fast SSD storage attached (NVMe) and 16GB of RAM, such as ``c5d.2xlarge``. SSH into it (probably with the ``ec2-user`` account), then try this:
+
+```
+   sudo -i
+   # Launch cfdisk for the NVMe volume, give it a gpt partition table and create a single partition spanning the entire disk:
+   cfdisk /dev/nvme1n1
+   mkfs.xfs /dev/nvme1n1p1
+   mount /dev/nvme1n1p1 /var/lib/mongo
+   echo "[mongodb-org-4.4]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/4.4/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc" >/etc/yum.repos.d
+   yum update
+   yum install -y mongodb-org-server mongodb-org-tools mongodb-org-shell docker
+   chown mongod /var/lib/mongo
+   chgrp mongod /var/lib/mongo
+```
+Now adjust the ``/etc/mongod.conf`` file in two places; one to restrict the cache size to limit MongoDB's memory use, and another one to expose MongoDB's default port ``27017`` also to the Docker network:
+
+```
+storage:
+  dbPath: /var/lib/mongo
+  journal:
+    enabled: true
++ wiredTiger:
++   engineConfig:
++     cacheSizeGB: 4
+...
+net:
+  port: 27017
+- bindIp: 127.0.0.1
++ bindIp: 172.17.0.1,127.0.0.1
+```
+
+Then continue as follows:
+
+```
+   systemctl start mongod
+   systemctl start docker
+   touch /tmp/windEstimationModels.dat
+```
+
 For your account that is equipped with the ``TRACKED_RACE:EXPORT`` permission you'll need the bearer token which you can obtain, when logged in on the web site, from [https://security-service.sapsailing.com/security/api/restsecurity/access_token](https://security-service.sapsailing.com/security/api/restsecurity/access_token). The value of the ``access_token`` attribute is what you will need in the following command:
 
 ```
    docker run --mount type=bind,source=/tmp/windEstimationModels.dat,target=/home/sailing/windEstimationModels.dat \
-              -m 10g --rm -it \
+              -m 10g --rm -d \
               -e MONGODB_URI="mongodb://172.17.0.1/windestimation?retryWrites=true" \
               -e BEARER_TOKEN="{your-bearer-token-here}" \
               -e MEMORY=-Xmx8g \
               docker.sapsailing.com:443/windestimationtraining:latest
+```
+If successful (and you may want to remove the ``--rm`` option otherwise to allow you to inspect logs after unsuccessful execution) you will find the output under ``/tmp/windEstimationModels.dat`` which you can upload as usual, e.g., as in
+```
+    curl -X POST -H "Content-Type: application/octet-stream" --data-binary @windEstimationModels.dat \
+                 -H "Authorization: Bearer 987235098w0t98yw409857098745=" \
+                 https://host.sapsailing.com/windestimation/api/windestimation_data
 ```
 
 ### Creating the Docker Image for Model Training
@@ -35,7 +85,7 @@ For your account that is equipped with the ``TRACKED_RACE:EXPORT`` permission yo
 Under ``docker/Dockerfile_windestimation`` there is a docker file that can be used to produce the Docker image, given that a ``WindEstimationModelsTraining.jar`` exists under [https://static.sapsailing.com/WindEstimationModelsTraining.jar](https://static.sapsailing.com/WindEstimationModelsTraining.jar). Producing an image works like this:
 
 ```
-    docker build --no-cache -f Dockerfile_windestimation -t docker.sapsailing.com:443/windestimationtraining:0.0.4,docker.sapsailing.com:443/windestimationtraining:latest
+    docker build --no-cache -f Dockerfile_windestimation -t docker.sapsailing.com:443/windestimationtraining:0.0.4 .
 ```
 
 To produce the JAR file used for the Docker image creation, run an "Export" command in Eclipse, using "File - Export - Runnable JAR File" with the ``SimpleModelsTrainingPart1`` launch configuration. This will export a JAR that you can then upload to ``trac@sapsailing.com:static`` using a command such as
