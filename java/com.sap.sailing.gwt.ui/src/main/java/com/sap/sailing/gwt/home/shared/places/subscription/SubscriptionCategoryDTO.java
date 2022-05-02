@@ -60,10 +60,6 @@ public class SubscriptionCategoryDTO implements IsSerializable {
         return isUserSubscribedToPlan;
     }
 
-    public boolean isCurrentUserSubscribed() {
-        return false;
-    }
-
     public HashSet<SubscriptionPrice> getPrices() {
         return prices;
     }
