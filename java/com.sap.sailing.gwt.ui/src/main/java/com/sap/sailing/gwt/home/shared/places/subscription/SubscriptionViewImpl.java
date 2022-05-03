@@ -24,12 +24,12 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
     }
 
     @Override
-    public void addSubscriptionCategory(final SubscriptionGroupDTO category, final SubscriptionCard.Type type,
+    public void addSubscriptionCategory(final SubscriptionGroupDTO group, final SubscriptionCard.Type type,
             final EventBus eventBus) {
         switch (type) {
         case HIGHLIGHT:
         case DEFAULT:
-            container.addSubscription(new SubscriptionCard(category, type, (price) -> {
+            container.addSubscription(new SubscriptionCard(group, type, (price) -> {
                 final AuthenticationContext authenticationContext = presenter.getAuthenticationContext();
                 if (!authenticationContext.isLoggedIn()) {
                     onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
@@ -45,15 +45,15 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
             }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case OWNER:
-            container.addSubscription(new SubscriptionCard(category, type, price -> presenter.manageSubscriptions(),
+            container.addSubscription(new SubscriptionCard(group, type, price -> presenter.manageSubscriptions(),
                     eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case ONETIMELOCK:
-            container.addSubscription(new SubscriptionCard(category, type, price -> {},
+            container.addSubscription(new SubscriptionCard(group, type, price -> {},
                     eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case FREE:
-            container.addSubscription(new SubscriptionCard(category, type, price -> presenter.toggleAuthenticationFlyout(),
+            container.addSubscription(new SubscriptionCard(group, type, price -> presenter.toggleAuthenticationFlyout(),
                     eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         default:

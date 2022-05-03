@@ -71,7 +71,7 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                         public void onSuccess(final ArrayList<SubscriptionPlanDTO> result) {
                             view.resetSubscriptions();
                             addFreePlan(view);
-                            Map<PlanGroup, SubscriptionGroupDTO> categoryMap = new HashMap<>();
+                            Map<PlanGroup, SubscriptionGroupDTO> groupMap = new HashMap<>();
                             result.forEach(plan -> {
                                 final Type type;
                                 if (checkIfUserIsOwnerOfThePlan(plan) || checkIfUserIsSubscribedToPlanCategory(plan)) {
@@ -81,27 +81,27 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                 } else {
                                     type = Type.DEFAULT;
                                 }
-                                final SubscriptionGroupDTO categoryDTO;
-                                if (categoryMap.containsKey(plan.getGroup())) {
-                                    categoryDTO = categoryMap.get(plan.getGroup());
+                                final SubscriptionGroupDTO groupDTO;
+                                if (groupMap.containsKey(plan.getGroup())) {
+                                    groupDTO = groupMap.get(plan.getGroup());
                                     plan.getPrices().forEach(price -> {
                                         price.setDisablePlan(plan.isUserWasAlreadySubscribedToOneTimePlan());
-                                        categoryDTO.getPrices().add(price);
+                                        groupDTO.getPrices().add(price);
                                     });
                                 } else {
-                                    categoryDTO = new SubscriptionGroupDTO(plan.getGroup().getId(),
+                                    groupDTO = new SubscriptionGroupDTO(plan.getGroup().getId(),
                                             plan.isUserSubscribedToPlan(), plan.getPrices(), plan.getGroup(),
                                             plan.isUserWasAlreadySubscribedToOneTimePlan(),
                                             plan.isUserSubscribedToPlanCategory(), plan.getError(), type);
-                                    categoryMap.put(plan.getGroup(), categoryDTO);
+                                    groupMap.put(plan.getGroup(), groupDTO);
                                 }
-                                categoryDTO.getPrices().forEach(price -> {
+                                groupDTO.getPrices().forEach(price -> {
                                     price.setDisablePlan(plan.isUserWasAlreadySubscribedToOneTimePlan());
                                 });
                             });
-                            List<SubscriptionGroupDTO> categories = new ArrayList<SubscriptionGroupDTO>(categoryMap.values());
+                            List<SubscriptionGroupDTO> categories = new ArrayList<SubscriptionGroupDTO>(groupMap.values());
                             categories.sort(new Comparator<SubscriptionGroupDTO>() {
-
+                                
                                 @Override
                                 public int compare(SubscriptionGroupDTO o1, SubscriptionGroupDTO o2) {
                                     return o1.getGroup().compareTo(o2.getGroup());
