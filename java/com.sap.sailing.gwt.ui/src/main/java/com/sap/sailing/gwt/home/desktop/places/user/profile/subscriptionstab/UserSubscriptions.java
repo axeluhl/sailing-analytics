@@ -60,6 +60,8 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
 
     @UiField
     Button subscribeButtonUi;
+    @UiField
+    Button selfServiceControlUi;
     @UiField(provided = true)
     SortedCellTable<SubscriptionDTO> subscriptionsUi = new SortedCellTable<>(0, DesignedCellTableResources.INSTANCE);
 
@@ -89,9 +91,11 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     public void updateView(final SubscriptionListDTO subscriptions) {
         subscribeButtonUi.setEnabled(true);
         if (subscriptions == null) {
+            selfServiceControlUi.setVisible(false);
             subscriptionsUi.setPageSize(0);
             subscriptionsUi.setList(new ArrayList<SubscriptionDTO>());
         } else {
+            selfServiceControlUi.setVisible(true);
             subscriptionsUi.setPageSize(subscriptions.getSubscriptionItems().length);
             subscriptionsUi.setList(Arrays.asList(subscriptions.getSubscriptionItems()));
         }
