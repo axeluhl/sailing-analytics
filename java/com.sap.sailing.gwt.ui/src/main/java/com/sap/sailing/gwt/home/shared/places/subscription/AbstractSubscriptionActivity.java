@@ -85,19 +85,14 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                 if (groupMap.containsKey(plan.getGroup())) {
                                     groupDTO = groupMap.get(plan.getGroup());
                                     plan.getPrices().forEach(price -> {
-                                        price.setDisablePlan(plan.isUserWasAlreadySubscribedToOneTimePlan());
                                         groupDTO.getPrices().add(price);
                                     });
                                 } else {
                                     groupDTO = new SubscriptionGroupDTO(plan.getGroup().getId(),
                                             plan.isUserSubscribedToPlan(), plan.getPrices(), plan.getGroup(),
-                                            plan.isUserWasAlreadySubscribedToOneTimePlan(),
                                             plan.isUserSubscribedToPlanCategory(), plan.getError(), type);
                                     groupMap.put(plan.getGroup(), groupDTO);
                                 }
-                                groupDTO.getPrices().forEach(price -> {
-                                    price.setDisablePlan(plan.isUserWasAlreadySubscribedToOneTimePlan());
-                                });
                             });
                             List<SubscriptionGroupDTO> categories = new ArrayList<SubscriptionGroupDTO>(groupMap.values());
                             categories.sort(new Comparator<SubscriptionGroupDTO>() {
@@ -121,8 +116,8 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                         private void addFreePlan(final SubscriptionView view) {
                             final SubscriptionGroupDTO freePlan = new SubscriptionGroupDTO(
                                     "free_subscription_plan" /* id */, /* isUserSubscribedToPlan */ false,
-                                    Collections.emptySet() /* prices */, /* planCategory */ null,
-                                    /* userWasAlreadySubscribedToOneTimePlan */ false, /*isUserSubscribedToPlanCategory*/ false, null /* error */, Type.DEFAULT);
+                                    Collections.emptySet() /* prices */, /* planCategory */ null, 
+                                    /*isUserSubscribedToPlanCategory*/ false, null /* error */, Type.DEFAULT);
                             view.addSubscriptionCategory(freePlan, Type.FREE, eventBus);
                         }
                     });

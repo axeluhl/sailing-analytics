@@ -24,17 +24,14 @@ public class SubscriptionGroupDTO implements IsSerializable {
     private HashSet<SubscriptionPrice> prices = new HashSet<SubscriptionPrice>();
     private final Boolean isUserSubscribedToPlan;
     private final PlanGroup group;
-    private final Boolean userWasAlreadySubscribedToOneTimePlan;
     private final Boolean isUserSubscribedToGroup;
     private final SubscriptionCard.Type type;
 
     public SubscriptionGroupDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices,
-            PlanGroup group, boolean userWasAlreadySubscribedToOneTimePlan,
-            boolean isUserSubscribedToGroup, String error, SubscriptionCard.Type type) {
+            PlanGroup group, boolean isUserSubscribedToGroup, String error, SubscriptionCard.Type type) {
         this.id = id;
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
         this.group = group;
-        this.userWasAlreadySubscribedToOneTimePlan = userWasAlreadySubscribedToOneTimePlan;
         this.isUserSubscribedToGroup = isUserSubscribedToGroup;
         this.prices = new HashSet<SubscriptionPrice>(prices);
         this.type = type;
@@ -42,10 +39,6 @@ public class SubscriptionGroupDTO implements IsSerializable {
 
     public PlanGroup getGroup() {
         return group;
-    }
-
-    public boolean isUserWasAlreadySubscribedToOneTimePlan() {
-        return userWasAlreadySubscribedToOneTimePlan;
     }
 
     public static long getSerialversionuid() {
