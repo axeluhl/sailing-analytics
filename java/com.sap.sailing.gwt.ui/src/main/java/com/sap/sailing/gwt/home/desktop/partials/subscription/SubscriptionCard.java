@@ -121,7 +121,6 @@ public class SubscriptionCard extends Composite {
                     prices.add(priceInfo);
                 }
             }
-            // TODO: Implement new Price handling
         } else {
             final String priceText;
             if (type == Type.FREE) {
