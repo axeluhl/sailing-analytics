@@ -80,6 +80,11 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         presenter.navigateToSubscribe();
     }
     
+    @UiHandler("selfServiceControlUi")
+    void onSelfServiceControlClicked(final ClickEvent event) {
+        presenter.openSelfServicePortal();
+    }
+    
     @Override
     public void updateView(final SubscriptionListDTO subscriptions) {
         subscribeButtonUi.setEnabled(true);

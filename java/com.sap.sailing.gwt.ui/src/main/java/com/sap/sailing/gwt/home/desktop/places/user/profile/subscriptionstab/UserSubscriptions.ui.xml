@@ -17,6 +17,9 @@
                  <g:Button ui:field="subscribeButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}">
                     <ui:text from="{i18n.subscribe}" />
                 </g:Button>
+                <g:Button ui:field="selfServiceControlUi" addStyleNames=" {res.mediaCss.small12} {res.mainCss.button}">
+                    <ui:text from="{i18n.goToSelfServicePortalDialogTitle}" />
+                </g:Button>
             </g:FlowPanel>
         </div>
     </g:HTMLPanel>

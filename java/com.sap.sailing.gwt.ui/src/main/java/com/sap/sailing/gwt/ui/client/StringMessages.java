@@ -2404,4 +2404,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String videoGuide();
     String orcExplanation();
     String subscriptionOneTimePlanLockedText();
+    String goToSelfServicePortalDialogTitle();
+    String goToSelfServicePortalDialogText();
+    String failedFetchingSelfServicePortalSession();
 }

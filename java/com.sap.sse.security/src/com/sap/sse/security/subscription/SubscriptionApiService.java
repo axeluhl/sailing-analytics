@@ -3,6 +3,7 @@ package com.sap.sse.security.subscription;
 import java.util.List;
 import java.util.Map;
 
+import com.chargebee.models.PortalSession;
 import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
@@ -16,6 +17,10 @@ public interface SubscriptionApiService extends SubscriptionApiBaseService {
     
     public static interface OnCancelSubscriptionResultListener{
         void onCancelResult(SubscriptionCancelResult cancelResult);
+    }
+    
+    public static interface OnSelfServicePortalSessionResultListener{
+        void onSessionResult(PortalSession sessionResult);
     }
     
     /**
@@ -41,4 +46,6 @@ public interface SubscriptionApiService extends SubscriptionApiBaseService {
     }
 
     SubscriptionDataHandler getDataHandler();
+
+    void getUserSelfServicePortalSession(String userId, OnSelfServicePortalSessionResultListener listener);
 }
