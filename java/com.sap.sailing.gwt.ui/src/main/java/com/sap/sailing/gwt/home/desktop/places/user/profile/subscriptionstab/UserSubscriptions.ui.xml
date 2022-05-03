@@ -13,10 +13,12 @@
                     <g:Label text="{i18n.noDataFound}" addStyleNames="{local_res.css.overviewTableEmpty}" />
                 </c:emptyTableWidget>
             </c:CellTable>
-            <g:FlowPanel addStyleNames="{local_res.css.overviewTableFooter}" ui:field="footerUi">
-                 <g:Button ui:field="subscribeButtonUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}">
+            <g:FlowPanel addStyleNames="{local_res.css.overviewTableFooter}">
+                 <g:Button ui:field="subscribeButtonUi" addStyleNames="{res.mediaCss.small12} {res.mainCss.button} {res.mainCss.buttonprimary}">
                     <ui:text from="{i18n.subscribe}" />
                 </g:Button>
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="{local_res.css.overviewTableFooter}">
                 <g:Button ui:field="selfServiceControlUi" addStyleNames=" {res.mediaCss.small12} {res.mainCss.button}">
                     <ui:text from="{i18n.goToSelfServicePortalDialogTitle}" />
                 </g:Button>
