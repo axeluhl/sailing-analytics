@@ -71,14 +71,14 @@ public class SubscriptionCard extends Composite {
     private SubscriptionPrice currentPrice;
     private final SubscriptionGroupDTO subscriptionCategoryDTO;
 
-    public <T> SubscriptionCard(SubscriptionGroupDTO subscriptionCategroyDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
+    public <T> SubscriptionCard(SubscriptionGroupDTO subscriptionGroupDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
         this.subscriptionCallback = subscriptionCallback;
-        this.subscriptionCategoryDTO = subscriptionCategroyDTO;
+        this.subscriptionCategoryDTO = subscriptionGroupDTO;
         SubscriptionCardResources.INSTANCE.css().ensureInjected();
         SharedResources.INSTANCE.mediaCss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         addStyleName(SUBSCRIPTION_STYLE);
-        final List<SubscriptionPrice> priceList = new ArrayList<SubscriptionPrice>(subscriptionCategroyDTO.getPrices());
+        final List<SubscriptionPrice> priceList = new ArrayList<SubscriptionPrice>(subscriptionGroupDTO.getPrices());
         priceList.sort(new Comparator<SubscriptionPrice>() {
             @Override
             public int compare(SubscriptionPrice o1, SubscriptionPrice o2) {
@@ -115,7 +115,7 @@ public class SubscriptionCard extends Composite {
                 if (!subscriptionPrice.getDisablePlan()) {
                     prices.add(price);
                 }
-                Label priceInfo = new Label(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupPriceInfoMessageKey()));
+                Label priceInfo = new Label(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupPriceInfoMessageKey()));
                 priceInfo.addStyleName(PRICE_INFO_STYLE);
                 if (Boolean.TRUE.equals(subscriptionPrice.getIsOneTimePayment())) {
                     prices.add(priceInfo);
@@ -173,10 +173,10 @@ public class SubscriptionCard extends Composite {
         default:
             break;
         }       
-        title.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupNameMessageKey()));
-        description.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupDescMessageKey()));
-        info.setInnerText(subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupInfoMessageKey()));
-        final String[] featureStrings = subscriptionStringConstants.getString(subscriptionCategroyDTO.getSubscriptionGroupFeatureMessageKey()).split("[|]");
+        title.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupNameMessageKey()));
+        description.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupDescMessageKey()));
+        info.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupInfoMessageKey()));
+        final String[] featureStrings = subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupFeatureMessageKey()).split("[|]");
         for (String featureString : featureStrings) {
             if(featureString != "") {
                 FlowPanel feature = new FlowPanel();
