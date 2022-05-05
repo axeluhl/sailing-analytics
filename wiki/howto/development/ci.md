@@ -118,6 +118,8 @@ The image has been crafted specifically to contain the tools required for the bu
    sudo -u hudson mkdir /home/hudson/.m2
    sudo -u hudson cp /home/sailing/code/toolchains.xml /home/hudson/.m2
    sudo -u hudson ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls >/dev/null
+   echo "export JAVA_HOME=/opt/sapjvm_8" >/etc/profile.d/sapjvm.sh
+   chmod a+x /etc/profile.d/sapjvm.sh
    echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6TjveiR+KkEbQQcAEcme6PCUHZLLU5ENRCXnXKaFolWrBj77xEMf3RrlLJ1TINepuwydHDtN5of0D1kjykAIlgZPeMYf9zq3mx0dQk/B2IEFSW8Mbj74mYDpQoUULwosSmWz3yAhfLRgE83C7Wvdb0ToBGVHeHba2IFsupnxU6gcInz8SfX3lP78mh4KzVkNmQdXkfEC2Qe/HUeDLdI8gqVtAOd0NKY8yv/LUf4JX8wlZb6rU9Y4nWDGbgcv/k8h67xYRI4YbtEDVkPBqCZux66JuwKF4uZ2q+rPZTYRYJWT8/0x1jz5W5DQtuDVITT1jb1YsriegOZgp9LfS11B7w== hudson@ip-172-31-28-17" >/home/hudson/.ssh/authorized_keys
    sudo -u hudson wget -O /home/hudson/slave.jar "https://hudson.sapsailing.com/jnlpJars/slave.jar"
 ```
