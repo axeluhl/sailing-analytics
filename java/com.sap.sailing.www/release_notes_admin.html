@@ -35,6 +35,11 @@
                 leaderboard in the header.</li>
             <li>Errors during reading the wind estimation and maneuver classification models now lead to an
                 attempt to import them again from the URL specified for this purpose.</li>
+            <li>Loading a race with replicas attached now achieves higher throughput on the replicas while
+                inserting wind/mark/competitor fixes into the tracked race. This has been achieved by keying
+                the replication operations based on their lock contention and parallelizing only those that
+                do not compete for the same locks.</li>
+            <li>A WindFinder spot collection "lago_maggiore" has been added.</li>
           </ul>
           <h2 class="articleSubheadline">March 2022</h2>
           <ul class="bulletList">

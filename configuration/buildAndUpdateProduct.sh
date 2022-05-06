@@ -119,7 +119,7 @@ android=1
 java=1
 reporting=0
 suppress_confirmation=0
-export extra=''
+export extra='--batch-mode'
 parallelexecution=0
 p2local=0
 

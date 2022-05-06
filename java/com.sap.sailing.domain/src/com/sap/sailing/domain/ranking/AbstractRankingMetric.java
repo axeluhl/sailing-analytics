@@ -254,7 +254,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
     protected Competitor getCompetitorFarthestAhead(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Comparator<Competitor> oneDesignComparator = getWindwardDistanceTraveledComparator(timePoint, cache);
         Optional<Competitor> competitorFarthestAhead = StreamSupport
-                .stream(getCompetitors().spliterator(), /* parallel */true).
+                .stream(getCompetitors().spliterator(), /* parallel */ /* bug 5720 deadlock-prone: true */ false).
                 sorted(oneDesignComparator).findFirst();
         return competitorFarthestAhead.orElse(null);
     }
