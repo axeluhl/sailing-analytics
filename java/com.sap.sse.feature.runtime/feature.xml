@@ -620,6 +620,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.osgi.util.xml"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.xml.source"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.202109301733"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.osgi.services"
          download-size="0"
          install-size="0"
