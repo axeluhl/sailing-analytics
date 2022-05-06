@@ -101,10 +101,16 @@
 <unit id="org.eclipse.equinox.transforms.hook" version="1.2.500.v20190714-1852"/>
 <unit id="org.eclipse.equinox.transforms.xslt" version="1.1.100.v20200422-1833"/>
 <unit id="org.eclipse.equinox.useradmin" version="1.2.0.v20200807-1148"/>
-<unit id="org.eclipse.osgi" version="3.16.100.v20201030-1916"/>
-<unit id="org.eclipse.osgi.services" version="3.9.0.v20200511-1725"/>
-<unit id="org.eclipse.osgi.util" version="3.5.300.v20190708-1141"/>
 <repository location="https://download.eclipse.org/releases/2020-12"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.osgi" version="3.18.0.v20220426-2016"/>
+<unit id="org.eclipse.osgi.source" version="3.18.0.v20220426-2016"/>
+<unit id="org.eclipse.osgi.services" version="3.10.200.v20210723-0643"/>
+<unit id="org.eclipse.osgi.services.source" version="3.10.200.v20210723-0643"/>
+<unit id="org.eclipse.osgi.util" version="3.7.0.v20220427-2144"/>
+<unit id="org.eclipse.osgi.util.source" version="3.7.0.v20220427-2144"/>
+<repository location="https://download.eclipse.org/releases/2022-06"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xmlbeans" version="3.1.0.v20200922-1359"/>
@@ -258,9 +264,9 @@
 <plugin id="org.eclipse.jetty.xml"/>
 <plugin id="org.eclipse.jetty.xml.source"/>
 <plugin id="org.eclipse.osgi"/>
+<plugin id="org.eclipse.osgi.source"/>
 <plugin id="org.eclipse.osgi.services"/>
 <plugin id="org.eclipse.osgi.services.source"/>
-<plugin id="org.eclipse.osgi.source"/>
 <plugin id="org.hamcrest"/>
 <plugin id="org.hamcrest.core"/>
 <plugin id="org.hamcrest.integration"/>
