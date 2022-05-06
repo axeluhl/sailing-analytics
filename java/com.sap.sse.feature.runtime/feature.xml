@@ -606,6 +606,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.osgi.util.position"
+         download-size="0"
+         install-size="0"
+         version="1.0.1.201505202026"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.position.source"
+         download-size="0"
+         install-size="0"
+         version="1.0.1.201505202026"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.osgi.services"
          download-size="0"
          install-size="0"
