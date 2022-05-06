@@ -592,6 +592,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.osgi.util.measurement"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.201802012109""
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.measurement.source"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.201802012109""
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.osgi.services"
          download-size="0"
          install-size="0"
