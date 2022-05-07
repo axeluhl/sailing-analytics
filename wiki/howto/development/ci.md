@@ -78,7 +78,7 @@ The image has been crafted specifically to contain the tools required for the bu
    echo "deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" >/etc/apt/sources.list.d/mongodb-org-4.4.list
    apt-get -y update
    apt-get -y upgrade
-   apt-get -y install google-chrome-stable maven rabbitmq-server mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws
+   apt-get -y install google-chrome-stable maven rabbitmq-server mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws docker.io
    apt-get -y autoremove
    cd /tmp
    wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
@@ -97,6 +97,9 @@ The image has been crafted specifically to contain the tools required for the bu
    systemctl enable rabbitmq-server.service
    adduser --system --shell /bin/bash --quiet --group --disabled-password sailing
    adduser --system --shell /bin/bash --quiet --group --disabled-password hudson
+   adduser hudson docker
+   # Now log in to the docker registry at docker.sapsailing.com:443 with a valid user account for local user "hudson"
+   sudo -u hudson docker login docker.sapsailing.com:443
    sudo -u sailing mkdir /home/sailing/.ssh
    sudo -u sailing chmod 700 /home/sailing/.ssh
    sudo -u hudson mkdir /home/hudson/.ssh
