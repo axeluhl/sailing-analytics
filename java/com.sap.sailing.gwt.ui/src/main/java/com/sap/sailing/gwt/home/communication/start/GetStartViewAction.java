@@ -75,7 +75,7 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
         final Set<SailingImageDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
                                                                        // amount of shuffling
         final List<SailingVideoDTO> videoCandidates = new ArrayList<>();
-        for (EventHolder holder : recentEventsCalculator.getRecentEventsOfLast12Month()) {
+        for (EventHolder holder : recentEventsCalculator.getRecentEventsOfLast120Month()) {
             if (result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
                 result.addRecentEvent(HomeServiceUtil.convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer, context.getRacingEventService()));
             }
