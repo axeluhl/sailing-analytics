@@ -14,7 +14,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RecentEventsCalculator implements EventVisitor {
     private final TimePoint now = MillisecondsTimePoint.now();
-    private final SortedSet<EventHolder> recentEventsOfLast12Month = new TreeSet<>(new Comparator<EventHolder>() {
+    private final SortedSet<EventHolder> recentEventsOfLast120Month = new TreeSet<>(new Comparator<EventHolder>() {
         @Override
         public int compare(EventHolder o1, EventHolder o2) {
             final long diff = o2.event.getEndDate().asMillis() - o1.event.getEndDate().asMillis();
@@ -26,12 +26,12 @@ public class RecentEventsCalculator implements EventVisitor {
     public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
         final EventHolder holder = new EventHolder(event, onRemoteServer, baseURL);
         final TimePoint endDate = event.getEndDate();
-        if (endDate != null && endDate.before(now) && endDate.after(now.minus(Duration.ONE_YEAR))) {
-            recentEventsOfLast12Month.add(holder);
+        if (endDate != null && endDate.before(now) && endDate.after(now.minus(Duration.ONE_YEAR.times(10)))) {
+            recentEventsOfLast120Month.add(holder);
         }
     }
 
-    public Collection<EventHolder> getRecentEventsOfLast12Month() {
-        return recentEventsOfLast12Month;
+    public Collection<EventHolder> getRecentEventsOfLast120Month() {
+        return recentEventsOfLast120Month;
     }
 }
