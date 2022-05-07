@@ -476,7 +476,15 @@ public class CandidateChooserImpl implements CandidateChooser {
     
     @Override
     public void updateEndProxyNodeWaypointIndex() {
+        // remove "end" from the fixed passings which is ordered by waypoint number; after the change,
+        // "end" may need to be at a different position in the navigable set.
+        for (final NavigableSet<Candidate> fixedPassingsForCompetitor : fixedPassings.values()) {
+            fixedPassingsForCompetitor.remove(end);
+        }
         end.setOneBasedWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints()+1);
+        for (final NavigableSet<Candidate> fixedPassingsForCompetitor : fixedPassings.values()) {
+            fixedPassingsForCompetitor.add(end);
+        }
     }
 
     @Override
@@ -701,6 +709,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(new Edge(
                         new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
                         ()->1.0, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
+                // find the shortest path from startOfFixedInterval to endOfFixedInterval:
                 while (!endFound) {
                     Util.Pair<Edge, Double> mostLikelyEdgeWithProbability = currentEdgesMoreLikelyFirst.pollFirst();
                     if (mostLikelyEdgeWithProbability == null) {
@@ -743,6 +752,18 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
                 startOfFixedInterval = endOfFixedInterval;
                 endOfFixedInterval = fixedPasses.higher(endOfFixedInterval);
+                if (endOfFixedInterval != null && endOfFixedInterval.getOneBasedIndexOfWaypoint() > end.getOneBasedIndexOfWaypoint()) {
+                    // we have fixed candidates for waypoints whose index exceeds that of the proxy "end" node;
+                    // this can happen, e.g., if fixed passings are being processed already before a course
+                    // definition has been received yet.  In this case we call off the search; the fixedPassings
+                    // contain the "end" node not at the end; an inconsistency which the next call to
+                    // updateEndProxyNodeWaypointIndex() is expected to fix during the next round of changes.
+                    logger.warning("In "+this+" the proxy end node's waypoint index "+end.getOneBasedIndexOfWaypoint()+
+                            " was exceeded by that of the fixed mark passing "+endOfFixedInterval+
+                            ". Stopping at "+end+" in this round; the end node will be updated soon and another round "+
+                            "of calculations will start, then with an up-to-date waypoint index for the end proxy node.");
+                    endOfFixedInterval = null;
+                }
             }
             boolean changed = false;
             Map<Waypoint, MarkPassing> currentPasses = currentMarkPasses.get(c);
