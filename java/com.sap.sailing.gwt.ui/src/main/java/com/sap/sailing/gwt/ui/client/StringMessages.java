@@ -2404,4 +2404,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String videoGuide();
     String orcExplanation();
     String subscriptionOneTimePlanLockedText();
+    String errorSettingRaceToDefineItsOwnCompetitors(String leaderboardName, String raceColumnName, String fleetName, String message);
 }
