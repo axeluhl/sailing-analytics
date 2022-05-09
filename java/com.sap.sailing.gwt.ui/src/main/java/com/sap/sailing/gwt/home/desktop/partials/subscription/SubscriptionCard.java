@@ -69,11 +69,11 @@ public class SubscriptionCard extends Composite {
 
     private final Consumer<SubscriptionPrice> subscriptionCallback;
     private SubscriptionPrice currentPrice;
-    private final SubscriptionGroupDTO subscriptionCategoryDTO;
+    private final SubscriptionGroupDTO subscriptionGroupDTO;
 
     public <T> SubscriptionCard(SubscriptionGroupDTO subscriptionGroupDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
         this.subscriptionCallback = subscriptionCallback;
-        this.subscriptionCategoryDTO = subscriptionGroupDTO;
+        this.subscriptionGroupDTO = subscriptionGroupDTO;
         SubscriptionCardResources.INSTANCE.css().ensureInjected();
         SharedResources.INSTANCE.mediaCss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -186,8 +186,8 @@ public class SubscriptionCard extends Composite {
         }
     }
     
-    public SubscriptionGroupDTO getSubscriptionCategoryDTO() {
-        return subscriptionCategoryDTO;
+    public SubscriptionGroupDTO getSubscriptionGroupDTO() {
+        return subscriptionGroupDTO;
     }
 
     @UiHandler("button")
