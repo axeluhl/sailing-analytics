@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;

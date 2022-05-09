@@ -288,7 +288,9 @@ public class RaceBoardPanel
                 }
             }
         }
-        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
+        
+        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(),
+                mainCss.usermanagement_open(), mainCss.user_menu_premium());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);

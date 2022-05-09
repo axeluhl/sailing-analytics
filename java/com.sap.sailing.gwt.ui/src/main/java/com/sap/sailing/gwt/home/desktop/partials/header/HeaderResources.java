@@ -49,7 +49,7 @@ public interface HeaderResources extends AuthenticationResources {
         String header_navigation_icon();
         String header_navigation_iconactive();
         String subscriptions();
-        String premium();
+        String user_menu_premium();
         String premium_feature();
         String premium_hint();
     }
