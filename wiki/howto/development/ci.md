@@ -68,6 +68,11 @@ The image has been crafted specifically to contain the tools required for the bu
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/hudson_slave_setup/* /tmp
    sudo -i
+   dd if=/dev/zero of=/var/cache/swapfile bs=1G count=20
+   chmod 600 /var/cache/swapfile
+   mkswap /var/cache/swapfile
+   echo "/var/cache/swapfile none swap sw 0 0" >>/etc/fstab
+   swapon -a
    mkdir /opt/android-sdk-linux
    echo "dev.internal.sapsailing.com:/home/hudson/android-sdk-linux /opt/android-sdk-linux nfs tcp,intr,timeo=100,retry=0" >>/etc/fstab
    apt-get update
