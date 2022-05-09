@@ -8,7 +8,7 @@ import com.sap.sse.security.ui.client.subscription.SubscribeView;
 
 public interface SubscriptionView extends SubscribeView, IsWidget {
 
-    void addSubscriptionCategory(SubscriptionGroupDTO plan, final SubscriptionCard.Type type, final EventBus eventBus);
+    void addSubscriptionGroup(SubscriptionGroupDTO plan, final SubscriptionCard.Type type, final EventBus eventBus);
     
     void resetSubscriptions();
 

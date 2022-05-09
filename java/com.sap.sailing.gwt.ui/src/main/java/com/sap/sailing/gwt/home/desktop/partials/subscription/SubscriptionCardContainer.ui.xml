@@ -10,6 +10,9 @@
   <ui:style>
   </ui:style>
   <g:HTMLPanel styleName="{main.mediaCss.stackenblochen} {local.css.content}">
+    <h1>
+      <ui:text from="{i18n.subscriptionPlanOverview}" />
+    </h1>
     <div class="{local.css.subscriptionHeader}">
       <span class="{local.css.hint}">
         <g:Button ui:field="businessModelInfoButton">
@@ -19,9 +22,6 @@
         </g:Button>
       </span>
     </div>
-    <h1>
-      <ui:text from="{i18n.subscriptionPlanOverview}" />
-    </h1>
     <g:FlowPanel ui:field="container"
       styleName="{local.css.container}"></g:FlowPanel>
     <div class="{local.css.subscriptionHeader}">

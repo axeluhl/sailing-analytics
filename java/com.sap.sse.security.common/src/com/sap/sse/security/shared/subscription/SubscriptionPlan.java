@@ -43,10 +43,11 @@ public abstract class SubscriptionPlan implements Serializable {
     }
     
     /**
-     * Used to organize plans in groups to show on one subscription card.
+     * Used to organize plans in groups to show on one subscription card. 
+     * The order of this enumeration is usually also the main order on the UI.
      */
     public enum PlanGroup {
-        PREMIUM("premium"), DATA_MINING_ALL("data_mining_all"), DATA_MINING_ARCHIVE("data_mining_archive");
+        PREMIUM("premium"), DATA_MINING_ARCHIVE("data_mining_archive"), DATA_MINING_ALL("data_mining_all");
         final String id;
         PlanGroup(String id) {
             this.id = id;
