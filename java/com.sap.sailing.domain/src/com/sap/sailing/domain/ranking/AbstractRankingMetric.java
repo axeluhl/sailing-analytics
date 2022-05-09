@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
@@ -251,10 +253,16 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         return trackedRace;
     }
 
+    /**
+     * Uses a parallel spliterator across the competitors, doing calculations in {@link ForkJoinTask}s. If you call this
+     * potentially from a thread belonging to a {@link ForkJoinPool}, make sure to use
+     * {@link ForkJoinPool#managedBlock(java.util.concurrent.ForkJoinPool.ManagedBlocker) to wrap this.
+     */
     protected Competitor getCompetitorFarthestAhead(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Comparator<Competitor> oneDesignComparator = getWindwardDistanceTraveledComparator(timePoint, cache);
         Optional<Competitor> competitorFarthestAhead = StreamSupport
-                .stream(getCompetitors().spliterator(), /* parallel */ /* bug 5720 deadlock-prone: true */ false).
+                .stream(getCompetitors().spliterator(), /* parallel */ /* bug 5720 deadlock to be avoided by calling this in
+                a ForkJoinPool.ManagedBlocker */ true).
                 sorted(oneDesignComparator).findFirst();
         return competitorFarthestAhead.orElse(null);
     }

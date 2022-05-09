@@ -154,7 +154,10 @@
         <setEntry value="org.eclipse.jetty.websocket.common@default:default"/>
         <setEntry value="org.eclipse.jetty.xml.source"/>
         <setEntry value="org.eclipse.jetty.xml@default:default"/>
+        <setEntry value="org.eclipse.osgi.services.source"/>
         <setEntry value="org.eclipse.osgi.services@default:default"/>
+        <setEntry value="org.eclipse.osgi.source"/>
+        <setEntry value="org.eclipse.osgi.util.source"/>
         <setEntry value="org.eclipse.osgi.util@default:default"/>
         <setEntry value="org.eclipse.osgi@-1:true"/>
         <setEntry value="org.hyperic.sigar@default:default"/>
@@ -171,6 +174,16 @@
         <setEntry value="org.objectweb.asm@default:default"/>
         <setEntry value="org.osgi.service.packageadmin@default:default"/>
         <setEntry value="org.osgi.service.url@default:default"/>
+        <setEntry value="org.osgi.util.function.source"/>
+        <setEntry value="org.osgi.util.function@default:default"/>
+        <setEntry value="org.osgi.util.measurement.source"/>
+        <setEntry value="org.osgi.util.measurement@default:default"/>
+        <setEntry value="org.osgi.util.position.source"/>
+        <setEntry value="org.osgi.util.position@default:default"/>
+        <setEntry value="org.osgi.util.promise.source"/>
+        <setEntry value="org.osgi.util.promise@default:default"/>
+        <setEntry value="org.osgi.util.xml.source"/>
+        <setEntry value="org.osgi.util.xml@default:default"/>
         <setEntry value="org.owasp.encoder.source"/>
         <setEntry value="org.owasp.encoder@default:default"/>
         <setEntry value="routeconverter@default:default"/>
