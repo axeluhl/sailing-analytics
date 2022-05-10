@@ -94,7 +94,6 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Element centerMenuPanel;
     @UiField Anchor usermenu;
     @UiField ImageElement logoImage;
-    @UiField Element usermenuPremium;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     private final List<Anchor> links;
@@ -104,10 +103,10 @@ public class Header extends Composite implements HeaderConstants {
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
     private final PlaceNavigation<SubscriptionPlace> subscriptionsNavigation;
     private final AuthenticationMenuView authenticationMenuView;
-    
+
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
-    
+
     /**
      * Contains the logic for the dynamic hamburger menu on top of the page.
      * @author Georg Herdt
@@ -265,6 +264,8 @@ public class Header extends Composite implements HeaderConstants {
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
         subscriptionsPageLink.setHref(subscriptionsNavigation.getTargetUrl());
+        authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(),
+                HeaderResources.INSTANCE.css().open(), HeaderResources.INSTANCE.css().user_menu_premium());
         // make the Admin link visible only for signed-in users
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
         // initially hide admin console, data mining and strategy simulator in hamburger menu
@@ -346,11 +347,7 @@ public class Header extends Composite implements HeaderConstants {
                 
             }
             menuItemVisibilityHandler.refreshVisibilityDeferred();
-            if (authContext.hasPermission(authContext.getCurrentUser(), UserActions.BE_PREMIUM)) {
-                usermenuPremium.getStyle().setDisplay(Display.BLOCK);
-            } else {
-                usermenuPremium.getStyle().setDisplay(Display.NONE);
-            }
+            authenticationMenuView.showPremium(authContext.hasPermission(authContext.getCurrentUser(), UserActions.BE_PREMIUM));
         });
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addFocusHandler((focusEvent) -> menuItemVisibilityHandler.refreshVisibility(370));
@@ -371,7 +368,6 @@ public class Header extends Composite implements HeaderConstants {
                 updateActiveLink(event.getNewPlace());
             }
         });
-        authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
             logoImage.setTitle(StringMessages.INSTANCE.sapSailingAnalytics());

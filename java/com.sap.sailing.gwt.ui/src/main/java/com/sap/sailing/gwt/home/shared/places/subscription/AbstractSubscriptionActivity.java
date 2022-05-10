@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -94,17 +93,17 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                     groupMap.put(plan.getGroup(), groupDTO);
                                 }
                             });
-                            List<SubscriptionGroupDTO> categories = new ArrayList<SubscriptionGroupDTO>(groupMap.values());
-                            categories.sort(new Comparator<SubscriptionGroupDTO>() {
+                            List<SubscriptionGroupDTO> groups = new ArrayList<SubscriptionGroupDTO>(groupMap.values());
+                            groups.sort(new Comparator<SubscriptionGroupDTO>() {
                                 
                                 @Override
                                 public int compare(SubscriptionGroupDTO o1, SubscriptionGroupDTO o2) {
-                                    return o1.getGroup().compareTo(o2.getGroup());
+                                    // comparing by ordinal
+                                    return o1.getGroup().ordinal() - o2.getGroup().ordinal();
                                 }
                             });
-                            categories.forEach(category -> {
-                                GWT.log("Category: " + category.getSubscriptionGroupId());
-                                view.addSubscriptionCategory(category, category.getType(), eventBus);
+                            groups.forEach(group -> {
+                                view.addSubscriptionGroup(group, group.getType(), eventBus);
                             });
                         }
 
@@ -116,9 +115,9 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                         private void addFreePlan(final SubscriptionView view) {
                             final SubscriptionGroupDTO freePlan = new SubscriptionGroupDTO(
                                     "free_subscription_plan" /* id */, /* isUserSubscribedToPlan */ false,
-                                    Collections.emptySet() /* prices */, /* planCategory */ null, 
+                                    Collections.emptySet() /* prices */, /* group */ null, 
                                     /*isUserSubscribedToPlanCategory*/ false, null /* error */, Type.DEFAULT);
-                            view.addSubscriptionCategory(freePlan, Type.FREE, eventBus);
+                            view.addSubscriptionGroup(freePlan, Type.FREE, eventBus);
                         }
                     });
         } catch (final InvalidSubscriptionProviderException exc) {

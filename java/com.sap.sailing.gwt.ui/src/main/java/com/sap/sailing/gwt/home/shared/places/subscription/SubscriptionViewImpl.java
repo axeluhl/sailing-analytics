@@ -24,7 +24,7 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
     }
 
     @Override
-    public void addSubscriptionCategory(final SubscriptionGroupDTO group, final SubscriptionCard.Type type,
+    public void addSubscriptionGroup(final SubscriptionGroupDTO group, final SubscriptionCard.Type type,
             final EventBus eventBus) {
         switch (type) {
         case HIGHLIGHT:

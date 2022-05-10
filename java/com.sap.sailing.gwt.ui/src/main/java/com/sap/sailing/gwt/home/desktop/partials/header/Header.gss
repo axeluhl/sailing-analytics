@@ -162,8 +162,7 @@
 .user_menu_button.loggedin.open {
   background-image: resourceUrl('loggedinOpen');
 }
-.user_menu_button span.premium {
-  display: none;
+.user_menu_premium {
   position: absolute;
   bottom: -2px;
   left: 50%;
