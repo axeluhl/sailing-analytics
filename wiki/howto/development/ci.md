@@ -68,6 +68,11 @@ The image has been crafted specifically to contain the tools required for the bu
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/hudson_slave_setup/* /tmp
    sudo -i
+   dd if=/dev/zero of=/var/cache/swapfile bs=1G count=20
+   chmod 600 /var/cache/swapfile
+   mkswap /var/cache/swapfile
+   echo "/var/cache/swapfile none swap sw 0 0" >>/etc/fstab
+   swapon -a
    mkdir /opt/android-sdk-linux
    echo "dev.internal.sapsailing.com:/home/hudson/android-sdk-linux /opt/android-sdk-linux nfs tcp,intr,timeo=100,retry=0" >>/etc/fstab
    apt-get update
@@ -78,7 +83,7 @@ The image has been crafted specifically to contain the tools required for the bu
    echo "deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" >/etc/apt/sources.list.d/mongodb-org-4.4.list
    apt-get -y update
    apt-get -y upgrade
-   apt-get -y install google-chrome-stable maven rabbitmq-server mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws
+   apt-get -y install google-chrome-stable maven rabbitmq-server mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws docker.io
    apt-get -y autoremove
    cd /tmp
    wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
@@ -97,6 +102,9 @@ The image has been crafted specifically to contain the tools required for the bu
    systemctl enable rabbitmq-server.service
    adduser --system --shell /bin/bash --quiet --group --disabled-password sailing
    adduser --system --shell /bin/bash --quiet --group --disabled-password hudson
+   adduser hudson docker
+   # Now log in to the docker registry at docker.sapsailing.com:443 with a valid user account for local user "hudson"
+   sudo -u hudson docker login docker.sapsailing.com:443
    sudo -u sailing mkdir /home/sailing/.ssh
    sudo -u sailing chmod 700 /home/sailing/.ssh
    sudo -u hudson mkdir /home/hudson/.ssh
