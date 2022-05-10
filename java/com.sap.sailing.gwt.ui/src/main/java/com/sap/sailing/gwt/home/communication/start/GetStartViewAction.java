@@ -36,7 +36,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClientCacheable {
     private static final int MAX_RECENT_EVENTS = 3;
     private static final int MAX_VIDEO_COUNT = 3;
-    private static final int MAX_IMAGE_COUNT = 500;
+    private static final int MAX_IMAGE_COUNT = 100;
 
     /**
      * Creates a new {@link GetStartViewAction} instance.
