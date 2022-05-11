@@ -520,6 +520,7 @@
           <exclude>**/*$*</exclude>
         </excludes>
         <reportsDirectory>${reportsdirectory}</reportsDirectory>
+        <showEclipseLog>true</showEclipseLog>
       </configuration>
     </plugin>
     <plugin>
