@@ -2119,7 +2119,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype) {
+    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype, boolean makeReadableForAll) {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
@@ -2134,6 +2134,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             result = roleDefinition;
         } else {
             result = potentiallyExistingRoleDefinition;
+        }
+        if (makeReadableForAll && isInitialOrMigration()) {
+            // make role publicly readable
+            addToAccessControlList(result.getIdentifier(), /* for all users */ null, DefaultActions.READ.name());
         }
         return result;
     }

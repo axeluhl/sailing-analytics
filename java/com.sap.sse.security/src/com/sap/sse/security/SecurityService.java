@@ -629,7 +629,16 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     boolean isNewServer();
 
-    RoleDefinition getOrCreateRoleDefinitionFromPrototype(RolePrototype rolePrototype);
+    /**
+     * Tries to find a {@link RoleDefinition} whose ID equals that of the {@link RolePrototype} passed. If found, the
+     * permission set of the {@link RoleDefition} that was found is compared to that of the {@link RolePrototype}, and
+     * in case of differences the permission set of the {@link RolePrototype} is copied into the {@link RoleDefinition}.
+     * If no {@link RoleDefinition} by the ID specified by the {@link RolePrototype} is found, a new
+     * {@link RoleDefinition} is created. If {@code makeReadableForAll} is {@code true} and this server is just
+     * {@link #isInitialOrMigration() being initialized or migrating} then the new role definition will be made readable
+     * for all users by adding an ACL for the {@code null} group that grants the {@link DefaultActions#READ} permission.
+     */
+    RoleDefinition getOrCreateRoleDefinitionFromPrototype(RolePrototype rolePrototype, boolean makeReadableForAll);
 
     /** Sets the default ownership based on the current user. */
     void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description);
