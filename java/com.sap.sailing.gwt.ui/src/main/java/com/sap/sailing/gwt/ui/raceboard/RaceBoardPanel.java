@@ -288,7 +288,9 @@ public class RaceBoardPanel
                 }
             }
         }
-        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
+        
+        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(),
+                mainCss.usermanagement_open(), mainCss.user_menu_premium());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
@@ -557,7 +559,7 @@ public class RaceBoardPanel
         for (Pair<Component<?>, Action> componentAndAction : componentsForSideBySideViewer) {
             addChildComponent(componentAndAction.getA());
         }
-        this.setupUserManagementControlPanel(userService);
+        this.setupUserManagementControlPanel(userService, paywallResolver);
         mainPanel.add(mapViewer.getViewerWidget());
         boolean showLeaderboard = initialPerspectiveOwnSettings.isShowLeaderboard()
                 && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
@@ -594,10 +596,10 @@ public class RaceBoardPanel
         racetimePanel.setBarOverlays(overlays);
     }
 
-    private void setupUserManagementControlPanel(UserService userService) {
+    private void setupUserManagementControlPanel(UserService userService, PaywallResolver paywallResolver) {
         mainCss.ensureInjected();
         final FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, userManagementMenuView, display, 
+        final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, paywallResolver, userManagementMenuView, display, 
                 SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
         new RaceBoardLoginHintPopup(genericAuthentication.getAuthenticationManager());
     }

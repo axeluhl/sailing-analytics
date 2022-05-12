@@ -2,6 +2,10 @@ package com.sap.sailing.gwt.home.shared.places.subscription;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -11,6 +15,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard.Type;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanGroup;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
@@ -65,17 +70,40 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                         public void onSuccess(final ArrayList<SubscriptionPlanDTO> result) {
                             view.resetSubscriptions();
                             addFreePlan(view);
+                            Map<PlanGroup, SubscriptionGroupDTO> groupMap = new HashMap<>();
                             result.forEach(plan -> {
+                                final Type type;
                                 if (checkIfUserIsOwnerOfThePlan(plan) || checkIfUserIsSubscribedToPlanCategory(plan)) {
-                                    view.addSubscriptionPlan(plan, Type.OWNER, eventBus);
-                                } else if (checkIfUserWasAlreadySubscribedToOneTimePlan(plan)) {
-                                    view.addSubscriptionPlan(plan, Type.ONETIMELOCK, eventBus);
-                                } else if (subscriptionsPlace.getPlansToHighlight()
-                                        .contains(plan.getSubscriptionPlanId())) {
-                                    view.addSubscriptionPlan(plan, Type.HIGHLIGHT, eventBus);
+                                    type = Type.OWNER;
+                                } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getSubscriptionPlanId())) {
+                                    type = Type.HIGHLIGHT;
                                 } else {
-                                    view.addSubscriptionPlan(plan, Type.DEFAULT, eventBus);
+                                    type = Type.DEFAULT;
                                 }
+                                final SubscriptionGroupDTO groupDTO;
+                                if (groupMap.containsKey(plan.getGroup())) {
+                                    groupDTO = groupMap.get(plan.getGroup());
+                                    plan.getPrices().forEach(price -> {
+                                        groupDTO.getPrices().add(price);
+                                    });
+                                } else {
+                                    groupDTO = new SubscriptionGroupDTO(plan.getGroup().getId(),
+                                            plan.isUserSubscribedToPlan(), plan.getPrices(), plan.getGroup(),
+                                            plan.isUserSubscribedToPlanCategory(), plan.getError(), type);
+                                    groupMap.put(plan.getGroup(), groupDTO);
+                                }
+                            });
+                            List<SubscriptionGroupDTO> groups = new ArrayList<SubscriptionGroupDTO>(groupMap.values());
+                            groups.sort(new Comparator<SubscriptionGroupDTO>() {
+                                
+                                @Override
+                                public int compare(SubscriptionGroupDTO o1, SubscriptionGroupDTO o2) {
+                                    // comparing by ordinal
+                                    return o1.getGroup().ordinal() - o2.getGroup().ordinal();
+                                }
+                            });
+                            groups.forEach(group -> {
+                                view.addSubscriptionGroup(group, group.getType(), eventBus);
                             });
                         }
 
@@ -85,11 +113,11 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                         }
 
                         private void addFreePlan(final SubscriptionView view) {
-                            final SubscriptionPlanDTO freePlan = new SubscriptionPlanDTO(
+                            final SubscriptionGroupDTO freePlan = new SubscriptionGroupDTO(
                                     "free_subscription_plan" /* id */, /* isUserSubscribedToPlan */ false,
-                                    Collections.emptySet() /* prices */, /* planCategories */ Collections.emptySet(),
-                                    /* userWasAlreadySubscribedToOneTimePlan */ false, false, null /* error */);
-                            view.addSubscriptionPlan(freePlan, Type.FREE, eventBus);
+                                    Collections.emptySet() /* prices */, /* group */ null, 
+                                    /*isUserSubscribedToPlanCategory*/ false, null /* error */, Type.DEFAULT);
+                            view.addSubscriptionGroup(freePlan, Type.FREE, eventBus);
                         }
                     });
         } catch (final InvalidSubscriptionProviderException exc) {
@@ -114,10 +142,6 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
 
     private boolean checkIfUserIsOwnerOfThePlan(final SubscriptionPlanDTO plan) {
         return plan.isUserSubscribedToPlan();
-    }
-    
-    private boolean checkIfUserWasAlreadySubscribedToOneTimePlan(final SubscriptionPlanDTO plan) {
-        return plan.isUserWasAlreadySubscribedToOneTimePlan();
     }
     
     private boolean checkIfUserIsSubscribedToPlanCategory(final SubscriptionPlanDTO plan) {

@@ -70,6 +70,12 @@ public class ChargebeeApiService implements SubscriptionApiService {
         new ChargebeeCancelSubscriptionTask(subscriptionId, requestProcessor, result -> listener.onCancelResult(result), this)
                 .run();
     }
+    
+    @Override
+    public void getUserSelfServicePortalSession(String userId, OnSelfServicePortalSessionResultListener listener) {
+        new ChargeBeeGetSelfServicePortalSessionTask(userId, requestProcessor, result -> listener.onSessionResult(result), this)
+        .run();
+    }
 
     @Override
     public SubscriptionDataHandler getDataHandler() {

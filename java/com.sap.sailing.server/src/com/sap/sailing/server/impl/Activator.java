@@ -78,6 +78,8 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SubscriptionPlanProvider;
+import com.sap.sse.security.shared.subscription.AllDataMiningRole;
+import com.sap.sse.security.shared.subscription.ArchiveDataMiningRole;
 import com.sap.sse.security.util.GenericJSONPreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -266,6 +268,8 @@ public class Activator implements BundleActivator {
                     // TODO: Registering SubscriptionPlan specific RoleDefinitions here requires additional maintenance. Consider
                     // implementing another Construct like OSGIHasPermissionsProvider
                     securityService.getOrCreateRoleDefinitionFromPrototype(PremiumRole.getInstance());
+                    securityService.getOrCreateRoleDefinitionFromPrototype(ArchiveDataMiningRole.getInstance());
+                    securityService.getOrCreateRoleDefinitionFromPrototype(AllDataMiningRole.getInstance());
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),

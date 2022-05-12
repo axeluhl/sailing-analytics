@@ -10,7 +10,8 @@ public interface HasSubscriptionMessageKeys{
     String getSubscriptionPlanId();
     
     default public String getSubscriptionPlanNameMessageKey() {
-        return getSubscriptionPlanId() + NAME_MESSAGE_KEY_SUFFX;
+        final String subscriptionPlanId = getSubscriptionPlanId();
+        return subscriptionPlanId.substring(subscriptionPlanId.indexOf("_") + 1) + NAME_MESSAGE_KEY_SUFFX;
     }
 
     default public String getSubscriptionPlanDescMessageKey() {

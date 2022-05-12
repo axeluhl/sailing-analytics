@@ -29,6 +29,7 @@ import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorat
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
 
@@ -192,7 +193,8 @@ public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
 
     private void createSimulatorPanel(ServerInfoDTO serverInfo) {
         SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(getStringMessages().strategySimulatorTitle());
-        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         final String serverName = serverInfo.getName();
         authorizedContentDecorator.setPermissionToCheck(NamedSecuredObjectDTO.create(serverName,

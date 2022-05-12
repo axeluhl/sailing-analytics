@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.subscription;
 
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardContainer;
@@ -9,7 +8,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
-import com.sap.sse.security.ui.shared.subscription.SubscriptionPlanDTO;
 
 public class SubscriptionViewImpl extends Composite implements SubscriptionView {
 
@@ -26,12 +24,12 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
     }
 
     @Override
-    public void addSubscriptionPlan(final SubscriptionPlanDTO plan, final SubscriptionCard.Type type,
+    public void addSubscriptionGroup(final SubscriptionGroupDTO group, final SubscriptionCard.Type type,
             final EventBus eventBus) {
         switch (type) {
         case HIGHLIGHT:
         case DEFAULT:
-            container.addSubscription(new SubscriptionCard(plan, type, (price) -> {
+            container.addSubscription(new SubscriptionCard(group, type, (price) -> {
                 final AuthenticationContext authenticationContext = presenter.getAuthenticationContext();
                 if (!authenticationContext.isLoggedIn()) {
                     onOpenCheckoutError(StringMessages.INSTANCE.notLoggedIn());
@@ -47,20 +45,15 @@ public class SubscriptionViewImpl extends Composite implements SubscriptionView 
             }, eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case OWNER:
-            container.addSubscription(new SubscriptionCard(plan, type, price -> presenter.manageSubscriptions(),
+            container.addSubscription(new SubscriptionCard(group, type, price -> presenter.manageSubscriptions(),
                     eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         case ONETIMELOCK:
-            container.addSubscription(new SubscriptionCard(plan, type, price -> {},
+            container.addSubscription(new SubscriptionCard(group, type, price -> {},
                     eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
-        case INDIVIDUAL:
-            container.addSubscription(
-                    new SubscriptionCard(plan, type, price -> Window.Location.assign("mailto:info@sapsailing.com"),
-                            eventBus, presenter.getAuthenticationContext().isLoggedIn()));
-            break;
         case FREE:
-            container.addSubscription(new SubscriptionCard(plan, type, price -> presenter.toggleAuthenticationFlyout(),
+            container.addSubscription(new SubscriptionCard(group, type, price -> presenter.toggleAuthenticationFlyout(),
                     eventBus, presenter.getAuthenticationContext().isLoggedIn()));
             break;
         default:

@@ -7,16 +7,16 @@ import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.google.gwt.resources.client.ImageResource;
 
 public interface SharedDesktopResources extends SharedHomeResources {
-    
+
     public static final SharedDesktopResources INSTANCE = GWT.create(SharedDesktopResources.class);
-    
+
     @Source("dropdown__check@2x.png")
     ImageResource dropdownCheck();
-    
+
     @Source("liveraces.svg")
     @MimeType("image/svg+xml")
     DataResource liveraces();
-    
+
     @Source("arrow-down-filled-black.png")
     ImageResource arrowDownFilledBlack();
 }

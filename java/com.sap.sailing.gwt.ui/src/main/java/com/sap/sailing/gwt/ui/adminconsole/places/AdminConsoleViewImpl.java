@@ -127,6 +127,7 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDe
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
 import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
 public class AdminConsoleViewImpl extends Composite implements AdminConsoleView {
@@ -150,6 +151,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private final StringMessages stringMessages = StringMessages.INSTANCE;
 
     private UserService userService;
+    private PaywallResolver paywallResolver;
 
     private ErrorReporter errorReporter;
 
@@ -168,12 +170,13 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         this.userService = presenter.getUserService();
         this.errorReporter = presenter.getErrorReporter();
         this.placeController = presenter.getPlaceController();
+        this.paywallResolver = new PaywallResolver(this.userService, presenter.getSubscriptionServiceFactory());
     }
 
     @Override
     public HeaderPanel createUI(final ServerInfoDTO serverInfo) {
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(stringMessages.administration());
-        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(userService, header.getAuthenticationMenuView());
+        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(userService, paywallResolver, header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         authorizedContentDecorator.setContentWidgetFactory(() -> createAdminConsolePanel(serverInfo));
         headerPanel.setHeaderWidget(header);
