@@ -112,6 +112,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource Brassfahrt5Icon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt6.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Brassfahrt6Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CADET.png")
     @ImageOptions(preventInlining = true)
     ImageResource CadetIcon();

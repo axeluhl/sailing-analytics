@@ -35,6 +35,7 @@ public enum BoatClassMasterdata {
     BRASSFAHRT_III ("Brassfahrt III", true, 12.00, 3.50, BoatHullType.MONOHULL, true, "Brassfahrt 3"),
     BRASSFAHRT_IV ("Brassfahrt IV", true, 12.00, 3.50, BoatHullType.MONOHULL, true, "Brassfahrt 4"),
     BRASSFAHRT_V ("Brassfahrt V", true, 12.00, 3.50, BoatHullType.MONOHULL, true, "Brassfahrt 5"),
+    BRASSFAHRT_VI ("Brassfahrt VI", true, 12.00, 3.50, BoatHullType.MONOHULL, true, "Brassfahrt 6"),
     CADET ("Cadet", true, 3.20, 1.38, BoatHullType.MONOHULL, true),
     CANOE_IC ("International Canoe", true, 5.20, 1.01, BoatHullType.MONOHULL, true, "Canoe IC", "Canoe-IC", "IC", "Kanu IC", "International Canoe", "International 10 Sq.m. Sailing Canoe"),
     CANOE_TAIFUN ("Canoe Taifun", true, 5.20, 1.32, BoatHullType.MONOHULL, false, "Taifun", "Taifun Kanu", "Kanu Taifun"),

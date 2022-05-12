@@ -49,6 +49,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.BRASSFAHRT_III.getDisplayName(), imageResources.Brassfahrt3Icon());
         boatClassIconsMap.put(BoatClassMasterdata.BRASSFAHRT_IV.getDisplayName(), imageResources.Brassfahrt4Icon());
         boatClassIconsMap.put(BoatClassMasterdata.BRASSFAHRT_V.getDisplayName(), imageResources.Brassfahrt5Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.BRASSFAHRT_VI.getDisplayName(), imageResources.Brassfahrt6Icon());
         boatClassIconsMap.put(BoatClassMasterdata.CADET.getDisplayName(), imageResources.CadetIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CANOE_IC.getDisplayName(), imageResources.CanoeICIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CANOE_TAIFUN.getDisplayName(), imageResources.CanoeTaifunIcon());
