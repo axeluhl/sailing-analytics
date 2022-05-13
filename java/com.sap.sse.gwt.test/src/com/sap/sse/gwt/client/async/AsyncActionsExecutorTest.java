@@ -59,8 +59,8 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
      * Therefore, this class's class loader will be consulted for resolving the GWT module definition.
      */
     @Override
-    public void runTest() {
-        super.run();
+    public void runTest() throws Throwable {
+        super.runTest();
     }
 
     @Test
