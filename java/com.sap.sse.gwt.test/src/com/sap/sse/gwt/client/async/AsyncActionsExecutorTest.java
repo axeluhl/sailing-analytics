@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.async;
 
+import java.util.logging.Logger;
+
 import org.junit.Test;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -14,6 +16,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Simon Marcel Pamies
  */
 public class AsyncActionsExecutorTest extends GWTTestCase {
+    private static final Logger logger = Logger
+            .getLogger(AsyncActionsExecutorTest.AsyncActionWithExecutionCounter.class.getName());
+
     
     private class AsyncActionWithExecutionCounter implements AsyncAction<Void> {
         private int executionCounter = 0;
@@ -60,6 +65,7 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
      */
     @Override
     public void runTest() throws Throwable {
+        logger.entering(getClass().getName(), "runTest");
         super.runTest();
     }
 
