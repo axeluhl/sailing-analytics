@@ -59,9 +59,14 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
             if (DebugInfo.isDebugIdEnabled()) {
                 PendingAjaxCallMarker.incrementPendingAjaxCalls(this.category);
             }
-        } catch (ExceptionInInitializerError | NoClassDefFoundError e) {
-            // we're not in a GWT but probably in a test environment
-            logger.info("If this occurs outside of tests, please be alarmed!");
+        } catch (Throwable e) {
+            if (e.getClass().getSimpleName().equals("ExceptionInInitializerError")
+                    || e.getClass().getSimpleName().equals("NoClassDefFoundError")) {
+                // we're not in a GWT but probably in a test environment
+                logger.info("If this occurs outside of tests, please be alarmed!");
+            } else {
+                throw e;
+            }
         }
     }
     
@@ -82,9 +87,14 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
                 if (DebugInfo.isDebugIdEnabled()) {
                     PendingAjaxCallMarker.decrementPendingAjaxCalls(this.category);
                 }
-            } catch (ExceptionInInitializerError | NoClassDefFoundError e) {
-                // we're not in a GWT but probably in a test environment
-                logger.info("If this occurs outside of tests, please be alarmed!");
+            } catch (Throwable e) {
+                if (e.getClass().getSimpleName().equals("ExceptionInInitializerError")
+                        || e.getClass().getSimpleName().equals("NoClassDefFoundError")) {
+                    // we're not in a GWT but probably in a test environment
+                    logger.info("If this occurs outside of tests, please be alarmed!");
+                } else {
+                    throw e;
+                }
             }
         }
     }
@@ -106,9 +116,14 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
                 if (DebugInfo.isDebugIdEnabled()) {
                     PendingAjaxCallMarker.decrementPendingAjaxCalls(this.category);
                 }
-            } catch (ExceptionInInitializerError | NoClassDefFoundError e) {
-                // we're not in a GWT but probably in a test environment
-                logger.info("If this occurs outside of tests, please be alarmed!");
+            } catch (Throwable e) {
+                if (e.getClass().getSimpleName().equals("ExceptionInInitializerError")
+                        || e.getClass().getSimpleName().equals("NoClassDefFoundError")) {
+                    // we're not in a GWT but probably in a test environment
+                    logger.info("If this occurs outside of tests, please be alarmed!");
+                } else {
+                    throw e;
+                }
             }
         }
     }
