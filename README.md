@@ -46,7 +46,7 @@ Connect to your server at ``http://localhost:8888`` and find its administration 
 
 ## Docker
 
-To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default (private) Dockerhub repository will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``donaldduck70/sapsailing:...`` result from the build. To run that docker image, try something like
+To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default (private) Dockerhub repository will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``docker.sapsailing.com:443/sapsailing:...`` result from the build. To run that docker image, try something like
 ```
     docker run -d -e "MEMORY=4g" -e "MONGODB_URI=mongodb://my.mongohost.org?replicaSet=rs0&retryWrites=true" -P <yourimage>
 ```
@@ -62,7 +62,7 @@ to connect to the server's OSGi console.
 
 ## Docker Compose
 
-If you have built or obtained the ``donaldduck70/sapsailing:latest`` image, try this:
+If you have built or obtained the ``docker.sapsailing.com:443/sapsailing:latest`` image, try this:
 ```
     cd docker
     docker-compose up
