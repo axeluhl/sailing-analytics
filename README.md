@@ -52,7 +52,7 @@ To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to
 ```
 Do a "docker ps" to figure out the port exposing the web application:
 
-CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES 79f6faf19b6a donaldduck70/sapsailing:latest "/home/sailing/serve…" 33 seconds ago Up 32 seconds 0.0.0.0:32782->6666/tcp, 0.0.0.0:32781->7091/tcp, 0.0.0.0:32780->8000/tcp, 0.0.0.0:32779->8888/tcp, 0.0.0.0:32778->14888/tcp modest_dhawan
+CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES 79f6faf19b6a docker.sapsailing.com:443/sapsailing:latest "/home/sailing/serve…" 33 seconds ago Up 32 seconds 0.0.0.0:32782->6666/tcp, 0.0.0.0:32781->7091/tcp, 0.0.0.0:32780->8000/tcp, 0.0.0.0:32779->8888/tcp, 0.0.0.0:32778->14888/tcp modest_dhawan
 
 In this example, find your web application at http://localhost:32779 which is where the port 8888 exposed by the application is exposed at on your host. In the example with telnet port 14888 mapped to localhost:32788 do a
 ```
