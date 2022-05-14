@@ -66,7 +66,7 @@ public class AsyncActionsExecutorTest extends GWTTestCase {
     @Override
     public void runTest() throws Throwable {
         logger.entering(getClass().getName(), "runTest");
-        super.runTest();
+        super.run();
     }
 
     @Test
