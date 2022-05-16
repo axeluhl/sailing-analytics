@@ -5,6 +5,17 @@ import java.net.URL;
 
 import com.sap.sse.common.Named;
 
+/**
+ * The {@link Named#getName() name} of a result URL provider object must identify it uniquely. As this
+ * name may be used in UI controls such as list boxes, the name must not have leading nor trailing blanks
+ * because they may otherwise be removed, leading to issues with name matching when round-tripping such
+ * a name. Being used as a key also for storing URLs of the provider persistently, changing the name
+ * over the life-cycle of a result URL provider will most likely lose all URLs stored persistently
+ * for a server environment.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface ResultUrlProvider extends Named {
     /**
      * The URLs configured for this provider and readable with {@code Subject}'s permissions.

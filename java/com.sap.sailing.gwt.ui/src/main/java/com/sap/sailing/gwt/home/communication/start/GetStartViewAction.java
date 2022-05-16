@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.communication.start;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -36,6 +36,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClientCacheable {
     private static final int MAX_RECENT_EVENTS = 3;
     private static final int MAX_VIDEO_COUNT = 3;
+    private static final int MAX_IMAGE_COUNT = 100;
 
     /**
      * Creates a new {@link GetStartViewAction} instance.
@@ -75,7 +76,7 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
         final Set<SailingImageDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
                                                                        // amount of shuffling
         final List<SailingVideoDTO> videoCandidates = new ArrayList<>();
-        for (EventHolder holder : recentEventsCalculator.getRecentEventsOfLast12Month()) {
+        for (EventHolder holder : recentEventsCalculator.getEventsNewestFirst()) {
             if (result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
                 result.addRecentEvent(HomeServiceUtil.convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer, context.getRacingEventService()));
             }
@@ -119,14 +120,10 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
                 }
             }
         }
-        Random random = new Random();
-        List<SailingImageDTO> shuffledPhotoGallery = new ArrayList<>(photoGalleryUrls);
-        final int gallerySize = photoGalleryUrls.size();
-        for (int i = 0; i < gallerySize; i++) {
-            Collections.swap(shuffledPhotoGallery, i, random.nextInt(gallerySize));
-        }
-        for (SailingImageDTO holder : shuffledPhotoGallery) {
-            result.addPhoto(holder);
+        final Iterator<SailingImageDTO> i = photoGalleryUrls.iterator();
+        int photoCount = 0;
+        while (i.hasNext() && photoCount++ < MAX_IMAGE_COUNT) {
+            result.addPhoto(i.next());
         }
         // TODO media
         return result;

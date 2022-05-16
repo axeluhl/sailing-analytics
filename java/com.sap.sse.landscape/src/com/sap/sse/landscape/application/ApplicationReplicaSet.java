@@ -51,6 +51,15 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
     }
     
     /**
+     * The HTTP traffic port used by all processes of this application replica set. This must be so because processes
+     * may be added as targets to a target group, and such a target group always routes traffic to the same port
+     * for all nodes added to it. 
+     */
+    default int getPort() throws InterruptedException, ExecutionException {
+        return getMaster().getPort();
+    }
+    
+    /**
      * @return the scopes that are currently hosted by this application replica set; note that a scope may be "in
      *         transit" which can mean that for parts of the transit time period the scope may be available on two
      *         replica sets (source and target) until the source (exporting) replica set removes the scope again.

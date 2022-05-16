@@ -236,6 +236,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -336,6 +337,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return baseDomainFactory;
     }
 
+    @Override
     public Wind loadWind(Document object) {
         return new WindImpl(loadPosition(object), loadTimePoint(object), loadSpeedWithBearing(object));
     }

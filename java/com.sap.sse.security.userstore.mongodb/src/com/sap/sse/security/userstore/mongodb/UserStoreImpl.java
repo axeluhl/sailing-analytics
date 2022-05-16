@@ -540,9 +540,10 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void setRoleDefinitionPermissions(UUID roleDefinitionId, Set<WildcardPermission> permissions) {
-        RoleDefinition roleDefinition = roleDefinitions.get(roleDefinitionId);
-        roleDefinition = new RoleDefinitionImpl(roleDefinitionId, roleDefinition.getName(), permissions);
-        mongoObjectFactory.storeRoleDefinition(roleDefinition);
+        final RoleDefinition roleDefinition = roleDefinitions.get(roleDefinitionId);
+        final RoleDefinition newRoleDefinition = new RoleDefinitionImpl(roleDefinitionId, roleDefinition.getName(), permissions);
+        mongoObjectFactory.storeRoleDefinition(newRoleDefinition);
+        roleDefinition.setPermissions(permissions);
     }
 
     @Override
@@ -1193,7 +1194,7 @@ public class UserStoreImpl implements UserStore {
             }
             userMap.put(key, value);
         }
-        if (mongoObjectFactory != null) {
+        if (store && mongoObjectFactory != null) {
             mongoObjectFactory.storePreferences(username, userMap);
         }
     }

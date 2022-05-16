@@ -45,6 +45,6 @@ public class RoleDefinitionCreationAndUpdateDialogPO extends DataEntryDialogPO {
     
     public void clickOkButtonAndExpectPermissionError() {
         clickOkButtonOrThrow();
-        waitForPO(ErrorDialogPO::new, "ErrorDialog", 10).assertTitleContainsTextAndClose("Not permitted");
+        waitForPO(ErrorDialogPO::new, "ErrorDialog", 10).assertServerResponseContainsTextAndClose("Not permitted");
     }
 }

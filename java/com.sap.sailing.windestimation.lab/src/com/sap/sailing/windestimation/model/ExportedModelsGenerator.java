@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.integration.ExportedModels;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
@@ -21,7 +22,16 @@ public class ExportedModelsGenerator {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
-        ModelStore modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
+        final ModelStore modelStore;
+        if (args.length > 0) {
+            modelStore = new FileSystemModelStoreImpl(args[0]);
+        } else {
+            modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
+        }
+        new ExportedModelsGenerator().export(modelStore);
+    }
+    
+    public void export(ModelStore modelStore) throws FileNotFoundException, IOException {
         LoggingUtil.logInfo("Generating a single file with all trained models started");
         ExportedModels exportedModels = new ExportedModels();
         List<ModelDomainType> nonEmptyDomainTypes = new ArrayList<>();

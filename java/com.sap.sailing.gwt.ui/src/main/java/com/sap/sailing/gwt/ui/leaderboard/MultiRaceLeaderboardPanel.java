@@ -39,6 +39,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.WithSecurity;
 
 /**
  * This type of {@link LeaderboardPanel} shows a customizable set of leaderboard columns. In case of fleet racing it's
@@ -54,11 +55,11 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            boolean enableSyncScroller, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
-                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style, flagImageResolver, availableDetailTypes);
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style, flagImageResolver, availableDetailTypes, sailingCF);
         initialize(settings);
     }
 
@@ -66,9 +67,9 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             MultiRaceLeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes) {
+            boolean showRaceDetails, LeaderBoardStyle style, FlagImageResolver flagImageResolver, Iterable<DetailType> availableDetailTypes, WithSecurity sailingCF) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, competitorSelectionProvider,
-                leaderboardName, errorReporter, stringMessages, showRaceDetails,style, flagImageResolver, availableDetailTypes);
+                leaderboardName, errorReporter, stringMessages, showRaceDetails,style, flagImageResolver, availableDetailTypes, sailingCF);
         initialize(settings);
     }
 
@@ -158,7 +159,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
             MultiRaceLeaderboardSettings useTheseSettings) {
         return new MultiRaceLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
-                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo());
+                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo(), paywallResolver, leaderboard);
     }
 
     @Override

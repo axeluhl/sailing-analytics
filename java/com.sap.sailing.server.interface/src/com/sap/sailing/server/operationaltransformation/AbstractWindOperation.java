@@ -23,6 +23,11 @@ public abstract class AbstractWindOperation extends AbstractRaceOperation<Void> 
     public boolean requiresSynchronousExecution() {
         return false;
     }
+    
+    @Override
+    protected Object getRaceSpecificKeyComponentForAsynchronousExecution() {
+        return windSource;
+    }
 
     protected WindSource getWindSource() {
         return windSource;

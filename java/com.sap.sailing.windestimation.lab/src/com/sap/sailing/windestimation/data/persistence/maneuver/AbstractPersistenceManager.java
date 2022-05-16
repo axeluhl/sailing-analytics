@@ -31,9 +31,10 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     private final MongoDatabase database;
     private final JSONParser jsonParser = new JSONParser();
     private final JsonDeserializer<T> deserializer;
+    private final MongoDBService mongoDbService;
 
     public AbstractPersistenceManager() throws UnknownHostException {
-        MongoDBService mongoDbService = MongoDBConfiguration.getDefaultConfiguration().getService();
+        mongoDbService = MongoDBConfiguration.getDefaultConfiguration().getService();
         database = mongoDbService.getDB();
         deserializer = getNewJsonDeserializer();
     }

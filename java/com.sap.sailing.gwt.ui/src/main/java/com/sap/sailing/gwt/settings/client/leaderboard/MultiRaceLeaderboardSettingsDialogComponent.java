@@ -16,10 +16,12 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class MultiRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<MultiRaceLeaderboardSettings> {
@@ -29,8 +31,9 @@ public class MultiRaceLeaderboardSettingsDialogComponent
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
 
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
-            List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShown) {
-        super(initialSettings, stringMessages, availableDetailTypes, canBoatInfoBeShown);
+            List<String> allRaceColumnNames, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, 
+            boolean canBoatInfoBeShown, PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
+        super(initialSettings, stringMessages, availableDetailTypes, canBoatInfoBeShown, paywallResolver, leaderboardDTO);
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         this.raceAllRaceColumnNames = allRaceColumnNames;
         raceColumnCheckboxes = new LinkedHashMap<>();

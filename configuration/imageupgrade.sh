@@ -7,6 +7,7 @@
 
 run_yum_update
 run_git_pull
+download_and_install_latest_sap_jvm_8
 clean_logrotate_target
 clean_httpd_logs
 clean_servers_dir

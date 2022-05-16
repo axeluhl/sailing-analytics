@@ -24,6 +24,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * Given a {@link GPSFixTrack} containing {@link GPSFixMoving}, an instance of this class finds areas on the track where
@@ -43,6 +45,12 @@ import com.sap.sse.common.impl.TimeRangeImpl;
  * last fix in the current analysis window, it is inserted into the window accordingly, and the current window is
  * assessed for maneuvers as usual. Being in between fixes, this case does not influence the current analysis window's
  * duration.
+ * <p>
+ * 
+ * An approximation of this type internally manages a serialization lock that is locked for reading by its
+ * {@link #writeObject} method and that is locked exclusively for "writing" by methods that may modify the data
+ * structures that require consistent serialization, such as
+ * {@link #gpsFixReceived(GPSFixMoving, Competitor, boolean, AddResult)} and {@link #approximate(TimePoint, TimePoint)}.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -59,11 +67,13 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
      */
     private final NavigableSet<GPSFixMoving> maneuverCandidates;
     
+    private final NamedReentrantReadWriteLock serializationLock;
+    
     /**
-     * The fix window consists of the list of fixes, a corresponding list with the course
-     * changes at each fix within the window, as well as the aggregated total course change from the beginning of the
-     * window up to the respective fix; furthermore, the window duration is maintained to compare against the maximum
-     * window length.
+     * The fix window consists of the list of fixes, a corresponding list with the course changes at each fix within the
+     * window, as well as the aggregated total course change from the beginning of the window up to the respective fix;
+     * furthermore, the window duration is maintained to compare against the maximum window length.
+     * <p>
      * 
      * @author Axel Uhl (D043530)
      *
@@ -142,7 +152,7 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
          * @return a maneuver candidate from the {@link #window} if one became available by adding the {@code next} fix,
          *         or {@code null} if no maneuver candidate became available
          */
-        public GPSFixMoving add(GPSFixMoving next) {
+        GPSFixMoving add(GPSFixMoving next) {
             assert window.isEmpty() || !next.getTimePoint().before(window.peekFirst().getTimePoint());
             final GPSFixMoving result;
             final SpeedWithBearing nextSpeed = next.isEstimatedSpeedCached() ? next.getCachedEstimatedSpeed() : track.getEstimatedSpeed(next.getTimePoint());
@@ -223,7 +233,7 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
          * @return the maneuver candidate if one was found in the {@link #window}, or {@code null} if no such candidate
          *         was found.
          */
-        public GPSFixMoving tryToExtractManeuverCandidate() {
+        GPSFixMoving tryToExtractManeuverCandidate() {
             final GPSFixMoving result;
             // analysis window has exceeded the typical maneuver duration for the boat class;
             result = getManeuverCandidate();
@@ -307,13 +317,14 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
          * @return {@code true} if and only if this window is empty or the {@code fix} is not earlier than the first fix
          *         in this window
          */
-        public boolean isAtOrAfterFirst(TimePoint fix) {
+        boolean isAtOrAfterFirst(TimePoint fix) {
             return window.isEmpty() || !fix.before(window.peekFirst().getTimePoint());
         }
     }
 
     public CourseChangeBasedTrackApproximation(GPSFixTrack<Competitor, GPSFixMoving> track, BoatClass boatClass) {
         super();
+        this.serializationLock = new NamedReentrantReadWriteLock(getClass().getName()+" for track "+track.getTrackedItem(), /* fair */ false);
         this.track = track;
         this.boatClass = boatClass;
         this.fixWindow = new FixWindow();
@@ -323,8 +334,13 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
     }
     
     private void writeObject(ObjectOutputStream oos) throws IOException {
-        synchronized (maneuverCandidates) {
-            oos.defaultWriteObject();
+        LockUtil.lockForRead(serializationLock);
+        try {
+            synchronized (maneuverCandidates) {
+                oos.defaultWriteObject();
+            }
+        } finally {
+            LockUtil.unlockAfterRead(serializationLock);
         }
     }
     
@@ -364,42 +380,47 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
 
     @Override
     public synchronized void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack, AddResult addedOrReplaced) {
-        assert competitor == track.getTrackedItem();
-        if (fixWindow.isAtOrAfterFirst(fix.getTimePoint())) {
-            addFix(fix);
-        } else {
-            final FixWindow outOfOrderWindow = new FixWindow();
-            final Duration maximumWindowLength = outOfOrderWindow.getMaximumWindowLength();
-            // fix is an out-of-order delivery; construct a new FixWindow and analyze the track around the new fix.
-            // A time range around the fix is constructed that will be re-scanned. The time range covers at least
-            // maximumWindowLength before and after the fix. If any existing maneuver candidate is found in this
-            // time range, the range is extended to cover at least maximumWindowLength before and after that
-            // existing candidate, and the candidate is removed for now (in most cases it will be resurrected
-            // by the re-scan).
-            TimeRange leftPartOfTimeRangeToReScan = new TimeRangeImpl(fix.getTimePoint().minus(maximumWindowLength), fix.getTimePoint());
-            TimeRange rightPartOfTimeRangeToReScan = new TimeRangeImpl(fix.getTimePoint(), fix.getTimePoint().plus(maximumWindowLength));
-            GPSFixMoving candidateInRange;
-            while ((candidateInRange = getExistingManeuverCandidateInRange(leftPartOfTimeRangeToReScan)) != null) {
-                maneuverCandidates.remove(candidateInRange);
-                leftPartOfTimeRangeToReScan = new TimeRangeImpl(candidateInRange.getTimePoint().minus(maximumWindowLength), candidateInRange.getTimePoint());
-            }
-            while ((candidateInRange = getExistingManeuverCandidateInRange(rightPartOfTimeRangeToReScan)) != null) {
-                maneuverCandidates.remove(candidateInRange);
-                rightPartOfTimeRangeToReScan = new TimeRangeImpl(candidateInRange.getTimePoint(), candidateInRange.getTimePoint().plus(maximumWindowLength));
-            }
-            TimeRange totalRange = new TimeRangeImpl(leftPartOfTimeRangeToReScan.from(), rightPartOfTimeRangeToReScan.to());
-            track.lockForRead();
-            try {
-                for (final GPSFixMoving reAnalysisFix : track.getFixes(totalRange.from(), /* fromInclusive */ true, totalRange.to(), /* toInclusive */ true)) {
-                    addFix(reAnalysisFix, outOfOrderWindow);
+        LockUtil.lockForWrite(serializationLock);
+        try {
+            assert competitor == track.getTrackedItem();
+            if (fixWindow.isAtOrAfterFirst(fix.getTimePoint())) {
+                addFix(fix);
+            } else {
+                final FixWindow outOfOrderWindow = new FixWindow();
+                final Duration maximumWindowLength = outOfOrderWindow.getMaximumWindowLength();
+                // fix is an out-of-order delivery; construct a new FixWindow and analyze the track around the new fix.
+                // A time range around the fix is constructed that will be re-scanned. The time range covers at least
+                // maximumWindowLength before and after the fix. If any existing maneuver candidate is found in this
+                // time range, the range is extended to cover at least maximumWindowLength before and after that
+                // existing candidate, and the candidate is removed for now (in most cases it will be resurrected
+                // by the re-scan).
+                TimeRange leftPartOfTimeRangeToReScan = new TimeRangeImpl(fix.getTimePoint().minus(maximumWindowLength), fix.getTimePoint());
+                TimeRange rightPartOfTimeRangeToReScan = new TimeRangeImpl(fix.getTimePoint(), fix.getTimePoint().plus(maximumWindowLength));
+                GPSFixMoving candidateInRange;
+                while ((candidateInRange = getExistingManeuverCandidateInRange(leftPartOfTimeRangeToReScan)) != null) {
+                    maneuverCandidates.remove(candidateInRange);
+                    leftPartOfTimeRangeToReScan = new TimeRangeImpl(candidateInRange.getTimePoint().minus(maximumWindowLength), candidateInRange.getTimePoint());
                 }
-                GPSFixMoving remainingCandidate = outOfOrderWindow.tryToExtractManeuverCandidate(); // even if window isn't full now, look for a candidate
-                if (remainingCandidate != null) {
-                    maneuverCandidates.add(remainingCandidate);
+                while ((candidateInRange = getExistingManeuverCandidateInRange(rightPartOfTimeRangeToReScan)) != null) {
+                    maneuverCandidates.remove(candidateInRange);
+                    rightPartOfTimeRangeToReScan = new TimeRangeImpl(candidateInRange.getTimePoint(), candidateInRange.getTimePoint().plus(maximumWindowLength));
                 }
-            } finally {
-                track.unlockAfterRead();
+                TimeRange totalRange = new TimeRangeImpl(leftPartOfTimeRangeToReScan.from(), rightPartOfTimeRangeToReScan.to());
+                track.lockForRead(); // TODO bug5726: only grab fixes under lock; do the handling after unlocking
+                try {
+                    for (final GPSFixMoving reAnalysisFix : track.getFixes(totalRange.from(), /* fromInclusive */ true, totalRange.to(), /* toInclusive */ true)) {
+                        addFix(reAnalysisFix, outOfOrderWindow);
+                    }
+                    GPSFixMoving remainingCandidate = outOfOrderWindow.tryToExtractManeuverCandidate(); // even if window isn't full now, look for a candidate
+                    if (remainingCandidate != null) {
+                        maneuverCandidates.add(remainingCandidate);
+                    }
+                } finally {
+                    track.unlockAfterRead();
+                }
             }
+        } finally {
+            LockUtil.unlockAfterWrite(serializationLock);
         }
     }
 
@@ -428,23 +449,28 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
     }
 
     public synchronized Iterable<GPSFixMoving> approximate(TimePoint from, TimePoint to) {
-        final Iterable<GPSFixMoving> result;
-        if (fixWindow.isAtOrAfterFirst(to)) {
-            // there may be an overlap of the time range requested and the current window;
-            // could be that the non-full window contains a candidate; check:
-            GPSFixMoving remainingCandidate = fixWindow.tryToExtractManeuverCandidate();
-            if (remainingCandidate != null) {
-                maneuverCandidates.add(remainingCandidate);
+        LockUtil.lockForWrite(serializationLock);
+        try {
+            final Iterable<GPSFixMoving> result;
+            if (fixWindow.isAtOrAfterFirst(to)) {
+                // there may be an overlap of the time range requested and the current window;
+                // could be that the non-full window contains a candidate; check:
+                GPSFixMoving remainingCandidate = fixWindow.tryToExtractManeuverCandidate();
+                if (remainingCandidate != null) {
+                    maneuverCandidates.add(remainingCandidate);
+                }
             }
-        }
-        if (from.before(to)) {
-            synchronized (maneuverCandidates) {
-                result = new ArrayList<>(maneuverCandidates.subSet(createDummyFix(from), /* fromInclusive */ true, createDummyFix(to), /* toInclusive */ true));
+            if (from.before(to)) {
+                synchronized (maneuverCandidates) {
+                    result = new ArrayList<>(maneuverCandidates.subSet(createDummyFix(from), /* fromInclusive */ true, createDummyFix(to), /* toInclusive */ true));
+                }
+            } else {
+                result = Collections.emptySet();
             }
-        } else {
-            result = Collections.emptySet();
+            return result;
+        } finally {
+            LockUtil.unlockAfterWrite(serializationLock);
         }
-        return result;
     }
 
 }

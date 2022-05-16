@@ -11,9 +11,37 @@ run_yum_update() {
   yum -y update
 }
 
+run_apt_update_upgrade() {
+  echo "Updating packages using apt" >>/var/log/sailing.err
+  apt-get -y update; apt-get -y upgrade
+}
+
 run_git_pull() {
   echo "Pulling git to /home/sailing/code" >>/var/log/sailing.err
   su - sailing -c "cd code; git pull"
+}
+
+download_and_install_latest_sap_jvm_8() {
+  echo "Downloading and installing latest SAP JVM 8 to /opt/sapjvm_8" >>/var/log/sailing.err
+  vmpath=$( curl -s --cookie eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt https://tools.hana.ondemand.com | grep additional/sapjvm-8\..*-linux-x64.zip | head -1 | sed -e 's/^.*a href="\(additional\/sapjvm-8\..*-linux-x64\.zip\)".*/\1/' )
+  if [ -n "${vmpath}" ]; then
+    echo "Found VM version ${vmpath}; upgrading installation at /opt/sapjvm_8" >>/var/log/sailing.err
+    if [ -z "${TMP}" ]; then
+      TMP=/tmp
+    fi
+    echo "Downloading SAP JVM 8 as ZIP file to ${TMP}/sapjvm8-linux-x64.zip" >>/var/log/sailing.err
+    curl --cookie eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt "https://tools.hana.ondemand.com/${vmpath}" > ${TMP}/sapjvm8-linux-x64.zip 2>>/var/log/sailing.err
+    cd /opt
+    rm -rf sapjvm_8
+    if [ -f SIGNATURE.SMF ]; then
+      rm -f SIGNATURE.SMF
+    fi
+    unzip ${TMP}/sapjvm8-linux-x64.zip >>/var/log/sailing.err
+    rm -f ${TMP}/sapjvm8-linux-x64.zip
+    rm -f SIGNATURE.SMF
+  else
+    echo "Did not find SAP JVM 8 at tools.hana.ondemand.com; not trying to upgrade" >>/var/log/sailing.err
+  fi
 }
 
 clean_logrotate_target() {
@@ -53,14 +81,19 @@ clean_root_ssh_dir_and_tmp() {
   rm -rf /tmp/image-upgrade-finished
 }
 
+get_ec2_user_data() {
+  /opt/aws/bin/ec2-metadata -d | sed -e 's/^user-data: //'
+}
+
 finalize() {
   # Finally, shut down the node unless "no-shutdown" was provided in the user data, so that a new AMI can be constructed cleanly
-  if /opt/aws/bin/ec2-metadata -d | grep "^no-shutdown$"; then
+  if get_ec2_user_data | grep "^no-shutdown$"; then
     echo "Shutdown disabled by no-shutdown option in user data. Remember to clean /root/.ssh when done."
     touch /tmp/image-upgrade-finished
   else
     # Only clean ${LOGON_USER_HOME}/.ssh directory and /tmp/image-upgrade-finished if the next step is shutdown / image creation
     clean_root_ssh_dir_and_tmp
+    rm /var/log/sailing.err
     shutdown -h now &
   fi
 }

@@ -19,38 +19,20 @@ public abstract class SailingServiceHelper {
      * Creates a new {@link SailingServiceAsync} instance, should be used when code resides in the same bundle as the sailing service code.
      */
     public static SailingServiceAsync createSailingServiceInstance() {
-        return createSailingServiceInstance(true, null);
+        return createSailingServiceInstance(null);
     }
     
     /**
      * Creates a new {@link SailingServiceWriteAsync} instance, should be used when code resides in the same bundle as the sailing service code.
      */
     public static SailingServiceWriteAsync createSailingServiceWriteInstance() {
-        return createSailingServiceWriteInstance(/* same bundle */ true, /* no routing provider required, no sharding for write requests */ null);
+        return createSailingServiceWriteInstance(/* no routing provider required, no sharding for write requests */ null);
     }
     
-    /**
-     * Creates a new {@link SailingServiceAsync} instance.
-     * 
-     * @param sameBundle {@code false} if using {@link SailingService} from a different OSGi bundle (e.g. dashboards), {@code true} otherwise
-     */
-    public static SailingServiceAsync createSailingServiceInstance(boolean sameBundle) {
-        return createSailingServiceInstance(sameBundle, null);
-    }
-
     /**
      * Creates a new {@link SailingServiceAsync} instance that uses a routing provider, for code in same bundle.
      */
     public static SailingServiceAsync createSailingServiceInstance(ServiceRoutingProvider routingProvider) {
-        return createSailingServiceInstance(true, routingProvider);
-    }
-
-    /**
-     * Crates a new {@link SailingServiceAsync} instance.
-     * 
-     * @param sameBundle {@code false} if using {@link SailingService} from a different OSGi bundle (e.g. dashboards), {@code true} otherwise
-     */
-    public static SailingServiceAsync createSailingServiceInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
         final SailingServiceAsync service = GWT.create(SailingService.class);
         final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
         final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceRemotePath);
@@ -58,11 +40,7 @@ public abstract class SailingServiceHelper {
             servicePath.append(routingProvider.routingSuffixPath());
         }
         final String servicePathWithRoutingSuffix = servicePath.toString();
-        if (sameBundle) {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
-        } else {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
-        }
+        EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
         return service;
     }
 
@@ -70,10 +48,6 @@ public abstract class SailingServiceHelper {
      * Creates a new {@link SailingServiceWriteAsync} instance that uses a routing provider, for code in same bundle.
      */
     public static SailingServiceWriteAsync createSailingServiceWriteInstance(ServiceRoutingProvider routingProvider) {
-        return createSailingServiceWriteInstance(/* same bundle */ true, routingProvider);
-    }
-
-    public static SailingServiceWriteAsync createSailingServiceWriteInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
         final SailingServiceWriteAsync service = GWT.create(SailingServiceWrite.class);
         final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
         final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceRemotePath);
@@ -81,11 +55,7 @@ public abstract class SailingServiceHelper {
             servicePath.append(routingProvider.routingSuffixPath());
         }
         final String servicePathWithRoutingSuffix = servicePath.toString();
-        if (sameBundle) {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
-        } else {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
-        }
+        EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
         return service;
     }
 }

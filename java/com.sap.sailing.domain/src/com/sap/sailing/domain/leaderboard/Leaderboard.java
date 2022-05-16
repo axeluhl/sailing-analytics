@@ -689,6 +689,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            used to determine which of the races are still being tracked and which ones are not
      * @param baseDomainFactory
      *            required as factory and cache for various DTO types
+     * @return a leaderboard DTO with no defined security info (ownership, ACL) set; note that the DTO may originate
+     *         from a cache, e.g., the {@link LiveLeaderboardUpdater} or the {@link LeaderboardDTOCache}. A caller may
+     *         augment the DTO by adding security information that needs to be transmitted to a client. If such
+     *         information happens to be found on the object returned from this method it shall be considered "stale"
+     *         and has to be updated before sending it to a client. See {@code SecurityDTOUtil.addSecurityInformation(...)}.
      */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
@@ -714,18 +719,20 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
 
     /**
      * Returns true if a racecolumn evaluates to be a win for the given competitor at the given timepoint.
-     * If the competitor is not scored for this race, false is returned 
+     * If the competitor is not scored for this race, {@code false} is returned 
      */
     default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         final Double points = getTotalPoints(competitor, raceColumn, timePoint);
         final boolean result;
+        final double tolerance = 0.05;
         if (points == null) {
             result = false;
         } else if (getScoringScheme().isHigherBetter()) {
+            // FIXME this is broken for the high point variants where the winner gets more points than the number of competitors in the race because then even 2nd and 3rd rank may be considered a "win"
             double competitorCount = Util.size(getCompetitors());
-            result = points >= (competitorCount - 0.05);
+            result = points >= (competitorCount - tolerance);
         } else {
-            result = points <= 1.05;
+            result = points <= 1.0 + tolerance;
         }
         return result;
     }

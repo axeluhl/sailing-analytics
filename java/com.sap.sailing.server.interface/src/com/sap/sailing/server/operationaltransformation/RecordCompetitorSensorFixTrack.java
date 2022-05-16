@@ -33,6 +33,11 @@ public class RecordCompetitorSensorFixTrack extends AbstractRaceOperation<Void> 
     }
 
     @Override
+    protected Object getRaceSpecificKeyComponentForAsynchronousExecution() {
+        return null; // because all operations adding a track to the same race will block each other
+    }
+
+    @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         // it's fair to not wait for the tracked race to arrive here because we're receiving a replication operation
         // and the synchronous race-creating operation must have been processed synchronously before this operation

@@ -4,10 +4,10 @@ import java.util.Optional;
 
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.Release;
-import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
@@ -18,31 +18,32 @@ import com.sap.sse.landscape.orchestration.Procedure;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
- * For an {@link ApplicationReplicaSet} and a {@link TargetGroup} that represents the application replica set's
- * public target group creates an AWS EC2 Launch Configuration and a corresponding Auto-Scaling Group which by
- * default produces a minimum of one replica, a maximum of 30 replicas, scaling based on the number of requests
- * per target which are supposed to not exceed 30,000. An {@link AwsApplicationConfiguration} for the replica's
- * config must be provided and is expected to use the same {@link Release} as the master.<p>
+ * For an {@link ApplicationReplicaSet} and a {@link TargetGroup} that represents the application replica set's public
+ * target group creates an AWS EC2 Launch Configuration and a corresponding Auto-Scaling Group which by default produces
+ * a minimum of one replica, a maximum of 30 replicas, scaling based on the number of requests per target which are
+ * supposed to not exceed 15,000 per minute. An {@link AwsApplicationConfiguration} for the replica's config must be
+ * provided and is expected to use the same {@link Release} as the master.
+ * <p>
  * 
- * The builder for the procedure requires the bearer token for replication permissions and the target group. Other properties
- * are optional.
+ * The builder for the procedure requires the bearer token for replication permissions and the target group. Other
+ * properties are optional.
  * 
  * @author Axel Uhl (D043530)
  *
  * @param <ShardingKey>
  */
-public class CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+public class CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
 extends AbstractProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
     private static final int DEFAULT_MIN_REPLICAS = 1;
     private static final int DEFAULT_MAX_REPLICAS = 30;
-    private static final int DEFAULT_MAX_REQUESTS_PER_TARGET = 30000;
+    private static final int DEFAULT_MAX_REQUESTS_PER_TARGET = 15000;
     
     /**
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+    public static interface Builder<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey> {
         BuilderT setKeyName(String keyName);
 
@@ -71,10 +72,10 @@ implements Procedure<ShardingKey> {
         BuilderT setMaxRequestsPerTarget(int maxRequestsPerTarget);
     }
     
-    protected static class BuilderImpl<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+    protected static class BuilderImpl<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     extends AbstractProcedureImpl.BuilderImpl<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey>
     implements Builder<ShardingKey, BuilderT, MetricsT, ProcessT> {
-        private final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet;
+        private final String replicaSetName;
         private final TargetGroup<ShardingKey> targetGroup;
         private final Region region;
         private String keyName;
@@ -86,9 +87,9 @@ implements Procedure<ShardingKey> {
         private int maxReplicas = DEFAULT_MAX_REPLICAS;
         private int maxRequestsPerTarget = DEFAULT_MAX_REQUESTS_PER_TARGET;
 
-        public BuilderImpl(AwsLandscape<ShardingKey> landscape, Region region, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet,
+        public BuilderImpl(AwsLandscape<ShardingKey> landscape, Region region, String replicaSetName,
                 TargetGroup<ShardingKey> targetGroup) {
-            this.applicationReplicaSet = applicationReplicaSet;
+            this.replicaSetName = replicaSetName;
             this.targetGroup = targetGroup;
             this.region = region;
             setLandscape(landscape);
@@ -118,8 +119,8 @@ implements Procedure<ShardingKey> {
             return self();
         }
 
-        protected ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet() {
-            return applicationReplicaSet;
+        protected String getReplicaSetName() {
+            return replicaSetName;
         }
 
         protected int getMinReplicas() {
@@ -192,7 +193,7 @@ implements Procedure<ShardingKey> {
         }
     }
     
-    private final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet;
+    private final String replicaSetName;
     private final TargetGroup<ShardingKey> targetGroup;
     private final Region region;
     private final String keyName;
@@ -204,19 +205,19 @@ implements Procedure<ShardingKey> {
     private final int maxReplicas;
     private final int maxRequestsPerTarget;
     
-    public static <ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+    public static <ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     Builder<ShardingKey, BuilderT, MetricsT, ProcessT> builder(
             AwsLandscape<ShardingKey> landscape, Region region,
-            ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet,
+            String replicaSetName,
             TargetGroup<ShardingKey> targetGroup) {
-        return new BuilderImpl<>(landscape, region, applicationReplicaSet, targetGroup);
+        return new BuilderImpl<>(landscape, region, replicaSetName, targetGroup);
     }
     
     protected <BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>>
     CreateLaunchConfigurationAndAutoScalingGroup(BuilderImpl<ShardingKey, BuilderT, MetricsT, ProcessT> builder) {
         super(builder);
         this.region = builder.getRegion();
-        this.applicationReplicaSet = builder.getApplicationReplicaSet();
+        this.replicaSetName = builder.getReplicaSetName();
         this.targetGroup = builder.getTargetGroup();
         this.keyName = builder.getKeyName();
         this.imageId = builder.getImage().getId();
@@ -235,7 +236,7 @@ implements Procedure<ShardingKey> {
 
     @Override
     public void run() throws Exception {
-        getLandscape().createLaunchConfigurationAndAutoScalingGroup(region, applicationReplicaSet.getName(), tags,
+        getLandscape().createLaunchConfigurationAndAutoScalingGroup(region, replicaSetName, tags,
                 targetGroup, keyName, instanceType, imageId, replicaConfiguration, minReplicas, maxReplicas, maxRequestsPerTarget);
     }
 }

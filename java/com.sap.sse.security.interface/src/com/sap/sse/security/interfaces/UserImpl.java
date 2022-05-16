@@ -397,7 +397,8 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
 
     @Override
     public Subscription getSubscriptionByPlan(String planId) {
-        if (planId != null && !planId.equals("") && subscriptions != null && subscriptions.length > 0) {
+        if (planId != null && !planId.equals("") && subscriptions != null && 
+                subscriptions != null && subscriptions.length > 0) {
             for (Subscription subscription : subscriptions) {
                 if (subscription.getPlanId() != null && subscription.getPlanId().equals(planId)) {
                     return subscription;
@@ -409,7 +410,8 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
 
     @Override
     public Subscription getSubscriptionById(String subscriptionId) {
-        if (subscriptionId != null && !subscriptionId.isEmpty() && subscriptions.length > 0) {
+        if (subscriptionId != null && !subscriptionId.isEmpty() && 
+                subscriptions != null && subscriptions.length > 0) {
             for (Subscription subscription : subscriptions) {
                 if (subscription.getSubscriptionId() != null
                         && subscription.getSubscriptionId().equals(subscriptionId)) {
@@ -419,18 +421,31 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
         }
         return null;
     }
-
+    
     @Override
-    public boolean hasActiveSubscription() {
+    public boolean hasActiveSubscription(String planId) {
         boolean result = false;
         if (subscriptions != null && subscriptions.length > 0) {
             for (Subscription subscription : subscriptions) {
-                if (subscription.isActiveSubscription()) {
+                if (subscription.isActiveSubscription() && subscription.getPlanId() != null
+                        && subscription.getPlanId().equals(planId)) {
                     result = true;
                     break;
                 }
             }
         }
         return result;
+    }
+
+    @Override
+    public boolean hasAnySubscription(String planId) {
+        if (subscriptions != null && subscriptions.length > 0) {
+            for (Subscription subscription : subscriptions) {
+                if (planId.equals(subscription.getPlanId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

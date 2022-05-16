@@ -70,7 +70,7 @@ fi
 
 #reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 if [ "$SERVERS_HOME" = "" ]; then
-	SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
+    SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
 fi
 
 # x86 or x86_64 should work for most cases
@@ -119,7 +119,7 @@ android=1
 java=1
 reporting=0
 suppress_confirmation=0
-extra=''
+export extra='--batch-mode'
 parallelexecution=0
 p2local=0
 
@@ -612,15 +612,16 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $p2local -eq 1 ]; then
 	    echo "INFO: Building and using local p2 repo"
 	    #build local p2 repo
-	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
+	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
             echo "JAVA_HOME used: $JAVA_HOME"
-	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
-	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
-	    #create local target definition
+	    # Build AWS API; its local repo must exist for creating the local target definition in the next step
+	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
+	    # create local target definition
 	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
 	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
 	else
@@ -726,14 +727,28 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     
         # make sure to honour the service configuration
         # needed to make sure that tests use the right servers
-        APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+        if [ -n "${MONGODB_HOST}" ]; then
+          APP_PARAMETERS="-Dmongo.host=${MONGODB_HOST} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${MONGODB_PORT}" ]; then
+          APP_PARAMETERS="-Dmongo.port=${MONGODB_PORT} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${EXPEDITION_PORT}" ]; then
+          APP_PARAMETERS="-Dexpedition.udp.port=${EXPEDITION_PORT} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${REPLICATION_HOST}" ]; then
+          APP_PARAMETERS="-Dreplication.exchangeHost=${REPLICATION_HOST} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${REPLICATION_CHANNEL}" ]; then
+          APP_PARAMETERS="-Dreplication.exchangeName=${REPLICATION_CHANNEL} ${APP_PARAMETERS}"
+        fi
     
         extra="$extra -P with-not-android-relevant,!with-mobile"
     
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
         echo "JAVA_HOME used: $JAVA_HOME"
-	export MAVEN_OPTS="-Xmx2g"
+	export MAVEN_OPTS="-Xmx4g"
         mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         # now get the exit status from mvn, and not that of tee which is what $? contains now
         MVN_EXIT_CODE=${PIPESTATUS[0]}

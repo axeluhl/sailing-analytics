@@ -68,7 +68,6 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
             final DialogCallback<SettingsType> callback) {
         super(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled,
                 linkWithSettingsGenerator, new SettingsDialogCallback<>(component, callback));
-
         if (component.getComponentContext() != null && component.getComponentContext().isStorageSupported(component)) {
             initMakeDefaultButtons(component, stringMessages);
         }

@@ -124,6 +124,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
@@ -195,6 +196,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return database;
     }
 
+    @Override
     public Document storeWind(Wind wind) {
         Document result = new Document();
         storePositioned(wind, result);

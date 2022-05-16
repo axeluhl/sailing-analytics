@@ -10,10 +10,11 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifec
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTableLifecycle;
-import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> {
@@ -30,18 +31,17 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService,
-            Iterable<DetailType> availableDetailTypes, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService, PaywallResolver paywallResolver, 
+            Iterable<DetailType> availableDetailTypes, final SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
-        raceMapLifecycle = new RaceMapLifecycle(stringMessages);
+        raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolver, raceDTO);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         maneuverTableLifecycle = new ManeuverTableLifecycle(stringMessages);
         leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages, availableDetailTypes,
-                leaderboard.canBoatsOfCompetitorsChangePerRace);
+                leaderboard.canBoatsOfCompetitorsChangePerRace, paywallResolver, leaderboard);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, competitorChartAllowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages, userService, raceDTO);
-        
         addLifeCycle(raceMapLifecycle);
         addLifeCycle(windChartLifecycle);
         addLifeCycle(leaderboardPanelLifecycle);

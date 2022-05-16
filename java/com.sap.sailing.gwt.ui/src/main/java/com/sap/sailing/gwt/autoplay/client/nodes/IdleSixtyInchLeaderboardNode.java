@@ -97,7 +97,7 @@ public class IdleSixtyInchLeaderboardNode extends FiresPlaceNode {
                 cf.getSailingService(() -> leaderboardName), new AsyncActionsExecutor(), leaderboardSettings, false,
                 provider, timer, leaderboardName, cf.getErrorReporter(), StringMessages.INSTANCE, false, null,
                 false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
-                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()));
+                FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()), cf);
 
         IdleSixtyInchLeaderboardPlace place = new IdleSixtyInchLeaderboardPlace(leaderboardPanel, provider,
                 durationConsumer);

@@ -49,10 +49,10 @@ import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -112,7 +112,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                         /* sharedSailingData */ null, /* replicationServiceTracker */ null,
                         /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
                         /* resultUrlRegistryServiceTracker */ null);
-                result.addMasterDataClassLoader(this.getClass().getClassLoader());
+                result.getMasterDataClassLoaders().addClassLoader(this.getClass().getClassLoader());
                 return result;
             }
         });
@@ -330,7 +330,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             // is known during de-serialization because anonymous inner classes from that bundle may be used
             // in the object graph, e.g., for RankingMetricConstructor objects based on locally-instantiated lambda
             // expressions
-            fmaster.addMasterDataClassLoader(this.getClass().getClassLoader());
+            fmaster.getMasterDataClassLoaders().addClassLoader(this.getClass().getClassLoader());
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, fmaster,
                     currentUser, null);

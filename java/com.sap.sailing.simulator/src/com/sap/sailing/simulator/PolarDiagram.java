@@ -10,7 +10,6 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
 
 public interface PolarDiagram extends Serializable {
-
     enum WindSide {
         RIGHT, LEFT, UPWIND, DOWNWIND
     };
@@ -55,5 +54,4 @@ public interface PolarDiagram extends Serializable {
     NavigableMap<Speed, Bearing> getJibeAngles();
     NavigableMap<Speed, Speed> getBeatSOG();
     NavigableMap<Speed, Speed> getJibeSOG();
-
 }

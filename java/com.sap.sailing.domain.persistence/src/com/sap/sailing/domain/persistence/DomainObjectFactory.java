@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -220,4 +221,6 @@ public interface DomainObjectFactory {
     Map<? extends Integer, ? extends Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException;
     
     TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder();
+
+    Wind loadWind(Document windDocument);
 }

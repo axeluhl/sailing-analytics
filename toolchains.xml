@@ -12,7 +12,7 @@
             <vendor>sun</vendor>
       </provides>
       <configuration>
-            <jdkHome>/opt/jdk1.8.0_20/jre</jdkHome>
+            <jdkHome>/opt/sapjvm_8/jre</jdkHome>
       </configuration>
   </toolchain>
 </toolchains>

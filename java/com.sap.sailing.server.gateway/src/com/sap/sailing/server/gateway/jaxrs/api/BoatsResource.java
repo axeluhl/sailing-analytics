@@ -13,8 +13,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 

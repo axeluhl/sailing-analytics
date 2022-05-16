@@ -19,6 +19,23 @@
          ]
       },
       {  
+         "collectionName":"SubscriptionsUi",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/subscription",
+               "sourceFilters":[  
+                  "**/SubscriptionStringConstants*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"/XLF/[fullPath]/[targetFile]",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {  
          "collectionName":"LandscapeManagementUi",
          "folders":[  
             {  
@@ -367,6 +384,23 @@
 		"targetFileNamingConvention":"[filename].[extension]"
 	   }
 	 ]
+      },
+      {
+         "collectionName":"SailInsightReactNative",
+         "folders":[
+            {
+               "startingFolderPath":"mobile/sailinsight/src/i18n/translations/**",
+               "sourceFilters":[
+                  "**/*.json"
+               ],
+               "excludedSourceFilters":[
+                "**/zh.json"
+                ],
+               "xlfFolderPath":"./XLF",
+               "targetFolderPath":".",
+               "pseudoLocFolderPath":"."
+            }
+         ]
       }
    ],
    "defaultConfiguration":{  
