@@ -157,6 +157,7 @@ public abstract class DataEntryDialog<T> {
         buttonPanel.add(leftButtonPanel, DockPanel.WEST);
         if (cancelButtonName != null) {
             cancelButton = new Button(cancelButtonName);
+            cancelButton.addStyleName(DialogResources.INSTANCE.style().outlined());
             cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
             cancelButton.ensureDebugId("CancelButton");
             rightButtonPanel.add(cancelButton);

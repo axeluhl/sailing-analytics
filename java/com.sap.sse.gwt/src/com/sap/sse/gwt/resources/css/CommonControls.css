@@ -723,17 +723,19 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-DialogBox .Caption {
-	font-size: 14px;
+	font-size: 15px;
+	color: #555;
 	padding: 8px 10px;
-	background-color: #ededed;
-	border-bottom: 1px solid #3e3e3e;
+	background-color: #fff;
 	font-family: 'Open Sans', Verdana, Arial, sans-serif;
 	font-weight: 600;
+	border-radius: 4px 4px 0 0;
 }
 
 .gwt-DialogBox .dialogContent {
 	background: #ffffff;
 	padding: 10px;
+	border-radius: 0 0 4px 4px;
 }
 
 .gwt-Button, .gwt-Button:visited {
@@ -922,4 +924,18 @@ video {
 
 label {
 	padding-left: 4px;
+}
+
+.gwt-DialogBox button {
+    background-color: #008fcc;
+    color: #fff;
+    padding: .666666666666667em 2em;
+    font-weight: 600;
+    border: 1px solid #008fcc;
+}
+
+.gwt-DialogBox button:hover {
+    background-color: #0081b8;
+    color: #fff;
+}
 }

@@ -19,5 +19,6 @@ public interface DialogResources extends ClientBundle {
         String confirmationDialogPanel();
         String buttonsPanel();
         String dialogButton();
+        String outlined();
     }
 }
