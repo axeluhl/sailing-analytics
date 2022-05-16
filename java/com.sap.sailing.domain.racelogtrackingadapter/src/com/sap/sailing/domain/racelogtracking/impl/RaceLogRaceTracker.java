@@ -322,7 +322,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl<RaceLogConne
         final String raceName = denoteEvent.getRaceName();
         CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         if (courseBase == null) {
-            courseBase = new CourseDataImpl("Default course for " + raceName);
+            courseBase = new CourseDataImpl("Default course for " + raceName + " in regatta " + trackedRegatta.getRegatta().getName());
             logger.log(Level.FINE, "Using empty course in creation of race " + raceName);
         }
         final Course course = new CourseImpl(courseBase.getName() == null ? raceName + " course" : courseBase.getName(),
