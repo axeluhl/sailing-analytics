@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.confidence.impl;
 
+import com.sap.sailing.domain.common.DoubleTriple;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
@@ -9,31 +10,48 @@ import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
  * Wind values are scaled by separately scaling their speed and bearing, and separately scaling their time point, and
- * separately scaling their position. For the separate speed/bearing scaling see also {@link ScalableSpeedWithBearing}.
+ * separately scaling their position. For the separate speed/bearing scaling see also {@link ScalableSpeedWithBearing}.<p>
+ * 
+ * Internally, the 
  * 
  * @author Axel Uhl (d043530)
- * 
+ *
  */
 public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
-    private final ScalablePosition scalablePosition;
+    private final boolean scalablePositionNull;
+    private final double scalablePositionX;
+    private final double scalablePositionY;
+    private final double scalablePositionZ;
     private final double scaledTimePointSumInMilliseconds;
-    private final ScalableSpeedWithBearing scalableSpeedWithBearing;
-    
+    private final double speedWithBearingValueA;
+    private final double speedWithBearingValueB;
+    private final double speedWithBearingValueC;
     private final boolean useSpeed;
     
     public ScalableWind(Wind wind, boolean useSpeed) {
-        this.scalablePosition = wind.getPosition() == null ? null : new ScalablePosition(wind.getPosition());
-        this.scaledTimePointSumInMilliseconds = wind.getTimePoint().asMillis();
-        this.scalableSpeedWithBearing = new ScalableSpeedWithBearing(wind);
-        this.useSpeed = useSpeed;
+        this(wind.getPosition() == null ? null : new ScalablePosition(wind.getPosition()), wind.getTimePoint().asMillis(), new ScalableSpeedWithBearing(wind), useSpeed);
     }
     
     private ScalableWind(ScalablePosition scalablePosition, double scaledTimePointSumInMilliseconds,
             ScalableSpeedWithBearing scalableSpeedWithBearing, boolean useSpeed) {
         super();
-        this.scalablePosition = scalablePosition;
+        if (scalablePosition == null) {
+            scalablePositionNull = true;
+            this.scalablePositionX = 0.0;
+            this.scalablePositionY = 0.0;
+            this.scalablePositionZ = 0.0;
+        } else {
+            scalablePositionNull = false;
+            final DoubleTriple scalablePositionTriple = scalablePosition.getValueAsTriple();
+            this.scalablePositionX = scalablePositionTriple.getA();
+            this.scalablePositionY = scalablePositionTriple.getB();
+            this.scalablePositionZ = scalablePositionTriple.getC();
+        }
         this.scaledTimePointSumInMilliseconds = scaledTimePointSumInMilliseconds;
-        this.scalableSpeedWithBearing = scalableSpeedWithBearing;
+        final DoubleTriple scalableSpeedWithBearingTriple = scalableSpeedWithBearing.getValue();
+        this.speedWithBearingValueA = scalableSpeedWithBearingTriple.getA();
+        this.speedWithBearingValueB = scalableSpeedWithBearingTriple.getB();
+        this.speedWithBearingValueC = scalableSpeedWithBearingTriple.getC();
         this.useSpeed = useSpeed;
     }
     
@@ -43,8 +61,8 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
 
     @Override
     public ScalableWind multiply(double factor) {
-        return new ScalableWind(scalablePosition == null ? null : scalablePosition.multiply(factor),
-                factor * scaledTimePointSumInMilliseconds, scalableSpeedWithBearing.multiply(factor), useSpeed);
+        return new ScalableWind(getScalablePosition() == null ? null : getScalablePosition().multiply(factor),
+                factor * scaledTimePointSumInMilliseconds, getScalableSpeedWithBearing().multiply(factor), useSpeed);
     }
 
     /**
@@ -55,9 +73,10 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
      */
     @Override
     public ScalableWind add(ScalableValue<ScalableWind, Wind> t) {
-        return new ScalableWind(scalablePosition == null ? t.getValue().scalablePosition : scalablePosition.add(t
-                .getValue().scalablePosition), scaledTimePointSumInMilliseconds
-                + t.getValue().scaledTimePointSumInMilliseconds, this.scalableSpeedWithBearing.add(t.getValue().scalableSpeedWithBearing),
+        final ScalablePosition scalablePosition = getScalablePosition();
+        final ScalablePosition tValueScalablePosition = t.getValue().getScalablePosition();
+        return new ScalableWind(scalablePosition == null ? tValueScalablePosition : scalablePosition.add(tValueScalablePosition), scaledTimePointSumInMilliseconds
+                + t.getValue().scaledTimePointSumInMilliseconds, this.getScalableSpeedWithBearing().add(t.getValue().getScalableSpeedWithBearing()),
                 useSpeed || t.getValue().useSpeed);
     }
 
@@ -68,8 +87,16 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
 
     @Override
     public Wind divide(double divisor) {
-        return new WindImpl(scalablePosition == null ? null : new LazyDividedScaledPosition(scalablePosition, divisor),
+        return new WindImpl(getScalablePosition() == null ? null : new LazyDividedScaledPosition(getScalablePosition(), divisor),
                 new MillisecondsTimePoint(
-                        (long) (scaledTimePointSumInMilliseconds / divisor)), scalableSpeedWithBearing.divide(divisor));
+                        (long) (scaledTimePointSumInMilliseconds / divisor)), getScalableSpeedWithBearing().divide(divisor));
+    }
+
+    private ScalableSpeedWithBearing getScalableSpeedWithBearing() {
+        return new ScalableSpeedWithBearing(speedWithBearingValueA, speedWithBearingValueB, speedWithBearingValueC);
+    }
+
+    private ScalablePosition getScalablePosition() {
+        return scalablePositionNull ? null : new ScalablePosition(scalablePositionX, scalablePositionY, scalablePositionZ);
     }
 }

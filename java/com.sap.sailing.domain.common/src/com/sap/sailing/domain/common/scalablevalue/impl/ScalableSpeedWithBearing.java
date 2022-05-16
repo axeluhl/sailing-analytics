@@ -36,7 +36,7 @@ public class ScalableSpeedWithBearing implements ScalableValue<DoubleTriple, Spe
         this(speed.getKnots(), sin, cos);
     }
     
-    private ScalableSpeedWithBearing(double speedInKnots, double sin, double cos) {
+    public ScalableSpeedWithBearing(double speedInKnots, double sin, double cos) {
         this.speedInKnots = speedInKnots;
         this.sin = sin;
         this.cos = cos;

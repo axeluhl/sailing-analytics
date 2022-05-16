@@ -406,7 +406,7 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
                     rightPartOfTimeRangeToReScan = new TimeRangeImpl(candidateInRange.getTimePoint(), candidateInRange.getTimePoint().plus(maximumWindowLength));
                 }
                 TimeRange totalRange = new TimeRangeImpl(leftPartOfTimeRangeToReScan.from(), rightPartOfTimeRangeToReScan.to());
-                track.lockForRead();
+                track.lockForRead(); // TODO bug5726: only grab fixes under lock; do the handling after unlocking
                 try {
                     for (final GPSFixMoving reAnalysisFix : track.getFixes(totalRange.from(), /* fromInclusive */ true, totalRange.to(), /* toInclusive */ true)) {
                         addFix(reAnalysisFix, outOfOrderWindow);
