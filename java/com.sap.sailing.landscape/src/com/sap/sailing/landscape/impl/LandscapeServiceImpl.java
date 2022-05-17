@@ -997,6 +997,9 @@ public class LandscapeServiceImpl implements LandscapeService {
             final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
             logger.info("Launching dedicated replica host of type "+instanceType+" for replica "+replica);
             replicaHostStartProcedure.run();
+            Wait.wait(()->replicaHostStartProcedure.getSailingAnalyticsProcess().getHost().getInstance(), instance->instance != null, /* retryOnException */ true,
+                    WAIT_FOR_HOST_TIMEOUT, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.WARNING,
+                    "Waiting for replica instance with ID "+replicaHostStartProcedure.getHost().getInstanceId());
             result.add(replicaHostStartProcedure.getSailingAnalyticsProcess());
         }
         for (final SailingAnalyticsProcess<String> resultReplica : result) {
