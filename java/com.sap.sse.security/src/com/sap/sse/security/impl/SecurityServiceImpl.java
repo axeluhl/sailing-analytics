@@ -561,6 +561,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
     }
+    
+    public AccessControlListAnnotation getOrCreateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        return accessControlStore.getOrCreateAcl(idOfAccessControlledObjectAsString);
+    }
 
     /**
      * @param id Has to be globally unique
@@ -2135,9 +2139,14 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         } else {
             result = potentiallyExistingRoleDefinition;
         }
-        if (makeReadableForAll && isInitialOrMigration()) {
-            // make role publicly readable
-            addToAccessControlList(result.getIdentifier(), /* for all users */ null, DefaultActions.READ.name());
+        if (makeReadableForAll) {
+            AccessControlListAnnotation acl = getOrCreateAccessControlList(result.getIdentifier());
+            final Set<String> allowedActions = acl.getAnnotation().getAllowedActions(null);
+            if (!allowedActions.contains(DefaultActions.READ.name())) {
+                // make role publicly readable
+                addToAccessControlList(result.getIdentifier(), 
+                        /* for all users */ null, DefaultActions.READ.name());
+            }
         }
         return result;
     }
