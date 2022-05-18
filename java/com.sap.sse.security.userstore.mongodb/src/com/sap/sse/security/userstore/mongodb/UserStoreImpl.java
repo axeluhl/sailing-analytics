@@ -326,7 +326,7 @@ public class UserStoreImpl implements UserStore {
                     + rolePrototype.getName() + "\" with permission \"" + rolePrototype.getPermissions() + "\"");
             roleDefinition = createRoleDefinition(id, rolePrototype.getName(),
                     rolePrototype.getPermissions());
-        }else if(roleDefinition.getPermissions() != null
+        } else if(roleDefinition.getPermissions() != null
                 && !roleDefinition.getPermissions().equals(rolePrototype.getPermissions())){
             setRoleDefinitionPermissions(id, rolePrototype.getPermissions());
             roleDefinition = getRoleDefinition(id);
