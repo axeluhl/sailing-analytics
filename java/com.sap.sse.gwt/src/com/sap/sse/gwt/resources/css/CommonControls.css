@@ -927,15 +927,34 @@ label {
 }
 
 .gwt-DialogBox button {
-    background-color: #008fcc;
-    color: #fff;
-    padding: .666666666666667em 2em;
-    font-weight: 600;
+    background-color: #fff;
+    color: #008fcc;
     border: 1px solid #008fcc;
+    padding: 2px 8px 3px;
 }
 
 .gwt-DialogBox button:hover {
     background-color: #0081b8;
     color: #fff;
 }
+
+.gwt-DialogBox button.btn-primary {
+    background-color: #008fcc;
+    color: #fff;
+    margin-right: 2px;
+}
+
+.gwt-DialogBox button.btn-primary:hover {
+    background-color: #0081b8;
+    color: #fff;
+}
+
+.gwt-DialogBox button.btn-lg {
+    padding: .666666666666667em 2em;
+    font-weight: 600; 
+}
+
+.gwt-DialogBox button:disabled, .gwt-DialogBox button.btn-primary:disabled {
+    margin: 1px;
+    border: 1px solid #cfcfcf;
 }

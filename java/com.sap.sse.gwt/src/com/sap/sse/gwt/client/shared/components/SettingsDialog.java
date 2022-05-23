@@ -8,7 +8,6 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.StringMessages;
-import com.sap.sse.gwt.client.dialog.DialogResources;
 import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
@@ -78,7 +77,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
         makeDefaultButton = new Button(stringMessages.makeDefault());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
         makeDefaultButton.ensureDebugId("MakeDefaultButton");
-        makeDefaultButton.addStyleName(DialogResources.INSTANCE.style().outlined());
+        makeDefaultButton.addStyleName("btn-lg");
         getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -102,7 +101,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
             }
         });
         resetDefault = new Button(stringMessages.resetToDefault());
-        resetDefault.addStyleName(DialogResources.INSTANCE.style().outlined());
+        resetDefault.addStyleName("btn-lg");
         resetDefault.addClickHandler(new ClickHandler() {
 
             @Override

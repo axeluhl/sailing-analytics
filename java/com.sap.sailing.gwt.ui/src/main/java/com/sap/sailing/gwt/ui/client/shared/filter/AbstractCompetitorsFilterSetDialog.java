@@ -94,6 +94,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         filterUIFactories = new ArrayList<>();
         filterDeleteButtons = new ArrayList<>();
         addFilterButton = new Button(stringMessages.add());
+        addFilterButton.addStyleName("inlineButton");
         filterListBox = createListBox(false);
     }
     

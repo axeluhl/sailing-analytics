@@ -1,4 +1,3 @@
-@external gwt-DialogBox, button;
 .infoText {
     margin-bottom: 10px;
 }
@@ -37,15 +36,4 @@
 
 .buttonsPanel>.dialogButton:not(:first-child) {
     margin-left: 5px;
-}
-
-.gwt-DialogBox button.outlined {
-    background-color: #fff;
-    color: #008fcc;
-    border: 1px solid #008fcc;
-}
-
-.gwt-DialogBox button.outlined:hover {
-    background-color: #0081b8;
-    color: #fff;
 }

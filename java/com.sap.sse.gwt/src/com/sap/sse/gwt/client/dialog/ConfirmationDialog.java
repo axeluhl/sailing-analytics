@@ -114,11 +114,12 @@ public class ConfirmationDialog extends DialogBox {
             ConfirmationDialog.this.hide();
         });
         button.addStyleName(style.dialogButton());
-        if (!primary) {
-            button.addStyleName(style.outlined());
-            DialogUtils.linkEscapeToButton(button, hiddenBox);
-        } else {
+        button.addStyleName("btn-lg");
+        if (primary) {
+            button.addStyleName("btn-primary");
             DialogUtils.linkEnterToButton(button, hiddenBox);
+        } else {
+            DialogUtils.linkEscapeToButton(button, hiddenBox);
         }
         buttonsPanel.add(button);
         return this;
