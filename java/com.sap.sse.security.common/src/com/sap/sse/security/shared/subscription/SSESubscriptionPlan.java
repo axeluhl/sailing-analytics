@@ -21,8 +21,8 @@ public class SSESubscriptionPlan extends SubscriptionPlan {
     private static final Map<String, SSESubscriptionPlan> plansById = new HashMap<String, SSESubscriptionPlan>();
 
     private SSESubscriptionPlan(String id, HashSet<SubscriptionPrice> prices, Set<PlanCategory> planCategories,
-            Boolean isOneTimePlan, SubscriptionPlanRole... roles) {
-        super(id, prices, planCategories, isOneTimePlan, roles);
+            Boolean isOneTimePlan, PlanGroup group, SubscriptionPlanRole... roles) {
+        super(id, prices, planCategories, isOneTimePlan, group, roles);
         plansById.put(id, this);
     }
     

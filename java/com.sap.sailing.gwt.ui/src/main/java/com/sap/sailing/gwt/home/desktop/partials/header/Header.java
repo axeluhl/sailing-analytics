@@ -20,6 +20,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -54,6 +55,7 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 import com.sap.sse.gwt.shared.ClientConfiguration;
@@ -92,7 +94,6 @@ public class Header extends Composite implements HeaderConstants {
     @UiField Element centerMenuPanel;
     @UiField Anchor usermenu;
     @UiField ImageElement logoImage;
-    @UiField Element usermenuPremium;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     private final List<Anchor> links;
@@ -102,10 +103,10 @@ public class Header extends Composite implements HeaderConstants {
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
     private final PlaceNavigation<SubscriptionPlace> subscriptionsNavigation;
     private final AuthenticationMenuView authenticationMenuView;
-    
+
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
-    
+
     /**
      * Contains the logic for the dynamic hamburger menu on top of the page.
      * @author Georg Herdt
@@ -233,7 +234,6 @@ public class Header extends Composite implements HeaderConstants {
         this.navigator = navigator;
         HeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
         Map<Anchor,Anchor> menuToDropDownItemMap = new HashMap<>();
         menuToDropDownItemMap.put(startPageLink, startPageLinkMenu);
         menuToDropDownItemMap.put(eventsPageLink, eventsPageLinkMenu);
@@ -242,10 +242,18 @@ public class Header extends Composite implements HeaderConstants {
         menuToDropDownItemMap.put(adminConsolePageLink, adminConsolePageLinkMenu);
         menuToDropDownItemMap.put(dataMiningPageLink, dataMiningPageLinkMenu);
         menuToDropDownItemMap.put(strategySimulatorPageLink, strategySimulatorPageLinkMenu);
-
         headerNavigationDropDownMenuContainer.getStyle().setDisplay(Display.NONE);
         final DropdownHandler dropdownHandler = new DropdownHandler(hamburgerMenuIcon, headerNavigationDropDownMenuContainer);
         menuItemVisibilityHandler = new MenuItemVisibilityHandler(menuToDropDownItemMap, dropdownHandler, hamburgerMenuIcon, centerMenuPanel);
+        // close menu if menu item was clicked
+        for (Anchor anchor: menuToDropDownItemMap.values()) {
+            anchor.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    dropdownHandler.setVisible(false);
+                }
+            });
+        }
         Window.addResizeHandler(menuItemVisibilityHandler);
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, subscriptionsPageLink, adminConsolePageLink, dataMiningPageLink });
         homeNavigation = navigator.getHomeNavigation();
@@ -256,10 +264,10 @@ public class Header extends Composite implements HeaderConstants {
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
         subscriptionsPageLink.setHref(subscriptionsNavigation.getTargetUrl());
-        // make the Admin and DataMining links visible only for signed-in users
+        authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(),
+                HeaderResources.INSTANCE.css().open(), HeaderResources.INSTANCE.css().user_menu_premium());
+        // make the Admin link visible only for signed-in users
         adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
-        dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
-        strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.NONE);
         // initially hide admin console, data mining and strategy simulator in hamburger menu
         menuItemVisibilityHandler.addIgnore(adminConsolePageLink);
         menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
@@ -287,36 +295,59 @@ public class Header extends Composite implements HeaderConstants {
                 adminConsolePageLink.getElement().getStyle().setDisplay(Display.NONE);
                 menuItemVisibilityHandler.addIgnore(adminConsolePageLink);
             }
-            if (authContext.hasServerPermission(ServerActions.DATA_MINING)) {
+            menuItemVisibilityHandler.removeIgnore(dataMiningPageLink);
+            if (authContext.getPaywallResolver().hasPermission(ServerActions.DATA_MINING, authContext.getServerInfo())) {
                 dataMiningPageLinkMenu.setHref(DATA_MINING_PATH);
                 dataMiningPageLinkMenu.setTarget(DATA_MINING_WINDOW);
+                dataMiningPageLinkMenu.removeStyleName(HeaderResources.INSTANCE.css().premium_hint());
                 dataMiningPageLink.setHref(DATA_MINING_PATH);
                 dataMiningPageLink.setTarget(DATA_MINING_WINDOW);
+                dataMiningPageLink.removeStyleName(HeaderResources.INSTANCE.css().premium_hint());
                 dataMiningPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-                menuItemVisibilityHandler.removeIgnore(dataMiningPageLink);
             } else {
-                dataMiningPageLink.getElement().getStyle().setDisplay(Display.NONE);
-                menuItemVisibilityHandler.addIgnore(dataMiningPageLink);
+                dataMiningPageLinkMenu.setHref(subscriptionsNavigation.getTargetUrl());
+                dataMiningPageLinkMenu.setTarget(SELF);
+                dataMiningPageLinkMenu.addStyleName(HeaderResources.INSTANCE.css().premium_hint());
+                dataMiningPageLink.setHref(subscriptionsNavigation.getTargetUrl());
+                dataMiningPageLink.setTarget(SELF);
+                dataMiningPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                dataMiningPageLink.addStyleName(HeaderResources.INSTANCE.css().premium_hint());
+                // add possible subscription plans to URL
+                authContext.getPaywallResolver().getUnlockingSubscriptionPlans(ServerActions.DATA_MINING, authContext.getServerInfo(),
+                        (unlockingPlans) -> {
+                            dataMiningPageLinkMenu.setHref(EntryPointLinkFactory.createSubscriptionPageLink(unlockingPlans));
+                            dataMiningPageLink.setHref(EntryPointLinkFactory.createSubscriptionPageLink(unlockingPlans));
+                        });
             }
-            if (authContext.hasPermission(NamedSecuredObjectDTO.create(authContext.getServerInfo().getName(),
-                    SecuredDomainType.SIMULATOR, new TypeRelativeObjectIdentifier(authContext.getServerInfo().getName())),
-                    DefaultActions.READ)) {
+            menuItemVisibilityHandler.removeIgnore(strategySimulatorPageLink);
+            if (authContext.getPaywallResolver().hasPermission(DefaultActions.READ, NamedSecuredObjectDTO.create(authContext.getServerInfo().getName(),
+                    SecuredDomainType.SIMULATOR, new TypeRelativeObjectIdentifier(authContext.getServerInfo().getName())))) {
                 strategySimulatorPageLinkMenu.setHref(STRATEGY_SIMULATOR_PATH);
                 strategySimulatorPageLinkMenu.setTarget(STRATEGY_SIMULATOR_WINDOW);
+                strategySimulatorPageLinkMenu.removeStyleName(HeaderResources.INSTANCE.css().premium_hint());
                 strategySimulatorPageLink.setHref(STRATEGY_SIMULATOR_PATH);
                 strategySimulatorPageLink.setTarget(STRATEGY_SIMULATOR_WINDOW);
                 strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-                menuItemVisibilityHandler.removeIgnore(strategySimulatorPageLink);
+                strategySimulatorPageLink.removeStyleName(HeaderResources.INSTANCE.css().premium_hint());
             } else {
-                strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.NONE);
-                menuItemVisibilityHandler.addIgnore(strategySimulatorPageLink);
+                strategySimulatorPageLinkMenu.setHref(subscriptionsNavigation.getTargetUrl());
+                strategySimulatorPageLinkMenu.setTarget(SELF);
+                strategySimulatorPageLinkMenu.addStyleName(HeaderResources.INSTANCE.css().premium_hint());
+                strategySimulatorPageLink.setHref(subscriptionsNavigation.getTargetUrl());
+                strategySimulatorPageLink.setTarget(SELF);
+                strategySimulatorPageLink.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+                strategySimulatorPageLink.addStyleName(HeaderResources.INSTANCE.css().premium_hint());
+                // add possible subscription plans to URL
+                authContext.getPaywallResolver().getUnlockingSubscriptionPlans(DefaultActions.READ, NamedSecuredObjectDTO.create(authContext.getServerInfo().getName(),
+                        SecuredDomainType.SIMULATOR, new TypeRelativeObjectIdentifier(authContext.getServerInfo().getName())),
+                        (unlockingPlans) -> {
+                            strategySimulatorPageLinkMenu.setHref(EntryPointLinkFactory.createSubscriptionPageLink(unlockingPlans));
+                            strategySimulatorPageLink.setHref(EntryPointLinkFactory.createSubscriptionPageLink(unlockingPlans));
+                        });
+                
             }
             menuItemVisibilityHandler.refreshVisibilityDeferred();
-            if (authContext.hasPermission(authContext.getCurrentUser(), UserActions.BE_PREMIUM)) {
-                usermenuPremium.getStyle().setDisplay(Display.BLOCK);
-            } else {
-                usermenuPremium.getStyle().setDisplay(Display.NONE);
-            }
+            authenticationMenuView.showPremium(authContext.hasPermission(authContext.getCurrentUser(), UserActions.BE_PREMIUM));
         });
         searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addFocusHandler((focusEvent) -> menuItemVisibilityHandler.refreshVisibility(370));
@@ -337,7 +368,6 @@ public class Header extends Composite implements HeaderConstants {
                 updateActiveLink(event.getNewPlace());
             }
         });
-        authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoImage.getStyle().setDisplay(Display.NONE);
             logoImage.setTitle(StringMessages.INSTANCE.sapSailingAnalytics());

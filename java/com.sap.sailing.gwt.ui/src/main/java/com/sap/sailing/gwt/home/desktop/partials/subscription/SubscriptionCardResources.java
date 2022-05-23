@@ -17,7 +17,6 @@ public interface SubscriptionCardResources extends SharedHomeResources {
         String feature();
         String highlight();
         String owned();
-        String individual();
         String subscription();
         String title();
         String description();
@@ -41,6 +40,7 @@ public interface SubscriptionCardResources extends SharedHomeResources {
         String featureDescription();
         String featureLink();
         String featureCheck();
+        String featureNone();
         String featureHeader();
     }
 }

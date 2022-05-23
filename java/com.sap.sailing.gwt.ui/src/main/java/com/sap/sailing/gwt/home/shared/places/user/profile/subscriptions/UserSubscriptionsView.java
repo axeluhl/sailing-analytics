@@ -25,5 +25,7 @@ public interface UserSubscriptionsView extends SubscriptionsView, IsWidget {
         void cancelSubscription(String planId, String providerName);
 
         void navigateToSubscribe();
+        
+        void openSelfServicePortal();
     }
 }

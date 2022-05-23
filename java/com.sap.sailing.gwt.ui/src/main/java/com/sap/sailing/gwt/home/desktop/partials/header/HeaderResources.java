@@ -23,6 +23,10 @@ public interface HeaderResources extends AuthenticationResources {
     @Source("crown.png")
     @MimeType("image/png")
     DataResource crown();
+    
+    @Source("icon_premium.svg")
+    @MimeType("image/svg+xml")
+    DataResource premiumIcon();
 
     public interface LocalCss extends CssResource {
         String siteheader();
@@ -45,6 +49,8 @@ public interface HeaderResources extends AuthenticationResources {
         String header_navigation_icon();
         String header_navigation_iconactive();
         String subscriptions();
-        String premium();
+        String user_menu_premium();
+        String premium_feature();
+        String premium_hint();
     }
 }

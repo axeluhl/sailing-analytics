@@ -62,7 +62,7 @@ The basic idea of setting up a build job is to create a so-called "free-style so
 
 In order to elastically scale our build / CI infrastructure, we use AWS to provide Hudson build slaves on demand. The Hudson Master (https://hudson.sapsailing.com) has a script obtained from our git at ``./configuration/launchhudsonslave`` which takes an Amazon Machine Image (AMI), launches it in our default region (eu-west-1) and connects to it. The AWS credentials are stored in the ``root`` account on ``hudson.sapsailing.com``, and the ``hudson`` user is granted access to the script by means of an ``/etc/sudoers.d`` entry.
 
-The image has been crafted specifically to contain the tools required for the build. In order to set up such an image based on Ubuntu, consider running the following commands as root (see also https://tecadmin.net/setup-selenium-chromedriver-on-ubuntu/), on a fresh Ubuntu 20.04 instance with a 100GB root partition, starting as the "ubuntu" user:
+The image has been crafted specifically to contain the tools required for the build. In order to set up such an image based on Ubuntu, consider running the following commands as root on a fresh Ubuntu 20.04 instance with a 100GB root partition, starting as the "ubuntu" user:
 
 ```
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
@@ -79,16 +79,12 @@ The image has been crafted specifically to contain the tools required for the bu
    apt-get install -y unzip xvfb libxi6 libgconf-2-4 nfs-common
    curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
    wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-   echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
    echo "deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" >/etc/apt/sources.list.d/mongodb-org-4.4.list
    apt-get -y update
    apt-get -y upgrade
-   apt-get -y install google-chrome-stable maven rabbitmq-server mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws docker.io
+   apt-get -y install maven rabbitmq-server mongodb-org firefox firefox-geckodriver fwupd linux-aws linux-headers-aws linux-image-aws docker.io
    apt-get -y autoremove
    cd /tmp
-   wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
-   cd /usr/bin
-   unzip /tmp/chromedriver_linux64.zip
    mv /tmp/imageupgrade /usr/local/bin
    mv /tmp/imageupgrade_functions.sh /usr/local/bin
    mv /tmp/mounthudsonworkspace /usr/local/bin

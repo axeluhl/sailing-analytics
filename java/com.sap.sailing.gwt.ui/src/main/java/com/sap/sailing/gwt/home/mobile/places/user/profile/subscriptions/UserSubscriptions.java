@@ -65,5 +65,10 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
     public void onSubscribeClicked(final ClickEvent event) {
         presenter.navigateToSubscribe();
     }
+    
+    @UiHandler("selfServiceControlUi")
+    void onSelfServiceControlClicked(final ClickEvent event) {
+        presenter.openSelfServicePortal();
+    }
 
 }

@@ -14,21 +14,23 @@ Additionally there is a detailed list of all features which are included in a pa
 		com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan
 	
 	A plan definition includes the plan and price IDs and a list of connected roles.
+	
+3. Group the plan by defining a (SubscriptionPlan.)PlanGroup and set the group to init of SailingSubscriptionPlan
 
-3. Add following texts to class (and related property files)
+4. Add following texts to class (and related property files)
 
 		com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants
 	
-	- `<PLAN-ID>_name`
+	- `<GROUP-ID>_name`
 		- Name or title of the plan (`<H1>`)
-	- `<PLAN-ID>_description`
+	- `<GROUP-ID>_description`
 		- A short description of the plan content (`<H4>`)
-	- `<PLAN-ID>_info`
+	- `<GROUP-ID>_info`
 		- Can be uses for additional info (`<H5>`)
-	- `<PLAN-ID>_price_info`
-		- It's a red rubber stamp over the price. It will only be rendered if not empty text is existing.
-	- `<PLAN-ID>_features`
-		- Comma separated list of feature labels
+	- `<GROUP-ID>_price_info`
+		- It's a red rubber stamp over the price. It will only be rendered if price is a one time payment.
+	- `<GROUP-ID>_features`
+		- Pipe (|) separated list of feature labels
 
 
 ### Business Model Info

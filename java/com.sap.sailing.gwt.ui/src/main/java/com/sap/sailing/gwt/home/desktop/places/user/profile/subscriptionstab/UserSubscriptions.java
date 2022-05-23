@@ -60,6 +60,8 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
 
     @UiField
     Button subscribeButtonUi;
+    @UiField
+    Button selfServiceControlUi;
     @UiField(provided = true)
     SortedCellTable<SubscriptionDTO> subscriptionsUi = new SortedCellTable<>(0, DesignedCellTableResources.INSTANCE);
 
@@ -80,13 +82,20 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
         presenter.navigateToSubscribe();
     }
     
+    @UiHandler("selfServiceControlUi")
+    void onSelfServiceControlClicked(final ClickEvent event) {
+        presenter.openSelfServicePortal();
+    }
+    
     @Override
     public void updateView(final SubscriptionListDTO subscriptions) {
         subscribeButtonUi.setEnabled(true);
         if (subscriptions == null) {
+            selfServiceControlUi.setVisible(false);
             subscriptionsUi.setPageSize(0);
             subscriptionsUi.setList(new ArrayList<SubscriptionDTO>());
         } else {
+            selfServiceControlUi.setVisible(true);
             subscriptionsUi.setPageSize(subscriptions.getSubscriptionItems().length);
             subscriptionsUi.setList(Arrays.asList(subscriptions.getSubscriptionItems()));
         }
@@ -129,7 +138,6 @@ public class UserSubscriptions extends Composite implements UserSubscriptionsVie
             @Override
             public void update(final int index, final SubscriptionDTO object, final String value) {
                 if (!object.isCancelled()) {
-                    // FIXME: Maybe integrate a confirmation dialog to avoid unintended canceling
                     presenter.cancelSubscription(object.getSubscriptionPlanId(), object.getProvider());
                 }
             }
