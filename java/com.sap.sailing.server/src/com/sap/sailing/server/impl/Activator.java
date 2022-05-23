@@ -243,8 +243,13 @@ public class Activator implements BundleActivator {
                             replicationService = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class).waitForService(0);
                             if (!replicationService.isReplicationStarting() && securityService.getMasterDescriptor() == null) {
                                 // see also bug 5569: this must only be done if it is clear that this instance is not to become a replica
+                                // TODO: Registering RoleDefinitions here requires additional maintenance. Consider
+                                // implementing another Construct like OSGIHasPermissionsProvider
                                 final RoleDefinition sailingViewerRoleDefinition = securityService
                                         .getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance(), /* makeReadableForAll */ true);
+                                securityService.getOrCreateRoleDefinitionFromPrototype(PremiumRole.getInstance(), /* makeReadableForAll */ true);
+                                securityService.getOrCreateRoleDefinitionFromPrototype(ArchiveDataMiningRole.getInstance(), /* makeReadableForAll */ true);
+                                securityService.getOrCreateRoleDefinitionFromPrototype(AllDataMiningRole.getInstance(), /* makeReadableForAll */ true);
                                 if (securityService.isNewServer()) {
                                     // The server is initially set to be public by adding sailing_viewer role to the server group
                                     // with forAll=true
@@ -259,11 +264,6 @@ public class Activator implements BundleActivator {
                     }, "Waiting for replication service to tell whether this SecurityService will become a replica");
                     backgroundThread.setDaemon(true);
                     backgroundThread.start();
-                    // TODO: Registering SubscriptionPlan specific RoleDefinitions here requires additional maintenance. Consider
-                    // implementing another Construct like OSGIHasPermissionsProvider
-                    securityService.getOrCreateRoleDefinitionFromPrototype(PremiumRole.getInstance(), /* makeReadableForAll */ true);
-                    securityService.getOrCreateRoleDefinitionFromPrototype(ArchiveDataMiningRole.getInstance(), /* makeReadableForAll */ true);
-                    securityService.getOrCreateRoleDefinitionFromPrototype(AllDataMiningRole.getInstance(), /* makeReadableForAll */ true);
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),
