@@ -86,8 +86,10 @@ public class MobileGalleryPlayer extends ResizeComposite {
     }-*/;
     
     private native void _slickPlay() /*-{
-    $wnd.$('.mainSlider').slick('slickPlay').slick('slickNext').slick(
+        $wnd.$('.mainSlider').slick('slickPlay').slick('slickNext').slick(
             'setOption', 'autoplay', true); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
+        $wnd.$('.subSlider').slick('slickPlay').slick('slickNext').slick(
+            'setOption', 'autoplaySpeed', 15000);
     }-*/;
     
     private native void _slickPause() /*-{
