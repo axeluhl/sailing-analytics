@@ -561,6 +561,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
     }
+    
+    public AccessControlListAnnotation getOrCreateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        return accessControlStore.getOrCreateAcl(idOfAccessControlledObjectAsString);
+    }
 
     /**
      * @param id Has to be globally unique
@@ -2119,21 +2123,30 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype) {
+    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype, boolean makeReadableForAll) {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
             result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
                     rolePrototype.getPermissions());
             setOwnership(result.getIdentifier(), null, getServerGroup());
-        } else if (!Util.containsAll(potentiallyExistingRoleDefinition.getPermissions(),
-                rolePrototype.getPermissions())) {
+        } else if (rolePrototype.getPermissions() != null
+                && !rolePrototype.getPermissions().equals(potentiallyExistingRoleDefinition.getPermissions())) {
             store.setRoleDefinitionPermissions(potentiallyExistingRoleDefinition.getId(),
                     rolePrototype.getPermissions());
             RoleDefinition roleDefinition = store.getRoleDefinition(rolePrototype.getId());
             result = roleDefinition;
         } else {
             result = potentiallyExistingRoleDefinition;
+        }
+        if (makeReadableForAll) {
+            AccessControlListAnnotation acl = getOrCreateAccessControlList(result.getIdentifier());
+            final Set<String> allowedActions = acl.getAnnotation().getAllowedActions(null);
+            if (!allowedActions.contains(DefaultActions.READ.name())) {
+                // make role publicly readable
+                addToAccessControlList(result.getIdentifier(), 
+                        /* for all users */ null, DefaultActions.READ.name());
+            }
         }
         return result;
     }

@@ -1661,6 +1661,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     @Override
     public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url, boolean include) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" requested addition of remote sailing server reference "+name);
         RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, include, /* IDs of included/excluded events */ Collections.emptySet());
         remoteSailingServerSet.add(result);
         mongoObjectFactory.storeSailingServer(result);
@@ -1670,6 +1671,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     @Override
     public RemoteSailingServerReference updateRemoteSailingServerReference(final String name, final boolean include,
             final Set<UUID> selectedEventIds) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" requested update of remote sailing server reference "+name);
         RemoteSailingServerReference result = getRemoteServerReferenceByName(name);
         if (result != null) {
             result.updateSelectedEventIds(selectedEventIds);
@@ -1713,6 +1715,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     @Override
     public void removeRemoteSailingServerReference(String name) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" requested removal of remote sailing server reference "+name);
         remoteSailingServerSet.remove(name);
         mongoObjectFactory.removeSailingServer(name);
     }
