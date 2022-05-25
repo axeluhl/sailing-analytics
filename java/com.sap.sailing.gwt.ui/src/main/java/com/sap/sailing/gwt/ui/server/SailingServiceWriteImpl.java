@@ -749,7 +749,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         for (String serverName : namesOfSailingServersToRemove) {
             getService().apply(new RemoveRemoteSailingServerReference(serverName));
         }
@@ -757,7 +757,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         final String expandedURL;
         if (sailingServer.getUrl().contains("//")) {
             expandedURL = sailingServer.getUrl();
@@ -775,7 +775,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public RemoteSailingServerReferenceDTO updateRemoteSailingServerReference(
             final RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         RemoteSailingServerReference serverRef = getService()
                 .apply(new UpdateSailingServerReference(sailingServer.getName(),
                         sailingServer.isInclude(), sailingServer.getSelectedEvents().stream().map(element -> {
@@ -789,7 +789,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(final String sailingServerName)
             throws MalformedURLException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
         RemoteSailingServerReference serverRef = getService().getRemoteServerReferenceByName(sailingServerName);
         com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService()
                 .getCompleteRemoteServerReference(serverRef);
