@@ -36,6 +36,7 @@ public class SubscriptionUpdateTask implements Runnable {
                         .getServiceReferences()) {
                     final SubscriptionApiService apiService = subscriptionApiServiceTracker.getService(serviceReference);
                     if (apiService != null && apiService.isActive()) {
+                        logger.info("Fetching and updating provider subscriptions for API service "+apiService.getProviderName());
                         fetchAndUpdateProviderSubscriptions(apiService);
                     }
                 }
