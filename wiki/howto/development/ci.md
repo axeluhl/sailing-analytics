@@ -86,8 +86,9 @@ The image has been crafted specifically to contain the tools required for the bu
    # the firefox package may be "firefox-esr" and firefox-geckodriver and the linux*aws packages may not be available at
    # all, in which case a direct download, e.g., from https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
    # is an alternative; unpack to /usr/local/bin.
-   # Furthermore, on Debian 11 we need cloud-guest-utils.
-   apt-get -y install maven rabbitmq-server mongodb-org firefox firefox-geckodriver fwupd linux-aws linux-headers-aws linux-image-aws docker.io
+   cd /usr/local/bin
+   wget -O - "https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz" | tar xzvpf -
+   apt-get -y install cloud-guest-utils maven rabbitmq-server mongodb-org firefox fwupd linux-aws linux-headers-aws linux-image-aws docker.io
    apt-get -y autoremove
    cd /tmp
    mv /tmp/imageupgrade /usr/local/bin
