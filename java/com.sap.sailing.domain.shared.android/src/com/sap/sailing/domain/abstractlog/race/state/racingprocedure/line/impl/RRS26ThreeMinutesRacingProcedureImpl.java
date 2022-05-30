@@ -9,8 +9,8 @@ import com.sap.sse.common.Duration;
 
 public class RRS26ThreeMinutesRacingProcedureImpl extends BaseRRS26RacingProcedureImpl {
 
-    private final static Duration startPhaseClassUpInterval = Duration.ONE_MINUTE.times(5);
-    private final static Duration startPhaseStartModeUpInterval = Duration.ONE_MINUTE.times(4);
+    private final static Duration startPhaseClassUpInterval = Duration.ONE_MINUTE.times(3);
+    private final static Duration startPhaseStartModeUpInterval = Duration.ONE_MINUTE.times(2);
 
     public RRS26ThreeMinutesRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
                                     RRS26Configuration configuration, RaceLogResolver raceLogResolver) {
@@ -19,6 +19,6 @@ public class RRS26ThreeMinutesRacingProcedureImpl extends BaseRRS26RacingProcedu
     
     @Override
     public RacingProcedureType getType() {
-        return RacingProcedureType.RRS26;
+        return RacingProcedureType.RRS26_3MIN;
     }
 }
