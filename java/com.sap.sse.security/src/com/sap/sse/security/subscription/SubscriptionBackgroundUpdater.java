@@ -22,18 +22,14 @@ public class SubscriptionBackgroundUpdater {
     private final ScheduledExecutorService executor;
     private final ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker;
 
-    private boolean started;
-
     public SubscriptionBackgroundUpdater(BundleContext context) {
         this.executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         subscriptionApiServiceTracker = ServiceTrackerFactory.createAndOpen(context, SubscriptionApiService.class);
     }
 
     public void start(CompletableFuture<SecurityService> securityService) {
-        if (!started) {
-            logger.info(() -> "Start subscription background update task");
-            executor.scheduleAtFixedRate(new SubscriptionUpdateTask(securityService, subscriptionApiServiceTracker),
-                    /* initial */ 1, /* period */ 720, TimeUnit.MINUTES);
-        }
+        logger.info(() -> "Start subscription background update task");
+        executor.scheduleAtFixedRate(new SubscriptionUpdateTask(securityService, subscriptionApiServiceTracker),
+                /* initial */ 1, /* period */ 720, TimeUnit.MINUTES);
     }
 }
