@@ -7,18 +7,18 @@ import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.Duration;
 
-public class RRS26RacingProcedureImpl extends BaseRRS26RacingProcedureImpl {
+public class RRS26ThreeMinutesRacingProcedureImpl extends BaseRRS26RacingProcedureImpl {
 
-    private final static Duration startPhaseClassUpInterval = Duration.ONE_MINUTE.times(3);
-    private final static Duration startPhaseStartModeUpInterval = Duration.ONE_MINUTE.times(2);
+    private final static Duration startPhaseClassUpInterval = Duration.ONE_MINUTE.times(5);
+    private final static Duration startPhaseStartModeUpInterval = Duration.ONE_MINUTE.times(4);
 
-    public RRS26RacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
+    public RRS26ThreeMinutesRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
                                     RRS26Configuration configuration, RaceLogResolver raceLogResolver) {
         super(raceLog, author, configuration, raceLogResolver, startPhaseClassUpInterval, startPhaseStartModeUpInterval);
     }
     
     @Override
     public RacingProcedureType getType() {
-        return RacingProcedureType.RRS26_3MIN;
+        return RacingProcedureType.RRS26;
     }
 }
