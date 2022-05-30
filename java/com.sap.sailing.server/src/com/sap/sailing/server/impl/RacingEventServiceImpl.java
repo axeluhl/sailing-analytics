@@ -5098,6 +5098,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             throw e;
         }
         final User user = getSecurityService().getCurrentUser();
+        logger.info("Importing master data from "+urlAsString+" for leaderboard groups "+Arrays.toString(leaderboardGroupIds)+
+                " for user "+user.getName());
         final String token = getSecurityService().getOrCreateTargetServerBearerToken(urlAsString, targetServerUsername, targetServerPassword, targetServerBearerToken);
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();

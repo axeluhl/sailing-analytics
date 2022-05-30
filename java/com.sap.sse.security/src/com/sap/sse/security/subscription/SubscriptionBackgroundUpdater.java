@@ -13,7 +13,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
- * Manage to start a schedule task to perfom fetching, checking and updating subscriptions for users from payment
+ * Manage to start a schedule task to perform fetching, checking and updating subscriptions for users from payment
  * service providers. Call {@code #start(CompletableFuture)} to schedule task in background thread.
  */
 public class SubscriptionBackgroundUpdater {

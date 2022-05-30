@@ -398,7 +398,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
             throw new IllegalArgumentException("Competitor "+to+" is expected to have passed "+fromWaypoint+" but hasn't");
         }
         if (whenToPassedFromWaypoint.getTimePoint().after(timePointOfTosPosition)) {
-            throw new IllegalArgumentException("Competitor was expected to have passed "+fromWaypoint+" before "+timePointOfTosPosition+
+            throw new IllegalArgumentException("Competitor "+to+" was expected to have passed "+fromWaypoint+" before "+timePointOfTosPosition+
                     " but did pass it at "+whenToPassedFromWaypoint.getTimePoint());
         }
     }
