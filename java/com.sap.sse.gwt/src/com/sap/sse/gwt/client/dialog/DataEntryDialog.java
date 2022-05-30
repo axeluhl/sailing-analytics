@@ -163,6 +163,7 @@ public abstract class DataEntryDialog<T> {
             cancelButton.ensureDebugId("CancelButton");
             rightButtonPanel.add(cancelButton);
             cancelButton.addStyleName("btn-lg");
+            cancelButton.addStyleName("btn-secondary");
             cancelButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {

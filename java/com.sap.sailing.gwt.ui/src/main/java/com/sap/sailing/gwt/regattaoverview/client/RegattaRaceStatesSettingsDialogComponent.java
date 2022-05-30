@@ -87,6 +87,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         }
         
         courseAreaDeselectButton = new Button();
+        courseAreaDeselectButton.addStyleName("btn-secondary");
         setTextOfDeselectButton(courseAreaDeselectButton, allCheckboxesSelected);
         courseAreaDeselectButton.addClickHandler(new ClickHandler() {
 
@@ -147,6 +148,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         }
         
         regattaDeselectButton = new Button();
+        regattaDeselectButton.addStyleName("btn-secondary");
         setTextOfDeselectButton(regattaDeselectButton, allCheckboxesSelected);
         regattaDeselectButton.addClickHandler(new ClickHandler() {
 

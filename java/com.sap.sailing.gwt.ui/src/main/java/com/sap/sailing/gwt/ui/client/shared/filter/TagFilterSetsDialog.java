@@ -64,6 +64,7 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
         deleteFilterSetButtons = new ArrayList<Button>();
         filterSets = new ArrayList<>();
         addFilterSetButton = new Button(stringMessages.actionAddFilter());
+        addFilterSetButton.addStyleName("btn-secondary");
         availableTagFilterNames = new ArrayList<String>();
         availableTagFilterNames.add(TagTagFilter.FILTER_NAME);
         availableTagFilterNames.add(TagUsernameFilter.FILTER_NAME);

@@ -95,6 +95,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         filterDeleteButtons = new ArrayList<>();
         addFilterButton = new Button(stringMessages.add());
         addFilterButton.addStyleName("inlineButton");
+        addFilterButton.addStyleName("btn-secondary");
         filterListBox = createListBox(false);
     }
     

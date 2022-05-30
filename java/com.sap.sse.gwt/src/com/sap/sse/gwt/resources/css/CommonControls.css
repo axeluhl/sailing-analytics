@@ -926,14 +926,14 @@ label {
 	padding-left: 4px;
 }
 
-.gwt-DialogBox button {
+.gwt-DialogBox button.btn-secondary {
     background-color: #fff;
     color: #008fcc;
     border: 1px solid #008fcc;
     padding: 2px 8px 3px;
 }
 
-.gwt-DialogBox button:hover {
+.gwt-DialogBox button.btn-secondary:hover {
     background-color: #0081b8;
     color: #fff;
 }
@@ -949,12 +949,12 @@ label {
     color: #fff;
 }
 
-.gwt-DialogBox button.btn-lg {
+.gwt-DialogBox button.btn-secondary.btn-lg, .gwt-DialogBox button.btn-primary.btn-lg {
     padding: .666666666666667em 2em;
     font-weight: 600; 
 }
 
-.gwt-DialogBox button:disabled, .gwt-DialogBox button.btn-primary:disabled {
+.gwt-DialogBox button.btn-secondary:disabled, .gwt-DialogBox button.btn-primary:disabled {
     margin: 1px;
     border: 1px solid #cfcfcf;
 }

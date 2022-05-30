@@ -98,6 +98,7 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
         filterDeleteButtons = new ArrayList<>();
         addFilterButton = new Button(stringMessages.add());
         addFilterButton.addStyleName("inlineButton");
+        addFilterButton.addStyleName("btn-secondary");
         filterListBox = createListBox(false);
     }
 
