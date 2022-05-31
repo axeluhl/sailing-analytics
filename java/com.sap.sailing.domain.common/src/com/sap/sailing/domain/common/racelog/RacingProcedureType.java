@@ -11,12 +11,12 @@ import java.util.List;
 public enum RacingProcedureType {
     UNKNOWN("Unknown"),
     RRS26("Fix Line Start (RRS26)"),
-    RRS26_3MIN("Fix Line Start with 3min Sequence (RRS26/3)"),
     SWC("Sailing World Cup Start"),
     GateStart("Gate Start"),
     ESS("\"Extreme Sailing Series\"-Start"),
     BASIC("Basic Countdown Start"),
-    LEAGUE("League Start");
+    LEAGUE("League Start"),
+    RRS26_3MIN("Fix Line Start with 3min Sequence (RRS26/3)");
     
     private String displayName;
 
