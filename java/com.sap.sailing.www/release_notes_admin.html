@@ -30,6 +30,9 @@
             <li>Running subscription updates is now avoided on replica servers.</li> 
             <li>Added the penalty code (IRM) "NSC" to the XRR schema, e.g., for allowing it to be imported
                 from XRR sources such as Manage2Sail.</li>
+            <li>Bug fix: when renaming a series while adding/removing columns to/from it, the model, especially
+                on a replica, could become inconsistent due to operations interleaving. This is now run in
+                sequential order, avoiding the undesired interleaving.</li>
           </ul>
           <h2 class="articleSubheadline">April 2022</h2>
           <ul class="bulletList">

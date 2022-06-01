@@ -403,34 +403,32 @@ public class RegattaDetailsComposite extends Composite {
 
                                         @Override
                                         public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                                            presenter.getRegattasRefresher().reloadAndCallFillAll();
-                                            presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
+                                            if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
+                                                    || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
+                                                    || seriesNameChanged || maximumNumberOfDiscardsChanged) {
+                                                sailingServiceWrite.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
+                                                        seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
+                                                        seriesDescriptor.isStartsWithZeroScore(),
+                                                        seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
+                                                        seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.getMaximumNumberOfDiscards(),
+                                                        series.getFleets(), new AsyncCallback<Void>() {
+                                                    @Override
+                                                    public void onFailure(Throwable caught) {
+                                                        errorReporter.reportError("Error trying to update series " + series.getName() + ": "
+                                                                + caught.getMessage());
+                                                    }
+                                                    
+                                                    @Override
+                                                    public void onSuccess(Void result) {
+                                                        presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                                        presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
+                                                    }
+                                                });
+                                            }
                                         }
                                     });
                         }
                     });
-            if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
-                    || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
-                    || seriesNameChanged || maximumNumberOfDiscardsChanged) {
-                sailingServiceWrite.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
-                        seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
-                        seriesDescriptor.isStartsWithZeroScore(),
-                        seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
-                        seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.getMaximumNumberOfDiscards(),
-                        series.getFleets(), new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error trying to update series " + series.getName() + ": "
-                                        + caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                presenter.getRegattasRefresher().reloadAndCallFillAll();
-                                presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
-                            }
-                        });
-            }
         }
     }
 

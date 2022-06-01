@@ -1636,7 +1636,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
-        for(String columnName: columnNames) {
+        for (String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
         }
     }
