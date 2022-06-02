@@ -35,6 +35,7 @@ public class CurrentRaceFilterImplTest {
     private RaceGroup isaf;
     private RaceGroup league;
     private RaceGroup ess;
+    private RaceGroup iQFOil;
     private Map<RaceGroupSeriesFleetRaceColumn, SimpleFilterableRace> races;
 
     @Before
@@ -55,6 +56,8 @@ public class CurrentRaceFilterImplTest {
         races.putAll(getAllRaces(league));
         ess = createEssRegatta();
         races.putAll(getAllRaces(ess));
+        iQFOil = createiQFOilRegatta();
+        races.putAll(getAllRaces(iQFOil));
         fixture = new CurrentRaceFilterImpl<>(races.values());
     }
 
@@ -86,7 +89,7 @@ public class CurrentRaceFilterImplTest {
         isafSeries.add(new SeriesWithRowsImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, isafQualificationRaceRows));
         final List<RaceRow> isafFinalRaceRows = Arrays.asList(createRaceRow(6, 5, "F", "Gold"), createRaceRow(6, 5, "F", "Silver"));
         isafSeries.add(new SeriesWithRowsImpl("Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, isafFinalRaceRows));
-        final List<RaceRow> isafMedalRaceRows = Arrays.asList(createRaceRow(1, 1, "M", "Medal"));
+        final List<RaceRow> isafMedalRaceRows = Arrays.asList(createRaceRow(1, 1, "M", ")Medal"));
         isafSeries.add(new SeriesWithRowsImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, isafMedalRaceRows));
         final RaceGroup isaf = new RaceGroupImpl("ISAF", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata._470), /* canBoatsOfCompetitorsChangePerRace */ false,
@@ -122,6 +125,26 @@ public class CurrentRaceFilterImplTest {
                 new BoatClassImpl(BoatClassMasterdata.J70), /* canBoatsOfCompetitorsChangePerRace */ false,
                 leagueSeries, /* regattaConfiguration */ null);
         return league;
+    }
+
+    private RaceGroup createiQFOilRegatta() {
+        final List<SeriesWithRows> iQFOilSeries = new ArrayList<>();
+        final List<RaceRow> iQFOilOpeningSeries1RaceRows = Arrays.asList(createRaceRow(1, 16, "R", "Default"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Opening (1)", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilOpeningSeries1RaceRows));
+        final List<RaceRow> iQFOilMarathonRaceRows = Arrays.asList(createRaceRow(16, 0, "R", "Default"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Marathon", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilMarathonRaceRows));
+        final List<RaceRow> iQFOilOpeningSeries2RaceRows = Arrays.asList(createRaceRow(16, 0, "R", "Default"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Opening (2)", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilOpeningSeries2RaceRows));
+        final List<RaceRow> iQFOilQuarterFinalRaceRows = Arrays.asList(createRaceRow(1, 1, "QF", "Grand Final"), createRaceRow(1, 1, "QF", "Semi Final"), createRaceRow(1, 1, "QF", "Quarter Final"), createRaceRow(1, 1, "QF", "Not Qualified"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Quarter Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilQuarterFinalRaceRows));
+        final List<RaceRow> iQFOilSemiFinalRaceRows = Arrays.asList(createRaceRow(1, 1, "SF", "Grand Final"), createRaceRow(1, 1, "SF", "Semi Final"), createRaceRow(1, 1, "SF", "Not Qualified for Semi Final"), createRaceRow(1, 1, "SF", "Not Qualified for Quarter Final"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Quarter Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilSemiFinalRaceRows));
+        final List<RaceRow> iQFOilGrandFinalRaceRows = Arrays.asList(createRaceRow(1, 1, "QF", "Grand Final"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Quarter Final", /* isMedal */ true, /* isFleetsCanRunInParallel */ false, iQFOilGrandFinalRaceRows));
+        final RaceGroup iQFOil = new RaceGroupImpl("iQFOil", /* displayName */ null,
+                new BoatClassImpl(BoatClassMasterdata.IQFOIL_MEN), /* canBoatsOfCompetitorsChangePerRace */ false,
+                iQFOilSeries, /* regattaConfiguration */ null);
+        return iQFOil;
     }
 
     private Map<RaceGroupSeriesFleetRaceColumn, SimpleFilterableRace> getAllRaces(RaceGroup raceGroup) {
