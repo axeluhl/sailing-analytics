@@ -424,6 +424,9 @@ public class RegattaDetailsComposite extends Composite {
                                                         presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                                     }
                                                 });
+                                            } else {
+                                                presenter.getRegattasRefresher().reloadAndCallFillAll();
+                                                presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
                                             }
                                         }
                                     });
