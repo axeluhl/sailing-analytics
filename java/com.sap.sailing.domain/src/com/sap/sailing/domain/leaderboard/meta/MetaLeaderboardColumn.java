@@ -189,6 +189,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        getRaceColumnListeners().notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
+    }
+
+    @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         getRaceColumnListeners().notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
     }

@@ -25,6 +25,11 @@
                 <div class="innerContent">
           <h2 class="articleSubheadline">May 2022</h2>
           <ul class="bulletList">
+            <li>Bug fix: when only the maximum number of discards of a series was changed, the leaderboard caches were not
+                properly invalidated, hence results wouldn't have been recalculated up to the next "real" change.</li>
+          </ul>
+          <h2 class="articleSubheadline">May 2022</h2>
+          <ul class="bulletList">
             <li>To configure remote server references, instead of the <tt>SERVER:UPDATE</tt> permission users
                 now need the more specific <tt>SERVER:CONFIGURE_REMOTE_INSTANCES</tt> permission.</li>
             <li>Running subscription updates is now avoided on replica servers.</li> 
