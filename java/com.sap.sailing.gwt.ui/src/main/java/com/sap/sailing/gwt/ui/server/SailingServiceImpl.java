@@ -4089,7 +4089,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     /**
-     * The client's day starts at <code>00:00:00Z - clientTimeZoneOffset</code> and ends at <code>23:59:59Z - clientTimeZoneOffset</code>.
+     * The client's day starts at <code>00:00:00Z - clientTimeZoneOffset</code> and ends at
+     * <code>23:59:59Z - clientTimeZoneOffset</code>.
+     * 
+     * @param visibleRegattas
+     *            if {@code null}, entries from any regatta will be accepted; otherwise (including in case of an empty
+     *            list), only entries from regattas whose name is in the list will be accepted.
      */
     private List<RegattaOverviewEntryDTO> getRaceStateEntriesForLeaderboard(Leaderboard leaderboard,
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, Duration clientTimeZoneOffset, final List<String> visibleRegattas)
