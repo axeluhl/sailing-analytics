@@ -86,5 +86,10 @@ public class ChargebeeApiService implements SubscriptionApiService {
     public SubscriptionPlanProvider getSubscriptionPlanProvider() {
         return subscriptionPlanProvider;
     }
+
+    @Override
+    public void getSubscriptionPlans(OnItemPriceResultListener listener) {
+        new ChargebeeFetchItemPricesTask(requestProcessor, result -> listener.onItemPriceResult(result), this);
+    }
     
 }
