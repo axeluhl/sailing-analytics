@@ -28,7 +28,7 @@ public class SubscriptionPlanBackgroundUpdater {
     }
 
     public void start(CompletableFuture<SecurityService> securityService) {
-        logger.info(() -> "Start subscription background update task");
+        logger.info(() -> "Start subscription plan background update task");
         executor.schedule(new SubscriptionPlanUpdateTask(securityService, subscriptionApiServiceTracker),
                 /* initial */ 1, TimeUnit.MINUTES);
     }

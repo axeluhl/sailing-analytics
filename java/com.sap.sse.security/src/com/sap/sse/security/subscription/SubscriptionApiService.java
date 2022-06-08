@@ -42,7 +42,7 @@ public interface SubscriptionApiService extends SubscriptionApiBaseService {
      * 
      * @param listener will be notified once result is available
      */
-    void getSubscriptionPlans(OnItemPriceResultListener listener);
+    void getItemPrices(OnItemPriceResultListener listener);
 
     /**
      * Cancel user subscription by its {@link Subscription#getSubscriptionId() id}

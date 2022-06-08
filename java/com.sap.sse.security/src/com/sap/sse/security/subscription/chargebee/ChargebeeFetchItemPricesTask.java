@@ -29,7 +29,7 @@ public class ChargebeeFetchItemPricesTask implements ChargebeeItemPriceListReque
     }
 
     public void run() {
-        fetchSubscriptionList(null);
+        fetchItemPriceList(null);
     }
 
     @Override
@@ -38,12 +38,12 @@ public class ChargebeeFetchItemPricesTask implements ChargebeeItemPriceListReque
         if (nextOffset == null || nextOffset.isEmpty()) {
             onDone();
         } else {
-            fetchSubscriptionList(nextOffset);
+            fetchItemPriceList(nextOffset);
         }
     }
 
-    private void fetchSubscriptionList(String offset) {
-        logger.info(() -> "Schedule fetch Chargebee subscriptions, offset: "
+    private void fetchItemPriceList(String offset) {
+        logger.info(() -> "Schedule fetch Chargebee ItemPrices, offset: "
                 + (offset == null ? "" : offset));
         requestProcessor.addRequest(new ChargebeeItemPriceListRequest(offset, this, requestProcessor, chargebeeApiServiceParams));
     }

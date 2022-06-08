@@ -27,9 +27,9 @@ public class ProviderSubscriptionPlanUpdateTask implements SubscriptionApiServic
     public void run() {
         try {
             // Currently this only retrieves and updates Itemprices. Additional Processes and Updates might be queued here.
-            apiService.getSubscriptionPlans(this);
+            apiService.getItemPrices(this);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Fetch subscriptions failed, provider: " 
+            logger.log(Level.SEVERE, "Fetch subscription plans failed, provider: " 
         + apiService.getProviderName(), e);
         }
     }
@@ -42,7 +42,7 @@ public class ProviderSubscriptionPlanUpdateTask implements SubscriptionApiServic
         if (itemPrices != null) {
             getSecurityService().updateSubscriptionPlanPrices(itemPrices);
         } else {
-            logger.log(Level.SEVERE, "Update subscription plans failed, provider: " + apiService.getProviderName());
+            logger.log(Level.SEVERE, "Updating item prices failed, provider: " + apiService.getProviderName());
         }
     }
 
