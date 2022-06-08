@@ -1109,6 +1109,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             info = new GateStartInfoDTO(gateStart.getPathfinder(), gateStart.getGateLaunchStopTime());
             break;
         case RRS26:
+        case RRS26_3MIN:
         case SWC:
             ConfigurableStartModeFlagRacingProcedure linestart = state.getTypedReadonlyRacingProcedure();
             info = new LineStartInfoDTO(linestart.getStartModeFlag());

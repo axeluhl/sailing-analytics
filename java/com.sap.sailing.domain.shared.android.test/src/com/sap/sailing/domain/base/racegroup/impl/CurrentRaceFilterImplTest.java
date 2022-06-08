@@ -35,6 +35,7 @@ public class CurrentRaceFilterImplTest {
     private RaceGroup isaf;
     private RaceGroup league;
     private RaceGroup ess;
+    private RaceGroup iQFOil;
     private Map<RaceGroupSeriesFleetRaceColumn, SimpleFilterableRace> races;
 
     @Before
@@ -55,6 +56,8 @@ public class CurrentRaceFilterImplTest {
         races.putAll(getAllRaces(league));
         ess = createEssRegatta();
         races.putAll(getAllRaces(ess));
+        iQFOil = createiQFOilRegatta();
+        races.putAll(getAllRaces(iQFOil));
         fixture = new CurrentRaceFilterImpl<>(races.values());
     }
 
@@ -122,6 +125,26 @@ public class CurrentRaceFilterImplTest {
                 new BoatClassImpl(BoatClassMasterdata.J70), /* canBoatsOfCompetitorsChangePerRace */ false,
                 leagueSeries, /* regattaConfiguration */ null);
         return league;
+    }
+
+    private RaceGroup createiQFOilRegatta() {
+        final List<SeriesWithRows> iQFOilSeries = new ArrayList<>();
+        final List<RaceRow> iQFOilOpeningSeries1RaceRows = Arrays.asList(createRaceRow(1, 1, "R", "Default"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Opening (1)", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilOpeningSeries1RaceRows));
+        final List<RaceRow> iQFOilMarathonRaceRows = Arrays.asList(createRaceRow(2, 0, "R", "Default"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Marathon", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilMarathonRaceRows));
+        final List<RaceRow> iQFOilOpeningSeries2RaceRows = Arrays.asList(createRaceRow(16, 0, "R", "Default"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Opening (2)", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilOpeningSeries2RaceRows));
+        final List<RaceRow> iQFOilQuarterFinalRaceRows = Arrays.asList(createRaceRow(1, 1, "QF", "Grand Final"), createRaceRow(1, 1, "QF", "Semi Final"), createRaceRow(1, 1, "QF", "Quarter Final"), createRaceRow(1, 1, "QF", "Not Qualified"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Quarter Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilQuarterFinalRaceRows));
+        final List<RaceRow> iQFOilSemiFinalRaceRows = Arrays.asList(createRaceRow(1, 1, "SF", "Grand Final"), createRaceRow(1, 1, "SF", "Semi Final"), createRaceRow(1, 1, "SF", "Not Qualified for Semi Final"), createRaceRow(1, 1, "SF", "Not Qualified for Quarter Final"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Quarter Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, iQFOilSemiFinalRaceRows));
+        final List<RaceRow> iQFOilGrandFinalRaceRows = Arrays.asList(createRaceRow(1, 1, "QF", "Grand Final"));
+        iQFOilSeries.add(new SeriesWithRowsImpl("Quarter Final", /* isMedal */ true, /* isFleetsCanRunInParallel */ false, iQFOilGrandFinalRaceRows));
+        final RaceGroup iQFOil = new RaceGroupImpl("iQFOil", /* displayName */ null,
+                new BoatClassImpl(BoatClassMasterdata.IQFOIL_MEN), /* canBoatsOfCompetitorsChangePerRace */ false,
+                iQFOilSeries, /* regattaConfiguration */ null);
+        return iQFOil;
     }
 
     private Map<RaceGroupSeriesFleetRaceColumn, SimpleFilterableRace> getAllRaces(RaceGroup raceGroup) {
@@ -205,6 +228,30 @@ public class CurrentRaceFilterImplTest {
         assertTrue(current505Races.contains(get(_505, "R1", "Default"))); // it's scheduled, so it shows
         assertTrue(current505Races.contains(get(_505, "R2", "Default"))); // it's unscheduled and has a scheduled immediate predecessor
     }
+
+    @Test
+    public void testSchedulingRaceAfterEmptySeries() {
+        {
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        // with all races unscheduled we can expect the first race of each regatta's first series to show
+        final Set<SimpleFilterableRace> currentiQFOilRaces = currentRaces.stream().filter(r->r.getRaceGroup() == iQFOil).collect(Collectors.toSet());
+        assertEquals(1, currentiQFOilRaces.size());
+        final SimpleFilterableRace firstRace = currentiQFOilRaces.iterator().next();
+        assertEquals("R1", firstRace.getRaceColumnName());
+        }
+        get(iQFOil, "R1", "Default").setStatus(RaceLogRaceStatus.SCHEDULED);
+        {
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        final Set<SimpleFilterableRace> currentiQFOilRaces = currentRaces.stream().filter(r->r.getRaceGroup() == iQFOil).collect(Collectors.toSet());
+        assertEquals(5, currentiQFOilRaces.size());
+        assertTrue(currentiQFOilRaces.contains(get(iQFOil, "R1", "Default"))); // it's scheduled, so it shows
+        assertTrue(currentiQFOilRaces.contains(get(iQFOil, "QF1", "Quarter Final")));
+        assertTrue(currentiQFOilRaces.contains(get(iQFOil, "QF1", "Semi Final")));
+        assertTrue(currentiQFOilRaces.contains(get(iQFOil, "QF1", "Quarter Final")));
+        assertTrue(currentiQFOilRaces.contains(get(iQFOil, "QF1", "Semi Final")));
+        }
+    }
+
 
     @Test
     public void testSchedulingFirstIsafRace() {

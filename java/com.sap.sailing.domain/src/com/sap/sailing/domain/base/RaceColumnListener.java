@@ -41,6 +41,8 @@ public interface RaceColumnListener extends Serializable {
 
     void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule);
 
+    void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards);
+
     void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event);
     
     default void regattaLogEventAdded(RegattaLogEvent event) {};
@@ -56,5 +58,4 @@ public interface RaceColumnListener extends Serializable {
      * exclude listeners from the serialization that return <code>true</code> from this method.
      */
     boolean isTransient();
-
 }
