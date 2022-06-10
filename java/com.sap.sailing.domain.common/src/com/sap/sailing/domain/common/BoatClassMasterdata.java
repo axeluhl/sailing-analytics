@@ -148,6 +148,7 @@ public enum BoatClassMasterdata {
     VIPER_640 ("Viper 640", true, 6.43, 2.49, BoatHullType.MONOHULL, true),
     VO60 ("VO60", true, 19.5, 5.25, BoatHullType.MONOHULL, true, "Volvo Ocean 60", "VolvoOcean60", "W60", "Whitbread60", "Whitbread 60"),
     VX_ONE ("VX ONE", true, 5.79, 2.19, BoatHullType.MONOHULL, true, "VX-ONE"),
+    WASZP ("WASZP", true, 3.35, 2.25, BoatHullType.MONOHULL, false, "WASZPs"),
     WAYFARER ("Wayfarer", true, 4.82, 1.85, BoatHullType.MONOHULL, false),
     WETA ("Weta", true, 4.4, 3.5, BoatHullType.TRIMARAN, true, "Weta Trimaran"),
     X_332 ("X-332", true, 10.06, 3.30, BoatHullType.MONOHULL, true, "X332"),
