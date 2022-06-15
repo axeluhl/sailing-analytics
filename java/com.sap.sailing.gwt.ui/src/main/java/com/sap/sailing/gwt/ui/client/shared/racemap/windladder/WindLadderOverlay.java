@@ -4,17 +4,25 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.Composite;
 import com.google.gwt.canvas.dom.client.Context2d.Repetition;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnAddHandler;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.client.shared.racemap.ManeuverAngleCache;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
+import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.MovingCanvasOverlay;
 import com.sap.sse.common.Bearing;
 
@@ -22,70 +30,44 @@ import com.sap.sse.common.Bearing;
  * 
  * @author Tim Hessenmüller (D062243)
  */
-public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanvasOverlay
+public class WindLadderOverlay extends FullCanvasOverlay {
     protected static final WindLadderResources RESOURCES = GWT.create(WindLadderResources.class);
-    protected static final double PADDING_MULT = 1.2d;
-    protected static final double TEXTURE_ALPHA = 0.8d;
+    protected static final double TEXTURE_ALPHA = 0.6d;
+    protected static final double CANVAS_RESERVE = 0.1;
 
-    protected WindLadderMaskGenerator maskGen = new EdgeFeatherMaskGenerator(0.2d);
-    protected LaylineClipper laylineClipper = new LaylineClipper();
+    protected double canvasRotationDegrees;
+
     protected ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture());
 
-    protected WindDTO windFix;
+    protected Double windBearing;
+    protected Position fixPosition;
 
-    private final ManeuverAngleCache maneuverAngleCache;
-    private Position legEnd;
-    private Position legStart;
-    private Point center;
-    private Point patternFixPoint;
-    private int width;
-    private int height;
-    private double rotation;
+    protected Double drawnWindBearing;
+    protected Double drawnPatternSize;
 
-    public WindLadderOverlay(ManeuverAngleCache maneuverAngleCache, MapWidget map, int zIndex,
-            CoordinateSystem coordinateSystem) {
+    protected Double previousOffset;
+
+    public WindLadderOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
-        this.maneuverAngleCache = maneuverAngleCache;
     }
 
-    public void update(WaypointDTO legStart, WaypointDTO legEnd, WindDTO windFix) {
-        this.legStart = averageMarkPositions(legStart.controlPoint.getMarks());
-        this.legEnd = averageMarkPositions(legEnd.controlPoint.getMarks());
-        this.laylineClipper.update(legEnd);
+    public void update(WindDTO windFix, Position fixPosition, long timeForPositionTransitionMillis) {
         if (windFix != null) {
-            this.windFix = windFix;
+            windBearing = Math.toRadians(coordinateSystem.mapDegreeBearing(windFix.trueWindFromDeg)); //TODO every draw?
         }
-        //updateTransition(-1);
-        draw(); //TODO Force additional draw?
+        if (fixPosition != null) {
+            this.fixPosition = fixPosition;
+        }
+        updateTransition(timeForPositionTransitionMillis);
+        draw();
     }
 
-    private Position averageMarkPositions(Iterable<MarkDTO> marks) {
-        long size = marks.spliterator().getExactSizeIfKnown();
-        if (size == -1) {
-            size = 0;
-            for (@SuppressWarnings("unused") MarkDTO mark : marks) { //TODO Integrate into loop below
-                size++;
-            }
-        }
-        Position result = null;
-        if (size > 0) {
-            double sumLat = 0d;
-            double sumLng = 0d;
-            for (MarkDTO mark : marks) {
-                sumLat += mark.position.getLatRad();
-                sumLng += mark.position.getLngRad();
-            }
-            result = new RadianPosition(sumLat / size, sumLng / size);
-        }
-        return result;
+    protected boolean isRedrawNeeded() {
+        return drawnWindBearing == null || drawnPatternSize == null || Math.abs(drawnWindBearing - windBearing) > Math.toRadians(5);
     }
 
-    private void calculateMaskSize(Position pos1, Position pos2) {
-        Point p1 = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos1));
-        Point p2 = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos2));
-        height = (int) Math.ceil(Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2))
-                * PADDING_MULT);
-        width = (int) Math.ceil(height * 0.75d); //TODO Get width of field
+    protected void forceRedraw() {
+        drawnWindBearing = null;
     }
 
     private double calculatePatternScale(int patternSize) {
@@ -95,83 +77,123 @@ public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanva
         final double patternSizeMeters = pos1.getDistance(pos2).getMeters();
         final double boatLength = 6.4d;
         double scale = boatLength * 10 / patternSizeMeters; //TODO Adaptive
-        GWT.log("Scale: " + scale);
+        GWT.log("Scale: " + patternSize + " -> " + scale);
         return scale;
+    }
+
+    /**
+     * Resets the canvas into a neutral position and rotation
+     */
+    @Override
+    public void setCanvasSettings() {
+        if (mapWidth == null) {
+            mapWidth = getMap().getDiv().getClientWidth();
+        }
+        if (mapHeight == null) {
+            mapHeight = getMap().getDiv().getClientHeight();
+        }
+        int canvasWidthReserve = (int) (mapWidth * CANVAS_RESERVE);
+        int canvasHeightReserve = (int) (mapHeight * CANVAS_RESERVE);
+        int canvasWidth = mapWidth + canvasWidthReserve;
+        int canvasHeight = mapHeight + canvasHeightReserve;
+
+        canvas.setWidth(String.valueOf(canvasWidth));
+        canvas.setHeight(String.valueOf(canvasHeight));
+        canvas.setCoordinateSpaceWidth(canvasWidth);
+        canvas.setCoordinateSpaceHeight(canvasHeight);
+
+        Point sw = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getSouthWest());
+        Point ne = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getNorthEast());
+        setWidgetPosLeft(Math.min(sw.getX(), ne.getX()) - canvasWidthReserve / 2);
+        setWidgetPosTop(Math.min(sw.getY(), ne.getY()) - canvasHeightReserve / 2);
+
+        setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
+        setCanvasRotation(0.0);
     }
 
     @Override
     protected void draw() {
-        if (legStart == null || legEnd == null || windFix == null || mapProjection == null) {
-            return;
-        }
-        boolean redraw = true; //TODO
-        calculateMaskSize(legStart, legEnd);
-        Bearing bearing = legEnd.getBearingGreatCircle(legStart);
-        Position middle = legEnd.translateGreatCircle(bearing, legEnd.getDistance(legStart).scale(0.5d));
-        center = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(middle));
-        patternFixPoint = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(legEnd));
-        rotation = bearing.getRadians();
-        if (redraw) {
-            drawToCanvas();
+        if (mapProjection != null && windBearing != null && fixPosition != null && tileGen.getReady()) {
+
+            if (isRedrawNeeded()) {
+                GWT.log("redraw");
+                updateTransition(-1);
+                setCanvasSettings();
+                drawToCanvas();
+            } else {
+                // Rotation
+                setCanvasRotation(Math.toDegrees(windBearing - drawnWindBearing));
+            }
+            // Offset from centered position
+            Point fixPointInMap = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(fixPosition));
+            GWT.log(fixPointInMap.toString());
+            Point windUnitVector = Point.newInstance(-Math.sin(-windBearing), -Math.cos(-windBearing));
+            // Dot product of the two vectors above
+            final double fixPointWindwardDistance = fixPointInMap.getX() * windUnitVector.getX() + fixPointInMap.getY() * windUnitVector.getY();;
+            double offset = fixPointWindwardDistance % drawnPatternSize;
+            offset = offset < 0.0 ? offset + drawnPatternSize : offset; // Full modulus instead of remainder
+            offset = offset > drawnPatternSize / 2.0 ? offset - drawnPatternSize : offset; // Center around 0
+            Point offsetVector = Point.newInstance(offset * windUnitVector.getX(), offset * windUnitVector.getY());
+            // Detect pattern jump
+            if (previousOffset != null && Math.abs(offset - previousOffset) > drawnPatternSize / 2.0) {
+                updateTransition(-1);
+            }
+            previousOffset = offset;
+            setCanvasPosition(getWidgetPosLeft() + offsetVector.getX(), getWidgetPosTop() + offsetVector.getY());
         }
     }
 
     protected void drawToCanvas() {
         // Prepare canvas
-        super.setCanvasSettings(); //This clears the canvas //TODO Call on every resize/move
-        final int canvasWidth = getMap().getDiv().getClientWidth();
-        final int canvasHeight = getMap().getDiv().getClientHeight();
+        final int canvasWidth = canvas.getCoordinateSpaceWidth();
+        final int canvasHeight = canvas.getCoordinateSpaceHeight();
         final double patternScale = calculatePatternScale(tileGen.getHeight());
-        Context2d ctx = getCanvas().getContext2d();
-        // Transpose to area of interest
-        ctx.save();
-        ctx.fillRect(100, 100, 100, 100); //TODO Clip here
-        ctx.translate(center.getX() + canvasWidth / 2, center.getY() + canvasHeight / 2);
-        ctx.rotate(rotation);
-        ctx.translate(-width / 2, -height / 2);
-        // Draw transparency mask
-        maskGen.drawMask(width, height, ctx);
-        ctx.restore();
+        Context2d ctx = canvas.getContext2d();
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         // Change composite mode
         ctx.save();
         ctx.setGlobalAlpha(TEXTURE_ALPHA);
-        ctx.setGlobalCompositeOperation(Composite.SOURCE_IN);
+        //ctx.setGlobalCompositeOperation(Composite.SOURCE_IN);
         // Prepare pattern texture
         ctx.setFillStyle(ctx.createPattern(tileGen.getTile(), Repetition.REPEAT));
-        ctx.rect(0, 0, canvasWidth, canvasHeight); //TODO Find a way to reduce the fill size
-        // Transpose to pattern fix point
-        ctx.translate(patternFixPoint.getX() + canvasWidth / 2, patternFixPoint.getY() + canvasHeight / 2);
-        ctx.rotate(Math.toRadians(windFix.trueWindFromDeg));
+        ctx.rect(0, 0, canvasWidth, canvasHeight);
+        ctx.translate(canvasWidth / 2, canvasHeight / 2);
+        ctx.rotate(windBearing);
         ctx.scale(patternScale, patternScale);
         // Draw pattern onto mask
         ctx.fill();
+        // DEBUG
         ctx.restore();
-
-        // Debug arrow
-        ctx.setStrokeStyle("magenta");
         ctx.beginPath();
-        ctx.moveTo(200, 200);
-        ctx.lineTo(center.getX() + canvasWidth / 2, center.getY() + canvasHeight / 2);
-        ctx.stroke();
+        ctx.translate(canvasWidth / 2, canvasHeight / 2);
+        ctx.rect(-2, -2, 4, 4);
+        ctx.setFillStyle("red");
+        ctx.fill();
+        drawnWindBearing = windBearing;
+        drawnPatternSize = tileGen.getHeight() * patternScale;
+    }
 
-        ctx.setStrokeStyle("green");
-        Point start = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(legStart));
-        ctx.beginPath();
-        ctx.moveTo(200, 200);
-        ctx.lineTo(start.getX() + canvasWidth / 2, start.getY() + canvasHeight / 2);
-        ctx.stroke();
+    @Override
+    protected void setCanvasRotation(double rotationInDegrees) {
+        super.setCanvasRotation(rotationInDegrees);
+        canvasRotationDegrees = rotationInDegrees;
+    }
 
-        ctx.setStrokeStyle("red");
-        Point end = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(legEnd));
-        ctx.beginPath();
-        ctx.moveTo(200, 200);
-        ctx.lineTo(end.getX() + canvasWidth / 2, end.getY() + canvasHeight / 2);
-        ctx.stroke();
-        // Debug outline
-        //ctx.setStrokeStyle("magenta");
-        //ctx.strokeRect(0, 0, width, height);
-        //ctx.setStrokeStyle("red");
-        //ctx.strokeRect(0, 0, width, 0);
+    protected double getCanvasRotation() {
+        return canvasRotationDegrees;
+    }
+
+    @Override
+    public void onResize() {
+        forceRedraw();
+        super.onResize();
+    }
+
+    @Override
+    protected void drawCenterChanged() {
+        updateTransition(-1);
+        GWT.log("drawCenterChanged");
+        draw();
     }
 
     @Override

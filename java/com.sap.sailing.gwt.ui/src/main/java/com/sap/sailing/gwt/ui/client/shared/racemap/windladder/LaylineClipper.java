@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap.windladder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.overlays.MapCanvasProjection;
@@ -19,6 +17,9 @@ public class LaylineClipper {
     protected final List<Position> markPositions = new ArrayList<>(1);
     protected PassingInstruction passingInstruction;
     protected LegType legType;
+    /**
+     * Maneuver Angle in reference to wind (i.e. half of the maneuver angle)
+     */
     protected Double maneuverAngleRadians;
 
     public void update(WaypointDTO waypointDto, LegType legType, double maneuverAngleRadians) {
@@ -30,7 +31,7 @@ public class LaylineClipper {
             passingInstruction = waypointDto.passingInstructions;
         }
         this.legType = legType;
-        this.maneuverAngleRadians = maneuverAngleRadians;
+        this.maneuverAngleRadians = maneuverAngleRadians / 2.0;
     }
 
     public void clippingPath(double windRotation, int width, int height, Context2d ctx, MapCanvasProjection projection) {
@@ -42,7 +43,6 @@ public class LaylineClipper {
                 // projection.fromLatLngToDivPixel returns position in reference to div; 0,0 being centered
                 points[i] = projection.fromLatLngToDivPixel(LatLng.newInstance(pos.getLatDeg(), pos.getLngDeg()));
             }
-            GWT.log(Arrays.toString(points));
             final int leftMarkIndex, rightMarkIndex;
             if (points.length == 1) {
                 leftMarkIndex = 0;
@@ -58,9 +58,14 @@ public class LaylineClipper {
             }
             ctx.translate(width / 2, height / 2);
             ctx.beginPath();
-            final double length = 300;
-            // Left layline to left mark
-            Point start = laylineEndPoint(points[leftMarkIndex], length, -maneuverAngleRadians);
+            final double length = 10000; //TODO Calculate correct value
+            // Left layline to left mark //FIXME Add 2 more points to allow for maneuver angles >=90°
+            final Point start;
+            if (legType == LegType.UPWIND) {
+                start = laylineEndPoint(points[leftMarkIndex], length, -maneuverAngleRadians - windRotation);
+            } else {
+                start = laylineEndPoint(points[leftMarkIndex], length, -maneuverAngleRadians - windRotation + Math.PI);
+            }
             ctx.moveTo(start.getX(), start.getY());
             ctx.lineTo(points[leftMarkIndex].getX(), points[leftMarkIndex].getY());
             // Left mark to right mark (if applicable)
@@ -68,7 +73,12 @@ public class LaylineClipper {
                 ctx.lineTo(points[rightMarkIndex].getX(), points[rightMarkIndex].getY());
             }
             // Right mark to right layline
-            Point end = laylineEndPoint(points[rightMarkIndex], length, maneuverAngleRadians);
+            final Point end;
+            if (legType == LegType.UPWIND) {
+                end = laylineEndPoint(points[rightMarkIndex], length, maneuverAngleRadians - windRotation);
+            } else {
+                end = laylineEndPoint(points[rightMarkIndex], length, maneuverAngleRadians - windRotation + Math.PI);
+            }
             ctx.lineTo(end.getX(), end.getY());
             ctx.closePath();
         }

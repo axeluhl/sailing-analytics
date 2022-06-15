@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class ImageTileGenerator implements WindLadderTileGenerator {
     protected final Canvas canvas;
+    protected boolean isReady = false;
 
     public ImageTileGenerator(ImageResource resource) {
         canvas = Canvas.createIfSupported();
@@ -25,6 +26,7 @@ public class ImageTileGenerator implements WindLadderTileGenerator {
                     Context2d ctx = canvas.getContext2d();
                     ctx.drawImage(ImageElement.as(image.getElement()), 0, 0);
                     RootPanel.get().remove(image);
+                    isReady = true;
                 }
             });
             image.setVisible(false);
@@ -35,6 +37,10 @@ public class ImageTileGenerator implements WindLadderTileGenerator {
     @Override
     public CanvasElement getTile() {
         return canvas.getCanvasElement();
+    }
+
+    public boolean getReady() {
+        return isReady;
     }
 
     public int getWidth() {

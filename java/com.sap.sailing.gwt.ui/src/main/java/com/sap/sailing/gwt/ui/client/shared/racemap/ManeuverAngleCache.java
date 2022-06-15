@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -22,7 +24,7 @@ import com.sap.sse.common.Util.Triple;
  */
 public class ManeuverAngleCache {
     private static final Long TTL_MILLIS = 600_000L;
-    private static final Integer WIND_BUCKET_RESOLUTION = 3;
+    private static final Integer WIND_BUCKET_RESOLUTION = 1;
     private static final Integer WIND_BUCKET_INITIAL_CAP = 8;
 
     private final class Key {
@@ -62,7 +64,7 @@ public class ManeuverAngleCache {
     }
 
     private final SailingServiceAsync sailingService;
-    private final HashMap<Key, List<Triple<Long, Bearing, Double>>> cache = new HashMap<>();
+    private final HashMap<Key, ArrayList<Triple<Long, Bearing, Double>>> cache = new HashMap<>();
     /**
      * Set of request that have been sent and are still being processed.
      */
@@ -165,21 +167,21 @@ public class ManeuverAngleCache {
         Triple<Long, Bearing, Double> result = null;
         int downIndex = bucketIndex - 1;
         int upIndex = bucketIndex + 1;
-        while (downIndex >= 0 && upIndex < size) {
+        while (downIndex >= 0 || upIndex < size) {
             if (downIndex >= 0 && downIndex < size) {
                 result = windBuckets.get(downIndex);
                 if (result != null) {
                     break;
                 }
-                downIndex--;
             }
+            downIndex--;
             if (upIndex < size) {
                 result = windBuckets.get(upIndex);
                 if (result != null) {
                     break;
                 }
-                upIndex++;
             }
+            upIndex++;
         }
         return result;
     }
@@ -194,17 +196,22 @@ public class ManeuverAngleCache {
         final Triple<BoatClassDTO, ManeuverType, Integer> requestKey = new Triple<>(boatClass, maneuverType, windSpeedBucket);
         if (!requestSet.contains(requestKey)) {
             final Speed windSpeed = bucketAvgSpeed(windSpeedBucket);
+            GWT.log("callGetManeuverAngle: " + boatClass + ", " + maneuverType + ", " + windSpeed);
             sailingService.getManeuverAngle(boatClass, maneuverType, windSpeed,
                     new AsyncCallback<BearingWithConfidenceDTO>() {
                         @Override
                         public void onSuccess(BearingWithConfidenceDTO result) {
                             if (result != null) {
+                                final int index = windSpeedBucket;
                                 final Key key = new Key(boatClass, maneuverType);
-                                final List<Triple<Long, Bearing, Double>> windBuckets = cache.computeIfAbsent(key,
-                                        k -> new ArrayList<>(WIND_BUCKET_INITIAL_CAP));
-                                final int index = bucketIndex(windSpeed);
+                                final ArrayList<Triple<Long, Bearing, Double>> windBuckets = cache.computeIfAbsent(key,
+                                        k -> new ArrayList<>(Math.max(WIND_BUCKET_INITIAL_CAP, index + 1)));
                                 final long expiry = System.currentTimeMillis() + TTL_MILLIS; // TODO Adjust TTL by
                                                                                              // confidence
+                                if (index >= windBuckets.size()) {
+                                    windBuckets.ensureCapacity(index + 1);
+                                    windBuckets.addAll(windBuckets.size(), Collections.nCopies(index - windBuckets.size() + 1, null));
+                                }
                                 windBuckets.set(index, new Triple<>(expiry, result.getBearing(), result.getConfidence()));
                             }
                             requestSet.remove(requestKey);
@@ -212,7 +219,8 @@ public class ManeuverAngleCache {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            // TODO Auto-generated method stub
+                            //TODO Throttle requests?
+                            GWT.log("[ERROR] callGetManeuverAngle:", caught);
                             requestSet.remove(requestKey);
                         }
                     });
@@ -226,7 +234,7 @@ public class ManeuverAngleCache {
      * @return {@code int} bucket index
      */
     private static int bucketIndex(Speed windSpeed) {
-        return ((int) Math.round(windSpeed.getKnots())) / WIND_BUCKET_RESOLUTION;
+        return ((int) Math.floor(windSpeed.getKnots())) / WIND_BUCKET_RESOLUTION;
     }
 
     /**
@@ -237,5 +245,11 @@ public class ManeuverAngleCache {
     private static Speed bucketAvgSpeed(int bucketIndex) {
         double speed = bucketIndex * WIND_BUCKET_RESOLUTION + WIND_BUCKET_RESOLUTION / 2.0;
         return new KnotSpeedImpl(speed);
+    }
+
+    @Override
+    public String toString() {
+        return "ManeuverAngleCache [defaultAngle=" + defaultAngle + ", overrideAngle="
+                + overrideAngle + "]";
     }
 }
