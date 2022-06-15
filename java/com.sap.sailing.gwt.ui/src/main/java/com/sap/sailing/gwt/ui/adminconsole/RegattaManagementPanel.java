@@ -18,7 +18,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.gwt.common.client.help.HelpButton;
-import com.sap.sailing.gwt.ui.adminconsole.help.AdminConsoleHelpButtonResources;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -85,8 +85,8 @@ public class RegattaManagementPanel extends SimplePanel implements FilterablePan
                     final Collection<RegattaIdentifier> regattas = createModifiableCollection();
                     removeRegattas(regattas);
                 });
-        buttonPanel.addUnsecuredWidget(new HelpButton(AdminConsoleHelpButtonResources.INSTANCE, 
-                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4"));
+        buttonPanel.addUnsecuredWidget(new HelpButton(HelpButtonResources.INSTANCE,
+                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4", 0));
         regattasContentPanel.add(buttonPanel);
         refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
