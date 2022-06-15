@@ -623,6 +623,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
+    public void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        raceColumnListeners.notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }

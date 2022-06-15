@@ -3,31 +3,36 @@ package com.sap.sse.security.shared.subscription;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class SubscriptionPrice implements Serializable{
+public class SubscriptionPrice implements Serializable {
     private static final long serialVersionUID = -1448071130685381256L;
     private String priceId;
     private BigDecimal price;
     private PaymentInterval paymentInterval;
     private String currencyCode;
+    private Boolean disablePlan;
+    private Boolean isOneTimePayment;
 
     /*
      * For GWT Serialization
      */
     @Deprecated
-    public SubscriptionPrice() {}
-    
-    public SubscriptionPrice(String priceId, BigDecimal price, String currencyCode, PaymentInterval paymentInterval) {
+    public SubscriptionPrice() {
+    }
+
+    public SubscriptionPrice(String priceId, BigDecimal price, String currencyCode, PaymentInterval paymentInterval,
+            boolean isOneTimePayment) {
         super();
         this.priceId = priceId;
         this.price = price;
         this.currencyCode = currencyCode;
         this.paymentInterval = paymentInterval;
+        this.isOneTimePayment = isOneTimePayment;
     }
-    
+
     public String getCurrencyCode() {
         return currencyCode;
     }
-    
+
     public void setCurrencyCode(String currencyCode) {
         this.currencyCode = currencyCode;
     }
@@ -47,7 +52,7 @@ public class SubscriptionPrice implements Serializable{
     public void setPaymentInterval(PaymentInterval paymentInterval) {
         this.paymentInterval = paymentInterval;
     }
-    
+
     public String getPriceId() {
         return priceId;
     }
@@ -56,10 +61,21 @@ public class SubscriptionPrice implements Serializable{
         this.priceId = priceId;
     }
 
+    public Boolean getDisablePlan() {
+        return disablePlan;
+    }
+
+    public void setDisablePlan(Boolean disablePlan) {
+        this.disablePlan = disablePlan;
+    }
+
+    public Boolean getIsOneTimePayment() {
+        return isOneTimePayment;
+    }
+
     public enum PaymentInterval {
         YEAR, MONTH, WEEK, DAY
     }
-    
 
     @Override
     public String toString() {

@@ -26,7 +26,6 @@ import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sse.common.Util;
 
 public class SailingGalleryPlayer extends ResizeComposite implements HasSelectionChangedHandlers, HasClickHandlers {
-   
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     interface MyBinder extends UiBinder<Widget, SailingGalleryPlayer> {
@@ -123,7 +122,7 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
 			    arrows : false,
 			    centerMode : false,
 			    speed : 500,
-			    autoplaySpeed : 10000,
+			    autoplaySpeed : 15000,
 			    pauseOnHover : true,
 			    variableWidth : false,
 			    adaptiveHeight : false,
@@ -162,6 +161,8 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
     private native void _slickPlay() /*-{
 	$wnd.$('.subSlider').slick('slickPlay').slick('slickNext').slick(
 		'setOption', 'autoplay', true); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
+        $wnd.$('.subSlider').slick('slickPlay').slick('slickNext').slick(
+                'setOption', 'autoplaySpeed', 15000); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
     }-*/;
 
     private native void _slickPause() /*-{

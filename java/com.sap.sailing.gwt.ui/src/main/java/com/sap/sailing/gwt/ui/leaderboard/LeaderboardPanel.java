@@ -942,7 +942,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             BoatDTO boat = boatFetcher.getBoat(object);
-            sb.appendEscaped(getShortInfo(boat));
+            if (boat != null) {
+                sb.appendEscaped(getShortInfo(boat));
+            }
         }
         
         private String getShortInfo(BoatDTO boat) {

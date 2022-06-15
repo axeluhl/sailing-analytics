@@ -22,6 +22,7 @@ public abstract class SubscriptionPlan implements Serializable {
     private final Set<SubscriptionPrice> prices;
     private final Set<PlanCategory> planCategory;
     private final Boolean isOneTimePlan;
+    private final PlanGroup group;
     /**
      * Roles assigned for this plan, if user subscribe to the plan then the user will be assigned these roles
      */
@@ -31,16 +32,39 @@ public abstract class SubscriptionPlan implements Serializable {
      * Used to make Plans of the same category mutually exclusive.
      */
     public enum PlanCategory {
-        PREMIUM;
+        PREMIUM("premium"), DATA_MINING("data_mining");
+        final String id;
+        PlanCategory(String id) {
+            this.id = id;
+        }
+        public String getId() {
+            return id;
+        }
+    }
+    
+    /**
+     * Used to organize plans in groups to show on one subscription card. 
+     * The order of this enumeration is usually also the main order on the UI.
+     */
+    public enum PlanGroup {
+        PREMIUM("premium"), DATA_MINING_ARCHIVE("data_mining_archive"), DATA_MINING_ALL("data_mining_all");
+        final String id;
+        PlanGroup(String id) {
+            this.id = id;
+        }
+        public String getId() {
+            return id;
+        }
     }
     
     protected SubscriptionPlan(String id, Set<SubscriptionPrice> prices, Set<PlanCategory> planCategory,
-            Boolean isOneTimePlan, SubscriptionPlanRole[] roles) {
+            Boolean isOneTimePlan, PlanGroup group, SubscriptionPlanRole[] roles) {
         this.id = id;
         this.roles = roles;
         this.prices = prices;
         this.planCategory = planCategory;
         this.isOneTimePlan = isOneTimePlan;
+        this.group = group;
     }
 
     public String getId() {
@@ -61,6 +85,10 @@ public abstract class SubscriptionPlan implements Serializable {
     
     public Boolean getIsOneTimePlan() {
         return isOneTimePlan;
+    }
+    
+    public PlanGroup getGroup() {
+        return group;
     }
 
     public boolean isUserInPossessionOfRoles(User user) {

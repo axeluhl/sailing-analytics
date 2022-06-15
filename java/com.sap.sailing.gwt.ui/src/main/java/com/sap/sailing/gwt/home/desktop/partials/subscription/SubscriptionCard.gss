@@ -57,10 +57,6 @@
  }
 }
 
-.subscription.individual {
- order: 999;
-}
-
 .subscription.highlight {
  order: 1;
 }
@@ -166,16 +162,18 @@
  border-radius: 0.333333333333333em;
  border-color: red;
  /* display: inline; */
- padding: 4px;
  color: red;
  font-weight: bold;
  position: relative;
- top: -60px;
- right: -240px;
- transform: rotate(45deg);
+ top: -45px;
+ right: -270px;
+ transform: rotate(30deg);
+ font-size: 10px;
+ padding: 4px;
+ margin: -14px;
 }
 
-.free .price, .individual .price {
+.free .price {
  border-color: #f0ab00;
  background-color: #f0ab00;
  color: #fff;
@@ -186,7 +184,7 @@
  color: #fff;
 }
 
-.free .price:hover, .individual .price:hover {
+.free .price:hover {
  border-color: #d79900;
 }
 
@@ -231,17 +229,17 @@
  width: 100%;
  display: block;
  position: relative;
- padding: 4px;
+ padding: 0px 4px 12px 4px;
 }
 
 .hint {
- position: absolute;
+ position: relative;
+ display: inline-block;
  color: #333;
  font-size: 12px;
  width: 100%;
  top: 3px;
  text-align: right;
- padding: 8px;
 }
 
 .hint button {
@@ -293,7 +291,20 @@
  width: 27px;
 }
 
+.featureCheck {
+ text-align: center;
+ margin: 0 1em;
+}
+
+.featureNone {
+ text-align: center;
+ margin: 0 1em;
+ color: #999;
+ font-size: 32px;
+}
+
 .featureHeader {
+ text-align: center;
  font-weight: bold;
  font-size: 1.2em;
  text-transform: capitalize;

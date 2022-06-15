@@ -997,6 +997,9 @@ public class LandscapeServiceImpl implements LandscapeService {
             final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
             logger.info("Launching dedicated replica host of type "+instanceType+" for replica "+replica);
             replicaHostStartProcedure.run();
+            Wait.wait(()->replicaHostStartProcedure.getSailingAnalyticsProcess().getHost().getInstance(), instance->instance != null, /* retryOnException */ true,
+                    WAIT_FOR_HOST_TIMEOUT, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.WARNING,
+                    "Waiting for replica instance with ID "+replicaHostStartProcedure.getHost().getInstanceId());
             result.add(replicaHostStartProcedure.getSailingAnalyticsProcess());
         }
         for (final SailingAnalyticsProcess<String> resultReplica : result) {
@@ -1059,7 +1062,11 @@ public class LandscapeServiceImpl implements LandscapeService {
         logger.info("Stopping replication for replica set "+replicaSet.getName());
         for (final SailingAnalyticsProcess<String> replica : replicasToStopReplicating) {
             logger.info("...asking replica "+replica+" to stop replication");
-            replica.stopReplicatingFromMaster(effectiveReplicaReplicationBearerToken, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT);
+            try {
+                replica.stopReplicatingFromMaster(effectiveReplicaReplicationBearerToken, LandscapeService.WAIT_FOR_PROCESS_TIMEOUT);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Telling replica "+replica+" to stop replicating from master didn't work; assuming it's dead; continuing...", e);
+            }
         }
         logger.info("Done stopping replication. Removing master "+replicaSet.getMaster()+" from target groups "+
                 replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());

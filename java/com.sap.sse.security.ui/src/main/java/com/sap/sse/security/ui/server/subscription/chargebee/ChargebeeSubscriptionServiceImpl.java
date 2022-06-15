@@ -3,9 +3,11 @@ package com.sap.sse.security.ui.server.subscription.chargebee;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.chargebee.models.PortalSession;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
@@ -84,5 +86,23 @@ public class ChargebeeSubscriptionServiceImpl extends SubscriptionServiceImpl im
     public SubscriptionPlanDTO getSubscriptionPlanDTOById(final String planId) {
         final SubscriptionPlan subscriptionPlanById = getSecurityService().getSubscriptionPlanById(planId);
         return subscriptionPlanById == null ? null : convertToDto(subscriptionPlanById);
+    }
+    
+    @Override
+    public String getSelfServicePortalSession() {
+        try {
+            User currentUser = getCurrentUser();
+            CompletableFuture<PortalSession> result = new CompletableFuture<>();
+            getApiService().getUserSelfServicePortalSession(currentUser.getId().toString(), (session) -> result.complete(session));
+            final PortalSession portalSession = result.get();
+            if(portalSession != null) {
+                return portalSession.accessUrl();
+            }else {
+                return null;
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error in getting session", e);
+            return null;
+        }
     }
 }

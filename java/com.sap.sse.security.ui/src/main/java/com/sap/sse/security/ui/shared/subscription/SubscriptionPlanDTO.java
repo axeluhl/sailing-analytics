@@ -6,6 +6,7 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanCategory;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanGroup;
 import com.sap.sse.security.ui.client.subscription.SubscriptionService;
 
 /**
@@ -20,6 +21,7 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
     private Set<PlanCategory> planCategory;
     private Boolean userWasAlreadySubscribedToOneTimePlan;
     private Boolean isUserSubscribedToPlanCategory;
+    private PlanGroup group;
 
     /**
      * For GWT Serialization only
@@ -30,7 +32,7 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
 
     public SubscriptionPlanDTO(String id, boolean isUserSubscribedToPlan, Set<SubscriptionPrice> prices,
             Set<PlanCategory> planCategory, boolean userWasAlreadySubscribedToOneTimePlan,
-            boolean isUserSubscribedToPlanCategory, String error) {
+            boolean isUserSubscribedToPlanCategory, String error, PlanGroup group) {
         this.id = id;
         this.isUserSubscribedToPlan = isUserSubscribedToPlan;
         this.planCategory = planCategory;
@@ -38,6 +40,11 @@ public class SubscriptionPlanDTO implements HasSubscriptionMessageKeys, IsSerial
         this.isUserSubscribedToPlanCategory = isUserSubscribedToPlanCategory;
         this.prices = new HashSet<SubscriptionPrice>(prices);
         this.error = error;
+        this.group = group;
+    }
+    
+    public PlanGroup getGroup() {
+        return group;
     }
     
     public Set<PlanCategory> getPlanCategory() {

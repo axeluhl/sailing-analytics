@@ -142,7 +142,8 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
     private void createErrorPage(String message) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
         final SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication();
-        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
         RootLayoutPanel.get().add(vp);
         vp.addNorth(header, 100);
         final Label infoText = new Label(message);

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscriptions;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionPlace;
@@ -73,6 +74,35 @@ public class UserSubscriptionsPresenter<C extends WithUserService & WithSecurity
                                 @Override
                                 public void onFailure(final Throwable caught) {
                                     showError(StringMessages.INSTANCE.errorCancelSubscription(caught.getMessage()));
+                                }
+                            });
+                        } catch (final InvalidSubscriptionProviderException e) {
+                            onInvalidSubscriptionProviderError(e);
+                        }
+                    }
+                }).center();
+    }
+    
+    @Override
+    public void openSelfServicePortal(){
+        ConfirmationDialog.create(StringMessages.INSTANCE.goToSelfServicePortalDialogTitle(),
+                StringMessages.INSTANCE.goToSelfServicePortalDialogText(), StringMessages.INSTANCE.confirm(),
+                StringMessages.INSTANCE.cancel(), (confirmed) -> {
+                    if (confirmed) {
+                        try {
+                            factory.getDefaultAsyncService()
+                            .getSelfServicePortalSession(new AsyncCallback<String>() {
+                                @Override
+                                public void onSuccess(final String result) {
+                                    if (result == null) {
+                                        showError(StringMessages.INSTANCE.failedFetchingSelfServicePortalSession());
+                                    } else {
+                                        Window.open(result, "_blank", "");
+                                    }
+                                }
+                                @Override
+                                public void onFailure(final Throwable caught) {
+                                    showError(StringMessages.INSTANCE.failedFetchingSelfServicePortalSession());
                                 }
                             });
                         } catch (final InvalidSubscriptionProviderException e) {

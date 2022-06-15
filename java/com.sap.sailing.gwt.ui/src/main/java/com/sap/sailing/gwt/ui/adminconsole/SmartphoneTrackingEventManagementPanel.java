@@ -652,9 +652,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     private void denoteForRaceLogTracking(final StrippedLeaderboardDTO leaderboard) {
-        final ChooseNameDenoteEventDialog dialog = new ChooseNameDenoteEventDialog(stringMessages,leaderboard,
+        final ChooseNameDenoteEventDialog dialog = new ChooseNameDenoteEventDialog(stringMessages, leaderboard,
                 new DialogCallback<String>() {
-
                     @Override
                     public void ok(String prefix) {
                         sailingServiceWrite.denoteForRaceLogTracking(leaderboard.getName(), prefix, new AsyncCallback<Void>() {
@@ -662,6 +661,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             public void onSuccess(Void result) {
                                 loadAndRefreshLeaderboard(leaderboard.getName());
                                 updateRegattaConfigDesignerModeToByMarks(leaderboard.regattaName);
+                                denoteRacesWithMultipleFleetsToDefineTheirOwnCompetitors(leaderboard.getName(), leaderboard.getRaceList());
                                 raceColumnTableSelectionModel.clear();
                             }
 
@@ -681,6 +681,37 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         dialog.show();
     }
 
+    /**
+     * When a race in a race column is denoted for smartphone tracking and the race column has more than one fleet then it
+     * is inevitable for the race to define its own set of competitors so that competitors don't overlap for the races
+     * in a single race column. This method denotes all races in the columns specified to define their own set of competitors
+     * through their race logs if the race column has more than one fleet.
+     */
+    private void denoteRacesWithMultipleFleetsToDefineTheirOwnCompetitors(String leaderboardName, Iterable<RaceColumnDTO> raceColumns) {
+        final Set<Pair<RaceColumnDTO, FleetDTO>> raceCoordinatesUsingOwnCompetitors = new HashSet<>();
+        for (final RaceColumnDTO raceColumn : raceColumns) {
+            if (raceColumn.getFleets().size() > 1) {
+                for (final FleetDTO fleet : raceColumn.getFleets()) {
+                    sailingServiceWrite.enableCompetitorRegistrationsForRace(leaderboardName, raceColumn.getName(), fleet.getName(),
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            stringMessages.errorSettingRaceToDefineItsOwnCompetitors(leaderboardName,
+                                                    raceColumn.getName(), fleet.getName(), caught.getMessage()),
+                                            /* silentMode */ true);
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                }
+                    });
+                    raceCoordinatesUsingOwnCompetitors.add(new Pair<>(raceColumn, fleet));
+                }
+            }
+        }
+    }
+    
     private void updateRegattaConfigDesignerModeToByMarks(final String regattaName) {
         final RegattaDTO regatta = getRegattaByName(regattaName);
         if (regatta != null) {
@@ -763,7 +794,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             @Override
             public void onSuccess(Boolean result) {
                 if (result == true) {
-                            loadAndRefreshLeaderboard(t.getC().getName());
+                    loadAndRefreshLeaderboard(t.getC().getName());
+                    denoteRacesWithMultipleFleetsToDefineTheirOwnCompetitors(t.getC().getName(), Collections.singleton(t.getA()));
                 }
             }
 

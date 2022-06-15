@@ -33,4 +33,9 @@ public interface HeaderConstants {
      * The name of the tab/window to open the strategy simulator UI in
      */
     String STRATEGY_SIMULATOR_WINDOW = "strategyDimulatorWindow";
+    
+    /**
+     * Default self target if not specified different.
+     */
+    String SELF = "_self";
 }

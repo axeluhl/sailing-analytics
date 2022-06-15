@@ -62,28 +62,35 @@ The basic idea of setting up a build job is to create a so-called "free-style so
 
 In order to elastically scale our build / CI infrastructure, we use AWS to provide Hudson build slaves on demand. The Hudson Master (https://hudson.sapsailing.com) has a script obtained from our git at ``./configuration/launchhudsonslave`` which takes an Amazon Machine Image (AMI), launches it in our default region (eu-west-1) and connects to it. The AWS credentials are stored in the ``root`` account on ``hudson.sapsailing.com``, and the ``hudson`` user is granted access to the script by means of an ``/etc/sudoers.d`` entry.
 
-The image has been crafted specifically to contain the tools required for the build. In order to set up such an image based on Ubuntu, consider running the following commands as root (see also https://tecadmin.net/setup-selenium-chromedriver-on-ubuntu/), on a fresh Ubuntu 20.04 instance with a 100GB root partition, starting as the "ubuntu" user:
+The image has been crafted specifically to contain the tools required for the build. In order to set up such an image based on Ubuntu, consider running the following commands as root on a fresh Ubuntu 20.04 instance with a 100GB root partition, starting as the "ubuntu" user:
 
 ```
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/imageupgrade_functions.sh /tmp
    scp -o StrictHostKeyChecking=false trac@sapsailing.com:/home/wiki/gitwiki/configuration/hudson_slave_setup/* /tmp
    sudo -i
+   dd if=/dev/zero of=/var/cache/swapfile bs=1G count=20
+   chmod 600 /var/cache/swapfile
+   mkswap /var/cache/swapfile
+   echo "/var/cache/swapfile none swap sw 0 0" >>/etc/fstab
+   swapon -a
    mkdir /opt/android-sdk-linux
    echo "dev.internal.sapsailing.com:/home/hudson/android-sdk-linux /opt/android-sdk-linux nfs tcp,intr,timeo=100,retry=0" >>/etc/fstab
    apt-get update
-   apt-get install -y unzip xvfb libxi6 libgconf-2-4 nfs-common
+   apt-get install -y unzip xvfb libxi6 libgconf-2-4 nfs-common gnupg
    curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
    wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-   echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
    echo "deb https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" >/etc/apt/sources.list.d/mongodb-org-4.4.list
    apt-get -y update
    apt-get -y upgrade
-   apt-get -y install google-chrome-stable maven rabbitmq-server mongodb-org fwupd linux-aws linux-headers-aws linux-image-aws
+   # The following work well on Ubuntu 20.04 but not on Ubuntu 22.04 or Debian 11 because
+   # the firefox package may be "firefox-esr" and firefox-geckodriver and the linux*aws packages may not be available at
+   # all, in which case a direct download, e.g., from https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
+   # is an alternative; unpack to /usr/local/bin.
+   cd /usr/local/bin
+   wget -O - "https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz" | tar xzvpf -
+   apt-get -y install cloud-guest-utils maven rabbitmq-server mongodb-org firefox fwupd linux-aws linux-headers-aws linux-image-aws docker.io
    apt-get -y autoremove
    cd /tmp
-   wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
-   cd /usr/bin
-   unzip /tmp/chromedriver_linux64.zip
    mv /tmp/imageupgrade /usr/local/bin
    mv /tmp/imageupgrade_functions.sh /usr/local/bin
    mv /tmp/mounthudsonworkspace /usr/local/bin
@@ -97,6 +104,9 @@ The image has been crafted specifically to contain the tools required for the bu
    systemctl enable rabbitmq-server.service
    adduser --system --shell /bin/bash --quiet --group --disabled-password sailing
    adduser --system --shell /bin/bash --quiet --group --disabled-password hudson
+   adduser hudson docker
+   # Now log in to the docker registry at docker.sapsailing.com:443 with a valid user account for local user "hudson"
+   sudo -u hudson docker login docker.sapsailing.com:443
    sudo -u sailing mkdir /home/sailing/.ssh
    sudo -u sailing chmod 700 /home/sailing/.ssh
    sudo -u hudson mkdir /home/hudson/.ssh

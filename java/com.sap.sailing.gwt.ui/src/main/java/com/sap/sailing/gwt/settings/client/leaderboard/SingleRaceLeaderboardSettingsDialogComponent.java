@@ -55,9 +55,12 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     
     @Override
     protected FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {
-        FlowPanel detailPanel = super.createOverallDetailPanel(dialog);
+        final FlowPanel detailPanel = super.createOverallDetailPanel(dialog);
         showRaceRankColumn = createCheckbox(dialog, stringMessages.showRaceRankColumn(), initialSettings.isShowRaceRankColumn(), null);
-        detailPanel.add(showRaceRankColumn);
+        final FlowPanel overallDetailDialogContentThirdLine = new FlowPanel();
+        overallDetailDialogContentThirdLine.addStyleName("dialogInnerContent");
+        overallDetailDialogContentThirdLine.add(showRaceRankColumn);
+        detailPanel.add(overallDetailDialogContentThirdLine);
         return detailPanel;
     }
 

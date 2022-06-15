@@ -612,10 +612,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $p2local -eq 1 ]; then
 	    echo "INFO: Building and using local p2 repo"
 	    #build local p2 repo
-	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
+	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
             echo "JAVA_HOME used: $JAVA_HOME"
-	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
