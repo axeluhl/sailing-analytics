@@ -83,9 +83,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.getStartCountDownFontSizeScaling(),
                 defaultSettings.isShowManeuverLossVisualization(),
                 defaultSettings.isShowSatelliteLayer(),
-                defaultSettings.isShowWindLadder(),
-                defaultSettings.isWindLadderOverride(),
-                defaultSettings.getWindLadderManeuverAngle());
+                defaultSettings.isShowWindLadder());
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {
