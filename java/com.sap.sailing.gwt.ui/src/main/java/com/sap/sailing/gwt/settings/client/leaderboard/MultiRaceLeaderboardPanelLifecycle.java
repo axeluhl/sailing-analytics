@@ -6,18 +6,19 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class MultiRaceLeaderboardPanelLifecycle
         extends AbstractMultiRaceLeaderboardPanelLifecycle<MultiRaceLeaderboardSettings> {
 
     public MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes) {
-        super(leaderboard, stringMessages, availableDetailTypes);
+            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+        super(leaderboard, stringMessages, availableDetailTypes, paywallResolver);
     }
 
-    protected MultiRaceLeaderboardPanelLifecycle(List<String> namesOfRaceColumns, boolean canBoatInfoBeShown,
-            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
-        super(namesOfRaceColumns, canBoatInfoBeShown, stringMessages, availableDetailTypes);
+    protected MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, List<String> namesOfRaceColumns, boolean canBoatInfoBeShown,
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
+        super(leaderboard, namesOfRaceColumns, canBoatInfoBeShown, stringMessages, availableDetailTypes, paywallResolver);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class MultiRaceLeaderboardPanelLifecycle
     public MultiRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(
             MultiRaceLeaderboardSettings settings) {
         return new MultiRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages,
-                availableDetailTypes, canBoatInfoBeShown);
+                availableDetailTypes, canBoatInfoBeShown, paywallResolver, leaderboardDTO);
     }
 
     @Override

@@ -82,6 +82,10 @@ public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStrea
         SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup);
         this.polarDataMiner = new PolarDataMiner(settings, cubicRegressionPerCourseProcessor, speedRegressionPerAngleClusterProcessor, angleClusterGroup);
     }
+    
+    public boolean isCurrentlyActiveAndOrHasQueue() {
+        return polarDataMiner.isCurrentlyActiveAndOrHasQueue();
+    }
 
     private ClusterGroup<Bearing> createAngleClusterGroup() {
         return new BearingClusterGroup(0, 180, 5);

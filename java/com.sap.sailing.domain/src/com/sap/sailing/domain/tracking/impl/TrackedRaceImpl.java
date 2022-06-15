@@ -3969,7 +3969,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
-        if(polarDataService != null && windEstimation != null) {
+        if (polarDataService != null && windEstimation != null) {
             updateManeuversAndWindWithNewWindEstimation(windEstimation, windEstimation);
         }
     }
@@ -3989,6 +3989,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (windEstimation != null) {
             windTracks.put(windSource, windEstimation.getWindTrack());
         }
+        updateWindSourcesByType(windSource);
         this.windEstimation = windEstimation;
         // TODO Make more efficient by reusing the state of incremental maneuver detectors. The already computed
         // complete maneuver curves can be fed directly into the windEstimation.

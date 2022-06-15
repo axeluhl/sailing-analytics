@@ -83,7 +83,6 @@ import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
@@ -111,6 +110,7 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to the time-dependent
@@ -200,7 +200,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
             throws UnauthorizedException, Exception;
 
-    List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() throws UnauthorizedException;
+    List<StrippedLeaderboardDTO> getLeaderboardsWithSecurity() throws UnauthorizedException;
 
     Map<String, RegattaAndRaceIdentifier> getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(
             String leaderboardName, String raceColumnName) throws UnauthorizedException;
@@ -227,7 +227,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors,
             Date from, Date to, long stepSizeInMs, DetailType detailType, String leaderboardGroupName,
-            UUID leaderboardGroupId, String leaderboardName) throws NoWindException, UnauthorizedException;
+            UUID leaderboardGroupId, String leaderboardName) throws NoWindException, UnauthorizedException, NotFoundException;
 
     Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws UnauthorizedException, Exception;
 
@@ -260,7 +260,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     StrippedLeaderboardDTO getLeaderboard(String leaderboardName) throws UnauthorizedException;
 
-    StrippedLeaderboardDTOWithSecurity getLeaderboardWithSecurity(String leaderboardName) throws UnauthorizedException;
+    StrippedLeaderboardDTO getLeaderboardWithSecurity(String leaderboardName) throws UnauthorizedException;
 
     List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl) throws UnauthorizedException;
 
@@ -369,8 +369,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     boolean doesRegattaLogContainCompetitors(String name)
             throws UnauthorizedException, DoesNotHaveRegattaLogException, NotFoundException;
 
-    RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName)
-            throws UnauthorizedException;
+    Pair<RegattaAndRaceIdentifier, SecuredDTO> getRaceIdentifierAndTrackedRaceSecuredDTO(String regattaLikeName,
+            String raceColumnName, String fleetName);
 
     Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimes(String leaderboardName,
             String raceColumnName, String fleetName) throws UnauthorizedException, NotFoundException;

@@ -25,7 +25,6 @@ import com.sap.sse.common.util.MappingIterable;
 import com.sap.sse.common.util.MappingIterator;
 import com.sap.sse.common.util.NaturalComparator;
 
-
 public class Util {
     public static class Pair<A, B> implements Serializable {
         private static final long serialVersionUID = -7631774746419135931L;

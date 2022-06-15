@@ -67,7 +67,7 @@ public class MainMedia extends Composite {
         imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer(navigator));
         Iterator<SailingVideoDTO> videoIterator = videos.iterator();
         int videoCount = 0;
-        while(videoCount < MAX_VIDEO_COUNT && videoIterator.hasNext()) {
+        while (videoCount < MAX_VIDEO_COUNT && videoIterator.hasNext()) {
             SailingVideoDTO videoDTO = videoIterator.next();
             MainMediaVideo video = new MainMediaVideo(videoDTO, exclusionPlayHandler);
             videosPanel.add(video);

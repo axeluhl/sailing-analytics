@@ -201,10 +201,10 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     }
     
     /**
-     * Once a client has fetched such a Future from {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations} while
-     * holding the object monitor of {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client knows that
+     * Once a client has fetched such a Future from {@link SmartFutureCache#ongoingRecalculations} while
+     * holding the object monitor of {@link SmartFutureCache#ongoingRecalculations}, the client knows that
      * the Future hasn't been cancelled yet. To avoid that the Future is cancelled after the client has fetched it from
-     * {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client can call {@link #dontCancel()} on this
+     * {@link SmartFutureCache#ongoingRecalculations}, the client can call {@link #dontCancel()} on this
      * future. After that, calls to {@link #cancel(boolean)} will return <code>false</code> immediately and the Future
      * will be executed as originally scheduled.
      * 

@@ -8,6 +8,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -25,7 +26,7 @@ public class SecurityBundleTestWrapper {
             final AccessControlStoreImpl accessControlStoreImpl = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStoreImpl);
             securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, store, accessControlStoreImpl,
-                    new MockedHasPermissionProvider());
+                    new MockedHasPermissionProvider(), SSESubscriptionPlan::getAllInstances);
             ((SecurityServiceImpl) securityService).clearState();
             securityService.initialize();
             SecurityUtils.setSecurityManager(securityService.getSecurityManager());

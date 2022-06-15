@@ -21,42 +21,42 @@
          id="org.mongodb.driver-core"
          download-size="0"
          install-size="0"
-         version="4.5.0"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-core.source"
          download-size="0"
          install-size="0"
-         version="4.5.0"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.bson"
          download-size="0"
          install-size="0"
-         version="4.5.0"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.bson.source"
          download-size="0"
          install-size="0"
-         version="4.5.0"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-sync"
          download-size="0"
          install-size="0"
-         version="4.5.0"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-sync"
          download-size="0"
          install-size="0"
-         version="4.5.0"
+         version="4.5.1"
          unpack="false"/>
 
    <plugin
@@ -553,14 +553,98 @@
          id="org.eclipse.osgi"
          download-size="0"
          install-size="0"
-         version="3.16.100.v20201030-1916"
+         version="3.18.0.v20220426-2016"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.osgi.source"
+         download-size="0"
+         install-size="0"
+         version="3.18.0.v20220426-2016"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.promise"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.promise.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.function"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.function.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.measurement"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.201802012109"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.measurement.source"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.201802012109"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.position"
+         download-size="0"
+         install-size="0"
+         version="1.0.1.201505202026"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.position.source"
+         download-size="0"
+         install-size="0"
+         version="1.0.1.201505202026"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.xml"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.util.xml.source"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.202109301733"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.osgi.services"
          download-size="0"
          install-size="0"
-         version="3.9.0.v20200511-1725"
+         version="3.10.200.v20210723-0643"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.osgi.services.source"
+         download-size="0"
+         install-size="0"
+         version="3.10.200.v20210723-0643"
          unpack="false"/>
 
    <plugin
@@ -608,7 +692,14 @@
          id="org.eclipse.osgi.util"
          download-size="0"
          install-size="0"
-         version="3.5.300.v20190708-1141"
+         version="3.7.0.v20220427-2144"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.osgi.util.source"
+         download-size="0"
+         install-size="0"
+         version="3.7.0.v20220427-2144"
          unpack="false"/>
 
    <plugin
@@ -823,9 +914,59 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.code.findbugs.jsr305"
+         id="com.github.haifengl.smile-core"
          download-size="0"
          install-size="0"
-         version="1.3.9"
+         version="1.5.3"
          unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-core.source"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-data"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-data.source"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-graph"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-graph.source"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-math"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.haifengl.smile-math.source"
+         download-size="0"
+         install-size="0"
+         version="1.5.3"
+         unpack="false"/>
+
 </feature>

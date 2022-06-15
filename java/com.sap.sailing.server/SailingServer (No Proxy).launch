@@ -23,7 +23,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console 12001 -clean"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=5010 -Xmx6000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -XX:+UseMembar -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -Drestore.tracked.races=true -Dorg.eclipse.jetty.server.Request.maxFormContentSize=50000000 -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=5010 -Xmx6000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -XX:+UseMembar -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -Drestore.tracked.races=true -Dorg.eclipse.jetty.server.Request.maxFormContentSize=50000000 -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120 -Dchargebee.site=sailytics-test -Dchargebee.apikey=test_G8QP4NUM1f4MCeZeni1VFC04cdIGZSNyp -Dsubscriptions.disableMailVerificationRequirement=true"/>
     <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
     <stringAttribute key="pde.version" value="3.3"/>
     <stringAttribute key="profilingTraceType-ALLOCATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%INCREASE_COUNT%CTX_KEY%8192%CTX_ENTRY%KEY_MIN_SIZE%CTX_KEY%32%CTX_ENTRY%KEY_MAX_SIZE%CTX_KEY%65536%CTX_ENTRY%KEY_INC_LINE_NRS%CTX_KEY%true%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%CLASS_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ADAPTIVE%CTX_KEY%false%CTX_ENTRY%"/>
@@ -133,7 +133,19 @@
 <setEntry value="org.eclipse.equinox.launcher@default:default"/>
 <setEntry value="org.eclipse.equinox.simpleconfigurator@2:true"/>
 <setEntry value="org.eclipse.osgi@-1:true"/>
+<setEntry value="org.eclipse.osgi.source@default:default"/>
+<setEntry value="org.osgi.util.promise@default:default"/>
+<setEntry value="org.osgi.util.promise.source@default:default"/>
+<setEntry value="org.osgi.util.function@default:default"/>
+<setEntry value="org.osgi.util.function.source@default:default"/>
+<setEntry value="org.osgi.util.measurement@default:default"/>
+<setEntry value="org.osgi.util.measurement.source@default:default"/>
+<setEntry value="org.osgi.util.position@default:default"/>
+<setEntry value="org.osgi.util.position.source@default:default"/>
+<setEntry value="org.osgi.util.xml@default:default"/>
+<setEntry value="org.osgi.util.xml.source@default:default"/>
 <setEntry value="org.eclipse.osgi.services@default:default"/>
+<setEntry value="org.eclipse.osgi.services.source@default:default"/>
 <setEntry value="org.eclipse.equinox.cm@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
 <setEntry value="jaxb-api@default:default"/>
@@ -141,6 +153,7 @@
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
 <setEntry value="org.eclipse.osgi.util@default:default"/>
+<setEntry value="org.eclipse.osgi.util.source@default:default"/>
 <setEntry value="com.chargebee.chargebee-java@default:default"/>
 <setEntry value="com.jcraft.jsch@default:default"/>
 <setEntry value="com.amazon.aws.aws-java-api@default:default"/>
@@ -171,7 +184,14 @@
 <setEntry value="com.sap.db.jdbc.source@default:default"/>
 <setEntry value="org.osgi.service.packageadmin@default:default"/>
 <setEntry value="org.osgi.service.url@default:default"/>
-<setEntry value="com.google.code.findbugs.jsr305@default:default"/>
+<setEntry value="com.github.haifengl.smile-core@default:default"/>
+<setEntry value="com.github.haifengl.smile-core.source@default:default"/>
+<setEntry value="com.github.haifengl.smile-data@default:default"/>
+<setEntry value="com.github.haifengl.smile-data.source@default:default"/>
+<setEntry value="com.github.haifengl.smile-graph@default:default"/>
+<setEntry value="com.github.haifengl.smile-graph.source@default:default"/>
+<setEntry value="com.github.haifengl.smile-math@default:default"/>
+<setEntry value="com.github.haifengl.smile-math.source@default:default"/>
 </setAttribute>
     <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>

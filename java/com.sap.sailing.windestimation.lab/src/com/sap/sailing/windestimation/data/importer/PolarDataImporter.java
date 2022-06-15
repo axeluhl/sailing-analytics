@@ -51,8 +51,12 @@ public class PolarDataImporter {
 
     public static void main(String[] args) throws Exception {
         PolarDataImporter polarDataImporter = new PolarDataImporter();
-        InputStream inputStream = polarDataImporter.retrievePolarDataRegressionAsBytes();
-        polarDataImporter.persistPolarDataRegressionAsBytes(new File(polarDataFilePath), inputStream);
+        polarDataImporter.importPolarData();
+    }
+
+    public void importPolarData() throws IOException, ParseException {
+        InputStream inputStream = retrievePolarDataRegressionAsBytes();
+        persistPolarDataRegressionAsBytes(new File(polarDataFilePath), inputStream);
     }
 
 }

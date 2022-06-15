@@ -1592,7 +1592,8 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/highQualityWindFixes")
     public Response getHighQualityWindFixes(@PathParam("regattaname") String regattaName,
-            @PathParam("racename") String raceName) {
+            @PathParam("racename") String raceName,
+            @HeaderParam(SECONDARY_USER_BEARER_TOKEN) String secondaryUserBearerToken) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1607,6 +1608,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                getSecurityService().checkCurrentUserReadPermission(regatta);
+                getSecurityService().checkCurrentUserReadPermission(trackedRace);
+                checkExportPermission(trackedRace, secondaryUserBearerToken);
                 RaceWindJsonSerializer serializer = new RaceWindJsonSerializer();
                 JSONObject jsonWindTracks = serializer.serialize(trackedRace);
                 return Response.ok(streamingOutput(jsonWindTracks)).build();

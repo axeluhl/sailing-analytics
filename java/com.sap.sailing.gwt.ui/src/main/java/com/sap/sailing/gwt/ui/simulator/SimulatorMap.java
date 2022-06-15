@@ -626,7 +626,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         busyIndicator.setBusy(true);
         timer.pause();
         timer.setTime(windParams.getStartTime().getTime());
-
         simulatorService.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {

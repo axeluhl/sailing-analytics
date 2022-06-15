@@ -105,7 +105,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         showSelectedCompetitorsInfo = new BooleanSetting("showSelectedCompetitorsInfo", this, true);
         maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), ManeuverType::valueOf);
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
-        showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false);
+        showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false); 
         startCountDownFontSizeScaling = new DoubleSetting("startCountDownFontSizeScaling", this, 1.0);
         showManeuverLossVisualization = new BooleanSetting("showManeuverLossVisualization", this, false);
     }

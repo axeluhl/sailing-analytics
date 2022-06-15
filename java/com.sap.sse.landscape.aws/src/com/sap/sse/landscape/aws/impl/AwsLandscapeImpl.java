@@ -158,6 +158,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.SetRulePrior
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.SubnetMapping;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
@@ -1012,11 +1013,30 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .targetType(TargetTypeEnum.INSTANCE)
                 .build()).targetGroups().iterator().next();
         final String targetGroupArn = targetGroup.targetGroupArn();
-        loadBalancingClient.modifyTargetGroupAttributes(ModifyTargetGroupAttributesRequest.builder()
-                .targetGroupArn(targetGroupArn)
-                .attributes(TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
-                            TargetGroupAttribute.builder().key("load_balancing.algorithm.type").value("least_outstanding_requests")
-                            .build()).build());
+        int numberOfRetries = 3;
+        final Duration TIME_BETWEEN_RETRIES = Duration.ONE_SECOND;
+        boolean success = false;
+        while (!success && numberOfRetries-- > 0) { 
+            try {
+                loadBalancingClient.modifyTargetGroupAttributes(ModifyTargetGroupAttributesRequest.builder()
+                        .targetGroupArn(targetGroupArn)
+                        .attributes(TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
+                                    TargetGroupAttribute.builder().key("load_balancing.algorithm.type").value("least_outstanding_requests")
+                                    .build()).build());
+                success = true;
+            } catch (TargetGroupNotFoundException e) {
+                // See also https://github.com/hashicorp/terraform-provider-aws/issues/16860; try again
+                logger.log(Level.WARNING, "Couldn't find target group with ARN "+targetGroupArn+" that was just created successfully." +
+                        (numberOfRetries > 0 ? " Trying again..." : ""), e);
+                if (numberOfRetries > 0) {
+                    try {
+                        Thread.sleep(TIME_BETWEEN_RETRIES.asMillis());
+                    } catch (InterruptedException e1) {
+                        logger.warning("Sleep got interrupted. Well, then we'll retry a bit sooner...");
+                    }
+                }
+            }
+        }
         return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn, loadBalancerArn,
                 targetGroup.protocol(), port, targetGroup.healthCheckProtocol(), healthCheckPort, healthCheckPath);
     }

@@ -14,6 +14,8 @@ import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 /**
  * Master data about a single race that is to be transferred to the client.<p>
  * 
+ * The permission type represented by this class of objects is {@link SecuredDomainType#TRACKED_RACE}.
+ * 
  * @author Axel Uhl (d043530)
  *
  */
@@ -131,7 +133,7 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     
     @Override
     public HasPermissions getPermissionType() {
-        return SecuredDomainType.TRACKED_RACE;
+        return getPermissionTypeForClass();
     }
     
     @Override
@@ -139,8 +141,16 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
         return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public static HasPermissions getPermissionTypeForClass() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
         return raceIdentifier.getTypeRelativeObjectIdentifier();
+    }
+    
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(raceIdentifier);
     }
 
 }

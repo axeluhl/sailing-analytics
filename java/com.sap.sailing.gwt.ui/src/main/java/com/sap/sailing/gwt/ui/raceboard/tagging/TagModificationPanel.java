@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
+import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -63,12 +64,9 @@ public class TagModificationPanel extends FlowPanel {
                 if ((taggingComponent.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
                         || (taggingComponent.getCurrentState().equals(State.EDIT_TAG)
                                 && !inputPanel.compareFieldsToTag(taggingComponent.getSelectedTag()))) {
-                    new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
-                            stringMessages.tagDiscardChanges(), result -> {
-                                if (result) {
-                                    resetState();
-                                }
-                            });
+                    ConfirmationDialog.create(stringMessages.tagDiscardChangesHeading(),
+                            stringMessages.tagDiscardChanges(), stringMessages.confirm(), stringMessages.cancel(),
+                            TagModificationPanel.this::resetState).center();
                 } else {
                     resetState();
                 }
@@ -106,12 +104,9 @@ public class TagModificationPanel extends FlowPanel {
             if ((taggingComponent.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
                     || (taggingComponent.getCurrentState().equals(State.EDIT_TAG)
                             && !inputPanel.compareFieldsToTag(taggingComponent.getSelectedTag()))) {
-                new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
-                        stringMessages.tagDiscardChanges(), result -> {
-                            if (result) {
-                                resetState();
-                            }
-                        });
+                ConfirmationDialog.create(stringMessages.tagDiscardChangesHeading(), stringMessages.tagDiscardChanges(),
+                        stringMessages.confirm(), stringMessages.cancel(), TagModificationPanel.this::resetState)
+                        .center();
             } else {
                 resetState();
             }

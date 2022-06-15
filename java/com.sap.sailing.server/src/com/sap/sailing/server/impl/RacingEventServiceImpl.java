@@ -333,8 +333,10 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.util.RemoteServerUtil;
@@ -1102,6 +1104,24 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             }
         }
         securityService.assumeOwnershipMigrated(SecuredDomainType.RESULT_IMPORT_URL.getName());
+        securityService.migrateOwnership(new WithQualifiedObjectIdentifier() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getName() {
+                return "Simulator of server "+ServerInfo.getName();
+            }
+            
+            @Override
+            public HasPermissions getPermissionType() {
+                return SecuredDomainType.SIMULATOR;
+            }
+            
+            @Override
+            public QualifiedObjectIdentifier getIdentifier() {
+                return SecuredDomainType.SIMULATOR.getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+            }
+        });
         securityService.assumeOwnershipMigrated(SecuredDomainType.SIMULATOR.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.FILE_STORAGE.getName());
         for (DeviceConfiguration device : getAllDeviceConfigurations()) {
@@ -1641,6 +1661,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     @Override
     public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url, boolean include) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" requested addition of remote sailing server reference "+name);
         RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url, include, /* IDs of included/excluded events */ Collections.emptySet());
         remoteSailingServerSet.add(result);
         mongoObjectFactory.storeSailingServer(result);
@@ -1650,6 +1671,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     @Override
     public RemoteSailingServerReference updateRemoteSailingServerReference(final String name, final boolean include,
             final Set<UUID> selectedEventIds) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" requested update of remote sailing server reference "+name);
         RemoteSailingServerReference result = getRemoteServerReferenceByName(name);
         if (result != null) {
             result.updateSelectedEventIds(selectedEventIds);
@@ -1693,6 +1715,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     @Override
     public void removeRemoteSailingServerReference(String name) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" requested removal of remote sailing server reference "+name);
         remoteSailingServerSet.remove(name);
         mongoObjectFactory.removeSailingServer(name);
     }
@@ -5075,6 +5098,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             throw e;
         }
         final User user = getSecurityService().getCurrentUser();
+        logger.info("Importing master data from "+urlAsString+" for leaderboard groups "+Arrays.toString(leaderboardGroupIds)+
+                " for user "+user.getName());
         final String token = getSecurityService().getOrCreateTargetServerBearerToken(urlAsString, targetServerUsername, targetServerPassword, targetServerBearerToken);
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();

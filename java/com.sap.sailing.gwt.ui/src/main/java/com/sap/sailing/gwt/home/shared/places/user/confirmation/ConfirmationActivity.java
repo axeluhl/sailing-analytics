@@ -42,6 +42,7 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
                             final String message = result ? i18n_sec.emailValidatedSuccessfully(place.getName())
                                     : i18n_sec.emailValidationUnsuccessful(place.getName());
                             view.setMessage(message);
+                            clientFactory.getUserService().fireUserUpdateEvent();
                         }
                     }));
             break;

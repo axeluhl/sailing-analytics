@@ -67,19 +67,43 @@ public enum LabelType {
 //            return StringMessages.INSTANCE.;
             return null;
         }
+    },
+    ACTIVE("active") {
+        @Override
+        public String getLabel() {
+            return StringMessages.INSTANCE.active();
+        }
+    },
+    IN_TRIAL("intrial") {
+        @Override
+        public String getLabel() {
+            return StringMessages.INSTANCE.inTrial();
+        }
+    },
+    CANCELLED("cancelled") {
+        @Override
+        public String getLabel() {
+            return StringMessages.INSTANCE.cancelled();
+        }
+    },
+    UNKNOWN("unknown") {
+        @Override
+        public String getLabel() {
+            return StringMessages.INSTANCE.unknown();
+        }
     };
-    
+
     private final String labelType;
-    
+
     private LabelType() {
         // For GWT serialization only
         labelType = null;
     }
-    
-    private LabelType(String labelType) {
+
+    private LabelType(final String labelType) {
         this.labelType = labelType;
     }
-    
+
     public abstract String getLabel();
 
     public String getLabelType() {

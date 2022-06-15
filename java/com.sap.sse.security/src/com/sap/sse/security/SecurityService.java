@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -50,6 +51,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 
 /**
@@ -529,13 +531,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void assumeOwnershipMigrated(String typeName);
 
     /**
+     * If {@code object} doesn't have an ownership then it will be assigned the {@link #getServerGroup() server group}
+     * as its group owner.
      * 
-     * @param object
      * @return {@code true} if the object required ownership migration
      */
     boolean migrateOwnership(WithQualifiedObjectIdentifier object);
 
     /**
+     * If {@code object} doesn't have an ownership then it will be assigned the {@link #getServerGroup() server group}
+     * as its group owner.
+     * 
      * @return {@code true} if the object required ownership migration
      */
     boolean migrateOwnership(QualifiedObjectIdentifier object, String displayName);
@@ -623,7 +629,16 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     boolean isNewServer();
 
-    RoleDefinition getOrCreateRoleDefinitionFromPrototype(RolePrototype rolePrototype);
+    /**
+     * Tries to find a {@link RoleDefinition} whose ID equals that of the {@link RolePrototype} passed. If found, the
+     * permission set of the {@link RoleDefition} that was found is compared to that of the {@link RolePrototype}, and
+     * in case of differences the permission set of the {@link RolePrototype} is copied into the {@link RoleDefinition}.
+     * If no {@link RoleDefinition} by the ID specified by the {@link RolePrototype} is found, a new
+     * {@link RoleDefinition} is created. If {@code makeReadableForAll} is {@code true} and this server is just
+     * {@link #isInitialOrMigration() being initialized or migrating} then the new role definition will be made readable
+     * for all users by adding an ACL for the {@code null} group that grants the {@link DefaultActions#READ} permission.
+     */
+    RoleDefinition getOrCreateRoleDefinitionFromPrototype(RolePrototype rolePrototype, boolean makeReadableForAll);
 
     /** Sets the default ownership based on the current user. */
     void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description);
@@ -728,6 +743,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     Iterable<? extends HasPermissions> getAllHasPermissions();
     
     /**
+     * Obtains all {@link SubscriptionPlan} subscription plans managed by this security service. In an OSGi environment, those
+     * are obtained from all {@link SubscriptionPlanProvider}s registered as an OSGi service by any active bundle.
+     */
+    Map<Serializable, SubscriptionPlan> getAllSubscriptionPlans();
+    
+    SubscriptionPlan getSubscriptionPlanById(String planId);
+    
+    /**
      * Tries to find a {@link HasPermissions secured type} in the {@link #getAllHasPermissions() set of secured types
      * known by this security service} based on its name, like it is used in the first
      * {@link WildcardPermission#getParts() part} of a permission specification, as in {@code USER:READ:*}.
@@ -739,6 +762,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     default HasPermissions getHasPermissionsByName(String securedTypeName) {
         return Util.first(Util.filter(getAllHasPermissions(), hp->hp.getName().equals(securedTypeName)));
     }
-
+    
     ClassLoaderRegistry getInitialLoadClassLoaderRegistry();
+
+    /*
+     * Will resolve potential roles, which a user would inherit, when given a specific subscription plan.
+     */
+    Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan);
+
+    SubscriptionPlan getSubscriptionPlanByItemPriceId(String itemPriceId);
+    
 }

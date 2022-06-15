@@ -115,7 +115,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                         if (PermissionChecker.isPermitted(permissionToCheck, null, Collections.singleton(groupOwner),
                                 allUser, userGroupsOfAllUser,
                                 ownershipOfAccount == null ? null : ownershipOfAccount.getAnnotation(),
-                                aclOfAccount == null ? null : aclOfAccount.getAnnotation())) {
+                                aclOfAccount == null ? null : aclOfAccount.getAnnotation(), null)) {
                             isPermittedToUseAccount = true;
                         } else {
                             isPermittedToUseAccount = false;

@@ -12,5 +12,5 @@ public interface ExperimentalFeatures {
     /**
      * Provide a tab "subscription" in the user profile page.
      */
-    public static final boolean SHOW_SUBSCRIPTION_IN_USER_PROFILE = false;
+    public static final boolean SHOW_SUBSCRIPTION_IN_USER_PROFILE = true;
 }

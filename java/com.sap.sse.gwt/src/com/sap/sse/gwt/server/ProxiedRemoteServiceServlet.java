@@ -19,7 +19,6 @@ import org.apache.shiro.subject.Subject;
 
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPCRequest;
-import com.google.gwt.user.server.rpc.RPCServletUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.sap.sse.common.Duration;
@@ -81,7 +80,6 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
                 throw new RuntimeException("Unable to report failure", e);
             }
             ServletContext servletContext = getServletContext();
-            RPCServletUtils.writeResponseForUnexpectedFailure(servletContext, servletResponse, e);
             servletContext.log("Exception while dispatching incoming RPC call", e.getCause()==null?e:e.getCause());
             try {
                 servletResponse.setContentType("text/plain");

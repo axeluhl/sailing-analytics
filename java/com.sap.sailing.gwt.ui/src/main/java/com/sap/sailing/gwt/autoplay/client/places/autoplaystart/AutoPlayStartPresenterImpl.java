@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.event.LocaleChangeEventHandler;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AutoPlayStartPresenterImpl extends AbstractActivity implements AutoPlayStartView.Presenter {
     public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
@@ -51,23 +52,21 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
             clientFactory.getSailingService().getEventById(apcd.getEventId(), true, new AsyncCallback<EventDTO>() {
                 @Override
                 public void onSuccess(final EventDTO event) {
-
                     StrippedLeaderboardDTO leaderBoard = AutoplayHelper.getSelectedLeaderboard(event,
                             apcd.getLeaderboardName());
-
-                    apcd.getType().getConfig().loadSettingsDefault(event, apcd, leaderBoard, clientFactory.getUserService(), new OnSettingsCallback() {
-
-                        @Override
-                        public void newSettings(PerspectiveCompositeSettings<?> newSettings, String urlWithSettings) {
-                            if (newSettings != null) {
-                                serializer.deserializeSettingsMapFromCurrentLocation(newSettings);
-                            }
-                            startRootNode(apcd, newSettings, event);
-                        }
-
-                    });
+                    apcd.getType().getConfig().loadSettingsDefault(event, apcd, leaderBoard,
+                            clientFactory.getUserService(), clientFactory.getSubscriptionServiceFactory(),
+                            new OnSettingsCallback() {
+                                @Override
+                                public void newSettings(PerspectiveCompositeSettings<?> newSettings,
+                                        String urlWithSettings) {
+                                    if (newSettings != null) {
+                                        serializer.deserializeSettingsMapFromCurrentLocation(newSettings);
+                                    }
+                                    startRootNode(apcd, newSettings, event);
+                                }
+                            });
                 }
-
                 @Override
                 public void onFailure(Throwable caught) {
                     clientFactory.getEventBus().fireEvent(
@@ -124,5 +123,10 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     @Override
     public UserService getUserService() {
         return clientFactory.getUserService();
+    }
+
+    @Override
+    public SubscriptionServiceFactory getSubscriptionServiceFactory() {
+        return clientFactory.getSubscriptionServiceFactory();
     }
 }

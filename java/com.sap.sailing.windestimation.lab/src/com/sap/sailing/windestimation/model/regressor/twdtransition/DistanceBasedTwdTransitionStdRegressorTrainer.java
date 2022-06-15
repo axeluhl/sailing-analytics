@@ -3,8 +3,10 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager.AggregatedSingleDimensionType;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
@@ -26,7 +28,25 @@ public class DistanceBasedTwdTransitionStdRegressorTrainer extends TwdTransition
     public static void main(String[] args) throws Exception {
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 AggregatedSingleDimensionType.DISTANCE);
-        ModelStore modelStore = new MongoDbModelStoreImpl(distanceBasedPersistenceManager.getDb());
+        final ModelStore modelStore;
+        if (args.length > 0) {
+            modelStore = new FileSystemModelStoreImpl(args[0]);
+        } else {
+            modelStore = new MongoDbModelStoreImpl(distanceBasedPersistenceManager.getDb());
+        }
+        train(distanceBasedPersistenceManager, modelStore);
+    }
+
+    public static void train(
+            final ModelStore modelStore) throws ModelPersistenceException, Exception {
+        AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
+                AggregatedSingleDimensionType.DISTANCE);
+        train(distanceBasedPersistenceManager, modelStore);
+    }
+    
+    public static void train(
+            AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager,
+            final ModelStore modelStore) throws ModelPersistenceException, Exception {
         modelStore.deleteAll(ModelDomainType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
         DistanceBasedTwdTransitionRegressorModelFactory distanceBasedTwdTransitionRegressorModelFactory = new DistanceBasedTwdTransitionRegressorModelFactory();
         for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {

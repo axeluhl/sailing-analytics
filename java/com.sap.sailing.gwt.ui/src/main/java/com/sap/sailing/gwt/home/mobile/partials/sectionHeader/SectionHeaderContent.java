@@ -126,17 +126,12 @@ public class SectionHeaderContent extends Composite {
             }
         });
         actionArrowUi.addClassName(SectionHeaderResources.INSTANCE.css().accordion());
-        titleAndLabelContainerUi.addClassName(local_res.css().sectionheader_item_adjust_title_right());
-        actionArrowUi.getStyle().clearDisplay();
-        headerRightUi.setVisible(true);
+        this.adjustedActionStyles();
     }
 
     public void setClickAction(final PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(headerMainUi);
         this.adjustedActionStyles();
-        titleAndLabelContainerUi.addClassName(local_res.css().sectionheader_item_adjust_title_right());
-        headerRightUi.setVisible(true);
-        actionArrowUi.getStyle().clearDisplay();
     }
 
     public void setClickAction(final String url) {
@@ -148,6 +143,7 @@ public class SectionHeaderContent extends Composite {
 
     private void adjustedActionStyles() {
         titleAndLabelContainerUi.addClassName(local_res.css().sectionheader_item_adjust_title_right());
+        subtitleUi.addClassName(local_res.css().sectionheader_item_adjust_title_right());
         headerRightUi.setVisible(true);
         actionArrowUi.getStyle().clearDisplay();
     }

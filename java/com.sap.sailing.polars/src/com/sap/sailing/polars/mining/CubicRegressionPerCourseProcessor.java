@@ -47,7 +47,6 @@ public class CubicRegressionPerCourseProcessor implements
 
     @Override
     public boolean canProcessElements() {
-        // TODO Auto-generated method stub
         return true;
     }
 

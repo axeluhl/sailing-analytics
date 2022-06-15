@@ -39,6 +39,8 @@ java/com.sap.sailing.selenium.test/com.sap.sailing.selenium.test (No Proxy) indi
 ## Kubernetes
 kubernetes/aws-alb-ingress-controller.yaml
 java/com.sap.sailing.gwt.ui/360_VR_Wimbachklamm.mp4
+SailingServer (No Proxy, Axel) Chargebee.launch
+SailingServer (No Proxy) Chargebee.launch
 
 ## SAC Showcase, HDI Container
 mta_archives/

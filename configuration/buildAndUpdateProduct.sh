@@ -119,7 +119,7 @@ android=1
 java=1
 reporting=0
 suppress_confirmation=0
-extra=''
+export extra='--batch-mode'
 parallelexecution=0
 p2local=0
 
@@ -612,15 +612,16 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $p2local -eq 1 ]; then
 	    echo "INFO: Building and using local p2 repo"
 	    #build local p2 repo
-	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
+	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
             echo "JAVA_HOME used: $JAVA_HOME"
-	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
-	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
-	    #create local target definition
+	    # Build AWS API; its local repo must exist for creating the local target definition in the next step
+	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
+	    # create local target definition
 	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
 	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
 	else
@@ -747,7 +748,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
         echo "JAVA_HOME used: $JAVA_HOME"
-	export MAVEN_OPTS="-Xmx2g"
+	export MAVEN_OPTS="-Xmx4g"
         mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         # now get the exit status from mvn, and not that of tee which is what $? contains now
         MVN_EXIT_CODE=${PIPESTATUS[0]}

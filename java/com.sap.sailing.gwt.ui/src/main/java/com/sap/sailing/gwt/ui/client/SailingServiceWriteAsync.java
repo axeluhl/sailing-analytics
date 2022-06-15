@@ -58,7 +58,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -344,20 +344,20 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds,
-            List<UUID> newCourseAreaIds, AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
+            List<UUID> newCourseAreaIds, AsyncCallback<StrippedLeaderboardDTO> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds,
             ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds,
-            AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName,
-            int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
+            int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboardWithEliminations(String name, String displayName,
             String regattaName,
-            AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 

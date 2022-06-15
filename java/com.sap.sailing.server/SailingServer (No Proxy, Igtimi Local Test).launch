@@ -129,7 +129,19 @@
 <setEntry value="org.eclipse.equinox.launcher@default:default"/>
 <setEntry value="org.eclipse.equinox.simpleconfigurator@2:true"/>
 <setEntry value="org.eclipse.osgi@-1:true"/>
+<setEntry value="org.eclipse.osgi.source@default:default"/>
+<setEntry value="org.osgi.util.promise@default:default"/>
+<setEntry value="org.osgi.util.promise.source@default:default"/>
+<setEntry value="org.osgi.util.function@default:default"/>
+<setEntry value="org.osgi.util.function.source@default:default"/>
+<setEntry value="org.osgi.util.measurement@default:default"/>
+<setEntry value="org.osgi.util.measurement.source@default:default"/>
+<setEntry value="org.osgi.util.position@default:default"/>
+<setEntry value="org.osgi.util.position.source@default:default"/>
+<setEntry value="org.osgi.util.xml@default:default"/>
+<setEntry value="org.osgi.util.xml.source@default:default"/>
 <setEntry value="org.eclipse.osgi.services@default:default"/>
+<setEntry value="org.eclipse.osgi.services.source@default:default"/>
 <setEntry value="org.eclipse.equinox.cm@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
 <setEntry value="jaxb-api@default:default"/>
@@ -137,6 +149,7 @@
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
 <setEntry value="org.eclipse.osgi.util@default:default"/>
+<setEntry value="org.eclipse.osgi.util.source@default:default"/>
 <setEntry value="com.chargebee.chargebee-java@default:default"/>
 <setEntry value="com.jcraft.jsch@default:default"/>
 <setEntry value="com.amazon.aws.aws-java-api@default:default"/>
@@ -167,7 +180,14 @@
 <setEntry value="com.sap.db.jdbc.source@default:default"/>
 <setEntry value="org.osgi.service.packageadmin@default:default"/>
 <setEntry value="org.osgi.service.url@default:default"/>
-<setEntry value="com.google.code.findbugs.jsr305@default:default"/>
+<setEntry value="com.github.haifengl.smile-core@default:default"/>
+<setEntry value="com.github.haifengl.smile-core.source@default:default"/>
+<setEntry value="com.github.haifengl.smile-data@default:default"/>
+<setEntry value="com.github.haifengl.smile-data.source@default:default"/>
+<setEntry value="com.github.haifengl.smile-graph@default:default"/>
+<setEntry value="com.github.haifengl.smile-graph.source@default:default"/>
+<setEntry value="com.github.haifengl.smile-math@default:default"/>
+<setEntry value="com.github.haifengl.smile-math.source@default:default"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>

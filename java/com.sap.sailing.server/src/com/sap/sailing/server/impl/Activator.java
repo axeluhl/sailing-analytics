@@ -32,6 +32,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.subscription.PremiumRole;
+import com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -72,9 +74,11 @@ import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.interfaces.PreferenceConverter;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
+import com.sap.sse.security.shared.subscription.AllDataMiningRole;
+import com.sap.sse.security.shared.subscription.ArchiveDataMiningRole;
 import com.sap.sse.security.util.GenericJSONPreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -225,9 +229,12 @@ public class Activator implements BundleActivator {
         final Dictionary<String, String> sailingSecurityUrlPathProviderProperties = new Hashtable<>();
         sailingSecurityUrlPathProviderProperties.put(TypeBasedServiceFinder.TYPE,
                 SecurityUrlPathProviderSailingImpl.APPLICATION);
-        context.registerService(SecurityUrlPathProvider.class, new SecurityUrlPathProviderSailingImpl(),
-                sailingSecurityUrlPathProviderProperties);
-        registrations.add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
+        registrations.add(context.registerService(SecurityUrlPathProvider.class,
+                new SecurityUrlPathProviderSailingImpl(), sailingSecurityUrlPathProviderProperties));
+        registrations
+                .add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
+        registrations.add(context.registerService(SubscriptionPlanProvider.class,
+                SailingSubscriptionPlan::getAllInstances, null));
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final Thread backgroundThread = new Thread(()->{
@@ -236,18 +243,18 @@ public class Activator implements BundleActivator {
                             replicationService = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class).waitForService(0);
                             if (!replicationService.isReplicationStarting() && securityService.getMasterDescriptor() == null) {
                                 // see also bug 5569: this must only be done if it is clear that this instance is not to become a replica
+                                // TODO: Registering RoleDefinitions here requires additional maintenance. Consider
+                                // implementing another Construct like OSGIHasPermissionsProvider
                                 final RoleDefinition sailingViewerRoleDefinition = securityService
-                                        .getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
+                                        .getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance(), /* makeReadableForAll */ true);
+                                securityService.getOrCreateRoleDefinitionFromPrototype(PremiumRole.getInstance(), /* makeReadableForAll */ true);
+                                securityService.getOrCreateRoleDefinitionFromPrototype(ArchiveDataMiningRole.getInstance(), /* makeReadableForAll */ true);
+                                securityService.getOrCreateRoleDefinitionFromPrototype(AllDataMiningRole.getInstance(), /* makeReadableForAll */ true);
                                 if (securityService.isNewServer()) {
                                     // The server is initially set to be public by adding sailing_viewer role to the server group
                                     // with forAll=true
                                     securityService.putRoleDefinitionToUserGroup(securityService.getServerGroup(),
                                             sailingViewerRoleDefinition, true);
-                                }
-                                if (securityService.isInitialOrMigration()) {
-                                    // sailing_viewer role is publicly readable
-                                    securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(),
-                                            null, DefaultActions.READ.name());
                                 }
                             }
                         } catch (InterruptedException e) {

@@ -1,0 +1,12 @@
+FROM docker.sapsailing.com:443/sapjvm8:8.1.086
+LABEL maintainer=axel.uhl@sap.com
+# Download and extract the release
+WORKDIR /home/sailing
+RUN apt-get update \
+ && apt-get install -y vim
+COPY vimrc /root/.vimrc
+RUN wget -O /tmp/rds.pem https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
+ && /opt/sapjvm_8/bin/keytool -importcert -alias AWSRDS -file /tmp/rds.pem -keystore /opt/sapjvm_8/jre/lib/security/cacerts -noprompt -storepass changeit \
+ && rm /tmp/rds.pem
+RUN wget -O /home/sailing/WindEstimationModelsTraining.jar https://static.sapsailing.com/WindEstimationModelsTraining.jar
+CMD exec java "${MEMORY}" -Dmongo.uri="${MONGODB_URI}" -jar WindEstimationModelsTraining.jar "${BEARER_TOKEN}"

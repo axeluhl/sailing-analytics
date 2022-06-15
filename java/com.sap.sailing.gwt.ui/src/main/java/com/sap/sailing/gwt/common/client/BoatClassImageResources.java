@@ -76,10 +76,6 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource BOneIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BB10M.png")
-    @ImageOptions(preventInlining = true)
-    ImageResource BB10MIcon();
-
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BAVARIA_CRUISER_41S.png")
     @ImageOptions(preventInlining = true)
     ImageResource BavariaCruiser41S();
@@ -92,6 +88,34 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource BavariaCruiser46();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/BB10M.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource BB10MIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt1.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Brassfahrt1Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt2.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Brassfahrt2Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt3.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Brassfahrt3Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt4.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Brassfahrt4Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt5.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Brassfahrt5Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/Brassfahrt6.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Brassfahrt6Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CADET.png")
     @ImageOptions(preventInlining = true)
     ImageResource CadetIcon();
@@ -531,6 +555,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VIPER_640.png")
     @ImageOptions(preventInlining = true)
     ImageResource Viper640Icon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/WASZP.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource WaszpIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/WAYFARER.png")
     @ImageOptions(preventInlining = true)
