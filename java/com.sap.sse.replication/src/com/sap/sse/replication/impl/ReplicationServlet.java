@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -291,7 +292,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
         Thread.currentThread().setContextClassLoader(replicable.getClass().getClassLoader());
         final O operation;
         try {
-            operation = replicable.readOperation(is);
+            operation = replicable.readOperation(is, /* classLoaderCache */ new HashMap<>());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error trying to de-serialize an operation for replicable "+replicable.getId(), e);
             throw e;

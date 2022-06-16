@@ -3,6 +3,7 @@ package com.sap.sse.replication.interfaces.impl;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -19,7 +20,7 @@ import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 /**
- * Subclasses must implement {@link #createObjectInputStreamResolvingAgainstCache(InputStream)}, usually by instantiating an anonymous inner class
+ * Subclasses must implement {@link #createObjectInputStreamResolvingAgainstCache(InputStream, Map)}, usually by instantiating an anonymous inner class
  * that is subclass of {@link ObjectInputStreamResolvingAgainstCache}, as in
  * <pre>
  *  public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {

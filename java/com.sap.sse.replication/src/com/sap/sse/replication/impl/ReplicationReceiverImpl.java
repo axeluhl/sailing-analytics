@@ -174,7 +174,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
      * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's a
      * {@link ReplicationServiceImpl#createUncompressingInputStream(InputStream) compressed} stream that first
      * {@link DataInputStream#readUTF() encodes a UTF string} representing the {@link Replicable#getId() replicable ID},
-     * followed by a sequence of serialized {@code byte[]} objects which each can be {@link Replicable#readOperation(InputStream) de-serialized}
+     * followed by a sequence of serialized {@code byte[]} objects which each can be {@link Replicable#readOperation(InputStream, Map) de-serialized}
      * by the receiving {@link Replicable} identified by the ID received as a prefix. This method then applies these operations to the
      * {@link Replicable} identified by the ID, retrieved through the {@link #replicableProvider}.
      * 
@@ -217,11 +217,12 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                 if (replicable != null) {
                     ObjectInputStream ois = new ObjectInputStream(uncompressingInputStream); // no special stream required; only reading a generic byte[]
                     int operationsInMessage = 0;
+                    final Map<String, Class<?>> classLoaderCache = new HashMap<>();
                     try {
                         while (true) {
                             byte[] serializedOperation = (byte[]) ois.readObject();
                             if (Util.contains(master.getReplicables(), replicable)) {
-                                readOperationAndApplyOrQueueIt(replicable, serializedOperation);
+                                readOperationAndApplyOrQueueIt(replicable, serializedOperation, classLoaderCache);
                                 operationCount++;
                                 operationsInMessage++;
                                 if (operationCount % 10000l == 0) {
@@ -375,8 +376,8 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     }
     
     private <S, O extends OperationWithResult<S, ?>> void readOperationAndApplyOrQueueIt(Replicable<S, O> replicable,
-            byte[] serializedOperation) throws ClassNotFoundException, IOException {
-        O operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation));
+            byte[] serializedOperation, Map<String, Class<?>> classLoaderCache) throws ClassNotFoundException, IOException {
+        O operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation), classLoaderCache);
         applyOrQueue(operation, replicable);
     }
 

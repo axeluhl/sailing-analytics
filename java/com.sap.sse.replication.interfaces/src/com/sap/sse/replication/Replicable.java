@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -57,7 +58,7 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * <li>Consider using {@link AbstractReplicableWithObjectInputStream} as an abstract base class for your
  * {@link Replicable} implementation.</li>
  * <li>Implement the necessary methods, in particular ensuring that your
- * {@link ReplicableWithObjectInputStream#createObjectInputStreamResolvingAgainstCache(InputStream)} implementation
+ * {@link ReplicableWithObjectInputStream#createObjectInputStreamResolvingAgainstCache(InputStream, Map)} implementation
  * returns an object whose class is loaded by your replicable's class loader, such as an in-place anonymous inner class
  * instantiation of the {@link ObjectInputStreamResolvingAgainstCache} class.</li>
  * <li>In your bundle's {@link BundleActivator activator} create your replicable instance and
@@ -191,7 +192,7 @@ extends OperationsToMasterSender<S, O>, Replicator<S, O> {
      * Separating reading and applying gives clients an opportunity to queue operations, e.g., in order to wait until
      * receiving and {@link #initiallyFillFrom(InputStream) filling} the initial load has completed.
      */
-    O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException;
+    O readOperation(InputStream inputStream, Map<String, Class<?>> classLoaderCache) throws IOException, ClassNotFoundException;
 
     /**
      * Checks if {@link #hasSentOperationToMaster(OperationWithResultWithIdWrapper) the operation was previously
