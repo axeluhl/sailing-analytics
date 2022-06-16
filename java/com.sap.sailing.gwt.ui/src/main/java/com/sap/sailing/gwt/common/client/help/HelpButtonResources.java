@@ -5,39 +5,26 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 
-public interface HelpButtonResources extends ClientBundle{
+public interface HelpButtonResources extends ClientBundle {
     static HelpButtonResources INSTANCE = GWT.create(HelpButtonResources.class);
 
     @Source("help.png")
     ImageResource icon();
 
-    @Source("adminConsoleHelp.gss")
+    @Source("HelpButton.gss")
     Style style();
-    
-    @Source("dataMiningHelp.gss")
-    Style style2();
-    
+
     interface Style extends CssResource {
         @ClassName("help-icon")
         String icon();
+
         @ClassName("help-popup")
         String popup();
 
         String content();
+
         String text();
+
         String link();
     }
-    
-    interface Style2 extends CssResource {
-        @ClassName("help-icon")
-        String icon();
-        @ClassName("help-popup")
-        String popup();
-
-        String content();
-        String text();
-        String link();
-    }
-    
-
 }

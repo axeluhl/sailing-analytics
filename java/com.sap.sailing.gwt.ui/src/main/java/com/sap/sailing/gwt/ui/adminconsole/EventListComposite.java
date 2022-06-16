@@ -194,7 +194,7 @@ public class EventListComposite extends Composite {
             }
         });
         buttonPanel.addUnsecuredWidget(new HelpButton(HelpButtonResources.INSTANCE,
-                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/CreatingYourFirstEvent.mp4", 0));
+                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/CreatingYourFirstEvent.mp4"));
         panel.add(filterTextbox);
         panel.add(eventTable);
         noEventsLabel = new Label(stringMessages.noEventsYet());

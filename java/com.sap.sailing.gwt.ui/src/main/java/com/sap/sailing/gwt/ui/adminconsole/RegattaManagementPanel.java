@@ -86,7 +86,7 @@ public class RegattaManagementPanel extends SimplePanel implements FilterablePan
                     removeRegattas(regattas);
                 });
         buttonPanel.addUnsecuredWidget(new HelpButton(HelpButtonResources.INSTANCE,
-                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4", 0));
+                stringMessages.videoGuide(), "https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4"));
         regattasContentPanel.add(buttonPanel);
         refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override

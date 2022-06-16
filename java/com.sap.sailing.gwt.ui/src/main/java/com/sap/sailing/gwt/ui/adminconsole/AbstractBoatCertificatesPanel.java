@@ -181,7 +181,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
                 contextUpdatePermissionCheck, this::suggestCertificates);
         suggestCertificatesButton.ensureDebugId("SuggestCertificatesButton");
         topButtonPanel.addUnsecuredWidget(new HelpButton(HelpButtonResources.INSTANCE,
-                stringMessages.orcExplanation(), "https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta#setting-up-an-orc-regatta-with-performance-curve-scoring-pcs", 0));
+                stringMessages.orcExplanation(), "https://wiki.sapsailing.com/wiki/howto/setup-orc-regatta#setting-up-an-orc-regatta-with-performance-curve-scoring-pcs"));
         // TABLE - Boats
         CaptionPanel boatCaptionPanel = new CaptionPanel(stringMessages.boats());
         boatCaptionPanel.add(boatTable);
