@@ -25,6 +25,21 @@ public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfigur
     private UUID eventId;
     private UUID courseAreaId;
     private Integer priority;
+    
+    /**
+     * A copy constructor
+     */
+    public DeviceConfigurationImpl(DeviceConfiguration other) {
+        super(other.getName());
+        this.id = other.getId();
+        this.regattaConfiguration = other.getRegattaConfiguration();
+        this.allowedCourseAreaNames = other.getAllowedCourseAreaNames();
+        this.resultsMailRecipient = other.getResultsMailRecipient();
+        this.byNameDesignerCourseNames = other.getByNameCourseDesignerCourseNames();
+        this.eventId = other.getEventId().orElse(null);
+        this.courseAreaId = other.getCourseAreaId().orElse(null);
+        this.priority = other.getPriority().orElse(null);
+    }
 
     public DeviceConfigurationImpl(RegattaConfiguration regattaConfiguration, UUID id, String name) {
         super(name);

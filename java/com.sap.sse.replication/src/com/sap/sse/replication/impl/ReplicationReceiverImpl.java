@@ -208,8 +208,6 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                 }
                 final byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
-                // Set the replicable's class's class loader as context for deserialization so that all exported classes
-                // of all required bundles/packages can be deserialized at least
                 final InputStream uncompressingInputStream = ReplicationServiceImpl.createUncompressingInputStream(new ByteArrayInputStream(bytesFromMessage));
                 final String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
                 // TODO bug 2465: decide based on the master descriptor whether we want to process this message; if it's for a Replicable we're not replicating from that master, drop the message
