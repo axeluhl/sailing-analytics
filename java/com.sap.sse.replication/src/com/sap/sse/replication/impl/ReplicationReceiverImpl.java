@@ -213,14 +213,12 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                 // TODO bug 2465: decide based on the master descriptor whether we want to process this message; if it's for a Replicable we're not replicating from that master, drop the message
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
-                    ObjectInputStream ois = new ObjectInputStream(uncompressingInputStream); // no special stream required; only reading a generic byte[]
+                    final ObjectInputStream ois = replicable.createObjectInputStreamResolvingAgainstCache(uncompressingInputStream, /* class loader cache */ new HashMap<>());
                     int operationsInMessage = 0;
-                    final Map<String, Class<?>> classLoaderCache = new HashMap<>();
                     try {
                         while (true) {
-                            byte[] serializedOperation = (byte[]) ois.readObject();
+                            readOperationAndApplyOrQueueIt(replicable, ois);
                             if (Util.contains(master.getReplicables(), replicable)) {
-                                readOperationAndApplyOrQueueIt(replicable, serializedOperation, classLoaderCache);
                                 operationCount++;
                                 operationsInMessage++;
                                 if (operationCount % 10000l == 0) {
@@ -374,9 +372,11 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     }
     
     private <S, O extends OperationWithResult<S, ?>> void readOperationAndApplyOrQueueIt(Replicable<S, O> replicable,
-            byte[] serializedOperation, Map<String, Class<?>> classLoaderCache) throws ClassNotFoundException, IOException {
-        O operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation), classLoaderCache);
-        applyOrQueue(operation, replicable);
+            ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        O operation = replicable.readOperationFromObjectInputStream(ois);
+        if (Util.contains(master.getReplicables(), replicable)) {
+            applyOrQueue(operation, replicable);
+        }
     }
 
     /**

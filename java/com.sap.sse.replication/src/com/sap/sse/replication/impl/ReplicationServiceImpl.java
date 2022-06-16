@@ -561,9 +561,6 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             Replicable<S, O> replicable) throws IOException {
         // need to write the operations one by one, making sure the ObjectOutputStream always writes
         // identical objects again if required because they may have changed state in between
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        replicable.writeOperation(operation, bos, /* close stream */true);
-        final byte[] serializedOperation = bos.toByteArray();
         synchronized (outboundBufferMonitor) {
             final String replicaIdAsString = replicable.getId().toString();
             if (outboundBuffer != null && !Util.equalsWithNull(outboundBufferReplicableIdAsString, replicaIdAsString)) {
@@ -578,7 +575,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                 outboundObjectBuffer = compressingObjectOutputStream;
                 outboundBufferClasses = new ArrayList<>();
             }
-            outboundObjectBuffer.writeObject(serializedOperation);
+            outboundObjectBuffer.writeObject(operation);
             outboundBufferClasses.add(operation.getClassForLogging());
             if (outboundBuffer.size() > TRIGGER_MESSAGE_SIZE_IN_BYTES) {
                 logger.info("Triggering replication because buffer holds " + outboundBuffer.size()

@@ -166,6 +166,12 @@ extends OperationsToMasterSender<S, O>, Replicator<S, O> {
     void clearReplicaState() throws MalformedURLException, IOException, InterruptedException;
 
     /**
+     * Produces an object input stream that can choose to resolve objects against a cache so that duplicate instances
+     * are avoided.
+     */
+    ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException;
+
+    /**
      * Dual, reading operation for {@link #serializeForInitialReplication(OutputStream)}. In other words, when this
      * operation returns, this service instance is in a state "equivalent" to that of the service instance that produced
      * the stream contents in its {@link #serializeForInitialReplication(OutputStream)}. "Equivalent" here means that a
@@ -186,6 +192,30 @@ extends OperationsToMasterSender<S, O>, Replicator<S, O> {
      * operation is {@link #initiallyFillFrom}.
      */
     void serializeForInitialReplication(OutputStream os) throws IOException;
+
+    /**
+     * The class loader to use for de-serializing objects. By default, this object's class's class loader is used.
+     */
+    default ClassLoader getDeserializationClassLoader() {
+        return getClass().getClassLoader();
+    }
+    
+    /**
+     * Implementation of {@link #readOperation(InputStream, Map)}, using the {@link ObjectInputStream} created by
+     * {@link #createObjectInputStreamResolvingAgainstCache(InputStream, Map)}. Before actually reading an operation
+     * object, the current thread's context class loader is set to the {@link #getDeserializationClassLoader() class
+     * loader for de-serialization} and restored to its previous value in the {@code finally} clause.
+     */
+    @SuppressWarnings("unchecked")
+    default O readOperationFromObjectInputStream(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
+        try {
+            return (O) ois.readObject();
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldContextClassloader);
+        }
+    }
 
     /**
      * From an input stream, reads an operation that can be {@link #apply(OperationWithResult) applied} to this object.
