@@ -34,9 +34,9 @@ public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfigur
         super(other.getName());
         this.id = other.getId();
         this.regattaConfiguration = other.getRegattaConfiguration();
-        this.allowedCourseAreaNames = new ArrayList<>(other.getAllowedCourseAreaNames());
+        this.allowedCourseAreaNames = other.getAllowedCourseAreaNames() == null ? null : new ArrayList<>(other.getAllowedCourseAreaNames());
         this.resultsMailRecipient = other.getResultsMailRecipient();
-        this.byNameDesignerCourseNames = new ArrayList<>(other.getByNameCourseDesignerCourseNames());
+        this.byNameDesignerCourseNames = other.getByNameCourseDesignerCourseNames() == null ? null : new ArrayList<>(other.getByNameCourseDesignerCourseNames());
         this.eventId = other.getEventId().orElse(null);
         this.courseAreaId = other.getCourseAreaId().orElse(null);
         this.priority = other.getPriority().orElse(null);
