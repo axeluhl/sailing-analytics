@@ -1,6 +1,7 @@
 package com.sap.sse.security.subscription.chargebee;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -34,7 +35,10 @@ public class ChargebeeFetchItemPricesTask implements ChargebeeItemPriceListReque
 
     @Override
     public void onItemPriceResult(Map<String, BigDecimal> itemPrices, String nextOffset) {
-        this.itemPrices = itemPrices;
+        if(itemPrices == null) {
+            this.itemPrices = new HashMap<>();
+        }
+        this.itemPrices.putAll(itemPrices);
         if (nextOffset == null || nextOffset.isEmpty()) {
             onDone();
         } else {
@@ -45,7 +49,8 @@ public class ChargebeeFetchItemPricesTask implements ChargebeeItemPriceListReque
     private void fetchItemPriceList(String offset) {
         logger.info(() -> "Schedule fetch Chargebee ItemPrices, offset: "
                 + (offset == null ? "" : offset));
-        requestProcessor.addRequest(new ChargebeeItemPriceListRequest(offset, this, requestProcessor, chargebeeApiServiceParams));
+        requestProcessor.addRequest(new ChargebeeItemPriceListRequest(offset, this, 
+                requestProcessor, chargebeeApiServiceParams));
     }
 
     private void onDone() {
