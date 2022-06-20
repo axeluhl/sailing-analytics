@@ -30,11 +30,11 @@ public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<R
 
     @Override
     public RegattaRaceStatesSettings createDefaultSettings() {
-        RegattaRaceStatesSettings settings = new RegattaRaceStatesSettings();
-        if(courseAreaDTOs != null) {
+        final RegattaRaceStatesSettings settings = new RegattaRaceStatesSettings();
+        if (courseAreaDTOs != null) {
             settings.setDefaultCourseAreas(courseAreaDTOs);
         }
-        if(raceGroupDTOs != null) {
+        if (raceGroupDTOs != null) {
             settings.setDefaultRegattas(raceGroupDTOs);
         }
         return settings;
