@@ -4,6 +4,14 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">June 2022</h5>
+         <ul class="bulletList">
+           <li>Bug fix: in the REST API's leaderboard-related end points the leaderboard object was not properly
+               used for premium permission checks. Therefore, a premium role qualified, e.g., with a user group
+               did not properly grant its permissions to requests.</li>
+           <li>Fixed a regression regarding the availability of <tt>/sailingserver/api/v1/regattas/{regatta-name}/datamining/...</tt>
+               requests; a refactoring attempt accidentally introduced this problem which has now been resolved.</li>
+         </ul>
          <h5 class="articleSubheadline">May 2022</h5>
          <ul class="bulletList">
            <li>Bug fix: when the "Boats" column is expanded for a race in which not all entries of the leaderboard

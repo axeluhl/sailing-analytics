@@ -75,6 +75,10 @@ public abstract class AbstractMediaDTO implements IsSerializable, Comparable<Abs
         this.mimeType = mimeType;
     }
 
+    /**
+     * @return a live collection of this media object's tags; callers can add to and/or remove from the list returned to
+     *         affect the set of tags, but of course not while iterating over this list at the same time
+     */
     public List<String> getTags() {
         return tags;
     }
