@@ -118,7 +118,6 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         flowPanel.add(dialog.createHeadline(stringMessages.showFollowingRegattas(), true));
         FlowPanel regattaNamesPanel = new FlowPanel();
         flowPanel.add(regattaNamesPanel);
-        
         int maxRegattasPerRow = 4;
         int numberOfRegattas = raceGroups.size();
         int numberOfRequiredRows = numberOfRegattas / maxRegattasPerRow;
@@ -127,10 +126,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         }
         int rowIndex = 0;
         int columnIndex = 0;
-        
         Grid regattaGrid = new Grid(numberOfRequiredRows, maxRegattasPerRow);
         regattaNamesPanel.add(regattaGrid);
-        
         boolean allCheckboxesSelected = true;
         for (RaceGroupDTO raceGroup : raceGroups) {
             CheckBox checkBox = dialog.createCheckbox(raceGroup.displayName);
@@ -145,11 +142,9 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
                 columnIndex = 0;
             }
         }
-        
         regattaDeselectButton = new Button();
         setTextOfDeselectButton(regattaDeselectButton, allCheckboxesSelected);
         regattaDeselectButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 if (regattaDeselectButton.getText().equals(stringMessages.deselectAll())) {
@@ -164,10 +159,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
                     regattaDeselectButton.setText(stringMessages.deselectAll());
                 }
             }
-            
         });
         flowPanel.add(regattaDeselectButton);
-        
         return flowPanel;
     }
     

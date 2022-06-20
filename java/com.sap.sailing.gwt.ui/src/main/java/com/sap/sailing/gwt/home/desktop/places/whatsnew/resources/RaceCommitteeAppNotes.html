@@ -4,12 +4,29 @@
 <div id="mainContent">
 	<h4 class="articleHeadline">What's New - SAP Sailing Race Manager</h4>
 	<div class="innerContent">
-		<h5 class="articleSubheadline">October 2021</h5>
-		<ul class="bulletList">
-			<li>The LEADERBOARD:UPDATE permission is now enough again for Race Committee App users to see
-			    all competitors for result entry. Due to a security check too strict, READ permissions for
-			    the non-public competitor fields were required before which shouldn't have been required.</li>
-		</ul>
+        <h5 class="articleSubheadline">June 2022</h5>
+        <ul class="bulletList">
+            <li>Bug fix: When starting the app after killing it, with unsent messages buffered, fixed
+                loading the messages from the persistent store.</li>
+            <li>Bug fix: Big protest flag (Bravo) button on the right side of the screen had no effect
+                until the navigation drawer was pulled in from the left.</li>
+        </ul>
+        <h5 class="articleSubheadline">May 2022</h5>
+        <ul class="bulletList">
+            <li>A variant of the RRS26 five minutes sequence has been added that shortens the sequence
+                to three minutes, with class up at 3, mode up at 2, mode down at one, and class down
+                at start.</li>
+            <li>Bug fix: when filtering for current races, empty series not containing any races caused
+                an internal, invisible error that led to the "Current Races" list staying empty. Now,
+                you can model empty series that have subsequent series with races, and those races
+                from the subsequent races can then be displayed as "current."</li>
+        </ul>
+        <h5 class="articleSubheadline">October 2021</h5>
+        <ul class="bulletList">
+            <li>The LEADERBOARD:UPDATE permission is now enough again for Race Committee App users to see
+                all competitors for result entry. Due to a security check too strict, READ permissions for
+                the non-public competitor fields were required before which shouldn't have been required.</li>
+        </ul>
 		<h5 class="articleSubheadline">July 2021</h5>
 		<ul class="bulletList">
 			<li>The date picker for setting the finishing time of a competitor only allows dates equal to the begin of
