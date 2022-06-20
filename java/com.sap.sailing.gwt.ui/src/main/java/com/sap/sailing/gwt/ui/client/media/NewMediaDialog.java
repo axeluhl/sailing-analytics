@@ -11,6 +11,8 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -92,6 +94,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (media.title == null || media.title.trim().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.name());
+            } else if (media.mimeType == null && media.url != null && !isMediaTypeSupported(media.url)) {
+                errorMessage = stringMessages.fileTypeNotSupported();
             } else if (media.mimeType == null) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.mimeType());
             } else if (media.startTime == null) {
@@ -100,6 +104,19 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.duration());
             }
             return errorMessage;
+        }
+        
+        private boolean isMediaTypeSupported(String url) {
+            final boolean supported;
+            int dotPos = url.lastIndexOf('.');
+            if (dotPos >= 0) {
+                String fileEnding = url.substring(dotPos + 1).toLowerCase();
+                List<MimeType> possibleMimeTypes = MimeType.byExtension(fileEnding);
+                supported = possibleMimeTypes.size() > 0;
+            } else {
+                supported = false;
+            }
+            return supported;
         }
     }
 
@@ -669,6 +686,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         for (int i = 0; i < proposedMimeTypes.length; i++) {
             mimeTypeListBox.addItem(proposedMimeTypes[i].name());
         }
+        mimeTypeListBox.addChangeHandler(new ChangeHandler() {
+            
+            @Override
+            public void onChange(ChangeEvent event) {
+                mediaTrack.mimeType = MimeType.byName(mimeTypeListBox.getSelectedValue());
+                validateAndUpdate();
+            }
+        });
         fp.add(mimeTypeListBox);
         infoLabel.setWidget(fp);
         updateBoxByMimeType();
