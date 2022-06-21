@@ -1,6 +1,8 @@
 package com.sap.sse.security.impl;
 
+import java.math.BigDecimal;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -112,5 +114,7 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalResetPassword(String username, String passwordResetSecret);
 
     Void internalUpdateSubscription(String username, Subscription newSubscription) throws UserManagementException;
+    
+    Void internalUpdateSubscriptionPlanPrices(Map<String, BigDecimal> updatedItemPrices);
 
 }

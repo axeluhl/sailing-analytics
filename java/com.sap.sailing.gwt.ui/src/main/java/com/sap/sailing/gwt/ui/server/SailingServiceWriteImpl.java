@@ -3202,18 +3202,18 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     getService().getFileStorageManagementService().getActiveFileStorageService()
                             .removeFile(new URI(alreadyStoredFileRef));
                 } catch (Exception e) {
+                    logger.warning("Exception trying to remove image file "+alreadyStoredFileRef+": "+e.getMessage());
                 }
                 // Exception occured while trying to revert changes after exception
                 // This only keeps some trash on the FileStorage
             }
             throw new Exception("Error occured while storing images on the FileStorage");
         }
-        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask,
-                resizedImages);
-        for (String tag : resizingTask.getImage().getTags()) {
+        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask, resizedImages);
+        final ImageDTO image = resizingTask.getImage();
+        for (String tag : new ArrayList<>(image.getTags())) {
             final MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
             if (predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
-                final ImageDTO image = resizingTask.getImage();
                 for (MediaTagConstants tagConstant : resizingTask.getResizingTask()) {
                     image.getTags().remove(tagConstant.getName());
                 }
