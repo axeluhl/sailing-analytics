@@ -10,6 +10,7 @@ import difflib
 import json
 import pickle
 import subprocess
+import argparse
 from sys import argv, stderr
 from os import linesep, path
 from shlex import quote
@@ -109,8 +110,9 @@ def main(event_id, mailinglist):
 
 
 if __name__ == '__main__':
-    if len(argv) < 3:
-        print("Error: Missing argument(s)" + linesep + "usage:" + linesep + "$ python3 " +
-              argv[0] + " <event_id> <mailing_list>", file=stderr)
-        exit(1)
-    main(argv[1], argv[2])
+    parser = argparse.ArgumentParser(description='Manage2Sail XRR Result document diff mailer')
+    parser.add_argument('event_id', help='UUID of the m2s event')
+    parser.add_argument('mailing_list', help='path to a file containing the recipients')
+    args = parser.parse_args()
+
+    main(args.event_id, args.mailing_list)
