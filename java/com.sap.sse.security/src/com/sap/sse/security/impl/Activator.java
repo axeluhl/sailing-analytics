@@ -47,6 +47,7 @@ import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessorImpl;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionBackgroundUpdater;
+import com.sap.sse.security.subscription.SubscriptionPlanBackgroundUpdater;
 import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
 import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -288,6 +289,7 @@ public class Activator implements BundleActivator {
                     final ReplicationMasterDescriptor masterDescriptor = securityService.get().getMasterDescriptor();
                     if (masterDescriptor == null) {
                         startSubscriptionDataUpdateTask(bundleContext);
+                        startSubscriptionPlanUpdateTask(bundleContext);
                     }
                 } catch (InterruptedException | UserStoreManagementException | ExecutionException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
@@ -368,5 +370,9 @@ public class Activator implements BundleActivator {
      */
     private void startSubscriptionDataUpdateTask(BundleContext bundleContext) {
         new SubscriptionBackgroundUpdater(context).start(securityService);
+    }
+    
+    private void startSubscriptionPlanUpdateTask(BundleContext bundleContext) {
+        new SubscriptionPlanBackgroundUpdater(bundleContext).start(securityService);;
     }
 }
