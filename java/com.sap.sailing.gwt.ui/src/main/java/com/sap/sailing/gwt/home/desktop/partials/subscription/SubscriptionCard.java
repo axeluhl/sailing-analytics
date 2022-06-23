@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.home.shared.places.subscription.SailingSubscriptionSt
 import com.sap.sailing.gwt.home.shared.places.subscription.SubscriptionGroupDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanGroup;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConstants;
@@ -117,7 +118,8 @@ public class SubscriptionCard extends Composite {
                 }
                 Label priceInfo = new Label(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupPriceInfoMessageKey()));
                 priceInfo.addStyleName(PRICE_INFO_STYLE);
-                if (Boolean.TRUE.equals(subscriptionPrice.getIsOneTimePayment())) {
+                if (Boolean.TRUE.equals(subscriptionPrice.getIsOneTimePayment())
+                        || PlanGroup.TRIAL == subscriptionGroupDTO.getGroup()) {
                     prices.add(priceInfo);
                 }
             }
