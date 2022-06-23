@@ -2,7 +2,7 @@
 """
 --- Manage2Sail XRR Result document diff mailer ---
 Example usage:
-$ python3 m2smail.py 123456789 path/to/mailinglist
+$ python3 m2smail.py 123456789 path/to/mailing_list_path
 Minimum required Python version is 3.6
 """
 import datetime
@@ -55,22 +55,31 @@ def nonblank_lines(f):
             yield line
 
 
-def send_mail(mailinglist_path, subject, body):
-    mailinglist = []
-    with open(mailinglist_path, "r") as f:
+def send_mail(mailing_list_path, subject, body):
+    mailing_list = []
+    with open(mailing_list_path, "r") as f:
         for recipient in nonblank_lines(f):
-            mailinglist.append(quote(recipient))
-    if mailinglist:
-        cmd = f"echo \"{body}\" | mail -s \"m2smail: {subject}\" {' '.join(mailinglist)}"
+            mailing_list.append(quote(recipient))
+    if mailing_list:
+        cmd = f"echo \"{body}\" | mail -s \"m2smail: {subject}\" {' '.join(mailing_list)}"
         result = subprocess.run(cmd, shell=True)
         if result.returncode != 0:
             print(f"[{get_time()}] mail exited with non 0 return code: {result.returncode}\n{result.stderr}", file=stderr)
     else:
-        print(f"[{get_time()}] Mailinglist is empty: {mailinglist_path}", file=stderr)
+        print(f"[{get_time()}] Mailing_list_path is empty: {mailing_list_path}", file=stderr)
 
 
-def main(event_id, mailinglist):
+def main(event_id, mailing_list_path, class_list_path):
     print(f"[{get_time()}] Starting up")
+
+    # Initialize class whitelist
+    class_list = []
+    if class_list_path:
+        with open(class_list_path, "r") as f:
+            for classname in nonblank_lines(f):
+                class_list.append(classname)
+
+    # Send request
     response = request(
         f"http://manage2sail.com/api/public/links/event/{event_id}?accesstoken=bDAv8CwsTM94ujZ&mediaType=json")
     now = get_time()
@@ -81,6 +90,12 @@ def main(event_id, mailinglist):
             output = []
             for regatta in data["Regattas"]:
                 name = regatta["Name"]
+
+                # Check class whitelist
+                if class_list:
+                    if name not in class_list:
+                        continue
+
                 cached_content = cache[name][0] if cache.get(
                     name) is not None and cache[name][0] is not None else ""
                 cached_date = cache[name][1] if cache.get(
@@ -92,9 +107,9 @@ def main(event_id, mailinglist):
                     cache[name] = (formatted_content, now)
                     output.append(diff)
             if output:
-                print(f"[{get_time()}] Sending mail with {len(output)} changes to {mailinglist}")
+                print(f"[{get_time()}] Sending mail with {len(output)} changes to {mailing_list_path}")
                 body = "\n\n".join(output)
-                send_mail(mailinglist, data["Name"], body)
+                send_mail(mailing_list_path, data["Name"], body)
                 save_cache(event_id, cache)
             else:
                 print(f"[{get_time()}] No changes")
@@ -112,7 +127,8 @@ def main(event_id, mailinglist):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Manage2Sail XRR Result document diff mailer')
     parser.add_argument('event_id', help='UUID of the m2s event')
-    parser.add_argument('mailing_list', help='path to a file containing the recipients')
+    parser.add_argument('mailing_list_path', help='path to a file containing the recipients')
+    parser.add_argument('-c', '--classes', help='path to a file containing the whitelisted classes')
     args = parser.parse_args()
 
-    main(args.event_id, args.mailing_list)
+    main(args.event_id, args.mailing_list_path, args.classes)
