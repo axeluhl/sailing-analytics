@@ -66,12 +66,10 @@ def send_mail(mailing_list_path, subject, body):
         if result.returncode != 0:
             print(f"[{get_time()}] mail exited with non 0 return code: {result.returncode}\n{result.stderr}", file=stderr)
     else:
-        print(f"[{get_time()}] Mailing_list_path is empty: {mailing_list_path}", file=stderr)
+        print(f"[{get_time()}] Mailing list is empty: {mailing_list_path}", file=stderr)
 
 
 def main(event_id, mailing_list_path, class_list_path):
-    print(f"[{get_time()}] Starting up")
-
     # Initialize class whitelist
     class_list = []
     if class_list_path:
@@ -80,6 +78,7 @@ def main(event_id, mailing_list_path, class_list_path):
                 class_list.append(classname)
 
     # Send request
+    print(f"[{get_time()}] Requesting results for {len(class_list)} classes...")
     response = request(
         f"http://manage2sail.com/api/public/links/event/{event_id}?accesstoken=bDAv8CwsTM94ujZ&mediaType=json")
     now = get_time()
@@ -107,7 +106,7 @@ def main(event_id, mailing_list_path, class_list_path):
                     cache[name] = (formatted_content, now)
                     output.append(diff)
             if output:
-                print(f"[{get_time()}] Sending mail with {len(output)} changes to {mailing_list_path}")
+                print(f"[{get_time()}] {len(output)} change(s) found. Sending mail to {mailing_list_path}")
                 body = "\n\n".join(output)
                 send_mail(mailing_list_path, data["Name"], body)
                 save_cache(event_id, cache)
