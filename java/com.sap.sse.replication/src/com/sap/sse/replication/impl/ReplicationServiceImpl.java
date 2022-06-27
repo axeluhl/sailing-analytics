@@ -37,6 +37,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationsToMasterSender;
@@ -186,12 +187,17 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     private static final Duration DURATION_BETWTEEN_SEND_RETRIES = Duration.ONE_SECOND.times(5);
 
     /**
-     * A single buffer for all operations that need to be sent out to replicas through a fan-out exchange.
-     * Bug 5741 will split this up into one buffer for all synchronous and multiple buffers for asynchronous operations
-     * where those for asynchronous operations will be fed from a queue to which all asynchronous operations are
-     * added.
+     * A buffer for operations that need to be sent out to replicas through a fan-out exchange and that require
+     * {@link Operation#requiresSynchronousExecution() synchronous execution}.
      */
-    private final OperationSerializerBuffer outboundBufferForAllOperations;
+    private final OperationSerializerBufferImpl outboundBufferForOperationsRequiringSynchronousExecution;
+
+    /**
+     * A buffer pool for all operations to be sent out to replicas through a fan-out exchange for which replicas may
+     * choose to apply them asynchronously. See {@link Operation#requiresSynchronousExecution()}. After construction,
+     * the pool is in the "stopped" state. It needs to be {@link OperationSerializerBufferPool#start}ed to 
+     */
+    private final OperationSerializerBufferPool outboundBufferPoolForOperationsAllowingForAsynchronousExecution;
 
     /**
      * Used to schedule the sending of all operations in {@link #outboundBuffer} using the {@link #sendingTask}.
@@ -321,7 +327,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider) throws Exception {
         this.sendJobQueue = new LinkedBlockingDeque<>();
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
-        this.outboundBufferForAllOperations = new OperationSerializerBuffer(this, TRANSMISSION_DELAY, TRIGGER_MESSAGE_SIZE_IN_BYTES, timer);
+        this.outboundBufferForOperationsRequiringSynchronousExecution = new OperationSerializerBufferImpl(/* sender */ this, TRANSMISSION_DELAY, TRIGGER_MESSAGE_SIZE_IN_BYTES, timer);
+        this.outboundBufferPoolForOperationsAllowingForAsynchronousExecution = new OperationSerializerBufferPool(/* sender */ this, TRANSMISSION_DELAY, TRIGGER_MESSAGE_SIZE_IN_BYTES, timer);
         this.totalSendJobsSize = new AtomicLong(0);
         createSendJob().start();
         this.mongoObjectFactory = optionalMongoObjectFactory;
@@ -414,16 +421,19 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         synchronized (replicationInstancesManager) {
             // need to establish the outbound messaging channel only when this is the first replica to be added:
             if (!replicationInstancesManager.hasReplicas()) {
-                synchronized (this) {
-                    if (masterChannel == null) {
-                        masterChannel = createMasterChannelAndDeclareFanoutExchange();
-                    }
-                }
+                openOutboundReplicationChannel();
             }
             replicationInstancesManager.registerReplica(replica);
             recordRegisteredReplicaPersistently(replica);
         }
         logger.info("Registered replica " + replica);
+    }
+
+    private synchronized void openOutboundReplicationChannel() throws Exception {
+        if (masterChannel == null) {
+            masterChannel = createMasterChannelAndDeclareFanoutExchange();
+        }
+        outboundBufferPoolForOperationsAllowingForAsynchronousExecution.start();
     }
 
     private void recordRegisteredReplicaPersistently(ReplicaDescriptor replica) {
@@ -467,12 +477,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
             }
             if (hadReplicas && !replicationInstancesManager.hasReplicas()) {
                 logger.info("Last replica got unregistered. Stopping to send out operations and closing outbound queue.");
-                synchronized (this) {
-                    if (masterChannel != null) {
-                        masterChannel.getConnection().close();
-                        masterChannel = null;
-                    }
-                }
+                closeOutboundReplicationChannel();
             }
             return unregisteredReplica;
         }
@@ -511,13 +516,14 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      */
     <S, O extends OperationWithResult<S, ?>> void broadcastOperation(OperationWithResult<?, ?> operation,
             Replicable<S, O> replicable) throws IOException {
-        // need to write the operations one by one, making sure the ObjectOutputStream always writes
-        // identical objects again if required because they may have changed state in between
-        outboundBufferForAllOperations.write(operation, replicable);
+        final OperationSerializerBuffer bufferToWriteTo = operation.requiresSynchronousExecution()
+                ? outboundBufferForOperationsRequiringSynchronousExecution
+                : outboundBufferPoolForOperationsAllowingForAsynchronousExecution;
+        bufferToWriteTo.write(operation, replicable);
         if (++messageCount % 10000l == 0) {
             logger.info("Handled " + messageCount
                     + " messages for replication. Current outbound replication queue size: "
-                    + outboundBufferForAllOperations.size());
+                    + outboundBufferForOperationsRequiringSynchronousExecution.size());
         }
     }
     
@@ -872,14 +878,17 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         if (replicationInstancesManager.hasReplicas()) {
             replicationInstancesManager.removeAll();
             removeAsListenerFromReplicables();
-            synchronized (this) {
-                if (masterChannel != null) {
-                    masterChannel.getConnection().close();
-                    masterChannel = null;
-                }
-            }
+            closeOutboundReplicationChannel();
             logger.info("Unregistered all replicas from this server!");
         }
+    }
+
+    private synchronized void closeOutboundReplicationChannel() throws IOException {
+        if (masterChannel != null) {
+            masterChannel.getConnection().close();
+            masterChannel = null;
+        }
+        outboundBufferPoolForOperationsAllowingForAsynchronousExecution.stop();
     }
 
     @Override

@@ -5,17 +5,21 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
 import java.util.UUID;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.impl.OperationSerializerBufferPool;
 
 public class ReplicationStopTest extends AbstractServerReplicationTest {
     @Test
