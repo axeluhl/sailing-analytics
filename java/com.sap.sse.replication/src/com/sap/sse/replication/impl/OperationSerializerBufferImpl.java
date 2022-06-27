@@ -120,6 +120,8 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
      */
     private final ByteArrayOutputStream bos;
     
+    private DataOutputStream dos;
+    
     /**
      * An object output stream that writes to {@link #bos}, through a compressing output stream. Operations are
      * serialized into this stream until the timer acquires the {@link #outboundBufferMonitor}, closes the stream and
@@ -172,8 +174,9 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
      * {@link ByteArrayOutputStream#reset()reset} before creating the new object output stream. A new empty
      * {@link #listOfClasses} is created, too. As another side effect, cancels any scheduled {@link #timerTask} and
      * nulls it.
+     * @param replicableIdAsString TODO
      */
-    private synchronized void createNewObjectOutputStream() throws IOException {
+    private synchronized void createNewObjectOutputStream(String replicableIdAsString) throws IOException {
         this.bos.reset();
         if (timerTask != null) {
             timerTask.cancel();
@@ -181,8 +184,8 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
         }
         listOfClasses = new ArrayList<>();
         LZ4BlockOutputStream zipper = new LZ4BlockOutputStream(this.bos);
-        @SuppressWarnings("resource") // left open on purpose; it would otherwise close the underlying ByteArrayOutputStream
-        final DataOutputStream dos = new DataOutputStream(zipper);
+        dos = new DataOutputStream(zipper);
+        this.replicableIdAsString = replicableIdAsString;
         dos.writeUTF(replicableIdAsString);
         final ObjectOutputStream compressingObjectOutputStream = new ObjectOutputStream(zipper);
         objectOutputStream = compressingObjectOutputStream;
@@ -205,9 +208,9 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
             final byte[] message = bos.toByteArray();
             logger.fine(()->"Successfully produced message array for replicable "+replicableIdAsString+" of length " + message.length);
             final List<Class<?>> listOfClasses = this.listOfClasses;
-            createNewObjectOutputStream();
             sender.send(message, listOfClasses);
         }
+        replicableIdAsString = null;
     }
     
     /**
@@ -218,8 +221,7 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
      */
     public synchronized <S, O extends OperationWithResult<S, ?>> void write(final OperationWithResult<?, ?> operation, Replicable<S, O> replicable) throws IOException {
         if (replicableIdAsString == null) {
-            replicableIdAsString = replicable.getId().toString();
-            createNewObjectOutputStream();
+            createNewObjectOutputStream(replicable.getId().toString());
         } else if (!replicableIdAsString.equals(replicable.getId().toString())) {
             logger.fine(()->"Received operation for replicable "+replicable.getId().toString()+" which is different from "+replicableIdAsString+"; sending buffer first");
             sendBuffer();
