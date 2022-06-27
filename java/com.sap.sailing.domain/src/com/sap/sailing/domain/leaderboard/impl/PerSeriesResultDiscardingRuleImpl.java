@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
@@ -35,19 +36,21 @@ public class PerSeriesResultDiscardingRuleImpl implements ResultDiscardingRule {
 
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
-            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
-        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint, ScoringScheme scoringScheme) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, scoringScheme, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
-            Function<RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+            ScoringScheme scoringScheme, Function<RaceColumn, Double> totalPointsSupplier,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Set<RaceColumn> result = new HashSet<>();
         for (final Series s : regatta.getSeries()) {
             if (s.getResultDiscardingRule() != null) {
                 final Iterable<RaceColumn> columnsToConsiderInSeries = getColumnsToConsiderInSeries(s, raceColumnsToConsider);
-                result.addAll(s.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard, columnsToConsiderInSeries, timePoint, totalPointsSupplier, cache));
+                result.addAll(s.getResultDiscardingRule().getDiscardedRaceColumns(competitor, leaderboard, columnsToConsiderInSeries,
+                        timePoint, scoringScheme, totalPointsSupplier, cache));
             }
         }
         return result;

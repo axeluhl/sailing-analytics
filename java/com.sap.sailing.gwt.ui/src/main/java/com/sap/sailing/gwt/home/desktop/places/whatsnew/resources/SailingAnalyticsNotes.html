@@ -11,6 +11,10 @@
                did not properly grant its permissions to requests.</li>
            <li>Fixed a regression regarding the availability of <tt>/sailingserver/api/v1/regattas/{regatta-name}/datamining/...</tt>
                requests; a refactoring attempt accidentally introduced this problem which has now been resolved.</li>
+           <li>Fixed an issue with column factors other than 1 in combination with excluding worst scores; previously,
+               the points before multiplication by the column factor were compared for discarding.
+               With this, the display of those discards has also been fixed such that the scaled number is displayed
+               with a strike-through.</li>
          </ul>
          <h5 class="articleSubheadline">May 2022</h5>
          <ul class="bulletList">
