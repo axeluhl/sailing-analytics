@@ -942,11 +942,16 @@ label {
     background-color: #008fcc;
     color: #fff;
     margin-right: 2px;
+    border: 1px solid #008fcc;
 }
 
 .gwt-DialogBox button.btn-primary:hover {
     background-color: #0081b8;
     color: #fff;
+}
+
+.gwt-DialogBox button.btn-primary:disabled {
+    background-color: #cfcfcf
 }
 
 .gwt-DialogBox button.btn-secondary.btn-lg, .gwt-DialogBox button.btn-primary.btn-lg {
@@ -958,3 +963,4 @@ label {
     margin: 1px;
     border: 1px solid #cfcfcf;
 }
+
