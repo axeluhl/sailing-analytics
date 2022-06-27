@@ -174,7 +174,6 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
      * {@link ByteArrayOutputStream#reset()reset} before creating the new object output stream. A new empty
      * {@link #listOfClasses} is created, too. As another side effect, cancels any scheduled {@link #timerTask} and
      * nulls it.
-     * @param replicableIdAsString TODO
      */
     private synchronized void createNewObjectOutputStream(String replicableIdAsString) throws IOException {
         this.bos.reset();
@@ -197,10 +196,11 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
      * sending out to the replicas by appending it to the {@link #queueToWriteTo} queue.
      */
     private synchronized void sendBuffer() throws IOException {
-        if (!listOfClasses.isEmpty()) {
+        if (replicableIdAsString != null && !listOfClasses.isEmpty()) {
             logger.fine("Preparing " + listOfClasses.size() + " operations for sending to RabbitMQ exchange");
             try {
                 objectOutputStream.close();
+                objectOutputStream = null;
                 logger.fine("Sucessfully closed ObjectOutputStream");
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Error trying to replicate " + listOfClasses.size() + " operations", e);
@@ -208,6 +208,7 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
             final byte[] message = bos.toByteArray();
             logger.fine(()->"Successfully produced message array for replicable "+replicableIdAsString+" of length " + message.length);
             final List<Class<?>> listOfClasses = this.listOfClasses;
+            this.listOfClasses = null;
             sender.send(message, listOfClasses);
         }
         replicableIdAsString = null;
@@ -225,7 +226,7 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
         } else if (!replicableIdAsString.equals(replicable.getId().toString())) {
             logger.fine(()->"Received operation for replicable "+replicable.getId().toString()+" which is different from "+replicableIdAsString+"; sending buffer first");
             sendBuffer();
-            replicableIdAsString = replicable.getId().toString();
+            createNewObjectOutputStream(replicable.getId().toString());
         }
         objectOutputStream.writeObject(operation);
         listOfClasses.add(operation.getClassForLogging());
@@ -258,6 +259,6 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
      * @return the number of operations currently in the buffer
      */
     public int size() {
-        return listOfClasses.size();
+        return listOfClasses == null ? 0 : listOfClasses.size();
     }
 }
