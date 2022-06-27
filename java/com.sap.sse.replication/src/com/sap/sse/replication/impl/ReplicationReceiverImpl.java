@@ -140,6 +140,13 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     private final static Executor executor = ThreadPoolUtil.INSTANCE
             .createForegroundTaskThreadPoolExecutor(ReplicationReceiverImpl.class.getName());
 
+    /**
+     * Generates a queue per distinct {@link Operation#getKeyForAsynchronousExecution() key} and schedules tasks to work
+     * on those queues. This way, only operations with different keys will be scheduled for parallel execution,
+     * therefore not blocking each other. For example, operations for fix insertions into the same track should have
+     * equal keys, thus getting scheduled through the same queue and hence not being applied in parallel to each other
+     * which would only let them wait for each other without creating any real parallelism.
+     */
     private final OperationQueueByKeyExecutor operationQueueByKeyExecutor;
     
     /**
