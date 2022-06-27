@@ -522,8 +522,12 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             if (AppConstants.ACTION_SHOW_PROTEST.equals(intent.getAction())) {
                 String raceGroupSeriesDisplayName = intent.getStringExtra(AppConstants.EXTRA_DEFAULT);
                 if (raceGroupSeriesDisplayName != null) {
-                    mRunnable = () -> showProtestTimeDialog(raceGroupSeriesDisplayName);
-                    closeDrawer();
+                    if (isDrawerOpen()) {
+                        mRunnable = () -> showProtestTimeDialog(raceGroupSeriesDisplayName);
+                        closeDrawer();
+                    } else {
+                        showProtestTimeDialog(raceGroupSeriesDisplayName);
+                    }
                 } else {
                     ExLog.e(getActivity(), TAG,
                             "INTENT_ACTION_SHOW_PROTEST does not carry an EXTRA_DEFAULT with the race group name!");

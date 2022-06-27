@@ -2,7 +2,6 @@ package com.sap.sse.security.subscription;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.ServiceReference;
@@ -15,14 +14,14 @@ import com.sap.sse.security.SecurityService;
  * OSGi service registry under the {@link SubscriptionApiService} interface. See
  * {@code SubscriptionBackgroundUpdater#start(CompletableFuture)}.
  */
-public class SubscriptionUpdateTask implements Runnable {
-    private static final Logger logger = Logger.getLogger(SubscriptionUpdateTask.class.getName());
+public class SubscriptionPlanUpdateTask implements Runnable {
+    private static final Logger logger = Logger.getLogger(SubscriptionPlanUpdateTask.class.getName());
 
     private final CompletableFuture<SecurityService> securityService;
 
     private final ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker;
 
-    public SubscriptionUpdateTask(CompletableFuture<SecurityService> securityService,
+    public SubscriptionPlanUpdateTask(CompletableFuture<SecurityService> securityService,
             ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker) {
         this.securityService = securityService;
         this.subscriptionApiServiceTracker = subscriptionApiServiceTracker;
@@ -36,26 +35,13 @@ public class SubscriptionUpdateTask implements Runnable {
                         .getServiceReferences()) {
                     final SubscriptionApiService apiService = subscriptionApiServiceTracker.getService(serviceReference);
                     if (apiService != null && apiService.isActive()) {
-                        logger.info("Fetching and updating provider subscriptions for API service "+apiService.getProviderName());
-                        fetchAndUpdateProviderSubscriptions(apiService);
+                        logger.info("Fetching and updating provider SubscriptionPlans for API service "+apiService.getProviderName());
+                        new ProviderSubscriptionPlanUpdateTask(apiService, securityService).run();
                     }
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
             logger.warning("Couldn't get a hold of the security service ("+e.getMessage()+"); not updating subscriptions.");
-        }
-    }
-
-    private void fetchAndUpdateProviderSubscriptions(SubscriptionApiService apiService) {
-        new ProviderSubscriptionUpdateTask(apiService, getSecurityService().getUserList(), securityService).run();
-    }
-
-    private SecurityService getSecurityService() {
-        try {
-            return securityService.get();
-        } catch (InterruptedException | ExecutionException e) {
-            logger.log(Level.SEVERE, "Failure to get SecurityService", e);
-            throw new RuntimeException(e);
         }
     }
 }

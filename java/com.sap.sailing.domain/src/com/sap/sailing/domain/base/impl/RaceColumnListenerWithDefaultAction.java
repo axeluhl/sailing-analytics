@@ -101,6 +101,12 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     }
 
     @Override
+    default void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards,
+            Integer newMaximumNumberOfDiscards) {
+        defaultAction(); 
+    }
+
+    @Override
     default void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         defaultAction(); 
     }

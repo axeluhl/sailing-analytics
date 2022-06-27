@@ -147,7 +147,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                         .customerId(user.getName()).customerEmail(user.getEmail())
                         .customerFirstName(usernames.getA()).customerLastName(usernames.getB())
                         .customerLocale(locale).billingAddressFirstName(usernames.getA())
-                        .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
+                        .billingAddressLastName(usernames.getB()).request();
                 response.setHostedPageJSONString(result.hostedPage().toJson());
             }
         } catch (final Exception e) {
