@@ -1308,7 +1308,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> moveMasterToOtherInstance(
                     final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
-                    boolean useSharedInstance, Optional<InstanceType> optionalInstanceType,
+                    final boolean useSharedInstance, Optional<InstanceType> optionalInstanceType,
                     Optional<SailingAnalyticsHost<String>> optionalPreferredInstanceToDeployTo, String optionalKeyName,
                     byte[] privateKeyEncryptionPassphrase, String optionalMasterReplicationBearerTokenOrNull, final String optionalReplicaReplicationBearerTokenOrNull, Integer optionalMemoryInMegabytesOrNull,
                     Integer optionalMemoryTotalSizeFactorOrNull)
@@ -1319,23 +1319,28 @@ public class LandscapeServiceImpl implements LandscapeService {
                 getEffectiveBearerToken(optionalReplicaReplicationBearerTokenOrNull));
         // important to obtain the release before stopping master:
         final Release release = replicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+        final AwsRegion region = replicaSet.getMaster().getHost().getRegion();
+        SailingAnalyticsHost<String> hostToDeployTo = null;
+        if (useSharedInstance) {
+            // determine new shared host before stopping old master; we want to *move* and not end up on the same instance again
+            hostToDeployTo = new EligbleInstanceForReplicaSetFindingStrategyImpl(this,
+                    region, optionalKeyName, privateKeyEncryptionPassphrase,
+                    /* master */ true, /* mustBeDifferentAvailabilityZone */ true, optionalInstanceType,
+                    optionalPreferredInstanceToDeployTo).getInstanceToDeployTo(replicaSet);
+        }
         logger.info("Stopping master "+replicaSet.getMaster());
         replicaSet.getMaster().stopAndTerminateIfLast(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
-        final AwsRegion region = replicaSet.getMaster().getHost().getRegion();
         final AppConfigBuilderT masterConfigurationBuilder = createMasterConfigurationBuilder(replicaSet.getName(),
                 optionalMasterReplicationBearerTokenOrNull, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
                 region, release);
         masterConfigurationBuilder.setPort(replicaSet.getPort()); // master must run on same port as the rest of the replica set
         final SailingAnalyticsProcess<String> newMaster;
-        final SailingAnalyticsHost<String> hostToDeployTo;
         if (useSharedInstance) {
-            hostToDeployTo = new EligbleInstanceForReplicaSetFindingStrategyImpl(this,
-                    region, optionalKeyName, privateKeyEncryptionPassphrase,
-                    /* master */ true, /* mustBeDifferentAvailabilityZone */ true, optionalInstanceType,
-                    optionalPreferredInstanceToDeployTo).getInstanceToDeployTo(replicaSet);
+            assert hostToDeployTo != null;
             logger.info("Launching new master on shared instance "+hostToDeployTo);
             newMaster = deployProcessToSharedInstance(hostToDeployTo, masterConfigurationBuilder, optionalKeyName, privateKeyEncryptionPassphrase);
         } else {
+            assert hostToDeployTo == null;
             final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
             masterHostBuilder
                 .setInstanceType(optionalInstanceType.orElse(InstanceType.valueOf(SharedLandscapeConstants.DEFAULT_DEDICATED_INSTANCE_TYPE_NAME)))
