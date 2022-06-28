@@ -1314,7 +1314,9 @@ public class LandscapeServiceImpl implements LandscapeService {
                     Integer optionalMemoryTotalSizeFactorOrNull)
                     throws MalformedURLException,
                     IOException, TimeoutException, InterruptedException, ExecutionException, Exception {
-        ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, getEffectiveBearerToken(optionalReplicaReplicationBearerTokenOrNull));
+        final SailingAnalyticsProcess<String> newTemporaryReplica = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(replicaSet,
+                optionalKeyName, privateKeyEncryptionPassphrase,
+                getEffectiveBearerToken(optionalReplicaReplicationBearerTokenOrNull));
         // important to obtain the release before stopping master:
         final Release release = replicaSet.getVersion(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         logger.info("Stopping master "+replicaSet.getMaster());
@@ -1354,6 +1356,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         logger.info("Adding new master "+newMaster+" to target groups");
         replicaSet.getPublicTargetGroup().addTarget(hostToDeployTo);
         replicaSet.getMasterTargetGroup().addTarget(hostToDeployTo);
+        if (newTemporaryReplica != null) {
+            newTemporaryReplica.stopAndTerminateIfLast(LandscapeService.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+        }
         replicaSet.restartAllReplicas(LandscapeService.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         return getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), newMaster, replicaSet.getReplicas());
     }
