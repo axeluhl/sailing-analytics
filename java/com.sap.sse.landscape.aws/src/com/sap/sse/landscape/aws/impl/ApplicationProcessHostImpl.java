@@ -91,7 +91,7 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
         if (sshChannel != null) { // could, e.g., have timed out
             try {
                 final JSONArray serverDirectoriesAndPorts = Wait.wait(()->getServerDirectoriesAndPorts(sshChannel), sdap->true, /* retryOnException */ true,
-                        optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_MINUTE, Level.INFO, "Parsing JSON response describing application processes on host "+this);
+                        optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.INFO, "Parsing JSON response describing application processes on host "+this);
                 for (final Object serverDirectoryAndPort : serverDirectoriesAndPorts) {
                     final JSONObject serverDirectoryAndPortObject = (JSONObject) serverDirectoryAndPort;
                     ProcessT process;
