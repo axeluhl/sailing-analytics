@@ -178,7 +178,21 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     }
     
     /**
-     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's a
+     * Starts fetching messages from the {@link #consumer}, uncompresses and de-serializes {@link Operation} objects from
+     * the stream and applies them to local {@link Replicable}s.<p>
+     * 
+     * Two protocol versions are supported:
+     * <ol>
+     * <li>For backward compatibility, if the compressed stream starts with a regular replicable ID as a string, operations
+     * are expected to be encoded one by one as {@code byte[]} objects to be de-serialized from an {@link ObjectInputStream}.
+     * Each such {@code byte[]} is then assumed to represents objects serialized by an {@link ObjectOutputStream}, so they
+     * can be read by an {@link ObjectInputStream}. Typically, the legacy format has exactly one operation per {@code byte[]}
+     * (which is partly explaining why performance was not very good). The stream for reading the nested {@code byte[]} is
+     * produced by the {@link Replicable#createObjectInputStreamResolvingAgainstCache(InputStream, Map)} method in order
+     * to avoid duplicates and for setting up proper class loading for the {@link Replicable}'s context.</li>
+     * <li></li>
+     * </ol>
+     * After receiving a single message, assumes it's a
      * {@link ReplicationServiceImpl#createUncompressingInputStream(InputStream) compressed} stream that first
      * {@link DataInputStream#readUTF() encodes a UTF string} representing the {@link Replicable#getId() replicable ID},
      * followed by a sequence of serialized {@code byte[]} objects which each can be {@link Replicable#readOperation(InputStream, Map) de-serialized}
@@ -216,15 +230,38 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                 final byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
                 final InputStream uncompressingInputStream = ReplicationServiceImpl.createUncompressingInputStream(new ByteArrayInputStream(bytesFromMessage));
-                final String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
+                final DataInputStream dataInputStream = new DataInputStream(uncompressingInputStream);
+                final String replicableIdAsStringOrVersionIndicator = dataInputStream.readUTF();
+                final String replicableIdAsString;
+                final boolean legacyVersion;
+                if (replicableIdAsStringOrVersionIndicator.equals(VERSION_INDICATOR)) {
+                    legacyVersion = false;
+                    final int protocolVersion = dataInputStream.read();
+                    logger.fine(()->"Found protocol version "+protocolVersion);
+                    replicableIdAsString = dataInputStream.readUTF();
+                } else {
+                    legacyVersion = true;
+                    logger.fine("No protocol version indicator found; using legacy protocol");
+                    replicableIdAsString = replicableIdAsStringOrVersionIndicator;
+                }
                 // TODO bug 2465: decide based on the master descriptor whether we want to process this message; if it's for a Replicable we're not replicating from that master, drop the message
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
-                    final ObjectInputStream ois = replicable.createObjectInputStreamResolvingAgainstCache(uncompressingInputStream, /* class loader cache */ new HashMap<>());
+                    final Map<String, Class<?>> classLoaderCache = new HashMap<>();
+                    final ObjectInputStream ois = legacyVersion
+                            ? new ObjectInputStream(uncompressingInputStream) // no special stream required; only reading a generic byte[]
+                            : replicable.createObjectInputStreamResolvingAgainstCache(uncompressingInputStream, classLoaderCache);
                     int operationsInMessage = 0;
                     try {
                         while (true) {
-                            readOperationAndApplyOrQueueIt(replicable, ois);
+                            if (legacyVersion) {
+                                byte[] serializedOperation = (byte[]) ois.readObject();
+                                if (Util.contains(master.getReplicables(), replicable)) {
+                                    readLegacyOperationAndApplyOrQueueIt(replicable, serializedOperation, classLoaderCache);
+                                }
+                            } else {
+                                readOperationAndApplyOrQueueIt(replicable, ois);
+                            }
                             if (Util.contains(master.getReplicables(), replicable)) {
                                 operationCount++;
                                 operationsInMessage++;
@@ -304,6 +341,13 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
             stopped = true;
             notifyAll();
         }
+    }
+
+    private <S, O extends OperationWithResult<S, ?>> void readLegacyOperationAndApplyOrQueueIt(
+            Replicable<S, O> replicable, byte[] serializedOperation, Map<String, Class<?>> classLoaderCache)
+            throws ClassNotFoundException, IOException {
+        O operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation), classLoaderCache);
+        applyOrQueue(operation, replicable);
     }
 
     /**

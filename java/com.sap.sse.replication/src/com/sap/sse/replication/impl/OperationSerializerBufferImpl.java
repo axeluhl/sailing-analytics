@@ -18,6 +18,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 
 import net.jpountz.lz4.LZ4BlockOutputStream;
@@ -96,6 +97,20 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  */
 public class OperationSerializerBufferImpl implements OperationSerializerBuffer {
     private static final Logger logger = Logger.getLogger(OperationSerializerBufferImpl.class.getName());
+    
+    /**
+     * The first (now legacy) protocol writes the replica ID as string, then followed by a sequence of serialized
+     * {@code byte[]} objects written into an {@link ObjectOutputStream}, each of which represents the result of
+     * serializing a single {@link Operation} into yet another {@link ObjectOutputStream}.
+     * <p>
+     * 
+     * Protocol version 2 (the current version) writes a {@link ReplicationReceiver#VERSION_INDICATOR version indicator},
+     * followed by an {@code int} value containing this protocol version, then followed by the replicable's ID as a
+     * {@link String}. Then, all operations follow in a single {@link ObjectOutputStream} format. This has become
+     * possible by now guaranteeing that {@link Operation} objects do not contain references to objects that may
+     * change state after the operation has been scheduled for sending.
+     */
+    private static final int PROTOCOL_VERSION = 2;
 
     /**
      * The {@link #objectOutputStream} contains serialized operations originating from a single
@@ -185,7 +200,9 @@ public class OperationSerializerBufferImpl implements OperationSerializerBuffer 
         LZ4BlockOutputStream zipper = new LZ4BlockOutputStream(this.bos);
         dos = new DataOutputStream(zipper);
         this.replicableIdAsString = replicableIdAsString;
-        dos.writeUTF(replicableIdAsString);
+        dos.writeUTF(ReplicationReceiver.VERSION_INDICATOR);
+        dos.write(PROTOCOL_VERSION);
+        dos.writeUTF(replicableIdAsString); // TODO bug5741: write something that clearly indicates the new version, ideally something that could never occur as a replicableIdAsString in the old protocol version
         final ObjectOutputStream compressingObjectOutputStream = new ObjectOutputStream(zipper);
         objectOutputStream = compressingObjectOutputStream;
     }

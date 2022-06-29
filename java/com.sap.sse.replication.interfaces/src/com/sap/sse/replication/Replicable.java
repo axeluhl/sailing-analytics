@@ -72,6 +72,8 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * {@code REPLICATE_ON_START} variable has its default value defined.</li>
  * </ul>
  * 
+ * The {@link #getId() ID} must be different from {@link ReplicationReceiver#VERSION_INDICATOR}.<p>
+ * 
  * @param <S>
  *            the type of state to which the operations are applied; usually this will be set to the implementing
  *            subclass

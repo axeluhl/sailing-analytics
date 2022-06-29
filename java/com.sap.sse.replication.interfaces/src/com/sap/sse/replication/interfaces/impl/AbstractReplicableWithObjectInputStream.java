@@ -15,6 +15,7 @@ import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
@@ -92,7 +93,9 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     @Override
     public Serializable getId() {
-        return getClass().getName();
+        final String result = getClass().getName();
+        assert !result.equals(ReplicationReceiver.VERSION_INDICATOR);
+        return result;
     }
 
     @Override
