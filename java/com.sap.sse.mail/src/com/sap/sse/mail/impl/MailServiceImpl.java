@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -140,8 +141,8 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
     }
 
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver, null) {
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver, null, classLoaderCache) {
         };
     }
 

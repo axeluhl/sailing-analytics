@@ -104,8 +104,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTracked
 
     @Override
     public ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(
-            InputStream inputStream, ResolveListener resolveListener) throws IOException {
-        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this, resolveListener);
+            InputStream inputStream, ResolveListener resolveListener, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this, resolveListener, classLoaderCache);
     }
 
     @Override

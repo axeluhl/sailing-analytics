@@ -2166,8 +2166,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null);
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null, classLoaderCache);
     }
 
     @Override
