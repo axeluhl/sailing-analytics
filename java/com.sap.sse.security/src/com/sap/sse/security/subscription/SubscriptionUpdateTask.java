@@ -30,12 +30,19 @@ public class SubscriptionUpdateTask implements Runnable {
 
     @Override
     public void run() {
-        for (final ServiceReference<SubscriptionApiService> serviceReference : subscriptionApiServiceTracker
-                .getServiceReferences()) {
-            final SubscriptionApiService apiService = subscriptionApiServiceTracker.getService(serviceReference);
-            if (apiService != null && apiService.isActive()) {
-                fetchAndUpdateProviderSubscriptions(apiService);
+        try {
+            if (securityService.get().getMasterDescriptor() == null) {
+                for (final ServiceReference<SubscriptionApiService> serviceReference : subscriptionApiServiceTracker
+                        .getServiceReferences()) {
+                    final SubscriptionApiService apiService = subscriptionApiServiceTracker.getService(serviceReference);
+                    if (apiService != null && apiService.isActive()) {
+                        logger.info("Fetching and updating provider subscriptions for API service "+apiService.getProviderName());
+                        fetchAndUpdateProviderSubscriptions(apiService);
+                    }
+                }
             }
+        } catch (InterruptedException | ExecutionException e) {
+            logger.warning("Couldn't get a hold of the security service ("+e.getMessage()+"); not updating subscriptions.");
         }
     }
 

@@ -298,7 +298,6 @@ public class SmartFutureCacheTest {
         final AtomicInteger callCounter = new AtomicInteger(0);
         CyclicBarrier barrier = new CyclicBarrier(2);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
-
             @Override
             public Integer computeCacheUpdate(Integer key, EmptyUpdateInterval updateInterval) throws Exception {
                 synchronized (callCounter) {
@@ -309,7 +308,7 @@ public class SmartFutureCacheTest {
                 barrier.await();
                 barrier.await();
                 barrier.await();
-                //For this test case value will be same as key, when updated.
+                // For this test case value will be same as key, when updated.
                 return key;
             }
 
@@ -342,7 +341,6 @@ public class SmartFutureCacheTest {
         final AtomicInteger callCounter = new AtomicInteger(0);
         CyclicBarrier barrier = new CyclicBarrier(2);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
-
             @Override
             public Integer computeCacheUpdate(Integer key, EmptyUpdateInterval updateInterval) throws Exception {
                 synchronized (callCounter) {
@@ -369,10 +367,8 @@ public class SmartFutureCacheTest {
         assertEquals(1, callCounter.get());
         testCache.triggerUpdate(1, null);
         testCache.suspend();
-
         CyclicBarrier getResultBarrier = new CyclicBarrier(2);
         Thread thread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 //FIXME find a way to guarantee that get is called, while the first computeUpdate Future is still running
@@ -388,9 +384,7 @@ public class SmartFutureCacheTest {
         });
         thread.start();
         barrier.await();
-        
         barrier.await();
-
         barrier.await();
         assertEquals(2, callCounter.get());
         //Trigger again. This update should not retrigger add another future, since cache is disabled and no
@@ -409,7 +403,5 @@ public class SmartFutureCacheTest {
             timeOut = true;
         }
         assertTrue(timeOut);
-        
-        
     }
 }

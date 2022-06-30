@@ -93,7 +93,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         discardedRaceColumnsPerCompetitor = new HashMap<>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(
-                    competitor, leaderboard, raceColumnsToConsider, timePoint);
+                    competitor, leaderboard, raceColumnsToConsider, timePoint, leaderboard.getScoringScheme());
             this.discardedRaceColumnsPerCompetitor.put(competitor, discardedRaceColumns);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
