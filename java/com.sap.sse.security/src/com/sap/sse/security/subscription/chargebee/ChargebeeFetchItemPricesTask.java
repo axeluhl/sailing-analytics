@@ -35,7 +35,7 @@ public class ChargebeeFetchItemPricesTask implements ChargebeeItemPriceListReque
 
     @Override
     public void onItemPriceResult(Map<String, BigDecimal> itemPrices, String nextOffset) {
-        if(itemPrices == null) {
+        if(this.itemPrices == null) {
             this.itemPrices = new HashMap<>();
         }
         this.itemPrices.putAll(itemPrices);
