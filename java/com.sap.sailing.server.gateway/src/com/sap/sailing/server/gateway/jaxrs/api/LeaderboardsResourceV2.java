@@ -254,9 +254,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
                             final Competitor c = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
                             final TrackedRace trackedRace = c == null || raceColumn == null ? null : raceColumn.getTrackedRace(c);
-                            Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type,
-                                    leaderboardRowDTO, leaderboardEntry, currentLegEntry, trackedRace, raceColumn,
-                                    c, leaderboardTimePoint);
+                            Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(leaderboard,
+                                    type, leaderboardRowDTO, leaderboardEntry, currentLegEntry, trackedRace,
+                                    raceColumn, c, leaderboardTimePoint);
                             if (valueForRaceDetailType != null && valueForRaceDetailType.getA() != null && valueForRaceDetailType.getB() != null) {
                                 jsonRaceDetails.put(valueForRaceDetailType.getA(), valueForRaceDetailType.getB());
                             }
@@ -328,14 +328,14 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return new DetailType[] { DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
     }
 
-    private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardRowDTO leaderboardRowDTO,
-            LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry, TrackedRace trackedRace, RaceColumn raceColumn,
-            Competitor competitor, TimePoint timePoint) {
+    private Pair<String, Object> getValueForRaceDetailType(Leaderboard leaderboard, DetailType type,
+            LeaderboardRowDTO leaderboardRowDTO, LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry, TrackedRace trackedRace,
+            RaceColumn raceColumn, Competitor competitor, TimePoint timePoint) {
         String name;
         Object value = null;
         Pair<String, Object> result = null;
         if (type.getPremiumAction() == null
-                || SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermission(type.getPremiumAction()))) {
+                || SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(type.getPremiumAction(), leaderboard))) {
             switch (type) {
                 case RACE_GAP_TO_LEADER_IN_SECONDS:
                     name = "gapToLeader-s";

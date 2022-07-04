@@ -32,7 +32,7 @@ public class StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
     @Override
     protected Flags performAnalysis() {
         RacingProcedureType type = procedureAnalyzer.analyze();
-        if (!(RacingProcedureType.RRS26.equals(type) || RacingProcedureType.SWC.equals(type))) {
+        if (!(RacingProcedureType.RRS26.equals(type) || RacingProcedureType.RRS26_3MIN.equals(type) || RacingProcedureType.SWC.equals(type))) {
             return null;
         }
         for (RaceLogEvent event : getPassEventsDescending()) {

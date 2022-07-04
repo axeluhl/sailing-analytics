@@ -509,7 +509,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
             result.competitors.add(competitorDTO);
-            final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
+            final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint, getScoringScheme());
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
                 // in case boats can't change set the also the boat on the row to simplify access
                 if (result.canBoatsOfCompetitorsChangePerRace == false && row.boat == null) {
