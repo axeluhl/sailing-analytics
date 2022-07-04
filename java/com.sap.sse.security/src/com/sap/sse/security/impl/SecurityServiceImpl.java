@@ -2166,8 +2166,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null);
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null, classLoaderCache);
     }
 
     @Override
@@ -2977,6 +2977,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             for (SubscriptionPrice subscriptionPrice : subscriptionPlan.getPrices()) {
                 final BigDecimal updatedPrice = updatedItemPrices.get(subscriptionPrice.getPriceId());
                 if(updatedPrice != null) {
+                    logger.log(Level.INFO, "Setting ItemPrice for SubscriptionPrice " + subscriptionPrice.getPriceId());
                     subscriptionPrice.setPrice(updatedPrice);
                 }
             }

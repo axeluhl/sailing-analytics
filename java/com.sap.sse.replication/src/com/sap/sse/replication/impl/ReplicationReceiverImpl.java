@@ -140,6 +140,13 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     private final static Executor executor = ThreadPoolUtil.INSTANCE
             .createForegroundTaskThreadPoolExecutor(ReplicationReceiverImpl.class.getName());
 
+    /**
+     * Generates a queue per distinct {@link Operation#getKeyForAsynchronousExecution() key} and schedules tasks to work
+     * on those queues. This way, only operations with different keys will be scheduled for parallel execution,
+     * therefore not blocking each other. For example, operations for fix insertions into the same track should have
+     * equal keys, thus getting scheduled through the same queue and hence not being applied in parallel to each other
+     * which would only let them wait for each other without creating any real parallelism.
+     */
     private final OperationQueueByKeyExecutor operationQueueByKeyExecutor;
     
     /**
@@ -171,10 +178,24 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     }
     
     /**
-     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's a
+     * Starts fetching messages from the {@link #consumer}, uncompresses and de-serializes {@link Operation} objects from
+     * the stream and applies them to local {@link Replicable}s.<p>
+     * 
+     * Two protocol versions are supported:
+     * <ol>
+     * <li>For backward compatibility, if the compressed stream starts with a regular replicable ID as a string, operations
+     * are expected to be encoded one by one as {@code byte[]} objects to be de-serialized from an {@link ObjectInputStream}.
+     * Each such {@code byte[]} is then assumed to represents objects serialized by an {@link ObjectOutputStream}, so they
+     * can be read by an {@link ObjectInputStream}. Typically, the legacy format has exactly one operation per {@code byte[]}
+     * (which is partly explaining why performance was not very good). The stream for reading the nested {@code byte[]} is
+     * produced by the {@link Replicable#createObjectInputStreamResolvingAgainstCache(InputStream, Map)} method in order
+     * to avoid duplicates and for setting up proper class loading for the {@link Replicable}'s context.</li>
+     * <li></li>
+     * </ol>
+     * After receiving a single message, assumes it's a
      * {@link ReplicationServiceImpl#createUncompressingInputStream(InputStream) compressed} stream that first
      * {@link DataInputStream#readUTF() encodes a UTF string} representing the {@link Replicable#getId() replicable ID},
-     * followed by a sequence of serialized {@code byte[]} objects which each can be {@link Replicable#readOperation(InputStream) de-serialized}
+     * followed by a sequence of serialized {@code byte[]} objects which each can be {@link Replicable#readOperation(InputStream, Map) de-serialized}
      * by the receiving {@link Replicable} identified by the ID received as a prefix. This method then applies these operations to the
      * {@link Replicable} identified by the ID, retrieved through the {@link #replicableProvider}.
      * 
@@ -208,20 +229,40 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                 }
                 final byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
-                // Set the replicable's class's class loader as context for deserialization so that all exported classes
-                // of all required bundles/packages can be deserialized at least
                 final InputStream uncompressingInputStream = ReplicationServiceImpl.createUncompressingInputStream(new ByteArrayInputStream(bytesFromMessage));
-                final String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
+                final DataInputStream dataInputStream = new DataInputStream(uncompressingInputStream);
+                final String replicableIdAsStringOrVersionIndicator = dataInputStream.readUTF();
+                final String replicableIdAsString;
+                final boolean legacyVersion;
+                if (replicableIdAsStringOrVersionIndicator.equals(VERSION_INDICATOR)) {
+                    legacyVersion = false;
+                    final int protocolVersion = dataInputStream.read();
+                    logger.fine(()->"Found protocol version "+protocolVersion);
+                    replicableIdAsString = dataInputStream.readUTF();
+                } else {
+                    legacyVersion = true;
+                    logger.fine("No protocol version indicator found; using legacy protocol");
+                    replicableIdAsString = replicableIdAsStringOrVersionIndicator;
+                }
                 // TODO bug 2465: decide based on the master descriptor whether we want to process this message; if it's for a Replicable we're not replicating from that master, drop the message
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
-                    ObjectInputStream ois = new ObjectInputStream(uncompressingInputStream); // no special stream required; only reading a generic byte[]
+                    final Map<String, Class<?>> classLoaderCache = new HashMap<>();
+                    final ObjectInputStream ois = legacyVersion
+                            ? new ObjectInputStream(uncompressingInputStream) // no special stream required; only reading a generic byte[]
+                            : replicable.createObjectInputStreamResolvingAgainstCache(uncompressingInputStream, classLoaderCache);
                     int operationsInMessage = 0;
                     try {
                         while (true) {
-                            byte[] serializedOperation = (byte[]) ois.readObject();
+                            if (legacyVersion) {
+                                byte[] serializedOperation = (byte[]) ois.readObject();
+                                if (Util.contains(master.getReplicables(), replicable)) {
+                                    readLegacyOperationAndApplyOrQueueIt(replicable, serializedOperation, classLoaderCache);
+                                }
+                            } else {
+                                readOperationAndApplyOrQueueIt(replicable, ois);
+                            }
                             if (Util.contains(master.getReplicables(), replicable)) {
-                                readOperationAndApplyOrQueueIt(replicable, serializedOperation);
                                 operationCount++;
                                 operationsInMessage++;
                                 if (operationCount % 10000l == 0) {
@@ -302,6 +343,13 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
         }
     }
 
+    private <S, O extends OperationWithResult<S, ?>> void readLegacyOperationAndApplyOrQueueIt(
+            Replicable<S, O> replicable, byte[] serializedOperation, Map<String, Class<?>> classLoaderCache)
+            throws ClassNotFoundException, IOException {
+        O operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation), classLoaderCache);
+        applyOrQueue(operation, replicable);
+    }
+
     /**
      * Acknowledges a delivery asynchronously in the background by scheduling a task that will call {@link Channel#basicAck(long, boolean)}.
      * If further calls to this method occur, the maximum delivery tag value is recorded such that if the task gets its turn, a cumulative
@@ -375,9 +423,11 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     }
     
     private <S, O extends OperationWithResult<S, ?>> void readOperationAndApplyOrQueueIt(Replicable<S, O> replicable,
-            byte[] serializedOperation) throws ClassNotFoundException, IOException {
-        O operation = replicable.readOperation(new ByteArrayInputStream(serializedOperation));
-        applyOrQueue(operation, replicable);
+            ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        O operation = replicable.readOperationFromObjectInputStream(ois);
+        if (Util.contains(master.getReplicables(), replicable)) {
+            applyOrQueue(operation, replicable);
+        }
     }
 
     /**

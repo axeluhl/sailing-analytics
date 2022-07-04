@@ -153,7 +153,11 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final int port = getPort();
-        return new URL(port==443 ? "https" : "http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), port, pathAndQuery);
+        return new URL(port==443 ? "https" : "http",
+                Wait.wait(()->getHost().getPublicAddress(optionalTimeout),
+                        publicAddress->publicAddress != null, /* retryOnException */ true,
+                        optionalTimeout, /* sleep duration between attempts */ Duration.ONE_SECOND.times(10),
+                        Level.INFO, "Waiting for non-null public address").getCanonicalHostName(), port, pathAndQuery);
     }
     
     default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {

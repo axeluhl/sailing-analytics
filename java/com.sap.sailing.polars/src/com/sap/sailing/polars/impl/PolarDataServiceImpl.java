@@ -282,10 +282,10 @@ public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStrea
     }
 
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
         ObjectInputStream ois;
         if (domainFactory != null) {
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(is, null);
+            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(is, null, classLoaderCache);
         } else {
             // TODO ensure that domainfactory is set here. Otherwise there can be issues with duplicate domain objects
             logger.warning("PolarDataService didn't have a domain factory attached. Replication to this service could fail.");

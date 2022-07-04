@@ -3386,8 +3386,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     }
 
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is, null);
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
+        return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is, /* resolve listener */ null, classLoaderCache);
     }
     
     @Override
