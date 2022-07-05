@@ -33,10 +33,10 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 1. JDK >= 11, it is required by Eclipse and therefore should be referenced in the environment variable `JAVA_HOME`. As an alternative to the environment variable Eclipse can be configured to use a different version of Java see [here](https://stackoverflow.com/questions/18469170/how-to-run-eclipse-with-different-java-version) for further instructions.
 2. Eclipse IDE for Eclipse Committers, version 4.15.0 ["2021-03"](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-eclipse-committers)
 3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`), then open Eclipse and navigate to Window → Preferences → Java → Installed JREs and add the 1.8 VM.
-4. Install the eclipse plugins (see [Automatic Eclipse plugin installation](#automatic-eclipse-plugin-installation))
-5. Configure Eclipse (see [Tuning the Eclipse Installation](#tuning-the-eclipse-installation))
+4. Install the eclipse plugins (see [Automatic Eclipse plugin installation](#onboarding-information_sap-sailing-analytics-development-setup_automatic-eclipse-plugin-installation))
+5. Configure Eclipse (see [Tuning the Eclipse Installation](#onboarding-information_sap-sailing-analytics-development-setup_tuning-the-eclipse-installation))
 6. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
-7. Configure git (see [Git repository configuration essentials](#git-repository-configuration-essentials))
+7. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
 8. MongoDB (at least Release 4.4), download: [https://www.mongodb.com/](https://www.mongodb.com/)
 9. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with the latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to the newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8)
 10. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
@@ -47,9 +47,9 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
     Make sure that the environment variable `ANDROID_HOME` is set (e.g. Windows C:\Users\\**'user'**\AppData\Local\Android\Sdk )
 13. Get the content of the git repository
     Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git` or `ssh://trac@sapsailing.com/home/trac/git` User "trac" has all public ssh keys.
-14. Configure Maven to use the correct JRE by following the instructions in the paragraph [maven-setup](#maven-setup)
-15. Follow the instructions in the [development setup](#sap-sailing-analytics-development-setup) to build the project.
-16. The steps for building the project for a deployment can be found in the [Build for deployment](#build-for-deployment) section. This is not needed in the daily development workflow and should only be run when needed. 
+14. Configure Maven to use the correct JRE by following the instructions in the paragraph [maven-setup](#onboarding-information_sap-sailing-analytics-development-setup_maven-setup)
+15. Follow the instructions in the [development setup](#onboarding-information_sap-sailing-analytics-development-setup_sap-sailing-analytics-development-setup) to build the project.
+16. The steps for building the project for a deployment can be found in the [Build for deployment](#onboarding-information_sap-sailing-analytics-development-setup_build-for-deployment) section. This is not needed in the daily development workflow and should only be run when needed. 
 
 ### Further optional but recommended installations
 
