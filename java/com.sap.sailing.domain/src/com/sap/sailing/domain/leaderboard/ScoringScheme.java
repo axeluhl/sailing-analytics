@@ -94,7 +94,7 @@ public interface ScoringScheme extends Serializable {
      *            scores of the second competitor, in the order of race columns in the leaderboard
      * @param discardedRaceColumnsPerCompetitor
      *            for each competitor holds the result of {@link Leaderboard#getResultDiscardingRule()
-     *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            Leaderborad.getResultDiscardingRule()}{@code .}{@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint, ScoringScheme)
      *            getDiscardedRaceColumns(...)}. This accelerates things considerable because we do not have to make this expensive calculation
      *            for each competitor again.
      */
@@ -117,7 +117,7 @@ public interface ScoringScheme extends Serializable {
      * <p>
      * 
      * <em>"A8.2 If a tie remains between two or more boats, they shall be ranked in order of their scores in the last
-     * race. Any remaining ties shall be broken by using the tied boats’ scores in the next-to-last race and so on until
+     * race. Any remaining ties shall be broken by using the tied boatsï¿½ scores in the next-to-last race and so on until
      * all ties are broken. These scores shall be used even if some of them are excluded scores."</em>
      */
     int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, Competitor o1, Competitor o2);

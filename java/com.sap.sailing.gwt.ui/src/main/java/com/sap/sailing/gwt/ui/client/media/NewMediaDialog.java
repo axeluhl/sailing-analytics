@@ -174,6 +174,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             }
         });
         resetNameButton = new Button();
+        resetNameButton.addStyleName("btn-primary");
         resetNameButton.addStyleName(RESOURCES.css().resetNameButtonClass());
         resetNameButton.addClickHandler(new ClickHandler() {
             @Override
@@ -195,6 +196,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         });
         
         defaultTimeButton = new Button();
+        defaultTimeButton.addStyleName("btn-primary");
         defaultTimeButton.setTitle(StringMessages.INSTANCE.resetStartTimeToDefault());
         defaultTimeButton.addStyleName(RESOURCES.css().resetButtonClass());
         defaultTimeButton.addClickHandler(new ClickHandler() {

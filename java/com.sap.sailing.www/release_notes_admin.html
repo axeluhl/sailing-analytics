@@ -23,10 +23,13 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
-          <h2 class="articleSubheadline">May 2022</h2>
+          <h2 class="articleSubheadline">June 2022</h2>
           <ul class="bulletList">
             <li>Bug fix: when only the maximum number of discards of a series was changed, the leaderboard caches were not
                 properly invalidated, hence results wouldn't have been recalculated up to the next "real" change.</li>
+            <li>Replication performance has been updated. Less metadata overhead, parallel serialization for asynchronous
+                operations on the master node, and a versioned, yet backward-compatible protocol help to avoid congestion
+                situations when, e.g., re-loading races on a master node during live operations with several replicas attached.</li>
           </ul>
           <h2 class="articleSubheadline">May 2022</h2>
           <ul class="bulletList">

@@ -3,6 +3,7 @@ package com.sap.sailing.server.masterdata;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -64,7 +65,7 @@ public class MasterDataImporter {
                     @Override
                     public void onResolvedObject(Object result) {
                     }
-                });
+                }, /* classLoaderCache */ new HashMap<>());
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03,
                 DataImportSubProgress.TRANSFER_STARTED, 0.5);
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
