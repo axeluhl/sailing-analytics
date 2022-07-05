@@ -771,6 +771,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (trueNorthIndicatorPanel.isVisible()) {
                             trueNorthIndicatorPanel.redraw();
                         }
+                        if (combinedWindPanel.isVisible()) {
+                            combinedWindPanel.redraw();
+                        }
                         orientationChangeInProgress = false;
                     }
                 }

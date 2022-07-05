@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 
 import com.sap.sailing.domain.base.DomainFactory;
 
@@ -26,7 +27,7 @@ public abstract class AbstractSerializationTest {
             }
         }.start();
         Thread.currentThread().setContextClassLoader(AbstractSerializationTest.class.getClassLoader());
-        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis, null);
+        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis, /* resolve listener */ null, /* classLoaderCache */ new HashMap<>());
         @SuppressWarnings("unchecked")
         T result = (T) dis.readObject();
         dis.close();
@@ -50,7 +51,7 @@ public abstract class AbstractSerializationTest {
                 }
             }
         }.start();
-        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis, null);
+        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis, /* resolve listener */ null, /* classLoaderCache */ new HashMap<>());
         Object[] result = new Object[objects.length];
         for (int i=0; i<objects.length; i++) {
             result[i] = dis.readObject();

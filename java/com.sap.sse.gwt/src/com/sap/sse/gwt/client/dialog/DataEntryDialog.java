@@ -132,6 +132,8 @@ public abstract class DataEntryDialog<T> {
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
         okButton.ensureDebugId("OkButton");
+        okButton.addStyleName("btn-lg");
+        okButton.addStyleName("btn-primary");
         FlowPanel dialogFPanel = new FlowPanel();
         dialogFPanel.setWidth("100%");
         statusLabel = new HTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
@@ -160,6 +162,8 @@ public abstract class DataEntryDialog<T> {
             cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
             cancelButton.ensureDebugId("CancelButton");
             rightButtonPanel.add(cancelButton);
+            cancelButton.addStyleName("btn-lg");
+            cancelButton.addStyleName("btn-secondary");
             cancelButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -596,7 +600,24 @@ public abstract class DataEntryDialog<T> {
         dataEntryDialog.center();
         final FocusWidget focusWidget = getInitialFocusWidget();
         if (focusWidget != null) {
-            Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
+            if (focusWidget.isEnabled()) {
+                Scheduler.get().scheduleFinally(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        focusWidget.setFocus(true);
+                    }
+                });
+            } else {
+                DialogUtils.linkEscapeToButton(okButton, okButton);
+                Scheduler.get().scheduleFinally(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        okButton.setFocus(true);
+                    }
+                });
+            }
+        } else {
+            okButton.setFocus(true);
         }
     }
     

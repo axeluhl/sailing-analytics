@@ -1,5 +1,6 @@
 package com.sap.sse.replication;
 
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import com.sap.sse.operationaltransformation.Operation;
@@ -8,7 +9,21 @@ import com.sap.sse.operationaltransformation.Operation;
  * An operational transformation {@link Operation} is expected to return the target state after applying the operation.
  * This operation type offers the possibility to let an operation return a result value from its
  * {@link #internalApplyTo} method while in the context of operational transformation the operation will still return
- * the target state.
+ * the target state.<p>
+ * 
+ * Operations that are instance of a class implementing this interface inherit the serializability declared by this
+ * interface. Multiple operation instances may be serialized into the same {@link ObjectOutputStream} (see also
+ * bug 5741). Keep this in mind when choosing how to represent the operation's internals. For example, it is not a
+ * good idea to have the operation reference a mutable object with the intention to transport a new "to-be" state
+ * this way. If multiple such state changes end up in the same stream of operations, the mutable object will be
+ * serialized to the stream only once, in one (probably the first, thus oldest) state, and all subsequent operations
+ * referencing that same object will serialize only a handle referencing the object state already written. With this,
+ * you may lose state changes. Hence, make sure to either clone such objects before storing the clone in the operation,
+ * or---even better---use specialized operations describing the specific state change to apply. For example, instead
+ * of serializing an object with all its attributes, rather implement an operation per attribute that updates only
+ * that attribute's value. It may be more tedious, but it keeps your serialized operations small, is therefore more
+ * bandwidth-efficient in the replication architecture and less prone to accidentally dropping state changes by
+ * representing the same object in the stream only once.
  * 
  * @param <S>
  *            type of state to which the operation can be applied

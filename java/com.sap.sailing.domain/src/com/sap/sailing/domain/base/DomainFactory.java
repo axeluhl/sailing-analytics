@@ -75,9 +75,10 @@ public interface DomainFactory extends SharedDomainFactory<RaceLogAndTrackedRace
      *          Object o = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream).readObject();
      *          Thread.currentThread().setContextClassLoader(oldContextClassLoader);
      * </pre>
+     * @param classLoaderCache TODO
      */
     ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(
-            InputStream inputStream, ResolveListener resolver) throws IOException;
+            InputStream inputStream, ResolveListener resolver, Map<String, Class<?>> classLoaderCache) throws IOException;
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
