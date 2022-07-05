@@ -4,7 +4,6 @@ This document describes the onboarding process for a new team member (developer)
 
 First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612](http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612). That's a great book, and knowing at least some of it will help you a great deal finding your way around our solution.
 
-[TOC]
 ## SAP Sailing Analytics Development Setup
 
 ### Accounts
@@ -12,28 +11,28 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 1. Git Account
    The primary Git repository for the project is hosted on sapsailing.com. It is mirrored on an hourly basis into SAP's internal Git/Gerrit repository, but branches from the external Git end up under the remote `sapsailing.com` in the internal repository, thus do not automatically merge into their branch counterparts. Conversely, commits pushed onto branches of the SAP-internal Gerrit will not by themselves end up on the external Git at sapsailing.com.
 
-- For access to the external git at `ssh://trac@sapsailing.com/home/trac/git` please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead. For further instructions for generating an ssh-key see [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-- Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: [https://git.wdf.sap.corp:8080/](https://git.wdf.sap.corp:8080/); ask the Git administrator (Axel Uhl) to get on the list of enabled committers
+   - For access to the external git at `ssh://trac@sapsailing.com/home/trac/git` please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead. For further instructions for generating an ssh-key see [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+   - Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: [https://git.wdf.sap.corp:8080/](https://git.wdf.sap.corp:8080/); ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 
 2. Bugzilla
 
-- Create an account at https://bugzilla.sapsailing.com
-- Ask the Bugzilla administrator (axel.uhl@sap.com) to enable your account for editing bugs
-- Bugzilla url: [https://bugzilla.sapsailing.com](https://bugzilla.sapsailing.com)
+   - Create an account at https://bugzilla.sapsailing.com
+   - Ask the Bugzilla administrator (axel.uhl@sap.com) to enable your account for editing bugs
+   - Bugzilla url: [https://bugzilla.sapsailing.com](https://bugzilla.sapsailing.com)
 
 3. Wiki
 
-- Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
+   - Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
 
 4. Hudson
 
-- Request a [Hudson](https://hudson.sapsailing.com) user by sending e-mail to Axel Uhl or Simon Marcel Pamies.
+   - Request a [Hudson](https://hudson.sapsailing.com) user by sending e-mail to Axel Uhl or Simon Marcel Pamies.
 
 ### Installations
 
 1. JDK >= 11, it is required by Eclipse and therefore should be referenced in the environment variable `JAVA_HOME`. As an alternative to the environment variable Eclipse can be configured to use a different version of Java see [here](https://stackoverflow.com/questions/18469170/how-to-run-eclipse-with-different-java-version) for further instructions.
 2. Eclipse IDE for Eclipse Committers, version 4.15.0 ["2021-03"](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-eclipse-committers)
-3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows C:\Program Files\Java), then open Eclipse and navigate to Window → Preferences → Java → Installed JREs and add the 1.8 VM.
+3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`), then open Eclipse and navigate to Window → Preferences → Java → Installed JREs and add the 1.8 VM.
 4. Install the eclipse plugins (see [Automatic Eclipse plugin installation](#automatic-eclipse-plugin-installation))
 5. Configure Eclipse (see [Tuning the Eclipse Installation](#tuning-the-eclipse-installation))
 6. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
@@ -43,7 +42,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 10. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
     A setup guide for windows can be found on this webpage: [https://maven.apache.org/guides/getting-started/windows-prerequisites.html](https://maven.apache.org/guides/getting-started/windows-prerequisites.html)
 11. GWT SDK 2.9.0 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
-    Download the gwt sdk and extract it to a location of your preference (e.g. windows C:\Program Files\gwt)
+    Download the gwt sdk and extract it to a location of your preference (e.g. windows `C:\Program Files\gwt`)
 12. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
     Make sure that the environment variable `ANDROID_HOME` is set (e.g. Windows C:\Users\\**'user'**\AppData\Local\Android\Sdk )
 13. Get the content of the git repository
@@ -82,7 +81,7 @@ The script will install the following plugins for your convenience:
 
 #### On Windows
 
-You need a Git Bash or Cygwin shell to run the script. The default path of Eclipse on Windows is: C:/Users/**'user'**/eclipse//committers-2021-03/eclipse
+You need a Git Bash or Cygwin shell to run the script. The default path of Eclipse on Windows is: `C:/Users/'user'/eclipse//committers-2021-03/eclipse`
 
 #### On Mac OS:
 
@@ -118,42 +117,45 @@ Copy the settings.xml **and** the toolchains.xml from the top-level git folder t
 1. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 2. Setup and configure Eclipse
 
-- Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Window ⇒ Preferences ⇒ Java ⇒ Code Style ⇒ Formatter)
-- It is also strongly recommended to import CodeFormatter_JavaScript.xml (from $GIT_HOME/java) into your Eclipse preferences (Window ⇒ Preferences ⇒ Web ⇒ Client-side JavaScript ⇒ Formatter) to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
-- In Eclipse go to "Window ⇒ Preferences ⇒ Java ⇒ Build Path ⇒ Classpath Variables" and create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
-- Add the SDK in Eclipse (Preferences ⇒ GWT ⇒ GWT Settings ⇒ Add...)
-- In "Window ⇒ Preferences ⇒ GWT ⇒ Errors/Warnings, set "Missing SDK" to "Ignore" (If not done earlier, see: Tuning the Eclipse Installation)
-- In "Window ⇒ Preferences ⇒ General ⇒ Editors ⇒ TextEditors" check Insert Spaces for Tabs
-- In "Window ⇒ Preferences ⇒ Web ⇒ HTML Files ⇒ Editor" indent using Spaces
-- In "Window ⇒ Preferences ⇒ General ⇒ Content Types" select on the right side CSS, now add in the lower file association list \*.gss to get limited syntax highlighting and content assist in GSS files
-- In "Window ⇒ Preferences ⇒ XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
-- Install Eclipse debugger for GWT SuperDevMode
-- Install Eclipse eGit (optional)
-- Check that JDK 1.8 is available and has been set for compilation in Eclipse
-- Check that JDK 1.8 has been matched to JavaSE-1.8 ("Window ⇒ Preferences ⇒ Java ⇒ Installed JREs ⇒ Execution Environments ⇒ JavaSE-1.8)
-- Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard [but without smart import] "Import ⇒ General ⇒ Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
-- Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
-- Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions) Window ⇒ Preferences ⇒ Plug-in Development ⇒ Target Platform select `Race Analysis Target`
-- Wait until the target platform has been resolved completely
-- Rebuild all projects
+   - Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Window ⇒ Preferences ⇒ Java ⇒ Code Style ⇒ Formatter)
+   - It is also strongly recommended to import CodeFormatter_JavaScript.xml (from $GIT_HOME/java) into your Eclipse preferences (Window ⇒ Preferences ⇒ Web ⇒ Client-side JavaScript ⇒ Formatter) to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
+   - In Eclipse go to "Window ⇒ Preferences ⇒ Java ⇒ Build Path ⇒ Classpath Variables" and create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
+   - Add the SDK in Eclipse (Preferences ⇒ GWT ⇒ GWT Settings ⇒ Add...)
+   - In "Window ⇒ Preferences ⇒ GWT ⇒ Errors/Warnings, set "Missing SDK" to "Ignore" (If not done earlier, see: Tuning the Eclipse Installation)
+   - In "Window ⇒ Preferences ⇒ General ⇒ Editors ⇒ TextEditors" check Insert Spaces for Tabs
+   - In "Window ⇒ Preferences ⇒ Web ⇒ HTML Files ⇒ Editor" indent using Spaces
+   - In "Window ⇒ Preferences ⇒ General ⇒ Content Types" select on the right side CSS, now add in the lower file association list \*.gss to get limited syntax highlighting and content assist in GSS files
+   - In "Window ⇒ Preferences ⇒ XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
+   - Install Eclipse debugger for GWT SuperDevMode
+   - Install Eclipse eGit (optional)
+   - Check that JDK 1.8 is available and has been set for compilation in Eclipse
+   - Check that JDK 1.8 has been matched to JavaSE-1.8 ("Window ⇒ Preferences ⇒ Java ⇒ Installed JREs ⇒ Execution Environments ⇒ JavaSE-1.8)
+   - Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard [but without smart import] "Import ⇒ General ⇒ Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
+   - Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
+   - Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions) Window ⇒ Preferences ⇒ Plug-in Development ⇒ Target Platform select `Race Analysis Target`
+   - Wait until the target platform has been resolved completely
+   - Rebuild all projects
 
-1. On clear workspace additional steps should be performed once:
+3. On clear workspace additional steps should be performed once:
    1. Run "GWT Dashboards SDM" launch configuration. After successful start, launch configuration can be stopped.
    2. Run "GWT Security SDM" launch configuration. After successful start, launch configuration can be stopped.
    3. Run "GWT xdStorage Sample SDM" launch configuration. After successful start, launch configuration can be stopped.
-2. Run the Race Analysis Suite
-   1. Start the MongoDB (cd /somePathTo MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)
+4. Run the Race Analysis Suite
+   1. Start the MongoDB-Server
+      1. Create a folder for the mongoDB to store the data. For existing folders make sure they do not contain a `mongod.lock` file 
+      2. Open a terminal and navigate to the location of the MongoDB installation `cd /somePathTo MongoDBInstallation/mongodb/bin`
+      3. Start the databse in the with the mongoDB Datafolder as db path:
+       `./mongod --dbpath /somePathTo/MongoDBDataDirectory`
    2. Run "GWT Sailing SDM" in the debug dropdown
    3. Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (no Proxy)') You´ll find this in the debug dropdown
-3. Import races within the Race Analysis Suite
+5. Import races within the Race Analysis Suite
+   - Choose "GWT Sailing SDM" in the "Development Mode" Tab and open "...AdminConsole.html..." (It is normal that the first try fails. Reload the page after the first try)
+   - Default Login: user "admin", password "admin"
+   - In the list on the left, click on "Connectors"
+   - For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL [http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php](http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php)(all other required information will be filled in automatically)
+   - Press "List Races"
 
-- Choose "GWT Sailing SDM" in the "Development Mode" Tab and open "...AdminConsole.html..." (It is normal that the first try fails. Reload the page after the first try)
-- Default Login: user "admin", password "admin"
-- In the list on the left, click on "Connectors"
-- For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL [http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php](http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php)(all other required information will be filled in automatically)
-- Press "List Races"
-
-- Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window ⇒ Perspective ⇒ Open Perspective ⇒ Profiling)
+   - Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window ⇒ Perspective ⇒ Open Perspective ⇒ Profiling)
 
 ### Build for deployment
 Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.
@@ -230,3 +232,6 @@ When a file has "wrong line endings" (line endings are different to what is conf
 3. if everything is correct, you'll see the current branch at the bottom line
 
 See [RaceCommittee App](/wiki/info/mobile/racecommittee-app) for more information regarding the mobile app.
+
+### GWT Browser Plugin 
+Install the GWT Browser Plugin for the GWT Development mode. As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work. The Plugin can be found on this page: [https://code.google.com/archive/p/google-web-toolkit/downloads](https://code.google.com/archive/p/google-web-toolkit/downloads)
