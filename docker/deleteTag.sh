@@ -7,8 +7,8 @@
 
 # set username, password, and organization
 
-# TOKEN can be generated using docker login docker.sapsailing.com:443
-TOKEN=$( cat ~/.docker/config.json | jq -r '.auths."docker.sapsailing.com:443".auth' )
+# TOKEN can be generated using docker login docker.sapsailing.com
+TOKEN=$( cat ~/.docker/config.json | jq -r '.auths."docker.sapsailing.com".auth' )
 if [ "${TOKEN}" = "null" ]; then
   # set username, password, and organization
   read -p "Username: " UNAME
