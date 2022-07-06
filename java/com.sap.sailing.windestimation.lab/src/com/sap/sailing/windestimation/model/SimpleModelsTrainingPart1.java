@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -86,7 +87,9 @@ public class SimpleModelsTrainingPart1 {
         }
         maneuverForEstimationPersistenceManager.dropCollection();
         new RegularManeuversForEstimationPersistenceManager().dropCollection();
+        logger.info("Scheduling import of polar data");
         executeInThreadPool(() -> new PolarDataImporter().importPolarData());
+        logger.info("Scheduling import of regattas");
         executeInThreadPool(() -> new ManeuverAndWindImporter().importAllRegattas(bearerToken));
         awaitThreadPoolCompletion();
         executeInThreadPool(() -> {
@@ -171,9 +174,8 @@ public class SimpleModelsTrainingPart1 {
             try {
                 runnable.run();
             } catch (Throwable t) {
-                t.printStackTrace();
+                logger.log(Level.SEVERE, "FAILURE: Caught unexpected exception. Model training aborted", t);
                 System.exit(1);
-                LoggingUtil.logInfo("FAILURE: Caught unexpected exception. Model training aborted");
             }
         });
     }
