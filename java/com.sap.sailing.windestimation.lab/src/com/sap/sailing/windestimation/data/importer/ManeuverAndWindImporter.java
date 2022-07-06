@@ -17,6 +17,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.Header;
@@ -318,7 +319,7 @@ public class ManeuverAndWindImporter {
             completeManeuverCurvePersistanceManager.addRace(regattaName, trackedRaceName, windQuality,
                     competitorTracks);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to add a race's maneuvers: "+regattaName+"/"+trackedRaceName, e);
         }
         addTransformedElementsToCompetitorTrackJson(competitorTracks, competitorTracksWithEstimationData,
                 maneuverForDataAnalysisTransformer, maneuverForDataAnalysisJsonSerializer);
@@ -326,7 +327,7 @@ public class ManeuverAndWindImporter {
             maneuverForDataAnalysisPersistenceManager.addRace(regattaName, trackedRaceName, windQuality,
                     competitorTracks);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to add a race's maneuvers: "+regattaName+"/"+trackedRaceName, e);
         }
         addTransformedElementsToCompetitorTrackJson(competitorTracks, competitorTracksWithEstimationData,
                 maneuverForEstimationTransformer, maneuverForEstimationJsonSerializer);
@@ -334,7 +335,7 @@ public class ManeuverAndWindImporter {
             maneuverForEstimationPersistenceManager.addRace(regattaName, trackedRaceName, windQuality,
                     competitorTracks);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to add a race's maneuvers: "+regattaName+"/"+trackedRaceName, e);
         }
         logger.info("Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount
                 + " maneuvers in race \"" + trackedRaceName + "\" of regatta \"" + regattaName + "\"");
