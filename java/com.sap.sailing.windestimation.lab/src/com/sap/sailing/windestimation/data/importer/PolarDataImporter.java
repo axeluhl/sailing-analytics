@@ -35,7 +35,7 @@ public class PolarDataImporter {
     }
 
     public void persistPolarDataRegressionAsBytes(File targetFile, InputStream inputStream) throws IOException {
-        logger.info("Persisting polar regression data");
+        logger.info("Persisting polar regression data to file "+targetFile+" (canonical path: "+targetFile.getCanonicalPath()+")");
         FileUtils.copyInputStreamToFile(inputStream, targetFile);
         logger.info("Persisting polar regression data succeeded");
     }
