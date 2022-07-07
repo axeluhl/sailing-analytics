@@ -101,6 +101,7 @@ The p2f-file includes the following plugins for your convenience:
 - SAP JVM Profiler ([https://tools.hana.ondemand.com](https://tools.hana.ondemand.com))
 - UMLet ([https://www.umlet.com/](https://www.umlet.com/))
 - various updates to preinstalled plugins
+
 ### Tuning the Eclipse Installation
 
 Out of the box, two settings in Eclipse avoid a clean workspace. Go to Window - Preferences and change the following two settings:
