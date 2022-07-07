@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?p2f version='1.0.0'?>
+<p2f version='1.0.0'>
+  <ius size='3'>
+    <iu id='org.eclipse.jst.web_ui.feature.feature.group' name='Eclipse Java Web Developer Tools' version='3.22.0.v202103200058'>
+      <repositories size='1'>
+        <repository location='https://download.eclipse.org/releases/2021-06'/>
+      </repositories>
+    </iu>
+    <iu id='com.gwtplugins.eclipse.suite.v3.feature.feature.group' name='GWT Eclipse Plugin' version='3.0.0.201710131939'>
+      <repositories size='1'>
+        <repository location='http://storage.googleapis.com/gwt-eclipse-plugin/v3/release'/>
+      </repositories>
+    </iu>
+    <iu id='com.oracle.jmc.feature.ide.feature.group' name='Oracle Java Mission Control IDE Integration'>
+      <repositories size='1'>
+        <repository location='http://download.oracle.com/technology/products/missioncontrol/updatesites/base/6.0.0/eclipse'/>
+      </repositories>
+    </iu>
+    <iu id='de.anbos.eclipse.easyshell.feature.feature.group' name='EasyShell'>
+      <repositories size='1'>
+        <repository location='http://anb0s.github.io/EasyShell'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.mat.feature.feature.group' name='Memory Analyzer'>
+      <repositories size='1'>
+        <repository location='https://download.eclipse.org/releases/latest'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.mat.chart.feature.feature.group' name='Memory Analyzer (Charts) [optional]'>
+      <repositories size='1'>
+        <repository location='https://download.eclipse.org/releases/latest'/>
+      </repositories>
+    </iu>
+    <iu id='com.sap.jvm.profiling.feature.group' name='SAP JVM Tools'>
+      <repositories size='1'>
+        <repository location='https://tools.hana.ondemand.com/oxygen'/>
+      </repositories>
+    </iu>
+    <iu id='umlet-eclipse-feature.feature.group' name='UMLet Eclipse Plugin'>
+      <repositories size='1'>
+        <repository location='https://www.umlet.com/umlet_latest/repository/'/>
+      </repositories>
+    </iu>
+        <iu id='org.sf.feeling.decompiler.feature.group' name='Enhanced Class Decompiler (Core)'>
+      <repositories size='1'>
+        <repository location='https://ecd-plugin.github.io/update'/>
+      </repositories>
+    </iu>
+    <iu id='org.sf.feeling.decompiler.cfr.feature.group' name='Enhanced Class Decompiler CFR Extension (Optional)'>
+      <repositories size='1'>
+        <repository location='https://ecd-plugin.github.io/update'/>
+      </repositories>
+    </iu>
+    <iu id='org.sf.feeling.decompiler.jad.feature.group' name='Enhanced Class Decompiler Jad Extension (Optional)'>
+      <repositories size='1'>
+        <repository location='https://ecd-plugin.github.io/update'/>
+      </repositories>
+    </iu>
+    <iu id='org.sf.feeling.decompiler.jd.feature.group' name='Enhanced Class Decompiler JD-Core Extension (Optional)'>
+      <repositories size='1'>
+        <repository location='https://ecd-plugin.github.io/update'/>
+      </repositories>
+    </iu>
+    <iu id='org.sf.feeling.decompiler.procyon.feature.group' name='Enhanced Class Decompiler Procyon Extension (Optional)'>
+      <repositories size='1'>
+        <repository location='https://ecd-plugin.github.io/update'/>
+      </repositories>
+    </iu>
+    <iu id='javax.xml.bind' name='XML Binding for Java' version='2.2.0.v201105210648'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/mylyn/releases/latest'/>
+      </repositories>
+    </iu>
+  </ius>
+</p2f>

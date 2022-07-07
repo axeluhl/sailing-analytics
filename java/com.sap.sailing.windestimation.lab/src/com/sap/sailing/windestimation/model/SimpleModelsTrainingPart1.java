@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -86,7 +87,9 @@ public class SimpleModelsTrainingPart1 {
         }
         maneuverForEstimationPersistenceManager.dropCollection();
         new RegularManeuversForEstimationPersistenceManager().dropCollection();
+        logger.info("Scheduling import of polar data");
         executeInThreadPool(() -> new PolarDataImporter().importPolarData());
+        logger.info("Scheduling import of regattas with a bearer token of length "+bearerToken.length());
         executeInThreadPool(() -> new ManeuverAndWindImporter().importAllRegattas(bearerToken));
         awaitThreadPoolCompletion();
         executeInThreadPool(() -> {
@@ -152,13 +155,16 @@ public class SimpleModelsTrainingPart1 {
     }
 
     private static void awaitThreadPoolCompletion() throws InterruptedException {
+        logger.info("Awaiting thread pool completion");
         executorService.shutdown();
         final long TIMEOUT_IN_HOURS = 48;
         boolean success = executorService.awaitTermination(TIMEOUT_IN_HOURS, TimeUnit.HOURS);
         if (!success) {
-            LoggingUtil.logInfo("Thread-pool was terminated after "+TIMEOUT_IN_HOURS+
+            logger.severe("Thread-pool was terminated after "+TIMEOUT_IN_HOURS+
                     " hours waiting time. Launching next step. You may, e.g., be seeing an empty chart in case the process is really still running."+
                     " In this case, please follow the log and keep refreshing until you see content.");
+        } else {
+            logger.info("Thread pool completed");
         }
         Thread.sleep(1000L);
     }
@@ -171,9 +177,8 @@ public class SimpleModelsTrainingPart1 {
             try {
                 runnable.run();
             } catch (Throwable t) {
-                t.printStackTrace();
+                logger.log(Level.SEVERE, "FAILURE: Caught unexpected exception. Model training aborted", t);
                 System.exit(1);
-                LoggingUtil.logInfo("FAILURE: Caught unexpected exception. Model training aborted");
             }
         });
     }
