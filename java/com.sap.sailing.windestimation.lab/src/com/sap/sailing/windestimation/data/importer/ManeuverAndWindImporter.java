@@ -347,9 +347,10 @@ public class ManeuverAndWindImporter {
 
     private JSONObject getHttpResponseAsJson(String trackedRegattaName, String trackedRaceName,
             HttpGet getEstimationData) throws InterruptedException, Exception {
+        final int NUMBER_OF_ATTEMPTS = 10;
         HttpResponse httpResponse = null;
         Exception lastException = null;
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= NUMBER_OF_ATTEMPTS; i++) {
             try {
                 httpResponse = createNewHttpClient().execute(getEstimationData);
                 JSONObject resultJson = (JSONObject) getJsonFromResponse(httpResponse);
@@ -358,10 +359,10 @@ public class ManeuverAndWindImporter {
                 Thread.sleep(10000);
                 lastException = e;
                 if (trackedRaceName == null) {
-                    logger.info("Connection error (" + i + "/10) "+e.getMessage()+" while querying races of regatta \""
+                    logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+" while querying races of regatta \""
                             + trackedRegattaName + "\", retrying...");
                 } else {
-                    logger.info("Connection error (" + i + "/10) "+e.getMessage()+" while processing race \"" + trackedRaceName
+                    logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+" while processing race \"" + trackedRaceName
                             + "\" of regatta \"" + trackedRegattaName + "\", retrying...");
                 }
             }
