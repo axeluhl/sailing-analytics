@@ -112,7 +112,7 @@ Out of the box, two settings in Eclipse avoid a clean workspace. Go to Window - 
 - In "Java ⇒ Code Style ⇒ FormatterImport" import the CodeFormatter.xml from $GIT_HOME/java 
 - In "Java ⇒ Compiler" set the Compiler compliance level to 1.8
 - In "Java ⇒ Installed JREs" add the Java 8 sdk and activate it. 
-- In "Java ⇒ Installed JREs ⇒ Execution Environments" make shure that the Java 8 JRE is selected for JavaSE-1.8 (if the jre is not listed open and close the preference Window once) 
+- In "Java ⇒ Installed JREs ⇒ Execution Environments" make sure that the Java 8 JRE is selected for JavaSE-1.8 (if the jre is not listed open and close the preference Window once) 
 - In "Web ⇒ Client-side JavaScript ⇒ Formatter" import the CodeFormatter_JavaScript.xml for JavaScript from $GIT_HOME/java to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
 - In "Web ⇒ HTML Files ⇒ Editor" activate indent using Spaces
 - In "XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
