@@ -1,7 +1,9 @@
+# OnBoarding Information
+
 <!-- 
 This Markdown document is designed to work with Gollum not with GitHub. Internal links to chapters have the following syntax in for Gollum:
 
-Chapter Hirachie: 
+Chapter Hierachy: 
 # chapter
 ## new chapter
 ### chapter to reference
@@ -9,7 +11,6 @@ Chapter Hirachie:
 
 [linkText](#chapter_new-subchapter_chapter-to-reference)
  -->
-# OnBoarding Information
 
 This document describes the onboarding process for a new team member (developer)
 
