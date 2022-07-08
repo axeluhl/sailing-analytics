@@ -2,6 +2,11 @@
 <?p2f version='1.0.0'?>
 <p2f version='1.0.0'>
   <ius size='3'>
+    <iu id='org.apache.lucene.core' name='Lucene Core' version='7.1.0.v20171214-1510'>
+      <repositories size='1'>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20190602212107/repository'/>
+      </repositories>
+    </iu>
     <iu id='org.eclipse.jst.web_ui.feature.feature.group' name='Eclipse Java Web Developer Tools' version='3.22.0.v202103200058'>
       <repositories size='1'>
         <repository location='https://download.eclipse.org/releases/2021-06'/>
