@@ -102,6 +102,26 @@
         <repository location='http://download.eclipse.org/mylyn/releases/latest'/>
       </repositories>
     </iu>
+    <iu id='org.eclipse.mylyn.tasks.ide.feature.group' name='Mylyn Tasks Connector: Eclipse IDE'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/mylyn/releases/latest'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.mylyn.sdk_feature.feature.group' name='Mylyn Tasks SDK'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/mylyn/releases/latest'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.mylyn.commons.feature.group' name='Mylyn Commons'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/mylyn/releases/latest'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.mylyn.commons.sdk.feature.group' name='Mylyn Commons SDK'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/mylyn/releases/latest'/>
+      </repositories>
+    </iu>
     <iu id='com.github.sdbg.feature.feature.group' name='JavaScript Debugger with Source Mapping Support'>
       <repositories size='1'>
         <repository location='https://p2.sapsailing.com/p2/sdbg'/>
