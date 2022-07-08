@@ -360,10 +360,10 @@ public class ManeuverAndWindImporter {
                 lastException = e;
                 if (trackedRaceName == null) {
                     logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+" while querying races of regatta \""
-                            + trackedRegattaName + "\", retrying...");
+                            + trackedRegattaName + "\"; request was "+getEstimationData+", retrying...");
                 } else {
                     logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+" while processing race \"" + trackedRaceName
-                            + "\" of regatta \"" + trackedRegattaName + "\", retrying...");
+                            + "\" of regatta \"" + trackedRegattaName + "\"; request was "+getEstimationData+", retrying...");
                 }
             }
         }
