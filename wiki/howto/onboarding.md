@@ -104,14 +104,14 @@ The p2f-file includes the following plugins for your convenience:
 
 ### Tuning the Eclipse Installation
 
-Out of the box, two settings in Eclipse avoid a clean workspace. Go to Window - Preferences and change the following two settings:
+Out of the box, multiple settings in Eclipse need to be changed. Go to Window ⇒ Preferences and change the following two settings:
 
 - In "General ⇒ Content Types" select on CSS (Text ⇒ CSS) and add \*.gss in the lower file association list to get limited syntax highlighting and content assist in GSS files
 - In "General ⇒ Editors ⇒ TextEditors" check Insert Spaces for Tabs
 - In "GWT ⇒ Errors/Warnings" set "Missing SDK" to "Ignore" 
 - In "GWT ⇒ GWT Settings ⇒ Add..." add the GWT SDK 
 - In "Java ⇒ Build Path ⇒ Classpath Variables" create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
-- In "Java ⇒ Code Style ⇒ FormatterImport" import the CodeFormatter.xml from $GIT_HOME/java 
+- In "Java ⇒ Code Style ⇒ Formatter" import the CodeFormatter.xml from $GIT_HOME/java 
 - In "Java ⇒ Compiler" set the Compiler compliance level to 1.8
 - In "Java ⇒ Installed JREs" add the Java 8 sdk and activate it. 
 - In "Java ⇒ Installed JREs ⇒ Execution Environments" make sure that the Java 8 JRE is selected for JavaSE-1.8 (if the jre is not listed open and close the preference Window once) 
