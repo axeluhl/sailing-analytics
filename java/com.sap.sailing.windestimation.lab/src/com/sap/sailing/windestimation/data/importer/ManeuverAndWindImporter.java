@@ -348,9 +348,9 @@ public class ManeuverAndWindImporter {
     private JSONObject getHttpResponseAsJson(String trackedRegattaName, String trackedRaceName,
             HttpGet getEstimationData) throws InterruptedException, Exception {
         final int NUMBER_OF_ATTEMPTS = 10;
-        HttpResponse httpResponse = null;
         Exception lastException = null;
         for (int i = 1; i <= NUMBER_OF_ATTEMPTS; i++) {
+            HttpResponse httpResponse = null;
             try {
                 httpResponse = createNewHttpClient().execute(getEstimationData);
                 JSONObject resultJson = (JSONObject) getJsonFromResponse(httpResponse);
@@ -359,11 +359,13 @@ public class ManeuverAndWindImporter {
                 Thread.sleep(10000);
                 lastException = e;
                 if (trackedRaceName == null) {
-                    logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+" while querying races of regatta \""
-                            + trackedRegattaName + "\"; request was "+getEstimationData+", retrying...");
+                    logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+
+                            ", response code: "+(httpResponse==null?"null":httpResponse.getStatusLine())+" while querying races of regatta \""
+                            + trackedRegattaName + "\"; request was "+getEstimationData+(i<NUMBER_OF_ATTEMPTS?", retrying...":", FAILED"));
                 } else {
-                    logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+" while processing race \"" + trackedRaceName
-                            + "\" of regatta \"" + trackedRegattaName + "\"; request was "+getEstimationData+", retrying...");
+                    logger.info("Connection error (" + i + "/"+NUMBER_OF_ATTEMPTS+") "+e+
+                            ", response code: "+(httpResponse==null?"null":httpResponse.getStatusLine())+" while processing race \"" + trackedRaceName
+                            + "\" of regatta \"" + trackedRegattaName + "\"; request was "+getEstimationData+(i<NUMBER_OF_ATTEMPTS?", retrying...":", FAILED"));
                 }
             }
         }
@@ -417,7 +419,6 @@ public class ManeuverAndWindImporter {
     }
 
     private static class HttpClientException extends Exception {
-
         private static final long serialVersionUID = 4948532287832868768L;
         private final String request;
 
@@ -429,7 +430,5 @@ public class ManeuverAndWindImporter {
         public String getRequest() {
             return request;
         }
-
     }
-
 }
