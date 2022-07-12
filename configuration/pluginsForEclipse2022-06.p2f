@@ -2,17 +2,34 @@
 <?p2f version='1.0.0'?>
 <p2f version='1.0.0'>
   <ius size='3'>
+    <!-- These Mylyn extension are needed to get back the md editor in 2022-06. The editor is added back in the next release. Then these two can be removed -->
+    <iu id='org.eclipse.mylyn.wikitext.editors_feature.feature.group' name='Mylyn WikiText Editors' version='3.0.42.202201072301'>
+      <repositories size='1'>
+        <repository location='https://download.eclipse.org/releases/latest'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.mylyn.wikitext_feature.group' name='Mylyn WikiText' version='3.0.42.202201072301'>
+      <repositories size='1'>
+        <repository location='https://download.eclipse.org/releases/latest'/>
+      </repositories>
+    </iu>
+
+    <!-- Quartz is needed to make eclipse aware of the repository so that lucene can be found. 
+          Lucene is needed for the mylyn Tasks SDk. The SDK is needed for the MyLyn tasks list. 
+          As of writing 2022-07-12 the dependencies are not correct so that a manual installation is needed. -->
+    <iu id='org.quartz' name='Quartz Scheduler' version='1.8.3.v20110329-1420'>
+      <repositories size='1'>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20190602212107/repository'/>
+      </repositories>
+    </iu>
     <iu id='org.apache.lucene.core' name='Lucene Core' version='7.1.0.v20171214-1510'>
       <repositories size='1'>
         <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20190602212107/repository'/>
       </repositories>
     </iu>
-    <iu id='org.eclipse.jst.web_ui.feature.feature.group' name='Eclipse Java Web Developer Tools' version='3.22.0.v202103200058'>
-      <repositories size='1'>
-        <repository location='https://download.eclipse.org/releases/2021-06'/>
-      </repositories>
-    </iu>
-    <iu id='com.gwtplugins.eclipse.suite.v3.feature.feature.group' name='GWT Eclipse Plugin' version='3.0.0.201710131939'>
+
+    <!-- multiple Plugins needed for the development -->
+    <iu id='com.gwtplugins.eclipse.suite.v3.feature.feature.group' name='GWT EclipFse Plugin' version='3.0.0.201710131939'>
       <repositories size='1'>
         <repository location='http://storage.googleapis.com/gwt-eclipse-plugin/v3/release'/>
       </repositories>
