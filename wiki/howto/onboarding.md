@@ -1,5 +1,17 @@
 # OnBoarding Information
 
+<!-- 
+This Markdown document is designed to work with Gollum not with GitHub. Internal links to chapters have the following syntax in for Gollum:
+
+Chapter Hierachy: 
+# chapter
+## new subchapter
+### chapter to reference
+## another chapter
+
+[linkText](#chapter_new-subchapter_chapter-to-reference)
+ -->
+
 This document describes the onboarding process for a new team member (developer)
 
 First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612](http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612). That's a great book, and knowing at least some of it will help you a great deal finding your way around our solution.
@@ -31,25 +43,26 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 ### Installations
 
 1. JDK >= 11, it is required by Eclipse and therefore should be referenced in the environment variable `JAVA_HOME`. As an alternative to the environment variable Eclipse can be configured to use a different version of Java see [here](https://stackoverflow.com/questions/18469170/how-to-run-eclipse-with-different-java-version) for further instructions.
-2. Eclipse IDE for Eclipse Committers, version 4.15.0 ["2021-03"](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-eclipse-committers)
-3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`), then open Eclipse and navigate to Window → Preferences → Java → Installed JREs and add the 1.8 VM.
-4. Install the eclipse plugins (see [Automatic Eclipse plugin installation](#onboarding-information_sap-sailing-analytics-development-setup_automatic-eclipse-plugin-installation))
-5. Configure Eclipse (see [Tuning the Eclipse Installation](#onboarding-information_sap-sailing-analytics-development-setup_tuning-the-eclipse-installation))
-6. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
-7. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
-8. MongoDB (at least Release 4.4), download: [https://www.mongodb.com/](https://www.mongodb.com/)
-9. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with the latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to the newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8)
-10. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
+2. Eclipse IDE for Eclipse Committers, version 4.24.0 ["2022-06"](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-eclipse-committers)
+3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`
+4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
+5. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
+6. MongoDB (at least Release 4.4), download: [https://www.mongodb.com/](https://www.mongodb.com/)
+7. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with the latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to the newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8)
+8.  Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
     A setup guide for windows can be found on this webpage: [https://maven.apache.org/guides/getting-started/windows-prerequisites.html](https://maven.apache.org/guides/getting-started/windows-prerequisites.html)
-11. GWT SDK 2.9.0 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
+9.  GWT SDK 2.9.0 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
     Download the gwt sdk and extract it to a location of your preference (e.g. windows `C:\Program Files\gwt`)
-12. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
+10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
     Make sure that the environment variable `ANDROID_HOME` is set (e.g. Windows C:\Users\\**'user'**\AppData\Local\Android\Sdk )
-13. Get the content of the git repository
+11. Get the content of the git repository
     Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git` or `ssh://trac@sapsailing.com/home/trac/git` User "trac" has all public ssh keys.
-14. Configure Maven to use the correct JRE by following the instructions in the paragraph [maven-setup](#onboarding-information_sap-sailing-analytics-development-setup_maven-setup)
-15. Follow the instructions in the [development setup](#onboarding-information_sap-sailing-analytics-development-setup_sap-sailing-analytics-development-setup) to build the project.
-16. The steps for building the project for a deployment can be found in the [Build for deployment](#onboarding-information_sap-sailing-analytics-development-setup_build-for-deployment) section. This is not needed in the daily development workflow and should only be run when needed. 
+    
+12. Install the eclipse plugins (see [Automatic Eclipse plugin installation](#onboarding-information_sap-sailing-analytics-development-setup_automatic-eclipse-plugin-installation))
+12. Configure Eclipse (see [Tuning the Eclipse Installation](#onboarding-information_sap-sailing-analytics-development-setup_tuning-the-eclipse-installation))
+13. Configure Maven to use the correct JRE by following the instructions in the paragraph [maven-setup](#onboarding-information_sap-sailing-analytics-development-setup_maven-setup)
+14. Follow the instructions in the [development setup](#onboarding-information_sap-sailing-analytics-development-setup_sap-sailing-analytics-development-setup) to build the project.
+15. The steps for building the project for a deployment can be found in the [Build for deployment](#onboarding-information_sap-sailing-analytics-development-setup_build-for-deployment) section. This is not needed in the daily development workflow and should only be run when needed. 
 
 ### Further optional but recommended installations
 
@@ -59,46 +72,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 3. kdiff3 (git tool)
 4. Firebug (javascript & .css debugging, included in Firefox Developer Tools in newer versions of Firefox by default)
 
-### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of ["2021-03"](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-eclipse-committers) by using the script "./configuration/installPluginsForEclipse2021-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
-
-    ./installPluginsForEclipse2021-03.sh "/some/path/on/my/computer/eclipse"
-
-Be aware that with this script it's not possible to update the plugins to newer versions. Instead, you can install a new version by unpacking the base package and executing the script.
-
-Be aware hat the installation may take several minutes depending on your Internet connection. When the script finished running, please check that no errors occurred (the installation process only logs warnings/errors but doesn't fail).
-
-The script will install the following plugins for your convenience:
-
-- GWT Plugin ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin))
-- GWT SDM Debug Bridge ([http://sdbg.github.io/](http://sdbg.github.io/))
-- Easy Shell ([https://anb0s.github.io/EasyShell/](https://anb0s.github.io/EasyShell/))
-- Memory Analyzer ([https://www.eclipse.org/mat/](https://www.eclipse.org/mat/))
-- SAP JVM Profiler ([https://tools.hana.ondemand.com](https://tools.hana.ondemand.com))
-- UMLet ([https://www.umlet.com/](https://www.umlet.com/))
-- various updates to preinstalled plugins
-
-#### On Windows
-
-You need a Git Bash or Cygwin shell to run the script. The default path of Eclipse on Windows is: `C:/Users/'user'/eclipse//committers-2021-03/eclipse`
-
-#### On Mac OS:
-
-- Before running the script, start eclipse and install **GWT Plugin** manually from repository [http://storage.googleapis.com/gwt-eclipse-plugin/v3/release](http://storage.googleapis.com/gwt-eclipse-plugin/v3/release)
-- It's not sufficient to provide the path to the app, instead you need to get the path to the directory inside of the app package hosting the "eclipse" binary (.../Eclipse.app/Contents/MacOS).
-
-### Tuning the Eclipse Installation
-
-Out of the box, two settings in Eclipse avoid a clean workspace. Go to Window - Preferences and change the following two settings:
-
-- Set the "Missing GWT SDK" warning to "Ignore". See screenshot below.
-
-![](ignore-missing-gwt-sdk-warning.png)
-
-- Set the "Plug-in does not export all packages" warning to "Ignore". See screenshot below.
-
-![](ignore-package-not-exported-warning.png)
 
 ### Git repository configuration essentials
 
@@ -112,29 +86,50 @@ Depending on the location of your local repository, it's filepaths might be too 
 
 Copy the settings.xml **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for corporate network inside). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. 
 
+### Automatic Eclipse plugin installation
+The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2022-06"](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2022-06.p2f` file. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2022-06.p2f`. 
+Make sure to select all Plugins (it might not be possible to select Lucene ignore that) and click next. Skip the `Installation details`, accept the licence agreements and click finish. While Eclipse is installing the plugins a pop-up will appear in the background where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
+
+Be also aware that with this p2f-file it's not possible to update the plugins to newer versions. 
+
+The p2f-file includes the following plugins for your convenience:
+
+- GWT Plugin ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin))
+- GWT SDM Debug Bridge ([http://sdbg.github.io/](http://sdbg.github.io/))
+- Easy Shell ([https://anb0s.github.io/EasyShell/](https://anb0s.github.io/EasyShell/))
+- Memory Analyzer ([https://www.eclipse.org/mat/](https://www.eclipse.org/mat/))
+- SAP JVM Profiler ([https://tools.hana.ondemand.com](https://tools.hana.ondemand.com))
+- UMLet ([https://www.umlet.com/](https://www.umlet.com/))
+- various updates to preinstalled plugins
+
+### Tuning the Eclipse Installation
+
+Out of the box, multiple settings in Eclipse need to be changed. Go to Window ⇒ Preferences and change the following two settings:
+
+- In "General ⇒ Content Types" select on CSS (Text ⇒ CSS) and add \*.gss in the lower file association list to get limited syntax highlighting and content assist in GSS files
+- In "General ⇒ Editors ⇒ Text Editors" check Insert Spaces for Tabs
+- In "GWT ⇒ Errors/Warnings" set "Missing SDK" to "Ignore" 
+- In "GWT ⇒ GWT Settings ⇒ Add..." add the GWT SDK 
+- In "Java ⇒ Build Path ⇒ Classpath Variables" create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
+- In "Java ⇒ Code Style ⇒ Formatter" import the CodeFormatter.xml from $GIT_HOME/java 
+- In "Java ⇒ Compiler" set the Compiler compliance level to 1.8
+- In "Java ⇒ Installed JREs" add the Java 8 sdk and activate it. 
+- In "Java ⇒ Installed JREs ⇒ Execution Environments" make sure that the Java 8 JRE is selected for JavaSE-1.8 (if the jre is not listed open and close the preference Window once) 
+- In "Web ⇒ Client-side JavaScript ⇒ Formatter" import the CodeFormatter_JavaScript.xml for JavaScript from $GIT_HOME/java to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
+- In "Web ⇒ HTML Files ⇒ Editor" activate indent using Spaces
+- In "XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
+- Install Eclipse eGit (optional)
+
+
 ### Steps to build and run the Race Analysis Suite
 
 1. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 2. Setup and configure Eclipse
-
-   - Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Window ⇒ Preferences ⇒ Java ⇒ Code Style ⇒ Formatter)
-   - It is also strongly recommended to import CodeFormatter_JavaScript.xml (from $GIT_HOME/java) into your Eclipse preferences (Window ⇒ Preferences ⇒ Web ⇒ Client-side JavaScript ⇒ Formatter) to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
-   - In Eclipse go to "Window ⇒ Preferences ⇒ Java ⇒ Build Path ⇒ Classpath Variables" and create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
-   - Add the SDK in Eclipse (Preferences ⇒ GWT ⇒ GWT Settings ⇒ Add...)
-   - In "Window ⇒ Preferences ⇒ GWT ⇒ Errors/Warnings, set "Missing SDK" to "Ignore" (If not done earlier, see: Tuning the Eclipse Installation)
-   - In "Window ⇒ Preferences ⇒ General ⇒ Editors ⇒ TextEditors" check Insert Spaces for Tabs
-   - In "Window ⇒ Preferences ⇒ Web ⇒ HTML Files ⇒ Editor" indent using Spaces
-   - In "Window ⇒ Preferences ⇒ General ⇒ Content Types" select on the right side CSS, now add in the lower file association list \*.gss to get limited syntax highlighting and content assist in GSS files
-   - In "Window ⇒ Preferences ⇒ XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
-   - Install Eclipse debugger for GWT SuperDevMode
-   - Install Eclipse eGit (optional)
-   - Check that JDK 1.8 is available and has been set for compilation in Eclipse
-   - Check that JDK 1.8 has been matched to JavaSE-1.8 ("Window ⇒ Preferences ⇒ Java ⇒ Installed JREs ⇒ Execution Environments ⇒ JavaSE-1.8)
    - Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard [but without smart import] "Import ⇒ General ⇒ Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
    - Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
-   - Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions) Window ⇒ Preferences ⇒ Plug-in Development ⇒ Target Platform select `Race Analysis Target`
+   - In "Window ⇒ Preferences ⇒ Plug-in Development ⇒ Target Platform" set the Eclipse target platform to `Race Analysis Target` (located in com.sap.sailing.targetplatform/definitions//race-analysis-p2-remote.target) 
    - Wait until the target platform has been resolved completely
-   - Rebuild all projects
+   - Start a clean build (Project ⇒ Clean)
 
 3. On clear workspace additional steps should be performed once:
    1. Run "GWT Dashboards SDM" launch configuration. After successful start, launch configuration can be stopped.
