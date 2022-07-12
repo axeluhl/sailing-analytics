@@ -96,6 +96,39 @@ To produce the JAR file used for the Docker image creation, run an "Export" comm
     scp WindEstimationModelsTraining.jar trac@sapsailing.com:static
 ```
 
+### AI Core
+
+In the "Canary - Public Cloud [Feature Set B]" landscape (Europe (Frankfurt) - Canary - AWS) we have a Global Account named "SAP Sailing Analytics" which is also used for our SAP Analytics Cloud (SAP) showcase. It is configured through the SAP BTP Control Center which can be reached at [https://cp-control-client-uc2.cfapps.sap.hana.ondemand.com/index.html](https://cp-control-client-uc2.cfapps.sap.hana.ondemand.com/index.html). There, in the Entitlements section you need the "AI Cockpit," "SAP AI Launchpad," and the "SAP AI Core" elements.
+
+When managing this account in the SAP BTP Control Center (e.g., [here](https://cockpit.sap.hana.ondemand.com/cockpit/#/globalaccount/6e49f5f8-1822-44f0-b669-9d0d5e79abc5/accountModel&//?section=SubaccountsSection&view=TilesView)) then under Entitlements these same services need to be present. In the "SAC Showcase" sub-account these entitlements then need to be configured. Afterwards, under "Instances and Subscriptions" the "SAP AI Core" and "SAP AI Launchpad" services can be subscribed to. Once the services are deployed, you'll see the "SAP AI Launchpad" subscription where you can use the "..." button to go to the application. This will take you to [https://sac4sapsailing.ai-launchpad.prodintern.eu-central-1.aws.apps.ml.hana.ondemand.com/aic/index.html#/workspaces](https://sac4sapsailing.ai-launchpad.prodintern.eu-central-1.aws.apps.ml.hana.ondemand.com/aic/index.html#/workspaces).
+
+Obtain your API access key from the "Instances and Subscriptions" page from your "SAP AI Core" instance. See also [https://help.sap.com/docs/AI_CORE/2d6c5984063c40a59eda62f4a9135bee/7323ff4e37ba41c198b06e9669b80920.html](https://help.sap.com/docs/AI_CORE/2d6c5984063c40a59eda62f4a9135bee/7323ff4e37ba41c198b06e9669b80920.html) for a description. However, the way the descriptions there continues to explain how to set up the environment for API calls, e.g., with ``curl``, didn't work for me. Instead, I started to create a bunch of scripts that help me with obtaining ``curl``-based access, as well as establish the basic environment including Git repository access, access to a private Docker registry, an AWS S3 object store secret, a SAP Sailing Analytics bearer token secret, as well as the "Application" object that tells AI Core where to find workflow templates in the Git repository.
+
+Create a service key using the "..." menu on your "SAP AI Core" instance and download the credentials file. This will can later be used as an argument to a little script ``aicore-credentials.sh`` that helps you set your shell variables for easy ``curl`` API access. Call like this:
+
+```
+  eval `./aicore-credentials.sh YOUR-KEY-FILE.json`
+```
+
+This will establish, in particular, a ``TOKEN`` and the ``AI_API_URL`` environment variable which can then be used by subsequent scripts and API calls which basically follow this pattern:
+
+```
+    curl --location --request POST "$AI_API_URL/v2/admin/repositories" \
+         --header "Authorization: Bearer $TOKEN" \
+         --header 'Content-Type: application/json' \
+         ...
+```
+
+The next step is to establish a connection for the Docker registry from which Docker images are to be pulled. Log on to the registry you'd like to use, e.g., with a command such as
+
+```
+    docker login docker.sapsailing.com
+```
+
+The credentials you provide are encoded in ``~/.docker/config.json``. You can then use the script ``configureDockerRegistry.sh`` to establish the image pull secret. Either provide the name of your docker registry (e.g., ``docker.sapsailing.com`` as the single argument to the script or call without argument to have the script prompt you for it. The script will then read your ``~/.docker/config.json`` and extract the corresponding authorization information to pass it on as the AI Core registry secret.
+
+Then, you can create the GIT connection. Use script ``createGitConfig.sh``, either with three arguments (GIT URL, user email, personal access token (PAT)), or have the script prompt for these. I have created a Git repository with the necessary workflow definition under ``https://github.tools.sap/D043530/aicore-sailing``.
+
 ### Traditional
 
 1. Run ``com.sap.sailing.windestimation.model.SimpleModelsTrainingPart1`` as a normal Java Application. If you would like to run this outside of your development environment, use "Export as..." in Eclipse, pick the launch configuration for ``SimpleModelsTrainingPart1`` and let the exporter pack all required dependencies into the single executable JAR file that you can send anywhere you would like to execute it and then run ``java -jar SimpleModelsTrainingPar1.jar`` or however you called the JAR file produced by the export. After this, all the necessary maneuver and wind data will be downloaded, pre-processed and maneuver classifiers get trained. You can use the usual MongoDB system properties to configure the database connection, such as ``-Dmongo.dbName=windestimation -Dmongo.port=10202 -Dmongo.host=dbserver.internal.sapsailing.com`` or ``"-Dmongo.uri=mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/windestimation?replicaSet=live&retryWrites=true"``. You have to provide the VM at least 16GB of RAM. Use ``-Xms16g -Xmx16g`` as VM arguments to accomplish this. A full command line could, e.g., look like this:
