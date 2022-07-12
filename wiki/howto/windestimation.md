@@ -77,6 +77,7 @@ For your account that is equipped with the ``TRACKED_RACE:EXPORT`` permission yo
               docker.sapsailing.com/windestimationtraining:latest
 ```
 If successful (and you may want to remove the ``--rm`` option otherwise to allow you to inspect logs after unsuccessful execution) you will find the output under ``/tmp/windEstimationModels.dat`` which you can upload as usual, e.g., as in
+
 ```
     curl -X POST -H "Content-Type: application/octet-stream" --data-binary @windEstimationModels.dat \
                  -H "Authorization: Bearer 987235098w0t98yw409857098745=" \
@@ -127,7 +128,7 @@ The next step is to establish a connection for the Docker registry from which Do
 
 The credentials you provide are encoded in ``~/.docker/config.json``. You can then use the script ``configureDockerRegistry.sh`` to establish the image pull secret. Either provide the name of your docker registry (e.g., ``docker.sapsailing.com`` as the single argument to the script or call without argument to have the script prompt you for it. The script will then read your ``~/.docker/config.json`` and extract the corresponding authorization information to pass it on as the AI Core registry secret.
 
-Then, you can create the GIT connection. Use script ``createGitConfig.sh``, either with three arguments (GIT URL, user email, personal access token (PAT)), or have the script prompt for these. I have created a Git repository with the necessary workflow definition under ``https://github.tools.sap/D043530/aicore-sailing``.
+Then, you can create the GIT connection. Use script ``createGitConfig.sh``, either with three arguments (GIT URL, user email, personal access token (PAT)), or have the script prompt for these. I have created a Git repository with the necessary workflow definition under ``https://github.tools.sap/D043530/aicore-sailing``. In the ``workflows`` folder there is a ``workflow-template.yaml`` file which contains the specification of an Argo workflow template. It runs the ``docker.sapsailing.com/windestimation:latest``.
 
 ### Traditional
 

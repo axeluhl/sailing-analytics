@@ -57,12 +57,13 @@ public class SimpleModelsTrainingPart1 {
      *            permission on the {@code TRACKED_RACE}s for wind data access. Only regattas/races are considered that
      *            the user authenticated by this token can {@code READ}. {@code args[1]} may contain a percentage of the
      *            maneuvers to use for training which defaults to 80; {@code args[2]} may contain a percentage of the
-     *            maneuvers to use for testing which defaults to 20. If {@code args[3]} is also provided, it is taken to
-     *            be the file system path for storing the models that result from the training process; with this, the
-     *            models are not stored in MongoDB which otherwise would be the default. If {@code args[4]} is provided and
-     *            is something that {@link Boolean#valueOf(String)} evaluates to {@code true} then visuals are presented
-     *            (requiring a display to be available to the Java process which may, e.g., not be the case for a docker
-     *            container) that show the results of outlier removal for the wind regressions.
+     *            maneuvers to use for testing which defaults to {@code 100-percentForTraining}. If {@code args[3]} is
+     *            also provided, it is taken to be the file system path for storing the models that result from the
+     *            training process; with this, the models are not stored in MongoDB which otherwise would be the
+     *            default. If {@code args[4]} is provided and is something that {@link Boolean#valueOf(String)}
+     *            evaluates to {@code true} then visuals are presented (requiring a display to be available to the Java
+     *            process which may, e.g., not be the case for a docker container) that show the results of outlier
+     *            removal for the wind regressions.
      */
     public static void main(String[] args) throws Exception {
         final String bearerToken = args[0];
@@ -76,7 +77,7 @@ public class SimpleModelsTrainingPart1 {
         if (args.length > 2) {
             percentForTesting = Integer.valueOf(args[2]);
         } else {
-            percentForTesting = 20;
+            percentForTesting = 100-percentForTraining;
         }
         final ManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager = new ManeuverForEstimationPersistenceManager();
         final ModelStore modelStore;
