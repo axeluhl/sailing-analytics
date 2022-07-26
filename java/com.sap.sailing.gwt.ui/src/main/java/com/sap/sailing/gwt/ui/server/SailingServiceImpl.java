@@ -3771,8 +3771,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         result.setMimeType(image.getMimeType());
         result.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
         result.setLocale(toLocaleName(image.getLocale()));
-        List<String> tags = new ArrayList<String>();
-        for(String tag: image.getTags()) {
+        final List<String> tags = new ArrayList<String>();
+        for (String tag : image.getTags()) {
             tags.add(tag);
         }
         result.setTags(tags);

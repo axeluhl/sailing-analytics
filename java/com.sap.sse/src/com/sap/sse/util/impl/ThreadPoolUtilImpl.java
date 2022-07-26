@@ -60,8 +60,10 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
     }
 
     private ScheduledExecutorService createThreadPoolExecutor(String name, final int priority, final int size) {
-        return new NamedTracingScheduledThreadPoolExecutor(name, /* corePoolSize */ size, new ThreadFactoryWithPriority(
-                name, priority, /* daemon */ true));
+        final NamedTracingScheduledThreadPoolExecutor result = new NamedTracingScheduledThreadPoolExecutor(
+                name, /* corePoolSize */ size, new ThreadFactoryWithPriority(name, priority, /* daemon */ true));
+        result.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        return result;
     }
 
     @Override

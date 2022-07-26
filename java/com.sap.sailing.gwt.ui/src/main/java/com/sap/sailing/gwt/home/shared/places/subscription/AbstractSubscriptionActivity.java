@@ -75,6 +75,8 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                 final Type type;
                                 if (checkIfUserIsOwnerOfThePlan(plan) || checkIfUserIsSubscribedToPlanCategory(plan)) {
                                     type = Type.OWNER;
+                                } else if (checkIfUserWasAlreadySubscripedToOneTimePlan(plan)) {
+                                    type = Type.ONETIMELOCK;
                                 } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getSubscriptionPlanId())) {
                                     type = Type.HIGHLIGHT;
                                 } else {
@@ -146,6 +148,10 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     
     private boolean checkIfUserIsSubscribedToPlanCategory(final SubscriptionPlanDTO plan) {
         return plan.isUserSubscribedToPlanCategory();
+    }
+    
+    private boolean checkIfUserWasAlreadySubscripedToOneTimePlan(final SubscriptionPlanDTO plan) {
+        return plan.isUserWasAlreadySubscribedToOneTimePlan();
     }
 
     private void onInvalidSubscriptionProviderError(final InvalidSubscriptionProviderException exc) {

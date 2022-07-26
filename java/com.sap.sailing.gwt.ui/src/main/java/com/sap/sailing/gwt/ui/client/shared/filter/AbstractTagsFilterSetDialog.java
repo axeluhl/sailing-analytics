@@ -11,14 +11,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -97,32 +96,35 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
         filterUIFactories = new ArrayList<>();
         filterDeleteButtons = new ArrayList<>();
         addFilterButton = new Button(stringMessages.add());
+        addFilterButton.addStyleName("inlineButton");
+        addFilterButton.addStyleName("btn-secondary");
         filterListBox = createListBox(false);
     }
 
     @Override
     protected Widget getAdditionalWidget() {
         mainPanel = new VerticalPanel();
-
-        HorizontalPanel hPanel = new HorizontalPanel();
-        mainPanel.add(hPanel);
-        hPanel.add(new Label(stringMessages.filterName() + ":"));
-        hPanel.add(filterSetNameTextBox);
-
+        Grid hGrid = new Grid(1, 2);
+        mainPanel.add(hGrid);
+        hGrid.setWidget(0, 0, new Label(stringMessages.filterName() + ":"));
+        Grid filterSetNameTextBoxWrapperGrid = new Grid(1,1);
+        filterSetNameTextBoxWrapperGrid.setWidget(0, 0, filterSetNameTextBox);
+        filterSetNameTextBoxWrapperGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        hGrid.setWidget(0, 1, filterSetNameTextBoxWrapperGrid);
+        hGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        hGrid.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_MIDDLE);
         filterListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 updateSelectedFilterInfo();
             }
         });
-
         filterListBox.addItem(stringMessages.selectAFilterCriteria() + "...");
         for (String filterName : availableTagFilterNames) {
             FilterWithUI<?> filter = TagFilterWithUIFactory.createFilter(filterName);
             filterListBox.addItem(filter.getLocalizedName(stringMessages));
         }
         updateSelectedFilterInfo();
-
         addFilterButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -138,11 +140,12 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
                 validateAndUpdate();
             }
         });
-
-        mainPanel.add(tagsFiltersGridHeadline);
+        Grid tagsFiltersGridHeadlineGrid = new Grid(1, 1);
+        tagsFiltersGridHeadlineGrid.setWidget(0, 0, tagsFiltersGridHeadline);
+        tagsFiltersGridHeadlineGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        mainPanel.add(tagsFiltersGridHeadlineGrid);
         mainPanel.add(tagsFiltersGrid);
         mainPanel.add(tagsFiltersGridFooter);
-
         for (FilterWithUI<TagDTO> existingFilter : tagsFilterSet.getFilters()) {
             FilterWithUI<TagDTO> filter = existingFilter.copy();
             FilterUIFactory<TagDTO> filterUIFactory = filter.createUIFactory();
@@ -151,15 +154,18 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
             createFilterEditWidget(filterUIFactory);
             createFilterDeleteButton(filter);
         }
-
         updateTagsFiltersGrid(mainPanel);
-
-        HorizontalPanel addFilterPanel = new HorizontalPanel();
+        Grid addFilterPanel = new Grid(1, 3);
         mainPanel.add(addFilterPanel);
-        addFilterPanel.add(new Label(stringMessages.filterCriteria() + ":"));
-        addFilterPanel.add(filterListBox);
-        addFilterPanel.add(addFilterButton);
-
+        addFilterPanel.setWidget(0, 0, new Label(stringMessages.filterCriteria() + ":"));
+        Grid filterListBoxWrapperGrid = new Grid(1,1);
+        filterListBoxWrapperGrid.setWidget(0, 0, filterListBox);
+        filterListBoxWrapperGrid.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        addFilterPanel.setWidget(0, 1, filterListBoxWrapperGrid);
+        addFilterPanel.setWidget(0, 2, addFilterButton);
+        addFilterPanel.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        addFilterPanel.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_MIDDLE);
+        addFilterPanel.getCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_MIDDLE);
         return mainPanel;
     }
 
@@ -179,6 +185,7 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
     private Button createFilterDeleteButton(FilterWithUI<TagDTO> filter) {
         final Button filterDeleteBtn = new Button(stringMessages.delete());
         filterDeleteBtn.addStyleName("inlineButton");
+        filterDeleteBtn.addStyleName("btn-secondary");
         filterDeleteButtons.add(filterDeleteBtn);
         filterDeleteBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -239,14 +246,12 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
     private void updateTagsFiltersGrid(VerticalPanel parentPanel) {
         int widgetIndex = parentPanel.getWidgetIndex(tagsFiltersGrid);
         parentPanel.remove(tagsFiltersGrid);
-
         int filterCount = filterNameLabels.size();
         boolean showGridHeadline = filterCount >= 1 ? true : false;
         boolean showGridFooter = filterCount >= 1 ? true : false;
         if (filterCount > 0) {
             tagsFiltersGrid = new Grid(filterCount, 3);
             tagsFiltersGrid.setCellSpacing(4);
-
             tagsFiltersGridHeadline.setVisible(showGridHeadline);
             tagsFiltersGridFooter.setVisible(showGridFooter);
             if (showGridHeadline) {
@@ -255,7 +260,6 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
             if (showGridFooter) {
                 tagsFiltersGridFooter.setText("");
             }
-
             for (int i = 0; i < filterCount; i++) {
                 tagsFiltersGrid.setWidget(i, 0, filterNameLabels.get(i));
                 tagsFiltersGrid.setWidget(i, 1, filterEditWidgets.get(i));
