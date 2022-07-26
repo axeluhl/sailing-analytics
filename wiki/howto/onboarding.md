@@ -5,7 +5,7 @@ This Markdown document is designed to work with Gollum not with GitHub. Internal
 
 Chapter Hierachy: 
 # chapter
-## new chapter
+## new subchapter
 ### chapter to reference
 ## another chapter
 
@@ -87,8 +87,8 @@ Depending on the location of your local repository, it's filepaths might be too 
 Copy the settings.xml **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for corporate network inside). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. 
 
 ### Automatic Eclipse plugin installation
-
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of ["2022-06"](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2022-06.p2f` file. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2022-06.p2f`. Skip the installation details and Accept the licence agreements. While Eclipse is installing the plugins in the background a pop-up will appear where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
+The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2022-06"](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2022-06.p2f` file. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2022-06.p2f`. 
+Make sure to select all Plugins (it might not be possible to select Lucene ignore that) and click next. Skip the `Installation details`, accept the licence agreements and click finish. While Eclipse is installing the plugins a pop-up will appear in the background where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
 
 Be also aware that with this p2f-file it's not possible to update the plugins to newer versions. 
 
@@ -104,14 +104,14 @@ The p2f-file includes the following plugins for your convenience:
 
 ### Tuning the Eclipse Installation
 
-Out of the box, two settings in Eclipse avoid a clean workspace. Go to Window - Preferences and change the following two settings:
+Out of the box, multiple settings in Eclipse need to be changed. Go to Window ⇒ Preferences and change the following two settings:
 
 - In "General ⇒ Content Types" select on CSS (Text ⇒ CSS) and add \*.gss in the lower file association list to get limited syntax highlighting and content assist in GSS files
-- In "General ⇒ Editors ⇒ TextEditors" check Insert Spaces for Tabs
+- In "General ⇒ Editors ⇒ Text Editors" check Insert Spaces for Tabs
 - In "GWT ⇒ Errors/Warnings" set "Missing SDK" to "Ignore" 
 - In "GWT ⇒ GWT Settings ⇒ Add..." add the GWT SDK 
 - In "Java ⇒ Build Path ⇒ Classpath Variables" create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
-- In "Java ⇒ Code Style ⇒ FormatterImport" import the CodeFormatter.xml from $GIT_HOME/java 
+- In "Java ⇒ Code Style ⇒ Formatter" import the CodeFormatter.xml from $GIT_HOME/java 
 - In "Java ⇒ Compiler" set the Compiler compliance level to 1.8
 - In "Java ⇒ Installed JREs" add the Java 8 sdk and activate it. 
 - In "Java ⇒ Installed JREs ⇒ Execution Environments" make sure that the Java 8 JRE is selected for JavaSE-1.8 (if the jre is not listed open and close the preference Window once) 
@@ -129,7 +129,7 @@ Out of the box, two settings in Eclipse avoid a clean workspace. Go to Window - 
    - Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
    - In "Window ⇒ Preferences ⇒ Plug-in Development ⇒ Target Platform" set the Eclipse target platform to `Race Analysis Target` (located in com.sap.sailing.targetplatform/definitions//race-analysis-p2-remote.target) 
    - Wait until the target platform has been resolved completely
-   - Rebuild all projects
+   - Start a clean build (Project ⇒ Clean)
 
 3. On clear workspace additional steps should be performed once:
    1. Run "GWT Dashboards SDM" launch configuration. After successful start, launch configuration can be stopped.
