@@ -55,38 +55,38 @@ public class ManeuverClassifierTrainer {
             LabelExtraction<LabeledManeuverForEstimation> labelExtraction, int percentForTraining, int percentForTesting) throws Exception {
         ManeuverClassifierModelContext modelContext = classifierModel.getModelContext();
         List<LabeledManeuverForEstimation> maneuvers = getSuitableManeuvers(modelContext);
-        LoggingUtil.logInfo("Using " + maneuvers.size() + " maneuvers");
+        logger.info("Using " + maneuvers.size() + " maneuvers");
         if (maneuvers.size() < MIN_MANEUVERS_COUNT) {
-            LoggingUtil.logInfo("Not enough maneuver data for training. Training aborted!");
+            logger.info("Not enough maneuver data for training. Training aborted!");
         } else {
-            LoggingUtil.logInfo("Splitting training and test data...");
+            logger.info("Splitting training and test data...");
             Collections.sort(maneuvers, (m1, m2)->m1.getManeuverTimePoint().compareTo(m2.getManeuverTimePoint()));
             List<LabeledManeuverForEstimation> trainManeuvers = new ArrayList<>();
             List<LabeledManeuverForEstimation> testManeuvers = new ArrayList<>();
             trainManeuvers.addAll(maneuvers.subList(0, maneuvers.size()/100*percentForTraining));
             testManeuvers.addAll(maneuvers.subList(maneuvers.size()-maneuvers.size()/100*percentForTesting, maneuvers.size()));
             if (testManeuvers.size() < MIN_MANEUVERS_COUNT * 0.2 || trainManeuvers.size() < MIN_MANEUVERS_COUNT * 0.8) {
-                LoggingUtil.logInfo("Not enough maneuver data for training. Training aborted!");
+                logger.info("Not enough maneuver data for training. Training aborted!");
             } else {
-                LoggingUtil.logInfo("Training with  " + trainManeuvers.size() + " maneuvers...");
+                logger.info("Training with  " + trainManeuvers.size() + " maneuvers...");
                 double[][] x = modelContext.getXMatrix(maneuvers);
                 int[] y = labelExtraction.getYVector(maneuvers);
                 classifierModel.train(x, y);
-                LoggingUtil.logInfo("Training finished. Validating on train dataset...");
+                logger.info("Training finished. Validating on train dataset...");
                 ManeuverClassifierScoring classifierScoring = new ManeuverClassifierScoring(classifierModel);
                 String printScoring = classifierScoring.printScoring(trainManeuvers, labelExtraction);
-                LoggingUtil.logInfo("Training score:\n" + printScoring);
+                logger.info("Training score:\n" + printScoring);
                 double trainScore = classifierScoring.getLastAvgF1Score();
                 int numberOfTrainingInstances = trainManeuvers.size();
 
-                LoggingUtil.logInfo("Validating on test dataset with " + testManeuvers.size() + " maneuvers...");
+                logger.info("Validating on test dataset with " + testManeuvers.size() + " maneuvers...");
                 printScoring = classifierScoring.printScoring(testManeuvers, labelExtraction);
-                LoggingUtil.logInfo("Test score:\n" + printScoring);
+                logger.info("Test score:\n" + printScoring);
                 double testScore = classifierScoring.getLastAvgF1Score();
-                LoggingUtil.logInfo("Persisting trained classifier...");
+                logger.info("Persisting trained classifier...");
                 classifierModel.setStatsAfterSuccessfulTraining(trainScore, testScore, numberOfTrainingInstances);
                 classifierModelStore.persistModel(classifierModel);
-                LoggingUtil.logInfo("Classifier persisted successfully. Finished!");
+                logger.info("Classifier persisted successfully. Finished!");
             }
         }
     }
@@ -99,9 +99,9 @@ public class ManeuverClassifierTrainer {
         List<LabeledManeuverForEstimation> maneuvers = maneuversPerBoatClass.get(key);
         if (maneuvers == null) {
             if (allManeuvers == null) {
-                LoggingUtil.logInfo("Connecting to MongoDB");
+                logger.info("Connecting to MongoDB");
                 persistenceManager.createIfNotExistsCollectionWithTransformedManeuvers();
-                LoggingUtil.logInfo("Querying dataset...");
+                logger.info("Querying dataset...");
                 allManeuvers = persistenceManager.getAllElements();
             }
             LoggingUtil
@@ -161,26 +161,26 @@ public class ManeuverClassifierTrainer {
         ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(persistenceManager, modelStore);
         ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory();
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
-            LoggingUtil.logInfo(
+            logger.info(
                     "### Training classifier for all boat classes with maneuver features: " + maneuverFeatures);
             ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures, null,
                     ManeuverClassifierModelFactory.orderedSupportedTargetValues);
             ManeuverLabelExtraction labelExtraction = new ManeuverLabelExtraction(modelContext);
             TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel = classifierModelFactory
                     .getNewModel(modelContext);
-            LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
+            logger.info("## Classifier: " + classifierModel.getClass().getName());
             classifierTrainer.trainClassifier(classifierModel, labelExtraction, percentForTraining, percentForTesting);
         }
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
             for (BoatClass boatClass : allBoatClasses) {
-                LoggingUtil.logInfo("### Training classifier for boat class " + boatClass + " with maneuver features: " + maneuverFeatures);
+                logger.info("### Training classifier for boat class " + boatClass + " with maneuver features: " + maneuverFeatures);
                 ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures,
                         boatClass.getName(), ManeuverClassifierModelFactory.orderedSupportedTargetValues);
                 ManeuverLabelExtraction labelExtraction = new ManeuverLabelExtraction(modelContext);
                 TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel = classifierModelFactory
                         .getNewModel(modelContext);
-                LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
+                logger.info("## Classifier: " + classifierModel.getClass().getName());
                 classifierTrainer.trainClassifier(classifierModel, labelExtraction, percentForTraining, percentForTesting);
             }
         }

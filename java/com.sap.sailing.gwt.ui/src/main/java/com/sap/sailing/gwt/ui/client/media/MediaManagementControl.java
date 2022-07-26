@@ -68,6 +68,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                     mediaPlayerManager.addMediaTrack();
                 }
             });
+            addButton.addStyleName("btn-secondary");
             controlButtons.add(addButton);
         }
         Button closeButton = new Button(stringMessages.close(), new ClickHandler() {
@@ -76,6 +77,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                 hide();
             }
         });
+        closeButton.addStyleName("btn-secondary");
         controlButtons.add(closeButton);
         controlButtons.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
         grid.add(controlButtons);

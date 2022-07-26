@@ -55,7 +55,7 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
             double[][] scoresAfterNRaces, TimePoint timePoint, Competitor[] competitors) throws NoWindException {
         for (int competitorIndex=0; competitorIndex<scoresAfterNRaces.length; competitorIndex++) {
             final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule()
-                    .getDiscardedRaceColumns(competitors[competitorIndex], leaderboard, raceColumnsToConsider, timePoint);
+                    .getDiscardedRaceColumns(competitors[competitorIndex], leaderboard, raceColumnsToConsider, timePoint, leaderboard.getScoringScheme());
             for (int raceColumnIndex=0; raceColumnIndex<raceColumnsToConsider.size(); raceColumnIndex++) {
                 assertEquals(scoresAfterNRaces[competitorIndex][raceColumnIndex],
                         leaderboard.getNetPoints(competitors[competitorIndex], raceColumnsToConsider.get(raceColumnIndex),
