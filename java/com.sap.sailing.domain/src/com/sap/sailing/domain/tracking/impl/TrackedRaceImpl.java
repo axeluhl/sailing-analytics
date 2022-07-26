@@ -39,6 +39,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -442,6 +443,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private static final int MAX_DISTANCES_FROM_STARBOARD_SIDE_OF_START_LINE_PROJECTED_ONTO_LINE_CACHE_SIZE = 10;
     private transient ConcurrentMap<TimePoint, SortedMap<Competitor, Distance>> distancesFromStarboardSideOfStartLineProjectedOntoLineCache;
     private transient ConcurrentMap<TimePoint, TimePoint> distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes;
+    
+    private int hash = 0;
     
     /**
      * When a regatta's {@link Regatta#useStartTimeInference()} or {@link Regatta#isControlTrackingFromStartAndFinishTimes()}
@@ -4301,5 +4304,27 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return trackingConnectorInfo;
+    }
+
+    public int getHash() {
+        return hash;
+    }
+
+    public void calculateHash() {
+        int res = 0;
+        HashCalculationForTrackedRaceHashImpl hashCalculator = new HashCalculationForTrackedRaceHashImpl(this);
+        
+        for (Competitor c : getRace().getCompetitors()) {
+            res = res ^ hashCalculator.calculateHashForMarkpassings(getMarkPassings(c));
+            res = res ^ hashCalculator.calculateHashForBoat(getRace().getBoatOfCompetitor(c));
+        }
+        res = res ^ hashCalculator.calculateHashForWaypoints(this.getRace().getCourse().getWaypoints());
+        
+        logger.info("The hash value of the Race " + this.toString() + " is: "+ res);
+        this.hash = res;
+        
+//        competitorStats.getValue().getEdges();
+//        fixedPassings.get(c).hashCode();
+//        suppressedPassings.get(c);
     }
 }

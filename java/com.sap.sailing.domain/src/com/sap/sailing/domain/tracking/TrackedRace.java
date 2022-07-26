@@ -1379,4 +1379,8 @@ public interface TrackedRace
      * hypothetical "line" perpendicular to the first leg's bearing.
      */
     Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
+    
+    int getHash();
+    
+    void calculateHash();
 }

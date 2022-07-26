@@ -873,4 +873,13 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public boolean hasFinishedLoading() {
         return false;
     }
+    
+    @Override 
+    public int getHash() {
+        return 0;
+    }
+    
+    @Override
+    public void calculateHash() {
+    }
 }
