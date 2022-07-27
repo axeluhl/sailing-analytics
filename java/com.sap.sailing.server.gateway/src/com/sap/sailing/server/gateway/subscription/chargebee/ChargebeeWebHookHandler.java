@@ -140,6 +140,10 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                     updateSubscriptionInvoice(user, userSubscription, event);
                 }
                 break;
+            default:
+                logger.warning(
+                        () -> "Webhook event type was unknown and will not be processed ");
+                break;
             }
             logger.info(() -> "Webhook event \"" + eventType.getName() + "\" has been processed for user "
                     + user.getName());
