@@ -175,7 +175,7 @@ public class EligbleInstanceForReplicaSetFindingStrategyImpl implements Eligible
      * <p>
      * 
      * Next, the comparator considers the number of application processes already running on the hosts. The host with
-     * less processes is considered better. For performance reasons, the number of
+     * fewer processes is considered better. For performance reasons, the number of
      * {@link ApplicationProcessHost#getApplicationProcesses(Optional, Optional, byte[]) processes}
      * is cached by the comparator.
      */

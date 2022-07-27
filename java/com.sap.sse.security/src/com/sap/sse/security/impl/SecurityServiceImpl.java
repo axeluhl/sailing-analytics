@@ -2977,6 +2977,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             for (SubscriptionPrice subscriptionPrice : subscriptionPlan.getPrices()) {
                 final BigDecimal updatedPrice = updatedItemPrices.get(subscriptionPrice.getPriceId());
                 if(updatedPrice != null) {
+                    logger.log(Level.INFO, "Setting ItemPrice for SubscriptionPrice " + subscriptionPrice.getPriceId());
                     subscriptionPrice.setPrice(updatedPrice);
                 }
             }
