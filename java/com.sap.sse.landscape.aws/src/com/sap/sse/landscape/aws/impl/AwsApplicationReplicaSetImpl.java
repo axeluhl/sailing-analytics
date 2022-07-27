@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
@@ -403,5 +404,10 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 logger.log(Level.SEVERE, "Problem restarting replica "+replica+". Continuing by restarting the next replica if there are more.", e);
             }
         }
+    }
+
+    @Override
+    public boolean isLocalReplicaSet() {
+        return getName().equals(ServerInfo.getName());
     }
 }
