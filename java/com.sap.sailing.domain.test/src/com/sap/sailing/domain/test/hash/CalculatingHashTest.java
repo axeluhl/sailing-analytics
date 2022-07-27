@@ -42,13 +42,13 @@ public class CalculatingHashTest extends OnlineTracTracBasedTest{
         super.setUp("event_20110505_SailingTea", // Semifinale
                 /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c",
                 /* liveUri */ null, /* storedUri */ null,
-                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS});
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA});
         trackedRace1 = getTrackedRace();
         super.setUp();
         super.setUp("event_20110505_SailingTea", // Semifinale
                 /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c",
                 /* liveUri */ null, /* storedUri */ null,
-                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS});
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA});
         trackedRace2 = getTrackedRace();
     }
         
@@ -68,7 +68,6 @@ public class CalculatingHashTest extends OnlineTracTracBasedTest{
     public void testWithChangesInRace() {
         trackedRace1.calculateHash();
         int hash1 = trackedRace1.getHash();
-        
 //      Change of the race should result in a different hash
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
@@ -83,10 +82,8 @@ public class CalculatingHashTest extends OnlineTracTracBasedTest{
                 trackedRace2.getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), now));
             }
         }
-        
         trackedRace2.calculateHash();
         int hash2 = trackedRace2.getHash();
-        hash2++;        //thath needs to be deleted if you want to test it
         
         assertNotEquals("Hash1 and Hash2 are equal", hash1, hash2);
     }

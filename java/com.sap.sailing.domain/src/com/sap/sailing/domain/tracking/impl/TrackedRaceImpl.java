@@ -39,7 +39,6 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -4313,18 +4312,37 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public void calculateHash() {
         int res = 0;
         HashCalculationForTrackedRaceHashImpl hashCalculator = new HashCalculationForTrackedRaceHashImpl(this);
+        Iterable<Waypoint> waypoints = getRace().getCourse().getWaypoints();
         
         for (Competitor c : getRace().getCompetitors()) {
+            res = res ^ hashCalculator.calculateHashForCompetitor(c);
             res = res ^ hashCalculator.calculateHashForMarkpassings(getMarkPassings(c));
             res = res ^ hashCalculator.calculateHashForBoat(getRace().getBoatOfCompetitor(c));
         }
-        res = res ^ hashCalculator.calculateHashForWaypoints(this.getRace().getCourse().getWaypoints());
-        
+        res = res ^ hashCalculator.calculateHashForWaypoints(waypoints); //I think I could exclude this calculation to improve Runtime
+        res = res ^ hashCalculator.calculateHashForStart();
+        res = res ^ hashCalculator.calculateHashForEnd();
+        res = res ^ hashCalculator.calculateHashForFinish();
+        for (Waypoint w : waypoints) {
+            for (Mark m : w.getMarks()) {
+                Iterable<GPSFix> gpsTrack = null;
+                try {
+                    getTrack(m).lockForRead();
+                    gpsTrack = getTrack(m).getFixes();
+                    
+                    for (GPSFix gf : gpsTrack) {
+                        res = res ^ hashCalculator.calculateHashForGPS(gf);
+                        res = res * 31;
+                        res = res ^ hashCalculator.calculateHashForWind(getWind(gf.getPosition(), gf.getTimePoint()));
+                    }
+                } catch (Exception e) {
+                    logger.info("The call for the GPSFixes or Wind failed: " + e);
+                } finally {
+                    getTrack(m).unlockAfterRead();
+                }
+            }
+        }
         logger.info("The hash value of the Race " + this.toString() + " is: "+ res);
         this.hash = res;
-        
-//        competitorStats.getValue().getEdges();
-//        fixedPassings.get(c).hashCode();
-//        suppressedPassings.get(c);
     }
 }
