@@ -7,12 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ForkJoinTask;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,7 +70,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 public class ORCPerformanceCurveByImpliedWindRankingMetric extends AbstractRankingMetric
@@ -637,24 +633,15 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
         final Competitor competitorFarthestAhead = getCompetitorFarthestAhead(timePoint, cache);
         if (startOfRace != null) {
             final Duration durationSinceStartOfRaceUntilTimePoint = startOfRace.until(timePoint);
-            final Set<ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>>> futures = new HashSet<>();
             for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-                futures.add(ForkJoinTask.adapt(()->{
                     final Duration correctedTime = getCorrectedTime(competitor, timePoint, cache);
-                    return new Pair<>(competitor,
-                            new CompetitorRankingInfoImpl(timePoint, competitor,
-                                    getWindwardDistanceTraveled(competitor, timePoint, cache),
-                                    durationSinceStartOfRaceUntilTimePoint,
-                                    getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), correctedTime,
-                                    getEstimatedActualDurationToCompetitorFarthestAhead(competitor,
-                                            competitorFarthestAhead, timePoint, cache),
-                                    correctedTime));
-                }).fork());
-            }
-            for (final ForkJoinTask<Pair<Competitor, CompetitorRankingInfoImpl>> future : futures) {
-                Pair<Competitor, CompetitorRankingInfoImpl> resultForCompetitor;
-                resultForCompetitor = future.join();
-                competitorRankingInfo.put(resultForCompetitor.getA(), resultForCompetitor.getB());
+                    competitorRankingInfo.put(competitor, new CompetitorRankingInfoImpl(timePoint, competitor,
+                            getWindwardDistanceTraveled(competitor, timePoint, cache),
+                            durationSinceStartOfRaceUntilTimePoint,
+                            getTrackedRace().getTimeSailedSinceRaceStart(competitor, timePoint), correctedTime,
+                            getEstimatedActualDurationToCompetitorFarthestAhead(competitor,
+                                    competitorFarthestAhead, timePoint, cache),
+                            correctedTime));
             }
         }
         return new ORCPerformanceCurveRankingInfo(timePoint, competitorFarthestAhead, competitorRankingInfo, cache);
