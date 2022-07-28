@@ -372,6 +372,9 @@ public class LandscapeServiceImpl implements LandscapeService {
             int maxNumberOfCompareServerAttempts, boolean removeApplicationReplicaSet, MongoEndpoint moveDatabaseHere,
             String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
+        if (removeApplicationReplicaSet && applicationReplicaSetToArchive.isLocalReplicaSet()) {
+            throw new IllegalArgumentException("A replica set cannot archive itself if it is going to be removed. Current replica set: "+ServerInfo.getName());
+        }
         final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> archiveReplicaSet = getApplicationReplicaSet(
                 region, SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME,
@@ -492,8 +495,12 @@ public class LandscapeServiceImpl implements LandscapeService {
     
     @Override
     public void removeApplicationReplicaSet(String regionId,
-            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)
             throws Exception {
+        if (applicationReplicaSet.isLocalReplicaSet()) {
+            throw new IllegalArgumentException("A replica set cannot remove itself. Current replica set: "+ServerInfo.getName());
+        }
         final AwsRegion region = new AwsRegion(regionId, getLandscape());
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         final CompletableFuture<Void> autoScalingGroupRemoval;
@@ -832,6 +839,9 @@ public class LandscapeServiceImpl implements LandscapeService {
             String releaseOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String replicaReplicationBearerToken)
             throws MalformedURLException, IOException, TimeoutException, Exception {
+        if (replicaSet.isLocalReplicaSet()) {
+            throw new IllegalArgumentException("A replica set cannot upgrade itself. Current replica set: "+ServerInfo.getName());
+        }
         final Release release = getRelease(releaseOrNullForLatestMaster);
         final String effectiveReplicaReplicationBearerToken = getEffectiveBearerToken(replicaReplicationBearerToken);
         final int oldAutoScalingGroupMinSize;
@@ -1314,6 +1324,9 @@ public class LandscapeServiceImpl implements LandscapeService {
                     Integer optionalMemoryTotalSizeFactorOrNull)
                     throws MalformedURLException,
                     IOException, TimeoutException, InterruptedException, ExecutionException, Exception {
+        if (replicaSet.isLocalReplicaSet()) {
+            throw new IllegalArgumentException("A replica set cannot move its own master process. Current replica set: "+ServerInfo.getName());
+        }
         final SailingAnalyticsProcess<String> newTemporaryReplica = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(replicaSet,
                 optionalKeyName, privateKeyEncryptionPassphrase,
                 getEffectiveBearerToken(optionalReplicaReplicationBearerTokenOrNull));
