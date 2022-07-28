@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -443,7 +444,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient ConcurrentMap<TimePoint, SortedMap<Competitor, Distance>> distancesFromStarboardSideOfStartLineProjectedOntoLineCache;
     private transient ConcurrentMap<TimePoint, TimePoint> distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes;
     
-    private int hash = 0;
+    private int[] hashValues;
     
     /**
      * When a regatta's {@link Regatta#useStartTimeInference()} or {@link Regatta#isControlTrackingFromStartAndFinishTimes()}
@@ -520,6 +521,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
         int i = 0;
+        this.hashValues = new int[10]; 
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Mark mark : waypoint.getMarks()) {
                 getOrCreateTrack(mark);
@@ -4304,45 +4306,33 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return trackingConnectorInfo;
     }
-
-    public int getHash() {
-        return hash;
+    
+    //This should be privat
+    public void setHashValue (int position, int value) {
+        this.hashValues[position] = value;
     }
-
+    
+    public int[] getHashValue () {
+        return this.hashValues;
+    }
+    
     public void calculateHash() {
-        int res = 0;
+        //Rather should regulate the acces to the HashValue via an Enum 
         HashCalculationForTrackedRaceHashImpl hashCalculator = new HashCalculationForTrackedRaceHashImpl(this);
-        Iterable<Waypoint> waypoints = getRace().getCourse().getWaypoints();
+        int competitorHash = 0;
+        int boatHash = 0;
+        setHashValue(0, 42);
         
         for (Competitor c : getRace().getCompetitors()) {
-            res = res ^ hashCalculator.calculateHashForCompetitor(c);
-            res = res ^ hashCalculator.calculateHashForMarkpassings(getMarkPassings(c));
-            res = res ^ hashCalculator.calculateHashForBoat(getRace().getBoatOfCompetitor(c));
+            competitorHash = competitorHash + hashCalculator.calculateHashForCompetitor(c);
+            boatHash = boatHash + hashCalculator.calculateHashForBoat(getRace().getBoatOfCompetitor(c));
         }
-        res = res ^ hashCalculator.calculateHashForWaypoints(waypoints); //I think I could exclude this calculation to improve Runtime
-        res = res ^ hashCalculator.calculateHashForStart();
-        res = res ^ hashCalculator.calculateHashForEnd();
-        res = res ^ hashCalculator.calculateHashForFinish();
-        for (Waypoint w : waypoints) {
-            for (Mark m : w.getMarks()) {
-                Iterable<GPSFix> gpsTrack = null;
-                try {
-                    getTrack(m).lockForRead();
-                    gpsTrack = getTrack(m).getFixes();
-                    
-                    for (GPSFix gf : gpsTrack) {
-                        res = res ^ hashCalculator.calculateHashForGPS(gf);
-                        res = res * 31;
-                        res = res ^ hashCalculator.calculateHashForWind(getWind(gf.getPosition(), gf.getTimePoint()));
-                    }
-                } catch (Exception e) {
-                    logger.info("The call for the GPSFixes or Wind failed: " + e);
-                } finally {
-                    getTrack(m).unlockAfterRead();
-                }
-            }
-        }
-        logger.info("The hash value of the Race " + this.toString() + " is: "+ res);
-        this.hash = res;
+        setHashValue(1, competitorHash);
+        setHashValue(2, boatHash);
+        setHashValue(3, hashCalculator.calculateHashForStart());
+        setHashValue(4, hashCalculator.calculateHashForEnd());
+        setHashValue(7, hashCalculator.calculateHashForWaypoints());
+        setHashValue(5, hashCalculator.calculateHashForNumberOfGPSFixes());
+        setHashValue(6, hashCalculator.calculateHashForGPSFixes());
     }
 }

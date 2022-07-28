@@ -1361,13 +1361,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public boolean hasFinishedLoading() {
         return false;
     }
-    
-    @Override 
-    public int getHash() {
-        return 0;
+
+    @Override
+    public void setHashValue(int position, int value) {
     }
-    
+
+    @Override
+    public int[] getHashValue() {
+        return null;
+    }
+
     @Override
     public void calculateHash() {
+        
     }
 }

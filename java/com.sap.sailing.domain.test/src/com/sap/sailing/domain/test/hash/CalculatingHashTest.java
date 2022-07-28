@@ -55,19 +55,24 @@ public class CalculatingHashTest extends OnlineTracTracBasedTest{
     @Test
     public void testWithoutChangesInRace() {
         trackedRace1.calculateHash();
-        int hash1 = trackedRace1.getHash();
-        logger.info("eins: " + hash1);
+        int[] hash1 = trackedRace1.getHashValue();
         trackedRace2.calculateHash();
-        int hash2 = trackedRace2.getHash();
-        logger.info("zwei: " + hash2);
+        int[] hash2 = trackedRace2.getHashValue();
         
-        assertEquals("Hash1 ans Hash2 are not equal", hash1, hash2);
+        assertEquals("0: Hash1: " + hash1[0] + " Hash2: " + hash2[0], hash1[0], hash2[0]);
+        assertEquals("1: Hash1: " + hash1[1] + " Hash2: " + hash2[1], hash1[1], hash2[1]);
+        assertEquals("2: Hash1: " + hash1[2] + " Hash2: " + hash2[2], hash1[2], hash2[2]);
+        assertEquals("3: Hash1: " + hash1[3] + " Hash2: " + hash2[3], hash1[3], hash2[3]);
+        assertEquals("4: Hash1: " + hash1[4] + " Hash2: " + hash2[4], hash1[4], hash2[4]);
+        assertEquals("5: Hash1: " + hash1[5] + " Hash2: " + hash2[5], hash1[5], hash2[5]);
+        assertEquals("6: Hash1: " + hash1[6] + " Hash2: " + hash2[6], hash1[6], hash2[6]);
+        //assertEquals("7: Hash1: " + hash1[7] + " Hash2: " + hash2[7], hash1[7], hash2[7]);
     }
     
     @Test
     public void testWithChangesInRace() {
         trackedRace1.calculateHash();
-        int hash1 = trackedRace1.getHash();
+        int[] hash1 = trackedRace1.getHashValue();
 //      Change of the race should result in a different hash
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
@@ -83,7 +88,7 @@ public class CalculatingHashTest extends OnlineTracTracBasedTest{
             }
         }
         trackedRace2.calculateHash();
-        int hash2 = trackedRace2.getHash();
+        int[] hash2 = trackedRace2.getHashValue();
         
         assertNotEquals("Hash1 and Hash2 are equal", hash1, hash2);
     }

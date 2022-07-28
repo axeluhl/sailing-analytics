@@ -1380,7 +1380,10 @@ public interface TrackedRace
      */
     Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
     
-    int getHash();
+    void setHashValue (int position, int value);
+    
+    int[] getHashValue ();
     
     void calculateHash();
+    
 }
