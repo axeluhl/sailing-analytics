@@ -2,6 +2,8 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -2813,141 +2815,85 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(missing, rankedCompetitors.get(rankedCompetitors.size()-1));
     }
     
-    /*
-     * Tests the default behaviour of contiguously scored fleets when the ranks of the fleets are zero. 
-     * Expected behaviour: 
-     * Fleets are treated as if there was no contiguous scoring. Accordingly, ranks are doubled, 
-     * with fleets always alternating. Within a rank, the order is determined by the name of the sailor.
-     * The ordering within a rank is not tested within this test. 
+    /**
+     * Tests the default behavior of contiguously scored fleets when the ranks of the fleets are zero.
+     * <p>
+     * Expected behavior:<br>
+     * Fleets are treated as if there was no contiguous scoring. Accordingly, ranks are duplicated, with fleets always
+     * alternating. Within a fleet rank, the order is determined by the {@link Competitor#getName() name} of the
+     * competitor. The ordering within a rank is not tested within this test.
      */
     @Test
     public void testTotalRankComparatorForOrderedSplitFleetsWithZeroAsRank() throws NoWindException {
-        series = new ArrayList<Series>();
+        testTotalRankComparatorForOrderedSplitFleets(/* fleetOrdering */ 0);
+    }
+
+    private void testTotalRankComparatorForOrderedSplitFleets(final int fleetOrdering) {
+        series = new ArrayList<>();
         // -------- series with zero as rank ------------
         {
-            List<Fleet> fleets = new ArrayList<Fleet>();
+            final List<Fleet> fleets = new ArrayList<>();
             for (String FleetName : new String[] { "Yellow", "Blue" }) {
-                fleets.add(new FleetImpl(FleetName, 0));
+                fleets.add(new FleetImpl(FleetName, fleetOrdering));
             }
-            List<String> raceColumnNames = new ArrayList<String>();
+            final List<String> raceColumnNames = new ArrayList<>();
             raceColumnNames.add("R1");
-            Series zeroRankSeries = new SeriesImpl("zero Rank", /* isMedal */false, /* isFleetsCanRunInParallel */ true, fleets, raceColumnNames, /* trackedRegattaRegistry */ null);
+            final Series zeroRankSeries = new SeriesImpl("zero Rank", /* isMedal */false, /* isFleetsCanRunInParallel */ true, fleets, raceColumnNames, /* trackedRegattaRegistry */ null);
             zeroRankSeries.setSplitFleetContiguousScoring(true);
             series.add(zeroRankSeries);
         }
-        
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
+        final Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null,
                 series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
                 "123", /* course area */null, OneDesignRankingMetric::new,
                 /* registrationLinkSecret */ UUID.randomUUID().toString());
-        List<Competitor> competitors = createCompetitors(12);
+        final List<Competitor> competitors = createCompetitors(12);
         final int firstYellowCompetitorIndex = 3;
-        List<Competitor> yellow = new ArrayList<>(competitors.subList(firstYellowCompetitorIndex, firstYellowCompetitorIndex+4));
-        List<Competitor> blue = new ArrayList<>(competitors);
+        final List<Competitor> yellow = new ArrayList<>(competitors.subList(firstYellowCompetitorIndex, firstYellowCompetitorIndex+4));
+        final List<Competitor> blue = new ArrayList<>(competitors);
         blue.removeAll(yellow);
         Collections.shuffle(yellow);
         Collections.shuffle(blue);
-        
-        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint now = MillisecondsTimePoint.now();
-        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
-        RaceColumn r1Column = series.get(0).getRaceColumnByName("R1");
-        TrackedRace r1Yellow = new MockedTrackedRaceWithStartTimeAndRanks(now, yellow);
+        final Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        final TimePoint now = MillisecondsTimePoint.now();
+        final TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        final RaceColumn r1Column = series.get(0).getRaceColumnByName("R1");
+        final TrackedRace r1Yellow = new MockedTrackedRaceWithStartTimeAndRanks(now, yellow);
         r1Column.setTrackedRace(r1Column.getFleetByName("Yellow"), r1Yellow);
-        TrackedRace r1Blue = new MockedTrackedRaceWithStartTimeAndRanks(now, blue);
+        final TrackedRace r1Blue = new MockedTrackedRaceWithStartTimeAndRanks(now, blue);
         r1Column.setTrackedRace(r1Column.getFleetByName("Blue"), r1Blue);
-        
-
-        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        Map<Competitor, Double> netPoints = new LinkedHashMap<>();
+        final List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        final Map<Competitor, Double> netPoints = new LinkedHashMap<>();
         for (Competitor rankedCompetitor : rankedCompetitors) {
             netPoints.put(rankedCompetitor, leaderboard.getNetPoints(rankedCompetitor, later));
         }
- 
-        for(int i = 0; i < Math.min(yellow.size(), blue.size())*2; i = i+2) {
-            Competitor comp1 = rankedCompetitors.get(i); 
-            Competitor comp2 = rankedCompetitors.get(i+1);
-            assertTrue( netPoints.get(comp1).equals(netPoints.get(comp2)));
-            assertTrue(r1Column.getFleetOfCompetitor(comp1) != r1Column.getFleetOfCompetitor(comp2));
+        for (int i = 0; i < Math.min(yellow.size(), blue.size()) * 2; i = i + 2) {
+            final Competitor comp1 = rankedCompetitors.get(i);
+            final Competitor comp2 = rankedCompetitors.get(i + 1);
+            assertEquals(netPoints.get(comp1), netPoints.get(comp2));
+            assertNotSame(r1Column.getFleetOfCompetitor(comp1), r1Column.getFleetOfCompetitor(comp2));
         }
-        
-        for(int i = Math.min(yellow.size(), blue.size())*2; i <(yellow.size() + blue.size())-1; i++) {
-            Competitor comp1 = rankedCompetitors.get(i); 
-            Competitor comp2 = rankedCompetitors.get(i+1);         
-            assertFalse( netPoints.get(comp1).equals(netPoints.get(comp2)));
-            assertTrue(r1Column.getFleetOfCompetitor(comp1) == r1Column.getFleetOfCompetitor(comp2));
+        for (int i = Math.min(yellow.size(), blue.size()) * 2; i < (yellow.size() + blue.size()) - 1; i++) {
+            final Competitor comp1 = rankedCompetitors.get(i);
+            final Competitor comp2 = rankedCompetitors.get(i + 1);
+            assertNotEquals(netPoints.get(comp1), netPoints.get(comp2));
+            assertSame(r1Column.getFleetOfCompetitor(comp1), r1Column.getFleetOfCompetitor(comp2));
         }
     }
     
-    
-    /*
-     * Tests the default behaviour of contiguously scored fleets when the ranks of the fleets are not zero. 
-     * This test was added because the internal behaviour for fleets with a non-zero rank is different from 
-     * the behaviour of fleets with a rank equal to zero.     
-     * Expected behaviour: 
-     * Fleets are treated as if there were no contiguous scoring. Accordingly, ranks are doubled, 
+    /**
+     * Tests the default behavior of contiguously scored fleets when the ranks of the fleets are not zero. 
+     * This test was added because the internal behavior for fleets with a non-zero rank is different from 
+     * the behavior of fleets with a rank equal to zero.<p>   
+     * Expected behavior: <br>
+     * Fleets are treated as if there were no contiguous scoring. Accordingly, ranks are duplicated, 
      * with fleets always alternating. Within a rank, the order is determined by the name of the sailor.
      * The ordering within a rank is not tested within this test.
      */
     @Test
     public void testTotalRankComparatorForOrderedSplitFleetsWithOneAsRank() throws NoWindException {
-        series = new ArrayList<Series>();
-        // -------- series with zero as rank ------------
-        {
-            List<Fleet> fleets = new ArrayList<Fleet>();
-            for (String FleetName : new String[] { "Yellow", "Blue" }) {
-                fleets.add(new FleetImpl(FleetName, 1));
-            }
-            List<String> raceColumnNames = new ArrayList<String>();
-            raceColumnNames.add("R1");
-            Series zeroRankSeries = new SeriesImpl("zero Rank", /* isMedal */false, /* isFleetsCanRunInParallel */ true, fleets, raceColumnNames, /* trackedRegattaRegistry */ null);
-            zeroRankSeries.setSplitFleetContiguousScoring(true);
-            series.add(zeroRankSeries);
-        }
-        final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null,
-                series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
-                "123", /* course area */null, OneDesignRankingMetric::new,
-                /* registrationLinkSecret */ UUID.randomUUID().toString());
-        List<Competitor> competitors = createCompetitors(12);
-        final int firstYellowCompetitorIndex = 3;
-        List<Competitor> yellow = new ArrayList<>(competitors.subList(firstYellowCompetitorIndex, firstYellowCompetitorIndex+4));
-        List<Competitor> blue = new ArrayList<>(competitors);
-        blue.removeAll(yellow);
-        Collections.shuffle(yellow);
-        Collections.shuffle(blue);
-        
-        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint now = MillisecondsTimePoint.now();
-        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
-        RaceColumn r1Column = series.get(0).getRaceColumnByName("R1");
-        TrackedRace r1Yellow = new MockedTrackedRaceWithStartTimeAndRanks(now, yellow);
-        r1Column.setTrackedRace(r1Column.getFleetByName("Yellow"), r1Yellow);
-        TrackedRace r1Blue = new MockedTrackedRaceWithStartTimeAndRanks(now, blue);
-        r1Column.setTrackedRace(r1Column.getFleetByName("Blue"), r1Blue);
-        
-
-        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        Map<Competitor, Double> netPoints = new LinkedHashMap<>();
-        for (Competitor rankedCompetitor : rankedCompetitors) {
-            netPoints.put(rankedCompetitor, leaderboard.getNetPoints(rankedCompetitor, later));
-        }
-        for(int i = 0; i < Math.min(yellow.size(), blue.size())*2; i = i+2) {
-            Competitor comp1 = rankedCompetitors.get(i); 
-            Competitor comp2 = rankedCompetitors.get(i+1);
-            assertTrue( netPoints.get(comp1).equals(netPoints.get(comp2)));
-            assertTrue(r1Column.getFleetOfCompetitor(comp1) != r1Column.getFleetOfCompetitor(comp2));
-        }
-        
-        for(int i = Math.min(yellow.size(), blue.size())*2; i <(yellow.size() + blue.size())-1; i++) {
-            Competitor comp1 = rankedCompetitors.get(i); 
-            Competitor comp2 = rankedCompetitors.get(i+1);         
-            assertFalse( netPoints.get(comp1).equals(netPoints.get(comp2)));
-            assertTrue(r1Column.getFleetOfCompetitor(comp1) == r1Column.getFleetOfCompetitor(comp2));
-        }
+        testTotalRankComparatorForOrderedSplitFleets(/* fleetOrdering */ 1);
     }
 
     /**
