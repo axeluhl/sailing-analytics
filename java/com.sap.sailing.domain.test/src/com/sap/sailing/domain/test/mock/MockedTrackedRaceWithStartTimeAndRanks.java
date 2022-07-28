@@ -69,6 +69,7 @@ import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceHashForMarkPassingComperatorImpl.typeOfHash;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -875,15 +876,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void setHashValue(int position, int value) {
+    public void setHashValuesForMarkPassingCalculation(Map<typeOfHash, Integer> hashValues) {
     }
 
     @Override
-    public int[] getHashValue() {
+    public Map<typeOfHash, Integer> getHashValuesForMarkPassingCalculation() {
         return null;
     }
 
-    @Override
-    public void calculateHash() {
-    }
 }

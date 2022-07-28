@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test.mock;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
@@ -88,6 +89,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceHashForMarkPassingComperatorImpl.typeOfHash;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
@@ -1363,16 +1365,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setHashValue(int position, int value) {
+    public void setHashValuesForMarkPassingCalculation(Map<typeOfHash, Integer> hashValues) {
     }
 
     @Override
-    public int[] getHashValue() {
+    public Map<typeOfHash, Integer> getHashValuesForMarkPassingCalculation() {
         return null;
     }
 
-    @Override
-    public void calculateHash() {
-        
-    }
 }

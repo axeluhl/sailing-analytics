@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -159,6 +158,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceHashForMarkPassingComperatorImpl.typeOfHash;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -444,7 +444,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient ConcurrentMap<TimePoint, SortedMap<Competitor, Distance>> distancesFromStarboardSideOfStartLineProjectedOntoLineCache;
     private transient ConcurrentMap<TimePoint, TimePoint> distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes;
     
-    private int[] hashValues;
+    private Map<typeOfHash, Integer> hashValuesForMarkPassingCalculation;
     
     /**
      * When a regatta's {@link Regatta#useStartTimeInference()} or {@link Regatta#isControlTrackingFromStartAndFinishTimes()}
@@ -521,7 +521,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
         int i = 0;
-        this.hashValues = new int[10]; 
+        this.hashValuesForMarkPassingCalculation = new HashMap<>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Mark mark : waypoint.getMarks()) {
                 getOrCreateTrack(mark);
@@ -4307,32 +4307,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return trackingConnectorInfo;
     }
     
-    //This should be privat
-    public void setHashValue (int position, int value) {
-        this.hashValues[position] = value;
+    public void setHashValuesForMarkPassingCalculation(Map<typeOfHash, Integer> hashValues) {
+        this.hashValuesForMarkPassingCalculation = hashValues;
     }
     
-    public int[] getHashValue () {
-        return this.hashValues;
+    public Map<typeOfHash, Integer> getHashValuesForMarkPassingCalculation () {
+        return this.hashValuesForMarkPassingCalculation;
     }
     
-    public void calculateHash() {
-        //Rather should regulate the acces to the HashValue via an Enum 
-        HashCalculationForTrackedRaceHashImpl hashCalculator = new HashCalculationForTrackedRaceHashImpl(this);
-        int competitorHash = 0;
-        int boatHash = 0;
-        setHashValue(0, 42);
-        
-        for (Competitor c : getRace().getCompetitors()) {
-            competitorHash = competitorHash + hashCalculator.calculateHashForCompetitor(c);
-            boatHash = boatHash + hashCalculator.calculateHashForBoat(getRace().getBoatOfCompetitor(c));
-        }
-        setHashValue(1, competitorHash);
-        setHashValue(2, boatHash);
-        setHashValue(3, hashCalculator.calculateHashForStart());
-        setHashValue(4, hashCalculator.calculateHashForEnd());
-        setHashValue(7, hashCalculator.calculateHashForWaypoints());
-        setHashValue(5, hashCalculator.calculateHashForNumberOfGPSFixes());
-        setHashValue(6, hashCalculator.calculateHashForGPSFixes());
-    }
 }

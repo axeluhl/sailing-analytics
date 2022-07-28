@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
+import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
@@ -58,6 +60,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceHashForMarkPassingComperatorImpl.typeOfHash;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -71,7 +74,6 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
  * course may change over time as the race committee decides to change it. Therefore, a {@link TrackedRace} instance
@@ -1380,10 +1382,7 @@ public interface TrackedRace
      */
     Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
     
-    void setHashValue (int position, int value);
+    void setHashValuesForMarkPassingCalculation(Map<typeOfHash, Integer> hashValues);
     
-    int[] getHashValue ();
-    
-    void calculateHash();
-    
+    Map<typeOfHash, Integer> getHashValuesForMarkPassingCalculation ();
 }
