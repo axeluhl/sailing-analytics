@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ForkJoinPool;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -50,7 +49,6 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.ManagedBlockerForComputeIfAbsent;
 
 /**
  * A cache structure that is used for a single call to
@@ -194,21 +192,10 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     
     @Override
     public Position getApproximatePosition(TrackedRace trackedRace, Waypoint waypoint, TimePoint timePoint) {
-        // computeIfAbsent may block on the ConcurrentHashMap, waiting for the monitor of one of the hash map's nodes;
-        // therefore, and because this may have been invoked by a ForkJoinPool thread and in turn can invoke tasks that will
-        // be executed by a ForkJoinPool, it is necessary to manage this potentially blocking call. This way the ForkJoinPool may
-        // provide additional threads if necessary to avoid thread starving. See bug5720
-        Triple<TrackedRace, Waypoint, TimePoint> cacheKey = new Triple<>(trackedRace, waypoint, timePoint);
-        final ManagedBlockerForComputeIfAbsent<Triple<TrackedRace, Waypoint, TimePoint>, Position> computeIfAbsent =
-                new ManagedBlockerForComputeIfAbsent<>(approximateWaypointPositions, cacheKey, 
+        final Triple<TrackedRace, Waypoint, TimePoint> cacheKey = new Triple<>(trackedRace, waypoint, timePoint);
+        return approximateWaypointPositions.computeIfAbsent(cacheKey, 
                         // TODO bug5143: is it worth-while to pass through a MarkPositionAtTimePointCache here?
                         key->key.getA().getApproximatePosition(key.getB(), key.getC()));
-        try {
-            ForkJoinPool.managedBlock(computeIfAbsent);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return computeIfAbsent.getResult();
     }
 
     /**
@@ -258,95 +245,43 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
         return result;
     }
     
-    
-
     @Override
     public Competitor getScratchBoat(TimePoint timePoint, TrackedRace raceContext, Function<TimePoint, Competitor> scratchBoatSupplier) {
-        // computeIfAbsent may block on the ConcurrentHashMap, waitdng for the monitor of one of the hash map's nodes;
-        // therefore, and because this may have been invoked by a ForkJoinPool thread and in turn can invoke tasks that will
-        // be executed by a ForkJoinPool, it is necessary to manage this potentially blocking call. This way the ForkJoinPool may
-        // provide additional threads if necessary to avoid thread starving. See bug5720
-        final ManagedBlockerForComputeIfAbsent<Pair<TimePoint, TrackedRace>, Competitor> computeIfAbsent = new ManagedBlockerForComputeIfAbsent<>(scratchBoat,
-                new Pair<>(timePoint, raceContext), 
-                timePointAndRaceContext->scratchBoatSupplier.apply(timePointAndRaceContext.getA()));
-        try {
-            ForkJoinPool.managedBlock(computeIfAbsent);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return computeIfAbsent.getResult();
+        return scratchBoat.computeIfAbsent(new Pair<>(timePoint, raceContext), timePointAndRaceContext->scratchBoatSupplier.apply(timePointAndRaceContext.getA()));
     }
 
     @Override
     public ORCPerformanceCurve getPerformanceCurveForPartialCourse(TimePoint timePoint,
             TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, ORCPerformanceCurve> performanceCurveSupplier) {
-        // computeIfAbsent may block on the ConcurrentHashMap, waiting for the monitor of one of the hash map's nodes;
-        // therefore, and because this may have been invoked by a ForkJoinPool thread and in turn can invoke tasks that will
-        // be executed by a ForkJoinPool, it is necessary to manage this potentially blocking call. This way the ForkJoinPool may
-        // provide additional threads if necessary to avoid thread starving. See bug5720
-        final ManagedBlockerForComputeIfAbsent<Triple<TimePoint, TrackedRace, Competitor>, ORCPerformanceCurve> computeIfAbsent =
-                new ManagedBlockerForComputeIfAbsent<>(
-                        performanceCurvesPerCompetitor, new Triple<>(timePoint, raceContext, competitor),
-                        timePointAndTrackedRaceAndCompetitor -> {
-                        final ORCPerformanceCurve performanceCurve = performanceCurveSupplier.apply(timePointAndTrackedRaceAndCompetitor.getA(),
-                            timePointAndTrackedRaceAndCompetitor.getC());
-                        return performanceCurve == null ? NULL_PERFORMANCE_CURVE : performanceCurve;
-                    });
-        try {
-            ForkJoinPool.managedBlock(computeIfAbsent);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        final ORCPerformanceCurve result = computeIfAbsent.getResult();
+        final ORCPerformanceCurve result = performanceCurvesPerCompetitor.computeIfAbsent(
+                new Triple<>(timePoint, raceContext, competitor), timePointAndTrackedRaceAndCompetitor -> {
+                    final ORCPerformanceCurve performanceCurve = performanceCurveSupplier.apply(
+                            timePointAndTrackedRaceAndCompetitor.getA(), timePointAndTrackedRaceAndCompetitor.getC());
+                    return performanceCurve == null ? NULL_PERFORMANCE_CURVE : performanceCurve;
+                });
         return result == NULL_PERFORMANCE_CURVE ? null : result;
     }
 
     @Override
     public Speed getImpliedWind(TimePoint timePoint, TrackedRace raceContext, Competitor competitor, BiFunction<TimePoint, Competitor, Speed> impliedWindSupplier) {
-        // computeIfAbsent may block on the ConcurrentHashMap, waiting for the monitor of one of the hash map's nodes;
-        // therefore, and because this may have been invoked by a ForkJoinPool thread and in turn can invoke tasks that will
-        // be executed by a ForkJoinPool, it is necessary to manage this potentially blocking call. This way the ForkJoinPool may
-        // provide additional threads if necessary to avoid thread starving. See bug5720
-        final ManagedBlockerForComputeIfAbsent<Triple<TimePoint, TrackedRace, Competitor>, Speed> computeIfAbsent =
-                new ManagedBlockerForComputeIfAbsent<>(
-            impliedWindPerCompetitor, new Triple<>(timePoint, raceContext, competitor),
-                        timePointAndTrackedRaceAndCompetitor -> {
-                            final Speed impliedWind = impliedWindSupplier.apply(
-                                timePointAndTrackedRaceAndCompetitor.getA(),
-                                timePointAndTrackedRaceAndCompetitor.getC());
-                            return impliedWind == null ? NULL_IMPLIED_WIND : impliedWind;
-                        });
-        try {
-            ForkJoinPool.managedBlock(computeIfAbsent);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        final Speed result = computeIfAbsent.getResult();
+        final Speed result = impliedWindPerCompetitor.computeIfAbsent(new Triple<>(timePoint, raceContext, competitor),
+                timePointAndTrackedRaceAndCompetitor -> {
+                    final Speed impliedWind = impliedWindSupplier.apply(timePointAndTrackedRaceAndCompetitor.getA(),
+                            timePointAndTrackedRaceAndCompetitor.getC());
+                    return impliedWind == null ? NULL_IMPLIED_WIND : impliedWind;
+                });
         return result == NULL_IMPLIED_WIND ? null : result;
     }
 
     @Override
     public Duration getRelativeCorrectedTime(Competitor competitor, TrackedRace raceContext,
             TimePoint timePoint, BiFunction<Competitor, TimePoint, Duration> relativeCorrectedTimeSupplier) {
-        // computeIfAbsent may block on the ConcurrentHashMap, waiting for the monitor of one of the hash map's nodes;
-        // therefore, and because this may have been invoked by a ForkJoinPool thread and in turn can invoke tasks that will
-        // be executed by a ForkJoinPool, it is necessary to manage this potentially blocking call. This way the ForkJoinPool may
-        // provide additional threads if necessary to avoid thread starving. See bug5720
-        final ManagedBlockerForComputeIfAbsent<Triple<TimePoint, TrackedRace, Competitor>, Duration> computeIfAbsent =
-                new ManagedBlockerForComputeIfAbsent<>(
-            relativeCorrectedTimePerCompetitor, new Triple<>(timePoint, raceContext, competitor),
-                        timePointAndTrackedRaceAndCompetitor -> {
-                            final Duration relativeCorrectedTime = relativeCorrectedTimeSupplier.apply(
-                                timePointAndTrackedRaceAndCompetitor.getC(),
-                                timePointAndTrackedRaceAndCompetitor.getA());
-                            return relativeCorrectedTime == null ? NULL_RELATIVE_CORRECTED_TIME : relativeCorrectedTime;
-                        });
-        try {
-            ForkJoinPool.managedBlock(computeIfAbsent);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        final Duration result = computeIfAbsent.getResult();
+        final Duration result = relativeCorrectedTimePerCompetitor.computeIfAbsent(
+                new Triple<>(timePoint, raceContext, competitor), timePointAndTrackedRaceAndCompetitor -> {
+                    final Duration relativeCorrectedTime = relativeCorrectedTimeSupplier.apply(
+                            timePointAndTrackedRaceAndCompetitor.getC(), timePointAndTrackedRaceAndCompetitor.getA());
+                    return relativeCorrectedTime == null ? NULL_RELATIVE_CORRECTED_TIME : relativeCorrectedTime;
+                });
         return result == NULL_RELATIVE_CORRECTED_TIME ? null : result;
     }
 
