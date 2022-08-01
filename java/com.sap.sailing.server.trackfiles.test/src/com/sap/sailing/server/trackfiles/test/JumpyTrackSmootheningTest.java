@@ -111,6 +111,11 @@ public class JumpyTrackSmootheningTest {
                          * 
                          * With this in mind we would always have to look "both ways," trying to find out whether the left or
                          * the right fix is easier to move by an offset to fit in.
+                         * 
+                         * Judgment of fixes based on their neighbors may happen by comparing their position to the position
+                         * predicted by the previous and next fix using their position and speed vector each; the metric then
+                         * would be the distance between predicted and actual position. An additional metric could be the
+                         * fix's own speed vector compared to 
                          */
                         numberOfInconsistencies++;
                         final Duration offset = findOptimalOffset(fix, track);
