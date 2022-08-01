@@ -52,6 +52,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
@@ -60,7 +61,6 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceHashForMarkPassingComperatorImpl.typeOfHash;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -74,6 +74,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
  * course may change over time as the race committee decides to change it. Therefore, a {@link TrackedRace} instance
@@ -89,8 +90,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace
-        extends Serializable, IsManagedByCache<DomainFactory>, WithQualifiedObjectIdentifier {
+public interface TrackedRace extends Serializable, IsManagedByCache<DomainFactory>, WithQualifiedObjectIdentifier {
     final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
     final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_SECOND.times(30);
 
@@ -101,7 +101,7 @@ public interface TrackedRace
     RaceDefinition getRace();
 
     RegattaAndRaceIdentifier getRaceIdentifier();
-    
+
     /**
      * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
      * this will usually happen by projecting the competitors to the wind direction for upwind and downwind legs or to
@@ -116,17 +116,17 @@ public interface TrackedRace
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time
      * point which is expected to be before the race start time). The highest precedence take the
      * {@link #attachedRaceLogs race logs} and their start time events, followed by the field {@link #startTimeReceived}
-     * which can explicitly be set using {@link #setStartTimeReceived(TimePoint)}. When there are no {@link MarkPassing}s
-     * for the first mark, <code>null</code> is returned. If there are mark passings for the first mark and the start
-     * time is less than {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark
-     * passing for the first mark. Otherwise, the first mark passing for the first mark minus
+     * which can explicitly be set using {@link #setStartTimeReceived(TimePoint)}. When there are no
+     * {@link MarkPassing}s for the first mark, <code>null</code> is returned. If there are mark passings for the first
+     * mark and the start time is less than {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS}
+     * before the first mark passing for the first mark. Otherwise, the first mark passing for the first mark minus
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
      * <p>
      * 
      * If no start time can be determined this way, <code>null</code> is returned.
      */
     TimePoint getStartOfRace();
-    
+
     /**
      * Like {@link #getStartOfRace()}, but ignoring any inference from start mark passings in case {@code inferred} is
      * {@code false}. In this case, if no official start time was set, e.g., in the {@link RaceLog} or explicitly using
@@ -137,15 +137,15 @@ public interface TrackedRace
 
     /**
      * @return the time point taken from a valid, non-revoked {@link RaceLogRaceStatusEvent} that transfers the race
-     * into status {@link RaceLogRaceStatus#FINISHING} or {@code null} if no such event is found.
+     *         into status {@link RaceLogRaceStatus#FINISHING} or {@code null} if no such event is found.
      */
     TimePoint getFinishingTime();
 
     /**
      * @return the time point taken from a valid, non-revoked {@link RaceLogRaceStatusEvent} that transfers the race
-     *         into status {@link RaceLogRaceStatus#FINISHED} from any of the {@link RaceLog}s attached to this race,
-     *         or {@code null} if no such event is found.
-     *         
+     *         into status {@link RaceLogRaceStatus#FINISHED} from any of the {@link RaceLog}s attached to this race, or
+     *         {@code null} if no such event is found.
+     * 
      * @see {@link RaceChangeListener#finishedTimeChanged(TimePoint, TimePoint)}
      */
     TimePoint getFinishedTime();
@@ -172,18 +172,18 @@ public interface TrackedRace
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
      */
     boolean hasStarted(TimePoint at);
-   
+
     /**
-     * A race is considered "live" if it
-     * {@link TrackedRaceDTO#hasGPSData has GPS data} and {@link TrackedRaceDTO#hasWindData wind data} and if the
-     * <code>at</code> time point is between the start and the end of the race.
+     * A race is considered "live" if it {@link TrackedRaceDTO#hasGPSData has GPS data} and
+     * {@link TrackedRaceDTO#hasWindData wind data} and if the <code>at</code> time point is between the start and the
+     * end of the race.
      * <p>
      * 
-     * The pre-start phase of a race is interesting also in live mode. Therefore, if a {@link TrackedRace#getStartOfRace start
-     * time} is available for the race, the {@link TimingConstants#PRE_START_PHASE_DURATION_IN_MILLIS} is subtracted
-     * from the actual start time so that the pre-start phase also counts as live. If no start time is known for the
-     * race, but a {@link TrackedRace#getStartOfTracking start of tracking time} is known, it is used as the start of
-     * the "live" interval.
+     * The pre-start phase of a race is interesting also in live mode. Therefore, if a {@link TrackedRace#getStartOfRace
+     * start time} is available for the race, the {@link TimingConstants#PRE_START_PHASE_DURATION_IN_MILLIS} is
+     * subtracted from the actual start time so that the pre-start phase also counts as live. If no start time is known
+     * for the race, but a {@link TrackedRace#getStartOfTracking start of tracking time} is known, it is used as the
+     * start of the "live" interval.
      * <p>
      * 
      * If an {@link TrackedRace#getEndOfRace end time} is already known for the race,
@@ -193,8 +193,8 @@ public interface TrackedRace
      * <p>
      * 
      * @param at
-     *            the time point at which to determine whether the race for <code>fleet</code>
-     *            is/was live. A <code>null</code> value will use the start time of the race.
+     *            the time point at which to determine whether the race for <code>fleet</code> is/was live. A
+     *            <code>null</code> value will use the start time of the race.
      * @return
      */
     boolean isLive(TimePoint at);
@@ -222,12 +222,12 @@ public interface TrackedRace
     TrackedLeg getCurrentLeg(TimePoint timePoint);
 
     /**
-     * Tells the number of the last started leg at <code>timePoint</code>
-     * The leg number is 0 before the start, the number of the current leg during the race
-     * and the number of the last leg at the end of the race even if the race has finished. 
+     * Tells the number of the last started leg at <code>timePoint</code> The leg number is 0 before the start, the
+     * number of the current leg during the race and the number of the last leg at the end of the race even if the race
+     * has finished.
      */
     int getLastLegStarted(TimePoint timePoint);
-    
+
     /**
      * Precondition: waypoint must still be part of {@link #getRace()}.{@link RaceDefinition#getCourse() getCourse()}.
      * Returns {@code null} for the first waypoint of the course. If the waypoint is not part of the course, an
@@ -251,16 +251,21 @@ public interface TrackedRace
      * So every type of track has an associated name. With this construct you can have track implementations that
      * provide specific functionality based on the contained fix type.
      * 
-     * @param competitor the competitor to get the track for
-     * @param trackName the name of the track to get
+     * @param competitor
+     *            the competitor to get the track for
+     * @param trackName
+     *            the name of the track to get
      * @return the track associated to the given Competitor and name or <code>null</code> if there is none.
      */
-    <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(Competitor competitor, String trackName);
-    
+    <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
+            Competitor competitor, String trackName);
+
     /**
-     * Returns all contained {@link SensorFixTrack SensorFixTracks} for the given trackName and associated to any competitor.
+     * Returns all contained {@link SensorFixTrack SensorFixTracks} for the given trackName and associated to any
+     * competitor.
      */
-    <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(String trackName);
+    <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> Iterable<TrackT> getSensorTracks(
+            String trackName);
 
     /**
      * Tells the leg on which the <code>competitor</code> was at time <code>at</code>. If the competitor hasn't passed
@@ -329,7 +334,7 @@ public interface TrackedRace
      * @see #getTrack(Mark)
      */
     GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
-    
+
     /**
      * Yields the track describing <code>mark</code>'s movement over time; <code>null</code> if no track exists for
      * <code>mark</code> so far.
@@ -357,7 +362,7 @@ public interface TrackedRace
     default Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
         return getApproximatePosition(waypoint, timePoint, new NonCachingMarkPositionAtTimePointCache(this, timePoint));
     }
-    
+
     /**
      * Same as {@link #getApproximatePosition(Waypoint, TimePoint)}, but giving the caller the possibility to pass a
      * cache of mark positions and related information that can help speed up compound operations requiring frequent
@@ -411,18 +416,19 @@ public interface TrackedRace
     /**
      * Retrieves the wind sources used so far by this race that have the specified <code>type</code> as their
      * {@link WindSource#getType() type}. Always returns a non-<code>null</code> iterable which may be empty in case the
-     * race does not use any wind source of the specified type (yet).<p>
+     * race does not use any wind source of the specified type (yet).
+     * <p>
      * 
-     * It is possible to ask for the {@link WindSourceType#COMBINED} and {@link WindSourceType#LEG_MIDDLE} types and
-     * get a non-empty result although those sources are never returned by {@link #getWindSources()}.
+     * It is possible to ask for the {@link WindSourceType#COMBINED} and {@link WindSourceType#LEG_MIDDLE} types and get
+     * a non-empty result although those sources are never returned by {@link #getWindSources()}.
      */
     Set<WindSource> getWindSources(WindSourceType type);
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
-     * Callers can freely iterate because the set returned is weakly-consistent and never throws a {@link ConcurrentModificationException}
-     * upon iteration. The {@link WindSourceType#COMBINED} wind source
-     * as well as the {@link WindSourceType#LEG_MIDDLE} sources are never part of the result.
+     * Callers can freely iterate because the set returned is weakly-consistent and never throws a
+     * {@link ConcurrentModificationException} upon iteration. The {@link WindSourceType#COMBINED} wind source as well
+     * as the {@link WindSourceType#LEG_MIDDLE} sources are never part of the result.
      */
     Set<WindSource> getWindSources();
 
@@ -475,7 +481,7 @@ public interface TrackedRace
      *         lock.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
-    
+
     /**
      * Returns competitor's mark passings.
      * 
@@ -490,18 +496,20 @@ public interface TrackedRace
     /**
      * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.
      * See also bug 1370 (http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1370). This is necessary because the
-     * code that executes a course update will first ask the course's write lock and then relay execution to the
-     * course change listeners among which there is a {@link TrackedRace} which will then update the mark passings
-     * for all competitors and therefore will need to ask the write lock for those. If the thread calling this method
-     * first obtains the mark passings read lock and later, while holding on to that lock, asks for the course's read
-     * lock, a deadlock may result.<p>
+     * code that executes a course update will first ask the course's write lock and then relay execution to the course
+     * change listeners among which there is a {@link TrackedRace} which will then update the mark passings for all
+     * competitors and therefore will need to ask the write lock for those. If the thread calling this method first
+     * obtains the mark passings read lock and later, while holding on to that lock, asks for the course's read lock, a
+     * deadlock may result.
+     * <p>
      * 
-     * Furthermore, when trying to acquire both, a lock for the {@link #getMarkPassings(Competitor) mark passings for a competitor}
-     * and a lock for the {@link #getMarkPassingsInOrder(Waypoint) mark passings for a waypoint, this needs to happen in exactly
-     * this order, or a deadlock may result.<p>
+     * Furthermore, when trying to acquire both, a lock for the {@link #getMarkPassings(Competitor) mark passings for a
+     * competitor} and a lock for the {@link #getMarkPassingsInOrder(Waypoint) mark passings for a waypoint, this needs
+     * to happen in exactly this order, or a deadlock may result.
+     * <p>
      * 
-     * The {@link #unlockAfterRead(Iterable)} method will symmetrically unlock the course's read lock after releasing the
-     * read lock for the mark passings.
+     * The {@link #unlockAfterRead(Iterable)} method will symmetrically unlock the course's read lock after releasing
+     * the read lock for the mark passings.
      */
     void lockForRead(Iterable<MarkPassing> markPassings);
 
@@ -559,7 +567,7 @@ public interface TrackedRace
      * {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
-    
+
     /**
      * Based on the wind direction at <code>timePoint</code> and at position <code>where</code>, compares the
      * <code>boatBearing</code> to the wind's bearing at that time and place and determined the tack.
@@ -585,8 +593,8 @@ public interface TrackedRace
 
     /**
      * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default
-     * speed of zero knots. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
-     * <code>true</code>.
+     * speed of zero knots. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()}
+     * returns <code>true</code>.
      * 
      * @param at
      *            usually the {@link #getStart() start time} should be used; if no valid start time is provided, the
@@ -618,7 +626,7 @@ public interface TrackedRace
      *         for the <code>key</code> is still ongoing, the result of that ongoing re-calculation is returned.
      */
     Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest);
-    
+
     /**
      * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in
      *         this race. Depending on <code>waitForLatest</code> the result is taken from the cache straight away
@@ -659,7 +667,8 @@ public interface TrackedRace
      * tracked race. This runs synchronized with the otherwise asynchronous loading of wind tracks, triggered by the
      * constructor of the {@link TrackedRace} implementation classes. This procedure guarantees that eventually the
      * listener will have received a notification for all wind fixes, regardless of whether they were already loaded at
-     * the time the listener is registered or they are loaded after the registration has completed.<p>
+     * the time the listener is registered or they are loaded after the registration has completed.
+     * <p>
      * 
      * The same is true for the GPS fixes for marks and competitors.
      */
@@ -667,10 +676,10 @@ public interface TrackedRace
             boolean notifyAboutGPSFixesAlreadyLoaded);
 
     void removeListener(RaceChangeListener listener);
-    
+
     /**
-     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
-     * or if the competitor has not finished one of the legs in the race.
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race or if the
+     *         competitor has not finished one of the legs in the race.
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
@@ -680,32 +689,35 @@ public interface TrackedRace
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
 
     /**
-     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
-     * or if the competitor has not finished one of the legs in the race.
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race or if the
+     *         competitor has not finished one of the legs in the race.
      */
     Distance getDistanceFoiled(Competitor competitor, TimePoint timePoint);
 
     /**
-     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
-     * or if the competitor has not finished one of the legs in the race.
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race or if the
+     *         competitor has not finished one of the legs in the race.
      */
     Duration getDurationFoiled(Competitor competitor, TimePoint timePoint);
 
     /**
-     * See {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}
+     * See
+     * {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}
      */
-    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode);
 
     /**
-     * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(Competitor, TimePoint, WindPositionMode)}, only with an
-     * additional cache to speed up wind and leg type and leg bearing calculations in case of multiple similar look-ups
-     * for the same time point.
+     * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(Competitor, TimePoint, WindPositionMode)}, only with
+     * an additional cache to speed up wind and leg type and leg bearing calculations in case of multiple similar
+     * look-ups for the same time point.
      * 
      * @param rankingInfo
      *            materialized ranking information that is expensive to calculate, avoiding redundant calculations
      */
     Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+            WindPositionMode windPositionMode, RankingInfo rankingInfo,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
@@ -729,8 +741,8 @@ public interface TrackedRace
             Set<WindSource> windSourcesToExclude);
 
     /**
-     * Same as {@link #getEstimatedWindDirection(TimePoint)}, but propagates the confidence of the wind
-     * estimation, relative to the <code>timePoint</code> for which the request is made, in the result. The
+     * Same as {@link #getEstimatedWindDirection(TimePoint)}, but propagates the confidence of the wind estimation,
+     * relative to the <code>timePoint</code> for which the request is made, in the result. The
      * {@link Wind#getPosition() position} of all {@link Wind} fixes returned is <code>null</code>.
      */
     WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint);
@@ -748,16 +760,18 @@ public interface TrackedRace
      *            if <code>true</code> and any cache update is currently going on, wait for the update to complete and
      *            then fetch the updated value; otherwise, serve this requests from whatever is currently in the cache
      */
-    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis);
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalysis);
 
     /**
-     * Same as {@link #getAverageAbsoluteCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
-     * wind on leg and leg bearing is provided.
+     * Same as {@link #getAverageAbsoluteCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg
+     * type, wind on leg and leg bearing is provided.
      */
-    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
-    
-    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses);
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatestAnalyses);
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis);
 
@@ -776,13 +790,13 @@ public interface TrackedRace
     WindStore getWindStore();
 
     Competitor getOverallLeader(TimePoint timePoint);
-    
+
     Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     Boat getBoatOfCompetitor(Competitor competitor);
-    
+
     Competitor getCompetitorOfBoat(Boat boat);
-    
+
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
@@ -790,34 +804,34 @@ public interface TrackedRace
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
     /**
-     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
-     * bearing values.
+     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg bearing
+     * values.
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
-     * When provided with a {@link WindStore} during construction, the tracked race will
-     * asynchronously load the wind data for this tracked race from the wind store and the GPS store in a
-     * background thread and update this tracked race with the results. Clients that want to wait for the wind
-     * loading process to complete can do so by calling this method which will block until the wind loading has
-     * completed.
+     * When provided with a {@link WindStore} during construction, the tracked race will asynchronously load the wind
+     * data for this tracked race from the wind store and the GPS store in a background thread and update this tracked
+     * race with the results. Clients that want to wait for the wind loading process to complete can do so by calling
+     * this method which will block until the wind loading has completed.
      */
     void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
 
     /**
      * Whenever a {@link RegattaLog} is attached, fixes are loaded from the {@link SensorFixStore} for all mappings
-     * found in the {@code RegattaLog} in a separate thread. This method blocks if there is such a thread loading
-     * fixes, until that thread is finished.
+     * found in the {@code RegattaLog} in a separate thread. This method blocks if there is such a thread loading fixes,
+     * until that thread is finished.
      */
     void waitForLoadingToFinish() throws InterruptedException;
-    
+
     /**
      * Returns the current status of the {@link TrackedRace}. This consists of one of the {@link TrackedRaceStatusEnum}
      * values plus a progress for LOADING state.<br>
      * Due to the fact that multiple loaders can exist that load data into the {@link TrackedRace}, the returned status
      * is a composite of those loader statuses. When a loader is finished, its status isn't tracked anymore. This causes
-     * the overall progress to not be guaranteed to be monotonic (progress may jump to a lower percentage when one loader
-     * that had a progress of 100% is finished and thus removed).
+     * the overall progress to not be guaranteed to be monotonic (progress may jump to a lower percentage when one
+     * loader that had a progress of 100% is finished and thus removed).
      * 
      * @see TrackedRaceStatus
      * @see DynamicTrackedRace#onStatusChanged(TrackingDataLoader, TrackedRaceStatus)
@@ -825,8 +839,8 @@ public interface TrackedRace
     TrackedRaceStatus getStatus();
 
     /**
-     * If the {@link #getStatus() status} is currently {@link TrackedRaceStatusEnum#LOADING}, blocks until the status changes to any
-     * other status.
+     * If the {@link #getStatus() status} is currently {@link TrackedRaceStatusEnum#LOADING}, blocks until the status
+     * changes to any other status.
      */
     void waitUntilNotLoading();
 
@@ -836,64 +850,64 @@ public interface TrackedRace
      * @return the race log detached or {@code null} if no race log can be found by the {@code identifier}
      */
     RaceLog detachRaceLog(Serializable identifier);
-    
+
     /**
      * Detaches the link {@link RaceExecutionOrderProvider}
      */
     void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
-    
+
     /**
-     * Attaches the passed race log with this {@link TrackedRace}.
-     * This causes fixes from the {@link SensorFixStore} to be loaded for such {@link RegattaLogDeviceMappingEvent RegattaLogDeviceMappingEvents}
-     * that are present in the {@link RaceLog raceLog}. This loading is offloaded into a separate thread, that blocks
-     * serialization until it is finished. If multiple race logs are attached, the loading process is
-     * forced to be serialized.
-     * To guarantee that a the fixes for a race log have been fully loaded before continuing,
-     * {@link #waitForLoadingToFinish()} can be used.
-     * @param raceLog to be attached.
+     * Attaches the passed race log with this {@link TrackedRace}. This causes fixes from the {@link SensorFixStore} to
+     * be loaded for such {@link RegattaLogDeviceMappingEvent RegattaLogDeviceMappingEvents} that are present in the
+     * {@link RaceLog raceLog}. This loading is offloaded into a separate thread, that blocks serialization until it is
+     * finished. If multiple race logs are attached, the loading process is forced to be serialized. To guarantee that a
+     * the fixes for a race log have been fully loaded before continuing, {@link #waitForLoadingToFinish()} can be used.
+     * 
+     * @param raceLog
+     *            to be attached.
      */
     void attachRaceLog(RaceLog raceLog);
-    
+
     /**
-     * Attaches the passed {@link RegattaLog} with this {@link TrackedRace}.
-     * This also causes fixes from the {@link SensorFixStore} to be loaded (see {@link #attachRaceLog(RaceLog)} for details).
+     * Attaches the passed {@link RegattaLog} with this {@link TrackedRace}. This also causes fixes from the
+     * {@link SensorFixStore} to be loaded (see {@link #attachRaceLog(RaceLog)} for details).
      */
     void attachRegattaLog(RegattaLog regattaLog);
-    
+
     /**
      * @return all currently attached {@link RegattaLog}s or an empty Iterable if there aren't any
      */
     Iterable<RegattaLog> getAttachedRegattaLogs();
-    
+
     /**
-     * Attaches a {@link RaceExecutionOrderProvider} to make a {@link TrackedRace} aware
-     * which races are scheduled around it in the execution order of a {@link Regatta}.
-     * */
+     * Attaches a {@link RaceExecutionOrderProvider} to make a {@link TrackedRace} aware which races are scheduled
+     * around it in the execution order of a {@link Regatta}.
+     */
     void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
-    
+
     /**
-     * Returns the attached race log event track for this race if any.
-     * Otherwise <code>null</code>.
+     * Returns the attached race log event track for this race if any. Otherwise <code>null</code>.
      */
     RaceLog getRaceLog(Serializable identifier);
-    
+
     /**
-     * A setter for the listener on course design changes suggested by one of the {@link RaceLog RaceLog} attached to this
-     * race. The listener is mostly part of the tracking provider adapter.
+     * A setter for the listener on course design changes suggested by one of the {@link RaceLog RaceLog} attached to
+     * this race. The listener is mostly part of the tracking provider adapter.
      * 
      * @param listener
      *            the listener to operate with.
      */
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
-    
+
     void addStartTimeChangedListener(StartTimeChangedListener listener);
-    
+
     void removeStartTimeChangedListener(StartTimeChangedListener listener);
 
     void addRaceAbortedListener(RaceAbortedListener listener);
 
     /**
-     * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds before the start.
+     * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds
+     * before the start.
      * <p>
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
@@ -938,8 +952,9 @@ public interface TrackedRace
      * Like {@link #getWindwardDistanceToFavoredSideOfStartLine(Competitor, long)}, but with a cache to accelerate
      * repetitive requests for wind and leg types.
      */
-    Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
-    
+    Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, long millisecondsBeforeRaceStart,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+
     /**
      * Tells how far, projected onto the wind for upwind/downwind and projected onto the course middle line for reaching
      * starts, the given <code>competitor</code> was from the favored end of the start line at the given
@@ -952,7 +967,8 @@ public interface TrackedRace
      * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
      */
     default Distance getWindwardDistanceToFavoredSideOfStartLine(Competitor competitor, TimePoint timePoint) {
-        return getWindwardDistanceToFavoredSideOfStartLine(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+        return getWindwardDistanceToFavoredSideOfStartLine(competitor, timePoint,
+                new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     /**
@@ -963,19 +979,19 @@ public interface TrackedRace
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
-     * When the <code>competitor</code> has started, this method returns the distance to the starboard end of the start line
-     * or---if the start waypoint was a single mark---the distance to the single start mark at the time the competitor started.
-     * If the competitor hasn't started yet, <code>null</code> is returned.
+     * When the <code>competitor</code> has started, this method returns the distance to the starboard end of the start
+     * line or---if the start waypoint was a single mark---the distance to the single start mark at the time the
+     * competitor started. If the competitor hasn't started yet, <code>null</code> is returned.
      */
     Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
-    
+
     /**
-     * At the given timepoint and for the competitor, this method returns the distance to the starboard end of the start line
-     * or---if the start waypoint was a single mark---the distance to the single start mark at the timepoint.
-     * If the competitor hasn't started yet, <code>null</code> is returned.
+     * At the given timepoint and for the competitor, this method returns the distance to the starboard end of the start
+     * line or---if the start waypoint was a single mark---the distance to the single start mark at the timepoint. If
+     * the competitor hasn't started yet, <code>null</code> is returned.
      */
     Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint);
-    
+
     /**
      * At the given timepoint and for the competitor, this method returns the distance between the starboard end of the
      * start line and the competitor position projected perpendicularly onto the line. If the start waypoint was a
@@ -984,7 +1000,7 @@ public interface TrackedRace
      * hasn't started yet, <code>null</code> is returned.
      */
     Distance getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor competitor, TimePoint timePoint);
-    
+
     /**
      * For all competitors in this race computes their
      * {@link #getDistanceFromStarboardSideOfStartLineProjectedOntoLine(Competitor, TimePoint)} and puts the results in
@@ -992,50 +1008,62 @@ public interface TrackedRace
      * finding adjacent records, using {@link SortedMap#headMap(Object)} and {@link SortedMap#tailMap(Object)}.
      * <p>
      * 
-     * Competitors who are part of this race but for which no such {@link Distance} can be calculated, a record is
-     * put to the resulting map with a {@code null} value associated. Those entries are sorted to the end of the map,
-     * meaning that "{@code null} is greater" than other values.</p>
+     * Competitors who are part of this race but for which no such {@link Distance} can be calculated, a record is put
+     * to the resulting map with a {@code null} value associated. Those entries are sorted to the end of the map,
+     * meaning that "{@code null} is greater" than other values.
+     * </p>
      * 
      * Results are cached in a fixed-size LRU cache which is invalidated by competitor or mark positions within the
      * averaging time range of {@code timePoint}. With this, repeated requests for equal {@code timePoint}s have a good
-     * chance of being fulfilled from a previous computation result.<p>
+     * chance of being fulfilled from a previous computation result.
+     * <p>
      * 
      * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
      * which both suggest the boat may not have made a serious attempt to start.
      */
     SortedMap<Competitor, Distance> getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint timePoint,
             BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
-    
+
     /**
-     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint, Function<Triple<Competitor, RaceColumn, TimePoint>, MaxPointsReason>)}, finds the
-     * next competitor to port regarding their start line projection at {@code timePoint}. Returns {@code null} if
-     * the start line cannot be determined or if there is no competitor further to port.<p>
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint,
+     * Function<Triple<Competitor, RaceColumn, TimePoint>, MaxPointsReason>)}, finds the next competitor to port
+     * regarding their start line projection at {@code timePoint}. Returns {@code null} if the start line cannot be
+     * determined or if there is no competitor further to port.
+     * <p>
      * 
      * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
      * which both suggest the boat may not have made a serious attempt to start.
-     * @param maxPointsReasonSupplier TODO
+     * 
+     * @param maxPointsReasonSupplier
+     *            TODO
      */
-    Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint, BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
-    
+    Competitor getNextCompetitorToPortOnStartLine(Competitor relativeTo, TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
+
     /**
-     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint, Function<Triple<Competitor, RaceColumn, TimePoint>, MaxPointsReason>)}, finds the
-     * next competitor to starboard regarding their start line projection at {@code timePoint}. Returns {@code null} if
-     * the start line cannot be determined or if there is no competitor further to starboard.<p>
+     * Based on the result of {@link #getDistancesFromStarboardSideOfStartLineProjectedOntoLine(TimePoint,
+     * Function<Triple<Competitor, RaceColumn, TimePoint>, MaxPointsReason>)}, finds the next competitor to starboard
+     * regarding their start line projection at {@code timePoint}. Returns {@code null} if the start line cannot be
+     * determined or if there is no competitor further to starboard.
+     * <p>
      * 
      * Boats are not considered in this if they are {@link MaxPointsReason#DNC DNC} or {@link MaxPointsReason#DNC DNS}
      * which both suggest the boat may not have made a serious attempt to start.
-     * @param maxPointsReasonSupplier TODO
+     * 
+     * @param maxPointsReasonSupplier
+     *            TODO
      */
-    Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint, BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
-    
+    Competitor getNextCompetitorToStarboardOnStartLine(Competitor relativeTo, TimePoint timePoint,
+            BiFunction<Competitor, TimePoint, MaxPointsReason> maxPointsReasonSupplier);
+
     /**
-     * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
+     * The estimated speed of the competitor at the time point of the given seconds before the start of race.
      */
     Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart);
-    
+
     /**
-     * The speed of the competitor when crossing the start line. It will return null if there are no recorded
-     * mark passings for this competitor (competitor did not yet or never pass the start line).
+     * The speed of the competitor when crossing the start line. It will return null if there are no recorded mark
+     * passings for this competitor (competitor did not yet or never pass the start line).
      */
     Speed getSpeedWhenCrossingStartLine(Competitor competitor);
 
@@ -1043,56 +1071,58 @@ public interface TrackedRace
      * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.
      */
     TimePoint getStartTimeReceived();
-    
+
     /**
-     * @return <code>null</code> if the start waypoint does not have two marks or the course
-     * is empty or the start waypoint is the only waypoint
+     * @return <code>null</code> if the start waypoint does not have two marks or the course is empty or the start
+     *         waypoint is the only waypoint
      */
     LineDetails getStartLine(TimePoint at);
-    
+
     /**
-     * @return <code>null</code> if the finish waypoint does not have two marks or the course
-     * is empty or the finish waypoint is the only waypoint
+     * @return <code>null</code> if the finish waypoint does not have two marks or the course is empty or the finish
+     *         waypoint is the only waypoint
      */
     LineDetails getFinishLine(TimePoint at);
-    
+
     /**
      * Length of course if there are mark passings for competitors.
      */
     Distance getCourseLength();
-    
+
     /**
-     * The average wind speed with confidence for this race. It uses the timepoint of the {@link #getEndOfRace race end} as
-     * a reference point, or, if that is {@code null}, the {@link #getTimePointOfNewestEvent()}.
+     * The average wind speed with confidence for this race. It uses the timepoint of the {@link #getEndOfRace race end}
+     * as a reference point, or, if that is {@code null}, the {@link #getTimePointOfNewestEvent()}.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
-    
+
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidenceWithNumberOfSamples(int numberOfSamples);
-    
+
     /**
      * The average wind speed with confidence for this race.
      */
-    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint fromTimePoint, TimePoint toTimePoint, int numberOfSamples);
-    
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(TimePoint fromTimePoint, TimePoint toTimePoint,
+            int numberOfSamples);
+
     /**
      * Computes the center point of the course's marks at the given time point.
      */
     Position getCenterOfCourse(TimePoint at);
 
     /**
-     * If the {@link RacingProcedure} defined by any of the {@link #attachedRaceLogs attached} {@link RaceLog}s
-     * has type {@link RacingProcedureType#GateStart}, this method returns <code>true</code>, <code>false</code> for
-     * any other type found. If no type is found, e.g., because no race log is currently attached to this tracked race,
+     * If the {@link RacingProcedure} defined by any of the {@link #attachedRaceLogs attached} {@link RaceLog}s has type
+     * {@link RacingProcedureType#GateStart}, this method returns <code>true</code>, <code>false</code> for any other
+     * type found. If no type is found, e.g., because no race log is currently attached to this tracked race,
      * <code>null</code> is returned, meaning that the type is not known.
      */
     Boolean isGateStart();
-    
+
     /**
-     * Returns the time in milliseconds when the line was closed with lowering flag {@link Flags#GOLF} if {@link #isGateStart()} is <code>true</code>.
-     * If flag was not raised or {@link #isGateStart()} is <code>false</code> it returns <code>null</code>. 
+     * Returns the time in milliseconds when the line was closed with lowering flag {@link Flags#GOLF} if
+     * {@link #isGateStart()} is <code>true</code>. If flag was not raised or {@link #isGateStart()} is
+     * <code>false</code> it returns <code>null</code>.
      */
     long getGateStartGolfDownTime();
-    
+
     /**
      * If the race was started with a gate start (see {@link #isGateStart()}, this method returns the distance between
      * the competitor's starting position and the port side of the start line (pin end); otherwise, returns a zero
@@ -1101,7 +1131,7 @@ public interface TrackedRace
     Distance getAdditionalGateStartDistance(Competitor competitor, TimePoint timePoint);
 
     boolean isUsingMarkPassingCalculator();
-    
+
     /**
      * Calculates the estimated time it takes a competitor to sail the race, from start to finish.
      * 
@@ -1109,13 +1139,15 @@ public interface TrackedRace
      *            Used for positions of marks and wind information; note that sometimes the marks are not in place yet
      *            when the race starts and that a windward mark may be collected already before the race finishes.
      * 
-     * @return estimated time it takes to complete the race, plus more useful information about how this result came about
+     * @return estimated time it takes to complete the race, plus more useful information about how this result came
+     *         about
      * 
      * @throws NotEnoughDataHasBeenAddedException
      *             thrown if not enough polar data has been added or polar data service is not available
      * @throws NoWindException
      */
-    TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
+    TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint)
+            throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**
      * Determine the time sailed for the {@code competitor} at {@code timePoint} in this race. This ignores whether or
@@ -1154,38 +1186,40 @@ public interface TrackedRace
     default Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimesFromRaceLogs() {
         return null;
     }
-    
+
     default Pair<TimePoint, TimePoint> getStartAndFinishedTimeFromRaceLogs() {
         return null;
     }
 
     /**
-     * Returns all marks found in the {@link #markTracks} map and the mark device mappings and mark
-     * definition events in all attached race and regatta logs. Note that usually a device mapping should
-     * exist for a mark only if that mark is also defined by a {@link RegattaLogDefineMarkEvent}, so for
-     * this standard case, adding the marks from the device mark mappings would be redundant.
+     * Returns all marks found in the {@link #markTracks} map and the mark device mappings and mark definition events in
+     * all attached race and regatta logs. Note that usually a device mapping should exist for a mark only if that mark
+     * is also defined by a {@link RegattaLogDefineMarkEvent}, so for this standard case, adding the marks from the
+     * device mark mappings would be redundant.
      */
     default Iterable<Mark> getMarksFromRegattaLogs() {
         return getMarks();
     }
-    
+
     /**
      * Updates the start and end of tracking in the following precedence order:
      * 
      * <ol>
      * <li>start/end of tracking in Racelog</li>
-     * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
-     * <li>start/end of race in Racelog -/+ {@link #START_TRACKING_THIS_MUCH_BEFORE_RACE_START}/{@link #STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH}</li>
+     * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and
+     * {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
+     * <li>start/end of race in Racelog -/+
+     * {@link #START_TRACKING_THIS_MUCH_BEFORE_RACE_START}/{@link #STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH}</li>
      * </ol>
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad);
-    
+
     default void lockForSerializationRead() {
     }
-    
+
     default void unlockAfterSerializationRead() {
     }
-    
+
     /**
      * @return all currently attached {@link RaceLog}s or an empty Iterable if there aren't any
      */
@@ -1201,7 +1235,6 @@ public interface TrackedRace
      */
     Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
 
-    
     /**
      * Computes the competitor's speed projected onto the wind (if wind data is available and the competitor is not
      * between start and finish (not racing) or not on a {@link LegType#REACHING reaching} leg; if outside a race and no
@@ -1214,21 +1247,25 @@ public interface TrackedRace
     }
 
     /**
-     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a {@link WindPositionMode}
-     * other than the default {@link WindPositionMode#EXACT}. If {@link WindPositionMode#LEG_MIDDLE} is used and the
-     * competitor is not currently sailing on a leg (hasn't started or has already finished), {@code null} is returned.
+     * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a
+     * {@link WindPositionMode} other than the default {@link WindPositionMode#EXACT}. If
+     * {@link WindPositionMode#LEG_MIDDLE} is used and the competitor is not currently sailing on a leg (hasn't started
+     * or has already finished), {@code null} is returned.
      */
-    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
-        return getVelocityMadeGood(competitor, timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) {
+        return getVelocityMadeGood(competitor, timePoint, windPositionMode,
+                new LeaderboardDTOCalculationReuseCache(timePoint));
     }
-    
-    
+
     /**
-     * Computes the angle between the competitors direction and the wind's "from" direction. The angle's direction is chosen such that
-     * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
-     * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
+     * Computes the angle between the competitors direction and the wind's "from" direction. The angle's direction is
+     * chosen such that it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom()
+     * "from"} direction. Example: wind from the north (0deg), boat's course over ground 90deg (moving east), then the
+     * bearing returned is -90deg.
      */
-    default Bearing getTWA(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    default Bearing getTWA(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Bearing twa = null;
         final GPSFixTrack<Competitor, GPSFixMoving> sogTrack = this.getTrack(competitor);
         if (sogTrack != null) {
@@ -1241,20 +1278,21 @@ public interface TrackedRace
         }
         return twa;
     }
-    
+
     /**
-     * Same as {@link #getTWA}, only that additionally a cache is provided that can allow the method to use
-     * cached wind and leg type values.
+     * Same as {@link #getTWA}, only that additionally a cache is provided that can allow the method to use cached wind
+     * and leg type values.
      */
-    default Bearing getTWA(Competitor competitor, TimePoint at){
+    default Bearing getTWA(Competitor competitor, TimePoint at) {
         return getTWA(competitor, at, new LeaderboardDTOCalculationReuseCache(at));
     }
-    
+
     /**
      * Like {@link #getVelocityMadeGood(Competitor, TimePoint)}, but allowing callers to specify a cache that can
      * accelerate requests for wind directions, the leg type and the competitor's current leg's bearing.
      */
-    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    default SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getVelocityMadeGood(competitor, timePoint, WindPositionMode.EXACT, cache);
     }
 
@@ -1274,6 +1312,7 @@ public interface TrackedRace
 
     /**
      * Gets polar service which is currently set in this tracked race instance.
+     * 
      * @see #setPolarDataService(PolarDataService)
      */
     PolarDataService getPolarDataService();
@@ -1291,16 +1330,16 @@ public interface TrackedRace
 
     /**
      * Obtains a quick, rough summary of the wind conditions during this race, based on a few wind samples at the
-     * beginning, in the middle and at the end of the race. This is summarized in a min and max wind speed as well
-     * as a single average wind direction.
+     * beginning, in the middle and at the end of the race. This is summarized in a min and max wind speed as well as a
+     * single average wind direction.
      */
     WindSummary getWindSummary();
-    
+
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
         return getIdentifier(getRaceIdentifier());
     }
-    
+
     public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
         return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId.getTypeRelativeObjectIdentifier());
     }
@@ -1318,7 +1357,7 @@ public interface TrackedRace
     default HasPermissions getPermissionType() {
         return getSecuredDomainType();
     }
-    
+
     public static HasPermissions getSecuredDomainType() {
         return SecuredDomainType.TRACKED_RACE;
     }
@@ -1341,13 +1380,14 @@ public interface TrackedRace
      * the maximum across their competitors' implied winds, or in case the implied wind was explicitly fixed by a
      * corresponding {@link RaceLogORCImpliedWindSourceEvent}, that fixed implied wind speed.
      */
-    default Speed getReferenceImpliedWind(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    default Speed getReferenceImpliedWind(TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getRankingMetric().getReferenceImpliedWind(timePoint, cache);
     }
-    
+
     /**
-     * gets a {@link TrackingConnectorInfo}, which contains a String representation of the Tracking-Service used to Track the Race and a web-URL for the Event Event; 
-     * may be {@code null}, particularly in test set-ups
+     * gets a {@link TrackingConnectorInfo}, which contains a String representation of the Tracking-Service used to
+     * Track the Race and a web-URL for the Event Event; may be {@code null}, particularly in test set-ups
      */
     TrackingConnectorInfo getTrackingConnectorInfo();
 
@@ -1381,8 +1421,8 @@ public interface TrackedRace
      * hypothetical "line" perpendicular to the first leg's bearing.
      */
     Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
-    
-    void setHashValuesForMarkPassingCalculation(Map<typeOfHash, Integer> hashValues);
-    
-    Map<typeOfHash, Integer> getHashValuesForMarkPassingCalculation ();
+
+    void setHashValuesForMarkPassingCalculation(Map<TypeOfHash, Integer> hashValues);
+
+    Map<TypeOfHash, Integer> getHashValuesForMarkPassingCalculation();
 }

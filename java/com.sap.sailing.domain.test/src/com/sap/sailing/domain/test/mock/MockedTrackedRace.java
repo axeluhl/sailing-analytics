@@ -50,6 +50,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
+import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
@@ -89,7 +90,6 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceHashForMarkPassingComperatorImpl.typeOfHash;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
@@ -1365,11 +1365,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setHashValuesForMarkPassingCalculation(Map<typeOfHash, Integer> hashValues) {
+    public void setHashValuesForMarkPassingCalculation(Map<TypeOfHash, Integer> hashValues) {
     }
 
     @Override
-    public Map<typeOfHash, Integer> getHashValuesForMarkPassingCalculation() {
+    public Map<TypeOfHash, Integer> getHashValuesForMarkPassingCalculation() {
         return null;
     }
 

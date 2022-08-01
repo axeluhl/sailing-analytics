@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tracking.impl;
+package com.sap.sailing.domain.markpassinghash.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,54 +10,46 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.TrackedRaceHashForMarkPassingComperator;
+import com.sap.sailing.domain.markpassinghash.TrackedRaceHashForMarkPassingComparator;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
-public class TrackedRaceHashForMarkPassingComperatorImpl implements TrackedRaceHashForMarkPassingComperator{
+public class TrackedRaceHashForMarkPassingComparatorImpl implements TrackedRaceHashForMarkPassingComparator {
 
-    public enum typeOfHash {
-        COMPETITOR,
-        BOAT,
-        START,
-        END,
-        WAYPOINTS,
-        NUMBEROFGPSFIXES,
-        GPSFIXES
-      }
-    
-    private static final Logger logger = Logger.getLogger(TrackedRaceHashForMarkPassingComperatorImpl.class.getName());
-    
+    public enum TypeOfHash {
+        COMPETITOR, START, END, WAYPOINTS, NUMBEROFGPSFIXES, GPSFIXES
+    }
+
+    private static final Logger logger = Logger.getLogger(TrackedRaceHashForMarkPassingComparatorImpl.class.getName());
+
     private TrackedRaceImpl trackedRace;
     private final Iterable<Waypoint> waypoints;
-    private Map<typeOfHash, Integer> hashValues;
-    
-    public TrackedRaceHashForMarkPassingComperatorImpl (TrackedRaceImpl trackedRace) {
+    private Map<TypeOfHash, Integer> hashValues;
+
+    public TrackedRaceHashForMarkPassingComparatorImpl(TrackedRaceImpl trackedRace) {
         this.trackedRace = trackedRace;
         this.waypoints = trackedRace.getRace().getCourse().getWaypoints();
         this.hashValues = new HashMap<>();
     }
-    
-    public void CalculateHash() {
+
+    public void calculateHash() {
         int competitorHash = 0;
-        int boatHash = 0;
-        hashValues.put(typeOfHash.WAYPOINTS, CalculateHashForWaypoints());
+        hashValues.put(TypeOfHash.WAYPOINTS, calculateHashForWaypoints());
         for (Competitor c : trackedRace.getRace().getCompetitors()) {
-            competitorHash = competitorHash + CalculateHashForCompetitor(c);
-            boatHash = boatHash + CalculateHashForBoat(trackedRace.getRace().getBoatOfCompetitor(c));
+            competitorHash = competitorHash + calculateHashForCompetitor(c);
         }
-        hashValues.put(typeOfHash.COMPETITOR, competitorHash);
-        hashValues.put(typeOfHash.BOAT, boatHash);
-        hashValues.put(typeOfHash.START, CalculateHashForStart());
-        hashValues.put(typeOfHash.END, CalculateHashForEnd());
-        
-        hashValues.put(typeOfHash.NUMBEROFGPSFIXES, CalculateHashForNumberOfGPSFixes());
-        hashValues.put(typeOfHash.GPSFIXES, CalculateHashForGPSFixes());
-        
+        hashValues.put(TypeOfHash.COMPETITOR, competitorHash);
+        hashValues.put(TypeOfHash.START, calculateHashForStart());
+        hashValues.put(TypeOfHash.END, calculateHashForEnd());
+        hashValues.put(TypeOfHash.NUMBEROFGPSFIXES, calculateHashForNumberOfGPSFixes());
+        hashValues.put(TypeOfHash.GPSFIXES, calculateHashForGPSFixes());
+
         trackedRace.setHashValuesForMarkPassingCalculation(hashValues);
     }
-    
-    public int CalculateHashForCompetitor (Competitor c) {
-        int res = 0; 
+
+    public int calculateHashForCompetitor(Competitor c) {
+        int res = 0;
         try {
             res = res ^ c.getId().hashCode();
             res = (res << 5) - res;
@@ -66,50 +58,50 @@ public class TrackedRaceHashForMarkPassingComperatorImpl implements TrackedRaceH
         }
         return res;
     }
-    
-    public int CalculateHashForBoat (Boat b) {
-        int res = 0; 
+
+    public int calculateHashForBoat(Boat b) {
+        int res = 0;
         try {
             res = res ^ b.getBoatClass().getName().hashCode();
             res = (res << 5) - res;
         } catch (Exception e) {
             logger.info("Hash calculation for competitor " + b + " failed: " + e);
         }
-        return res; 
+        return res;
     }
-    
-    public int CalculateHashForStart () {
+
+    public int calculateHashForStart() {
         int res = 0;
         try {
-        res = res ^ CalculateHashForTimePoint(trackedRace.getStartOfTracking());
-        res = (res << 5) - res;
+            res = res ^ calculateHashForTimePoint(trackedRace.getStartOfTracking());
+            res = (res << 5) - res;
         } catch (Exception e) {
             logger.info("An error occured when getting the start of tracking: " + e);
         }
         try {
-            //Maybe that could be solved by using .getStartOfRace(boolean inferred)
-            if( trackedRace.getTrackedRegatta().getRegatta().useStartTimeInference() == false) {
-                res = res ^ CalculateHashForTimePoint(trackedRace.getStartOfRace());
+            // Maybe that could be solved by using .getStartOfRace(boolean inferred)
+            if (trackedRace.getTrackedRegatta().getRegatta().useStartTimeInference() == false) {
+                res = res ^ calculateHashForTimePoint(trackedRace.getStartOfRace());
                 res = (res << 5) - res;
-            } 
+            }
         } catch (Exception e) {
             logger.info("An error occured when getting the starttime: " + e);
         }
         return res;
     }
-    
-    public int CalculateHashForEnd () {
-        int res = 0; 
+
+    public int calculateHashForEnd() {
+        int res = 0;
         try {
-        res = res ^ CalculateHashForTimePoint(trackedRace.getEndOfTracking());
-        res = (res << 5) - res;
+            res = res ^ calculateHashForTimePoint(trackedRace.getEndOfTracking());
+            res = (res << 5) - res;
         } catch (Exception e) {
             logger.info("Hash calculation for end of Tracking failed: " + e);
         }
         return res;
     }
-    
-    public int CalculateHashForNumberOfGPSFixes () {
+
+    public int calculateHashForNumberOfGPSFixes() {
         int count = 0;
         for (Waypoint w : waypoints) {
             for (Mark m : w.getMarks()) {
@@ -117,8 +109,8 @@ public class TrackedRaceHashForMarkPassingComperatorImpl implements TrackedRaceH
                 try {
                     trackedRace.getTrack(m).lockForRead();
                     gpsTrack = trackedRace.getTrack(m).getFixes();
-                    //Unused warning since we need the individual Fixes only to count
-                    for (GPSFix gf : gpsTrack) {
+                    // Unused warning since we need the individual Fixes only to count
+                    for (int i = 0; i < Util.size(gpsTrack); i++) {
                         count++;
                     }
                 } catch (Exception e) {
@@ -130,9 +122,8 @@ public class TrackedRaceHashForMarkPassingComperatorImpl implements TrackedRaceH
         }
         return count;
     }
-    
-    
-    public int CalculateHashForGPSFixes () {
+
+    public int calculateHashForGPSFixes() {
         int res = 0;
         for (Waypoint w : waypoints) {
             for (Mark m : w.getMarks()) {
@@ -141,9 +132,9 @@ public class TrackedRaceHashForMarkPassingComperatorImpl implements TrackedRaceH
                     trackedRace.getTrack(m).lockForRead();
                     gpsTrack = trackedRace.getTrack(m).getFixes();
                     for (GPSFix gf : gpsTrack) {
-                        res = res ^ CalculateHashForTimePoint(gf.getTimePoint());
+                        res = res ^ calculateHashForTimePoint(gf.getTimePoint());
                         res = (res << 5) - res;
-                        res = res ^ CalculateHashForPosition(gf.getPosition());
+                        res = res ^ calculateHashForPosition(gf.getPosition());
                         res = (res << 5) - res;
                     }
                 } catch (Exception e) {
@@ -155,31 +146,31 @@ public class TrackedRaceHashForMarkPassingComperatorImpl implements TrackedRaceH
         }
         return res;
     }
-    
-    public int CalculateHashForTimePoint (TimePoint tp) {
-        int res = 0; 
-        //How problematic is this cast? 
+
+    public int calculateHashForTimePoint(TimePoint tp) {
+        int res = 0;
+        // How problematic is this cast?
         try {
             res = res ^ (int) tp.asMillis();
             res = (res << 5) - res;
         } catch (Exception e) {
             logger.info("Ther");
         }
-         
-        return res; 
-    }
-    
-    public int CalculateHashForPosition (Position p) {
-        int res = 0;
-            res = res ^ (int) p.getLatDeg();
-            res = res ^ (int) p.getLngDeg();
-            res = (res << 5) - res;
+
         return res;
     }
-    
-    public int CalculateHashForWaypoints () {
+
+    public int calculateHashForPosition(Position p) {
         int res = 0;
-        for(Waypoint p : waypoints) {
+        res = res ^ (int) p.getLatDeg();
+        res = res ^ (int) p.getLngDeg();
+        res = (res << 5) - res;
+        return res;
+    }
+
+    public int calculateHashForWaypoints() {
+        int res = 0;
+        for (Waypoint p : waypoints) {
             res = res ^ p.getId().hashCode();
             try {
                 res = res ^ p.getPassingInstructions().hashCode();
@@ -187,6 +178,6 @@ public class TrackedRaceHashForMarkPassingComperatorImpl implements TrackedRaceH
                 logger.info("Hash calculation for Waypoints failed: " + e);
             }
         }
-        return res; 
+        return res;
     }
 }

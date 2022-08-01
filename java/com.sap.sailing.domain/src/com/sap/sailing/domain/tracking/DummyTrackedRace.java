@@ -35,13 +35,13 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceHashForMarkPassingComperatorImpl.typeOfHash;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -814,11 +814,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public void setHashValuesForMarkPassingCalculation(Map<typeOfHash, Integer> hashValues) {
+    public void setHashValuesForMarkPassingCalculation(Map<TypeOfHash, Integer> hashValues) {
     }
 
     @Override
-    public Map<typeOfHash, Integer> getHashValuesForMarkPassingCalculation() {
+    public Map<TypeOfHash, Integer> getHashValuesForMarkPassingCalculation() {
         return null;
     }
 

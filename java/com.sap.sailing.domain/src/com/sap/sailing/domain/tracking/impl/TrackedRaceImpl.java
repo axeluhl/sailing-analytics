@@ -123,6 +123,7 @@ import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
@@ -158,7 +159,6 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceHashForMarkPassingComperatorImpl.typeOfHash;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -444,7 +444,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient ConcurrentMap<TimePoint, SortedMap<Competitor, Distance>> distancesFromStarboardSideOfStartLineProjectedOntoLineCache;
     private transient ConcurrentMap<TimePoint, TimePoint> distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes;
     
-    private Map<typeOfHash, Integer> hashValuesForMarkPassingCalculation;
+    private Map<TypeOfHash, Integer> hashValuesForMarkPassingCalculation;
     
     /**
      * When a regatta's {@link Regatta#useStartTimeInference()} or {@link Regatta#isControlTrackingFromStartAndFinishTimes()}
@@ -4307,11 +4307,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return trackingConnectorInfo;
     }
     
-    public void setHashValuesForMarkPassingCalculation(Map<typeOfHash, Integer> hashValues) {
+    public void setHashValuesForMarkPassingCalculation(Map<TypeOfHash, Integer> hashValues) {
         this.hashValuesForMarkPassingCalculation = hashValues;
     }
     
-    public Map<typeOfHash, Integer> getHashValuesForMarkPassingCalculation () {
+    public Map<TypeOfHash, Integer> getHashValuesForMarkPassingCalculation () {
         return this.hashValuesForMarkPassingCalculation;
     }
     
