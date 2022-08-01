@@ -5304,4 +5304,5 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
         return new Pair<Boolean, String>(marksAreUsedInOtherRaceLogs, 
                 racesInCollision.substring(0, Math.max(0, racesInCollision.length()-2)));
     }
+    
 }
