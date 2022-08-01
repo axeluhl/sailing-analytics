@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -12,6 +14,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -19,10 +22,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
-import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
-import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 
 class RaceviewerLaunchPad<T extends SimpleRaceMetadataDTO> extends Composite {
 
@@ -38,12 +38,14 @@ class RaceviewerLaunchPad<T extends SimpleRaceMetadataDTO> extends Composite {
 
     private final PopupPanel parent;
     private final PaywallResolver paywallResolver;
+    private Set<RaceviewerLaunchPadItem> launchpadItems = new HashSet<>();
 
     RaceviewerLaunchPad(final T data, final BiFunction<? super T, String, String> raceboardUrlFactory,
-            final Function<? super T, String> mapAndWindChartUrlFactory, final PopupPanel parent) {
+            final Function<? super T, String> mapAndWindChartUrlFactory, final PopupPanel parent, PaywallResolver paywallResolver) {
         this.raceboardUrlFactory = raceboardUrlFactory;
         this.mapAndWindChartUrlFactory = mapAndWindChartUrlFactory;
         this.parent = parent;
+        this.paywallResolver = paywallResolver;
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
         paywallResolver.registerUserStatusEventHandler((dto, notifyOtherInstances) -> {
@@ -53,6 +55,13 @@ class RaceviewerLaunchPad<T extends SimpleRaceMetadataDTO> extends Composite {
         initItems(data);
         initStyles(data);
         sinkEvents(Event.ONCLICK);
+    }
+    
+    private void removeItems() {
+        for (RaceviewerLaunchPadItem element : launchpadItems) {
+            element.getElement().removeFromParent();
+        }
+        launchpadItems.clear();
     }
 
     private ConfirmationDialog createSubscribeDialog(Action action, SecuredDTO contextDTO) {
@@ -100,10 +109,13 @@ class RaceviewerLaunchPad<T extends SimpleRaceMetadataDTO> extends Composite {
             final String url = RaceviewerLaunchPadMenuItem.WIND_AND_COURSE == item ? 
                     mapAndWindChartUrlFactory.apply(data)
                     : raceboardUrlFactory.apply(data, item.raceBoardMode);
-            itemContainerUi.appendChild(new RaceviewerLaunchPadItem(item.label, item.icon, url).getElement());
+            final RaceviewerLaunchPadItem element = new RaceviewerLaunchPadItem(item.label, item.icon, url);
+            this.launchpadItems.add(element);
+            itemContainerUi.appendChild(element.getElement());
         }else {
             createSubscribeDialog(item.action, data);
         }
+        
     }
 
     private enum RaceviewerLaunchPadMenuItem {
