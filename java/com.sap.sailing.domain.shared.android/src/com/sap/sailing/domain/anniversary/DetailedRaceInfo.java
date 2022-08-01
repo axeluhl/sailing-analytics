@@ -17,7 +17,7 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
     private final String eventName;
     private final String leaderboardDisplayName;
     private final String leaderboardName;
-    private EventType eventType;
+    private final EventType eventType;
 
     public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, String leaderboardDisplayName,
             TimePoint timePoint, UUID eventId, String eventName, EventType eventType,

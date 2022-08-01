@@ -213,7 +213,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     }
 
     @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is, Map<String, Class<?>> classLoaderCache) throws IOException {
         return new ObjectInputStream(is);
     }
 
