@@ -41,7 +41,6 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
@@ -874,14 +873,4 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public boolean hasFinishedLoading() {
         return false;
     }
-
-    @Override
-    public void setHashValuesForMarkPassingCalculation(Map<TypeOfHash, Integer> hashValues) {
-    }
-
-    @Override
-    public Map<TypeOfHash, Integer> getHashValuesForMarkPassingCalculation() {
-        return null;
-    }
-
 }

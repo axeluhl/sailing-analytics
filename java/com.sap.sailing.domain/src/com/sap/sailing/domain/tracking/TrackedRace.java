@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking;
 import java.io.Serializable;
 import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
@@ -52,7 +51,6 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
@@ -1421,8 +1419,4 @@ public interface TrackedRace extends Serializable, IsManagedByCache<DomainFactor
      * hypothetical "line" perpendicular to the first leg's bearing.
      */
     Pair<Bearing, Position> getStartLineBearingAndStarboardMarkPosition(TimePoint timePoint);
-
-    void setHashValuesForMarkPassingCalculation(Map<TypeOfHash, Integer> hashValues);
-
-    Map<TypeOfHash, Integer> getHashValuesForMarkPassingCalculation();
 }

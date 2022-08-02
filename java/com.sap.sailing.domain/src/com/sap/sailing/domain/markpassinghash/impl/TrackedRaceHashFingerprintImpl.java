@@ -11,7 +11,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -19,64 +18,81 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
     private static final Logger logger = Logger.getLogger(TrackedRaceHashFingerprintImpl.class.getName());
 
     private final int competitorHash;
-    private final int startHash; // TODO use TimePoint instead?
+    private final int startHash; // TODO use TimePoint instead? -> problem would be that we use startOfTracking and startOfRace if it is allowed
     private final int endHash; // TODO use TimePoint instead?
     private final int waypointsHash;
     private final int numberOfGPSFixesHash;
     private final int gpsFixesHash;
-    
-    private static enum JSON_FIELDS { COMPETITOR, START_TIME, END_TIME, EAYPOINTS, NUMBEROFGPSFIXES, GPSFIXES };
+
+    private static enum JSON_FIELDS {
+        COMPETITOR, START_TIME, END_TIME, WAYPOINTS, NUMBEROFGPSFIXES, GPSFIXES
+    };
 
     public TrackedRaceHashFingerprintImpl(TrackedRace trackedRace) {
+        this.competitorHash = calculateHashForCompetitors(trackedRace);
+        this.startHash = calculateHashForStart(trackedRace);
+        this.endHash = calculateHashForStart(trackedRace);
+        this.waypointsHash = calculateHashForWaypoints(trackedRace);
+        this.numberOfGPSFixesHash = calculateHashForNumberOfGPSFixes(trackedRace);
+        this.gpsFixesHash = calculateHashForGPSFixes(trackedRace);
     }
-    
+
     public TrackedRaceHashFingerprintImpl(JSONObject json) {
-        JSONObject result = new JSONObject();
-        result.put(COMPETITOR, hashValues.get(TypeOfHash.COMPETITOR));
-        result.put(START, hashValues.get(TypeOfHash.START));
-        result.put(END, hashValues.get(TypeOfHash.END));
-        result.put(WAYYPOINTS, hashValues.get(TypeOfHash.WAYPOINTS));
-        result.put(NUMBEROFGPSFIXES, hashValues.get(TypeOfHash.NUMBEROFGPSFIXES));
-        result.put(GPSFIXES, hashValues.get(TypeOfHash.GPSFIXES));
-        return result;
+        int competitorHash = 0;
+        int startHash = 0;
+        int endHash = 0;
+        int waypointsHash = 0;
+        int numberOfGPSFixesHash = 0;
+        int gpsFixesHash = 0;
+        try {
+            competitorHash = (int) json.get(JSON_FIELDS.COMPETITOR);
+            startHash = (int) json.get(JSON_FIELDS.START_TIME);
+            endHash = (int) json.get(JSON_FIELDS.END_TIME);
+            waypointsHash = (int) json.get(JSON_FIELDS.WAYPOINTS);
+            numberOfGPSFixesHash = (int) json.get(JSON_FIELDS.NUMBEROFGPSFIXES);
+            gpsFixesHash = (int) json.get(JSON_FIELDS.GPSFIXES);
+        } catch (Exception e) {
+            logger.info("An error occured: " + e);
+        }
+        this.competitorHash = competitorHash;
+        this.startHash = startHash;
+        this.endHash = endHash;
+        this.waypointsHash = waypointsHash;
+        this.numberOfGPSFixesHash = numberOfGPSFixesHash;
+        this.gpsFixesHash = gpsFixesHash;
     }
 
     @Override
     public JSONObject toJson() {
-        return null;
+        JSONObject result = new JSONObject();
+        result.put(JSON_FIELDS.COMPETITOR, competitorHash);
+        result.put(JSON_FIELDS.START_TIME, startHash);
+        result.put(JSON_FIELDS.END_TIME, endHash);
+        result.put(JSON_FIELDS.WAYPOINTS, waypointsHash);
+        result.put(JSON_FIELDS.NUMBEROFGPSFIXES, numberOfGPSFixesHash);
+        result.put(JSON_FIELDS.GPSFIXES, gpsFixesHash);
+        return result;
     }
 
     @Override
     public boolean matches(TrackedRace trackedRace) {
-        TrackedRaceHashForMarkPassingCalculationFactoryImpl factory = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
         final boolean result;
-        if (getWaypoints() != trackedRaceHashFingerprint.getWaypoints()) {
+        if (waypointsHash != calculateHashForWaypoints(trackedRace)) {
             result = false;
         } else if (competitorHash != calculateHashForCompetitors(trackedRace)) {
             result = false;
-        } else if (getStart() != trackedRaceHashFingerprint.getStart()) {
+        } else if (startHash != calculateHashForStart(trackedRace)) {
             result = false;
-        } else if (getEnd() != trackedRaceHashFingerprint.getEnd()) {
+        } else if (endHash != calculateHashForEnd(trackedRace)) {
             result = false;
-        } else if (getNumberOfGPSFixes() != trackedRaceHashFingerprint.getNumberOfGPSFixes()) {
+        } else if (numberOfGPSFixesHash != calculateHashForNumberOfGPSFixes(trackedRace)) {
             result = false;
-        } else if (getGpsFixes() != trackedRaceHashFingerprint.getGpsFixes()) {
+        } else if (gpsFixesHash != calculateHashForGPSFixes(trackedRace)) {
             result = false;
         } else {
             result = true;
         }
         return result;
-    }
-    
-    public TrackedRaceHashFingerprintImpl create(TrackedRace trackedRace) {
-        int hashForWaypoints = calculateHashForWaypoints(trackedRace);
-        int hashForCompetitors = calculateHashForCompetitors(trackedRace);
-        int hashForStart = calculateHashForStart(trackedRace);
-        int hashForEnd = calculateHashForEnd(trackedRace);
-        int hashForNumberOfGPSFixes = calculateHashForNumberOfGPSFixes(trackedRace);
-        int hashForGPSFixes = calculateHashForGPSFixes(trackedRace);
-        return new TrackedRaceHashFingerprintImpl(hashForWaypoints, hashForCompetitors, hashForStart, hashForEnd,
-                hashForNumberOfGPSFixes, hashForGPSFixes);
     }
 
     private int calculateHashForCompetitors(TrackedRace trackedRace) {
@@ -138,7 +154,6 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
                 try {
                     trackedRace.getTrack(m).lockForRead();
                     gpsTrack = trackedRace.getTrack(m).getFixes();
-                    // Unused warning since we need the individual Fixes only to count
                     for (int i = 0; i < Util.size(gpsTrack); i++) {
                         count++;
                     }
@@ -162,6 +177,7 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
                     trackedRace.getTrack(m).lockForRead();
                     gpsTrack = trackedRace.getTrack(m).getFixes();
                     for (GPSFix gf : gpsTrack) {
+                        //could we leave them out since 
                         res = res ^ calculateHashForTimePoint(gf.getTimePoint());
                         res = (res << 5) - res;
                         res = res ^ calculateHashForPosition(gf.getPosition());

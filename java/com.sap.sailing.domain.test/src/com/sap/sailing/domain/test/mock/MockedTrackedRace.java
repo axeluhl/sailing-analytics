@@ -3,7 +3,6 @@ package com.sap.sailing.domain.test.mock;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
@@ -50,7 +49,6 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
@@ -1363,14 +1361,4 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public boolean hasFinishedLoading() {
         return false;
     }
-
-    @Override
-    public void setHashValuesForMarkPassingCalculation(Map<TypeOfHash, Integer> hashValues) {
-    }
-
-    @Override
-    public Map<TypeOfHash, Integer> getHashValuesForMarkPassingCalculation() {
-        return null;
-    }
-
 }

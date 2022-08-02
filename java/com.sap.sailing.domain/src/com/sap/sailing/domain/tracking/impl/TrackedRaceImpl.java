@@ -123,7 +123,6 @@ import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
@@ -444,8 +443,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient ConcurrentMap<TimePoint, SortedMap<Competitor, Distance>> distancesFromStarboardSideOfStartLineProjectedOntoLineCache;
     private transient ConcurrentMap<TimePoint, TimePoint> distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes;
     
-    private Map<TypeOfHash, Integer> hashValuesForMarkPassingCalculation;
-    
     /**
      * When a regatta's {@link Regatta#useStartTimeInference()} or {@link Regatta#isControlTrackingFromStartAndFinishTimes()}
      * changes, the tracking start/end times need to be recalculated. This regatta listener handles this. It has to be
@@ -521,7 +518,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
         int i = 0;
-        this.hashValuesForMarkPassingCalculation = new HashMap<>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Mark mark : waypoint.getMarks()) {
                 getOrCreateTrack(mark);
@@ -4306,13 +4302,4 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return trackingConnectorInfo;
     }
-    
-    public void setHashValuesForMarkPassingCalculation(Map<TypeOfHash, Integer> hashValues) {
-        this.hashValuesForMarkPassingCalculation = hashValues;
-    }
-    
-    public Map<TypeOfHash, Integer> getHashValuesForMarkPassingCalculation () {
-        return this.hashValuesForMarkPassingCalculation;
-    }
-    
 }
