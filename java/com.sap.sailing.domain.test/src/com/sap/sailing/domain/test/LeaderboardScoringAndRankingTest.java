@@ -2819,13 +2819,27 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
      * Tests the default behavior of contiguously scored fleets when the ranks of the fleets are zero.
      * <p>
      * Expected behavior:<br>
-     * Fleets are treated as if there was no contiguous scoring. Accordingly, ranks are duplicated, with fleets always
+     * Fleets are treated as if there was no contiguous scoring. Accordingly, ranks are present twice, with fleets always
      * alternating. Within a fleet rank, the order is determined by the {@link Competitor#getName() name} of the
      * competitor. The ordering within a rank is not tested within this test.
      */
     @Test
     public void testTotalRankComparatorForOrderedSplitFleetsWithZeroAsRank() throws NoWindException {
         testTotalRankComparatorForOrderedSplitFleets(/* fleetOrdering */ 0);
+    }
+    
+    /**
+     * Tests the default behavior of contiguously scored fleets when the ranks of the fleets are not zero. 
+     * This test was added because the internal behavior for fleets with a non-zero rank is different from 
+     * the behavior of fleets with a rank equal to zero.<p>   
+     * Expected behavior: <br>
+     * Fleets are treated as if there was no contiguous scoring. Accordingly, ranks are present twice, with fleets always
+     * alternating. Within a fleet rank, the order is determined by the {@link Competitor#getName() name} of the
+     * competitor. The ordering within a rank is not tested within this test.
+     */
+    @Test
+    public void testTotalRankComparatorForOrderedSplitFleetsWithOneAsRank() throws NoWindException {
+        testTotalRankComparatorForOrderedSplitFleets(/* fleetOrdering */ 1);
     }
 
     private void testTotalRankComparatorForOrderedSplitFleets(final int fleetOrdering) {
@@ -2868,12 +2882,18 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         for (Competitor rankedCompetitor : rankedCompetitors) {
             netPoints.put(rankedCompetitor, leaderboard.getNetPoints(rankedCompetitor, later));
         }
+        
+        /*
+         * Checks all ranks that have been awarded twice (in both fleets). 
+         * This is done by iterating over each "rank pair". 
+         */
         for (int i = 0; i < Math.min(yellow.size(), blue.size()) * 2; i = i + 2) {
             final Competitor comp1 = rankedCompetitors.get(i);
             final Competitor comp2 = rankedCompetitors.get(i + 1);
             assertEquals(netPoints.get(comp1), netPoints.get(comp2));
             assertNotSame(r1Column.getFleetOfCompetitor(comp1), r1Column.getFleetOfCompetitor(comp2));
         }
+        // Checks all ranks that have been awarded once. 
         for (int i = Math.min(yellow.size(), blue.size()) * 2; i < (yellow.size() + blue.size()) - 1; i++) {
             final Competitor comp1 = rankedCompetitors.get(i);
             final Competitor comp2 = rankedCompetitors.get(i + 1);
@@ -2882,19 +2902,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         }
     }
     
-    /**
-     * Tests the default behavior of contiguously scored fleets when the ranks of the fleets are not zero. 
-     * This test was added because the internal behavior for fleets with a non-zero rank is different from 
-     * the behavior of fleets with a rank equal to zero.<p>   
-     * Expected behavior: <br>
-     * Fleets are treated as if there were no contiguous scoring. Accordingly, ranks are duplicated, 
-     * with fleets always alternating. Within a rank, the order is determined by the name of the sailor.
-     * The ordering within a rank is not tested within this test.
-     */
-    @Test
-    public void testTotalRankComparatorForOrderedSplitFleetsWithOneAsRank() throws NoWindException {
-        testTotalRankComparatorForOrderedSplitFleets(/* fleetOrdering */ 1);
-    }
+
 
     /**
      * See bug 3798: special discarding rule that limits the number of discards for the final series; configured
