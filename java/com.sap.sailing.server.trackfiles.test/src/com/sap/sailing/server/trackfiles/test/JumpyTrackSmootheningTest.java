@@ -123,6 +123,13 @@ public class JumpyTrackSmootheningTest {
                          * metric could be the fix's own speed vector compared to the speed vectors calculated to the
                          * two adjacent fixes. Sub-sequence transitions then could be detected by massive deviations
                          * between the adjacent fixes.
+                         * 
+                         * In our special cases we have so far, if the "fix" has a non-zero milliseconds part in its
+                         * time stamp then the "previous" fix has a zero milliseconds part, and vice versa. Furthermore,
+                         * if the "fix" has a non-zero milliseconds part then the jump seems to be a forward jump with the
+                         * course remaining mostly the same and only the speed showing an outlier, whereas if the
+                         * "previous" fix has a non-zero milliseconds part then the course flips approximately to its
+                         * reverse course compared to the course reported consistently by all of the fixes.
                          */
                         numberOfInconsistencies++;
                         final Duration offset = findOptimalOffset(fix, track);
@@ -148,6 +155,11 @@ public class JumpyTrackSmootheningTest {
         final Duration samplingInterval = track.getAverageIntervalBetweenFixes();
         final Iterator<GPSFixMoving> ascendingIterator = track.getFixesIterator(fix.getTimePoint(), /* inclusive */ false);
         final Iterator<GPSFixMoving> descendingIterator = track.getFixesDescendingIterator(fix.getTimePoint(), /* inclusive */ false);
+        // TODO why not use the fix position instead of projecting its COG/SOG and try to find the optimal time point along the track where it fits,
+        // based on the position of the respective adjacent fixes? Then interpolate the time point based on the respective distances from the
+        // two adjacent fixes and an assumed constant speed between them
+        // TODO problem: is fix the first of a correct or an incorrect sub-sequence? Within its sub-sequence it will be placed perfectly fine, but the offset
+        // will have to be computed with the other sub-sequence. Take the maximum of the two minima found in each direction.
         final Position predictedNextPosition = fix.getSpeed().travelTo(fix.getPosition(), samplingInterval);
         Duration ascendingOffset = null;
         Duration descendingOffset = null;
@@ -182,11 +194,12 @@ public class JumpyTrackSmootheningTest {
     }
 
     private boolean tooDifferent(SpeedWithBearing inferred, SpeedWithBearing reported) {
+        final double speedRatio = Math.abs((inferred.getKnots()-reported.getKnots()) / reported.getKnots());
         return
                 // speed difference must be less than 20% of 
-                (Math.abs((inferred.getKnots()-reported.getKnots()) / inferred.getKnots()) > 0.7 ||
+                speedRatio > 2.0 ||
                 // course difference must be less than 10deg
-                Math.abs(inferred.getBearing().getDifferenceTo(reported.getBearing()).getDegrees()) > 30);
+                Math.abs(inferred.getBearing().getDifferenceTo(reported.getBearing()).getDegrees()) > 120;
     }
 
     @Test
