@@ -94,28 +94,35 @@ public class JumpyTrackSmootheningTest {
                          * 
                          * We start with a fix that doesn't seem to fit the sequence when extrapolating from the
                          * "previous" fix. We do not know which of the two has the correct time, but we can try moving
-                         * the "fix" along the time axis, searching for an offset that would minimize the difference
-                         * between the position interpolated between two adjacent positions and the actual position of
-                         * the fix. The interpolated time point minus the fix's reported time stamp then is a candidate
-                         * for an offset.
+                         * the "offending fix" along the time axis, searching for an offset that would minimize the
+                         * "offense." Part of the "offense metric" could be the difference between the position
+                         * interpolated between two adjacent positions and the actual position of the fix. The
+                         * interpolated time point minus the fix's reported time stamp then is a candidate for an
+                         * offset.
                          * 
-                         * However, the "fix" may be followed immediately by another fix of the same incorrect time line.
-                         * Then, it would seem as if leaving it where it is gives a good prediction of the next position
-                         * in the track where in fact that next fix would also need to be moved back or forward in time
-                         * by the same offset.
+                         * However, the "fix" may be followed immediately by another fix of the same incorrect time
+                         * line. Then, it would seem as if leaving it where it is gives a good prediction of the next
+                         * position in the track where in fact that next fix would also need to be moved back or forward
+                         * in time by the same offset.
                          * 
-                         * At each boundary between the two sub-sequences a mismatch between position / course extrapolated
-                         * and observed/reported would be detected. If the fix in hand is one of the "correct" time line,
-                         * trying to determine its offset may be tricky because we would try to match it against fixes
-                         * in the incorrect sparse sub-sequence that may not have enough fixes for a reasonable interpolation.
+                         * At each boundary between the two sub-sequences a mismatch between position / course
+                         * extrapolated and observed/reported would be detected. Furthermore, the sequence of COG/SOG
+                         * vectors will experience a significant "jump" at such a boundary, jumping back near its
+                         * original value after the end of the interleaved part of the other sub-sequence.
                          * 
-                         * With this in mind we would always have to look "both ways," trying to find out whether the left or
-                         * the right fix is easier to move by an offset to fit in.
+                         * If the fix in hand is one of the "correct" time line, trying to determine its offset may be
+                         * tricky because we would try to match it against fixes in the incorrect sparse sub-sequence
+                         * that may not have enough fixes for a reasonable interpolation.
                          * 
-                         * Judgment of fixes based on their neighbors may happen by comparing their position to the position
-                         * predicted by the previous and next fix using their position and speed vector each; the metric then
-                         * would be the distance between predicted and actual position. An additional metric could be the
-                         * fix's own speed vector compared to 
+                         * With this in mind we would always have to look "both ways," trying to find out whether the
+                         * left or the right fix is easier to move by an offset to fit in.
+                         * 
+                         * Judgment of fixes based on their neighbors may happen by comparing their position to the
+                         * position predicted by the previous and next fix using their position and speed vector each;
+                         * the metric then would be the distance between predicted and actual position. An additional
+                         * metric could be the fix's own speed vector compared to the speed vectors calculated to the
+                         * two adjacent fixes. Sub-sequence transitions then could be detected by massive deviations
+                         * between the adjacent fixes.
                          */
                         numberOfInconsistencies++;
                         final Duration offset = findOptimalOffset(fix, track);
