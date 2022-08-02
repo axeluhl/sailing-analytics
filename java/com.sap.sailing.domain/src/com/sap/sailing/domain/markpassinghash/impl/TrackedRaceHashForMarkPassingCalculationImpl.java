@@ -1,54 +1,34 @@
 package com.sap.sailing.domain.markpassinghash.impl;
 
-import java.util.Map;
-
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingComparatorImpl.TypeOfHash;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 
 public class TrackedRaceHashForMarkPassingCalculationImpl {
-    private final int competitor;
-    private final int start;
-    private final int end;
-    private final int waypoints;
-    private final int numberOfGPSFixes;
-    private final int gpsFixes;
+    private final TrackedRaceHashFingerprintImpl hashFingerprint;
 
-    public TrackedRaceHashForMarkPassingCalculationImpl(Map<TypeOfHash, Integer> hashValues) {
-        this.competitor = hashValues.get(TypeOfHash.COMPETITOR);
-        this.start = hashValues.get(TypeOfHash.START);
-        this.end = hashValues.get(TypeOfHash.END);
-        this.waypoints = hashValues.get(TypeOfHash.WAYPOINTS);
-        this.numberOfGPSFixes = hashValues.get(TypeOfHash.NUMBEROFGPSFIXES);
-        this.gpsFixes = hashValues.get(TypeOfHash.GPSFIXES);
-
+    public TrackedRaceHashForMarkPassingCalculationImpl(TrackedRaceHashFingerprintImpl hashFingerprint) {
+        this.hashFingerprint = hashFingerprint;
     }
 
     public boolean equals(TrackedRaceImpl trackedRace) {
-        TrackedRaceHashForMarkPassingComparatorImpl hashCalculator = new TrackedRaceHashForMarkPassingComparatorImpl(
-                trackedRace);
-        int competitorHash = 0;
+        TrackedRaceHashForMarkPassingCalculationFactoryImpl factory = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
+        TrackedRaceHashFingerprintImpl trackedRaceHashFingerprint = factory.create(trackedRace);
 
-        if (hashCalculator.calculateHashForWaypoints() != waypoints)
+        if (hashFingerprint.getWaypoints() != trackedRaceHashFingerprint.getWaypoints())
             return false;
 
-        for (Competitor c : trackedRace.getRace().getCompetitors()) {
-            competitorHash = competitorHash + hashCalculator.calculateHashForCompetitor(c);
-        }
-
-        if (competitorHash != competitor)
+        if (hashFingerprint.getCompetitor() != trackedRaceHashFingerprint.getCompetitor())
             return false;
 
-        if (hashCalculator.calculateHashForStart() != start)
+        if (hashFingerprint.getStart() != trackedRaceHashFingerprint.getStart())
             return false;
 
-        if (hashCalculator.calculateHashForEnd() != end)
+        if (hashFingerprint.getEnd() != trackedRaceHashFingerprint.getEnd())
             return false;
 
-        if (hashCalculator.calculateHashForNumberOfGPSFixes() != numberOfGPSFixes)
+        if (hashFingerprint.getNumberOfGPSFixes() != trackedRaceHashFingerprint.getNumberOfGPSFixes())
             return false;
 
-        if (hashCalculator.calculateHashForGPSFixes() != gpsFixes)
+        if (hashFingerprint.getGpsFixes() != trackedRaceHashFingerprint.getGpsFixes())
             return false;
 
         return true;

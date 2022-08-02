@@ -2,7 +2,6 @@ package com.sap.sailing.domain.test.hash;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.logging.Logger;
 
 import org.junit.Before;
 
@@ -11,7 +10,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public class CalculatingHashTest extends OnlineTracTracBasedTest {
-    private static final Logger logger = Logger.getLogger(CalculatingHashTest.class.getName());
+//    private static final Logger logger = Logger.getLogger(CalculatingHashTest.class.getName());
     DynamicTrackedRaceImpl trackedRace1;
     DynamicTrackedRaceImpl trackedRace2;
 
