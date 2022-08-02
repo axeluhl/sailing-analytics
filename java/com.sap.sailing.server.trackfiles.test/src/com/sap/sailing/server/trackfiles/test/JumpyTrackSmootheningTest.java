@@ -189,7 +189,8 @@ public class JumpyTrackSmootheningTest {
                 previousDescendingFix = descendingFix;
             }
         }
-        return ascendingMinimum.compareTo(descendingMinimum) < 0 && ascendingOffset != null ?
+        // Use the greater of the two offsets; the lesser will link it to its own sub-sequence neighbor
+        return ascendingMinimum.abs().compareTo(descendingMinimum.abs()) > 0 && ascendingOffset != null ?
                 ascendingOffset : descendingOffset;
     }
 
