@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.markpassinghash;
 
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashFingerprintImpl;
-import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingCalculationImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import org.json.simple.JSONObject;
+
+import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashForMarkPassingCalculationFactoryImpl;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 public interface TrackedRaceHashForMaskPassingCalculationFactory {
-
-    TrackedRaceHashFingerprintImpl create(TrackedRaceImpl trackedRace);
+    TrackedRaceHashForMaskPassingCalculationFactory INSTANCE = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
+    
+    TrackedRaceHashFingerprint createFingerprint(TrackedRace trackedRace);
+    
+    TrackedRaceHashFingerprint fromJson(JSONObject json);
 }
