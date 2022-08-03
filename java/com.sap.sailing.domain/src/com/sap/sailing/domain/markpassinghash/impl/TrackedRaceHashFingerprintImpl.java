@@ -217,7 +217,27 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
         int res = 0;
         for (Waypoint p : waypoints) {
-            //auf kongruenz der marks equals auf cours aber nicht als equals methode 
+            Iterable<Mark> marks = p.getMarks();
+            for (Mark m : marks) {
+                try {
+                    res = res ^ m.getOriginatingMarkPropertiesIdOrNull().hashCode();
+                    res = res ^ m.getOriginatingMarkTemplateIdOrNull().hashCode();
+                    res = res ^ m.getType().hashCode();
+                    res = (res << 5) - res;
+                } catch (Exception e) {
+                    logger.info("Getting the OriginationMarkPropertiesId and OriginationgMarkTemplateId for the mark " + m + " failed: " + e);
+                }
+                Iterable<Mark> controlPoints = m.getMarks();
+                for (Mark cp : controlPoints) {
+                    try {
+                        res = res ^ cp.getOriginatingMarkPropertiesIdOrNull().hashCode();
+                        res = res ^ cp.getOriginatingMarkTemplateIdOrNull().hashCode();
+                        res = (res << 5) - res;
+                    } catch (Exception e) {
+                        logger.info("Getting the OriginationMarkPropertiesId and OriginationgMarkTemplateId  for the controlPoint " + cp + " failed: " + e);
+                    }
+                }
+            }
             res = res ^ p.getName().hashCode();
             try {
                 res = res ^ p.getPassingInstructions().hashCode();

@@ -13,8 +13,11 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -112,7 +115,6 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
     @Test
     public void JsonDeserializationWithChangesInRace() {
         DynamicTrackedRaceImpl testRace = trackedRace2;
-        
         TrackedRaceHashForMarkPassingCalculationFactoryImpl factory = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
         TrackedRaceHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         // Change of the race should result in a different hash
@@ -140,6 +142,23 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         assertNotEquals(output1.toJson(), output2.toJson());
     }
     
+    @Test
+    public void WaypointChangePassingInstructionTest () {
+        DynamicTrackedRaceImpl testRace = trackedRace2;
+        TrackedRaceHashForMarkPassingCalculationFactoryImpl factory = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
+        Waypoint wp = testRace.getRace().getCourse().getFirstWaypoint();
+        ControlPoint cP = wp.getControlPoint();
+        WaypointImpl wpNew = new WaypointImpl(cP, PassingInstruction.Gate);
+        
+        testRace.getRace().getCourse().removeWaypoint(0);
+        testRace.getRace().getCourse().addWaypoint(0, wpNew);
+        TrackedRaceHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(testRace);
+        JSONObject json1 = fingerprint1.toJson();
+        JSONObject json2 = fingerprint2.toJson();
+        
+        assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
+    }
     
     //test für änderungen an einem Waypoint
 }
