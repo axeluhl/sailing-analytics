@@ -26,6 +26,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.kmeans.Cluster;
 import com.sap.sse.util.kmeans.KMeansClusterer;
@@ -131,6 +132,7 @@ public class JumpyTrackSmootheningTest {
                          * "previous" fix has a non-zero milliseconds part then the course flips approximately to its
                          * reverse course compared to the course reported consistently by all of the fixes.
                          */
+                        // FIXME: the problem is that fix or previous can be an outlier; if "previous" is the outlier, looking to move "fix" around won't help
                         numberOfInconsistencies++;
                         final Duration offset = findOptimalOffset(fix, track);
                         offsetSum = offsetSum.plus(offset);
@@ -152,46 +154,41 @@ public class JumpyTrackSmootheningTest {
     }
     
     private Duration findOptimalOffset(GPSFixMoving fix, DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
-        final Duration samplingInterval = track.getAverageIntervalBetweenFixes();
         final Iterator<GPSFixMoving> ascendingIterator = track.getFixesIterator(fix.getTimePoint(), /* inclusive */ false);
         final Iterator<GPSFixMoving> descendingIterator = track.getFixesDescendingIterator(fix.getTimePoint(), /* inclusive */ false);
-        // TODO why not use the fix position instead of projecting its COG/SOG and try to find the optimal time point along the track where it fits,
-        // based on the position of the respective adjacent fixes? Then interpolate the time point based on the respective distances from the
-        // two adjacent fixes and an assumed constant speed between them
-        // TODO problem: is fix the first of a correct or an incorrect sub-sequence? Within its sub-sequence it will be placed perfectly fine, but the offset
-        // will have to be computed with the other sub-sequence. Take the maximum of the two minima found in each direction.
-        final Position predictedNextPosition = fix.getSpeed().travelTo(fix.getPosition(), samplingInterval);
-        Duration ascendingOffset = null;
-        Duration descendingOffset = null;
-        Distance ascendingMinimum = new MeterDistance(Double.MAX_VALUE);
-        Distance descendingMinimum = new MeterDistance(Double.MAX_VALUE);
+        final Duration ascendingOffset = findOptimalOffset(fix, ascendingIterator);
+        final Duration descendingOffset = findOptimalOffset(fix, descendingIterator);
+        // Use the greater of the two offsets; the lesser will link it to its own sub-sequence neighbor
+        return ascendingOffset != null && ascendingOffset.abs().compareTo(descendingOffset.abs()) > 0 ?
+                ascendingOffset : descendingOffset;
+    }
+    
+    private Duration findOptimalOffset(final GPSFixMoving fix, final Iterator<GPSFixMoving> ascendingIterator) {
+        final Position fixPosition = fix.getPosition();
         GPSFixMoving previousAscendingFix = null;
-        GPSFixMoving previousDescendingFix = null;
-        while ((ascendingOffset == null && ascendingIterator.hasNext()) || (descendingOffset == null && descendingIterator.hasNext())) {
-            if (ascendingIterator.hasNext()) {
-                final GPSFixMoving ascendingFix = ascendingIterator.next();
-                final Distance d = ascendingFix.getPosition().getDistance(predictedNextPosition);
+        Distance ascendingMinimum = new MeterDistance(Double.MAX_VALUE);
+        Duration ascendingOffset = null;
+        boolean foundMinimum = false;
+        while (!foundMinimum && ascendingIterator.hasNext()) {
+            final GPSFixMoving ascendingFix = ascendingIterator.next();
+            if (previousAscendingFix != null) {
+                final Distance d = fixPosition.getDistanceToLine(previousAscendingFix.getPosition(), ascendingFix.getPosition()).abs();
                 if (d.compareTo(ascendingMinimum) < 0) {
                     ascendingMinimum = d;
+                    final Distance distanceFromPreviousAscendingFix = previousAscendingFix.getPosition().getDistance(fixPosition);
+                    final Distance distanceFromAscendingFix = ascendingFix.getPosition().getDistance(fixPosition);
+                    // interpolate the time between the adjacent fixes to whose connection "fix" is closest, splitting the duration
+                    // between the adjacent fixes proportionately based on "fix"'s distances to each of the two adjacent fixes:
+                    final TimePoint inferredTimePointForFix = previousAscendingFix.getTimePoint().plus(previousAscendingFix.getTimePoint().until(ascendingFix.getTimePoint()).times(
+                            distanceFromPreviousAscendingFix.divide(distanceFromPreviousAscendingFix.add(distanceFromAscendingFix))));
+                    ascendingOffset = fix.getTimePoint().until(inferredTimePointForFix);
                 } else { // we found a minimum after fix:
-                    ascendingOffset = fix.getTimePoint().until(previousAscendingFix.getTimePoint().minus(samplingInterval));
+                    foundMinimum = true;
                 }
-                previousAscendingFix = ascendingFix;
             }
-            if (descendingIterator.hasNext()) {
-                final GPSFixMoving descendingFix = descendingIterator.next();
-                final Distance d = descendingFix.getPosition().getDistance(predictedNextPosition);
-                if (d.compareTo(descendingMinimum) < 0) {
-                    descendingMinimum = d;
-                } else { // we found a minimum after fix:
-                    descendingOffset = fix.getTimePoint().until(previousDescendingFix.getTimePoint().minus(samplingInterval));
-                }
-                previousDescendingFix = descendingFix;
-            }
+            previousAscendingFix = ascendingFix;
         }
-        // Use the greater of the two offsets; the lesser will link it to its own sub-sequence neighbor
-        return ascendingMinimum.abs().compareTo(descendingMinimum.abs()) > 0 && ascendingOffset != null ?
-                ascendingOffset : descendingOffset;
+        return ascendingOffset;
     }
 
     private boolean tooDifferent(SpeedWithBearing inferred, SpeedWithBearing reported) {
