@@ -169,7 +169,7 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
 
     private int calculateHashForGPSFixes(TrackedRace trackedRace) {
         Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
-        int res = 0;
+        int res = 1;
         for (Waypoint w : waypoints) {
             for (Mark m : w.getMarks()) {
                 Iterable<GPSFix> gpsTrack = null;
@@ -177,7 +177,6 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
                     trackedRace.getTrack(m).lockForRead();
                     gpsTrack = trackedRace.getTrack(m).getFixes();
                     for (GPSFix gf : gpsTrack) {
-                        //could we leave them out since 
                         res = res ^ calculateHashForTimePoint(gf.getTimePoint());
                         res = (res << 5) - res;
                         res = res ^ calculateHashForPosition(gf.getPosition());
@@ -218,12 +217,14 @@ public class TrackedRaceHashFingerprintImpl implements TrackedRaceHashFingerprin
         Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
         int res = 0;
         for (Waypoint p : waypoints) {
-            res = res ^ p.getId().hashCode();
+            //auf kongruenz der marks equals auf cours aber nicht als equals methode 
+            res = res ^ p.getName().hashCode();
             try {
                 res = res ^ p.getPassingInstructions().hashCode();
             } catch (Exception e) {
                 logger.info("Hash calculation for Waypoints failed: " + e);
             }
+            res = (res << 5) - res;
         }
         return res;
     }
