@@ -70,6 +70,14 @@ public class JumpyTrackSmootheningTest {
                 (fix, device)->track.add((GPSFixMoving) fix), /* inferSpeedAndBearing */ false, filename);
     }
     
+    private boolean isBoundaryBetweenCorrectAndIncorrectSubsequence(GPSFixMoving previous, GPSFixMoving fix) {
+        final SpeedWithBearing inferred = previous.getSpeedAndBearingRequiredToReach(fix);
+        final SpeedWithBearing reportedByPrevious = previous.getSpeed();
+        final SpeedWithBearing reportedByFix = fix.getSpeed();
+        // TODO for high frequency (~1Hz) tracks with approximately equal COG/SOG values for previous/fix as could additionally assume that fix needs to be close to the position extrapolated from previous and the average COG/SOG
+        return tooDifferent(inferred, reportedByPrevious) || tooDifferent(inferred, reportedByFix);
+    }
+    
     /**
      * On {@link #track} looks at adjacent fixes and compares the COG/SOG values reported by those fixes
      * with the COG/SOG value inferred from their position and time delta.
@@ -84,11 +92,8 @@ public class JumpyTrackSmootheningTest {
         try {
             for (final GPSFixMoving fix : track.getRawFixes()) { // raw fixes with ascending reported time
                 if (previous != null) {
-                    final SpeedWithBearing inferred = previous.getSpeedAndBearingRequiredToReach(fix);
-                    inferredSpeeds.put(fix, inferred);
-                    final SpeedWithBearing reportedByPrevious = previous.getSpeed();
-                    final SpeedWithBearing reportedByFix = fix.getSpeed();
-                    if (tooDifferent(inferred, reportedByPrevious) || tooDifferent(inferred, reportedByFix)) {
+                    inferredSpeeds.put(fix, previous.getSpeedAndBearingRequiredToReach(fix));
+                    if (isBoundaryBetweenCorrectAndIncorrectSubsequence(previous, fix)) {
                         /*
                          * Hypothesis: we have two sequences folded/merged into one, where one is offset to the other by
                          * some more or less constant duration. Both describe the movement of the same object, and the
@@ -99,8 +104,8 @@ public class JumpyTrackSmootheningTest {
                          * 
                          * We can identify boundaries between the two sub-sequences with some probability. There are the
                          * transitions from the "correct" to the "outlier" sub-sequence and vice-versa. If a transition
-                         * represents a jump forward in time then it is harder to detect reliably because it mostly
-                         * looks as if only the SOG as inferred between the adjacent fixes has increased by some margin,
+                         * represents a jump forward in time then it may be hard to detect reliably because it mostly
+                         * looks as if only the SOG as inferred between the adjacent fixes had increased by some margin,
                          * with the COG often remaining near the value reported. If the transition is a jump backward in
                          * time then it is mostly easy to recognize because the COG inferred approximately reverses
                          * compared to the COGs reported, and the SOG may in some cases even reach ridiculously high
@@ -119,44 +124,40 @@ public class JumpyTrackSmootheningTest {
                          * between COG/SOG reported and COG/SOG inferred between the fixes considered.
                          */
                         
-                        /* Cases:
-                         *  - "previous" is the outlier:
+                        /* Cases for a jump back in time from "previous" to "fix", with significant COG deviation:
+                         *  - "previous" is the outlier (its time stamp is too early; it really was recorded later than it states):
                          *    * pre-"previous" to "previous" was not recognized as a boundary:
                          *      o incorrectly so, because pre-"previous" to "previous" actually *was* a boundary:
-                         *        this makes "previous" a single outlier; try to learn the offset in both directions
-                         *      o correctly so, because there are several outliers in a row of which "previous" is the last
+                         *        this makes "previous" a single outlier; try to learn the offset by moving "previous"
+                         *        further into the future to minimize the mismatch
+                         *      o correctly so, because there are several outliers in a row of which "previous" is the last:
+                         *        try to learn an offset by which to move the sub-sequence ending at "previous" to later
+                         *        time points to minimize the mismatch
                          *    * pre-"previous" to "previous" *was* recognized as a boundary:
-                         *      "previous" seems to be a single outlier, and its offset must be determined
-                         *  - "fix" is the outlier:
-                         *    * "fix"'s successor is also outlier (no boundary after "fix")
-                         *      o offset to the right seems to be zero; need to look through the outlier sub-sequence and
-                         *        start learning offset after the next boundary
+                         *      "previous" seems to be a single outlier, and its offset must be determined; see above
+                         *  - "fix" is the outlier (its time stamp is too late; it really was recorded earlier than it states):
+                         *    * "fix"'s successor is also outlier (no boundary after "fix"):
+                         *      offset to the right seems to be zero; need to look through the outlier sub-sequence and
+                         *      start learning offset after the next boundary
                          *    * "fix" is a single outlier (another boundary after "fix"):
-                         *      try to learn offset in both directions because we don't know in which direction "fix" is offset
+                         *      try to learn offset by moving "fix" to an earlier time point that minimizes the mismatch
                          */
                         
                         /* 
+                         * With this in mind we would always have to look "both ways," trying to find out whether
+                         * "previous" or "fix" is easier to move by an offset to fit in.
+                         * 
+                         * PROBLEM: When "previous" is a single outlier, the offset computed for moving "fix" into the
+                         * past will seem reasonable because "fix" is on the line connecting previous and its predecessor.
+                         * However, "previous" probably wouldn't be consistent with its predecessor regarding COG/SOG...
+                         * 
                          * However, the "fix" may be followed immediately by another fix of the same incorrect time
                          * line. Then, it would seem as if leaving it where it is gives a good prediction of the next
                          * position in the track where in fact that next fix would also need to be moved back or forward
                          * in time by the same offset.
                          * 
-                         * 
-                         * 
                          * The interpolated time point minus the fix's reported time stamp then is a candidate for an
                          * offset.
-                         * 
-                         * At each boundary between the two sub-sequences a mismatch between position / course
-                         * extrapolated and observed/reported would be detected. Furthermore, the sequence of COG/SOG
-                         * vectors will experience a significant "jump" at such a boundary, jumping back near its
-                         * original value after the end of the interleaved part of the other sub-sequence.
-                         * 
-                         * If the fix in hand is one of the "correct" time line, trying to determine its offset may be
-                         * tricky because we would try to match it against fixes in the incorrect sparse sub-sequence
-                         * that may not have enough fixes for a reasonable interpolation.
-                         * 
-                         * With this in mind we would always have to look "both ways," trying to find out whether the
-                         * left or the right fix is easier to move by an offset to fit in.
                          * 
                          * Judgment of fixes based on their neighbors may happen by comparing their position to the
                          * position predicted by the previous and next fix using their position and speed vector each;
@@ -174,7 +175,7 @@ public class JumpyTrackSmootheningTest {
                          */
                         // FIXME: the problem is that fix or previous can be an outlier; if "previous" is the outlier, looking to move "fix" around won't help
                         numberOfInconsistencies++;
-                        final Duration offset = findOptimalOffset(fix, track);
+                        final Duration offset = findOptimalOffset(previous, fix, track);
                         offsetSum = offsetSum.plus(offset);
                         offsets.put(fix, new ScalableDuration(offset));
                     }
@@ -193,42 +194,56 @@ public class JumpyTrackSmootheningTest {
         return numberOfInconsistencies;
     }
     
-    private Duration findOptimalOffset(GPSFixMoving fix, DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
-        final Iterator<GPSFixMoving> ascendingIterator = track.getFixesIterator(fix.getTimePoint(), /* inclusive */ false);
-        final Iterator<GPSFixMoving> descendingIterator = track.getFixesDescendingIterator(fix.getTimePoint(), /* inclusive */ false);
-        final Duration ascendingOffset = findOptimalOffset(fix, ascendingIterator);
+    private Duration findOptimalOffset(GPSFixMoving previous, GPSFixMoving fix, DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
+        final Iterator<GPSFixMoving> ascendingIterator = track.getFixesIterator(fix.getTimePoint(), /* inclusive */ true);
+        final Duration ascendingOffset = findOptimalOffset(previous, ascendingIterator);
+        final Iterator<GPSFixMoving> descendingIterator = track.getFixesDescendingIterator(previous.getTimePoint(), /* inclusive */ true);
         final Duration descendingOffset = findOptimalOffset(fix, descendingIterator);
         // Use the greater of the two offsets; the lesser will link it to its own sub-sequence neighbor
         return ascendingOffset != null && ascendingOffset.abs().compareTo(descendingOffset.abs()) > 0 ?
                 ascendingOffset : descendingOffset;
     }
     
-    private Duration findOptimalOffset(final GPSFixMoving fix, final Iterator<GPSFixMoving> ascendingIterator) {
+    /**
+     * Starting with the first pair of fixes returned by the {@code iterator} looks for the minimal distance of fix's position
+     * to the line connecting the pair of fixes.<p>
+     * 
+     * Should {@code fix} be consistent with the fixes from {@code iterator} then
+     * the minimum distance is expected to be found right for the first pair of fixes, and that distance would then be the
+     * typical distance traveled between to fixes at the COG/SOG reported. The offset computed should then be pretty close
+     * to zero.<p>
+     * 
+     * Otherwise, a minimum would be found some number of fixes away. The distance of {@code fix}'s position two the two
+     * other fixes will then be determined, and the duration between those fixes will be split proportionately based on the
+     * respective distances of {@code fix}'s position to each of them to obtain a good estimate of its actual time point.
+     * The difference between this inferred time point and the time point that {@code fix} reports is then used as the
+     * offset.
+     */
+    private Duration findOptimalOffset(final GPSFixMoving fix, final Iterator<GPSFixMoving> iterator) {
         final Position fixPosition = fix.getPosition();
-        GPSFixMoving previousAscendingFix = null;
-        Distance ascendingMinimum = new MeterDistance(Double.MAX_VALUE);
-        Duration ascendingOffset = null;
+        GPSFixMoving lastFix = null;
+        Distance minimum = new MeterDistance(Double.MAX_VALUE);
+        Duration offset = null;
         boolean foundMinimum = false;
-        while (!foundMinimum && ascendingIterator.hasNext()) {
-            final GPSFixMoving ascendingFix = ascendingIterator.next();
-            if (previousAscendingFix != null) {
-                final Distance d = fixPosition.getDistanceToLine(previousAscendingFix.getPosition(), ascendingFix.getPosition()).abs();
-                if (d.compareTo(ascendingMinimum) < 0) {
-                    ascendingMinimum = d;
-                    final Distance distanceFromPreviousAscendingFix = previousAscendingFix.getPosition().getDistance(fixPosition);
-                    final Distance distanceFromAscendingFix = ascendingFix.getPosition().getDistance(fixPosition);
+        while (!foundMinimum && iterator.hasNext()) {
+            final GPSFixMoving currentFix = iterator.next();
+            if (lastFix != null) {
+                final Distance d = fixPosition.getDistanceToLine(lastFix.getPosition(), currentFix.getPosition()).abs();
+                if (d.compareTo(minimum) < 0) {
+                    minimum = d;
+                    final Distance alongTrackDistanceFromLastFix = fixPosition.alongTrackDistance(lastFix.getPosition(), lastFix.getPosition().getBearingGreatCircle(currentFix.getPosition()));
                     // interpolate the time between the adjacent fixes to whose connection "fix" is closest, splitting the duration
                     // between the adjacent fixes proportionately based on "fix"'s distances to each of the two adjacent fixes:
-                    final TimePoint inferredTimePointForFix = previousAscendingFix.getTimePoint().plus(previousAscendingFix.getTimePoint().until(ascendingFix.getTimePoint()).times(
-                            distanceFromPreviousAscendingFix.divide(distanceFromPreviousAscendingFix.add(distanceFromAscendingFix))));
-                    ascendingOffset = fix.getTimePoint().until(inferredTimePointForFix);
+                    final TimePoint inferredTimePointForFix = lastFix.getTimePoint().plus(lastFix.getTimePoint().until(currentFix.getTimePoint()).times(
+                            alongTrackDistanceFromLastFix.divide(lastFix.getPosition().getDistance(currentFix.getPosition()))));
+                    offset = fix.getTimePoint().until(inferredTimePointForFix);
                 } else { // we found a minimum after fix:
                     foundMinimum = true;
                 }
             }
-            previousAscendingFix = ascendingFix;
+            lastFix = currentFix;
         }
-        return ascendingOffset;
+        return offset;
     }
 
     private boolean tooDifferent(SpeedWithBearing inferred, SpeedWithBearing reported) {

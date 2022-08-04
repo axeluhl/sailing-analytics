@@ -80,6 +80,9 @@ public interface Position extends Serializable {
      * is no solution, and a <code>NaN</code> or exception will result.
      * <p>
      * 
+     * The distance returned will be negative if one needs to travel towards the reverse of {@code bearing} to reach this
+     * position starting at {@code from} on the shortest path.<p>
+     * 
      * If either <code>from</code> or <code>bearing</code> or both are <code>null</code>, <code>null</code> is returned.
      */
 
