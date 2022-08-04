@@ -342,7 +342,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitorWithBoat, raceColumn);
             if (race.hasStarted(now)) {
                 int rank = race.getRank(competitorWithBoat, now).getA();
-                assertEquals(rank, leaderboard.getTrackedRank(competitorWithBoat, raceColumn, now));
+                assertEquals(Integer.valueOf(rank), leaderboard.getTrackedRank(competitorWithBoat, raceColumn, now).getA());
                 assertEquals(rank, leaderboard.getContent(now).get(key).getTrackedRank());
                 assertEquals(rank, leaderboard.getEntry(competitorWithBoat, raceColumn, now).getTrackedRank());
                 assertEquals(rank, leaderboard.getTotalPoints(competitorWithBoat, raceColumn, now), 0.000000001);
@@ -360,7 +360,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 assertEquals(expected, leaderboard.getEntry(competitorWithBoat, raceColumn, now).getNetPoints(), 0.000000001);
                 netPoints += leaderboard.getContent(now).get(key).getNetPoints();
             } else {
-                assertEquals(0, leaderboard.getTrackedRank(competitorWithBoat, raceColumn, now));
+                assertEquals(Integer.valueOf(0), leaderboard.getTrackedRank(competitorWithBoat, raceColumn, now).getA());
                 assertNull(leaderboard.getTotalPoints(competitorWithBoat, raceColumn, now));
                 assertEquals(0, leaderboard.getContent(now).get(key).getTrackedRank());
                 assertNull(leaderboard.getContent(now).get(key).getTotalPoints());
