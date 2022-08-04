@@ -89,37 +89,30 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         Fleet getFleet();
     }
     
-    public interface RankComparable<T extends Comparable<T>> {
-        public T getValue(); 
+    public interface RankComparable<T extends RankComparable<T>> extends Comparable<T> {
+
     }
-    
-    public class RankComparableRank implements RankComparable<Integer>{
-        private final Integer rank; 
-        
+
+    public class RankComparableRank implements RankComparable<RankComparableRank> {
+        private final Integer rank;
+
         public RankComparableRank(Integer rank) {
             this.rank = rank;
         }
-        
-        public Integer getValue() {
-            return rank;
+
+        @Override
+        public int compareTo(RankComparableRank o) {
+            if (rank == 0) {
+                return 1; // the other RankComparable is better because this RankComparable has not started
+            } else {
+                if (o.rank == 0) {
+                    return -1; // this RankComparable is better (lower rank) than the other one because the other one
+                               // has not started
+                } else {
+                    return rank - o.rank; // normal integer compare
+                }
+            }
         }
-            
-    }
-    
-    
-    // TODO: check the if the implementation of Enum.compareTo is correct for the Ordering of MaxPointsReason
-    public class RankComparableMaxPoints implements RankComparable<MaxPointsReason>{
-        private final MaxPointsReason maxPointsReason; 
-        
-        public RankComparableMaxPoints(MaxPointsReason maxPointsReason) {
-            
-            this.maxPointsReason = maxPointsReason;
-        }
-        
-        public MaxPointsReason getValue() {
-            return maxPointsReason;
-        }
-            
     }
     
     LeaderboardDTO computeDTO(final TimePoint timePoint,
