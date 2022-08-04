@@ -6,8 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
@@ -77,34 +77,74 @@ public class JumpyTrackSmootheningTest {
     private int getInconsistenciesOnRawFixes() {
         int numberOfInconsistencies = 0;
         Duration offsetSum = Duration.NULL;
-        final List<ScalableDuration> offsets = new LinkedList<>();
+        final Map<GPSFixMoving, ScalableDuration> offsets = new LinkedHashMap<>();
+        final Map<GPSFixMoving, SpeedWithBearing> inferredSpeeds = new LinkedHashMap<>();
         GPSFixMoving previous = null;
         track.lockForRead();
         try {
             for (final GPSFixMoving fix : track.getRawFixes()) { // raw fixes with ascending reported time
                 if (previous != null) {
                     final SpeedWithBearing inferred = previous.getSpeedAndBearingRequiredToReach(fix);
+                    inferredSpeeds.put(fix, inferred);
                     final SpeedWithBearing reportedByPrevious = previous.getSpeed();
                     final SpeedWithBearing reportedByFix = fix.getSpeed();
                     if (tooDifferent(inferred, reportedByPrevious) || tooDifferent(inferred, reportedByFix)) {
                         /*
                          * Hypothesis: we have two sequences folded/merged into one, where one is offset to the other by
-                         * some more or less constant duration. Both describe the movement of the same object. If we can
-                         * determine the offset and identify the fixes of the sub-sequence subject to offsetting then we
-                         * can correct those fixes by adding the offset to their timestamp.
+                         * some more or less constant duration. Both describe the movement of the same object, and the
+                         * COG/SOG values reported by the fixes are approximately correct. Only the time points of a
+                         * sub-sequence of the fixes are offset by some duration. If we can determine this offset and
+                         * identify the fixes of the sub-sequence subject to offsetting then we can correct those fixes
+                         * by adding the offset to their timestamp, resulting in a correct, consistent fix sequence.
                          * 
-                         * We start with a fix that doesn't seem to fit the sequence when extrapolating from the
-                         * "previous" fix. We do not know which of the two has the correct time, but we can try moving
-                         * the "offending fix" along the time axis, searching for an offset that would minimize the
-                         * "offense." Part of the "offense metric" could be the difference between the position
-                         * interpolated between two adjacent positions and the actual position of the fix. The
-                         * interpolated time point minus the fix's reported time stamp then is a candidate for an
-                         * offset.
+                         * We can identify boundaries between the two sub-sequences with some probability. There are the
+                         * transitions from the "correct" to the "outlier" sub-sequence and vice-versa. If a transition
+                         * represents a jump forward in time then it is harder to detect reliably because it mostly
+                         * looks as if only the SOG as inferred between the adjacent fixes has increased by some margin,
+                         * with the COG often remaining near the value reported. If the transition is a jump backward in
+                         * time then it is mostly easy to recognize because the COG inferred approximately reverses
+                         * compared to the COGs reported, and the SOG may in some cases even reach ridiculously high
+                         * values. The direction of the jump does not tell which fix of the transition is "correct" and
+                         * which one is the "outlier" because we don't know whether the outlier fixes have time stamps
+                         * too early or too late.
                          * 
+                         * (With an obvious jump back in time we could look more closely for the forward jump in the
+                         * vicinity of this transition, e.g., by narrowing the threshold for such a forward jump
+                         * regarding the SOG change.)
+                         * 
+                         * We do not know which of the two fixes has the correct time, but we can try moving both of
+                         * them along the time axis, searching for an offset that would minimize the mismatch. Part of
+                         * the "mismatch metric" could be the difference between the position interpolated between two
+                         * adjacent positions and the actual position of the fix; or it could be the combined difference
+                         * between COG/SOG reported and COG/SOG inferred between the fixes considered.
+                         */
+                        
+                        /* Cases:
+                         *  - "previous" is the outlier:
+                         *    * pre-"previous" to "previous" was not recognized as a boundary:
+                         *      o incorrectly so, because pre-"previous" to "previous" actually *was* a boundary:
+                         *        this makes "previous" a single outlier; try to learn the offset in both directions
+                         *      o correctly so, because there are several outliers in a row of which "previous" is the last
+                         *    * pre-"previous" to "previous" *was* recognized as a boundary:
+                         *      "previous" seems to be a single outlier, and its offset must be determined
+                         *  - "fix" is the outlier:
+                         *    * "fix"'s successor is also outlier (no boundary after "fix")
+                         *      o offset to the right seems to be zero; need to look through the outlier sub-sequence and
+                         *        start learning offset after the next boundary
+                         *    * "fix" is a single outlier (another boundary after "fix"):
+                         *      try to learn offset in both directions because we don't know in which direction "fix" is offset
+                         */
+                        
+                        /* 
                          * However, the "fix" may be followed immediately by another fix of the same incorrect time
                          * line. Then, it would seem as if leaving it where it is gives a good prediction of the next
                          * position in the track where in fact that next fix would also need to be moved back or forward
                          * in time by the same offset.
+                         * 
+                         * 
+                         * 
+                         * The interpolated time point minus the fix's reported time stamp then is a candidate for an
+                         * offset.
                          * 
                          * At each boundary between the two sub-sequences a mismatch between position / course
                          * extrapolated and observed/reported would be detected. Furthermore, the sequence of COG/SOG
@@ -127,8 +167,8 @@ public class JumpyTrackSmootheningTest {
                          * 
                          * In our special cases we have so far, if the "fix" has a non-zero milliseconds part in its
                          * time stamp then the "previous" fix has a zero milliseconds part, and vice versa. Furthermore,
-                         * if the "fix" has a non-zero milliseconds part then the jump seems to be a forward jump with the
-                         * course remaining mostly the same and only the speed showing an outlier, whereas if the
+                         * if the "fix" has a non-zero milliseconds part then the jump seems to be a forward jump with
+                         * the course remaining mostly the same and only the speed showing an outlier, whereas if the
                          * "previous" fix has a non-zero milliseconds part then the course flips approximately to its
                          * reverse course compared to the course reported consistently by all of the fixes.
                          */
@@ -136,7 +176,7 @@ public class JumpyTrackSmootheningTest {
                         numberOfInconsistencies++;
                         final Duration offset = findOptimalOffset(fix, track);
                         offsetSum = offsetSum.plus(offset);
-                        offsets.add(new ScalableDuration(offset));
+                        offsets.put(fix, new ScalableDuration(offset));
                     }
                 }
                 previous = fix;
@@ -145,7 +185,7 @@ public class JumpyTrackSmootheningTest {
             track.unlockAfterRead();
         }
         logger.info("Average offset found: "+offsetSum.divide(numberOfInconsistencies));
-        KMeansClusterer<Double, Duration, ScalableDuration> kMeansCluster = new KMeansClusterer<>(2, offsets);
+        KMeansClusterer<Double, Duration, ScalableDuration> kMeansCluster = new KMeansClusterer<>(2, offsets.values());
         final Set<Cluster<ScalableDuration, Double, Duration, ScalableDuration>> clusters = kMeansCluster.getClusters();
         for (final Cluster<ScalableDuration, Double, Duration, ScalableDuration> cluster : clusters) {
             logger.info("Cluster: "+cluster);
