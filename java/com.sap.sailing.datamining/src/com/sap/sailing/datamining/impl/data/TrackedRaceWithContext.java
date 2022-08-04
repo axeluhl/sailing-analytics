@@ -283,7 +283,7 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     public Integer getRankAtFinishForCompetitor(Competitor competitor) {
         final Integer result;
         if (getTrackedRace() != null) {
-            int rank = getTrackedRace().getRank(competitor, getTrackedRace().getEndOfTracking());
+            int rank = getTrackedRace().getRank(competitor, getTrackedRace().getEndOfTracking()).getA();
             result = rank == 0 ? null : rank;
         } else {
             result = null;

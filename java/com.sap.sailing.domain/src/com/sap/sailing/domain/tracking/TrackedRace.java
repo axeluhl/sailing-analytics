@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -282,24 +283,28 @@ public interface TrackedRace
     int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint);
 
     /**
-     * Computes the rank of the competitor in this race for the current time.
+     * Computes the competitor's rank in this race for the current time as A and a metric for the rank as B. 
+     * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their rank. 
+     * If the race hasn't {@link #hasStarted(TimePoint) started} yet, the result is undefined.
+     * 
+     * @return <code> (0,0)</code> in case the {@link Competitor} has not started / participated yet.  
+     *         A Pair <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the {@link RankingMetric} . The rank starts with 1 for the winner. 
      */
-    int getRank(Competitor competitor) throws NoWindException;
+    Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException;
 
     /**
-     * Computes the rank of <code>competitor</code> in this race. A competitor is ahead of all competitors that are one
-     * or more legs behind. Within the same leg, the rank is determined by the windward distance to go and therefore
-     * depends on the assumptions of the wind direction for the given <code>timePoint</code>. If the race hasn't
-     * {@link #hasStarted(TimePoint) started} yet, the result is undefined.
+     * Computes the competitor's rank in this race for the provided {@link TimePoint} as A and a metric for the rank as B. 
+     * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their rank.  
+     * If the race hasn't {@link #hasStarted(TimePoint) started} yet, the result is undefined.
      * 
-     * @return <code>0</code> in case the competitor hasn't participated in the race; a rank starting with
-     *         <code>1</code> where rank <code>1</code> identifies the leader otherwise
+     * @return <code> (0,0)</code> in case the {@link Competitor} has not started / participated yet.  
+     *         A Pair <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the {@link RankingMetric} . The rank starts with 1 for the winner.
      */
-    default int getRank(Competitor competitor, TimePoint timePoint) {
+    default Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint) {
         return getRank(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
-    int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at

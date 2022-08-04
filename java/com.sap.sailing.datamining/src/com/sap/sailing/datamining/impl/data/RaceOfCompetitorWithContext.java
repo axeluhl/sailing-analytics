@@ -209,7 +209,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
             return null;
         }
         long halfOffset = (finishTime.asMillis() - startTime.asMillis()) / 2;
-        int rank = getTrackedRace().getRank(getCompetitor(), startTime.plus(halfOffset));
+        int rank = getTrackedRace().getRank(getCompetitor(), startTime.plus(halfOffset)).getA();
         return rank == 0 ? null : Double.valueOf(rank);
     }
     
@@ -219,7 +219,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Waypoint firstMark = course.getFirstLeg().getTo();
         Competitor competitor = getCompetitor();
         final MarkPassing markPassing = getTrackedRace().getMarkPassing(competitor, firstMark);
-        int rank = markPassing == null ? 0 : getTrackedRace().getRank(competitor, markPassing.getTimePoint());
+        int rank = markPassing == null ? 0 : getTrackedRace().getRank(competitor, markPassing.getTimePoint()).getA();
         return rank == 0 ? null : rank;
     }
     
@@ -624,7 +624,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         if (startOfRace == null) {
             return null;
         }
-        Integer rank = getTrackedRace().getRank(getCompetitor(), timePoint);
+        Integer rank = getTrackedRace().getRank(getCompetitor(), timePoint).getA();
         return rank == 0 ? null : rank;
     }
 }

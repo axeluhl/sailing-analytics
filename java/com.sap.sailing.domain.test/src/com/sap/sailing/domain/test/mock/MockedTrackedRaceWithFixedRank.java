@@ -16,8 +16,11 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     private static final long serialVersionUID = -8587203762630194172L;
@@ -115,13 +118,13 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return rank;
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new Pair<>(rank, new RankComparableRank(rank));
     }
 
     @Override
-    public int getRank(Competitor competitor) throws NoWindException {
-        return rank;
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
+        return new Pair<>(rank, new RankComparableRank(rank));
     }
 
     @Override

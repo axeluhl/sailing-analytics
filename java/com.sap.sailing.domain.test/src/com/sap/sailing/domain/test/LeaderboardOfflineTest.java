@@ -201,8 +201,8 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             i++;
             RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */false);
             raceColumnsInLeaderboard.put(race, raceColumn);
-            if (race.getRank(competitorWithBoat) < bestScore) {
-                bestScore = race.getRank(competitorWithBoat);
+            if (race.getRank(competitorWithBoat).getA() < bestScore) {
+                bestScore = race.getRank(competitorWithBoat).getA();
                 bestScoringRaceColumn = raceColumn;
             }
         }
@@ -287,8 +287,8 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             i++;
             RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */false);
             raceColumnsInLeaderboard.put(race, raceColumn);
-            if (race.getRank(competitorWithBoat) < bestScore) {
-                bestScore = race.getRank(competitorWithBoat);
+            if (race.getRank(competitorWithBoat).getA() < bestScore) {
+                bestScore = race.getRank(competitorWithBoat).getA();
                 bestScoringRaceColumn = raceColumn;
             }
         }
@@ -328,7 +328,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             if (column.getTrackedRace(defaultFleet) != null && column.getTrackedRace(defaultFleet).hasStarted(now)) {
                 numberOfRacesToCompareToDiscardThresholds++;
                 if (!column.isMedalRace()) {
-                    ranksOfNonMedalStartedRaces.add(column.getTrackedRace(defaultFleet).getRank(competitorWithBoat, now));
+                    ranksOfNonMedalStartedRaces.add(column.getTrackedRace(defaultFleet).getRank(competitorWithBoat, now).getA());
                 }
             }
         }
@@ -341,7 +341,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             RaceColumn raceColumn = raceColumnsInLeaderboard.get(race);
             com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitorWithBoat, raceColumn);
             if (race.hasStarted(now)) {
-                int rank = race.getRank(competitorWithBoat, now);
+                int rank = race.getRank(competitorWithBoat, now).getA();
                 assertEquals(rank, leaderboard.getTrackedRank(competitorWithBoat, raceColumn, now));
                 assertEquals(rank, leaderboard.getContent(now).get(key).getTrackedRank());
                 assertEquals(rank, leaderboard.getEntry(competitorWithBoat, raceColumn, now).getTrackedRank());
@@ -376,7 +376,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         for (TrackedRace r : testRaces) {
             if (raceColumnsInLeaderboard.get(r) != null && raceColumnsInLeaderboard.get(r).isMedalRace() &&
                     raceColumnsInLeaderboard.get(r).getTrackedRace(fleet).hasStarted(at)) {
-                return raceColumnsInLeaderboard.get(r).getTrackedRace(fleet).getRank(competitor, at);
+                return raceColumnsInLeaderboard.get(r).getTrackedRace(fleet).getRank(competitor, at).getA();
             }
         }
         return 0;

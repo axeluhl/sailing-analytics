@@ -55,7 +55,7 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
         if (!rankHasBeenInitialized) {
             TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedRace();
             Competitor competitor = getTrackedLegOfCompetitorContext().getCompetitor();
-            int rank = trackedRace.getRank(competitor, getManeuver().getTimePoint());
+            int rank = trackedRace.getRank(competitor, getManeuver().getTimePoint()).getA();
             absoluteRank = rank == 0 ? null : Double.valueOf(rank);
             rankHasBeenInitialized = true;
         }

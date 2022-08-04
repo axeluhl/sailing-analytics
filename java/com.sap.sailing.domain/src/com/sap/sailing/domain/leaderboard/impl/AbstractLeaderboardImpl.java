@@ -138,11 +138,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        return trackedRace == null ? 0
+        return trackedRace == null ? new Pair<>(0,null)
                 : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race,
-                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : 0;
+                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : new Pair<>(0,null);
     }
 
     /**
@@ -158,17 +158,17 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      * @param rank
      *            a competitors rank according to the tracking system
      * 
-     * @return the unmodified <code>rank</code> if no disqualifications for better-ranked competitors exist for
-     *         <code>race</code>, or otherwise a rank improved (lowered) by the number of disqualifications of
+     * @return the unmodified <code>Pair(Rank, {@link RankComparable}</code> if no disqualifications for better-ranked competitors exist for
+     *         <code>race</code>, or otherwise a <code> <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of disqualifications of
      *         competitors whose tracked rank is better (lower) than <code>rank</code>.
      */
-    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
-            TimePoint timePoint, int rank) {
-        int correctedRank = rank;
+    private Pair<Integer, RankComparable<?>> improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
+            TimePoint timePoint, Pair<Integer, RankComparable<?>> rank) {
+        Pair<Integer, RankComparable<?>> correctedRank = rank;
         List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
         int betterCompetitorRank = 1;
         Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
-        while (betterCompetitorRank < rank && ci.hasNext()) {
+        while (betterCompetitorRank < rank.getA() && ci.hasNext()) {
             final Competitor betterTrackedCompetitor = ci.next();
             MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(
                     betterTrackedCompetitor, raceColumn, timePoint);
@@ -176,7 +176,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                     (maxPointsReasonForBetterCompetitor != null
                     && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
                     && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
-                correctedRank--;
+                correctedRank = new Pair<>(correctedRank.getA() - 1, correctedRank.getB()); 
             }
             betterCompetitorRank++;
         }

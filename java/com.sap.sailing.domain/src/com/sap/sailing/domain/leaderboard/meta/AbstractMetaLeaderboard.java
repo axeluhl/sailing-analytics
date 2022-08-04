@@ -53,6 +53,7 @@ import com.sap.sse.common.Util.Pair;
  */
 public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardImpl implements MetaLeaderboard {
     private static final long serialVersionUID = 2368754404068836260L;
+    // If more than one Fleet gets supported in the future <code> getTrackedRank </code> must be adapted to support multiple Fleets. 
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
     private final String name;
@@ -108,6 +109,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(resultDiscardingRule);
+        // If more than one Fleet gets supported in the future <code> getTrackedRank </code> must be adapted to support multiple Fleets. 
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
@@ -188,15 +190,16 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Leaderboard leaderboard = ((MetaLeaderboardColumn) race).getLeaderboard();
-        final int result;
+        final Pair<Integer, RankComparable<?>> result;
         if (leaderboard.hasScores(competitor, timePoint)) {
             final List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
             Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
-            result = competitorsFromBestToWorst.indexOf(competitor)+1;
+            // the Rank is also returned as RankComparable because fleets are not supported by MetaLeaderboards. Therefore a cross fleet rankingmetric is not needed. 
+            result = new Pair<>(competitorsFromBestToWorst.indexOf(competitor)+1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor)+1));
         } else {
-            result = 0;
+            result = new Pair<>(0, null );
         }
         return result;
     }

@@ -267,7 +267,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getCarriedPoints(competitor);
     }
 
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    @Override
+    public Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getFullLeaderboard().getTrackedRank(competitor, race, timePoint, cache);
     }
 

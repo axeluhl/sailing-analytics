@@ -5,8 +5,10 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Returns 0 for {@link #getRank(Competitor)} and {@link #getRank(Competitor, TimePoint)} in all cases. Still, the competitor
@@ -29,13 +31,13 @@ public class MockedTrackedRaceWithStartTimeAndZeroRanks extends MockedTrackedRac
     }
 
     @Override
-    public int getRank(Competitor competitor) throws NoWindException {
-        return 0;
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
+        return new Pair<>(0,null);
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return 0;
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new Pair<>(0,null);
     }
 
 }

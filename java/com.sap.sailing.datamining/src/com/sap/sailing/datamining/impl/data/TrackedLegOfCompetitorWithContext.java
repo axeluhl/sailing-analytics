@@ -170,7 +170,7 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         if (getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
             if (!isRankAtStartInitialized) {
                 TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-                int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
+                int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime()).getA();
                 rankAtStart = rank == 0 ? null : rank;
                 isRankAtStartInitialized = true;
             }
@@ -196,7 +196,7 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
             final TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
             if (startTime != null && finishTime != null) {
                 final TimePoint timePoint = startTime.plus(startTime.until(finishTime).times(ratioOfLegTimeSpent));
-                result = trackedRace.getRank(getCompetitor(), timePoint);
+                result = trackedRace.getRank(getCompetitor(), timePoint).getA();
             } else {
                 result = null;
             }
@@ -263,7 +263,7 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     public Integer getRankAtFinish() {
         if (!isRankAtFinishInitialized) {
             TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getFinishTime());
+            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getFinishTime()).getA();
             rankAtFinish = rank == 0 ? null : rank;
             isRankAtFinishInitialized = true;
         }

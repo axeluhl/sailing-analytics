@@ -89,6 +89,39 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         Fleet getFleet();
     }
     
+    public interface RankComparable<T extends Comparable<T>> {
+        public T getValue(); 
+    }
+    
+    public class RankComparableRank implements RankComparable<Integer>{
+        private final Integer rank; 
+        
+        public RankComparableRank(Integer rank) {
+            this.rank = rank;
+        }
+        
+        public Integer getValue() {
+            return rank;
+        }
+            
+    }
+    
+    
+    // TODO: check the if the implementation of Enum.compareTo is correct for the Ordering of MaxPointsReason
+    public class RankComparableMaxPoints implements RankComparable<MaxPointsReason>{
+        private final MaxPointsReason maxPointsReason; 
+        
+        public RankComparableMaxPoints(MaxPointsReason maxPointsReason) {
+            
+            this.maxPointsReason = maxPointsReason;
+        }
+        
+        public MaxPointsReason getValue() {
+            return maxPointsReason;
+        }
+            
+    }
+    
     LeaderboardDTO computeDTO(final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry,
@@ -262,7 +295,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sse.common.TimePoint)} with the additional logic
      * that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet or no
-     * {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked race
+     * {@link TrackedRace} exists for <code>race</code>, <code>Pair(0,null)</code> will be returned for all those competitors. The tracked race
      * for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
      * <p>
      * 
@@ -274,9 +307,9 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
-     * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
+     * @return a Pair of a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race} as A and a {@link RankingComparable} for comparing {@link Competitor}s across {@link Fleet}s.
      */
-    default int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
+    default Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
         return getTrackedRank(competitor, race, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
@@ -297,7 +330,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            a race that is contained in the {@link #getRaceColumns()} result
      * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
      */
-    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+     Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling

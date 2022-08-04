@@ -309,7 +309,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         lockTrackedRacesForRead();
         try {
             for (TrackedRace trackedRace : getTrackedRaces()) {
-                result += trackedRace.getRank(competitor, timePoint);
+                result += trackedRace.getRank(competitor, timePoint).getA();
             }
             return result;
         } finally {

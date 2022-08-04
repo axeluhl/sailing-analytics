@@ -41,6 +41,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
@@ -221,13 +223,13 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor) throws NoWindException {
-        return competitorsFromBestToWorst.indexOf(competitor) + 1;
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
+        return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return competitorsFromBestToWorst.indexOf(competitor) + 1;
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
     }
 
     @Override

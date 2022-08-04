@@ -409,7 +409,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public Double getTotalPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return getScoreCorrection().getCorrectedScore(() -> getTrackedRank(competitor, raceColumn, timePoint, cache),
+        return getScoreCorrection().getCorrectedScore(() -> getTrackedRank(competitor, raceColumn, timePoint, cache).getA(),
                 competitor, raceColumn, this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme(), cache)
                 .getCorrectedScore();
     }
@@ -646,7 +646,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
                 && (getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint)
                         || ((trackedRaceForCompetitorInColumn = raceColumn.getTrackedRace(competitor)) != null
                                 && trackedRaceForCompetitorInColumn.hasStarted(timePoint)
-                                && trackedRaceForCompetitorInColumn.getRank(competitor, timePoint) != 0));
+                                && trackedRaceForCompetitorInColumn.getRank(competitor, timePoint).getA() != 0));
     }
 
     @Override
@@ -670,7 +670,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns) throws NoWindException {
-        Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, race, timePoint);
+        Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, race, timePoint).getA();
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
                 this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
         boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
@@ -740,7 +740,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         Map<Competitor, Set<RaceColumn>> discardedRaces = new HashMap<Competitor, Set<RaceColumn>>();
         for (final RaceColumn raceColumn : getRaceColumns()) {
             for (final Competitor competitor : getCompetitors()) {
-                Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, raceColumn, timePoint);
+                Callable<Integer> trackedRankProvider = () -> getTrackedRank(competitor, raceColumn, timePoint).getA();
                 final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor,
                         raceColumn, this, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);

@@ -117,6 +117,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
@@ -1555,7 +1556,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public int getRank(Competitor competitor) throws NoWindException {
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
         return getRank(competitor, MillisecondsTimePoint.now());
     }
 
@@ -1575,11 +1576,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        int result;
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Pair<Integer, RankComparable<?>> result;
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings.isEmpty()) {
-            result = 0;
+            result = new Pair<>(0, null);
         } else {
             final boolean hasNoMarkPassingAtOrBeforeTimePoint;
             lockForRead(markPassings);
@@ -1590,8 +1591,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (hasNoMarkPassingAtOrBeforeTimePoint) {
                 // no mark passing at or before timePoint; competitor has not started / participated yet
-                result = 0;
-            } else {
+                result = new Pair<>(0, null);
+            } else { 
                 result = getCompetitorsFromBestToWorst(timePoint, cache).indexOf(competitor) + 1;
             }
         }
