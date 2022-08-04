@@ -199,7 +199,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
             // the Rank is also returned as RankComparable because fleets are not supported by MetaLeaderboards. Therefore a cross fleet rankingmetric is not needed. 
             result = new Pair<>(competitorsFromBestToWorst.indexOf(competitor)+1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor)+1));
         } else {
-            result = new Pair<>(0, 0 );
+            result = new Pair<>(0, new RankComparableRank(0));
         }
         return result;
     }

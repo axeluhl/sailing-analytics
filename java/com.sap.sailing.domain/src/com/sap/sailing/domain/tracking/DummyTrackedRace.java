@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
@@ -179,12 +180,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
-        return new Pair<>(0, 0);
+        return new Pair<>(0, new RankComparableRank(0));
     }
 
     @Override
     public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return new Pair<>(0, 0);
+        return new Pair<>(0, new RankComparableRank(0));
     }
 
     @Override

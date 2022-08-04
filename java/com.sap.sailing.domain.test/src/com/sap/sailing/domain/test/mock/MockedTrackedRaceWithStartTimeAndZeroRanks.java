@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -32,12 +33,13 @@ public class MockedTrackedRaceWithStartTimeAndZeroRanks extends MockedTrackedRac
 
     @Override
     public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
-        return new Pair<>(0,0);
+        return new Pair<>(0, new RankComparableRank(0));
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return new Pair<>(0,0);
+    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return new Pair<>(0, new RankComparableRank(0));
     }
 
 }

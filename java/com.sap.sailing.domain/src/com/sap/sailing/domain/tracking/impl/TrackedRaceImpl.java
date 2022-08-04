@@ -118,6 +118,7 @@ import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
@@ -1580,7 +1581,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final Pair<Integer, RankComparable<?>> result;
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings.isEmpty()) {
-            result = new Pair<>(0, 0);
+            result = new Pair<>(0, new RankComparableRank(0));
         } else {
             final boolean hasNoMarkPassingAtOrBeforeTimePoint;
             lockForRead(markPassings);
@@ -1591,7 +1592,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (hasNoMarkPassingAtOrBeforeTimePoint) {
                 // no mark passing at or before timePoint; competitor has not started / participated yet
-                result = new Pair<>(0, 0);
+                result = new Pair<>(0, new RankComparableRank(0));
             } else { 
                 result = getCompetitorsFromBestToWorst(timePoint, cache).indexOf(competitor) + 1;
             }
