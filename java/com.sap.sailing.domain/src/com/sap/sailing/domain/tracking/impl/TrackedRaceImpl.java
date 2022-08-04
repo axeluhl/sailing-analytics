@@ -1580,7 +1580,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final Pair<Integer, RankComparable<?>> result;
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings.isEmpty()) {
-            result = new Pair<>(0, null);
+            result = new Pair<>(0, 0);
         } else {
             final boolean hasNoMarkPassingAtOrBeforeTimePoint;
             lockForRead(markPassings);
@@ -1591,7 +1591,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (hasNoMarkPassingAtOrBeforeTimePoint) {
                 // no mark passing at or before timePoint; competitor has not started / participated yet
-                result = new Pair<>(0, null);
+                result = new Pair<>(0, 0);
             } else { 
                 result = getCompetitorsFromBestToWorst(timePoint, cache).indexOf(competitor) + 1;
             }

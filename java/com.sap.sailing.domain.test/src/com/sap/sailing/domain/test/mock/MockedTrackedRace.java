@@ -187,12 +187,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
-        return new Pair<>(0, null);
+        return new Pair<>(0, 0);
     }
 
     @Override
     public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return new Pair<>(0, null);
+        return new Pair<>(0, 0);
     }
 
     @Override

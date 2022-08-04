@@ -140,9 +140,9 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     @Override
     public Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        return trackedRace == null ? new Pair<>(0,null)
+        return trackedRace == null ? new Pair<>(0,0)
                 : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race,
-                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : new Pair<>(0,null);
+                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : new Pair<>(0,0);
     }
 
     /**
