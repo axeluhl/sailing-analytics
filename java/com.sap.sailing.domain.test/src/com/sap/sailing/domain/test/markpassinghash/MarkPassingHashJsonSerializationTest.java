@@ -14,8 +14,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
@@ -75,19 +78,15 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
         JSONObject json1 = fingerprint1.toJson();
         JSONObject json2 = fingerprint2.toJson();
-
         TrackedRaceHashFingerprint output1 = factory.fromJson(json1);
         TrackedRaceHashFingerprint output2 = factory.fromJson(json2);
-
-        // Does it make sense with the .toJson in the comparison 
-
+        // TODO Does it make sense with the .toJson in the comparison?
         assertEquals(output1.toJson(), output2.toJson());
     }
 
     @Test
     public void JsonSerializationWithChangesInRace() {
         DynamicTrackedRaceImpl testRace = trackedRace2;
-        
         TrackedRaceHashForMarkPassingCalculationFactoryImpl factory = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
         TrackedRaceHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         // Change of the race should result in a different hash
@@ -105,13 +104,11 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
             }
         }
         TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(testRace);
-        
         JSONObject json1 = fingerprint1.toJson();
         JSONObject json2 = fingerprint2.toJson();
-
         assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
     }
-    
+
     @Test
     public void JsonDeserializationWithChangesInRace() {
         DynamicTrackedRaceImpl testRace = trackedRace2;
@@ -132,33 +129,46 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
             }
         }
         TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(testRace);
-        
         JSONObject json1 = fingerprint1.toJson();
         JSONObject json2 = fingerprint2.toJson();
-        
         TrackedRaceHashFingerprint output1 = factory.fromJson(json1);
         TrackedRaceHashFingerprint output2 = factory.fromJson(json2);
-
         assertNotEquals(output1.toJson(), output2.toJson());
     }
-    
+
     @Test
-    public void WaypointChangePassingInstructionTest () {
+    public void WaypointChangePassingInstructionTest() {
         DynamicTrackedRaceImpl testRace = trackedRace2;
         TrackedRaceHashForMarkPassingCalculationFactoryImpl factory = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
         Waypoint wp = testRace.getRace().getCourse().getFirstWaypoint();
         ControlPoint cP = wp.getControlPoint();
         WaypointImpl wpNew = new WaypointImpl(cP, PassingInstruction.Gate);
-        
         testRace.getRace().getCourse().removeWaypoint(0);
         testRace.getRace().getCourse().addWaypoint(0, wpNew);
         TrackedRaceHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(testRace);
         JSONObject json1 = fingerprint1.toJson();
         JSONObject json2 = fingerprint2.toJson();
-        
         assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
     }
-    
-    //test für änderungen an einem Waypoint
+
+    @Test
+    public void ControlPointChangeTest() {
+        DynamicTrackedRaceImpl testRace = trackedRace2;
+        TrackedRaceHashForMarkPassingCalculationFactoryImpl factory = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
+        Waypoint wp = testRace.getRace().getCourse().getFirstWaypoint();
+        MarkImpl mark1 = new MarkImpl("eins");
+        MarkImpl mark2 = new MarkImpl("zwei");
+        Mark gate1 = new MarkImpl("Gate1");
+        Mark gate2 = new MarkImpl("Gate2");
+        ControlPointWithTwoMarks cp = new ControlPointWithTwoMarksImpl(gate1, gate2, "cp", "");
+        Waypoint wpNew = new WaypointImpl(cp, PassingInstruction.None);
+        testRace.getRace().getCourse().removeWaypoint(0);
+        testRace.getRace().getCourse().addWaypoint(0, wpNew);
+        TrackedRaceHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(testRace);
+        JSONObject json1 = fingerprint1.toJson();
+        JSONObject json2 = fingerprint2.toJson();
+        assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
+    }
 }
