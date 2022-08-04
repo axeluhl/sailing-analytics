@@ -33,7 +33,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTest {
-    private static final Logger logger = Logger.getLogger(MarkPassingHashJsonSerializationTest.class.getName());
     DynamicTrackedRaceImpl trackedRace1;
     DynamicTrackedRaceImpl trackedRace2;
 
@@ -156,9 +155,6 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
     public void ControlPointChangeTest() {
         DynamicTrackedRaceImpl testRace = trackedRace2;
         TrackedRaceHashForMarkPassingCalculationFactoryImpl factory = new TrackedRaceHashForMarkPassingCalculationFactoryImpl();
-        Waypoint wp = testRace.getRace().getCourse().getFirstWaypoint();
-        MarkImpl mark1 = new MarkImpl("eins");
-        MarkImpl mark2 = new MarkImpl("zwei");
         Mark gate1 = new MarkImpl("Gate1");
         Mark gate2 = new MarkImpl("Gate2");
         ControlPointWithTwoMarks cp = new ControlPointWithTwoMarksImpl(gate1, gate2, "cp", "");
