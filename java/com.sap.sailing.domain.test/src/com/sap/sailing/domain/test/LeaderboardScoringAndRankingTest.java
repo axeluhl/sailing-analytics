@@ -58,6 +58,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
@@ -83,6 +84,7 @@ import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
@@ -2186,25 +2188,33 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         double diffX2 = 7.0 / 5.0;
         double[] expectedResultsFleet3 = { 8, 8 - diffX2 * 1, 8 - diffX2 * 2, 8 - diffX2 * 3, 8 - diffX2 * 4, 1 };
 
-        List<Competitor> rankedCompetitorsFleet1 = r1Fleet1.getCompetitorsFromBestToWorst(later);
-        assertEquals(8, rankedCompetitorsFleet1.size());
-        for (int i = 0; i < expectedResultsFleet1.length; i++) {
-            assertTrue(rankedCompetitorsFleet1.get(i) == competitors.get(i));
-            assertEquals(expectedResultsFleet1[i], leaderboard.getNetPoints(rankedCompetitorsFleet1.get(i), later), 0.000000001);
-        }
-
-        List<Competitor> rankedCompetitorsFleet2 = r1Fleet2.getCompetitorsFromBestToWorst(later);
-        assertEquals(7, rankedCompetitorsFleet2.size());
-        for (int i = 0; i < expectedResultsFleet2.length; i++) {
-            assertTrue(rankedCompetitorsFleet2.get(i) == competitors.get(8+i));
-            assertEquals(expectedResultsFleet2[i], leaderboard.getNetPoints(rankedCompetitorsFleet2.get(i), later), 0.000000001);
+        // check first race
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> rankedCompetitorsFleet1 = r1Fleet1.getCompetitorsFromBestToWorst(later);
+        assertEquals(expectedResultsFleet1.length, rankedCompetitorsFleet1.size());
+        Iterator<Competitor> iteratorFleet1 = rankedCompetitorsFleet1.keySet().iterator(); 
+        for (int i = 0; iteratorFleet1.hasNext(); i++) {
+            Competitor currentCompetitor = iteratorFleet1.next(); 
+            assertTrue(currentCompetitor == competitors.get(i));
+            assertEquals(expectedResultsFleet1[i], leaderboard.getNetPoints(currentCompetitor, later), 0.000000001);
         }
         
-        List<Competitor> rankedCompetitorsFleet3 = r1Fleet3.getCompetitorsFromBestToWorst(later);
-        assertEquals(6, rankedCompetitorsFleet3.size());
+        // check second race
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> rankedCompetitorsFleet2 = r1Fleet2.getCompetitorsFromBestToWorst(later);
+        assertEquals(expectedResultsFleet2.length, rankedCompetitorsFleet2.size());
+        Iterator<Competitor> iteratorFleet2 = rankedCompetitorsFleet2.keySet().iterator(); 
+        for (int i = 0; iteratorFleet1.hasNext(); i++) {
+            Competitor currentCompetitor = iteratorFleet2.next(); 
+            assertTrue(currentCompetitor == competitors.get(i));
+            assertEquals(expectedResultsFleet2[i], leaderboard.getNetPoints(currentCompetitor, later), 0.000000001);
+        }
+        
+        // checked third race
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> rankedCompetitorsFleet3 = r1Fleet3.getCompetitorsFromBestToWorst(later);
+        assertEquals(expectedResultsFleet3.length, rankedCompetitorsFleet3.size());
         for (int i = 0; i < expectedResultsFleet3.length; i++) {
-            assertTrue(rankedCompetitorsFleet3.get(i) == competitors.get(15+i));
-            assertEquals(expectedResultsFleet3[i], leaderboard.getNetPoints(rankedCompetitorsFleet3.get(i), later), 0.000000001);
+            Competitor currentCompetitor = iteratorFleet2.next(); 
+            assertTrue(currentCompetitor == competitors.get(15+i));
+            assertEquals(expectedResultsFleet3[i], leaderboard.getNetPoints(currentCompetitor, later), 0.000000001);
         }
         
         List<Competitor> allCompetitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(later);

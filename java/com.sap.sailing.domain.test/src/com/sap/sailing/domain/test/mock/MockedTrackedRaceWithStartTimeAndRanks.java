@@ -1,9 +1,10 @@
 package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -92,7 +93,7 @@ import com.sap.sse.common.Util.Pair;
 public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     private static final long serialVersionUID = 2708044935347796930L;
     private final TimePoint startTime;
-    private final List<Competitor> competitorsFromBestToWorst;
+    private final LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst;
     private final Map<Competitor, Boat> competitorsAndBoats;
     private final Regatta regatta;
     private RaceDefinition race;
@@ -110,12 +111,14 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         this.regatta = regatta;
         this.startTime = startTime;
         // copies the list to make sure that later modifications to the list passed to this constructor don't affect the ranking produced by this race
-        this.competitorsFromBestToWorst = new ArrayList<Competitor>(competitorsFromBestToWorst);
+        this.competitorsFromBestToWorst =  new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>();
         BoatClass boatClass = new BoatClassImpl("49er", /* upwind start */ true);
         competitorsAndBoats = new HashMap<>();
-        int i = 1;
-        for (Competitor c: competitorsFromBestToWorst) {
-            Boat b = new BoatImpl("Boat" + i++, c.getName(), boatClass, c.getName(), null);
+        Iterator<Competitor> iterator = competitorsFromBestToWorst.iterator();
+        for (int i = 0; iterator.hasNext() ; i++ ) {
+            Competitor c = iterator.next();
+            this.competitorsFromBestToWorst.put(c, new Pair<Integer, RankComparable<?>>(i,new RankComparableRank(i)));
+            Boat b = new BoatImpl("Boat" + i+1, c.getName(), boatClass, c.getName(), null);
             competitorsAndBoats.put(c, b);
         }
         this.race = new RaceDefinitionImpl("Mocked Race", new CourseImpl("Mock Course", Collections.emptyList()), boatClass,
@@ -224,12 +227,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
-        return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
+        return new Pair<>(competitorsFromBestToWorst.get(competitor).getA() + 1, new RankComparableRank(competitorsFromBestToWorst.get(competitor).getA() + 1));
     }
 
     @Override
     public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
+        return new Pair<>(competitorsFromBestToWorst.get(competitor).getA() + 1, new RankComparableRank(competitorsFromBestToWorst.get(competitor).getA() + 1));
     }
 
     @Override
@@ -456,7 +459,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return competitorsFromBestToWorst;
     }
 
@@ -728,7 +731,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 

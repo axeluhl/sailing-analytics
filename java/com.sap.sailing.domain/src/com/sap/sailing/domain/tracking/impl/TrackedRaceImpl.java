@@ -1569,9 +1569,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         Competitor result = null;
-        List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint, cache);
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> ranks = getCompetitorsFromBestToWorst(timePoint, cache);
         if (ranks != null && !ranks.isEmpty()) {
-            result = ranks.iterator().next();
+            result = ranks.keySet().iterator().next();
         }
         return result;
     }
@@ -1594,7 +1594,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // no mark passing at or before timePoint; competitor has not started / participated yet
                 result = new Pair<>(0, new RankComparableRank(0));
             } else { 
-                result = getCompetitorsFromBestToWorst(timePoint, cache).indexOf(competitor) + 1;
+                // A new Pair must be created because pairs can not be changed. 
+                Pair<Integer, RankComparable<?>> rankingInfo = getCompetitorsFromBestToWorst(timePoint, cache).get(competitor); 
+                result = new Pair<Integer, RankComparable<?>>(rankingInfo.getA() + 1, rankingInfo.getB());
             }
         }
         return result;
@@ -1619,12 +1621,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TimePoint timePoint;
         // normalize the time point to get cache hits when asking for time points that are later than
         // the last time point affected by any event received for this tracked race

@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.communication.event.sixtyinch;
 
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TargetTimeInfo;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
@@ -19,6 +20,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
@@ -65,9 +67,9 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
             duration = estimateDuration(trace, duration,timePoint);
             distance = estimateDistance(trace, distance,timePoint);
         }else{
-            List<Competitor> competitorOrder = trace.getCompetitorsFromBestToWorst(trace.getEndOfRace());
+            LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorOrder = trace.getCompetitorsFromBestToWorst(trace.getEndOfRace());
             if(!competitorOrder.isEmpty()){
-                distance = trace.getDistanceTraveled(competitorOrder.get(0), trace.getEndOfRace());
+                distance = trace.getDistanceTraveled(competitorOrder.keySet().iterator().next(), trace.getEndOfRace());
                 duration = trace.getStartOfRace().until(trace.getEndOfRace());
             }
         }

@@ -249,6 +249,7 @@ import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -2287,8 +2288,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
             final RaceDefinition race = trackedRace.getRace();
             int oneBasedRank = 1;
-            final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(actualTimePoint);
-            for (Competitor competitor : competitorsFromBestToWorst) {
+            final LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(actualTimePoint);
+            for (Competitor competitor : competitorsFromBestToWorst.keySet()) {
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
                 if (trackedLeg != null || !trackedRace.getMarkPassings(competitor).isEmpty()) {
                     int legNumberOneBased = trackedLeg==null ? 0 : race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;

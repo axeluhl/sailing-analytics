@@ -2,9 +2,8 @@ package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
@@ -108,8 +107,10 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
     
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
-        return Collections.singletonList(competitorsAndBoats.keySet().iterator().next());
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst =   new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>(); 
+        competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(), new Pair<>(1,new RankComparableRank(1)));
+        return competitorsFromBestToWorst;
     }
 
     @Override

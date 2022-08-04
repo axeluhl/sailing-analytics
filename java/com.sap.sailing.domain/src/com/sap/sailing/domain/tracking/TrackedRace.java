@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
@@ -790,13 +790,13 @@ public interface TrackedRace
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+    LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
     /**
      * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
      * bearing values.
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will

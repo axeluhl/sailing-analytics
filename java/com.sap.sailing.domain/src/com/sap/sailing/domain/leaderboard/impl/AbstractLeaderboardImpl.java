@@ -3,7 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.UUID;
 
@@ -165,9 +165,9 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     private Pair<Integer, RankComparable<?>> improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
             TimePoint timePoint, Pair<Integer, RankComparable<?>> rank) {
         Pair<Integer, RankComparable<?>> correctedRank = rank;
-        List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
         int betterCompetitorRank = 1;
-        Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
+        Iterator<Competitor> ci = competitorsFromBestToWorst.keySet().iterator();
         while (betterCompetitorRank < rank.getA() && ci.hasNext()) {
             final Competitor betterTrackedCompetitor = ci.next();
             MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(
