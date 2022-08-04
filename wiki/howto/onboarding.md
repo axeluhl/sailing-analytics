@@ -108,6 +108,7 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
 
 - In "General ⇒ Content Types" select on CSS (Text ⇒ CSS) and add \*.gss in the lower file association list to get limited syntax highlighting and content assist in GSS files
 - In "General ⇒ Editors ⇒ Text Editors" check Insert Spaces for Tabs
+- In "General ⇒ Editors ⇒ Text Editors ⇒ Quick Diff" change the reference source from 'Version on Disk' to 'A Git Revision'. If you like other colours for marking diffs change them here. (Example: Changes = Yellow, Additions = Green, Deletions = Red)
 - In "GWT ⇒ Errors/Warnings" set "Missing SDK" to "Ignore" 
 - In "GWT ⇒ GWT Settings ⇒ Add..." add the GWT SDK 
 - In "Java ⇒ Build Path ⇒ Classpath Variables" create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
