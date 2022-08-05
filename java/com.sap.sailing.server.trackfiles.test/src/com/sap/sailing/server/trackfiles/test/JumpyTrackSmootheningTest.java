@@ -1,15 +1,13 @@
 package com.sap.sailing.server.trackfiles.test;
 
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 import org.junit.Test;
@@ -18,7 +16,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.scalablevalue.impl.ScalableDuration;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
@@ -31,8 +28,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.util.kmeans.Cluster;
-import com.sap.sse.util.kmeans.KMeansClusterer;
 
 /**
  * See also bug 5728. We have seen tracks coming from phones where there seem to be two
@@ -55,8 +50,6 @@ import com.sap.sse.util.kmeans.KMeansClusterer;
  *
  */
 public class JumpyTrackSmootheningTest {
-    private static final Logger logger = Logger.getLogger(JumpyTrackSmootheningTest.class.getName());
-
     private DynamicGPSFixTrack<Competitor, GPSFixMoving> track;
     
     protected void readTrack(String filename) throws Exception {
@@ -104,7 +97,7 @@ public class JumpyTrackSmootheningTest {
         if (isInconsistentWithSamplingRate(track, previous, fix, next)) {
             criteriaFulfilled++;
         }
-        if (hasInconsistentCogSog(previous, fix, next)) {
+        if (hasInconsistentCogSog(previous, fix, next, /* speed ratio tolerance */ 0.1, /* course degree tolerance */ 10)) {
             criteriaFulfilled++;
         }
         if (criteriaFulfilled >= HOW_MANY_CRITERIA_TO_FULFILL-1) {
@@ -122,25 +115,40 @@ public class JumpyTrackSmootheningTest {
         return adjustedFixAndDistance;
     }
     
-    private boolean hasInconsistentCogSog(GPSFixMoving previous, GPSFixMoving fix, GPSFixMoving next) {
+    public static LinkedHashMap<GPSFixMoving, SpeedWithBearing> getInferredSpeeds(DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
+        final LinkedHashMap<GPSFixMoving, SpeedWithBearing> inferredSpeeds = new LinkedHashMap<>();
+        track.lockForRead();
+        try {
+            GPSFixMoving previous = null;
+            for (final GPSFixMoving fix : track.getRawFixes()) {
+                if (previous != null) {
+                    inferredSpeeds.put(fix, previous.getSpeedAndBearingRequiredToReach(fix));
+                }
+                previous = fix;
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+        return inferredSpeeds;
+    }
+    
+    private boolean hasInconsistentCogSog(GPSFixMoving previous, GPSFixMoving fix, GPSFixMoving next, double SPEED_RATIO_TOLERANCE, double COURSE_DEGREE_TOLERANCE) {
         final SpeedWithBearing inferredBetweenPreviousAndFix = previous.getSpeedAndBearingRequiredToReach(fix);
         final SpeedWithBearing inferredBetweenFixAndNext = fix.getSpeedAndBearingRequiredToReach(next);
         final SpeedWithBearing reportedByPrevious = previous.getSpeed();
         final SpeedWithBearing reportedByFix = fix.getSpeed();
         final SpeedWithBearing reportedByNext = next.getSpeed();
-        return isConsistent(reportedByPrevious, reportedByNext)
-                && !isConsistent(reportedByPrevious, inferredBetweenPreviousAndFix)
-                && !isConsistent(inferredBetweenFixAndNext, reportedByFix)
-                && !isConsistent(inferredBetweenFixAndNext, reportedByNext);
+        return isConsistent(reportedByPrevious, reportedByNext, SPEED_RATIO_TOLERANCE, COURSE_DEGREE_TOLERANCE)
+                && !isConsistent(reportedByPrevious, inferredBetweenPreviousAndFix, SPEED_RATIO_TOLERANCE, COURSE_DEGREE_TOLERANCE)
+                && !isConsistent(inferredBetweenFixAndNext, reportedByFix, SPEED_RATIO_TOLERANCE, COURSE_DEGREE_TOLERANCE)
+                && !isConsistent(inferredBetweenFixAndNext, reportedByNext, SPEED_RATIO_TOLERANCE, COURSE_DEGREE_TOLERANCE);
     }
     
     private boolean isConsistent(double ratio, double tolerance) {
         return ratio < 1+tolerance && ratio > 1-tolerance; 
     }
 
-    private boolean isConsistent(SpeedWithBearing a, SpeedWithBearing b) {
-        final double SPEED_RATIO_TOLERANCE = 0.1;
-        final double COURSE_DEGREE_TOLERANCE = 10;
+    private boolean isConsistent(SpeedWithBearing a, SpeedWithBearing b, double SPEED_RATIO_TOLERANCE, double COURSE_DEGREE_TOLERANCE) {
         return isConsistent(a.getKnots()/b.getKnots(), SPEED_RATIO_TOLERANCE) &&
                a.getBearing().getDifferenceTo(b.getBearing()).abs().getDegrees() < COURSE_DEGREE_TOLERANCE;
     }
@@ -159,43 +167,44 @@ public class JumpyTrackSmootheningTest {
     }
 
     /**
-     * On {@link #track} looks at adjacent fixes and compares the COG/SOG values reported by those fixes
-     * with the COG/SOG value inferred from their position and time delta.
+     * On {@link #track} looks at adjacent fixes and compares the COG/SOG values reported by those fixes with the
+     * COG/SOG value inferred from their position and time delta.
+     * <p>
+     * 
+     * Hypothesis: we have a fix sequence that describes the trajectory of a sailing boat where some of the fixes have
+     * an incorrect time point. The offset of these incorrect time points varies. In the particular case observed, all
+     * regular fixes have a time point that is at a full second (UTC) with zero milliseconds, whereas all outliers have
+     * a non-zero millisecond part that does not fit the otherwise very regular sampling rate.
+     * <p>
+     * 
+     * Due to the irregularity of the offsets there is no point in trying to "learn" this offset. Instead, it's more
+     * about recognizing the outliers which so far always seem to come as a single fix in a longer series of regular
+     * fixes, and then finding a good time point adjustment so it matches the sequence.
+     * <p>
+     * 
+     * With this in mind we would always have to look "both ways," trying to find out whether the fix originally had an
+     * earlier or a later time point that would bring it closely in line with the other fixes. The fix does contain
+     * valuable information despite its incorrect time point because it could indicate a deviation from the straight
+     * line otherwise connecting the two adjacent fixes.
+     * <p>
+     * 
+     * To approximate the correct time point we look for the track segment closest to the fix's position, then project
+     * the fix onto it and split the segment's duration proportionately.
+     * <p>
+     * 
+     * @return the number of inconsistencies found on the {@code track} passed, as well as a replacement track that has
+     *         the outliers found adjusted
      */
-    private int getInconsistenciesOnRawFixes() {
+    private Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> findAndRemoveInconsistenciesOnRawFixes(DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
         int numberOfInconsistencies = 0;
         final DynamicGPSFixMovingTrackImpl<Competitor> replacedTrack = new DynamicGPSFixMovingTrackImpl<Competitor>(track.getTrackedItem(),
                 /* millisecondsOverWhichToAverage */ 5000, /* losslessCompaction */ true);
         replacedTrack.suspendValidityCaching();
-        Duration offsetSum = Duration.NULL;
-        final Map<GPSFixMoving, ScalableDuration> offsets = new LinkedHashMap<>();
-        final Map<GPSFixMoving, SpeedWithBearing> inferredSpeeds = new LinkedHashMap<>();
         GPSFixMoving previous = null, fix = null;
         track.lockForRead();
         try {
             for (final GPSFixMoving next : track.getRawFixes()) { // raw fixes with ascending reported time
                 if (previous != null && fix != null) {
-                    inferredSpeeds.put(fix, previous.getSpeedAndBearingRequiredToReach(fix));
-                    /*
-                     * Hypothesis: we have a fix sequence that describes the trajectory of a sailing boat where some
-                     * of the fixes have an incorrect time point. The offset of these incorrect time points varies.
-                     * In the particular case observed, all regular fixes have a time point that is at a full second
-                     * (UTC) with zero milliseconds, whereas all outliers have a non-zero millisecond part that does
-                     * not fit the otherwise very regular sampling rate.
-                     * 
-                     * Due to the irregularity of the offsets there is no point in trying to "learn" this offset.
-                     * Instead, it's more about recognizing the outliers which so far always seem to come as a
-                     * single fix in a longer series of regular fixes, and then finding a good time point adjustment
-                     * so it matches the sequence.
-                     * 
-                     * With this in mind we would always have to look "both ways," trying to find out whether the fix
-                     * originally had an earlier or a later time point that would bring it closely in line with the
-                     * other fixes. The fix does contain valuable information despite its incorrect time point because
-                     * it could indicate a deviation from the straight line otherwise connecting the two adjacent fixes.
-                     * 
-                     * To approximate the correct time point we look for the track segment closest to the fix's position,
-                     * then project the fix onto it and split the segment's duration proportionately.
-                     */
                     final Pair<GPSFixMoving, Double> adjusted = isLikelyOutlierWithCorrectableTimepoint(track, previous, fix, next);
                     if (adjusted != null) {
                         numberOfInconsistencies++;
@@ -211,26 +220,7 @@ public class JumpyTrackSmootheningTest {
         } finally {
             track.unlockAfterRead();
         }
-        final Map<GPSFixMoving, SpeedWithBearing> inferredSpeedsOnReplacedTrack = new LinkedHashMap<>();
-        replacedTrack.lockForRead();
-        try {
-            GPSFixMoving previousReplaced = null;
-            for (final GPSFixMoving fixReplaced : replacedTrack.getRawFixes()) {
-                if (previousReplaced != null) {
-                    inferredSpeedsOnReplacedTrack.put(fixReplaced, previousReplaced.getSpeedAndBearingRequiredToReach(fixReplaced));
-                }
-                previousReplaced = fixReplaced;
-            }
-        } finally {
-            replacedTrack.unlockAfterRead();
-        }
-        logger.info("Average offset found: "+offsetSum.divide(numberOfInconsistencies));
-        KMeansClusterer<Double, Duration, ScalableDuration> kMeansCluster = new KMeansClusterer<>(2, offsets.values());
-        final Set<Cluster<ScalableDuration, Double, Duration, ScalableDuration>> clusters = kMeansCluster.getClusters();
-        for (final Cluster<ScalableDuration, Double, Duration, ScalableDuration> cluster : clusters) {
-            logger.info("Cluster: "+cluster);
-        }
-        return numberOfInconsistencies;
+        return new Pair<>(numberOfInconsistencies, replacedTrack);
     }
     
     /**
@@ -294,30 +284,49 @@ public class JumpyTrackSmootheningTest {
         return foundMinimum ? new Pair<>(result, distanceRatio) : null;
     }
 
-    @Test
-    public void testCZE2471() throws Exception {
-        readTrack("CZE2471.gpx.gz");
+    private void adjustTrackAndAssertNoOutliersInResult(String trackFileName) throws Exception {
+        readTrack(trackFileName);
         track.lockForRead();
         try {
             assertFalse(Util.isEmpty(track.getRawFixes()));
         } finally {
             track.unlockAfterRead();
         }
-        final int numberOfInconsistencies = getInconsistenciesOnRawFixes();
-        assertTrue(numberOfInconsistencies > 0);
+        final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> numberOfInconsistenciesAndReplacedTrack = findAndRemoveInconsistenciesOnRawFixes(track);
+        assertTrue(numberOfInconsistenciesAndReplacedTrack.getA() > 0);
+        assertEquals(0, getNumberOfFixesWithInconsistentCogSog(numberOfInconsistenciesAndReplacedTrack.getB()));
     }
     
-    @Test
-    public void testCZE2956() throws Exception {
-        readTrack("CZE2956.gpx.gz");
+    /**
+     * Count severe COG/SOG inconsistencies left; severely inconsistent means a speed difference between inferred and
+     * reported of more than 50%, or a course inconsistency of more than 90 degrees.
+     */
+    private int getNumberOfFixesWithInconsistentCogSog(DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
+        int inconsistencies = 0;
         track.lockForRead();
         try {
-            assertFalse(Util.isEmpty(track.getRawFixes()));
+            GPSFixMoving previous = null, fix = null;
+            for (final GPSFixMoving next : track.getRawFixes()) {
+                if (previous != null && fix != null && hasInconsistentCogSog(previous, fix, next, /* speed ratio tolerance */ 0.5, /* course degree tolerance */ 90)) {
+                    inconsistencies++;
+                }
+                previous = fix;
+                fix = next;
+            }
         } finally {
             track.unlockAfterRead();
         }
-        final int numberOfInconsistencies = getInconsistenciesOnRawFixes();
-        assertTrue(numberOfInconsistencies > 0);
+        return inconsistencies;
+    }
+
+    @Test
+    public void testCZE2471() throws Exception {
+        adjustTrackAndAssertNoOutliersInResult("CZE2471.gpx.gz");
+    }
+
+    @Test
+    public void testCZE2956() throws Exception {
+        adjustTrackAndAssertNoOutliersInResult("CZE2956.gpx.gz");
     }
     
     /**
@@ -326,14 +335,6 @@ public class JumpyTrackSmootheningTest {
      */
     @Test
     public void testGallagherZelenka() throws Exception {
-        readTrack("GallagherZelenka.gpx.gz");
-        track.lockForRead();
-        try {
-            assertFalse(Util.isEmpty(track.getRawFixes()));
-        } finally {
-            track.unlockAfterRead();
-        }
-        final int numberOfInconsistencies = getInconsistenciesOnRawFixes();
-        assertTrue(numberOfInconsistencies > 0);
+        adjustTrackAndAssertNoOutliersInResult("GallagherZelenka.gpx.gz");
     }
 }
