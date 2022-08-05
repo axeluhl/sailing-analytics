@@ -13,6 +13,7 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
@@ -23,13 +24,17 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
 import com.sap.sailing.domain.markpassinghash.TrackedRaceHashForMaskPassingCalculationFactory;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTest {
@@ -100,7 +105,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
     }
 
     @Test
-    public void testWaypointChangePassingInstructionTest() {
+    public void testWaypointChangePassingInstruction() {
         TrackedRaceHashForMaskPassingCalculationFactory factory = TrackedRaceHashForMaskPassingCalculationFactory.INSTANCE;
         TrackedRaceHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         assertTrue(fingerprint1.matches(trackedRace2));
@@ -118,7 +123,7 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
     }
 
     @Test
-    public void testControlPointChangeTest() {
+    public void testControlPointChange() {
         TrackedRaceHashForMaskPassingCalculationFactory factory = TrackedRaceHashForMaskPassingCalculationFactory.INSTANCE;
         TrackedRaceHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
         assertTrue(fingerprint1.matches(trackedRace2));
@@ -130,6 +135,24 @@ public class MarkPassingHashJsonSerializationTest extends OnlineTracTracBasedTes
         trackedRace2.getRace().getCourse().addWaypoint(0, wpNew);
         TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(trackedRace2);
         assertFalse(fingerprint1.matches(trackedRace2));
+        assertFalse(fingerprint2.matches(trackedRace1));
+        JSONObject json1 = fingerprint1.toJson();
+        JSONObject json2 = fingerprint2.toJson();
+        assertNotEquals("Json1 and Json2 are equal: " + json1 + " json2: " + json2, json1, json2);
+    }
+    
+    @Test
+    public void testCompetitorFixChange() {
+        DynamicTrackedRaceImpl testRace = trackedRace2;
+        TrackedRaceHashForMaskPassingCalculationFactory factory = TrackedRaceHashForMaskPassingCalculationFactory.INSTANCE;
+        TrackedRaceHashFingerprint fingerprint1 = factory.createFingerprint(trackedRace1);
+        assertTrue(fingerprint1.matches(trackedRace2));
+        Competitor firstCompetitor = trackedRace2.getRace().getCompetitors().iterator().next();
+        final TimePoint timePointForNewFix = TimePoint.of(trackedRace2.getStartOfRace().asMillis() + 10);
+        GPSFixMoving gpsM = new GPSFixMovingImpl(new DegreePosition(-0.000155, 0.000103), timePointForNewFix, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(330)));
+        testRace.getTrack(firstCompetitor).add(gpsM, true);
+        TrackedRaceHashFingerprint fingerprint2 = factory.createFingerprint(testRace);
+        assertFalse(fingerprint1.matches(testRace));
         assertFalse(fingerprint2.matches(trackedRace1));
         JSONObject json1 = fingerprint1.toJson();
         JSONObject json2 = fingerprint2.toJson();
