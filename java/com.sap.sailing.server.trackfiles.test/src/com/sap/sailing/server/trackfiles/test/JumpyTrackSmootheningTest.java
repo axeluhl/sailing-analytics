@@ -95,83 +95,38 @@ public class JumpyTrackSmootheningTest {
                     inferredSpeeds.put(fix, previous.getSpeedAndBearingRequiredToReach(fix));
                     if (isBoundaryBetweenCorrectAndIncorrectSubsequence(previous, fix)) {
                         /*
-                         * Hypothesis: we have two sequences folded/merged into one, where one is offset to the other by
-                         * some more or less constant duration. Both describe the movement of the same object, and the
-                         * COG/SOG values reported by the fixes are approximately correct. Only the time points of a
-                         * sub-sequence of the fixes are offset by some duration. If we can determine this offset and
-                         * identify the fixes of the sub-sequence subject to offsetting then we can correct those fixes
-                         * by adding the offset to their timestamp, resulting in a correct, consistent fix sequence.
+                         * Hypothesis: we have a fix sequence that describes the trajectory of a sailing boat where some
+                         * of the fixes have an incorrect time point. The offset of these incorrect time points varies.
+                         * In the particular case observed, all regular fixes have a time point that is at a full second
+                         * (UTC) with zero milliseconds, whereas all outliers have a non-zero millisecond part that does
+                         * not fit the otherwise very regular sampling rate.
                          * 
-                         * We can identify boundaries between the two sub-sequences with some probability. There are the
-                         * transitions from the "correct" to the "outlier" sub-sequence and vice-versa. If a transition
-                         * represents a jump forward in time then it may be hard to detect reliably because it mostly
-                         * looks as if only the SOG as inferred between the adjacent fixes had increased by some margin,
-                         * with the COG often remaining near the value reported. If the transition is a jump backward in
-                         * time then it is mostly easy to recognize because the COG inferred approximately reverses
-                         * compared to the COGs reported, and the SOG may in some cases even reach ridiculously high
-                         * values. The direction of the jump does not tell which fix of the transition is "correct" and
-                         * which one is the "outlier" because we don't know whether the outlier fixes have time stamps
-                         * too early or too late.
+                         * Due to the irregularity of the offsets there is no point in trying to "learn" this offset.
+                         * Instead, it's more about recognizing the outliers which so far always seem to come as a
+                         * single fix in a longer series of regular fixes, and then finding a good time point adjustment
+                         * so it matches the sequence.
                          * 
-                         * (With an obvious jump back in time we could look more closely for the forward jump in the
-                         * vicinity of this transition, e.g., by narrowing the threshold for such a forward jump
-                         * regarding the SOG change.)
+                         * For identification, we use multiple hints:
+                         *
+                         * - a non-zero millisecond time point
                          * 
-                         * We do not know which of the two fixes has the correct time, but we can try moving both of
-                         * them along the time axis, searching for an offset that would minimize the mismatch. Part of
-                         * the "mismatch metric" could be the difference between the position interpolated between two
-                         * adjacent positions and the actual position of the fix; or it could be the combined difference
-                         * between COG/SOG reported and COG/SOG inferred between the fixes considered.
-                         */
-                        
-                        /* Cases for a jump back in time from "previous" to "fix", with significant COG deviation:
-                         *  - "previous" is the outlier (its time stamp is too early; it really was recorded later than it states):
-                         *    * pre-"previous" to "previous" was not recognized as a boundary:
-                         *      o incorrectly so, because pre-"previous" to "previous" actually *was* a boundary:
-                         *        this makes "previous" a single outlier; try to learn the offset by moving "previous"
-                         *        further into the future to minimize the mismatch
-                         *      o correctly so, because there are several outliers in a row of which "previous" is the last:
-                         *        try to learn an offset by which to move the sub-sequence ending at "previous" to later
-                         *        time points to minimize the mismatch
-                         *    * pre-"previous" to "previous" *was* recognized as a boundary:
-                         *      "previous" seems to be a single outlier, and its offset must be determined; see above
-                         *  - "fix" is the outlier (its time stamp is too late; it really was recorded earlier than it states):
-                         *    * "fix"'s successor is also outlier (no boundary after "fix"):
-                         *      offset to the right seems to be zero; need to look through the outlier sub-sequence and
-                         *      start learning offset after the next boundary
-                         *    * "fix" is a single outlier (another boundary after "fix"):
-                         *      try to learn offset by moving "fix" to an earlier time point that minimizes the mismatch
-                         */
-                        
-                        /* 
-                         * With this in mind we would always have to look "both ways," trying to find out whether
-                         * "previous" or "fix" is easier to move by an offset to fit in.
+                         * - a noticeable mismatch either in SOG (in case the fix has a time stamp too early and
+                         * actually was recorded later, so SOG is reported higher) with mostly consistent COG, or an
+                         * approximately reverse COG (in case the fix was actually recorded earlier) with a more or less
+                         * random SOG
+                         *
+                         * - the time point representing an inconsistency in an otherwise very regular sampling rate
                          * 
-                         * PROBLEM: When "previous" is a single outlier, the offset computed for moving "fix" into the
-                         * past will seem reasonable because "fix" is on the line connecting previous and its predecessor.
-                         * However, "previous" probably wouldn't be consistent with its predecessor regarding COG/SOG...
+                         * - the fix position being very close to the remaining trajectory, such that a segment between
+                         * two non-outlier fixes can be found to which the incorrectly-timed fix has a very small distance
                          * 
-                         * However, the "fix" may be followed immediately by another fix of the same incorrect time
-                         * line. Then, it would seem as if leaving it where it is gives a good prediction of the next
-                         * position in the track where in fact that next fix would also need to be moved back or forward
-                         * in time by the same offset.
+                         * With this in mind we would always have to look "both ways," trying to find out whether the fix
+                         * originally had an earlier or a later time point that would bring it closely in line with the
+                         * other fixes. The fix does contain valuable information despite its incorrect time point because
+                         * it could indicate a deviation from the straight line otherwise connecting the two adjacent fixes.
                          * 
-                         * The interpolated time point minus the fix's reported time stamp then is a candidate for an
-                         * offset.
-                         * 
-                         * Judgment of fixes based on their neighbors may happen by comparing their position to the
-                         * position predicted by the previous and next fix using their position and speed vector each;
-                         * the metric then would be the distance between predicted and actual position. An additional
-                         * metric could be the fix's own speed vector compared to the speed vectors calculated to the
-                         * two adjacent fixes. Sub-sequence transitions then could be detected by massive deviations
-                         * between the adjacent fixes.
-                         * 
-                         * In our special cases we have so far, if the "fix" has a non-zero milliseconds part in its
-                         * time stamp then the "previous" fix has a zero milliseconds part, and vice versa. Furthermore,
-                         * if the "fix" has a non-zero milliseconds part then the jump seems to be a forward jump with
-                         * the course remaining mostly the same and only the speed showing an outlier, whereas if the
-                         * "previous" fix has a non-zero milliseconds part then the course flips approximately to its
-                         * reverse course compared to the course reported consistently by all of the fixes.
+                         * To approximate the correct time point we look for the track segment closest to the fix's position,
+                         * then project the fix onto it and split the segment's duration proportionately.
                          */
                         // FIXME: the problem is that fix or previous can be an outlier; if "previous" is the outlier, looking to move "fix" around won't help
                         numberOfInconsistencies++;
