@@ -110,9 +110,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
-        List<Competitor> competitorsFromBestToWorst =   new ArrayList<>();
-        competitorsFromBestToWorst.add(competitorsAndBoats.keySet().iterator().next());
-        return competitorsFromBestToWorst;
+        return Collections.singletonList(competitorsAndBoats.keySet().iterator().next());
     }
     
     @Override

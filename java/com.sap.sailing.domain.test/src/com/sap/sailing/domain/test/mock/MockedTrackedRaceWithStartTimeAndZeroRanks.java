@@ -34,8 +34,7 @@ public class MockedTrackedRaceWithStartTimeAndZeroRanks extends MockedTrackedRac
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return 0;
     }
 

@@ -281,10 +281,12 @@ public interface TrackedRace
     long getUpdateCount();
 
     int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint);
-    
-    
+
+    /**
+     * Computes the rank of the competitor in this race for the current time.
+     */
     int getRank(Competitor competitor) throws NoWindException;
-    
+
     /**
      * Computes the competitor's rank in this race for the provided {@link TimePoint} as A and a metric for the rank as B. 
      * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their rank.  
@@ -808,12 +810,12 @@ public interface TrackedRace
     
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
-     * {@link #getRank(Competitor)} is 0 will be sorted "worst".
+     * {@link #getRankAndRankComparable(Competitor)} is 0 will be sorted "worst".
      */
     LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint);
 
     /**
-     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
+     * Same as {@link #getCompetitorsFromBestToWorstAndRankComparable(TimePoint)}, using a cache for wind, leg type and leg
      * bearing values.
      */
     LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);

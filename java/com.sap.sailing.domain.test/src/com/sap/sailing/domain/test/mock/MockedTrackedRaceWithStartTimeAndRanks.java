@@ -112,14 +112,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         this.regatta = regatta;
         this.startTime = startTime;
         // copies the list to make sure that later modifications to the list passed to this constructor don't affect the ranking produced by this race
-        this.competitorsFromBestToWorst =  new ArrayList<>();
+        this.competitorsFromBestToWorst = new ArrayList<Competitor>(competitorsFromBestToWorst);
         BoatClass boatClass = new BoatClassImpl("49er", /* upwind start */ true);
         competitorsAndBoats = new HashMap<>();
-        Iterator<Competitor> iterator = competitorsFromBestToWorst.iterator();
-        for (int i = 0; iterator.hasNext() ; i++ ) {
-            Competitor c = iterator.next();
-            this.competitorsFromBestToWorst.add(c);
-            Boat b = new BoatImpl("Boat" + i+1, c.getName(), boatClass, c.getName(), null);
+        int i = 1;
+        for (Competitor c: competitorsFromBestToWorst) {
+            Boat b = new BoatImpl("Boat" + i++, c.getName(), boatClass, c.getName(), null);
             competitorsAndBoats.put(c, b);
         }
         this.race = new RaceDefinitionImpl("Mocked Race", new CourseImpl("Mock Course", Collections.emptyList()), boatClass,
@@ -235,17 +233,15 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return competitorsFromBestToWorst.indexOf(competitor) + 1;
     }
-    
+
     @Override
     public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor) throws NoWindException {
-        // TODO Auto-generated method stub
         return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
     }
 
     @Override
     public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        // TODO Auto-generated method stub
         return new Pair<>(competitorsFromBestToWorst.indexOf(competitor) + 1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor) + 1));
     }
 

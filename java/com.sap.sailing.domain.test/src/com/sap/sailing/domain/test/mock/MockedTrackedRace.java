@@ -1237,7 +1237,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(
             TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        // TODO Auto-generated method stub
         return null;
     }
 

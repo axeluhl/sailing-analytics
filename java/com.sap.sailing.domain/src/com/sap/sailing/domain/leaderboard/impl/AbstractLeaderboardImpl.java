@@ -145,6 +145,23 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                         trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : 0;
     }
 
+    /**
+     * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
+     * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
+     * competitors ranked worse by the tracking system need to have their rank corrected by one.
+     * 
+     * @param trackedRace
+     *            the race to which the rank refers; look for disqualifications / max points reasons in this column
+     * @param timePoint
+     *            time point at which to consider disqualifications (not used yet because currently we don't remember
+     *            <em>when</em> a competitor was disqualified)
+     * @param rank
+     *            a competitors rank according to the tracking system
+     * 
+     * @return the unmodified <code>rank</code> if no disqualifications for better-ranked competitors exist for
+     *         <code>race</code>, or otherwise a rank improved (lowered) by the number of disqualifications of
+     *         competitors whose tracked rank is better (lower) than <code>rank</code>.
+     */
     private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
             TimePoint timePoint, int rank) {
 

@@ -706,9 +706,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
     
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(
-            TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        // TODO Auto-generated method stub
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
 
