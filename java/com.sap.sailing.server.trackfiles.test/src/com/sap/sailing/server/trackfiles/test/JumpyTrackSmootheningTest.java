@@ -20,14 +20,17 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableDuration;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.kmeans.Cluster;
 import com.sap.sse.util.kmeans.KMeansClusterer;
 
@@ -70,75 +73,155 @@ public class JumpyTrackSmootheningTest {
                 (fix, device)->track.add((GPSFixMoving) fix), /* inferSpeedAndBearing */ false, filename);
     }
     
-    private boolean isBoundaryBetweenCorrectAndIncorrectSubsequence(GPSFixMoving previous, GPSFixMoving fix) {
-        final SpeedWithBearing inferred = previous.getSpeedAndBearingRequiredToReach(fix);
-        final SpeedWithBearing reportedByPrevious = previous.getSpeed();
-        final SpeedWithBearing reportedByFix = fix.getSpeed();
-        // TODO for high frequency (~1Hz) tracks with approximately equal COG/SOG values for previous/fix as could additionally assume that fix needs to be close to the position extrapolated from previous and the average COG/SOG
-        return tooDifferent(inferred, reportedByPrevious) || tooDifferent(inferred, reportedByFix);
+    /**
+     * For outlier identification, we use multiple hints:
+     * <ul>
+     * <li>a non-zero millisecond time point</li>
+     * 
+     * <li>the time point representing an inconsistency in an otherwise very regular sampling rate</li>
+     * 
+     * <li>a noticeable mismatch either in SOG (in case the fix has a time stamp too early and actually was recorded
+     * later, so SOG is reported higher) with mostly consistent COG, or an approximately reverse COG (in case the fix
+     * was actually recorded earlier) with a more or less random SOG</li>
+     *
+     * <li>the fix position being very close to the remaining trajectory, such that a segment between two non-outlier
+     * fixes can be found to which the incorrectly-timed fix has a very small distance</li>
+     * </ul>
+     * 
+     * @return {@code null} if at less than three of these four criteria are fulfilled for the {@code fix}; otherwise
+     *         the adjusted fix with the new time point and the ratio between its distance from the closest track
+     *         segment and that segment's length
+     */
+    private Pair<GPSFixMoving, Double> isLikelyOutlierWithCorrectableTimepoint(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+            GPSFixMoving previous, GPSFixMoving fix, GPSFixMoving next) {
+        final int HOW_MANY_CRITERIA_TO_FULFILL = 3;
+        final double DISTANCE_RATIO_TOLERANCE = 0.5; // ratio between cross-track distance and length of closest segment
+        final Pair<GPSFixMoving, Double> adjustedFixAndDistance;
+        int criteriaFulfilled = 0;
+        if (hasNonZeroMilliseconds(fix.getTimePoint())) {
+            criteriaFulfilled++;
+        }
+        if (isInconsistentWithSamplingRate(track, previous, fix, next)) {
+            criteriaFulfilled++;
+        }
+        if (hasInconsistentCogSog(previous, fix, next)) {
+            criteriaFulfilled++;
+        }
+        if (criteriaFulfilled >= HOW_MANY_CRITERIA_TO_FULFILL-1) {
+            final Pair<GPSFixMoving, Double> adjusted = adjust(previous, fix, track);
+            if (adjusted.getB() > DISTANCE_RATIO_TOLERANCE) {
+                adjustedFixAndDistance = null;
+            } else {
+                adjustedFixAndDistance = adjusted;
+                criteriaFulfilled++;
+            }
+        } else {
+            adjustedFixAndDistance = null;
+        }
+        assert criteriaFulfilled >= 3 || adjustedFixAndDistance == null;
+        return adjustedFixAndDistance;
     }
     
+    private boolean hasInconsistentCogSog(GPSFixMoving previous, GPSFixMoving fix, GPSFixMoving next) {
+        final SpeedWithBearing inferredBetweenPreviousAndFix = previous.getSpeedAndBearingRequiredToReach(fix);
+        final SpeedWithBearing inferredBetweenFixAndNext = fix.getSpeedAndBearingRequiredToReach(next);
+        final SpeedWithBearing reportedByPrevious = previous.getSpeed();
+        final SpeedWithBearing reportedByFix = fix.getSpeed();
+        final SpeedWithBearing reportedByNext = next.getSpeed();
+        return isConsistent(reportedByPrevious, reportedByNext)
+                && !isConsistent(reportedByPrevious, inferredBetweenPreviousAndFix)
+                && !isConsistent(inferredBetweenFixAndNext, reportedByFix)
+                && !isConsistent(inferredBetweenFixAndNext, reportedByNext);
+    }
+    
+    private boolean isConsistent(double ratio, double tolerance) {
+        return ratio < 1+tolerance && ratio > 1-tolerance; 
+    }
+
+    private boolean isConsistent(SpeedWithBearing a, SpeedWithBearing b) {
+        final double SPEED_RATIO_TOLERANCE = 0.1;
+        final double COURSE_DEGREE_TOLERANCE = 10;
+        return isConsistent(a.getKnots()/b.getKnots(), SPEED_RATIO_TOLERANCE) &&
+               a.getBearing().getDifferenceTo(b.getBearing()).abs().getDegrees() < COURSE_DEGREE_TOLERANCE;
+    }
+
+    private boolean isInconsistentWithSamplingRate(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+            GPSFixMoving previous, GPSFixMoving fix, GPSFixMoving next) {
+        final double RATIO_TOLERANCE = 0.05;
+        final Duration averageIntervalBetweenFixes = track.getAverageIntervalBetweenFixes();
+        final double ratioPreviousToFix = previous.getTimePoint().until(fix.getTimePoint()).divide(averageIntervalBetweenFixes);
+        final double ratioFixToNext = fix.getTimePoint().until(next.getTimePoint()).divide(averageIntervalBetweenFixes);
+        return !isConsistent(ratioPreviousToFix, RATIO_TOLERANCE) || !isConsistent(ratioFixToNext, RATIO_TOLERANCE);
+    }
+
+    private boolean hasNonZeroMilliseconds(TimePoint timePoint) {
+        return timePoint.asMillis() % 1000 != 0;
+    }
+
     /**
      * On {@link #track} looks at adjacent fixes and compares the COG/SOG values reported by those fixes
      * with the COG/SOG value inferred from their position and time delta.
      */
     private int getInconsistenciesOnRawFixes() {
         int numberOfInconsistencies = 0;
+        final DynamicGPSFixMovingTrackImpl<Competitor> replacedTrack = new DynamicGPSFixMovingTrackImpl<Competitor>(track.getTrackedItem(),
+                /* millisecondsOverWhichToAverage */ 5000, /* losslessCompaction */ true);
         Duration offsetSum = Duration.NULL;
         final Map<GPSFixMoving, ScalableDuration> offsets = new LinkedHashMap<>();
         final Map<GPSFixMoving, SpeedWithBearing> inferredSpeeds = new LinkedHashMap<>();
-        GPSFixMoving previous = null;
+        GPSFixMoving previous = null, fix = null;
         track.lockForRead();
         try {
-            for (final GPSFixMoving fix : track.getRawFixes()) { // raw fixes with ascending reported time
-                if (previous != null) {
+            for (final GPSFixMoving next : track.getRawFixes()) { // raw fixes with ascending reported time
+                if (previous != null && fix != null) {
                     inferredSpeeds.put(fix, previous.getSpeedAndBearingRequiredToReach(fix));
-                    if (isBoundaryBetweenCorrectAndIncorrectSubsequence(previous, fix)) {
-                        /*
-                         * Hypothesis: we have a fix sequence that describes the trajectory of a sailing boat where some
-                         * of the fixes have an incorrect time point. The offset of these incorrect time points varies.
-                         * In the particular case observed, all regular fixes have a time point that is at a full second
-                         * (UTC) with zero milliseconds, whereas all outliers have a non-zero millisecond part that does
-                         * not fit the otherwise very regular sampling rate.
-                         * 
-                         * Due to the irregularity of the offsets there is no point in trying to "learn" this offset.
-                         * Instead, it's more about recognizing the outliers which so far always seem to come as a
-                         * single fix in a longer series of regular fixes, and then finding a good time point adjustment
-                         * so it matches the sequence.
-                         * 
-                         * For identification, we use multiple hints:
-                         *
-                         * - a non-zero millisecond time point
-                         * 
-                         * - a noticeable mismatch either in SOG (in case the fix has a time stamp too early and
-                         * actually was recorded later, so SOG is reported higher) with mostly consistent COG, or an
-                         * approximately reverse COG (in case the fix was actually recorded earlier) with a more or less
-                         * random SOG
-                         *
-                         * - the time point representing an inconsistency in an otherwise very regular sampling rate
-                         * 
-                         * - the fix position being very close to the remaining trajectory, such that a segment between
-                         * two non-outlier fixes can be found to which the incorrectly-timed fix has a very small distance
-                         * 
-                         * With this in mind we would always have to look "both ways," trying to find out whether the fix
-                         * originally had an earlier or a later time point that would bring it closely in line with the
-                         * other fixes. The fix does contain valuable information despite its incorrect time point because
-                         * it could indicate a deviation from the straight line otherwise connecting the two adjacent fixes.
-                         * 
-                         * To approximate the correct time point we look for the track segment closest to the fix's position,
-                         * then project the fix onto it and split the segment's duration proportionately.
-                         */
-                        // FIXME: the problem is that fix or previous can be an outlier; if "previous" is the outlier, looking to move "fix" around won't help
+                    /*
+                     * Hypothesis: we have a fix sequence that describes the trajectory of a sailing boat where some
+                     * of the fixes have an incorrect time point. The offset of these incorrect time points varies.
+                     * In the particular case observed, all regular fixes have a time point that is at a full second
+                     * (UTC) with zero milliseconds, whereas all outliers have a non-zero millisecond part that does
+                     * not fit the otherwise very regular sampling rate.
+                     * 
+                     * Due to the irregularity of the offsets there is no point in trying to "learn" this offset.
+                     * Instead, it's more about recognizing the outliers which so far always seem to come as a
+                     * single fix in a longer series of regular fixes, and then finding a good time point adjustment
+                     * so it matches the sequence.
+                     * 
+                     * With this in mind we would always have to look "both ways," trying to find out whether the fix
+                     * originally had an earlier or a later time point that would bring it closely in line with the
+                     * other fixes. The fix does contain valuable information despite its incorrect time point because
+                     * it could indicate a deviation from the straight line otherwise connecting the two adjacent fixes.
+                     * 
+                     * To approximate the correct time point we look for the track segment closest to the fix's position,
+                     * then project the fix onto it and split the segment's duration proportionately.
+                     */
+                    final Pair<GPSFixMoving, Double> adjusted = isLikelyOutlierWithCorrectableTimepoint(track, previous, fix, next);
+                    if (adjusted != null) {
                         numberOfInconsistencies++;
-                        final Duration offset = findOptimalOffset(previous, fix, track);
-                        offsetSum = offsetSum.plus(offset);
-                        offsets.put(fix, new ScalableDuration(offset));
+                        final GPSFixMoving replacementFix = adjusted.getA();
+                        replacedTrack.add(replacementFix);
+                    } else {
+                        replacedTrack.add(fix);
                     }
                 }
                 previous = fix;
+                fix = next;
             }
         } finally {
             track.unlockAfterRead();
+        }
+        final Map<GPSFixMoving, SpeedWithBearing> inferredSpeedsOnReplacedTrack = new LinkedHashMap<>();
+        replacedTrack.lockForRead();
+        try {
+            GPSFixMoving previousReplaced = null;
+            for (final GPSFixMoving fixReplaced : replacedTrack.getRawFixes()) {
+                if (previousReplaced != null) {
+                    inferredSpeedsOnReplacedTrack.put(fixReplaced, previousReplaced.getSpeedAndBearingRequiredToReach(fixReplaced));
+                }
+                previousReplaced = fixReplaced;
+            }
+        } finally {
+            replacedTrack.unlockAfterRead();
         }
         logger.info("Average offset found: "+offsetSum.divide(numberOfInconsistencies));
         KMeansClusterer<Double, Duration, ScalableDuration> kMeansCluster = new KMeansClusterer<>(2, offsets.values());
@@ -149,14 +232,18 @@ public class JumpyTrackSmootheningTest {
         return numberOfInconsistencies;
     }
     
-    private Duration findOptimalOffset(GPSFixMoving previous, GPSFixMoving fix, DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
-        final Iterator<GPSFixMoving> ascendingIterator = track.getFixesIterator(fix.getTimePoint(), /* inclusive */ true);
-        final Duration ascendingOffset = findOptimalOffset(previous, ascendingIterator);
-        final Iterator<GPSFixMoving> descendingIterator = track.getFixesDescendingIterator(previous.getTimePoint(), /* inclusive */ true);
-        final Duration descendingOffset = findOptimalOffset(fix, descendingIterator);
+    /**
+     * @return the adjusted fix, and the ratio between the fix's cross-track distance from the nearest track segment and
+     *         that segment's length
+     */
+    private Pair<GPSFixMoving, Double> adjust(GPSFixMoving previous, GPSFixMoving fix, DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
+        final Iterator<GPSFixMoving> ascendingIterator = track.getFixesIterator(previous.getTimePoint(), /* inclusive */ true);
+        final Pair<GPSFixMoving, Double> ascendingBestMatch = findBestMatch(fix, ascendingIterator);
+        final Iterator<GPSFixMoving> descendingIterator = track.getFixesDescendingIterator(fix.getTimePoint(), /* inclusive */ false);
+        final Pair<GPSFixMoving, Double> descendingBestMatch = findBestMatch(fix, descendingIterator);
         // Use the greater of the two offsets; the lesser will link it to its own sub-sequence neighbor
-        return ascendingOffset != null && ascendingOffset.abs().compareTo(descendingOffset.abs()) > 0 ?
-                ascendingOffset : descendingOffset;
+        return ascendingBestMatch != null && ascendingBestMatch.getB().compareTo(descendingBestMatch.getB()) < 0 ?
+                ascendingBestMatch : descendingBestMatch;
     }
     
     /**
@@ -174,40 +261,36 @@ public class JumpyTrackSmootheningTest {
      * The difference between this inferred time point and the time point that {@code fix} reports is then used as the
      * offset.
      */
-    private Duration findOptimalOffset(final GPSFixMoving fix, final Iterator<GPSFixMoving> iterator) {
+    private Pair<GPSFixMoving, Double> findBestMatch(final GPSFixMoving fix, final Iterator<GPSFixMoving> iterator) {
         final Position fixPosition = fix.getPosition();
         GPSFixMoving lastFix = null;
+        GPSFixMoving result = null;
         Distance minimum = new MeterDistance(Double.MAX_VALUE);
-        Duration offset = null;
         boolean foundMinimum = false;
+        Double distanceRatio = null;
         while (!foundMinimum && iterator.hasNext()) {
             final GPSFixMoving currentFix = iterator.next();
-            if (lastFix != null) {
-                final Distance d = fixPosition.getDistanceToLine(lastFix.getPosition(), currentFix.getPosition()).abs();
-                if (d.compareTo(minimum) < 0) {
-                    minimum = d;
-                    final Distance alongTrackDistanceFromLastFix = fixPosition.alongTrackDistance(lastFix.getPosition(), lastFix.getPosition().getBearingGreatCircle(currentFix.getPosition()));
-                    // interpolate the time between the adjacent fixes to whose connection "fix" is closest, splitting the duration
-                    // between the adjacent fixes proportionately based on "fix"'s distances to each of the two adjacent fixes:
-                    final TimePoint inferredTimePointForFix = lastFix.getTimePoint().plus(lastFix.getTimePoint().until(currentFix.getTimePoint()).times(
-                            alongTrackDistanceFromLastFix.divide(lastFix.getPosition().getDistance(currentFix.getPosition()))));
-                    offset = fix.getTimePoint().until(inferredTimePointForFix);
-                } else { // we found a minimum after fix:
-                    foundMinimum = true;
+            if (currentFix != fix) { // skip the outlier fix itself
+                if (lastFix != null) {
+                    final Distance distanceFromSegment = fixPosition.getDistanceToLine(lastFix.getPosition(), currentFix.getPosition()).abs();
+                    if (distanceFromSegment.compareTo(minimum) < 0) {
+                        minimum = distanceFromSegment;
+                        final Bearing bearingFromLastToCurrent = lastFix.getPosition().getBearingGreatCircle(currentFix.getPosition());
+                        final Distance alongTrackDistanceFromLastFix = fixPosition.alongTrackDistance(lastFix.getPosition(), bearingFromLastToCurrent);
+                        // interpolate the time between the adjacent fixes to whose connection "fix" is closest, splitting the duration
+                        // between the adjacent fixes proportionately based on "fix"'s distances to each of the two adjacent fixes:
+                        final TimePoint inferredTimePointForFix = lastFix.getTimePoint().plus(lastFix.getTimePoint().until(currentFix.getTimePoint()).times(
+                                alongTrackDistanceFromLastFix.divide(lastFix.getPosition().getDistance(currentFix.getPosition()))));
+                        result = new GPSFixMovingImpl(fixPosition, inferredTimePointForFix, fix.getSpeed());
+                        distanceRatio = distanceFromSegment.divide(lastFix.getPosition().getDistance(currentFix.getPosition()));
+                    } else { // we found a minimum after fix:
+                        foundMinimum = true;
+                    }
                 }
+                lastFix = currentFix;
             }
-            lastFix = currentFix;
         }
-        return offset;
-    }
-
-    private boolean tooDifferent(SpeedWithBearing inferred, SpeedWithBearing reported) {
-        final double speedRatio = Math.abs((inferred.getKnots()-reported.getKnots()) / reported.getKnots());
-        return
-                // speed difference must be less than 20% of 
-                speedRatio > 2.0 ||
-                // course difference must be less than 10deg
-                Math.abs(inferred.getBearing().getDifferenceTo(reported.getBearing()).getDegrees()) > 120;
+        return foundMinimum ? new Pair<>(result, distanceRatio) : null;
     }
 
     @Test
