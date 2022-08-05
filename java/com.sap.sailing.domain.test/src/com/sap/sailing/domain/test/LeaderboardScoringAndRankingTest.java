@@ -59,7 +59,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
@@ -84,7 +83,6 @@ import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
@@ -871,15 +869,15 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         f1Column.setTrackedRace(f1Column.getFleetByName("Silver"), f1Silver);
         int rank=1;
         for (Competitor goldCompetitor : gold) {
-            assertEquals(Integer.valueOf(rank), f1Column.getTrackedRace(goldCompetitor).getRank(goldCompetitor, later).getA());
-            assertEquals(Integer.valueOf(rank), leaderboard.getTrackedRank(goldCompetitor, f1Column, later).getA());
+            assertEquals(rank, f1Column.getTrackedRace(goldCompetitor).getRank(goldCompetitor, later));
+            assertEquals(rank, leaderboard.getTrackedRank(goldCompetitor, f1Column, later));
             assertEquals(NUMBER_OF_COMPETITORS/2+1-rank, leaderboard.getTotalPoints(goldCompetitor, f1Column, later), 0.00000001);
             rank++;
         }
         rank=1;
         for (Competitor silverCompetitor : silver) {
-            assertEquals(Integer.valueOf(rank), f1Column.getTrackedRace(silverCompetitor).getRank(silverCompetitor, later).getA());
-            assertEquals(Integer.valueOf(rank), leaderboard.getTrackedRank(silverCompetitor, f1Column, later).getA());
+            assertEquals(rank, f1Column.getTrackedRace(silverCompetitor).getRank(silverCompetitor, later));
+            assertEquals(rank, leaderboard.getTrackedRank(silverCompetitor, f1Column, later));
             assertEquals(NUMBER_OF_COMPETITORS/2+1-rank, leaderboard.getTotalPoints(silverCompetitor, f1Column, later), 0.00000001);
             rank++;
         }
@@ -905,12 +903,12 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         TrackedRace r1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
         r1Column.setTrackedRace(r1Column.getFleetByName("Default"), r1);
 
-        assertEquals(Integer.valueOf(1), r1Column.getTrackedRace(c1).getRank(c1, later).getA());
-        assertEquals(Integer.valueOf(1), leaderboard.getTrackedRank(c1, r1Column, later).getA());
+        assertEquals(1, r1Column.getTrackedRace(c1).getRank(c1, later));
+        assertEquals(1, leaderboard.getTrackedRank(c1, r1Column, later));
         assertEquals(1, leaderboard.getTotalPoints(c1, r1Column, later), 0.00000001);
 
-        assertEquals(Integer.valueOf(2), r1Column.getTrackedRace(c2).getRank(c2, later).getA());
-        assertEquals(Integer.valueOf(2), leaderboard.getTrackedRank(c2, r1Column, later).getA());
+        assertEquals(2, r1Column.getTrackedRace(c2).getRank(c2, later));
+        assertEquals(2, leaderboard.getTrackedRank(c2, r1Column, later));
         assertEquals(0, leaderboard.getTotalPoints(c2, r1Column, later), 0.00000001);
 
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
@@ -2189,43 +2187,47 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         double[] expectedResultsFleet3 = { 8, 8 - diffX2 * 1, 8 - diffX2 * 2, 8 - diffX2 * 3, 8 - diffX2 * 4, 1 };
 
         // check first race
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> rankedCompetitorsFleet1 = r1Fleet1.getCompetitorsFromBestToWorst(later);
-        assertEquals(expectedResultsFleet1.length, rankedCompetitorsFleet1.size());
-        Iterator<Competitor> iteratorFleet1 = rankedCompetitorsFleet1.keySet().iterator(); 
-        for (int i = 0; iteratorFleet1.hasNext(); i++) {
-            Competitor currentCompetitor = iteratorFleet1.next(); 
-            assertTrue(currentCompetitor == competitors.get(i));
+        Iterator<Competitor> rankedCompetitorsFleet1 = r1Fleet1.getCompetitorsFromBestToWorst(later).iterator();
+        int i = 0;
+        while (rankedCompetitorsFleet1.hasNext() ) {
+            Competitor currentCompetitor = rankedCompetitorsFleet1.next();
+            assertSame(currentCompetitor, competitors.get(i));
             assertEquals(expectedResultsFleet1[i], leaderboard.getNetPoints(currentCompetitor, later), 0.000000001);
+            i++;
         }
+        assertEquals(8, i);
         
         // check second race
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> rankedCompetitorsFleet2 = r1Fleet2.getCompetitorsFromBestToWorst(later);
-        assertEquals(expectedResultsFleet2.length, rankedCompetitorsFleet2.size());
-        Iterator<Competitor> iteratorFleet2 = rankedCompetitorsFleet2.keySet().iterator(); 
-        for (int i = 0; iteratorFleet1.hasNext(); i++) {
-            Competitor currentCompetitor = iteratorFleet2.next(); 
-            assertTrue(currentCompetitor == competitors.get(i));
+        Iterator<Competitor> rankedCompetitorsFleet2 = r1Fleet2.getCompetitorsFromBestToWorst(later).iterator();
+        i = 0; 
+        while (rankedCompetitorsFleet2.hasNext()) {
+            Competitor currentCompetitor = rankedCompetitorsFleet2.next();
+            assertSame(currentCompetitor, competitors.get(8+i));
             assertEquals(expectedResultsFleet2[i], leaderboard.getNetPoints(currentCompetitor, later), 0.000000001);
+            i++;
         }
+        assertEquals(7, i);
         
         // checked third race
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> rankedCompetitorsFleet3 = r1Fleet3.getCompetitorsFromBestToWorst(later);
-        assertEquals(expectedResultsFleet3.length, rankedCompetitorsFleet3.size());
-        Iterator<Competitor> iteratorFleet3 = rankedCompetitorsFleet3.keySet().iterator(); 
-        for (int i = 0; i < expectedResultsFleet3.length; i++) {
-            Competitor currentCompetitor = iteratorFleet3.next(); 
-            assertTrue(currentCompetitor == competitors.get(15+i));
+        Iterator<Competitor> rankedCompetitorsFleet3 = r1Fleet3.getCompetitorsFromBestToWorst(later).iterator();
+        i = 0; 
+        while (rankedCompetitorsFleet3.hasNext()) {
+            Competitor currentCompetitor = rankedCompetitorsFleet3.next();
+            assertSame(currentCompetitor, competitors.get(15+i));
             assertEquals(expectedResultsFleet3[i], leaderboard.getNetPoints(currentCompetitor, later), 0.000000001);
+            i++;
         }
+        assertEquals(6, i);
         
         List<Competitor> allCompetitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitorsCount, allCompetitorsFromBestToWorst.size());
+        
         // check that the fleet winners have all 8 points
         assertEquals(8.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(0), later), 0.000000001);
         assertEquals(8.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(1), later), 0.000000001);
         assertEquals(8.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(2), later), 0.000000001);
-        // check that the fleet looser have all 1 point
         
+        // check that the fleet looser have all 1 point
         assertEquals(1.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(competitorsCount-1), later), 0.000000001);
         assertEquals(1.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(competitorsCount-2), later), 0.000000001);
         assertEquals(1.0, leaderboard.getNetPoints(allCompetitorsFromBestToWorst.get(competitorsCount-3), later), 0.000000001);

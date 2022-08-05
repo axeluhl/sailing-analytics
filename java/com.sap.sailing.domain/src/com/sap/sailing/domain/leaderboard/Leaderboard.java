@@ -302,7 +302,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            a race that is contained in the {@link #getRaceColumns()} result
      * @return a Pair of a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race} as A and a {@link RankingComparable} for comparing {@link Competitor}s across {@link Fleet}s.
      */
-    default Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
+    default int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
         return getTrackedRank(competitor, race, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
@@ -323,7 +323,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            a race that is contained in the {@link #getRaceColumns()} result
      * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
      */
-     Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+     int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling

@@ -22,7 +22,6 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
-import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -191,19 +190,22 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Leaderboard leaderboard = ((MetaLeaderboardColumn) race).getLeaderboard();
-        final Pair<Integer, RankComparable<?>> result;
+        final int result;
         if (leaderboard.hasScores(competitor, timePoint)) {
             final List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
             Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
             // the Rank is also returned as RankComparable because fleets are not supported by MetaLeaderboards. Therefore a cross fleet rankingmetric is not needed. 
-            result = new Pair<>(competitorsFromBestToWorst.indexOf(competitor)+1, new RankComparableRank(competitorsFromBestToWorst.indexOf(competitor)+1));
+            result = competitorsFromBestToWorst.indexOf(competitor)+1;
         } else {
-            result = new Pair<>(0, new RankComparableRank(0));
+            result = 0;
         }
         return result;
     }
+    
+
+
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {

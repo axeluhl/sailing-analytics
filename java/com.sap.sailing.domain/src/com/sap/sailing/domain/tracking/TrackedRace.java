@@ -281,6 +281,23 @@ public interface TrackedRace
     long getUpdateCount();
 
     int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint);
+    
+    
+    int getRank(Competitor competitor) throws NoWindException;
+    
+    /**
+     * Computes the competitor's rank in this race for the provided {@link TimePoint} as A and a metric for the rank as B. 
+     * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their rank.  
+     * If the race hasn't {@link #hasStarted(TimePoint) started} yet, the result is undefined.
+     * 
+     * @return <code> (0,0)</code> in case the {@link Competitor} has not started / participated yet.  
+     *         A Pair <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the {@link RankingMetric} . The rank starts with 1 for the winner.
+     */
+    default int getRank(Competitor competitor, TimePoint timePoint) {
+        return getRank(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * Computes the competitor's rank in this race for the current time as {@link Pair#getA() A} and a metric for the
@@ -293,7 +310,7 @@ public interface TrackedRace
      *         <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the
      *         {@link RankingMetric} . The rank starts with 1 for the winner.
      */
-    Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException;
+    Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor) throws NoWindException;
 
     /**
      * Computes the competitor's rank in this race for the provided {@link TimePoint} as A and a metric for the rank as B. 
@@ -303,11 +320,11 @@ public interface TrackedRace
      * @return <code> (0,0)</code> in case the {@link Competitor} has not started / participated yet.  
      *         A Pair <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the {@link RankingMetric} . The rank starts with 1 for the winner.
      */
-    default Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint) {
-        return getRank(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    default Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint) {
+        return getRankAndRankComparable(competitor, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
 
-    Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
@@ -793,13 +810,25 @@ public interface TrackedRace
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
      */
-    LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint);
+    LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint);
 
     /**
      * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
      * bearing values.
      */
-    LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    
+    /**
+     * Returns the competitors of this tracked race, according to their ranking. Competitors whose
+     * {@link #getRank(Competitor)} is 0 will be sorted "worst".
+     */
+    Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+
+    /**
+     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
+     * bearing values.
+     */
+    Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will

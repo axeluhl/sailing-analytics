@@ -57,14 +57,14 @@ public class SteadyRankingForBiasedFinishLineTest extends OnlineTracTracBasedTes
         Competitor lewis = getCompetitorByName("Andrew Lewis");
         Competitor lynch = getCompetitorByName("Finn Lynch");
         Competitor blanco = getCompetitorByName("JoaquÃ­n Blanco");
-        assertEquals(Integer.valueOf(1), getTrackedRace().getRank(vadnai, TIME_14_30_00).getA());
-        assertEquals(Integer.valueOf(2), getTrackedRace().getRank(lewis, TIME_14_30_00).getA());
-        assertEquals(Integer.valueOf(3), getTrackedRace().getRank(lynch, TIME_14_30_00).getA());
-        assertEquals(Integer.valueOf(4), getTrackedRace().getRank(blanco, TIME_14_30_00).getA());
-        assertEquals(Integer.valueOf(1), getTrackedRace().getRank(vadnai, TIME_14_30_12).getA());
-        assertEquals(Integer.valueOf(2), getTrackedRace().getRank(lewis, TIME_14_30_12).getA());
-        assertEquals(Integer.valueOf(3), getTrackedRace().getRank(lynch, TIME_14_30_12).getA());
-        assertEquals(Integer.valueOf(4), getTrackedRace().getRank(blanco, TIME_14_30_12).getA());
+        assertEquals(1, getTrackedRace().getRank(vadnai, TIME_14_30_00));
+        assertEquals(2, getTrackedRace().getRank(lewis, TIME_14_30_00));
+        assertEquals(3, getTrackedRace().getRank(lynch, TIME_14_30_00));
+        assertEquals(4, getTrackedRace().getRank(blanco, TIME_14_30_00));
+        assertEquals(1, getTrackedRace().getRank(vadnai, TIME_14_30_12));
+        assertEquals(2, getTrackedRace().getRank(lewis, TIME_14_30_12));
+        assertEquals(3, getTrackedRace().getRank(lynch, TIME_14_30_12));
+        assertEquals(4, getTrackedRace().getRank(blanco, TIME_14_30_12));
     }
 
 }

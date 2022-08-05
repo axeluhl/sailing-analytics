@@ -3,7 +3,6 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.UUID;
 
@@ -139,13 +138,20 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        return trackedRace == null ? new Pair<>(0, new RankComparableRank(0))
+        return trackedRace == null ? 0
                 : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race,
-                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : new Pair<>(0,new RankComparableRank(0));
+                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint, cache)) : 0;
     }
 
+    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
+            TimePoint timePoint, int rank) {
+
+        return improveByDisqualificationsOfBetterRankedCompetitors(raceColumn,
+                trackedRace, timePoint, new Pair<>(rank, new RankComparableRank(rank))).getA();
+    }
+    
     /**
      * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
      * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
@@ -166,9 +172,9 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     private Pair<Integer, RankComparable<?>> improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
             TimePoint timePoint, Pair<Integer, RankComparable<?>> rank) {
         Pair<Integer, RankComparable<?>> correctedRank = rank;
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+        Iterable<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
         int betterCompetitorRank = 1;
-        Iterator<Competitor> ci = competitorsFromBestToWorst.keySet().iterator();
+        Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
         while (betterCompetitorRank < rank.getA() && ci.hasNext()) {
             final Competitor betterTrackedCompetitor = ci.next();
             MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(

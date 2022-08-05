@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -96,7 +95,6 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -2248,7 +2246,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 final JSONArray jsonCompetitors = new JSONArray();
-                final LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
+                final Iterable<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
                 final Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
                 if (leaderboard != null) {
                     List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
@@ -2261,7 +2259,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 Integer rank = 1;
-                for (Competitor competitor : competitorsFromBestToWorst.keySet()) {
+                for (Competitor competitor : competitorsFromBestToWorst) {
                     if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
                             SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                         final JSONObject jsonCompetitorInLeg = new JSONObject();

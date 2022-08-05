@@ -44,7 +44,7 @@ public class CompetitorWithPolarContext implements HasCompetitorPolarContext {
 
     @Override
     public int getRank() {
-        return trackedRace.getRank(competitor, new MillisecondsTimePoint(System.currentTimeMillis())).getA();
+        return trackedRace.getRank(competitor, new MillisecondsTimePoint(System.currentTimeMillis()));
     }
 
 }

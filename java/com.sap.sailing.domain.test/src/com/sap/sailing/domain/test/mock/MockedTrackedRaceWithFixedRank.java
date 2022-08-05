@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
@@ -107,7 +109,14 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
     
     @Override
-    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        List<Competitor> competitorsFromBestToWorst =   new ArrayList<>();
+        competitorsFromBestToWorst.add(competitorsAndBoats.keySet().iterator().next());
+        return competitorsFromBestToWorst;
+    }
+    
+    @Override
+    public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst =   new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>(); 
         competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(), new Pair<>(1,new RankComparableRank(1)));
         return competitorsFromBestToWorst;
@@ -119,13 +128,13 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        return new Pair<>(rank, new RankComparableRank(rank));
+    public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return rank;
     }
 
     @Override
-    public Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException {
-        return new Pair<>(rank, new RankComparableRank(rank));
+    public int getRank(Competitor competitor) throws NoWindException {
+        return rank;
     }
 
     @Override
