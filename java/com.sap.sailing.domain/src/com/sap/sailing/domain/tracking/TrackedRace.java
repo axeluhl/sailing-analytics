@@ -48,7 +48,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
-import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -283,12 +283,15 @@ public interface TrackedRace
     int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint);
 
     /**
-     * Computes the competitor's rank in this race for the current time as A and a metric for the rank as B. 
-     * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their rank. 
-     * If the race hasn't {@link #hasStarted(TimePoint) started} yet, the result is undefined.
+     * Computes the competitor's rank in this race for the current time as {@link Pair#getA() A} and a metric for the
+     * rank as {@link Pair#getB() B}. The metric is represented by a {@link RankComparable} and enables a later
+     * comparison of the participants regardless of their fleet. If the race hasn't {@link #hasStarted(TimePoint)
+     * started} yet, the result is undefined. Ordering competitors across fleets based on these {@link RankComparable}s
+     * must be consistent with the ordering by rank within each of those fleets.
      * 
-     * @return <code> (0,0)</code> in case the {@link Competitor} has not started / participated yet.  
-     *         A Pair <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the {@link RankingMetric} . The rank starts with 1 for the winner. 
+     * @return <code>(0,0)</code> in case the {@link Competitor} has not started / participated yet. A Pair
+     *         <code>(A,B)</code> where A is the actual rank and B is a {@link RankComparable} defined by the
+     *         {@link RankingMetric} . The rank starts with 1 for the winner.
      */
     Pair<Integer, RankComparable<?>> getRank(Competitor competitor) throws NoWindException;
 

@@ -89,14 +89,14 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         Fleet getFleet();
     }
     
-    public interface RankComparable<T extends RankComparable<T>> extends Comparable<T> {
-
-    }
-
     public class RankComparableRank implements RankComparable<RankComparableRank> {
         private final Integer rank;
 
         public RankComparableRank(Integer rank) {
+            assert rank != null;
+            if (rank == null) {
+                throw new NullPointerException("rank must not be null");
+            }
             this.rank = rank;
         }
 

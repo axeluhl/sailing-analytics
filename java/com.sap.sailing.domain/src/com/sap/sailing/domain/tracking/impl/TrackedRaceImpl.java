@@ -117,8 +117,8 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparableRank;
+import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
 import com.sap.sailing.domain.maneuverdetection.ManeuverDetector;
@@ -1681,8 +1681,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         for(int i = 0; it.hasNext(); i++) {
             temp.put(it.next(), new Pair<>(i, new RankComparableRank(i))); 
         }
-        
-        
         return temp;
     }
 

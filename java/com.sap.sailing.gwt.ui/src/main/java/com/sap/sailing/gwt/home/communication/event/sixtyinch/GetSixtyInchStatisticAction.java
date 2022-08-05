@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TargetTimeInfo;
-import com.sap.sailing.domain.leaderboard.Leaderboard.RankComparable;
+import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;

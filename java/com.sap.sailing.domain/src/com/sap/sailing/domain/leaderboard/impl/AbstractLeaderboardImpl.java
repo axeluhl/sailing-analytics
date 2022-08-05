@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
+import com.sap.sailing.domain.leaderboard.RankComparable;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
