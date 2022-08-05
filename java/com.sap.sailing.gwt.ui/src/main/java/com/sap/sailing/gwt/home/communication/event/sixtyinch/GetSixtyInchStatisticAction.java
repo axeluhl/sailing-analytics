@@ -51,27 +51,26 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
     @GwtIncompatible
     public GetSixtyInchStatisticDTO execute(SailingDispatchContext context) {
         int legs = 0;
-        RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaname, racename);
-        RaceDefinition race = context.getRacingEventService().getRace(identifier);
+        final RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaname, racename);
+        final RaceDefinition race = context.getRacingEventService().getRace(identifier);
         int competitors = com.sap.sse.common.Util.size(race.getCompetitors());
         legs = race.getCourse().getLegs().size();
-        DynamicTrackedRace trace = context.getRacingEventService().getTrackedRace(identifier);
-
+        final DynamicTrackedRace trace = context.getRacingEventService().getTrackedRace(identifier);
         Duration duration = null;
         Distance distance = null;
         TimePoint timePoint;
-        if(trace.getEndOfRace() == null){
+        if (trace.getEndOfRace() == null) {
             timePoint = MillisecondsTimePoint.now();
-            duration = estimateDuration(trace, duration,timePoint);
-            distance = estimateDistance(trace, distance,timePoint);
-        }else{
-            Iterator<Competitor> competitorIterator = trace.getCompetitorsFromBestToWorst(trace.getEndOfRace()).iterator();
-            if(competitorIterator.hasNext()){
+            duration = estimateDuration(trace, duration, timePoint);
+            distance = estimateDistance(trace, distance, timePoint);
+        } else {
+            final Iterator<Competitor> competitorIterator = trace.getCompetitorsFromBestToWorst(trace.getEndOfRace())
+                    .iterator();
+            if (competitorIterator.hasNext()) {
                 distance = trace.getDistanceTraveled(competitorIterator.next(), trace.getEndOfRace());
                 duration = trace.getStartOfRace().until(trace.getEndOfRace());
             }
         }
-
         return new GetSixtyInchStatisticDTO(competitors, legs, duration, distance);
     }
 

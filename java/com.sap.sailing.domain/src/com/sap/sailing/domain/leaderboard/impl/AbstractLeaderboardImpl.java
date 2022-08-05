@@ -164,7 +164,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      */
     private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
             TimePoint timePoint, int rank) {
-
         return improveByDisqualificationsOfBetterRankedCompetitors(raceColumn,
                 trackedRace, timePoint, new Pair<>(rank, new RankComparableRank(rank))).getA();
     }

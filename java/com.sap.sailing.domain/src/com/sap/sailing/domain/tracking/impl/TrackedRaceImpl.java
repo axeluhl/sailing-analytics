@@ -1587,7 +1587,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Pair<Integer,RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache){
+    public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache){
         final Pair<Integer, RankComparable<?>> result;
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings.isEmpty()) {
@@ -1697,9 +1697,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 LockUtil.unlockAfterWrite(readWriteLock);
             }
         }
-        Iterator<Competitor> it = rankedCompetitors.iterator(); 
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> temp = new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>(); 
-        for(int i = 0; it.hasNext(); i++) {
+        final Iterator<Competitor> it = rankedCompetitors.iterator(); 
+        final LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> temp = new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>(); 
+        for (int i = 0; it.hasNext(); i++) {
             temp.put(it.next(), new Pair<>(i, new RankComparableRank(i))); 
         }
         return temp;
