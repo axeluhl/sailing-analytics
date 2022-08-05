@@ -166,6 +166,7 @@ public class JumpyTrackSmootheningTest {
         int numberOfInconsistencies = 0;
         final DynamicGPSFixMovingTrackImpl<Competitor> replacedTrack = new DynamicGPSFixMovingTrackImpl<Competitor>(track.getTrackedItem(),
                 /* millisecondsOverWhichToAverage */ 5000, /* losslessCompaction */ true);
+        replacedTrack.suspendValidityCaching();
         Duration offsetSum = Duration.NULL;
         final Map<GPSFixMoving, ScalableDuration> offsets = new LinkedHashMap<>();
         final Map<GPSFixMoving, SpeedWithBearing> inferredSpeeds = new LinkedHashMap<>();
@@ -242,7 +243,7 @@ public class JumpyTrackSmootheningTest {
         final Iterator<GPSFixMoving> descendingIterator = track.getFixesDescendingIterator(fix.getTimePoint(), /* inclusive */ false);
         final Pair<GPSFixMoving, Double> descendingBestMatch = findBestMatch(fix, descendingIterator);
         // Use the greater of the two offsets; the lesser will link it to its own sub-sequence neighbor
-        return ascendingBestMatch != null && ascendingBestMatch.getB().compareTo(descendingBestMatch.getB()) < 0 ?
+        return ascendingBestMatch != null && (descendingBestMatch == null || ascendingBestMatch.getB().compareTo(descendingBestMatch.getB()) < 0) ?
                 ascendingBestMatch : descendingBestMatch;
     }
     
