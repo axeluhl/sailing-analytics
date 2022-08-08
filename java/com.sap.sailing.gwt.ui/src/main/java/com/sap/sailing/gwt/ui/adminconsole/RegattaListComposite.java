@@ -380,7 +380,7 @@ public class RegattaListComposite extends Composite {
                     final SeriesDTO series = seriesIter.next();
                     sailingServiceWrite.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
                         series.isFleetsCanRunInParallel(), series.getDiscardThresholds(), series.isStartsWithZeroScore(),
-                        series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
+                        series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(), series.hasCrossFleetMergedRanking(),
                         series.getMaximumNumberOfDiscards(), series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {

@@ -38,6 +38,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     protected CheckBox fleetsCanRunInParallelCheckbox;
     protected CheckBox startsWithZeroScoreCheckbox;
     protected CheckBox hasSplitFleetContiguousScoringCheckbox;
+    protected CheckBox hasCrossFleetMergedRankingCheckbox; 
     protected CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     protected CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     protected IntegerBox maximumNumberOfDiscardsBox;
@@ -135,6 +136,9 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         hasSplitFleetContiguousScoringCheckbox = createCheckbox(stringMessages.hasSplitFleetContiguousScoring());
         hasSplitFleetContiguousScoringCheckbox.ensureDebugId("HasSplitFleetContiguousScoringCheckbox");
         
+        hasCrossFleetMergedRankingCheckbox = createCheckbox(stringMessages.hasCrossFleetMergedRanking());
+        hasCrossFleetMergedRankingCheckbox.ensureDebugId("hasCrossFleetMergedRankingCheckbox");
+        
         maximumNumberOfDiscardsBox = createIntegerBox(null, /* visibleLength */ 3);
         maximumNumberOfDiscardsBox.ensureDebugId("maximumNumberOfDiscardsBox");
         
@@ -175,6 +179,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         series.setFleetsCanRunInParallel(fleetsCanRunInParallelCheckbox.getValue());
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
         series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoringCheckbox.getValue());
+        series.setCrossFleetMergedRanking(hasCrossFleetMergedRankingCheckbox.getValue());
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
         series.setMaximumNumberOfDiscards(maximumNumberOfDiscardsBox.getValue());
     	series.setFleets(fleetListComposite.getValue());
@@ -189,7 +194,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(9, 2);
+        Grid formGrid = new Grid(10, 2);
         panel.add(formGrid);
         int row = 0;
         formGrid.setWidget(row,  0, new Label(stringMessages.name() + ":"));
@@ -198,6 +203,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         formGrid.setWidget(row++, 1, fleetsCanRunInParallelCheckbox);
         formGrid.setWidget(row++, 1, startsWithZeroScoreCheckbox);
         formGrid.setWidget(row++, 1, hasSplitFleetContiguousScoringCheckbox);
+        formGrid.setWidget(row++, 1, hasCrossFleetMergedRankingCheckbox);
         formGrid.setWidget(row++, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
         formGrid.setWidget(row, 0, new Label(stringMessages.maximumNumberOfDiscards()));
         formGrid.setWidget(row++, 1, maximumNumberOfDiscardsBox);

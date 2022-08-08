@@ -20,18 +20,21 @@ public class SeriesCreationParametersDTO implements Serializable {
 
     private boolean hasSplitFleetContiguousScoring;
     
+    private boolean hasCrossFleetMergedRanking; 
+    
     private Integer maximumNumberOfDiscards;
     
     SeriesCreationParametersDTO() {}
 
     public SeriesCreationParametersDTO(List<FleetDTO> fleets, boolean isMedal, boolean isFleetsCanRunInParallel, boolean isStartsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
-            int[] discardingThresholds, boolean hasSplitFleetContiguousScoring, Integer maximumNumberOfDiscards) {
+            int[] discardingThresholds, boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking,  Integer maximumNumberOfDiscards) {
         super();
         this.fleets = fleets;
         this.isMedal = isMedal;
         this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.isStartsWithZeroScore = isStartsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking; 
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.discardingThresholds = discardingThresholds;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
@@ -55,6 +58,10 @@ public class SeriesCreationParametersDTO implements Serializable {
     
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
+    }
+    
+    public boolean hasCrossFleetMergedRanking() {
+       return hasCrossFleetMergedRanking;
     }
 
     public int[] getDiscardingThresholds() {

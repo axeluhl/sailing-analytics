@@ -103,6 +103,12 @@ public class RaceColumnListeners implements Serializable {
             listener.hasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
         }
     }
+    
+    public void notifyListenersAboutHasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.hasSplitFleetContiguousScoringChanged(raceColumn, hasCrossFleetMergedRanking);
+        }
+    }
 
     public void notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {

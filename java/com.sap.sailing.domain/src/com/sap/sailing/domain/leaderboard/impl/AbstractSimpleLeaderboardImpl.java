@@ -270,6 +270,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         getRaceColumnListeners().notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn,
                 hasSplitFleetContiguousScoring);
     }
+    
+    @Override
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        getRaceColumnListeners().notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
+    }
 
     @Override
     public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {

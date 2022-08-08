@@ -575,6 +575,12 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn,
                 hasSplitFleetContiguousScoring);
     }
+    
+    @Override
+    public void hasCrossFleetMergedRankingChanged (RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn,
+                hasCrossFleetMergedRanking);
+    }
 
     @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {

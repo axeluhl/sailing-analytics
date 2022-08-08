@@ -3,14 +3,16 @@ package com.sap.sailing.xrr.structureimport;
 public class SeriesParameters {
     private boolean firstColumnIsNonDiscardableCarryForward = false;
     private boolean hasSplitFleetContiguousScoring = false;
+    private boolean hasCrossFleetMergedRanking = false;
     private boolean startswithZeroScore = false;
     private int[] discardingThresholds = null;
     private Integer maximumNumberOfDiscards = null;
 
     public SeriesParameters(boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            boolean startswithZeroScore, int[] discardingThresholds, Integer maximumNumberOfDiscards) {
+            boolean hasCrossFleetMergedRanking, boolean startswithZeroScore, int[] discardingThresholds, Integer maximumNumberOfDiscards) {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking; 
         this.startswithZeroScore = startswithZeroScore;
         this.discardingThresholds = discardingThresholds;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
@@ -27,9 +29,17 @@ public class SeriesParameters {
     public boolean isHasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }
+    
+    public boolean isHasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
+    }
 
     public void setHasSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+    }
+    
+    public void sethasCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
     }
 
     public boolean isStartswithZeroScore() {

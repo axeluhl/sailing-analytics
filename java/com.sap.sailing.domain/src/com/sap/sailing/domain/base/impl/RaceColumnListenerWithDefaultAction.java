@@ -63,6 +63,11 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     default void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         defaultAction(); 
     }
+    
+    @Override
+    default void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        defaultAction(); 
+    }
 
     @Override
     default void raceColumnAddedToContainer(RaceColumn raceColumn) {

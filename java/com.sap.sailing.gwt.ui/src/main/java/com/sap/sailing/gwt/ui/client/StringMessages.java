@@ -1039,6 +1039,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String releaseNotes();
     String pwaAnchor();
     String hasSplitFleetContiguousScoring();
+    String hasCrossFleetMergedRanking();
     String eventOverview();
     String addRaceLogTracker();
     String addRaceLogTrackers();

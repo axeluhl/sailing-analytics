@@ -2653,6 +2653,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             boolean firstColumnIsNonDiscardableCarryForward = (boolean) requestObject
                     .get("firstColumnIsNonDiscardableCarryForward");
             boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
+            
+            boolean hasCrossFleetMergedRanking = (boolean) requestObject.get("hasCrossFleetMergedRanking");
 
             Integer maximumNumberOfDiscards = null;
             if (requestObject.containsKey("maximumNumberOfDiscards")) {
@@ -2679,7 +2681,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             }
             getService().apply(new UpdateSeries(regatta.getRegattaIdentifier(), seriesName, seriesNameNew, isMedal,
                     isFleetsCanRunInParallel, resultDiscardingThresholds, startsWithZeroScore,
-                    firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, maximumNumberOfDiscards,
+                    firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring, hasCrossFleetMergedRanking ,maximumNumberOfDiscards,
                     fleets));
         } else {
             throw new IllegalStateException("RegattaName could not be resolved to regatta " + regattaName);

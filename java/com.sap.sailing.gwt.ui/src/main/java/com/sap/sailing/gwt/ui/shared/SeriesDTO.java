@@ -17,6 +17,7 @@ public class SeriesDTO extends NamedDTO {
     private Boolean startsWithZeroScore;
     private boolean firstColumnIsNonDiscardableCarryForward;
     private boolean hasSplitFleetContiguousScoring;
+    private boolean hasCrossFleetMergedRanking;
     private Integer maximumNumberOfDiscards;
 
     public SeriesDTO() {
@@ -25,7 +26,7 @@ public class SeriesDTO extends NamedDTO {
     
     public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
-            boolean hasSplitFleetContiguousScoring, Integer maximumNumberOfDiscards) {
+            boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking, Integer maximumNumberOfDiscards) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
@@ -33,6 +34,7 @@ public class SeriesDTO extends NamedDTO {
         this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.startsWithZeroScore = startsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking; 
         this.discardThresholds = discardThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
@@ -47,7 +49,7 @@ public class SeriesDTO extends NamedDTO {
         this(otherSeries.getName(), otherSeries.getFleets(),
                 otherSeries.getRaceColumns() == null ? null : new ArrayList<RaceColumnDTO>(otherSeries.getRaceColumns()),
                 otherSeries.isMedal(), otherSeries.isFleetsCanRunInParallel(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
-                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring(),
+                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring(), otherSeries.hasCrossFleetMergedRanking(),
                 otherSeries.getMaximumNumberOfDiscards());
     }
 
@@ -122,6 +124,14 @@ public class SeriesDTO extends NamedDTO {
 
     public void setSplitFleetContiguousScoring(Boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+    }
+    
+    public Boolean hasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
+    }
+
+    public void setCrossFleetMergedRanking(Boolean hasCrossFleetMergedRanking) {
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
     }
 
     public Integer getMaximumNumberOfDiscards() {

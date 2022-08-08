@@ -57,7 +57,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                     seriesDTO.isMedal(), seriesDTO.isFleetsCanRunInParallel(), seriesDTO.isStartsWithZeroScore(),
                     seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
-                    seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
+                    seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.hasCrossFleetMergedRanking(), seriesDTO.getMaximumNumberOfDiscards());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
         sailingServiceWrite.createRegatta(newRegatta.getName(),

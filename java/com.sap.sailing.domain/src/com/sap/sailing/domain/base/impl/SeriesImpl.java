@@ -64,13 +64,21 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     private boolean firstColumnIsNonDiscardableCarryForward;
     
     /**
-     * When a column has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
-     * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
-     * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
-     * in the column as many times as there are fleets in the column. For the latter case, this field is <code>false</code> which is
-     * also the default.
+     * When a column has more than one fleet, there are two different options for scoring it when the fleets have different ranks. 
+     * Either the scoring scheme is applied to the sequence of competitors one gets when first ordering the competitors by fleets 
+     * and then within each fleet by their rank in the fleet's race; or the scoring scheme is applied to each fleet separately, 
+     * leading to the best score being awarded in the column as many times as there are fleets in the column. 
+     * For the latter case, this field is <code>false</code> which is also the default.
      */
     private boolean hasSplitFleetContiguousScoring;
+    
+    /**
+     * When a column has more than one fleet, there are two different options for scoring it when the fleets are of the same rank. 
+     * Either the scoring scheme is applied to both fleets at the same time and competitors compete across the fleets; or the scoring scheme is applied to each fleet separately, 
+     * leading to the best score being awarded in the column as many times as there are fleets in the column. 
+     * For the latter case, this field is <code>false</code> which is also the default.
+     */
+    private boolean hasCrossFleetMergedRanking; 
     
     /**
      * @param fleets
@@ -286,11 +294,6 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
-    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
-        raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
-    }
-
-    @Override
     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
         raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
     }
@@ -409,16 +412,6 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
-    public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
-        if (hasSplitFleetContiguousScoring != this.hasSplitFleetContiguousScoring) {
-            this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
-            for (RaceColumn raceColumn : getRaceColumns()) {
-                raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
-            }
-        }
-    }
-
-    @Override
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
     }
@@ -439,5 +432,40 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
+    }
+    
+    @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+    }
+
+    @Override
+    public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
+        if (hasSplitFleetContiguousScoring != this.hasSplitFleetContiguousScoring) {
+            this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+            }
+        }
+    }
+    
+    @Override
+    public boolean hasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
+    }
+
+    @Override
+    public void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
+        if (hasCrossFleetMergedRanking != this.hasCrossFleetMergedRanking) {
+            this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
+            }
+        }
+    }
+
+    @Override
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
     }
 }

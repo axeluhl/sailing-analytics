@@ -20,13 +20,14 @@ public class SeriesDescriptor {
     private final boolean isFleetsCanRunInParallel;
     private final boolean startsWithZeroScore;
     private final boolean hasSplitFleetContiguousScoring;
+    private final boolean hasCrossFleetMergedRanking;
     private final boolean firstColumnIsNonDiscardableCarryForward;
     private final Integer maximumNumberOfDiscards;
     private final int[] resultDiscardingThresholds;
     
     public SeriesDescriptor(SeriesDTO series, String seriesName, List<RaceColumnDTO> races, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring, Integer maximumNumberOfDiscards) {
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking,  Integer maximumNumberOfDiscards) {
         this.seriesName = seriesName;
         this.series = series;
         this.races = races;
@@ -34,6 +35,7 @@ public class SeriesDescriptor {
         this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.startsWithZeroScore = startsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking; 
         this.resultDiscardingThresholds = resultDiscardingThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
@@ -69,6 +71,10 @@ public class SeriesDescriptor {
     
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
+    }
+    
+    public boolean hasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
     }
 
     public boolean isFirstColumnIsNonDiscardableCarryForward() {

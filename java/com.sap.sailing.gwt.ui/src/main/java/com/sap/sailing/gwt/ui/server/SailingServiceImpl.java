@@ -985,7 +985,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(), series.isFleetsCanRunInParallel(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
                         series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
-                        series.getMaximumNumberOfDiscards());
+                        series.hasCrossFleetMergedRanking() , series.getMaximumNumberOfDiscards());
         return result;
     }
 
@@ -4142,9 +4142,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     private SeriesParameters getSeriesParameters(SeriesDTO seriesDTO) {
-        SeriesParameters series = new SeriesParameters(false, false, false, null, seriesDTO.getMaximumNumberOfDiscards());
+        SeriesParameters series = new SeriesParameters(false, false, false, false, null, seriesDTO.getMaximumNumberOfDiscards());
         series.setFirstColumnIsNonDiscardableCarryForward(seriesDTO.isFirstColumnIsNonDiscardableCarryForward());
         series.setHasSplitFleetContiguousScoring(seriesDTO.hasSplitFleetContiguousScoring());
+        series.sethasCrossFleetMergedRanking(seriesDTO.hasCrossFleetMergedRanking());
         series.setStartswithZeroScore(seriesDTO.isStartsWithZeroScore());
         series.setDiscardingThresholds(seriesDTO.getDiscardThresholds());
         return series;
@@ -4157,7 +4158,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 seriesCreationParams.put(series.getName(), new SeriesCreationParametersDTO(series.getFleets(),
                 false, true, seriesParameters.isStartswithZeroScore(), seriesParameters.isFirstColumnIsNonDiscardableCarryForward(),
                         seriesParameters.getDiscardingThresholds(), seriesParameters.isHasSplitFleetContiguousScoring(),
-                        seriesParameters.getMaximumNumberOfDiscards()));
+                        seriesParameters.isHasCrossFleetMergedRanking(),  seriesParameters.getMaximumNumberOfDiscards()));
             }
         return seriesCreationParams;
     }

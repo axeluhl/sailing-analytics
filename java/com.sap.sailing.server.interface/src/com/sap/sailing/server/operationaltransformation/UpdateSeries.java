@@ -26,13 +26,14 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     private final boolean startsWithZeroScore;
     private final boolean firstColumnIsNonDiscardableCarryForward;
     private final boolean hasSplitFleetContiguousScoring;
+    private final boolean hasCrossFleetMergedRanking; 
     private final boolean seriesNameChanged;
     private final String newSeriesName;
     private final Integer maximumNumberOfDiscards;
 
     public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking,
             Integer maximumNumberOfDiscards, List<FleetDTO> fleets) {
         super(regattaIdentifier, seriesName);
         this.seriesNameChanged = !seriesName.equals(newSeriesName);
@@ -43,6 +44,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         this.startsWithZeroScore = startsWithZeroScore;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking; 
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
         this.fleets = fleets;
     }
@@ -63,6 +65,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         series.setStartsWithZeroScore(startsWithZeroScore);
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForward);
         series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoring);
+        series.setCrossFleetMergedRanking(hasCrossFleetMergedRanking);
         series.setMaximumNumberOfDiscards(maximumNumberOfDiscards);
         if (series.getRegatta().isPersistent()) {
             toState.updateStoredRegatta(series.getRegatta());

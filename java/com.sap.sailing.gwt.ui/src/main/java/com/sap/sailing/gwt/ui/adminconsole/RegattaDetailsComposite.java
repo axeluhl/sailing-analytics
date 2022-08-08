@@ -202,6 +202,12 @@ public class RegattaDetailsComposite extends Composite {
                 return series.hasSplitFleetContiguousScoring() ? stringMessages.yes() : stringMessages.no();
             }
         };
+        TextColumn<SeriesDTO> hasCrossFleetMergedRankingColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.hasCrossFleetMergedRanking() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
         TextColumn<SeriesDTO> isFirstColumnIsNonDiscardableCarryForwardColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -310,6 +316,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(isFirstColumnIsNonDiscardableCarryForwardColumn, stringMessages.firstRaceIsNonDiscardableCarryForward());
         table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
         table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
+        table.addColumn(hasCrossFleetMergedRankingColumn, stringMessages.hasCrossFleetMergedRanking());
         table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
         table.addColumn(maximumNumberOfDiscardsColumn, stringMessages.maximumNumberOfDiscards());
         table.addColumn(actionsColumn, stringMessages.actions());
@@ -349,6 +356,7 @@ public class RegattaDetailsComposite extends Composite {
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
         final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
+        final boolean hasCrossFleetMergedRankingChanged = series.hasCrossFleetMergedRanking() != seriesDescriptor.hasCrossFleetMergedRanking();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());
         final boolean maximumNumberOfDiscardsChanged = series.getMaximumNumberOfDiscards() != seriesDescriptor.getMaximumNumberOfDiscards();
@@ -405,12 +413,12 @@ public class RegattaDetailsComposite extends Composite {
                                         public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
                                             if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                                                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
-                                                    || seriesNameChanged || maximumNumberOfDiscardsChanged) {
+                                                    || hasCrossFleetMergedRankingChanged || seriesNameChanged || maximumNumberOfDiscardsChanged) {
                                                 sailingServiceWrite.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
                                                         seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                                                         seriesDescriptor.isStartsWithZeroScore(),
                                                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
-                                                        seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.getMaximumNumberOfDiscards(),
+                                                        seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.hasCrossFleetMergedRanking(), seriesDescriptor.getMaximumNumberOfDiscards(),
                                                         series.getFleets(), new AsyncCallback<Void>() {
                                                     @Override
                                                     public void onFailure(Throwable caught) {

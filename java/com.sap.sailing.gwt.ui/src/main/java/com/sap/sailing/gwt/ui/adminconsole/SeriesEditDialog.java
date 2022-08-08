@@ -44,6 +44,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private CheckBox fleetsCanRunInParallelCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
+    private CheckBox hasCrossFleetMergedRankingCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private IntegerBox maximumNumberOfDiscardsBox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
@@ -135,12 +136,13 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             }
             races.add(raceColumnDTO);
         }
+        boolean status = hasCrossFleetMergedRankingCheckbox.getValue();
         return new SeriesDescriptor(selectedSeries, seriesNameTextBox.getValue(), races, isMedalCheckbox.getValue(),
                 fleetsCanRunInParallelCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
                         : null, startWithZeroScoreCheckbox.getValue(),
                 firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetContiguousScoringCheckbox.getValue(),
-                maximumNumberOfDiscardsBox.getValue());
+                hasCrossFleetMergedRankingCheckbox.getValue(), maximumNumberOfDiscardsBox.getValue());
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
@@ -190,6 +192,10 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         hasSplitFleetContiguousScoringCheckbox = createCheckbox(stringMessages.hasSplitFleetContiguousScoring());
         hasSplitFleetContiguousScoringCheckbox.setValue(selectedSeries.hasSplitFleetContiguousScoring());
         additionalWidgetPanel.add(hasSplitFleetContiguousScoringCheckbox);
+        
+        hasCrossFleetMergedRankingCheckbox = createCheckbox(stringMessages.hasCrossFleetMergedRanking());
+        hasCrossFleetMergedRankingCheckbox.setValue(selectedSeries.hasCrossFleetMergedRanking());
+        additionalWidgetPanel.add(hasCrossFleetMergedRankingCheckbox);
         
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
         firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");

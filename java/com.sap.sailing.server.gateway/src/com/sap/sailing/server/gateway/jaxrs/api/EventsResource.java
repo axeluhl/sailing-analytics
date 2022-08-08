@@ -729,8 +729,8 @@ public class EventsResource extends AbstractSailingServerResource {
         getService().apply(new UpdateSeries(new RegattaName(regatta.getName()), "Default", "Default", defaultSeries.isMedal(),
                 defaultSeries.isFleetsCanRunInParallel(), defaultSeries.getDiscardingThresholds(),
                 defaultSeries.isStartsWithZero(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(),
-                defaultSeries.hasSplitFleetContiguousScoring(), defaultSeries.getMaximumNumberOfDiscards(),
-                defaultSeries.getFleets()));
+                defaultSeries.hasSplitFleetContiguousScoring(), defaultSeries.hasCrossFleetMergedRanking(),
+                defaultSeries.getMaximumNumberOfDiscards(), defaultSeries.getFleets()));
     }
     
     private void addRaceColumns(String regattaName, String seriesName, int numberOfRaces) {
@@ -869,7 +869,7 @@ public class EventsResource extends AbstractSailingServerResource {
         final LinkedHashMap<String, SeriesCreationParametersDTO> series = new LinkedHashMap<>();
 
         series.put("Default", new SeriesCreationParametersDTO(
-                Arrays.asList(new FleetDTO("Default", 0, null)), false, false, false, false, null, false, null));
+                Arrays.asList(new FleetDTO("Default", 0, null)), false, false, false, false, null, false, false, null));
 
         return series;
     }

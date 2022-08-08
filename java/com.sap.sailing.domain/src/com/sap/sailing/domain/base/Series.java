@@ -126,5 +126,15 @@ public interface Series extends SeriesBase {
     boolean hasSplitFleetContiguousScoring();
 
     void setSplitFleetContiguousScoring(boolean hasSplitFleetScore);
+    
+    /**
+     * When a series has more than one fleet, there are two different options for scoring it when the fleets are of the same rank. 
+     * Either the scoring scheme is applied to both fleets at the same time and competitors compete across the fleets; or the scoring scheme is applied to each fleet separately, 
+     * leading to the best score being awarded in the column as many times as there are fleets in the column. 
+     * For the latter case, this field is <code>false</code> which is also the default.
+     */
+    boolean hasCrossFleetMergedRanking();
+
+    void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking);
 
 }
