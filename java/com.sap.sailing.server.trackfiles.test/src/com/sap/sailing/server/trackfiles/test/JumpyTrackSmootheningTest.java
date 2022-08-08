@@ -249,6 +249,7 @@ public class JumpyTrackSmootheningTest {
                 new Pair<>(finish, PassingInstruction.Line)),
                 /* associatedRoles */ Collections.emptyMap(), /* originatingCouseTemplateIdOrNull */ null, DomainFactory.INSTANCE);
         final DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrackInRace = trackedRace.getTrack(gallagherZelenka);
+        // TODO switch race into suspended mode to avoid updates during mass fix insertion:
         competitorTrack.lockForRead();
         try {
             for (final GPSFixMoving fix : competitorTrack.getRawFixes()) {
@@ -257,6 +258,7 @@ public class JumpyTrackSmootheningTest {
         } finally {
             competitorTrack.unlockAfterRead();
         }
+        // TODO resume race
         return trackedRace;
     }
     
