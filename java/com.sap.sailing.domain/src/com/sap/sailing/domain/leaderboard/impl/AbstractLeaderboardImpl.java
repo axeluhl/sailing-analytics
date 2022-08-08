@@ -171,7 +171,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     /**
      * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
      * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
-     * competitors ranked worse by the tracking system need to have their rank corrected by one.
+     * competitors ranked worse by the tracking system need to have their rank corrected by one. The {@link RankComparable} must also 
+     * consider the {@link MaxPointsReason} so that the behavior remains consistent. 
      * 
      * @param trackedRace
      *            the race to which the rank refers; look for disqualifications / max points reasons in this column
@@ -179,11 +180,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      *            time point at which to consider disqualifications (not used yet because currently we don't remember
      *            <em>when</em> a competitor was disqualified)
      * @param rank
-     *            a competitors rank according to the tracking system
+     *            a competitors rank and rankComparable according to the tracking system
      * 
      * @return the unmodified <code>Pair(Rank, {@link RankComparable}</code> if no disqualifications for better-ranked competitors exist for
-     *         <code>race</code>, or otherwise a <code> <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of disqualifications of
-     *         competitors whose tracked rank is better (lower) than <code>rank</code>.
+     *         <code>race</code>, or otherwise a <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of disqualifications of
+     *         competitors whose tracked rank is better (lower) than <code>rank</code> while the {@link RankComparable} is consistent with the new Rank.
      */
     private Pair<Integer, RankComparable<?>> improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace,
             TimePoint timePoint, Pair<Integer, RankComparable<?>> rank) {

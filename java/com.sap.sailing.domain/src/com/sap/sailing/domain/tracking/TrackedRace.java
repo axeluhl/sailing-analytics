@@ -809,26 +809,35 @@ public interface TrackedRace
     Competitor getCompetitorOfBoat(Boat boat);
     
     /**
-     * Returns the competitors of this tracked race, according to their iteration order ranking. Competitors whose
-     * {@link #getRankAndRankComparable(Competitor)} is 0 will be sorted "worst".
+     * Returns the competitors of this tracked race, according to their ranking (iteration order). Competitors whose
+     * {@link #getRank} is 0 will be sorted "worst". 
+     * 
+     * @return If no ranking can be computed for the given {@link TimePoint} an empty LinkeHashMap is returned not null. 
      */
     LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint);
 
     /**
      * Same as {@link #getCompetitorsFromBestToWorstAndRankComparable(TimePoint)}, using a cache for wind, leg type and leg
      * bearing values.
+     * 
+     * @return If no ranking can be computed for the given {@link TimePoint} an empty {@link LinkedHashMap} is returned not null. 
      */
     LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
     
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
+     * 
+     * @return If no ranking can be computed for the given {@link TimePoint} an {@link Iterable} with no Objects in it is returned not null. 
      */
     Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
     /**
      * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
      * bearing values.
+     * 
+     * @return If no ranking can be computed for the given {@link TimePoint} an {@link Iterable} with no Objects in it is returned not null. 
+
      */
     Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 

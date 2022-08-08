@@ -190,14 +190,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     
     @Override
     public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor) throws NoWindException {
-     // TODO: Diskutieren was hier zu erwarten ist...
         return null;
     }
 
     @Override
     public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        // TODO: Diskutieren was hier zu erwarten ist...
         return null;
     }
 

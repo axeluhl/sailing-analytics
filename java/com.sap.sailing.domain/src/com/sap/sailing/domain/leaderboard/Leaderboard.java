@@ -89,6 +89,14 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         Fleet getFleet();
     }
     
+    
+    /**
+     * This class is a default RankComparable that uses the ranks as Comparable.
+     * This class is only used as a placeholder while the new RankingSystem is under development. 
+     * 
+     * @author I518097
+     *
+     */
     public class RankComparableRank implements RankComparable<RankComparableRank> {
         private final Integer rank;
 
@@ -288,7 +296,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sse.common.TimePoint)} with the additional logic
      * that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet or no
-     * {@link TrackedRace} exists for <code>race</code>, <code>Pair(0,null)</code> will be returned for all those competitors. The tracked race
+     * {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked race
      * for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
      * <p>
      * 
@@ -300,7 +308,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
-     * @return a Pair of a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race} as A and a {@link RankingComparable} for comparing {@link Competitor}s across {@link Fleet}s.
+     * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
      */
     default int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
         return getTrackedRank(competitor, race, timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
@@ -323,7 +331,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *            a race that is contained in the {@link #getRaceColumns()} result
      * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
      */
-     int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
+    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
