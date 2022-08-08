@@ -3,31 +3,73 @@ package com.sap.sailing.server.trackfiles.test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
+import com.sap.sailing.domain.test.DummyTrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+
+import difflib.PatchFailedException;
 
 /**
  * See also bug 5728. We have seen tracks coming from phones where there seem to be two
@@ -50,8 +92,6 @@ import com.sap.sse.common.Util.Pair;
  *
  */
 public class JumpyTrackSmootheningTest {
-    private DynamicGPSFixTrack<Competitor, GPSFixMoving> track;
-    
     private static class Inconsistency {
         private final GPSFixMoving previous;
         private final GPSFixMoving fix;
@@ -120,8 +160,9 @@ public class JumpyTrackSmootheningTest {
         }
     }
     
-    protected void readTrack(String filename) throws Exception {
-        track = new DynamicGPSFixMovingTrackImpl<Competitor>(AbstractLeaderboardTest.createCompetitor(filename),
+    private DynamicGPSFixTrack<Competitor, GPSFixMoving> readTrack(String filename) throws Exception {
+        final DynamicBoat boat = new BoatImpl("1", "1", new BoatClassImpl(BoatClassMasterdata.MELGES_24), /* sailID */ "1");
+        final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Competitor>(AbstractLeaderboardTest.createCompetitorWithBoat(filename, boat),
                 /* millisecondsOverWhichToAverage */ 5000, /* losslessCompaction */ true);
         final InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream(filename);
         final InputStream inputStream;
@@ -132,6 +173,85 @@ public class JumpyTrackSmootheningTest {
         }
         RouteConverterGPSFixImporterFactory.INSTANCE.createRouteConverterGPSFixImporter().importFixes(inputStream,
                 (fix, device)->track.add((GPSFixMoving) fix), /* inferSpeedAndBearing */ false, filename);
+        return track;
+    }
+    
+    /**
+     * Simulates the "Oak cliff DH Distance Race" R1 with a single competitor, Gallagher / Zelenka, sail number "1" with
+     * the marks pinged statically to establish the course. The track of Gallagher / Zelenka is provided as a track of
+     * their GPS positions. This could be the raw track, or it may be a filtered variant of the track with outliers
+     * removed or adjusted.<p>
+     * 
+     * The race that is returned with have the mark passing calculator activated, and a test may wait for it to complete
+     * its calculation. As a result, a test may determine the impact filtering / adjusting the track may have on the
+     * mark passing analysis.
+     * @throws PatchFailedException 
+     */
+    private DynamicTrackedRace createRace(DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack) throws PatchFailedException {
+        final Competitor gallagherZelenka = competitorTrack.getTrackedItem();
+        final DynamicTrackedRace trackedRace = createTrackedRace("Oak cliff DH Distance Race", "R1", BoatClassMasterdata.MELGES_24, gallagherZelenka);
+//        final Mark lisR32a = createAndPlaceMark(trackedRace, "32A - Mid-Sound Buoy", "LIS R32A", 40.96866998355836, -73.54664996266365, MarkType.BUOY, Color.ofRgb("#FF0000"), "CYLINDER");
+//        final Mark lisC17 = createAndPlaceMark(trackedRace, "C17 - Sound Side of Center Island Green", "LIS C17", 40.93856998253614, -73.53271999396384, MarkType.BUOY, Color.ofRgb("#008000"), "CYLINDER");
+        final Mark cshG1 = createAndPlaceMark(trackedRace, "Cold Spring Harbor G1", "CSH G1", 40.92594997957349, -73.50404994562268, MarkType.BUOY, Color.ofRgb("#008000"), "CYLINDER");
+        final Mark cshl = createAndPlaceMark(trackedRace, "Cold Spring Harbor Light", "CSHL", 40.91418300289661, -73.4931492805481, MarkType.BUOY, null, "CYLINDER");
+        final Mark finishBoat = createAndPlaceMark(trackedRace, "Finish Boat", "FB", 40.89873938821256, -73.51117020472884, MarkType.FINISHBOAT, null, null);
+        final Mark finishPin = createAndPlaceMark(trackedRace, "Finish Pin", "FP", 40.897511816583574, -73.50983932614326, MarkType.BUOY, null, null);
+        final Mark faulkner = createAndPlaceMark(trackedRace, "G15 - North Side Faulkner Island", "Faulkner", 40.96866998355836, -73.54664996266365, MarkType.BUOY, Color.ofRgb("#008000"), "CONICAL");
+//        final Mark bayville = createAndPlaceMark(trackedRace, "LIS G19 - Bayville", "Bayville", 40.92419996391982, -73.56988325715065, MarkType.BUOY, Color.ofRgb("#008000"), "CONICAL");
+        final Mark matinecock = createAndPlaceMark(trackedRace, "LIS G21 - Matinecock Pt", "Matinecock Pt", 40.90974998194724, -73.63691660575569, MarkType.BUOY, Color.ofRgb("#008000"), "CONICAL");
+        final Mark sixMileReef = createAndPlaceMark(trackedRace, "LIS R8C - 6 Mile Reef", "6 Mile Reef", 41.17991665843874, -72.49066662043333, MarkType.BUOY, Color.ofRgb("#FF0000"), "CONICAL");
+        final Mark newMark = createAndPlaceMark(trackedRace, "New Mark", "NM", 40.924666626378894, -73.70251664891839, MarkType.BUOY, null, null);
+//        final Mark ob2 = createAndPlaceMark(trackedRace, "Oyster Bay Buoy 2", "OB2", 40.91139995958656, -73.50232997909188, MarkType.BUOY, Color.ofRgb("#FF0000"), "CONICAL");
+//        final Mark ob4 = createAndPlaceMark(trackedRace, "Oyster Bay Buoy 4", "OB4", 40.90192995965481, -73.50629998371005, MarkType.BUOY, Color.ofRgb("#FF0000"), "CONICAL");
+//        final Mark ob5 = createAndPlaceMark(trackedRace, "Oyster Bay Buoy 5 (Seawanhaka)", "OB5", 40.89752623345703, -73.50977637805045, MarkType.BUOY, Color.ofRgb("#008000"), "CYLINDER");
+        final Mark cows = createAndPlaceMark(trackedRace, "R32 - The Cows", "Cows", 41.003599972464144, -73.52359998039901, MarkType.BUOY, Color.ofRgb("#FF0000"), "CONICAL");
+        final Mark startBoat = createAndPlaceMark(trackedRace, "Start Boat", "SB", 40.8984215464443, -73.51104154251516, MarkType.STARTBOAT, null, null);
+        final Mark startPin = createAndPlaceMark(trackedRace, "Start Pin", "SP", 40.89739736169577, -73.50981149822474, MarkType.BUOY, null, null);
+//        final Mark cowes32 = createAndPlaceMark(trackedRace, "The Cowes Lighted Bell Buoy 32", "Cowes 32", 40.00361998099834, -73.52387993596494, MarkType.BUOY, null, null);
+        final ControlPointWithTwoMarks start = new ControlPointWithTwoMarksImpl(startBoat, startPin, "Start", "S");
+        final ControlPointWithTwoMarks finish = new ControlPointWithTwoMarksImpl(finishBoat, finishPin, "Finish", "F");
+        trackedRace.getRace().getCourse().update(Arrays.asList(
+                new Pair<>(start, PassingInstruction.Line),
+                new Pair<>(cshl, PassingInstruction.Port),
+                new Pair<>(cshG1, PassingInstruction.Port),
+                new Pair<>(cshl, PassingInstruction.Port),
+                new Pair<>(cows, PassingInstruction.Starboard),
+                new Pair<>(faulkner, PassingInstruction.Starboard),
+                new Pair<>(sixMileReef, PassingInstruction.Starboard),
+                new Pair<>(cows, PassingInstruction.Port),
+                new Pair<>(newMark, PassingInstruction.Port),
+                new Pair<>(matinecock, PassingInstruction.Port),
+                new Pair<>(cows, PassingInstruction.Starboard),
+                new Pair<>(cshl, PassingInstruction.Starboard),
+                new Pair<>(finish, PassingInstruction.Line)),
+                /* associatedRoles */ Collections.emptyMap(), /* originatingCouseTemplateIdOrNull */ null, DomainFactory.INSTANCE);
+        return trackedRace;
+    }
+    
+    private DynamicTrackedRace createTrackedRace(String regattaName, String name, BoatClassMasterdata boatClassMasterData, Competitor gallagherZelenka) {
+        final BoatClassImpl boatClass = new BoatClassImpl(boatClassMasterData);
+        final TrackedRegatta trackedRegatta = new TrackedRegattaImpl(new RegattaImpl(regattaName, boatClass,
+                /* canBoatsOfCompetitorsChangePerRace */ false, /* competitorRegistrationType */ CompetitorRegistrationType.CLOSED,
+                /* startDate */ null, /* endDate */ null, Collections.singleton(new SeriesImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
+                        Collections.singleton(new FleetImpl("Default", 0)), Collections.singleton("R1"), new DummyTrackedRegattaRegistry())), /* persistent */ false,
+                new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Default", UUID.randomUUID()), OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ null));
+        final Boat boat = ((CompetitorWithBoat) gallagherZelenka).getBoat();
+        final Map<Competitor, Boat> competitorsAndTheirBoats = Util.<Competitor, Boat>mapBuilder().put(gallagherZelenka, boat).build();
+        final Course course = new CourseImpl("R1 Course", Collections.emptySet());
+        final RaceDefinition race = new RaceDefinitionImpl(name, course, boatClass, competitorsAndTheirBoats, UUID.randomUUID());
+        return new DynamicTrackedRaceImpl(trackedRegatta, race, /* sidelines */ Collections.emptySet(), new EmptyWindStore(), /* delayToLiveInMillis */ 1000,
+                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, /* time over which to average speed: */ boatClass.getApproximateManeuverDurationInMilliseconds(),
+                /* useInternalMarkPassingAlgorithm */ true, OneDesignRankingMetric::new, mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null);
+    }
+
+    private Mark createAndPlaceMark(DynamicTrackedRace trackedRace, String name, String shortName, double latDeg, double lngDeg,
+            MarkType markType, Color color, String shape) {
+        final Mark mark = new MarkImpl(UUID.randomUUID(), name, markType, color, shape, /* pattern */ null);
+        final DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+        final GPSFix markFix = new GPSFixImpl(new DegreePosition(latDeg, lngDeg), trackedRace.getStartOfTracking());
+        markTrack.add(markFix);
+        return mark;
     }
     
     /**
@@ -356,7 +476,7 @@ public class JumpyTrackSmootheningTest {
     }
 
     private void adjustTrackAndAssertNoOutliersInResult(String trackFileName, int maximumNumberOfOutliersAllowed) throws Exception {
-        readTrack(trackFileName);
+        final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack(trackFileName);
         track.lockForRead();
         try {
             assertFalse(Util.isEmpty(track.getRawFixes()));
