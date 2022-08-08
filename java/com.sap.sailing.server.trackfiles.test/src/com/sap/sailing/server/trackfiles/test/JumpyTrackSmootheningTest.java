@@ -2,15 +2,19 @@ package com.sap.sailing.server.trackfiles.test;
 
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
@@ -54,12 +58,13 @@ import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.DummyTrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
@@ -160,6 +165,24 @@ public class JumpyTrackSmootheningTest {
         }
     }
     
+    @Test
+    public void testMarkPassingCalculatorForOriginal() throws Exception {
+        final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack("GallagherZelenka.gpx.gz");
+        final DynamicTrackedRace trackedRace = createRace(track);
+        final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(track.getTrackedItem(), /* wait for latest update */ true);
+        assertNotNull(markPassings);
+    }
+    
+    @Test
+    public void testMarkPassingCalculatorForAdjusted() throws Exception {
+        final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack("GallagherZelenka.gpx.gz");
+        final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> replaced = findAndRemoveInconsistenciesOnRawFixes(track);
+        final Competitor competitor = track.getTrackedItem();
+        final DynamicTrackedRace trackedRace = createRace(replaced.getB());
+        final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor, /* wait for latest update */ true);
+        assertNotNull(markPassings);
+    }
+    
     private DynamicGPSFixTrack<Competitor, GPSFixMoving> readTrack(String filename) throws Exception {
         final DynamicBoat boat = new BoatImpl("1", "1", new BoatClassImpl(BoatClassMasterdata.MELGES_24), /* sailID */ "1");
         final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Competitor>(AbstractLeaderboardTest.createCompetitorWithBoat(filename, boat),
@@ -185,11 +208,11 @@ public class JumpyTrackSmootheningTest {
      * The race that is returned with have the mark passing calculator activated, and a test may wait for it to complete
      * its calculation. As a result, a test may determine the impact filtering / adjusting the track may have on the
      * mark passing analysis.
-     * @throws PatchFailedException 
      */
-    private DynamicTrackedRace createRace(DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack) throws PatchFailedException {
+    private DynamicTrackedRace createRace(DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack) throws PatchFailedException, ParseException {
         final Competitor gallagherZelenka = competitorTrack.getTrackedItem();
         final DynamicTrackedRace trackedRace = createTrackedRace("Oak cliff DH Distance Race", "R1", BoatClassMasterdata.MELGES_24, gallagherZelenka);
+        trackedRace.setStartOfTrackingReceived(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2020-10-14T17:00:00Z")));
 //        final Mark lisR32a = createAndPlaceMark(trackedRace, "32A - Mid-Sound Buoy", "LIS R32A", 40.96866998355836, -73.54664996266365, MarkType.BUOY, Color.ofRgb("#FF0000"), "CYLINDER");
 //        final Mark lisC17 = createAndPlaceMark(trackedRace, "C17 - Sound Side of Center Island Green", "LIS C17", 40.93856998253614, -73.53271999396384, MarkType.BUOY, Color.ofRgb("#008000"), "CYLINDER");
         final Mark cshG1 = createAndPlaceMark(trackedRace, "Cold Spring Harbor G1", "CSH G1", 40.92594997957349, -73.50404994562268, MarkType.BUOY, Color.ofRgb("#008000"), "CYLINDER");
@@ -225,12 +248,21 @@ public class JumpyTrackSmootheningTest {
                 new Pair<>(cshl, PassingInstruction.Starboard),
                 new Pair<>(finish, PassingInstruction.Line)),
                 /* associatedRoles */ Collections.emptyMap(), /* originatingCouseTemplateIdOrNull */ null, DomainFactory.INSTANCE);
+        final DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrackInRace = trackedRace.getTrack(gallagherZelenka);
+        competitorTrack.lockForRead();
+        try {
+            for (final GPSFixMoving fix : competitorTrack.getRawFixes()) {
+                competitorTrackInRace.add(fix);
+            }
+        } finally {
+            competitorTrack.unlockAfterRead();
+        }
         return trackedRace;
     }
     
     private DynamicTrackedRace createTrackedRace(String regattaName, String name, BoatClassMasterdata boatClassMasterData, Competitor gallagherZelenka) {
         final BoatClassImpl boatClass = new BoatClassImpl(boatClassMasterData);
-        final TrackedRegatta trackedRegatta = new TrackedRegattaImpl(new RegattaImpl(regattaName, boatClass,
+        final TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(new RegattaImpl(regattaName, boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ false, /* competitorRegistrationType */ CompetitorRegistrationType.CLOSED,
                 /* startDate */ null, /* endDate */ null, Collections.singleton(new SeriesImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false,
                         Collections.singleton(new FleetImpl("Default", 0)), Collections.singleton("R1"), new DummyTrackedRegattaRegistry())), /* persistent */ false,
