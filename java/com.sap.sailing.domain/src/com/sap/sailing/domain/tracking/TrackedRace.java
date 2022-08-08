@@ -289,7 +289,7 @@ public interface TrackedRace
 
     /**
      * Computes the competitor's rank in this race for the provided {@link TimePoint} as A and a metric for the rank as B. 
-     * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their rank.  
+     * The metric is represented by a {@link RankComparable} and enables a later comparison of the participants regardless of their fleet.  
      * If the race hasn't {@link #hasStarted(TimePoint) started} yet, the result is undefined.
      * 
      * @return <code> (0,0)</code> in case the {@link Competitor} has not started / participated yet.  
@@ -809,7 +809,7 @@ public interface TrackedRace
     Competitor getCompetitorOfBoat(Boat boat);
     
     /**
-     * Returns the competitors of this tracked race, according to their ranking. Competitors whose
+     * Returns the competitors of this tracked race, according to their iteration order ranking. Competitors whose
      * {@link #getRankAndRankComparable(Competitor)} is 0 will be sorted "worst".
      */
     LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint);
