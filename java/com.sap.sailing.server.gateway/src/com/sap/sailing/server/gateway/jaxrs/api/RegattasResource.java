@@ -2653,7 +2653,6 @@ public class RegattasResource extends AbstractSailingServerResource {
             boolean firstColumnIsNonDiscardableCarryForward = (boolean) requestObject
                     .get("firstColumnIsNonDiscardableCarryForward");
             boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
-            
             boolean hasCrossFleetMergedRanking = (boolean) requestObject.get("hasCrossFleetMergedRanking");
 
             Integer maximumNumberOfDiscards = null;

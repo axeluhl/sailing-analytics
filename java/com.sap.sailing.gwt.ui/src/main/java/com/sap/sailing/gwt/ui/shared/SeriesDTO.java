@@ -57,6 +57,10 @@ public class SeriesDTO extends NamedDTO {
         return hasSplitFleetContiguousScoring;
     }
 
+    public Boolean hasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
+    }
+
     public List<FleetDTO> getFleets() {
         return fleets;
     }
@@ -124,10 +128,6 @@ public class SeriesDTO extends NamedDTO {
 
     public void setSplitFleetContiguousScoring(Boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
-    }
-    
-    public Boolean hasCrossFleetMergedRanking() {
-        return hasCrossFleetMergedRanking;
     }
 
     public void setCrossFleetMergedRanking(Boolean hasCrossFleetMergedRanking) {

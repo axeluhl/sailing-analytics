@@ -294,6 +294,16 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+    }
+
+    @Override
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
+    }
+
+    @Override
     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
         raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
     }
@@ -412,6 +422,26 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
+        if (hasSplitFleetContiguousScoring != this.hasSplitFleetContiguousScoring) {
+            this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+            }
+        }
+    }
+
+    @Override
+    public void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
+        if (hasCrossFleetMergedRanking != this.hasCrossFleetMergedRanking) {
+            this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
+            }
+        }
+    }
+    
+    @Override
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
     }
@@ -433,39 +463,9 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }
-    
-    @Override
-    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
-        raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
-    }
 
-    @Override
-    public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
-        if (hasSplitFleetContiguousScoring != this.hasSplitFleetContiguousScoring) {
-            this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
-            for (RaceColumn raceColumn : getRaceColumns()) {
-                raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
-            }
-        }
-    }
-    
     @Override
     public boolean hasCrossFleetMergedRanking() {
         return hasCrossFleetMergedRanking;
-    }
-
-    @Override
-    public void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
-        if (hasCrossFleetMergedRanking != this.hasCrossFleetMergedRanking) {
-            this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
-            for (RaceColumn raceColumn : getRaceColumns()) {
-                raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
-            }
-        }
-    }
-
-    @Override
-    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
-        raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
     }
 }

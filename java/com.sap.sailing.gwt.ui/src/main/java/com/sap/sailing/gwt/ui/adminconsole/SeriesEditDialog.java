@@ -136,7 +136,6 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             }
             races.add(raceColumnDTO);
         }
-        boolean status = hasCrossFleetMergedRankingCheckbox.getValue();
         return new SeriesDescriptor(selectedSeries, seriesNameTextBox.getValue(), races, isMedalCheckbox.getValue(),
                 fleetsCanRunInParallelCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()

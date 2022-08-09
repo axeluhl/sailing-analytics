@@ -278,7 +278,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), finals.getName(), finals.getName(), finals.isMedal(), finals.isFleetsCanRunInParallel(),
                 new int[] {},
                 finals.isStartsWithZeroScore(), finals.isFirstColumnIsNonDiscardableCarryForward(),
-                finals.hasSplitFleetContiguousScoring(), finals.hasCrossFleetMergedRanking() ,finals.getMaximumNumberOfDiscards(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
+                finals.hasSplitFleetContiguousScoring(), finals.hasCrossFleetMergedRanking(), finals.getMaximumNumberOfDiscards(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);

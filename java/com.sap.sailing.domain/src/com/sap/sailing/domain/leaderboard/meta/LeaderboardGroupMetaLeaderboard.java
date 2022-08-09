@@ -101,10 +101,4 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
     public LeaderboardType getLeaderboardType() {
         return LeaderboardType.RegattaMetaLeaderboard;
     }
-
-    @Override
-    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
-        // TODO Auto-generated method stub
-        
-    }
 }
