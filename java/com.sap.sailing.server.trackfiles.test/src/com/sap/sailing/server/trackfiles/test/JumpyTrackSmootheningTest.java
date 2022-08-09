@@ -180,6 +180,8 @@ public class JumpyTrackSmootheningTest {
     @Test
     public void testMarkPassingCalculatorForAdjusted() throws Exception {
         final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack("GallagherZelenka.gpx.gz");
+        final Duration durationForAdjustedTrack;
+        final Duration durationForOriginalTrack;
         {
             final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> replaced = findAndRemoveInconsistenciesOnRawFixes(track);
             final Competitor competitor = track.getTrackedItem();
@@ -187,7 +189,8 @@ public class JumpyTrackSmootheningTest {
             final DynamicTrackedRace trackedRace = createRace(replaced.getB());
             final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor, /* wait for latest update */ true);
             final TimePoint doneAt = TimePoint.now();
-            logger.info("Duration for computing mark passings witih adjusted track: "+startedAt.until(doneAt));
+            durationForAdjustedTrack = startedAt.until(doneAt);
+            logger.info("Duration for computing mark passings with adjusted track: "+durationForAdjustedTrack);
             assertNotNull(markPassings);
             assertEquals(13, markPassings.size());
         }
@@ -196,10 +199,13 @@ public class JumpyTrackSmootheningTest {
             final DynamicTrackedRace trackedRace = createRace(track);
             final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(track.getTrackedItem(), /* wait for latest update */ true);
             final TimePoint doneAt = TimePoint.now();
-            logger.info("Duration for computing mark passings with original track: "+startedAt.until(doneAt));
+            durationForOriginalTrack = startedAt.until(doneAt);
+            logger.info("Duration for computing mark passings with original track: "+durationForOriginalTrack);
             assertNotNull(markPassings);
             assertEquals(13, markPassings.size());
         }
+        assertTrue("Expected duration for mark passing analysis on adjusted track to be at least eight times less than for original track",
+                durationForAdjustedTrack.times(8).compareTo(durationForOriginalTrack) < 0);
     }
     
     private DynamicGPSFixTrack<Competitor, GPSFixMoving> readTrack(String filename) throws Exception {
