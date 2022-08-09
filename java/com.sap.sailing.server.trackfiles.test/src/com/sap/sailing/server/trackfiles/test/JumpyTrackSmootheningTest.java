@@ -1,12 +1,12 @@
 package com.sap.sailing.server.trackfiles.test;
 
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,8 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipOutputStream;
 
 import org.junit.Test;
 
@@ -56,8 +56,6 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.trackfiles.TrackFilesDataSource;
-import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -78,7 +76,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
-import com.sap.sailing.server.trackfiles.TrackFileExporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
@@ -110,6 +107,8 @@ import difflib.PatchFailedException;
  *
  */
 public class JumpyTrackSmootheningTest {
+    private static final Logger logger = Logger.getLogger(JumpyTrackSmootheningTest.class.getName());
+
     private static class Inconsistency {
         private final GPSFixMoving previous;
         private final GPSFixMoving fix;
@@ -179,27 +178,28 @@ public class JumpyTrackSmootheningTest {
     }
     
     @Test
-    public void testMarkPassingCalculatorForOriginal() throws Exception {
-        final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack("GallagherZelenka.gpx.gz");
-        final DynamicTrackedRace trackedRace = createRace(track);
-        final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(track.getTrackedItem(), /* wait for latest update */ true);
-        assertNotNull(markPassings);
-    }
-    
-    @Test
     public void testMarkPassingCalculatorForAdjusted() throws Exception {
         final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack("GallagherZelenka.gpx.gz");
-        final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> replaced = findAndRemoveInconsistenciesOnRawFixes(track);
-        final Competitor competitor = track.getTrackedItem();
-        final DynamicTrackedRace trackedRace = createRace(replaced.getB());
-        final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor, /* wait for latest update */ true);
-        assertNotNull(markPassings);
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(getClass().getSimpleName()+"_testMarkPassingCalculatorForAdjusted.zip"));
-        TrackFileExporter.INSTANCE.writeAllData(Arrays.asList(TrackFilesDataSource.COMPETITORS, TrackFilesDataSource.BUOYS),
-                TrackFilesFormat.Gpx11,
-                Collections.singletonList(trackedRace),
-                /* dataBeforeAfter */ true, /* rawFixes */ true, zos);
-        zos.close();
+        {
+            final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> replaced = findAndRemoveInconsistenciesOnRawFixes(track);
+            final Competitor competitor = track.getTrackedItem();
+            final TimePoint startedAt = TimePoint.now();
+            final DynamicTrackedRace trackedRace = createRace(replaced.getB());
+            final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor, /* wait for latest update */ true);
+            final TimePoint doneAt = TimePoint.now();
+            logger.info("Duration for computing mark passings witih adjusted track: "+startedAt.until(doneAt));
+            assertNotNull(markPassings);
+            assertEquals(13, markPassings.size());
+        }
+        {
+            final TimePoint startedAt = TimePoint.now();
+            final DynamicTrackedRace trackedRace = createRace(track);
+            final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(track.getTrackedItem(), /* wait for latest update */ true);
+            final TimePoint doneAt = TimePoint.now();
+            logger.info("Duration for computing mark passings with original track: "+startedAt.until(doneAt));
+            assertNotNull(markPassings);
+            assertEquals(13, markPassings.size());
+        }
     }
     
     private DynamicGPSFixTrack<Competitor, GPSFixMoving> readTrack(String filename) throws Exception {
