@@ -106,7 +106,7 @@ public class RaceColumnListeners implements Serializable {
     
     public void notifyListenersAboutHasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.hasSplitFleetContiguousScoringChanged(raceColumn, hasCrossFleetMergedRanking);
+            listener.hasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
         }
     }
 
