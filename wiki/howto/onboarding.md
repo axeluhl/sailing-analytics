@@ -152,7 +152,7 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
    - Press "List Races"
 6. Further useful launch configurations
    - Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window ⇒ Perspective ⇒ Open Perspective ⇒ Profiling)
-   - Debugging gwt: For further instructions please see [here](./development/super-dev-mode.md)
+   - Debugging gwt: For further instructions please see [here](./development/super-dev-mode)
 
 ### Build for deployment
 Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.
