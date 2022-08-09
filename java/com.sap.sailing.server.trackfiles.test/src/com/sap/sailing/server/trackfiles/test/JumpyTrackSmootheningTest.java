@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.junit.Test;
 
@@ -54,6 +56,8 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.trackfiles.TrackFilesDataSource;
+import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -74,6 +78,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
+import com.sap.sailing.server.trackfiles.TrackFileExporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
@@ -189,6 +194,12 @@ public class JumpyTrackSmootheningTest {
         final DynamicTrackedRace trackedRace = createRace(replaced.getB());
         final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor, /* wait for latest update */ true);
         assertNotNull(markPassings);
+        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(getClass().getSimpleName()+"_testMarkPassingCalculatorForAdjusted.zip"));
+        TrackFileExporter.INSTANCE.writeAllData(Arrays.asList(TrackFilesDataSource.COMPETITORS, TrackFilesDataSource.BUOYS),
+                TrackFilesFormat.Gpx11,
+                Collections.singletonList(trackedRace),
+                /* dataBeforeAfter */ true, /* rawFixes */ true, zos);
+        zos.close();
     }
     
     private DynamicGPSFixTrack<Competitor, GPSFixMoving> readTrack(String filename) throws Exception {
@@ -239,7 +250,7 @@ public class JumpyTrackSmootheningTest {
         final Mark cshl = createAndPlaceMark(trackedRace, "Cold Spring Harbor Light", "CSHL", 40.91418300289661, -73.4931492805481, MarkType.BUOY, null, "CYLINDER");
         final Mark finishBoat = createAndPlaceMark(trackedRace, "Finish Boat", "FB", 40.89873938821256, -73.51117020472884, MarkType.FINISHBOAT, null, null);
         final Mark finishPin = createAndPlaceMark(trackedRace, "Finish Pin", "FP", 40.897511816583574, -73.50983932614326, MarkType.BUOY, null, null);
-        final Mark faulkner = createAndPlaceMark(trackedRace, "G15 - North Side Faulkner Island", "Faulkner", 40.96866998355836, -73.54664996266365, MarkType.BUOY, Color.ofRgb("#008000"), "CONICAL");
+        final Mark faulkner = createAndPlaceMark(trackedRace, "G15 - North Side Faulkner Island", "Faulkner", 41.22299997601658, -72.65443325042725, MarkType.BUOY, Color.ofRgb("#008000"), "CONICAL");
 //        final Mark bayville = createAndPlaceMark(trackedRace, "LIS G19 - Bayville", "Bayville", 40.92419996391982, -73.56988325715065, MarkType.BUOY, Color.ofRgb("#008000"), "CONICAL");
         final Mark matinecock = createAndPlaceMark(trackedRace, "LIS G21 - Matinecock Pt", "Matinecock Pt", 40.90974998194724, -73.63691660575569, MarkType.BUOY, Color.ofRgb("#008000"), "CONICAL");
         final Mark sixMileReef = createAndPlaceMark(trackedRace, "LIS R8C - 6 Mile Reef", "6 Mile Reef", 41.17991665843874, -72.49066662043333, MarkType.BUOY, Color.ofRgb("#FF0000"), "CONICAL");
