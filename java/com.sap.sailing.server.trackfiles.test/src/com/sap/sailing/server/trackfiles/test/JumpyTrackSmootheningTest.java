@@ -20,14 +20,20 @@ import java.util.zip.GZIPInputStream;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
@@ -45,6 +51,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -65,6 +72,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
@@ -199,6 +207,13 @@ public class JumpyTrackSmootheningTest {
         return track;
     }
     
+    private void addFixedMarkPassingToRaceLog(String isoTimePoint, Competitor competitor, int zeroBasedIndexOfWaypointOfPassing, RaceLog raceLog) throws ParseException {
+        final LogEventAuthorImpl author = new LogEventAuthorImpl("me", 1);
+        final TimePoint markPassingTimePoint = TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(isoTimePoint));
+        raceLog.add(new RaceLogFixedMarkPassingEventImpl(markPassingTimePoint,
+                author, competitor, /* pPassId */ 1, markPassingTimePoint, zeroBasedIndexOfWaypointOfPassing));
+    }
+    
     /**
      * Simulates the "Oak cliff DH Distance Race" R1 with a single competitor, Gallagher / Zelenka, sail number "1" with
      * the marks pinged statically to establish the course. The track of Gallagher / Zelenka is provided as a track of
@@ -212,7 +227,12 @@ public class JumpyTrackSmootheningTest {
     private DynamicTrackedRace createRace(DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack) throws PatchFailedException, ParseException {
         final Competitor gallagherZelenka = competitorTrack.getTrackedItem();
         final DynamicTrackedRace trackedRace = createTrackedRace("Oak cliff DH Distance Race", "R1", BoatClassMasterdata.MELGES_24, gallagherZelenka);
+        final Series defaultSeries = trackedRace.getTrackedRegatta().getRegatta().getSeries().iterator().next();
+        final Fleet defaultFleet = defaultSeries.getFleets().iterator().next();
+        final RaceColumnInSeries r1RaceColumn = defaultSeries.getRaceColumns().iterator().next();
+        r1RaceColumn.setTrackedRace(defaultFleet, trackedRace);
         trackedRace.setStartOfTrackingReceived(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2020-10-14T17:00:00Z")));
+        trackedRace.setStartTimeReceived(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2020-10-14T17:05:00Z")));
 //        final Mark lisR32a = createAndPlaceMark(trackedRace, "32A - Mid-Sound Buoy", "LIS R32A", 40.96866998355836, -73.54664996266365, MarkType.BUOY, Color.ofRgb("#FF0000"), "CYLINDER");
 //        final Mark lisC17 = createAndPlaceMark(trackedRace, "C17 - Sound Side of Center Island Green", "LIS C17", 40.93856998253614, -73.53271999396384, MarkType.BUOY, Color.ofRgb("#008000"), "CYLINDER");
         final Mark cshG1 = createAndPlaceMark(trackedRace, "Cold Spring Harbor G1", "CSH G1", 40.92594997957349, -73.50404994562268, MarkType.BUOY, Color.ofRgb("#008000"), "CYLINDER");
@@ -248,6 +268,14 @@ public class JumpyTrackSmootheningTest {
                 new Pair<>(cshl, PassingInstruction.Starboard),
                 new Pair<>(finish, PassingInstruction.Line)),
                 /* associatedRoles */ Collections.emptyMap(), /* originatingCouseTemplateIdOrNull */ null, DomainFactory.INSTANCE);
+        // add fixed mark passings for Gallagher / Zelenka:
+        final RaceLog raceLog = r1RaceColumn.getRaceLog(defaultFleet);
+        addFixedMarkPassingToRaceLog("2020-10-14T17:05:05Z", gallagherZelenka, 0, raceLog);
+        addFixedMarkPassingToRaceLog("2020-10-14T17:20:41Z", gallagherZelenka, 1, raceLog);
+        addFixedMarkPassingToRaceLog("2020-10-14T17:29:36Z", gallagherZelenka, 2, raceLog);
+        addFixedMarkPassingToRaceLog("2020-10-14T17:36:42Z", gallagherZelenka, 3, raceLog);
+        addFixedMarkPassingToRaceLog("2020-10-14T18:21:38Z", gallagherZelenka, 4, raceLog);
+        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0.0));
         final DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrackInRace = trackedRace.getTrack(gallagherZelenka);
         // TODO switch race into suspended mode to avoid updates during mass fix insertion:
         competitorTrack.lockForRead();
@@ -258,6 +286,7 @@ public class JumpyTrackSmootheningTest {
         } finally {
             competitorTrack.unlockAfterRead();
         }
+        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1.0));
         // TODO resume race
         return trackedRace;
     }
