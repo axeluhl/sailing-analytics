@@ -24,7 +24,7 @@ Those tags must be put into the *.gwt.xml files e.g. "AdminConsole.gwt.xml".
 
 ## Debugging GWT
 ### Super dev Mode
-To debug GWT using the super dev Mode start the SailingServer according to your environment, then launch the GWT Sailing SDM in debug mode. After the initial compile all entry points will show up in the development Mode section. Do not use these entry points. Instead, to start debugging the web application open the debug drop down and select ``Debug Configurations..``. In the newly opened menu open the node ``Launch Chrome`` and select the configuration fitting your needs. To start the debug session just press debug.
+For further instructions look [here](./development/super-dev-mode.md). 
 ### dev Mode (deprecated)
 One of the great strengths of GWT is the use of Eclipse as a Java source-level debugging environment. To enjoy this feature, launch the SailingServer launch config appropriate for your environment (Proxy / No Proxy), then launch the SailingGWT launch configuration in debug mode. After a while it will show a "Development Mode" view that shows all entry points that have been initialized. Double-click on the one you want to debug, and your default browser (hopefully FireFox, because with other browsers the GWT debug plugin tends to be not very stable or not even present) will open.
 
