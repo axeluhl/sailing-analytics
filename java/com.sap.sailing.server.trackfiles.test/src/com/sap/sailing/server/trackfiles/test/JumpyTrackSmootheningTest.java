@@ -565,7 +565,9 @@ public class JumpyTrackSmootheningTest {
         }
         final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> numberOfInconsistenciesAndReplacedTrack = findAndRemoveInconsistenciesOnRawFixes(track);
         assertTrue(numberOfInconsistenciesAndReplacedTrack.getA() > maximumNumberOfOutliersAllowed);
-        assertTrue(getNumberOfFixesWithInconsistentCogSog(numberOfInconsistenciesAndReplacedTrack.getB()) <= maximumNumberOfOutliersAllowed);
+        final int actualNumberOfOutliers = getNumberOfFixesWithInconsistentCogSog(numberOfInconsistenciesAndReplacedTrack.getB());
+        assertTrue("Expected number of inconsistencies to be less than or equal to "+maximumNumberOfOutliersAllowed+" but was "+actualNumberOfOutliers,
+                actualNumberOfOutliers <= maximumNumberOfOutliersAllowed);
     }
     
     /**
