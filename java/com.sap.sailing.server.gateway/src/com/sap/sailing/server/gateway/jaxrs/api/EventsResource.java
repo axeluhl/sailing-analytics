@@ -57,6 +57,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
@@ -867,10 +868,10 @@ public class EventsResource extends AbstractSailingServerResource {
     
     private LinkedHashMap<String, SeriesCreationParametersDTO> createDefaultSeriesCreationParameters(String regattaName,int numberOfRaces ) {
         final LinkedHashMap<String, SeriesCreationParametersDTO> series = new LinkedHashMap<>();
-
-        series.put("Default", new SeriesCreationParametersDTO(
-                Arrays.asList(new FleetDTO("Default", 0, null)), false, false, false, false, null, false, false, null));
-
+        series.put(LeaderboardNameConstants.DEFAULT_SERIES_NAME, new SeriesCreationParametersDTO(
+                Arrays.asList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)),
+                /* isMedal */ false, /* isFleetsCanRunInParallel */ false, /* isStartsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
+                /* discardingThresholds */ null, /* hasSplitFleetContiguousScoring */ false, /* hasCrossFleetMergedRanking */ false, /* maximumNumberOfDiscards */ null));
         return series;
     }
 

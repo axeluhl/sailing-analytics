@@ -577,7 +577,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
-    public void hasCrossFleetMergedRankingChanged (RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
         raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn,
                 hasCrossFleetMergedRanking);
     }

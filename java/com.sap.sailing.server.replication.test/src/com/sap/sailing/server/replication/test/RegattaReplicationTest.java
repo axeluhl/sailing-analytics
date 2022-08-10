@@ -321,7 +321,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 qualification.isMedal(), qualification.isFleetsCanRunInParallel(),
                 new int[] {},
                 qualification.isStartsWithZeroScore(), qualification.isFirstColumnIsNonDiscardableCarryForward(),
-                qualification.hasSplitFleetContiguousScoring(), qualification.hasCrossFleetMergedRanking(),  qualification.getMaximumNumberOfDiscards(), Arrays.asList(new FleetDTO[] {  })));
+                qualification.hasSplitFleetContiguousScoring(), qualification.hasCrossFleetMergedRanking(),
+                qualification.getMaximumNumberOfDiscards(), Arrays.asList(new FleetDTO[] {  })));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -342,12 +343,11 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseAreas(masterEvent.getId(), new String[] {courseArea}, new UUID[] {UUID.randomUUID()})[0];
-        
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(eventName, boatClassName),
                 boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(), series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
-                masterCourseArea.getId(), /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                masterCourseArea.getId(), /* buoyZoneRadiusInHullLengths */ 2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());

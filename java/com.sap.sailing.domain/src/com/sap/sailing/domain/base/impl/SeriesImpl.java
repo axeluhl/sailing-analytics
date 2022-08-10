@@ -64,7 +64,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     private boolean firstColumnIsNonDiscardableCarryForward;
     
     /**
-     * When a column has more than one fleet, there are two different options for scoring it when the fleets have different ranks. 
+     * When a column has more than one fleet there are two different options for scoring it when the fleets have different ranks. 
      * Either the scoring scheme is applied to the sequence of competitors one gets when first ordering the competitors by fleets 
      * and then within each fleet by their rank in the fleet's race; or the scoring scheme is applied to each fleet separately, 
      * leading to the best score being awarded in the column as many times as there are fleets in the column. 
@@ -73,10 +73,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     private boolean hasSplitFleetContiguousScoring;
     
     /**
-     * When a column has more than one fleet, there are two different options for scoring it when the fleets are of the same rank. 
-     * Either the scoring scheme is applied to both fleets at the same time and competitors compete across the fleets; or the scoring scheme is applied to each fleet separately, 
-     * leading to the best score being awarded in the column as many times as there are fleets in the column. 
-     * For the latter case, this field is <code>false</code> which is also the default.
+     * When a column has more than one fleet there are two different options for scoring it when the fleets are of the
+     * same rank. Either the scoring scheme is applied to both fleets at the same time and competitors compete across
+     * the fleets; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded in
+     * the column as many times as there are fleets in the column. For the latter case, this field is <code>false</code>
+     * which is also the default.
      */
     private boolean hasCrossFleetMergedRanking; 
     

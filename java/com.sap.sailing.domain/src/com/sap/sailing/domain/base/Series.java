@@ -26,9 +26,6 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  * 
  */
 public interface Series extends SeriesBase {
-    
-    static public final String DEFAULT_NAME = "Default";
-    
     /**
      * A series consists of one or more "race columns." Some people would just say "race," but we use the term "race" for
      * something that has a single start time and start line; so if each fleet in a series gets their own start for
@@ -118,7 +115,7 @@ public interface Series extends SeriesBase {
     void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward);
 
     /**
-     * When a series has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
+     * When a series has more than one fleet there are two different options for scoring it. Either the scoring scheme is applied
      * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
      * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
      * in the column as many times as there are fleets in the column. For the former case, this method returns <code>true</code>.
@@ -128,10 +125,11 @@ public interface Series extends SeriesBase {
     void setSplitFleetContiguousScoring(boolean hasSplitFleetScore);
     
     /**
-     * When a series has more than one fleet, there are two different options for scoring it when the fleets are of the same rank. 
-     * Either the scoring scheme is applied to both fleets at the same time and competitors compete across the fleets; or the scoring scheme is applied to each fleet separately, 
-     * leading to the best score being awarded in the column as many times as there are fleets in the column. 
-     * For the latter case, this field is <code>false</code> which is also the default.
+     * When a series has more than one fleet there are two different options for scoring it when the fleets are of the
+     * same rank. Either the scoring scheme is applied to both fleets at the same time and competitors compete across
+     * the fleets; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded in
+     * the column as many times as there are fleets in the column. For the latter case, this field is <code>false</code>
+     * which is also the default.
      */
     boolean hasCrossFleetMergedRanking();
 

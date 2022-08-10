@@ -625,7 +625,7 @@ public class ExpeditionAllInOneImporter {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regattaName);
         // This is just the default used in the UI
         final Double buoyZoneRadiusInHullLengths = 3.0;
-        final String seriesName = Series.DEFAULT_NAME;
+        final String seriesName = LeaderboardNameConstants.DEFAULT_SERIES_NAME;
         final Event event = service.addEvent(eventName, description, eventStartDate, eventEndDate, filename, true, eventId);
         final UUID courseAreaId = addDefaultCourseArea(event);
         final Regatta regatta = createRegattaWithOneRaceColumn(boatClassName, regattaNameAndleaderboardName,

@@ -40,7 +40,6 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -59,7 +58,6 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 
 public class RaceColumnCacheTest extends AbstractLeaderboardTest {
-
     @Test
     public void testInvalidationOfLeaderboardAfterSeriesChanged()
             throws NoWindException, InterruptedException, ExecutionException {
@@ -85,48 +83,38 @@ public class RaceColumnCacheTest extends AbstractLeaderboardTest {
         raceColumn.setTrackedRace(fleet, mockedTrackedRace);
         Set<String> raceColumnNames = new HashSet<>();
         raceColumnNames.add(raceColumnName);
-
-
         RegattaLeaderboard spyLeaderboard = Mockito.spy(createRegattaLeaderboard(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
         DomainFactory baseDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
-
         spyLeaderboard.getLeaderboardDTO(/* TimePoint */ timePoint,
                 /* namesOfRaceColumnsForWhichToLoadLegDetails */ raceColumnNames,
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ trackedRegattaRegistry,
                 /* baseDomainFactory */ baseDomainFactory, /* fillTotalPointsUncorrected */ false);
-
-
+        // Assert that computeDTO was invoked exactly once by the call to getLeaderboardDTO
         verify(spyLeaderboard, times(1)).computeDTO(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
                 Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
-
+        // Assert that computeDTO is not invoked a second time because the result is assumed to come from the cache:
         spyLeaderboard.getLeaderboardDTO(/* TimePoint */ timePoint,
                 /* namesOfRaceColumnsForWhichToLoadLegDetails */ raceColumnNames,
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ trackedRegattaRegistry,
                 /* baseDomainFactory */ baseDomainFactory, /* fillTotalPointsUncorrected */ false);
-
         verify(spyLeaderboard, times(1)).computeDTO(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
                 Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
-
+        // making a change that is expected to invalidate the cache:
         series.setCrossFleetMergedRanking(true);
-
         spyLeaderboard.getLeaderboardDTO(/* TimePoint */ timePoint,
                 /* namesOfRaceColumnsForWhichToLoadLegDetails */ raceColumnNames,
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ trackedRegattaRegistry,
                 /* baseDomainFactory */ baseDomainFactory, /* fillTotalPointsUncorrected */ false);
-
-
+        // after the cache invalidation we expect another call to computeDTO when asking for the leaderboard DTO
         verify(spyLeaderboard, times(2)).computeDTO(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
                 Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
-        
+        // and now it's cached again
         spyLeaderboard.getLeaderboardDTO(/* TimePoint */ timePoint,
                 /* namesOfRaceColumnsForWhichToLoadLegDetails */ raceColumnNames,
                 /* addOverallDetails */ false, /* trackedRegattaRegistry */ trackedRegattaRegistry,
                 /* baseDomainFactory */ baseDomainFactory, /* fillTotalPointsUncorrected */ false);
-
-
         verify(spyLeaderboard, times(2)).computeDTO(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
                 Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
-
     }
 
     protected RegattaLeaderboard createRegattaLeaderboard(Regatta mockedRegatta,
@@ -142,7 +130,6 @@ public class RaceColumnCacheTest extends AbstractLeaderboardTest {
                 new HashSet<Sideline>(), EmptyWindStore.INSTANCE, 5000, 20000, 20000,
                 /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null));
-
         return spyedTrackedRace;
     }
 

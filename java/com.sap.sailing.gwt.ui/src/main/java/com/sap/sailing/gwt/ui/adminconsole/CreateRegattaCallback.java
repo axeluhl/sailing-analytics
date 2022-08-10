@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -88,7 +88,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
     private void createDefaultRacesIfDefaultSeriesIsPresent(final RegattaDTO newRegatta) {
         for (final SeriesDTO series: newRegatta.series) {
-            if (series.getName().equals(Series.DEFAULT_NAME) && !series.getRaceColumns().isEmpty()) {
+            if (series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME) && !series.getRaceColumns().isEmpty()) {
                 final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
                 for (RaceColumnDTO newRaceColumn : series.getRaceColumns()) {
                     // We could use an index counter here because we're assuming that we're creating

@@ -2654,12 +2654,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .get("firstColumnIsNonDiscardableCarryForward");
             boolean hasSplitFleetContiguousScoring = (boolean) requestObject.get("hasSplitFleetContiguousScoring");
             boolean hasCrossFleetMergedRanking = (boolean) requestObject.get("hasCrossFleetMergedRanking");
-
             Integer maximumNumberOfDiscards = null;
             if (requestObject.containsKey("maximumNumberOfDiscards")) {
                 maximumNumberOfDiscards = ((Long) requestObject.get("maximumNumberOfDiscards")).intValue();
             }
-
             int[] resultDiscardingThresholds = null;
             if (requestObject.containsKey("resultDiscardingThresholds")) {
                 JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject.get("resultDiscardingThresholds");
@@ -2668,7 +2666,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                     resultDiscardingThresholds[i] = ((Long) resultDiscardingThresholdsRaw.get(i)).intValue();
                 }
             }
-
             JSONArray fleetsRaw = (JSONArray) requestObject.get("fleets");
             List<FleetDTO> fleets = new ArrayList<>();
             for (Object fleetRaw : fleetsRaw) {

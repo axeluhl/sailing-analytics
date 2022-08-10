@@ -38,7 +38,7 @@ public class SeriesParameters {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
     }
     
-    public void sethasCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
+    public void setHasCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
         this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
     }
 
