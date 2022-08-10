@@ -54,6 +54,8 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sailing.domain.tracking.impl.OutlierFilter;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.Duration;
@@ -556,17 +558,35 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     }
                 }
                 
+                /**
+                 * First loads the fixes into a temporary track which is then subject to outlier filtering (see
+                 * {@link OutlierFilter}). The fixes that make it through outlier filtering are then inserted 
+                 * @param competitor
+                 * @param event
+                 */
                 private void loadForCompetitor(Competitor competitor, RegattaLogDeviceMappingEvent<?> event) {
-                    // TODO bug5728: load the fixes into an auxiliary track first, then adjust for odd time points before actually adding to trackedRace.getTrack(competitor)
                     DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     if (track != null) {
                         // for split-fleet racing, device mappings coming from the regatta log may not be relevant
                         // for the trackedRace because the competitors may not compete in it; in this case, the
                         // competitor retrieved from the mapping event does not have a track in trackedRace
+                        final DynamicGPSFixTrack<Competitor, GPSFixMoving> loadedFixes =
+                                new DynamicGPSFixMovingTrackImpl<Competitor>(track.getTrackedItem(), track.getMillisecondsOverWhichToAverageSpeed());
+                        loadedFixes.suspendValidityCaching();
                         try {
-                            sensorFixStore.<GPSFixMoving> loadFixes(fix -> track.add(fix, true), event.getDevice(),
+                            sensorFixStore.<GPSFixMoving> loadFixes(fix -> loadedFixes.add(fix, true), event.getDevice(),
                                     timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false,
                                     stopCallback, progressConsumer);
+                            final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> filtered = new OutlierFilter().findAndRemoveInconsistenciesOnRawFixes(loadedFixes);
+                            final DynamicGPSFixTrack<Competitor, GPSFixMoving> filteredTrack = filtered.getB();
+                            filteredTrack.lockForRead();
+                            try {
+                                for (final GPSFixMoving fix : filteredTrack.getRawFixes()) {
+                                    track.add(fix, true);
+                                }
+                            } finally {
+                                filteredTrack.unlockAfterRead();
+                            }
                         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                             logger.log(Level.WARNING, "Could not load competitor track " + competitor + "; device "
                                     + event.getDevice());
