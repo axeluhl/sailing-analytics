@@ -39,6 +39,10 @@ public interface SailingServer extends SecuredServer {
     URL getBaseUrl();
     
     Iterable<UUID> getLeaderboardGroupIds() throws Exception;
+    
+    Iterable<String> getLeaderboardNames() throws Exception;
+    
+    String getLeaderboardShardingKey(String leaderboardName) throws Exception;
 
     Iterable<UUID> getEventIds() throws Exception;
 

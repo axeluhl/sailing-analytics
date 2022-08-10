@@ -161,10 +161,11 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.util.impl.UUIDHelper;
 
-@Path("/v1/leaderboards")
+@Path(LeaderboardsResource.V1_LEADERBOARDS)
 public class LeaderboardsResource extends AbstractLeaderboardsResource {
     private static final Logger logger = Logger.getLogger(LeaderboardsResource.class.getName());
-    
+    public static final String V1_LEADERBOARDS = "/v1/leaderboards";
+
     /**
      * When an {@link #createAutoCourse(TrackedRace, RegattaLog) automatic course inference} is requested,
      * the COGs of competitors are analyzed to obtain a direction and length for a start and finish line.
