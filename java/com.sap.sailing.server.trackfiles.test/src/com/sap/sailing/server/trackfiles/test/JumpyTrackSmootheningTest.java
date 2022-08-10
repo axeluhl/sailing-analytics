@@ -610,6 +610,6 @@ public class JumpyTrackSmootheningTest {
      */
     @Test
     public void testGallagherZelenka() throws Exception {
-        adjustTrackAndAssertNoOutliersInResult("GallagherZelenka.gpx.gz", 23);
+        adjustTrackAndAssertNoOutliersInResult("GallagherZelenka.gpx.gz", 323);
     }
 }
