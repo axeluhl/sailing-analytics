@@ -572,13 +572,20 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         // competitor retrieved from the mapping event does not have a track in trackedRace
                         final DynamicGPSFixTrack<Competitor, GPSFixMoving> loadedFixes =
                                 new DynamicGPSFixMovingTrackImpl<Competitor>(track.getTrackedItem(), track.getMillisecondsOverWhichToAverageSpeed());
-                        loadedFixes.suspendValidityCaching();
+                        loadedFixes.suspendValidityAndMaxSpeedCaching(); // no validity nor max speed required on this track
                         try {
                             sensorFixStore.<GPSFixMoving> loadFixes(fix -> loadedFixes.add(fix, true), event.getDevice(),
                                     timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false,
                                     stopCallback, progressConsumer);
                             final Pair<Integer, DynamicGPSFixTrack<Competitor, GPSFixMoving>> filtered = new OutlierFilter().findAndRemoveInconsistenciesOnRawFixes(loadedFixes);
+                            loadedFixes.lockForRead();
+                            try {
+                                logger.info("Filtered competitor track for outliers; "+filtered.getA()+" outliers removed in track with "+Util.size(loadedFixes.getRawFixes())+" fixes");
+                            } finally {
+                                loadedFixes.unlockAfterRead();
+                            }
                             final DynamicGPSFixTrack<Competitor, GPSFixMoving> filteredTrack = filtered.getB();
+                            track.suspendValidityAndMaxSpeedCaching();
                             filteredTrack.lockForRead();
                             try {
                                 for (final GPSFixMoving fix : filteredTrack.getRawFixes()) {
@@ -587,6 +594,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                             } finally {
                                 filteredTrack.unlockAfterRead();
                             }
+                            track.resumeValidityAndMaxSpeedCaching();
                         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                             logger.log(Level.WARNING, "Could not load competitor track " + competitor + "; device "
                                     + event.getDevice());

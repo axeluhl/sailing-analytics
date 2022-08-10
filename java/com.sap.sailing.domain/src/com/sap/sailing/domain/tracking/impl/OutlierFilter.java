@@ -68,7 +68,7 @@ public class OutlierFilter {
         int numberOfInconsistencies = 0;
         final DynamicGPSFixMovingTrackImpl<Competitor> replacedTrack = new DynamicGPSFixMovingTrackImpl<Competitor>(track.getTrackedItem(),
                 /* millisecondsOverWhichToAverage */ 5000, /* losslessCompaction */ true);
-        replacedTrack.suspendValidityCaching();
+        replacedTrack.suspendValidityAndMaxSpeedCaching();
         GPSFixMoving previous = null, fix = null;
         track.lockForRead();
         try {
