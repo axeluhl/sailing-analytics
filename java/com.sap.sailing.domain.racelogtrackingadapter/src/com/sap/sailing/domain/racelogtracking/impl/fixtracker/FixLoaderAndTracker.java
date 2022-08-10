@@ -557,6 +557,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 }
                 
                 private void loadForCompetitor(Competitor competitor, RegattaLogDeviceMappingEvent<?> event) {
+                    // TODO bug5728: load the fixes into an auxiliary track first, then adjust for odd time points before actually adding to trackedRace.getTrack(competitor)
                     DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     if (track != null) {
                         // for split-fleet racing, device mappings coming from the regatta log may not be relevant
