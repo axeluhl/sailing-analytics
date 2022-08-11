@@ -1,15 +1,16 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static com.sap.sse.common.Util.size;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,6 +23,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
 
+import com.mongodb.MongoException;
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
@@ -52,6 +57,10 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTracki
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.impl.CollectionNames;
+import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFactory;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -62,9 +71,9 @@ import com.sap.sailing.domain.racelogtracking.test.RaceLogTrackingTestHelper;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -74,6 +83,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     private RacingEventService service;
@@ -91,13 +101,24 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     public Timeout CreateAndTrackWithRaceLogTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @Before
-    public void setup() {
-        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
+    public void setup() throws UnknownHostException, MongoException {
+        final ClientSession clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+        final ClientSession metadataCollectionClientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+        final MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
+        final MongoObjectFactory defaultMongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
+        defaultMongoObjectFactory.getDatabase().drop(clientSession);
+        // ensure that the drop has gone through:
+        defaultMongoObjectFactory.getDatabase().getCollection(CollectionNames.REGATTAS.name()).find(clientSession);
+        defaultMongoObjectFactory.getDatabase().getCollection(CollectionNames.LEADERBOARDS.name()).find(clientSession);
+        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
+                MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
+                        defaultMongoObjectFactory,
+                        PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory,
+                        ReadConcern.MAJORITY, WriteConcern.MAJORITY, clientSession, metadataCollectionClientSession),
+                serviceFinderFactory, /* restoreTrackedRaces */ false);
         sensorFixStore = service.getSensorFixStore();
-        service.getMongoObjectFactory().getDatabase().drop();
         author = service.getServerAuthor();
-        Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(),
-                service);
+        Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(), service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ null, /* startDate */null, /* endDate */null, UUID.randomUUID(),
@@ -161,7 +182,6 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
             NoCorrespondingServiceRegisteredException {
         // one fix should have been loaded from store
         testSize(race.getTrack(comp1), 1);
-
         // further fix arrives in race
         sensorFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(7), new KnotSpeedWithBearingImpl(
                 10, new DegreeBearingImpl(5))));
@@ -174,7 +194,6 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
             NoCorrespondingServiceRegisteredException {
         // add another mapping on the fly, other old fixes should be loaded
         testSize(race.getTrack(comp1), 4);
-
         // add another fix in new mapping range
         sensorFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(18), new KnotSpeedWithBearingImpl(
                 10, new DegreeBearingImpl(5))));

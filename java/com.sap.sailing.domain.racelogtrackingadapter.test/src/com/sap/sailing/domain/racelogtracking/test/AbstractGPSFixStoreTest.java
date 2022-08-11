@@ -101,7 +101,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
 
     private void dropPersistedData() {
         MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
-        mongoOF.getGPSFixCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        mongoOF.getGPSFixCollection(clientSession).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
         mongoOF.getGPSFixMetadataCollection().withWriteConcern(WriteConcern.MAJORITY).drop(metadataCollectionClientSession);
         mongoOF.getRaceLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
         mongoOF.getRegattaLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);

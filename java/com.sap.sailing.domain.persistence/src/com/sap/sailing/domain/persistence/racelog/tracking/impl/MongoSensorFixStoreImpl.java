@@ -91,7 +91,7 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
         super(serviceFinderFactory != null ? createFixServiceFinder(serviceFinderFactory) : null,
               serviceFinderFactory != null ? serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class) : null);
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
-        fixesCollection = mongoOF.getGPSFixCollection();
+        fixesCollection = mongoOF.getGPSFixCollection(clientSession);
         metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, readConcern, writeConcern, metadataCollectionClientSession);
         this.writeConcern = writeConcern;
         this.clientSession = clientSession;
