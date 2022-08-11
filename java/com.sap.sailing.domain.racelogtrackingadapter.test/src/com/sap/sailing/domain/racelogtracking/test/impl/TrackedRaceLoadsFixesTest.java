@@ -90,7 +90,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         final DynamicTrackedRaceImpl trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
-        new FixLoaderAndTracker(trackedRace, store, null);
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
@@ -134,7 +134,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
 
-        new FixLoaderAndTracker(trackedRace, store, null);
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         
         raceLog.add(new RaceLogStartOfTrackingEventImpl(TimePoint.BeginningOfTime, author, 0));
         trackedRace.attachRaceLog(raceLog);
@@ -529,7 +529,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        new FixLoaderAndTracker(trackedRace, store, null);
+        new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         for(Consumer<DynamicTrackedRace> afterTrackingStarted : afterTrackingStartedConsumers) {
             trackedRace.waitForLoadingToFinish();
             afterTrackingStarted.accept(trackedRace);

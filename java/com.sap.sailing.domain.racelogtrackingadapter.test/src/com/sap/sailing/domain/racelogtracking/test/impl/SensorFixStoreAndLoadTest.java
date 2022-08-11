@@ -447,7 +447,7 @@ public class SensorFixStoreAndLoadTest {
                 }
                 throw new IllegalArgumentException("Unknown event type");
             }
-        });
+        }, /* removeOutliersFromCompetitorTracks */ false);
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {

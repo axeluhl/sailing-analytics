@@ -96,8 +96,6 @@ public class MetadataUpdater {
                     } else {
                         setNextUpdate(null);
                     }
-                    updatesProcessed++;
-                    MetadataUpdater.this.notifyAll();
                 }
                 if (theNextUpdate != null) {
                     boolean success = false;
@@ -106,6 +104,10 @@ public class MetadataUpdater {
                         try {
                             metadataCollection.update(theNextUpdate);
                             success = true;
+                            synchronized (MetadataUpdater.this) {
+                                updatesProcessed++;
+                                MetadataUpdater.this.notifyAll();
+                            }
                         } catch (Exception e) {
                             logger.severe("Unable to write update "+theNextUpdate+" to the metadata collection for device "+forDevice+
                                     ": "+e.getMessage()+"; retrying "+retryCount+" more times.");

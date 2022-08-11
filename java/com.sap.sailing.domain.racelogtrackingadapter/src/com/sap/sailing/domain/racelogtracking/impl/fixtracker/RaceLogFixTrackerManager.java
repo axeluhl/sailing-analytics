@@ -128,7 +128,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private synchronized void startTrackerIfNotAlreadyStarted() {
         if (tracker == null) {
             logger.fine("Starting fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
-            tracker = new FixLoaderAndTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
+            tracker = new FixLoaderAndTracker(trackedRace, sensorFixStore, sensorFixMapperFactory, /* removeOutliersFromCompetitorTracks */ true);
         }
     }
 

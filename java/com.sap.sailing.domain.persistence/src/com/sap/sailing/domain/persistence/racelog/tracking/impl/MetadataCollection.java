@@ -2,7 +2,6 @@ package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.bson.Document;
@@ -43,7 +42,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 public class MetadataCollection extends MongoFixHandler {
     private static final Logger logger = Logger.getLogger(MetadataCollection.class.getName());
     private final MongoCollection<Document> metadataCollection;
-    private final ConcurrentHashMap<DeviceIdentifier, MetadataUpdater> metadataUpdaters;
+    private final HashMap<DeviceIdentifier, MetadataUpdater> metadataUpdaters;
     private final WriteConcern writeConcern;
     private final ReadConcern readConcern;
 
@@ -52,7 +51,7 @@ public class MetadataCollection extends MongoFixHandler {
             TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder, ReadConcern readConcern, WriteConcern writeConcern) {
         super(fixServiceFinder, deviceServiceFinder);
         this.metadataCollection = mongoOF.getGPSFixMetadataCollection();
-        this.metadataUpdaters = new ConcurrentHashMap<>();
+        this.metadataUpdaters = new HashMap<>();
         this.readConcern = readConcern;
         this.writeConcern = writeConcern;
     }
@@ -131,13 +130,13 @@ public class MetadataCollection extends MongoFixHandler {
         return result;
     }
 
-    <FixT extends Timed> void enqueueMetadataUpdate(DeviceIdentifier device, final Object dbDeviceId,
+    synchronized <FixT extends Timed> void enqueueMetadataUpdate(DeviceIdentifier device, final Object dbDeviceId,
             final int nrOfTotalFixes, TimeRange fixesTimeRange, FixT latestFix) throws TransformationException {
         final MetadataUpdater metadataUpdaterForDevice = metadataUpdaters.computeIfAbsent(device, d->new MetadataUpdater(this, device));
         metadataUpdaterForDevice.enqueueMetadataUpdate(device, dbDeviceId, nrOfTotalFixes, fixesTimeRange, latestFix);
     }
     
-    private void waitForPendingMetadataUpdates(DeviceIdentifier device) {
+    private synchronized void waitForPendingMetadataUpdates(DeviceIdentifier device) {
         final MetadataUpdater metadataUpdaterForDevice = metadataUpdaters.get(device);
         if (metadataUpdaterForDevice != null) {
             metadataUpdaterForDevice.waitForPendingUpdates();
@@ -157,6 +156,7 @@ public class MetadataCollection extends MongoFixHandler {
         MongoObjectFactoryImpl.storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
         updateOperation.append("$set", newMetadata);
         updateOperation.append("$inc", new Document(FieldNames.NUM_FIXES.name(), update.getNrOfTotalFixes()));
+        logger.fine(()->"Updating sensor fix store metadata with update operation "+updateOperation);
         metadataCollection.withWriteConcern(writeConcern).updateOne(com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, update.getDevice()), updateOperation, new UpdateOptions().upsert(true));
     }
 }
