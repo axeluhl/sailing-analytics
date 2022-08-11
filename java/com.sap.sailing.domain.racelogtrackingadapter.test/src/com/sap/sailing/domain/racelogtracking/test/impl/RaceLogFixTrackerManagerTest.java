@@ -94,7 +94,7 @@ public class RaceLogFixTrackerManagerTest {
         raceLog2 = new RaceLogImpl("racelog2");
         regattaLog = new RegattaLogImpl("regattalog");
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY, /* clientSession */ null);
         Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { new WaypointImpl(mark), new WaypointImpl(mark2) }));
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();

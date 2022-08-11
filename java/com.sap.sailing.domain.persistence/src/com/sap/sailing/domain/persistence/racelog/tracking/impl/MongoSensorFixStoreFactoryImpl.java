@@ -23,6 +23,6 @@ public class MongoSensorFixStoreFactoryImpl implements MongoSensorFixStoreFactor
     public MongoSensorFixStore getMongoGPSFixStore(MongoObjectFactory mongoObjectFactory,
             DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory,
             ReadConcern readConcern, WriteConcern writeConcern) throws UnknownHostException, MongoException {
-        return new MongoSensorFixStoreImpl(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, readConcern, writeConcern);
+        return new MongoSensorFixStoreImpl(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, readConcern, writeConcern, /* clientSession */ null);
     }
 }

@@ -86,10 +86,10 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
         service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
         raceLog = new RaceLogImpl("racelog");
         regattaLog = new RegattaLogImpl("regattalog");
-        dropPersistedData();
         clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+        dropPersistedData();
         store = new MongoSensorFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
-                serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
+                serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY, /* clientSession */ null);
     }
 
     @After
@@ -100,10 +100,10 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
 
     private void dropPersistedData() {
         MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
-        mongoOF.getGPSFixCollection().withWriteConcern(WriteConcern.MAJORITY).drop();
-        mongoOF.getGPSFixMetadataCollection().withWriteConcern(WriteConcern.MAJORITY).drop();
-        mongoOF.getRaceLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop();
-        mongoOF.getRegattaLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop();
+        mongoOF.getGPSFixCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        mongoOF.getGPSFixMetadataCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        mongoOF.getRaceLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        mongoOF.getRegattaLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
     }
 
     protected void map(RegattaLog regattaLog, Competitor comp, DeviceIdentifier device, long from, long to) {

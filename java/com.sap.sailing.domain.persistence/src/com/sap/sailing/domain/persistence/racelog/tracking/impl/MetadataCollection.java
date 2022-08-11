@@ -9,8 +9,10 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.lang.Nullable;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
@@ -46,14 +48,22 @@ public class MetadataCollection extends MongoFixHandler {
     private final WriteConcern writeConcern;
     private final ReadConcern readConcern;
 
+    /**
+     * Allows for causally-consistent access to the store; helpful, e.g., during test cases. May be {@code null}.
+     */
+    @Nullable
+    private final ClientSession clientSession;
+
     public MetadataCollection(MongoObjectFactoryImpl mongoOF,
             TypeBasedServiceFinder<FixMongoHandler<?>> fixServiceFinder,
-            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder, ReadConcern readConcern, WriteConcern writeConcern) {
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder, ReadConcern readConcern,
+            WriteConcern writeConcern, ClientSession clientSession) {
         super(fixServiceFinder, deviceServiceFinder);
         this.metadataCollection = mongoOF.getGPSFixMetadataCollection();
         this.metadataUpdaters = new HashMap<>();
         this.readConcern = readConcern;
         this.writeConcern = writeConcern;
+        this.clientSession = clientSession;
     }
 
     /**
@@ -72,7 +82,10 @@ public class MetadataCollection extends MongoFixHandler {
      */
     private Document findMetadataObjectInternal(DeviceIdentifier device) throws TransformationException {
         Bson query = com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, device);
-        Document result = metadataCollection.withReadConcern(readConcern).find(query).first();
+        final MongoCollection<Document> metadataCollectionWithReadConcern = metadataCollection.withReadConcern(readConcern);
+        Document result = (clientSession == null
+                ? metadataCollectionWithReadConcern.find(query) 
+                : metadataCollectionWithReadConcern.find(clientSession, query)).first();
         return result;
     }
 
@@ -157,6 +170,13 @@ public class MetadataCollection extends MongoFixHandler {
         updateOperation.append("$set", newMetadata);
         updateOperation.append("$inc", new Document(FieldNames.NUM_FIXES.name(), update.getNrOfTotalFixes()));
         logger.fine(()->"Updating sensor fix store metadata with update operation "+updateOperation);
-        metadataCollection.withWriteConcern(writeConcern).updateOne(com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, update.getDevice()), updateOperation, new UpdateOptions().upsert(true));
+        final MongoCollection<Document> metadataCollectionWithWriteConcern = metadataCollection.withWriteConcern(writeConcern);
+        final Bson deviceQuery = com.sap.sailing.shared.persistence.impl.MongoObjectFactoryImpl.getDeviceQuery(deviceServiceFinder, update.getDevice());
+        final UpdateOptions upsertOption = new UpdateOptions().upsert(true);
+        if (clientSession == null) {
+            metadataCollectionWithWriteConcern.updateOne(deviceQuery, updateOperation, upsertOption);
+        } else {
+            metadataCollectionWithWriteConcern.updateOne(clientSession, deviceQuery, updateOperation, upsertOption);
+        }
     }
 }
