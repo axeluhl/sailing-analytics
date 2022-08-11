@@ -3,9 +3,11 @@ package com.sap.sailing.domain.racelogtracking.test.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -119,9 +121,11 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(device2, createFix(100, 10, 20, 30, 40));
         store.storeFix(device3, createFix(100, 10, 20));
         store.storeFix(device3, createFix(100, 10, 20));
+        final List<GPSFixMoving> fixes = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
-            store.storeFix(device, createFix(i + 1000, 10, 20, 30, 40));
+            fixes.add(createFix(i + 1000, 10, 20, 30, 40));
         }
+        store.storeFixes(device, fixes, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         new FixLoaderAndTracker(trackedRace, store, null, /* removeOutliersFromCompetitorTracks */ false);
         raceLog.add(new RaceLogStartOfTrackingEventImpl(TimePoint.BeginningOfTime, author, 0));

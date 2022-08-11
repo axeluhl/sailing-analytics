@@ -81,17 +81,18 @@ public class MongoSensorFixStoreImpl extends MongoFixHandler implements MongoSen
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, ReadConcern.DEFAULT, WriteConcern.UNACKNOWLEDGED, /* clientSession */ null);
+        this(mongoObjectFactory, domainObjectFactory, serviceFinderFactory, ReadConcern.DEFAULT,
+                WriteConcern.UNACKNOWLEDGED, /* clientSession */ null, /* metadataCollectionClientSession */ null);
     }
     
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
             TypeBasedServiceFinderFactory serviceFinderFactory, ReadConcern readConcern, WriteConcern writeConcern,
-            ClientSession clientSession) {
+            ClientSession clientSession, ClientSession metadataCollectionClientSession) {
         super(serviceFinderFactory != null ? createFixServiceFinder(serviceFinderFactory) : null,
               serviceFinderFactory != null ? serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class) : null);
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
         fixesCollection = mongoOF.getGPSFixCollection();
-        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, readConcern, writeConcern, clientSession);
+        metadataCollection = new MetadataCollection(mongoOF, fixServiceFinder, deviceServiceFinder, readConcern, writeConcern, metadataCollectionClientSession);
         this.writeConcern = writeConcern;
         this.clientSession = clientSession;
     }

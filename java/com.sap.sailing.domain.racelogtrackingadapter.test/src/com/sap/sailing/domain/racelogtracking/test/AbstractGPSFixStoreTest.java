@@ -69,7 +69,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
     protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat("boat", "boat", boatClass, "GER 234", null, /* storePersistently */ true);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
-    private ClientSession clientSession;
+    private ClientSession clientSession, metadataCollectionClientSession;
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng),
@@ -87,9 +87,10 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
         raceLog = new RaceLogImpl("racelog");
         regattaLog = new RegattaLogImpl("regattalog");
         clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+        metadataCollectionClientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
         dropPersistedData();
         store = new MongoSensorFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
-                serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY, /* clientSession */ null);
+                serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY, clientSession, metadataCollectionClientSession);
     }
 
     @After
@@ -101,7 +102,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
     private void dropPersistedData() {
         MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
         mongoOF.getGPSFixCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
-        mongoOF.getGPSFixMetadataCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        mongoOF.getGPSFixMetadataCollection().withWriteConcern(WriteConcern.MAJORITY).drop(metadataCollectionClientSession);
         mongoOF.getRaceLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
         mongoOF.getRegattaLogCollection().withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
     }
