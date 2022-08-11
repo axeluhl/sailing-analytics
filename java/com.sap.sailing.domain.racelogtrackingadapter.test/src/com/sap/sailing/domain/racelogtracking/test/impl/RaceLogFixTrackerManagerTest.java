@@ -119,7 +119,6 @@ public class RaceLogFixTrackerManagerTest {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRaceLog(raceLog2);
-
         RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager(trackedRace,
                 EmptySensorFixStore.INSTANCE, new SensorFixMapperFactory() {
                     @Override
@@ -127,7 +126,7 @@ public class RaceLogFixTrackerManagerTest {
                             Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
                         throw new IllegalArgumentException("Unknown event type");
                     }
-                });
+                }, /* removeOutliersFromCompetitorTracks */ true);
         raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
     }
 
@@ -139,7 +138,6 @@ public class RaceLogFixTrackerManagerTest {
     public void testThatNoExceptionIsThrownWhenStoppingTrackingWhenAddingSecondRaceLogWhileAlreadyTracking_bug4001() {
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.attachRaceLog(raceLog);
-
         RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager(trackedRace,
                 EmptySensorFixStore.INSTANCE, new SensorFixMapperFactory() {
                     @Override
@@ -147,7 +145,7 @@ public class RaceLogFixTrackerManagerTest {
                             Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
                         throw new IllegalArgumentException("Unknown event type");
                     }
-                });
+                }, /* removeOutliersFromCompetitorTracks */ true);
         trackedRace.attachRaceLog(raceLog2);
         raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
     }

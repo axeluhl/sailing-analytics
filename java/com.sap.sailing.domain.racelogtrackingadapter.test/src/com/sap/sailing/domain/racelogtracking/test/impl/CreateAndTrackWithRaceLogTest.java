@@ -195,12 +195,10 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         RegattaLog regattaLog = leaderboard.getRegattaLike().getRegattaLog();
         RaceLog raceLog = column.getRaceLog(fleet);
-
         // can denote racelog for tracking
         assertTrue(raceLog.isEmpty());
         adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
         assertFalse(raceLog.isEmpty());
-
         // add a mapping and one fix in, one out of mapping
         Boat boat1 = new BoatImpl("id12345", "boat1", boatClass, /* sailID */ null);
         Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", "c", null, null, null, null,
@@ -214,18 +212,15 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         // start tracking
         TrackedRace race = trackAndGetRace(column);
         assertNotNull(race);
-        
-        RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
-
+        RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) race,
+                sensorFixStore, null, /* removeOutliersFromCompetitorTracks */ false);
         raceLogFixTrackerManager.waitForTracker();
         race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, 0, comp1, dev1, t(11), t(20)));
-
         race.waitForLoadingToFinish();
         // add another mapping on the fly, other old fixes should be loaded
         addFixes2(race, comp1, dev1);
-
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(false);
         raceLogFixTrackerManager.stop(/* preemptive */ false, /* willBeRemoved */ false);
@@ -281,7 +276,6 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         RegattaLog regattaLog = leaderboard.getRegattaLike().getRegattaLog();
         raceLog = column.getRaceLog(fleet);
         adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
-
         // add a mapping and one fix in, one out of mapping
         Boat boat1 = new BoatImpl("id12345", "boat1", boatClass, /* sailID */ null);
         CompetitorWithBoat comp1 = DomainFactory.INSTANCE.getOrCreateCompetitorWithBoat("comp1", "comp1", "c1", null, null, null, null,
@@ -292,22 +286,18 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         addFixes0(dev1);
         regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(t(), t(), author, UUID.randomUUID(), comp1));
         raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
-
         TrackedRace race = trackAndGetRace(column);
         assertNotNull(race);
-        
-        RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
-
+        RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) race,
+                sensorFixStore, null, /* removeOutliersFromCompetitorTracks */ false);
         raceLogFixTrackerManager.waitForTracker();
         race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
-
         // add another mapping on the fly, other old fixes should be loaded
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), comp1, dev1,
                 t(11), t(20)));
         race.waitForLoadingToFinish();
         addFixes2(race, comp1, dev1);
-
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
         raceLogFixTrackerManager.stop(false, /* willBeRemoved */ false);
