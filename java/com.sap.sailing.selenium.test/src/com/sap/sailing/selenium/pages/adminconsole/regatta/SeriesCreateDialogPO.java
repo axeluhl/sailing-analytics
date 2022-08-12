@@ -27,6 +27,12 @@ public class SeriesCreateDialogPO extends DataEntryDialogPO {
 //    @FindBy(how = BySeleniumId.class, using = "FleetListEditorComposite")
 //    private WebElement fleetsPanel;
     
+//    @FindBy(how = BySeleniumId.class, using = "HasSplitFleetContiguousScoringCheckbox")
+//    private WebElement hasSplitFleetContiguousScoringCheckbox;
+    
+//    @FindBy(how = BySeleniumId.class, using = "HasCrossFleetMergedRankingCheckbox")
+//    private WebElement hasCrossFleetMergedRankingCheckbox;
+
     public SeriesCreateDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }

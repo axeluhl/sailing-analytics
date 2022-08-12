@@ -39,6 +39,12 @@ public class SeriesEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "AddRacesButton")
     private WebElement addRacesButton;
     
+    @FindBy(how = BySeleniumId.class, using = "HasSplitFleetContiguousScoringCheckbox")
+    private WebElement hasSplitFleetContiguousScoringCheckbox; 
+    
+    @FindBy(how = BySeleniumId.class, using = "HasCrossFleetMergedRankingCheckbox")
+    private WebElement hasCrossFleetMergedRankingCheckbox; 
+    
     public SeriesEditDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -142,6 +148,18 @@ public class SeriesEditDialogPO extends DataEntryDialogPO {
     public void setMedalSeries(boolean medal) {
         if(medalSeriesCheckbox.isSelected() != medal) {
             new Actions(driver).moveToElement(medalSeriesCheckbox).click().build().perform();
+        }
+    }
+    
+    public void setCrossFleetMergedRankingCheckboxStatus(boolean status) {
+        if(hasCrossFleetMergedRankingCheckbox.isSelected() != status) {
+            hasCrossFleetMergedRankingCheckbox.click();
+        }
+    }
+    
+    public void setSplitFleetContiguousScoringCheckbox(boolean status) {
+        if(hasSplitFleetContiguousScoringCheckbox.isSelected() != status) {
+            hasSplitFleetContiguousScoringCheckbox.click();
         }
     }
 }

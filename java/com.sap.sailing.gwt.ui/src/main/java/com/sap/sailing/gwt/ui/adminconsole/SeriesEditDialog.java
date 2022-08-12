@@ -189,10 +189,12 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         additionalWidgetPanel.add(startWithZeroScoreCheckbox);
         
         hasSplitFleetContiguousScoringCheckbox = createCheckbox(stringMessages.hasSplitFleetContiguousScoring());
+        hasSplitFleetContiguousScoringCheckbox.ensureDebugId("HasSplitFleetContiguousScoringCheckbox");
         hasSplitFleetContiguousScoringCheckbox.setValue(selectedSeries.hasSplitFleetContiguousScoring());
         additionalWidgetPanel.add(hasSplitFleetContiguousScoringCheckbox);
         
         hasCrossFleetMergedRankingCheckbox = createCheckbox(stringMessages.hasCrossFleetMergedRanking());
+        hasCrossFleetMergedRankingCheckbox.ensureDebugId("HasCrossFleetMergedRankingCheckbox");
         hasCrossFleetMergedRankingCheckbox.setValue(selectedSeries.hasCrossFleetMergedRanking());
         additionalWidgetPanel.add(hasCrossFleetMergedRankingCheckbox);
         
