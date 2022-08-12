@@ -137,7 +137,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         hasSplitFleetContiguousScoringCheckbox.ensureDebugId("HasSplitFleetContiguousScoringCheckbox");
 
         hasCrossFleetMergedRankingCheckbox = createCheckbox(stringMessages.hasCrossFleetMergedRanking());
-        hasCrossFleetMergedRankingCheckbox.ensureDebugId("hasCrossFleetMergedRankingCheckbox");
+        hasCrossFleetMergedRankingCheckbox.ensureDebugId("HasCrossFleetMergedRankingCheckbox");
 
         maximumNumberOfDiscardsBox = createIntegerBox(null, /* visibleLength */ 3);
         maximumNumberOfDiscardsBox.ensureDebugId("maximumNumberOfDiscardsBox");
