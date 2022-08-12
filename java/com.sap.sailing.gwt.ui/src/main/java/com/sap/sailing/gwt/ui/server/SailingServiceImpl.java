@@ -4147,8 +4147,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 seriesDTO.isStartsWithZeroScore(), seriesDTO.getDiscardThresholds(),
                 seriesDTO.getMaximumNumberOfDiscards());
         series.setFirstColumnIsNonDiscardableCarryForward(seriesDTO.isFirstColumnIsNonDiscardableCarryForward());
-        series.setHasSplitFleetContiguousScoring(seriesDTO.hasSplitFleetContiguousScoring());
-        series.setHasCrossFleetMergedRanking(seriesDTO.hasCrossFleetMergedRanking());
+        series.setSplitFleetContiguousScoring(seriesDTO.hasSplitFleetContiguousScoring());
+        series.setCrossFleetMergedRanking(seriesDTO.hasCrossFleetMergedRanking());
         series.setStartswithZeroScore(seriesDTO.isStartsWithZeroScore());
         series.setDiscardingThresholds(seriesDTO.getDiscardThresholds());
         return series;

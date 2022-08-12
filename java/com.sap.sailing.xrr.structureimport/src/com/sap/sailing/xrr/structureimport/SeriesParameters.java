@@ -34,11 +34,11 @@ public class SeriesParameters {
         return hasCrossFleetMergedRanking;
     }
 
-    public void setHasSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
+    public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
     }
     
-    public void setHasCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
+    public void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
         this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
     }
 
