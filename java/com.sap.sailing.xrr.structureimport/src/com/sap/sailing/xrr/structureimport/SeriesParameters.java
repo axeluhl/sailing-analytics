@@ -12,7 +12,7 @@ public class SeriesParameters {
             boolean hasCrossFleetMergedRanking, boolean startswithZeroScore, int[] discardingThresholds, Integer maximumNumberOfDiscards) {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
-        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking; 
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
         this.startswithZeroScore = startswithZeroScore;
         this.discardingThresholds = discardingThresholds;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
@@ -29,7 +29,7 @@ public class SeriesParameters {
     public boolean isHasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }
-    
+
     public boolean isHasCrossFleetMergedRanking() {
         return hasCrossFleetMergedRanking;
     }
@@ -37,7 +37,7 @@ public class SeriesParameters {
     public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
     }
-    
+
     public void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
         this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
     }

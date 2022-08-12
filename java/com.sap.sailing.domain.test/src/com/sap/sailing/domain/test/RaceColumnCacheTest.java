@@ -73,7 +73,7 @@ public class RaceColumnCacheTest extends AbstractLeaderboardTest {
         String raceColumnName = "TestRace";
         RaceColumn raceColumn = series.addRaceColumn(raceColumnName, trackedRegattaRegistry);
         ScoringScheme scoringScheme = new LowPoint();
-        Regatta regatta = new RegattaImpl("TestRegatta", new BoatClassImpl(BoatClassMasterdata.PIRATE), 
+        Regatta regatta = new RegattaImpl("TestRegatta", new BoatClassImpl(BoatClassMasterdata.PIRATE),
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* startDate */ null, /* endDate */ null, seriesSet, false, scoringScheme, UUID.randomUUID(),
                 mock(CourseArea.class), null,

@@ -53,23 +53,23 @@ import com.sap.sse.common.Util.Pair;
  * regatta ("total") rank, and all competitors advance by as many ranks compared to the original leaderboard as there
  * are eliminated competitors ranking better in the original leaderboard.
  * <p>
- * 
+ *
  * This behavior is achieved by overriding any method returning a collection of {@link Competitor}s, such as
  * {@link #getCompetitors()}, such that the eliminated competitors are removed from the result which should let any
  * leaderboard panel displaying the contents of this leaderboard list only the non-eliminated competitors. This includes
  * {@link #getCompetitorsFromBestToWorst(TimePoint)} which also leads the implementation of
  * {@link #getTotalRankOfCompetitor(Competitor, TimePoint)} to calculate the ranks based on the competitor list without
  * those eliminated.
- * 
+ *
  * @author Axel Uhl (d043530)
  */
 public class DelegatingRegattaLeaderboardWithCompetitorElimination extends AbstractLeaderboardWithCache implements RegattaLeaderboardWithEliminations {
     private static final long serialVersionUID = 8331154893189722924L;
     private final String name;
     private RegattaLeaderboard fullLeaderboard;
-    
+
     private transient final Supplier<RegattaLeaderboard> fullLeaderboardSupplier;
-    
+
     /**
      * The particular use case for which this field is introduced is registering score correction
      * listeners at a point in time when the full leaderboard hasn't been resolved yet. Instead of
@@ -78,7 +78,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
      * leaderboard, all consumers in this set will be triggered.
      */
     private final ConcurrentHashMap<Consumer<RegattaLeaderboard>, Boolean> triggerWhenFullLeaderboardIsResolved;
-    
+
     /**
      * Competitors eliminated from this leaderboard for regatta ranking; those competitors are not part of
      * {@link #getCompetitors()} but appear in {@link #getAllCompetitors()}. They may have an overlap with
@@ -110,7 +110,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     public Iterable<Competitor> getCompetitors() {
         return new ObscuringIterable<>(getFullLeaderboard().getCompetitors(), eliminatedCompetitors.keySet());
     }
-    
+
     @Override
     public void setEliminated(Competitor competitor, boolean eliminated) {
         if (eliminated) {
@@ -119,7 +119,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
             eliminatedCompetitors.remove(competitor);
         }
     }
-    
+
     @Override
     public boolean isEliminated(Competitor competitor) {
         return eliminatedCompetitors.containsKey(competitor);
@@ -150,7 +150,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         }
         return result;
     }
-    
+
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
@@ -515,11 +515,11 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         }
         return fullLeaderboard;
     }
-    
+
     /**
      * Before being serialized, ensure that the leaderboard supplier has been used to tru
      * to resolve the leaderboard.
-     * @throws IOException 
+     * @throws IOException
      */
     private void writeObject(ObjectOutputStream oos) throws IOException {
         getFullLeaderboard();

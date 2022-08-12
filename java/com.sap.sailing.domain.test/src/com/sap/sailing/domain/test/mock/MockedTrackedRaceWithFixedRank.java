@@ -29,7 +29,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     protected final Map<Competitor,Boat> competitorsAndBoats;
     private final BoatClass boatClass;
     protected RaceDefinition raceDefinition;
-    
+
     public MockedTrackedRaceWithFixedRank(CompetitorWithBoat competitorWithBoat, int rank, boolean started, BoatClass boatClass) {
         this.rank = rank;
         this.started = started;
@@ -46,11 +46,11 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     private class MockedRaceDefinition implements RaceDefinition {
         private static final long serialVersionUID = 6812543850545870357L;
         private final Course course;
-        
+
         public MockedRaceDefinition() {
             course = new CourseImpl("Test Course", Arrays.asList(new Waypoint[0]));
         }
-        
+
         @Override
         public String getName() {
             return null;
@@ -106,15 +106,15 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
             return null;
         }
     }
-    
+
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return Collections.singletonList(competitorsAndBoats.keySet().iterator().next());
     }
-    
+
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
-        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst =   new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>(); 
+        LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> competitorsFromBestToWorst = new LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>>();
         competitorsFromBestToWorst.put(competitorsAndBoats.keySet().iterator().next(), new Pair<>(1,new RankComparableRank(1)));
         return competitorsFromBestToWorst;
     }
@@ -138,7 +138,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     public RaceDefinition getRace() {
         return raceDefinition;
     }
-    
+
     @Override
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return competitorsAndBoats.get(competitor);

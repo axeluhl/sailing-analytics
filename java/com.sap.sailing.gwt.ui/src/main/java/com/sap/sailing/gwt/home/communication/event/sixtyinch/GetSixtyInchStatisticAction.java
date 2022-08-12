@@ -64,8 +64,7 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
             duration = estimateDuration(trace, duration, timePoint);
             distance = estimateDistance(trace, distance, timePoint);
         } else {
-            final Iterator<Competitor> competitorIterator = trace.getCompetitorsFromBestToWorst(trace.getEndOfRace())
-                    .iterator();
+            final Iterator<Competitor> competitorIterator = trace.getCompetitorsFromBestToWorst(trace.getEndOfRace()).iterator();
             if (competitorIterator.hasNext()) {
                 distance = trace.getDistanceTraveled(competitorIterator.next(), trace.getEndOfRace());
                 duration = trace.getStartOfRace().until(trace.getEndOfRace());

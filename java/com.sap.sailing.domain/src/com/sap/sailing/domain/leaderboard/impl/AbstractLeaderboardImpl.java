@@ -42,7 +42,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * one. All events received this way are forwarded to all {@link RaceColumnListener}s subscribed. This can be used to
  * subscribe a concrete leaderboard implementation to the data structure providing the actual race columns in order to
  * be notified whenever the set of {@link TrackedRace}s attached to the leaderboard changes.
- * 
+ *
  * @author Axel Uhl (D043530)
  *
  */
@@ -149,7 +149,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
      * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
      * competitors ranked worse by the tracking system need to have their rank corrected by one.
-     * 
+     *
      * @param trackedRace
      *            the race to which the rank refers; look for disqualifications / max points reasons in this column
      * @param timePoint
@@ -157,7 +157,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      *            <em>when</em> a competitor was disqualified)
      * @param rank
      *            a competitors rank according to the tracking system
-     * 
+     *
      * @return the unmodified <code>rank</code> if no disqualifications for better-ranked competitors exist for
      *         <code>race</code>, or otherwise a rank improved (lowered) by the number of disqualifications of
      *         competitors whose tracked rank is better (lower) than <code>rank</code>.
@@ -167,13 +167,13 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         return improveByDisqualificationsOfBetterRankedCompetitors(raceColumn,
                 trackedRace, timePoint, new Pair<>(rank, new RankComparableRank(rank))).getA();
     }
-    
+
     /**
      * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
      * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
-     * competitors ranked worse by the tracking system need to have their rank corrected by one. The {@link RankComparable} must also 
-     * consider the {@link MaxPointsReason} so that the behavior remains consistent. 
-     * 
+     * competitors ranked worse by the tracking system need to have their rank corrected by one. The {@link RankComparable} must also
+     * consider the {@link MaxPointsReason} so that the behavior remains consistent.
+     *
      * @param trackedRace
      *            the race to which the rank refers; look for disqualifications / max points reasons in this column
      * @param timePoint
@@ -181,7 +181,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      *            <em>when</em> a competitor was disqualified)
      * @param rank
      *            a competitors rank and rankComparable according to the tracking system
-     * 
+     *
      * @return the unmodified <code>Pair(Rank, {@link RankComparable}</code> if no disqualifications for better-ranked competitors exist for
      *         <code>race</code>, or otherwise a <code>Pair(Rank, {@link RankComparable}</code> where the Rank is improved (lowered) by the number of disqualifications of
      *         competitors whose tracked rank is better (lower) than <code>rank</code> while the {@link RankComparable} is consistent with the new Rank.
@@ -200,7 +200,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                     (maxPointsReasonForBetterCompetitor != null
                     && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
                     && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
-                correctedRank = new Pair<>(correctedRank.getA() - 1, correctedRank.getB()); 
+                correctedRank = new Pair<>(correctedRank.getA() - 1, correctedRank.getB());
             }
             betterCompetitorRank++;
         }
@@ -242,17 +242,17 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                 regattaLog);
         return analyzer.analyze();
     }
-    
+
     @Override
     public void registerCompetitor(Competitor competitor) {
         registerCompetitors(Collections.singletonList(competitor));
     }
-    
+
     @Override
     public void registerCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
-        
+
         for (Competitor competitor: competitors) {
             regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
                     UUID.randomUUID(), competitor));
@@ -263,14 +263,14 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     public void deregisterCompetitor(Competitor competitor) {
         deregisterCompetitors(Collections.singleton(competitor));
     }
-    
+
     @Override
     public void deregisterCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForAbstractLeaderboard);
         deregisterer.deregister(deregisterer.analyze());
     }
-    
+
     // boat functions
     @Override
     public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
@@ -284,23 +284,23 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     public void registerBoat(Boat boat) {
         registerBoats(Collections.singleton(boat));
     }
-    
+
     @Override
     public void registerBoats(Iterable<Boat> boats) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
-        
+
         for (Boat boat : boats) {
             regattaLog.add(new RegattaLogRegisterBoatEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
                     UUID.randomUUID(), boat));
         }
     }
-    
+
     @Override
     public void deregisterBoat(Boat boat) {
         deregisterBoats(Collections.singleton(boat));
     }
-    
+
     @Override
     public void deregisterBoats(Iterable<Boat> boats) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();

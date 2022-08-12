@@ -28,7 +28,7 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    
+
     protected static class RegattaParameterValidator extends AbstractRegattaParameterValidator {
         private ArrayList<RegattaDTO> existingRegattas;
 

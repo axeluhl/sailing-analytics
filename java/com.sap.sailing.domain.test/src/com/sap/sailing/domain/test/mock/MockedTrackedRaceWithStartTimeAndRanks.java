@@ -86,7 +86,7 @@ import com.sap.sse.common.Util.Pair;
  * Simple mock for {@link TrackedRace} for leaderboard testing; the leaderboard only requests {@link #hasStarted(TimePoint)} and
  * {@link #getRank(Competitor)} and {@link #getRank(Competitor, TimePoint)}. Additionally, a mocked {@link RaceDefinition} is produced
  * from the competitor list.
- * 
+ *
  * @author Axel Uhl (D043530)
  *
  */
@@ -106,7 +106,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst) {
         this(startTime, competitorsFromBestToWorst, null);
     }
-    
+
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst, Regatta regatta) {
         this.regatta = regatta;
         this.startTime = startTime;
@@ -352,7 +352,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Tack getTack(Competitor competitor, TimePoint timePoint) {
         return null;
     }
-    
+
     @Override
     public Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint) {
         return null;
@@ -377,7 +377,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
-    
+
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
         return null;
@@ -471,7 +471,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return competitorsFromBestToWorst;
     }
-    
+
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         // TODO: wie soll das umgesetzt werden?
@@ -584,7 +584,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         return null;
     }
-    
+
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
     }
 
@@ -749,7 +749,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
-    
+
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
@@ -784,9 +784,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) { 
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
     }
-    
+
     @Override
     public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
             Competitor competitor, String trackName) {
@@ -807,7 +807,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
         return null;
     }
-    
+
     @Override
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
@@ -817,7 +817,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return competitorsAndBoats.get(competitor);
     }
-    
+
     @Override
     public Competitor getCompetitorOfBoat(Boat boat) {
         if (boat == null) {
@@ -869,7 +869,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public void removeWind(Wind wind, WindSource windSource) {
-        
+
     }
 
     @Override

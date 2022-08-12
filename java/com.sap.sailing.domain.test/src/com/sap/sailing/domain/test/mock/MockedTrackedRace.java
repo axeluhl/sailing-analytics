@@ -195,7 +195,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return 0;
     }
-    
+
     @Override
     public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor) throws NoWindException {
         return null;
@@ -742,7 +742,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
-    
+
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
         return null;
@@ -908,7 +908,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         return null;
     }
-    
+
     @Override
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return null;
@@ -1233,7 +1233,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
-    
+
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(
             TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
@@ -1265,7 +1265,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void setFinishedTime(TimePoint newFinishedTime) {
     }
-    
+
     @Override
     public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
             Competitor competitor, String trackName) {
@@ -1298,7 +1298,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void recordSensorFix(Competitor competitor, String trackName, SensorFix fix,
             boolean onlyWhenInTrackingTimeInterval) {
     }
-    
+
     @Override
     public void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
     }
@@ -1312,7 +1312,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
         return null;
     }
-    
+
     @Override
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
@@ -1322,7 +1322,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
-    
+
     @Override
     public Competitor getCompetitorOfBoat(Boat boat) {
         return null;

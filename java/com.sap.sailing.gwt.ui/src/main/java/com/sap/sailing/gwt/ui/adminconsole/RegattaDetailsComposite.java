@@ -322,7 +322,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(actionsColumn, stringMessages.actions());
         return table;
     }
-    
+
     public RegattaDTO getRegatta() {
         return regatta;
     }
@@ -333,7 +333,7 @@ public class RegattaDetailsComposite extends Composite {
     }
 
     private void editRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series) {
-        SeriesEditDialog raceDialog = new SeriesEditDialog(regatta, series, stringMessages, 
+        SeriesEditDialog raceDialog = new SeriesEditDialog(regatta, series, stringMessages,
                 new DialogCallback<SeriesDescriptor>() {
                     @Override
                     public void cancel() {
@@ -425,7 +425,7 @@ public class RegattaDetailsComposite extends Composite {
                                                         errorReporter.reportError("Error trying to update series " + series.getName() + ": "
                                                                 + caught.getMessage());
                                                     }
-                                                    
+
                                                     @Override
                                                     public void onSuccess(Void result) {
                                                         presenter.getRegattasRefresher().reloadAndCallFillAll();
@@ -472,6 +472,6 @@ public class RegattaDetailsComposite extends Composite {
             rankingMetric.setText(rankingMetricText);
             seriesListDataProvider.getList().clear();
             seriesListDataProvider.getList().addAll(regatta.series);
-        } 
+        }
     }
 }

@@ -126,31 +126,31 @@ public class EventsResource extends AbstractSailingServerResource {
     public static final String V1_EVENTS = "/v1/events";
     private static final Logger logger = Logger.getLogger(EventsResource.class.getName());
     private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    
+
     public static enum ErrorCodes {
         NO_VENUE(1), NO_BOAT_CLASS(2), LEADERBOARD_GROUP_ALREADY_EXISTS(3), REGATTA_ALREADY_EXISTS(4), LEADERBOARD_ALREADY_EXISTS(5);
-        
+
         private ErrorCodes(int errorCode) {
             this.errorCode = errorCode;
         }
-        
+
         public int getErrorCode() {
             return errorCode;
         }
-        
+
         private final int errorCode;
     }
-    
+
     public EventsResource() {
     }
-    
-    
+
+
     /**
      * Method to delete a specified {@link Event}.
-     * 
+     *
      * @param eventId - The UUID of the event to delete
      * @param withLeaderboardGroups - Boolean whether to delete all associated {@link LeaderboardGroup}s or not. Doing so will also delete the overall {@link Leaderboard}s of each group.
-     * @param withLeaderboards - Boolean whether to delete all associated {@link Leaderboard}s. 
+     * @param withLeaderboards - Boolean whether to delete all associated {@link Leaderboard}s.
      * @param withRegattas - Boolean whether to delete all associated {@link Regatta}s. Doing so will also delete all their {@link RegattaLeaderboard}s and {@link TrackedRace}s.
      * @return A 200 response, if the delete was successful or a 404 response, if the eventId was not found.
      * @throws ParseException
@@ -301,7 +301,7 @@ public class EventsResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
     private Response createErrorResponse(Status responseStatus, String message, ErrorCodes errorCode) {
         final JSONObject responseBody = new JSONObject();
         responseBody.put("message", message);
@@ -309,7 +309,7 @@ public class EventsResource extends AbstractSailingServerResource {
         responseBody.put("errorCode", errorCode.getErrorCode());
         return Response.status(responseStatus).entity(responseBody.toString()).build();
     }
-    
+
     @PUT
     @Path("/{eventId}/update")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -385,7 +385,7 @@ public class EventsResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents(@QueryParam("showNonPublic") String showNonPublic, @QueryParam("include") @DefaultValue("false") Boolean include,
@@ -480,7 +480,7 @@ public class EventsResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
     private RegattaLeaderboard validateAndCreateRegatta(String regattaNameParam, String boatClassNameParam,
             String scoringSchemeParam, UUID courseAreaId, String buoyZoneRadiusInHullLengthsParam,
             String useStartTimeInterferenceParam, String controlTrackingFromStartAndFinishTimesParam,
@@ -517,7 +517,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
         Regatta regatta = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName), 
+                SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
                 regattaName, new Callable<Regatta>() {
                     @Override
                     public Regatta call() throws Exception {
@@ -537,7 +537,7 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     /**
-     * @param canBoatsOfCompetitorsChangePerRace 
+     * @param canBoatsOfCompetitorsChangePerRace
      * @return the event created as first component; if a leaderboard group was to be created, the leaderboard group
      *         created as the second component or {@code null} otherwise; the regatta leaderboard as the third component
      *         in case a regatta was to be created, or {@code null} otherwise
@@ -580,7 +580,7 @@ public class EventsResource extends AbstractSailingServerResource {
         String eventDescription = eventDescriptionParam == null ? eventName : eventDescriptionParam;
         final TimePoint startDate = parseTimePoint(startDateParam, startDateAsMillis, now());
         final TimePoint endDate = parseTimePoint(endDateParam, endDateAsMillis, new MillisecondsTimePoint(addOneWeek(startDate.asDate())));
-        URL officialWebsiteURL = officialWebsiteURLParam == null ? null :  toURL(officialWebsiteURLParam);
+        URL officialWebsiteURL = officialWebsiteURLParam == null ? null : toURL(officialWebsiteURLParam);
         final URI baseUri = uriInfo.getBaseUri();
         final int port = baseUri.getPort();
         // guess the protocol; when behind an SSL-offloading reverse proxy or load balancer, all we'll see is a regular HTTP
@@ -653,7 +653,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 return new Util.Triple<>(event, leaderboardGroup, leaderboard);
             }
         };
-        
+
         try {
             if (competitorRegistrationType == CompetitorRegistrationType.OPEN_UNMODERATED) {
                 UUID newTenantId = UUID.randomUUID();
@@ -733,7 +733,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 defaultSeries.hasSplitFleetContiguousScoring(), defaultSeries.hasCrossFleetMergedRanking(),
                 defaultSeries.getMaximumNumberOfDiscards(), defaultSeries.getFleets()));
     }
-    
+
     private void addRaceColumns(String regattaName, String seriesName, int numberOfRaces) {
         final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -791,19 +791,19 @@ public class EventsResource extends AbstractSailingServerResource {
             defaultLeaderboardGroup.addLeaderboard(leaderboard);
             List<String> leaderboards = stream(defaultLeaderboardGroup.getLeaderboards().spliterator()).map(lg -> lg.getName())
                     .collect(Collectors.toList());
-            
+
             ResultDiscardingRule rule = defaultLeaderboardGroup.getOverallLeaderboard()==null?null:defaultLeaderboardGroup.getOverallLeaderboard().getResultDiscardingRule();
-            int[] overallLeaderboardDiscardThresholds = null; 
+            int[] overallLeaderboardDiscardThresholds = null;
             if(rule instanceof ThresholdBasedResultDiscardingRule){
                 ThresholdBasedResultDiscardingRule resultDiscardingRule = (ThresholdBasedResultDiscardingRule) rule;
                 overallLeaderboardDiscardThresholds = resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces();
             }
             getService().updateLeaderboardGroup(defaultLeaderboardGroup.getId(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
-                    defaultLeaderboardGroup.getDisplayName(), leaderboards, overallLeaderboardDiscardThresholds, 
+                    defaultLeaderboardGroup.getDisplayName(), leaderboards, overallLeaderboardDiscardThresholds,
                     defaultLeaderboardGroup.getOverallLeaderboard()==null?null:defaultLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
         }
     }
-    
+
     private RegattaLeaderboard addLeaderboard(String regattaName, int[] discardThresholds) {
         RegattaLeaderboard leaderboard = null;
         try {
@@ -852,7 +852,7 @@ public class EventsResource extends AbstractSailingServerResource {
             throw new MalformedURLException(ExceptionManager.invalidURLFormatMsg(url));
         }
     }
-    
+
     private List<UUID> toUUIDList(List<String> list){
         return list.stream().map(id -> toUUID(id))
                 .collect(Collectors.toList());
@@ -865,7 +865,7 @@ public class EventsResource extends AbstractSailingServerResource {
             throw new IllegalArgumentException(ExceptionManager.invalidIdFormatMsg(id));
         }
     }
-    
+
     private LinkedHashMap<String, SeriesCreationParametersDTO> createDefaultSeriesCreationParameters(String regattaName,int numberOfRaces ) {
         final LinkedHashMap<String, SeriesCreationParametersDTO> series = new LinkedHashMap<>();
         series.put(LeaderboardNameConstants.DEFAULT_SERIES_NAME, new SeriesCreationParametersDTO(

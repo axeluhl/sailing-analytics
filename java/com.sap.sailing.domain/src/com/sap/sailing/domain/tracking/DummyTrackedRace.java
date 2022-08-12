@@ -61,7 +61,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         this(competitorsAndBoats, regatta, trackedRegatta, new RaceDefinitionImpl("DummyRace", new CourseImpl("Dummy Course", Collections.<Waypoint>emptyList()),
                 regatta.getBoatClass(), competitorsAndBoats, raceId), windStore);
     }
-    
+
     public DummyTrackedRace(final Map<Competitor, Boat> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
             RaceDefinition race, WindStore windStore) {
         super(race, trackedRegatta, windStore, -1);
@@ -187,7 +187,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public int getRank(Competitor competitor, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return 0;
     }
-    
+
     @Override
     public Pair<Integer, RankComparable<?>> getRankAndRankComparable(Competitor competitor) throws NoWindException {
         return null;
@@ -326,7 +326,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
-    
+
     @Override
     public Iterable<Maneuver> getManeuvers(Competitor competitor, boolean waitForLatest) {
         return null;
@@ -452,7 +452,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return null;
     }
-    
+
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
         return null;
@@ -702,7 +702,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Iterable<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
     }
-    
+
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return null;
@@ -712,7 +712,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
-    
+
     @Override
     public Competitor getCompetitorOfBoat(Boat boat) {
         return null;
@@ -797,7 +797,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public WindSummary getWindSummary() {
         return null;
     }
-    
+
     @Override
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         return false;
@@ -805,7 +805,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void removeWind(Wind wind, WindSource windSource) {
-        
+
     }
 
     @Override

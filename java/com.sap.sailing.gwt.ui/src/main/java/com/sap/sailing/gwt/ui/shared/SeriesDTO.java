@@ -23,7 +23,7 @@ public class SeriesDTO extends NamedDTO {
     public SeriesDTO() {
         super("");
     }
-    
+
     public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
             boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking, Integer maximumNumberOfDiscards) {
@@ -34,12 +34,12 @@ public class SeriesDTO extends NamedDTO {
         this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.startsWithZeroScore = startsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
-        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking; 
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
         this.discardThresholds = discardThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
-    
+
     /**
      * Copy/clone constructor; the {@link #raceColumns} collection is created as a copy and not just assigned by reference.
      * Therefore, altering the elements in the {@link #raceColumns} collection of the new object does not alter the {@link #raceColumns}
@@ -92,7 +92,7 @@ public class SeriesDTO extends NamedDTO {
     public void setRaceColumns(List<RaceColumnDTO> raceColumns) {
         this.raceColumns = raceColumns;
     }
-    
+
     /**
      * @return whether this series defines its local result discarding rule; if so, any leaderboard based on the
      *         enclosing regatta has to respect this and has to use a result discarding rule implementation that keeps
@@ -105,7 +105,7 @@ public class SeriesDTO extends NamedDTO {
     public int[] getDiscardThresholds() {
         return discardThresholds;
     }
-    
+
     public void setDiscardThresholds(int[] discardThresholds) {
         this.discardThresholds = discardThresholds;
     }
@@ -117,7 +117,7 @@ public class SeriesDTO extends NamedDTO {
     public void setStartsWithZeroScore(Boolean startsWithZeroScore) {
         this.startsWithZeroScore = startsWithZeroScore;
     }
-    
+
     public void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward) {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }

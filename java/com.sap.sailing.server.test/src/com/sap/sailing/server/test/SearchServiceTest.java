@@ -280,7 +280,7 @@ public class SearchServiceTest {
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         aalRegattaLeaderboard.getRaceColumnByName("R2").setTrackedRace(aalRegattaLeaderboard.getRaceColumnByName("R2").getFleetByName("Default"), aalOrcTrackedR2);
     }
-    
+
     @Test
     public void testSetup() {
         assertNotNull(pfingstbusch29er);
@@ -293,7 +293,7 @@ public class SearchServiceTest {
         assertNotNull(aalOrcTrackedR1);
         assertNotNull(aalOrcTrackedR2);
     }
-    
+
     @Test
     public void testSimpleSearchByCompetitorName() {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Tobi" })));
