@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
 
 import com.sap.sse.util.impl.ThreadPoolUtilImpl;
@@ -55,11 +56,19 @@ public interface ThreadPoolUtil {
      * be submitted to the same executor as deadlocks may occur.
      * <p>
      * 
-     * The same configuration as for {@link #getDefaultBackgroundTaskThreadPoolExecutor()} is used.
+     * The same configuration as for {@link #getDefaultBackgroundTaskThreadPoolExecutor()} is used. In particular,
+     * {@code executeExistingDelayedTasksAfterShutdownPolicy} will be set to {@code false} by default.
      */
     ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(String name);
     
     ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name);
+    
+    /**
+     * Like {@link #createBackgroundTaskThreadPoolExecutor(int, String)}, but the caller can configure the
+     * {@code executeExistingDelayedTasksAfterShutdownPolicy}; see
+     * {@link ScheduledThreadPoolExecutor#setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean)}.
+     */
+    ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(int size, String name, boolean executeExistingDelayedTasksAfterShutdownPolicy);
 
     /**
      * In case an application module really requires its own thread pool instead of

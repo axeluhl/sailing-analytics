@@ -108,6 +108,7 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
 
 - In "General ⇒ Content Types" select on CSS (Text ⇒ CSS) and add \*.gss in the lower file association list to get limited syntax highlighting and content assist in GSS files
 - In "General ⇒ Editors ⇒ Text Editors" check Insert Spaces for Tabs
+- In "General ⇒ Editors ⇒ Text Editors ⇒ Quick Diff" change the reference source from 'Version on Disk' to 'A Git Revision'. If you like other colours for marking diffs change them here. (Example: Changes = Yellow, Additions = Green, Deletions = Red)
 - In "GWT ⇒ Errors/Warnings" set "Missing SDK" to "Ignore" 
 - In "GWT ⇒ GWT Settings ⇒ Add..." add the GWT SDK 
 - In "Java ⇒ Build Path ⇒ Classpath Variables" create a new classpath variable called `ANDROID_HOME`. Set its value to the installation location of your Android SDK, e.g., `C:\Users\'user'\AppData\Local\Android\Sdk` or `/usr/local/android-sdk-linux`.
@@ -149,8 +150,9 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
    - In the list on the left, click on "Connectors"
    - For TracTrac Events: In the "TracTrac Connections" Form, fill in the JSON URL [http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php](http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php)(all other required information will be filled in automatically)
    - Press "List Races"
-
+6. Further useful launch configurations
    - Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window ⇒ Perspective ⇒ Open Perspective ⇒ Profiling)
+   - Debugging gwt: For further instructions please see [here](./development/super-dev-mode)
 
 ### Build for deployment
 Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.

@@ -27,6 +27,7 @@ import com.mongodb.MongoCommandException;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
@@ -263,7 +264,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public MongoCollection<Document> getGPSFixCollection() {
+    public MongoCollection<Document> getGPSFixCollection(ClientSession clientSession) {
         MongoCollection<Document> gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
         // Removes old indexes not needed anymore
         dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
@@ -274,7 +275,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
         index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE.name(), 1);
         index.put(FieldNames.DEVICE_ID.name()+"."+com.sap.sailing.shared.persistence.impl.FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
-        gpsFixCollection.createIndex(index, new IndexOptions().name("fixbydevandtime").background(false));
+        final IndexOptions indexOptions = new IndexOptions().name("fixbydevandtime").background(false);
+        if (clientSession == null) {
+            gpsFixCollection.createIndex(index, indexOptions);
+        } else {
+            gpsFixCollection.createIndex(clientSession, index, indexOptions);
+        }
         return gpsFixCollection;
     }
     

@@ -154,7 +154,8 @@ public class SensorFixStoreAndLoadTest {
         raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(END_OF_TRACKING), author, 0));
         regattaLog = new RegattaLogImpl("regattalog");
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY);
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
+                WriteConcern.MAJORITY, /* clientSession */ null, /* metadataCollectionClientSession */ null);
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author,
                 new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author,
@@ -447,7 +448,7 @@ public class SensorFixStoreAndLoadTest {
                 }
                 throw new IllegalArgumentException("Unknown event type");
             }
-        });
+        }, /* removeOutliersFromCompetitorTracks */ false);
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
