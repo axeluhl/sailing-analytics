@@ -6,6 +6,7 @@ import java.util.function.Function;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.shared.partials.launchpad.AbstractLaunchPadController;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RaceviewerLaunchPadController<T extends SimpleRaceMetadataDTO> extends AbstractLaunchPadController<T> {
 
@@ -25,10 +26,10 @@ public class RaceviewerLaunchPadController<T extends SimpleRaceMetadataDTO> exte
      *            {@link Function Factory method} to get the EmbeddedMapAndWindChart URL for the given
      *            {@link SimpleRaceMetadataDTO race}
      */
-    public RaceviewerLaunchPadController(
-            final BiFunction<? super T, String, String> raceboardUrlFactory,
-            final Function<? super T, String> mapAndWindChartUrlFactory) {
-        super((data, panel) -> new RaceviewerLaunchPad<>(data, raceboardUrlFactory, mapAndWindChartUrlFactory, panel));
+    public RaceviewerLaunchPadController(final BiFunction<? super T, String, String> raceboardUrlFactory,
+            final Function<? super T, String> mapAndWindChartUrlFactory, PaywallResolver paywallResolver) {
+        super((data, panel) -> new RaceviewerLaunchPad<>(data, raceboardUrlFactory, mapAndWindChartUrlFactory, panel,
+                paywallResolver));
         this.raceboardUrlFactory = raceboardUrlFactory;
     }
 
