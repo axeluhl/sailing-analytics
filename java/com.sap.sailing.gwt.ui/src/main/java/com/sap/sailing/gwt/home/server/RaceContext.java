@@ -329,7 +329,9 @@ public class RaceContext {
             liveRaceDTO.setFlagState(getFlagStateOrNull());
             liveRaceDTO.setProgress(getProgressOrNull());
             liveRaceDTO.setWind(getWindOrNull());
-            SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), liveRaceDTO);
+            if(getRaceIdentifierOrNull() != null) {
+                SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), liveRaceDTO);
+            }
             return liveRaceDTO;
         }
         return null;
@@ -363,7 +365,9 @@ public class RaceContext {
                 windStatsDTO = null;
             }
             raceListRaceDTO.setWind(windStatsDTO);
-            SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), raceListRaceDTO);
+            if(getRaceIdentifierOrNull() != null) {
+                SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), raceListRaceDTO);
+            }
             return raceListRaceDTO;
         }
         return null;
@@ -372,7 +376,9 @@ public class RaceContext {
     public SimpleRaceMetadataDTO getRaceCompetitionFormat() {
         SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
         fillSimpleRaceMetadata(raceDTO);
-        SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), raceDTO);
+        if(getRaceIdentifierOrNull() != null) {
+            SecurityDTOUtil.addSecurityInformation(service.getSecurityService(), raceDTO);
+        }
         return raceDTO;
     }
 
