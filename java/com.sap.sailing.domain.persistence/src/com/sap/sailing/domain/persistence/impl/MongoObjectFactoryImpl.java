@@ -124,6 +124,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -1951,6 +1952,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         document.append(FieldNames.RACE_LOG_BOAT_ID.name(), event.getBoatId());
         document.append(FieldNames.ORC_CERTIFICATE.name(), createORCCertificateObject(event.getCertificate()));
         return storeRegattaLogEvent(regattaLikeIdentifier, document);
+    }
+
+    public Document storeFingerprint(TrackedRaceHashFingerprint fingerprint) {
+        JSONObject fingerprintjson = fingerprint.toJson();
+        Document result = Document.parse(fingerprintjson.toString());
+        return result;
     }
 
 }

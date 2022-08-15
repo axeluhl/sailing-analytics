@@ -235,6 +235,8 @@ import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
+import com.sap.sailing.domain.markpassinghash.impl.TrackedRaceHashFingerprintImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -3145,6 +3147,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder() {
         return raceTrackingConnectivityParamsServiceFinder;
+    }
+
+    public TrackedRaceHashFingerprint loadFingerprint(Document fingerprint) {
+        JSONObject json = null;
+        try {
+            json = Helpers.toJSONObjectSafe(new JSONParser().parse(fingerprint.toJson()));
+        } catch (JsonDeserializationException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        TrackedRaceHashFingerprint result = new TrackedRaceHashFingerprintImpl(json);
+        return result;
     }
 
 }

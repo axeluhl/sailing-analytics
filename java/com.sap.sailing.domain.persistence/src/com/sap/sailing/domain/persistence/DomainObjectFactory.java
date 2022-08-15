@@ -35,6 +35,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
+import com.sap.sailing.domain.markpassinghash.TrackedRaceHashFingerprint;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -223,4 +224,6 @@ public interface DomainObjectFactory {
     TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder();
 
     Wind loadWind(Document windDocument);
+    
+    TrackedRaceHashFingerprint loadFingerprint(Document fingerprint);
 }
