@@ -224,6 +224,6 @@ public interface DomainObjectFactory {
     TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> getRaceTrackingConnectivityParamsServiceFinder();
 
     Wind loadWind(Document windDocument);
-    
+
     TrackedRaceHashFingerprint loadFingerprint(Document fingerprint);
 }

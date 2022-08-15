@@ -3161,5 +3161,4 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         TrackedRaceHashFingerprint result = new TrackedRaceHashFingerprintImpl(json);
         return result;
     }
-
 }

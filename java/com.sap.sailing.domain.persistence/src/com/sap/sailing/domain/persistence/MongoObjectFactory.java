@@ -229,6 +229,6 @@ public interface MongoObjectFactory {
     void storeAnniversaryData(ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries);
 
     Document storeWind(Wind wind);
-    
+
     Document storeFingerprint(TrackedRaceHashFingerprint fingerprint);
 }

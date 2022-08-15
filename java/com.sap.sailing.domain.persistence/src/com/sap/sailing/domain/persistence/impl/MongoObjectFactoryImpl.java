@@ -1965,5 +1965,4 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document result = Document.parse(fingerprintjson.toString());
         return result;
     }
-
 }

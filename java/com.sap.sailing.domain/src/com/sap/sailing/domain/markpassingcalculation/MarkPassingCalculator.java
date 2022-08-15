@@ -483,6 +483,13 @@ public class MarkPassingCalculator {
      * evaluated even if nothing else arrives after this is called.
      */
     public void resume() {
+//      Target location:
+//      final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
+        
+//        Loading Location
+//          DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this, raceLogResolver);
+//          this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory)
+          
         logger.finest("Resumed MarkPassingCalculator");
         synchronized (this) {
             suspended = false;
