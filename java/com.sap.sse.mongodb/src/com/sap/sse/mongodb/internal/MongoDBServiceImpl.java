@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 
+import com.mongodb.ClientSessionOptions;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
@@ -70,6 +71,12 @@ public class MongoDBServiceImpl implements MongoDBService {
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @Override
+    public ClientSession startCausallyConsistentSession() {
+        ensureConfigurationDefaultingToTest();
+        return getMongo(getConfiguration()).startSession(ClientSessionOptions.builder().causallyConsistent(true).build());
     }
     
     @Override

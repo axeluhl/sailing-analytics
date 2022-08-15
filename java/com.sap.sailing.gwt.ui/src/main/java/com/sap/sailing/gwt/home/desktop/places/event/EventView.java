@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventView.Presenter> extends IsWidget {
 
@@ -75,6 +76,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         EventBus getEventBus();
         
         UserService getUserService();
+        
+        SubscriptionServiceFactory getSubscriptionServiceFactory();
 
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
