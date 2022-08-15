@@ -474,7 +474,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public LinkedHashMap<Competitor, Pair<Integer, RankComparable<?>>> getCompetitorsFromBestToWorstAndRankComparable(TimePoint timePoint) {
-        // TODO: wie soll das umgesetzt werden?
         return null;
     }
 
