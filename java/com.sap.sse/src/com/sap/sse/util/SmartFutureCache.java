@@ -239,7 +239,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         
         public FutureTaskWithCancelBlocking(SettableCallable<V> callable, final K key, final U updateInterval,
                 final boolean callerWaitsSynchronouslyForResult, final Thread callerThread) {
-            super(callable);
+            super(KnowsExecutorAndTracingGetImpl.associateWithSubjectIfAny(callable));
             tracingGetHelper = new KnowsExecutorAndTracingGetImpl<>();
             callable.setCallable(this);
             this.gettingThreads = new HashSet<>();
@@ -247,11 +247,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             this.updateInterval = updateInterval;
             this.callerWaitsSynchronouslyForResult = callerWaitsSynchronouslyForResult;
             this.callerThread = callerThread;
-        }
-
-        @Override
-        public Map<ThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
-            return tracingGetHelper.getThreadLocalValuesToInherit();
         }
 
         /**
@@ -297,7 +292,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
         @Override
         public V call() {
-            tracingGetHelper.setInheritableThreadLocalValues();
             try {
                 final U updateInterval;
                 final Set<Thread> locksPropagatedFromGettingThreads;
@@ -371,8 +365,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         LockUtil.unpropagateLockSetFrom(callerThread);
                     }
                     gettingThreads.clear();
-                    tracingGetHelper.removeInheritableThreadLocalValues();
-                    tracingGetHelper.removeThreadLocalValues();
                 }
             } catch (Exception e) {
                 // cache won't be updated
