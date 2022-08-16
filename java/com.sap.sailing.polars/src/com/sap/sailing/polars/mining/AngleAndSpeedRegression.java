@@ -94,10 +94,9 @@ public class AngleAndSpeedRegression implements Serializable {
      */
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(Speed speedOverGround,
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        double[] coefficiants = speedRegression.getOrCreatePolynomialFunction().getCoefficients();
-        CubicEquation equation = new CubicEquation(coefficiants[2], coefficiants[1], coefficiants[0],
+        final double[] coefficients = speedRegression.getOrCreatePolynomialFunction().getCoefficients();
+        CubicEquation equation = new CubicEquation(coefficients[2], coefficients[1], coefficients[0],
                 -speedOverGround.getKnots());
-
         double[] windSpeedCandidates = equation.solve();
         Set<SpeedWithBearingWithConfidence<Void>> result = new HashSet<>();
         for (int i = 0; i < windSpeedCandidates.length; i++) {
@@ -120,7 +119,6 @@ public class AngleAndSpeedRegression implements Serializable {
                 }
             }
         }
-
         return result;
     }
 
